@@ -78,7 +78,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "postinstall": "cd jacdac-ts && npm ci && npm run dist",
+    "postinstall": "cd jacdac-ts && yarn --frozen-lockfile && yarn dist",
     "pullsubmodules": "git submodule update --init --recursive",
     "lint": "node node_modules/eslint/bin/eslint.js src/**/*.ts src/**/*.tsx",
     "predistdocs": "node node_modules/gatsby/cli.js clean",

@@ -140,7 +140,7 @@ Create a new issue in https://github.com/microsoft/jacdac and select the ``MakeC
 
 ### HTML tools
 
-You can do ``npm run watch`` to watch/build bundles. Bundles are placed under the ``dist`` folder.
+You can do ``yarn watch`` to watch/build bundles. Bundles are placed under the ``dist`` folder.
 
 ```
 yarn watch
@@ -148,7 +148,7 @@ yarn watch
 
 On another terminal, launch a small web server and 
 try all the tools under ``docs/static/tools/*`` at http://localhost:8080/docs/static/tools/js/console.html . These tools load the files under ``dist`` so you'll want 
-to also run ``npm run watch`` on the side.
+to also run ``yarn watch`` on the side.
 
 ```
 yarn tools
@@ -171,9 +171,9 @@ The releases are automatically created by the build system based on the title of
 
 ### NPM scripts
 
- - `npm run watch`: Run `npm run build` in watch mode
- - `npm run lint`: Lints code
- - `npm run docs`: Launch docs web service
+ - `yarn watch`: Run `yarn build` in watch mode
+ - `yarn lint`: Lints code
+ - `yarn docs`: Launch docs web service
 
 ## Microsoft Open Source Code of Conduct
 
