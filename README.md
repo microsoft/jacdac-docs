@@ -28,20 +28,13 @@ yarn docs
 
 ### Local Setup
 
-* clone this repository and pull all submodules
-```
-git clone https://github.com/microsoft/jacdac-docs
-git submodule update --init --recursive
-git pull
-```
 * install node.js
 * install yarn
 ```
 npm install -g yarn
 ```
-* install dependencies
-```
-yarn install --frozen-lockfile
+* setup repo
+yarn setup
 ```
 
 ### VS Code
