@@ -89,7 +89,7 @@
     "docsbuild": "node node_modules/gatsby/cli.js build",
     "docsserve": "node node_modules/gatsby/cli.js serve",
     "dockerdocs": "node node_modules/gatsby/cli.js develop --host:0.0.0.0",
-    "builddtdl": "node dist/jacdac-cli.js --dtdl dist/dtdl --rm=on"
+    "builddtdl": "cd jacdac-ts && node dist/jacdac-cli.js --dtdl dist/dtdl --rm=on"
   },
   "repository": {
     "type": "git",
