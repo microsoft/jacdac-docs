@@ -13,7 +13,7 @@ export default function PacketMembersChip(props: { spec: jdspec.PacketInfo, memb
     const label = spec?.packFormat;
     const title = "pack format";
     return <Tooltip title={title}>
-        <Chip style={({ textDecoration: "none" })} href="/reference/pack-format" component="a"
+        <Chip style={({ textDecoration: "none" })} href="/reference/pack-format/" component="a"
             clickable className={className} size="small" icon={<CategoryIcon />} label={label} />
     </Tooltip>
 }

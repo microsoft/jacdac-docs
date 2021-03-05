@@ -104,7 +104,7 @@ export default function GithubPullRequestButton(props: GithubPullRequestButtonPr
         <Dialog open={confirmDialog} onClose={handleCloseConfirm}>
             <DialogContent>
                 <DialogContentText>
-                    We will open a new Pull Request in <Link href="https://github.com/microsoft/jacdac">microsoft/jacdac</Link> with your files. 
+                    We will open a new Pull Request in <Link href="https://github.com/microsoft/jacdac" rel="noreferrer nofollower">microsoft/jacdac</Link> with your files. 
                     If needed, we will fork <code>microsoft/jacdac</code> under your account and create a Pull Request in that repository.
                 </DialogContentText>
                 <ApiKeyAccordion
