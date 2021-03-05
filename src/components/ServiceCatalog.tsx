@@ -15,14 +15,14 @@ import {
     isSensor,
     resolveMakecodeServiceFromClassIdentifier,
     serviceSpecifications,
-} from "../../../src/jdom/spec"
-import { arrayConcatMany, unique } from "../../../src/jdom/utils"
+} from "../../jacdac-ts/src/jdom/spec"
+import { arrayConcatMany, unique } from "../../jacdac-ts/src/jdom/utils"
 import MakeCodeIcon from "./icons/MakeCodeIcon"
 import KindIcon from "./KindIcon"
 import { hostDefinitionFromServiceClass } from "../../../src/hosts/hosts"
 import JacdacIcon from "./icons/JacdacIcon"
 import SpeedIcon from "@material-ui/icons/Speed"
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../src/jdom/constants"
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../jacdac-ts/src/jdom/constants"
 import { useId } from "react-use-id-hook"
 
 interface ServiceFilter {

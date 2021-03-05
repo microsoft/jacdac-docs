@@ -4,7 +4,7 @@ import React, { ReactNode, useContext, useEffect, useState } from "react"
 import AppContext from "./AppContext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import ErrorIcon from '@material-ui/icons/Error';
-import { delay } from "../../../src/jdom/utils";
+import { delay } from "../../jacdac-ts/src/jdom/utils";
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip";
 import useAnalytics from "./hooks/useAnalytics";
 import useMounted from "./hooks/useMounted";

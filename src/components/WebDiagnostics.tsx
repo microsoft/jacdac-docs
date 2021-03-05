@@ -1,7 +1,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import React, { useContext, useState } from "react"
-import { NEW_LISTENER, REMOVE_LISTENER } from "../../../src/jdom/constants";
-import { JDNode, visitNodes } from "../../../src/jdom/node";
+import { NEW_LISTENER, REMOVE_LISTENER } from "../../jacdac-ts/src/jdom/constants";
+import { JDNode, visitNodes } from "../../jacdac-ts/src/jdom/node";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import PaperBox from "./ui/PaperBox";
 // tslint:disable-next-line: match-default-export-name no-submodule-imports

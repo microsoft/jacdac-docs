@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { REPORT_UPDATE } from "../../../src/jdom/constants";
-import { JDRegister } from "../../../src/jdom/register";
+import { REPORT_UPDATE } from "../../jacdac-ts/src/jdom/constants";
+import { JDRegister } from "../../jacdac-ts/src/jdom/register";
 
 export function useRegisterHumanValue(register: JDRegister): string {
     const [value, setValue] = useState<string>(register?.humanValue)

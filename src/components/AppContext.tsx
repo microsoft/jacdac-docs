@@ -1,8 +1,8 @@
 import { useSnackbar } from "notistack";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { BusState } from "../../../src/jdom/bus";
-import { CONNECTION_STATE, ERROR } from "../../../src/jdom/constants";
-import { isCancelError } from "../../../src/jdom/utils";
+import { BusState } from "../../jacdac-ts/src/jdom/bus";
+import { CONNECTION_STATE, ERROR } from "../../jacdac-ts/src/jdom/constants";
+import { isCancelError } from "../../jacdac-ts/src/jdom/utils";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import StartSimulatorDialog from "./dialogs/StartSimulatorDialog";
 

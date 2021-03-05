@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useEffect, useRef } from "react";
-import { JSONTryParse, SMap } from "../../../src/jdom/utils";
+import { JSONTryParse, SMap } from "../../jacdac-ts/src/jdom/utils";
 import { BrowserFileStorage, HostedFileStorage, IFileStorage } from '../../../src/embed/filestorage'
 import { IThemeMessage } from "../../../src/embed/protocol";
 import { ModelStore, HostedModelStore } from "../../../src/embed/modelstore";
 import { IFrameTransport } from "../../../src/embed/transport";
 import DarkModeContext from "./ui/DarkModeContext";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
-import { JDDevice } from "../../../src/jdom/device";
-import { IDeviceNameSettings, JDBus } from "../../../src/jdom/bus"
-import { inIFrame } from "../../../src/jdom/iframeclient";
+import { JDDevice } from "../../jacdac-ts/src/jdom/device";
+import { IDeviceNameSettings, JDBus } from "../../jacdac-ts/src/jdom/bus"
+import { inIFrame } from "../../jacdac-ts/src/jdom/iframeclient";
 
 export interface ISettings {
     get(key: string): string;

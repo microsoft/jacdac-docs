@@ -20,8 +20,8 @@ import { SliderPicker } from "react-color"
 import {
     LedAnimationData,
     LedAnimationFrame,
-} from "../../../../src/hosts/ledservicehost"
-import { clone } from "../../../../src/jdom/utils"
+} from "../../../jacdac-ts/src/hosts/ledservicehost"
+import { clone } from "../../../jacdac-ts/src/jdom/utils"
 import { useId } from "react-use-id-hook"
 
 function LedAnimationFrameDesigner(props: {

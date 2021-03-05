@@ -4,11 +4,11 @@ import { useRegisterBoolValue, useRegisterUnpackedValue } from "../../jacdac/use
 import useServiceHost from "../hooks/useServiceHost";
 import { Grid } from "@material-ui/core";
 import MicIcon from '@material-ui/icons/Mic';
-import { REFRESH, SoundSpectrumReg } from "../../../../src/jdom/constants";
+import { REFRESH, SoundSpectrumReg } from "../../../jacdac-ts/src/jdom/constants";
 import useMicrophoneSpectrum from "../hooks/useMicrophoneSpectrum";
 import IconButtonWithProgress from "../ui/IconButtonWithProgress";
-import { JDService } from "../../../../src/jdom/service";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 import useWidgetSize from "../widgets/useWidgetSize";
 import BytesBarGraphWidget from "../widgets/BytesBarGraphWidget";
 

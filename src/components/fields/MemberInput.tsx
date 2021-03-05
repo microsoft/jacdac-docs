@@ -7,21 +7,21 @@ import {
     prettyMemberUnit,
     prettyUnit,
     valueToFlags,
-} from "../../../../src/jdom/pretty"
+} from "../../../jacdac-ts/src/jdom/pretty"
 import {
     isIntegerType,
     isValueOrIntensity,
     memberValueToString,
     tryParseMemberValue,
-} from "../../../../src/jdom/spec"
-import { isSet, pick, roundWithPrecision } from "../../../../src/jdom/utils"
+} from "../../../jacdac-ts/src/jdom/spec"
+import { isSet, pick, roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils"
 import { RegisterInputVariant } from "../RegisterInput"
 import ButtonWidget from "../widgets/ButtonWidget"
 import GaugeWidget from "../widgets/GaugeWidget"
 import useWidgetSize from "../widgets/useWidgetSize"
 import ValueWithUnitWidget from "../widgets/ValueWithUnitWidget"
 import useUnitIcon from "../hooks/useUnitIcon"
-import { PackedSimpleValue } from "../../../../src/jdom/pack"
+import { PackedSimpleValue } from "../../../jacdac-ts/src/jdom/pack"
 import { useId } from "react-use-id-hook"
 
 export default function MemberInput(props: {

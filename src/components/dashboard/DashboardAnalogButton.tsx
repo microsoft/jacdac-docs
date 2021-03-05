@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AnalogButtonReg, AnalogButtonVariant } from "../../../../src/jdom/constants";
+import { AnalogButtonReg, AnalogButtonVariant } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetSize from "../widgets/useWidgetSize";
@@ -8,7 +8,7 @@ import SvgWidget from "../widgets/SvgWidget";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import { describeArc } from "../widgets/svgutils";
-import AnalogSensorServiceHost from "../../../../src/hosts/analogsensorservicehost";
+import AnalogSensorServiceHost from "../../../jacdac-ts/src/hosts/analogsensorservicehost";
 import useAnimationFrame from "../hooks/useAnimationFrame";
 
 const ACTIVE_SPEED = 0.05

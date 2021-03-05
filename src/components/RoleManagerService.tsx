@@ -1,14 +1,14 @@
 import React, { useContext, useState } from "react"
 import { Card, CardActions, CardContent, CircularProgress, Grid, MenuItem } from "@material-ui/core"
 import useChange from "../jacdac/useChange"
-import { JDService } from "../../../src/jdom/service"
-import { RequestedRole, RoleManagerClient } from "../../../src/jdom/rolemanagerclient"
+import { JDService } from "../../jacdac-ts/src/jdom/service"
+import { RequestedRole, RoleManagerClient } from "../../jacdac-ts/src/jdom/rolemanagerclient"
 import CmdButton from "./CmdButton"
 import DeviceCardHeader from "./DeviceCardHeader"
 import useServiceClient from "./useServiceClient"
 import SelectWithLabel from "./ui/SelectWithLabel"
 import DeviceName from "./DeviceName"
-import { serviceName } from "../../../src/jdom/pretty"
+import { serviceName } from "../../jacdac-ts/src/jdom/pretty"
 import { addHost, hostDefinitionFromServiceClass } from "../../../src/hosts/hosts"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 

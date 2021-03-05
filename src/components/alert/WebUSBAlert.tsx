@@ -1,5 +1,5 @@
 import React, { } from "react"
-import { isWebUSBEnabled, isWebUSBSupported } from "../../../../src/jdom/usb"
+import { isWebUSBEnabled, isWebUSBSupported } from "../../../jacdac-ts/src/jdom/usb"
 import { NoSsr } from '@material-ui/core';
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "../ui/Alert";

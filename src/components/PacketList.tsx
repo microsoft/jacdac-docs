@@ -1,6 +1,6 @@
 import { List } from "@material-ui/core";
 import React from "react";
-import Packet from "../../../src/jdom/packet";
+import Packet from "../../jacdac-ts/src/jdom/packet";
 import PacketListItem from "./PacketListItem";
 
 export default function PacketList(props: { packets: Packet[] }) {

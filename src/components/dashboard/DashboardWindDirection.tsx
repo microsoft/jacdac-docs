@@ -1,5 +1,5 @@
 import React, { } from "react";
-import { WindDirectionReg } from "../../../../src/jdom/constants";
+import { WindDirectionReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import SvgWidget from "../widgets/SvgWidget";
@@ -9,7 +9,7 @@ import useWidgetSize from "../widgets/useWidgetSize";
 import { useId } from "react-use-id-hook"
 import useThrottledValue from "../hooks/useThrottledValue";
 import { Grid, Slider } from "@material-ui/core";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 
 export default function DashboardWindDirection(props: DashboardServiceProps) {
     const { service, services, variant } = props;

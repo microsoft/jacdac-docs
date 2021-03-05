@@ -2,8 +2,8 @@ const path = require(`path`)
 const fs = require(`fs-extra`)
 const { slash } = require(`gatsby-core-utils`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
-const { serviceSpecifications } = require(`../dist/jacdac-jdom.cjs`)
-const { serviceSpecificationToDTDL, DTMIToRoute } = require(`../dist/jacdac-azure-iot.cjs`)
+const { serviceSpecifications } = require(`./jacdac-ts/dist/jacdac-jdom.cjs`)
+const { serviceSpecificationToDTDL, DTMIToRoute } = require(`./jacdac-ts/dist/jacdac-azure-iot.cjs`)
 const { IgnorePlugin } = require('webpack')
 
 async function createServicePages(graphql, actions, reporter) {

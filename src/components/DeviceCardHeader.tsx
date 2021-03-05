@@ -1,15 +1,15 @@
-import { ControlReg, SRV_CTRL } from "../../../src/jdom/constants";
+import { ControlReg, SRV_CTRL } from "../../jacdac-ts/src/jdom/constants";
 import { CardHeader, Chip, Typography } from "@material-ui/core";
 // tslint:disable-next-line: no-submodule-imports
 import { Link } from 'gatsby-theme-material-ui';
-import { JDDevice } from "../../../src/jdom/device";
+import { JDDevice } from "../../jacdac-ts/src/jdom/device";
 import React from "react";
 import { useRegisterIntValue, useRegisterStringValue } from "../jacdac/useRegisterValue";
 import DeviceActions from "./DeviceActions";
 import DeviceName from "./DeviceName";
 import DeviceCardMedia from "./DeviceCardMedia"
 import useDeviceSpecification from "../jacdac/useDeviceSpecification";
-import { identifierToUrlPath } from "../../../src/jdom/spec";
+import { identifierToUrlPath } from "../../jacdac-ts/src/jdom/spec";
 import DeviceAvatar from "./devices/DeviceAvatar";
 
 function DeviceFirmwareVersionChip(props: { device: JDDevice }) {

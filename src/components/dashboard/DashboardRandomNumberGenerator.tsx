@@ -4,9 +4,9 @@ import { Grid, TextField } from "@material-ui/core"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import RefreshIcon from "@material-ui/icons/Refresh"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
-import { toHex } from "../../../../src/jdom/utils"
+import { toHex } from "../../../jacdac-ts/src/jdom/utils"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
-import { RngReg } from "../../../../src/jdom/constants"
+import { RngReg } from "../../../jacdac-ts/src/jdom/constants"
 import { useId } from "react-use-id-hook"
 
 export default function DashboardRandomNumberGenerator(

@@ -1,6 +1,6 @@
 
 import React, { useRef } from "react";
-import { TrafficLightReg } from "../../../../src/jdom/constants";
+import { TrafficLightReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import SvgWidget from "../widgets/SvgWidget";
@@ -8,7 +8,7 @@ import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
-import TrafficLightServiceHost from "../../../../src/hosts/trafficlightservicehost";
+import TrafficLightServiceHost from "../../../jacdac-ts/src/hosts/trafficlightservicehost";
 import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps";
 
 const m = 2;

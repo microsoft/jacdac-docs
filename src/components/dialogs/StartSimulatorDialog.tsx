@@ -2,10 +2,10 @@ import { Button, Dialog, DialogContent, DialogTitle, Grid, MenuItem } from "@mat
 import { useSnackbar } from "notistack";
 import React, { useContext, useMemo, useState } from "react";
 import { useId } from "react-use-id-hook";
-import hosts, { addHost } from "../../../../src/hosts/hosts";
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../../src/jdom/constants";
-import Flags from "../../../../src/jdom/flags";
-import { delay, uniqueMap } from "../../../../src/jdom/utils";
+import hosts, { addHost } from "../../../jacdac-ts/src/hosts/hosts";
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants";
+import Flags from "../../../jacdac-ts/src/jdom/flags";
+import { delay, uniqueMap } from "../../../jacdac-ts/src/jdom/utils";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import KindIcon from "../KindIcon";
 import SelectWithLabel from "../ui/SelectWithLabel";

@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
-import { SoundPlayerCmd, SoundPlayerReg } from "../../../../src/jdom/constants";
+import { SoundPlayerCmd, SoundPlayerReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useServiceHost from "../hooks/useServiceHost";
 import { Button, Grid, Slider } from "@material-ui/core";
 import { useChangeAsync } from "../../jacdac/useChange";
-import { JDService } from "../../../../src/jdom/service";
-import { jdpack } from "../../../../src/jdom/pack";
-import SoundPlayerServiceHost from "../../../../src/hosts/soundplayerservicehost";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
+import { jdpack } from "../../../jacdac-ts/src/jdom/pack";
+import SoundPlayerServiceHost from "../../../jacdac-ts/src/hosts/soundplayerservicehost";
 import { Howl } from 'howler';
 
 function SoundButton(props: { service: JDService, name: string, duration: number }) {

@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core"
 import DeviceCardHeader from "./DeviceCardHeader"
 import Alert from "./ui/Alert"
-import { JDService } from "../../../src/jdom/service"
+import { JDService } from "../../jacdac-ts/src/jdom/service"
 
 export default function SelectService(props: {
     serviceClass: number

@@ -1,10 +1,10 @@
 import React from "react";
-import { ColorReg } from "../../../../src/jdom/constants";
+import { ColorReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useServiceHost from "../hooks/useServiceHost";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 import { BlockPicker } from "react-color"
 import ColorInput from "../ui/ColorInput";
 import SvgWidget from "../widgets/SvgWidget";

@@ -1,14 +1,14 @@
 
 import { Button, createStyles, Grid, makeStyles, Slider } from "@material-ui/core";
 import React, { useEffect, useRef } from "react";
-import { BuzzerCmd, BuzzerReg } from "../../../../src/jdom/constants";
+import { BuzzerCmd, BuzzerReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
-import { jdpack } from "../../../../src/jdom/pack";
+import { jdpack } from "../../../jacdac-ts/src/jdom/pack";
 import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useServiceHost from "../hooks/useServiceHost";
 import usePlayTone from "../hooks/usePlayTone";
-import BuzzerServiceHost from "../../../../src/hosts/buzzerservicehost";
+import BuzzerServiceHost from "../../../jacdac-ts/src/hosts/buzzerservicehost";
 
 const useStyles = makeStyles(() => createStyles({
     btn: {

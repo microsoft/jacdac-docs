@@ -1,6 +1,6 @@
 import { Grid } from "@material-ui/core";
 import React, { } from "react";
-import { JDDevice } from "../../../../src/jdom/device";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 import GridHeader from "../ui/GridHeader"
 import { DashboardDeviceProps } from "./Dashboard";
 import DashboardDeviceItem from "./DashboardDeviceItem";

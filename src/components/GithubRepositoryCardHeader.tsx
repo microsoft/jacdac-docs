@@ -4,7 +4,7 @@ import { Box, CardHeader, Typography } from '@material-ui/core';
 import { useLatestRelease, useRepository } from './github';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { Link } from 'gatsby-theme-material-ui';
-import { inIFrame } from '../../../src/jdom/iframeclient';
+import { inIFrame } from '../../jacdac-ts/src/jdom/iframeclient';
 
 export default function GithubRepositoryCardHeader(props: {
     slug: string,

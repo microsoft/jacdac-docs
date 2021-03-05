@@ -1,6 +1,6 @@
 import React from "react"
 import { Card, CardActions, CardContent, CardHeader, CardMedia, createStyles, Grid, makeStyles, Theme } from "@material-ui/core";
-import { deviceSpecificationFromFirmwareIdentifier, deviceSpecificationFromIdentifier, identifierToUrlPath, imageDeviceOf, serviceSpecificationFromClassIdentifier } from "../../../src/jdom/spec";
+import { deviceSpecificationFromFirmwareIdentifier, deviceSpecificationFromIdentifier, identifierToUrlPath, imageDeviceOf, serviceSpecificationFromClassIdentifier } from "../../jacdac-ts/src/jdom/spec";
 import GitHubButton from "./GitHubButton"
 import IDChip from "./IDChip";
 import { Button, IconButton } from "gatsby-theme-material-ui";

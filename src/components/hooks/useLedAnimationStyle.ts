@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useId } from "react-use-id-hook"
-import { LedAnimationData, LedAnimationFrame } from "../../../../src/hosts/ledservicehost";
-import { hsvToCss } from "../../../../src/jdom/color";
-import { roundWithPrecision } from "../../../../src/jdom/utils";
+import { LedAnimationData, LedAnimationFrame } from "../../../jacdac-ts/src/hosts/ledservicehost";
+import { hsvToCss } from "../../../jacdac-ts/src/jdom/color";
+import { roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
 
 export interface LedAnimationProps {
     monochrome?: boolean,

@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
 import { Typography } from "@material-ui/core";
-import { InPipeReader } from "../../../src/jdom/pipes";
-import { JDService } from "../../../src/jdom/service";
+import { InPipeReader } from "../../jacdac-ts/src/jdom/pipes";
+import { JDService } from "../../jacdac-ts/src/jdom/service";
 import DeviceName from "./DeviceName";
-import { hasPipeReport, isReportOf } from "../../../src/jdom/spec"
-import { packArguments } from "../../../src/jdom/command"
-import { DecodedPacket, printPacket, serviceName } from "../../../src/jdom/pretty"
-import Packet from "../../../src/jdom/packet";
+import { hasPipeReport, isReportOf } from "../../jacdac-ts/src/jdom/spec"
+import { packArguments } from "../../jacdac-ts/src/jdom/command"
+import { DecodedPacket, printPacket, serviceName } from "../../jacdac-ts/src/jdom/pretty"
+import Packet from "../../jacdac-ts/src/jdom/packet";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import CmdButton from "./CmdButton";
-import { PackedValues } from "../../../src/jdom/pack";
+import { PackedValues } from "../../jacdac-ts/src/jdom/pack";
 
 export default function CommandInput(props: {
     service: JDService,

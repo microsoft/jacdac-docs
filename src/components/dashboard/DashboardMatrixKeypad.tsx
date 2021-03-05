@@ -1,5 +1,5 @@
 import React, { SVGProps, useRef } from "react";
-import { MatrixKeypadReg } from "../../../../src/jdom/constants";
+import { MatrixKeypadReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetSize from "../widgets/useWidgetSize";
@@ -8,7 +8,7 @@ import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import useFireKey from "../hooks/useFireKey";
 import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps";
-import MatrixKeypadServiceHost from "../../../../src/hosts/matrixkeypadservicehost";
+import MatrixKeypadServiceHost from "../../../jacdac-ts/src/hosts/matrixkeypadservicehost";
 
 export default function DashboardMatrixKeypad(props: DashboardServiceProps) {
     const { service, services, variant } = props;

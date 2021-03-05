@@ -6,8 +6,8 @@ import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import useWidgetSize from "../widgets/useWidgetSize";
 import { Grid, Slider } from "@material-ui/core";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
-import { CompassReg, SystemStatusCodes } from "../../../../src/jdom/constants";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
+import { CompassReg, SystemStatusCodes } from "../../../jacdac-ts/src/jdom/constants";
 import PowerButton from "../widgets/PowerButton";
 
 export default function DashboardCompass(props: DashboardServiceProps) {

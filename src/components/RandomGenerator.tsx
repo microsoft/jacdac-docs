@@ -1,9 +1,9 @@
 import React, { useState } from "react"
-import { cryptoRandomUint32 } from "../../../src/jdom/utils"
+import { cryptoRandomUint32 } from "../../jacdac-ts/src/jdom/utils"
 import {
     deviceSpecificationFromFirmwareIdentifier,
     serviceSpecificationFromClassIdentifier,
-} from "../../../src/jdom/spec"
+} from "../../jacdac-ts/src/jdom/spec"
 import {
     TextField,
     Paper,

@@ -1,7 +1,7 @@
 
 import { Grid, Switch } from "@material-ui/core";
 import React from "react";
-import { RoleManagerReg } from "../../../../src/jdom/constants";
+import { RoleManagerReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import { useId } from "react-use-id-hook";

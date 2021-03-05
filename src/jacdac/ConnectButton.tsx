@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import { Button } from "gatsby-theme-material-ui";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
-import { BusState } from "../../../src/jdom/bus";
+import { BusState } from "../../jacdac-ts/src/jdom/bus";
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import UsbIcon from '@material-ui/icons/Usb';
 import { Badge, useMediaQuery, useTheme } from "@material-ui/core";
 import IconButtonWithProgress from "../components/ui/IconButtonWithProgress"
-import { isWebUSBEnabled, isWebUSBSupported } from "../../../src/jdom/usb";
+import { isWebUSBEnabled, isWebUSBSupported } from "../../jacdac-ts/src/jdom/usb";
 import { MOBILE_BREAKPOINT } from "../components/layout";
 
 export default function ConnectButton(props: {

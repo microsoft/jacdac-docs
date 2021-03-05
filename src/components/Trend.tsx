@@ -1,6 +1,6 @@
 import React from "react"
 import FieldDataSet, { Example } from "./FieldDataSet";
-import { unique } from "../../../src/jdom/utils";
+import { unique } from "../../jacdac-ts/src/jdom/utils";
 import { Paper, makeStyles, createStyles } from "@material-ui/core";
 import clsx from 'clsx';
 

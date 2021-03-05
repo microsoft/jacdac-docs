@@ -1,7 +1,7 @@
 import { Typography } from "@material-ui/core";
 import React, { useContext } from "react";
-import { prettySize } from "../../../src/jdom/pretty";
-import { roundWithPrecision } from "../../../src/jdom/utils";
+import { prettySize } from "../../jacdac-ts/src/jdom/pretty";
+import { roundWithPrecision } from "../../jacdac-ts/src/jdom/utils";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import useChange from "../jacdac/useChange";
 

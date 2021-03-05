@@ -1,9 +1,9 @@
 
 import React, { } from "react";
-import { RealTimeClockReg } from "../../../../src/jdom/constants";
+import { RealTimeClockReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
-import { RealTimeClockReadingType } from "../../../../src/hosts/realtimeclockservicehost";
+import { RealTimeClockReadingType } from "../../../jacdac-ts/src/hosts/realtimeclockservicehost";
 import { Typography } from "@material-ui/core";
 
 export default function DashboardRealTimeClock(props: DashboardServiceProps) {

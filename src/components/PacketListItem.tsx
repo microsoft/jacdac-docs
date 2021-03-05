@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 import { ListItem, ListItemIcon, makeStyles, createStyles, ListItemText, useMediaQuery, useTheme, Box } from '@material-ui/core';
-import Packet from '../../../src/jdom/packet';
+import Packet from '../../jacdac-ts/src/jdom/packet';
 import PacketsContext from './PacketsContext';
 import PacketBadge from './PacketBadge';
 import AppContext, { DrawerType } from './AppContext'
 import { MOBILE_BREAKPOINT } from './layout';
-import { META_PIPE, SRV_LOGGER } from '../../../src/jdom/constants';
-import { prettyDuration } from '../../../src/jdom/pretty';
-import { ellipseJoin } from '../../../src/jdom/utils';
-import { jdunpack } from '../../../src/jdom/pack';
+import { META_PIPE, SRV_LOGGER } from '../../jacdac-ts/src/jdom/constants';
+import { prettyDuration } from '../../jacdac-ts/src/jdom/pretty';
+import { ellipseJoin } from '../../jacdac-ts/src/jdom/utils';
+import { jdunpack } from '../../jacdac-ts/src/jdom/pack';
 import { navigate } from 'gatsby';
 
 const useStyles = makeStyles(() =>

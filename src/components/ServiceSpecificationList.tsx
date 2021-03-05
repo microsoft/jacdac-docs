@@ -1,11 +1,11 @@
 import { Chip, Grid, List, ListItem, ListItemText, Typography } from "@material-ui/core";
 import React, { useMemo } from "react";
-import { deviceSpecificationsForService, isInfrastructure, resolveMakecodeServiceFromClassIdentifier } from "../../../src/jdom/spec";
-import { arrayShuffle } from "../../../src/jdom/utils";
+import { deviceSpecificationsForService, isInfrastructure, resolveMakecodeServiceFromClassIdentifier } from "../../jacdac-ts/src/jdom/spec";
+import { arrayShuffle } from "../../jacdac-ts/src/jdom/utils";
 import GridHeader from "./ui/GridHeader"
 import { Link } from "gatsby-theme-material-ui";
 import MakeCodeIcon from "./icons/MakeCodeIcon"
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../src/jdom/constants";
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../jacdac-ts/src/jdom/constants";
 import { hostDefinitionFromServiceClass } from "../../../src/hosts/hosts"
 import KindIcon from "./KindIcon"
 import ChipList from "./ui/ChipList"

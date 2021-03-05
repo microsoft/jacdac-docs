@@ -24,7 +24,7 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `images`,
-        path: `${__dirname}/../jacdac-spec/spec/images`,
+        path: `${__dirname}/jacdac-ts/jacdac-spec/spec/images`,
       },
     },
     {
@@ -38,42 +38,42 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `specPages`,
-        path: `${__dirname}/../jacdac-spec/spec`,
+        path: `${__dirname}/jacdac-ts/jacdac-spec/spec`,
       },
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `services`,
-        path: `${__dirname}/../jacdac-spec/dist/services.json`,
+        path: `${__dirname}/jacdac-ts/jacdac-spec/dist/services.json`,
       },
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `serviceSources`,
-        path: `${__dirname}/../jacdac-spec/dist/services-sources.json`,
+        path: `${__dirname}/jacdac-ts/jacdac-spec/dist/services-sources.json`,
       },
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `devices`,
-        path: `${__dirname}/../jacdac-spec/dist/devices.json`,
+        path: `${__dirname}/jacdac-ts/jacdac-spec/dist/devices.json`,
       },
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `traces`,
-        path: `${__dirname}/../jacdac-spec/traces`,
+        path: `${__dirname}/jacdac-ts/jacdac-spec/traces`,
       },
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `package`,
-        path: `${__dirname}/../package.json`,
+        path: `${__dirname}/jacdac-ts/package.json`,
       },
     },
     `gatsby-plugin-optimize-svgs`,

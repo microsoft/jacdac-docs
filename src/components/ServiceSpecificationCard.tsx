@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 import { Card, CardActions, CardContent, CardHeader, CardMedia, Chip, createStyles, Grid, makeStyles, Theme, Typography } from "@material-ui/core";
-import { serviceSpecificationFromClassIdentifier } from "../../../src/jdom/spec";
+import { serviceSpecificationFromClassIdentifier } from "../../jacdac-ts/src/jdom/spec";
 import IDChip from "./IDChip";
 import { Button } from "gatsby-theme-material-ui";
 import Markdown from "./ui/Markdown"
@@ -8,7 +8,7 @@ import ServiceSpecificationStatusAlert from "./ServiceSpecificationStatusAlert"
 import { addHost, hostDefinitionFromServiceClass } from "../../../src/hosts/hosts";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import KindIcon from "./KindIcon";
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../src/jdom/constants";
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../jacdac-ts/src/jdom/constants";
 import { navigate } from "gatsby"
 
 export default function ServiceSpecificationCard(props: {

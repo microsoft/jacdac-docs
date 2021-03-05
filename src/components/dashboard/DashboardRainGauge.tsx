@@ -1,18 +1,18 @@
 
 import React, { useEffect, useState } from "react";
-import { CHANGE, RainGaugeReg } from "../../../../src/jdom/constants";
+import { CHANGE, RainGaugeReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useThrottledValue from "../hooks/useThrottledValue";
-import RainGaugeServiceHost from "../../../../src/hosts/RainGaugeServiceHost"
+import RainGaugeServiceHost from "../../../jacdac-ts/src/hosts/RainGaugeServiceHost"
 import useChange from "../../jacdac/useChange";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import { useId } from "react-use-id-hook";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
-import { roundWithPrecision } from "../../../../src/jdom/utils";
+import { roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
 
 const TILT = 15;
 

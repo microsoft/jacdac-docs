@@ -1,8 +1,8 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core";
 import React, { useContext, useEffect, useRef } from "react";
-import { PACKET_PROCESS, PACKET_SEND } from "../../../../src/jdom/constants";
-import { PacketMessage } from "../../../../src/jdom/iframebridgeclient";
-import Packet from "../../../../src/jdom/packet";
+import { PACKET_PROCESS, PACKET_SEND } from "../../../jacdac-ts/src/jdom/constants";
+import { PacketMessage } from "../../../jacdac-ts/src/jdom/iframebridgeclient";
+import Packet from "../../../jacdac-ts/src/jdom/packet";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import useWindowEvent from "../hooks/useWindowEvent";
 import PaperBox from "../ui/PaperBox";

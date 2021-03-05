@@ -29,7 +29,7 @@ import {
     PACKET_KIND_RO, PACKET_KIND_RW, CONST_NODE_NAME, COMMAND_NODE_NAME,
     REPORT_NODE_NAME, BUS_NODE_NAME, DEVICE_NODE_NAME, VIRTUAL_DEVICE_NODE_NAME,
     SERVICE_NODE_NAME, EVENT_NODE_NAME, PIPE_NODE_NAME, CRC_ACK_NODE_NAME, PIPE_REPORT_NODE_NAME, PACKET_KIND_ANNOUNCE
-} from "../../../src/jdom/constants";
+} from "../../jacdac-ts/src/jdom/constants";
 import JacdacIcon from "./icons/JacdacIcon";
 
 export default function KindIcon(props: { kind: string, className?: string }) {

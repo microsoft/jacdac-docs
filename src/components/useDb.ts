@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { JSONTryParse, readBlobToText, readBlobToUint8Array } from "../../../src/jdom/utils";
+import { JSONTryParse, readBlobToText, readBlobToUint8Array } from "../../jacdac-ts/src/jdom/utils";
 import DbContext, { DB_VALUE_CHANGE } from "./DbContext";
 import useEffectAsync from "./useEffectAsync";
 

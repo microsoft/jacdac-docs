@@ -1,11 +1,11 @@
 
 import React, { useEffect, useRef } from "react";
-import { LedPixelReg, LedPixelVariant, RENDER } from "../../../../src/jdom/constants";
+import { LedPixelReg, LedPixelVariant, RENDER } from "../../../jacdac-ts/src/jdom/constants";
 import useServiceHost from "../hooks/useServiceHost";
-import LedPixelServiceHost from "../../../../src/hosts/ledpixelservicehost";
+import LedPixelServiceHost from "../../../jacdac-ts/src/hosts/ledpixelservicehost";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
-import { JDService } from "../../../../src/jdom/service";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {

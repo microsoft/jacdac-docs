@@ -1,10 +1,10 @@
 import React, { useState, useEffect, ReactNode } from "react";
 import JacdacContext from "./Context";
-import { BusState, JDBus } from "../../../src/jdom/bus";
-import { createUSBBus } from "../../../src/jdom/usb";
-import { CONNECTION_STATE } from "../../../src/jdom/constants";
-import IFrameBridgeClient from "../../../src/jdom/iframebridgeclient"
-import Flags from "../../../src/jdom/flags"
+import { BusState, JDBus } from "../../jacdac-ts/src/jdom/bus";
+import { createUSBBus } from "../../jacdac-ts/src/jdom/usb";
+import { CONNECTION_STATE } from "../../jacdac-ts/src/jdom/constants";
+import IFrameBridgeClient from "../../jacdac-ts/src/jdom/iframebridgeclient"
+import Flags from "../../jacdac-ts/src/jdom/flags"
 import GamepadHostManager from "../../../src/hosts/gamepadhostmanager"
 
 function sniffQueryArguments() {

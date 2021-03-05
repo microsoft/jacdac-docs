@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { REPORT_UPDATE, SystemReg } from "../../../../src/jdom/constants";
-import { JDRegister } from "../../../../src/jdom/register";
+import { REPORT_UPDATE, SystemReg } from "../../../jacdac-ts/src/jdom/constants";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 
 
 export default function useReadingAuxilliaryValue(register: JDRegister, identifier: number =

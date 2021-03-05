@@ -5,12 +5,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 // tslint:disable-next-line: no-submodule-imports
 import CardContent from '@material-ui/core/CardContent';
-import { JDDevice } from '../../../src/jdom/device';
-import { SRV_CTRL, SRV_LOGGER, ControlReg } from '../../../src/jdom/constants';
+import { JDDevice } from '../../jacdac-ts/src/jdom/device';
+import { SRV_CTRL, SRV_LOGGER, ControlReg } from '../../jacdac-ts/src/jdom/constants';
 import ServiceButton from './ServiceButton';
 import useChange from '../jacdac/useChange';
 import { navigate } from "gatsby";
-import { JDService } from '../../../src/jdom/service';
+import { JDService } from '../../jacdac-ts/src/jdom/service';
 import { CardActions, createStyles } from '@material-ui/core';
 import DeviceCardHeader from './DeviceCardHeader';
 import { useRegisterStringValue } from '../jacdac/useRegisterValue';

@@ -1,6 +1,6 @@
 import React from "react"
 import { Grid } from "@material-ui/core"
-import { SRV_ROLE_MANAGER } from "../../../../src/jdom/constants"
+import { SRV_ROLE_MANAGER } from "../../../jacdac-ts/src/jdom/constants"
 import ConnectAlert from "../alert/ConnectAlert"
 import Alert from "../ui/Alert"
 import RoleManagerService from "../RoleManagerService"

@@ -1,4 +1,4 @@
-import { isRegister, isEvent, isCommand, tryParseMemberValue, serviceSpecificationFromClassIdentifier } from "../../../src/jdom/spec"
+import { isRegister, isEvent, isCommand, tryParseMemberValue, serviceSpecificationFromClassIdentifier } from "../../jacdac-ts/src/jdom/spec"
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "./ui/Alert";
 import React, { useState } from "react";
@@ -10,8 +10,8 @@ import IDChip from "./IDChip";
 import KindChip from "./KindChip";
 import PacketMembersChip from "./PacketMembersChip";
 import Markdown from "./ui/Markdown";
-import { prettyMemberUnit, prettyUnit } from "../../../src/jdom/pretty";
-import { isSet } from "../../../src/jdom/utils";
+import { prettyMemberUnit, prettyUnit } from "../../jacdac-ts/src/jdom/pretty";
+import { isSet } from "../../jacdac-ts/src/jdom/utils";
 
 const useStyles = makeStyles((theme) => createStyles({
     root: {

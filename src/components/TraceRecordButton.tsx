@@ -2,7 +2,7 @@ import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import { FiberManualRecord } from '@material-ui/icons';
 import React, { useContext } from "react";
 import PacketsContext from "./PacketsContext";
-import { BusState } from "../../../src/jdom/bus";
+import { BusState } from "../../jacdac-ts/src/jdom/bus";
 import IconButtonWithProgress, { IconButtonWithProgressProps } from "./ui/IconButtonWithProgress";
 
 export default function TraceRecordButton(props: { component?: string } & IconButtonWithProgressProps) {

@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
-import { BaseReg, SystemReg } from "../../../../src/jdom/constants";
+import { BaseReg, SystemReg } from "../../../jacdac-ts/src/jdom/constants";
 import useChange from "../../jacdac/useChange";
 import RegisterInput from "../RegisterInput";
-import { isIntegerType, isRegister } from "../../../../src/jdom/spec";
+import { isIntegerType, isRegister } from "../../../jacdac-ts/src/jdom/spec";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { Grid } from "@material-ui/core";
-import { JDRegister } from "../../../../src/jdom/register";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 
 // filter out common registers
 const ignoreRegisters = [

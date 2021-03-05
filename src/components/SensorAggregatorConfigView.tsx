@@ -1,7 +1,7 @@
 import { Paper } from "@material-ui/core";
 import React, { useContext } from "react"
-import { serviceName } from "../../../src/jdom/pretty";
-import { SensorAggregatorConfig, SensorAggregatorInputConfig } from "../../../src/jdom/sensoraggregatorclient"
+import { serviceName } from "../../jacdac-ts/src/jdom/pretty";
+import { SensorAggregatorConfig, SensorAggregatorInputConfig } from "../../jacdac-ts/src/jdom/sensoraggregatorclient"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import DeviceName from "./DeviceName";
 

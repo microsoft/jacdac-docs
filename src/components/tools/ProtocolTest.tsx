@@ -1,25 +1,25 @@
 import { Grid, Switch, Typography } from "@material-ui/core";
 import React, { useContext, useEffect, useState } from "react";
-import { bufferEq, cryptoRandomUint32, delay, pick, randomRange, toHex } from "../../../../src/jdom/utils";
+import { bufferEq, cryptoRandomUint32, delay, pick, randomRange, toHex } from "../../../jacdac-ts/src/jdom/utils";
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
-import { ProtoTestCmd, ProtoTestReg, SRV_PROTO_TEST } from "../../../../src/jdom/constants";
+import { ProtoTestCmd, ProtoTestReg, SRV_PROTO_TEST } from "../../../jacdac-ts/src/jdom/constants";
 import useChange from "../../jacdac/useChange"
-import { JDService } from "../../../../src/jdom/service";
-import { JDRegister } from "../../../../src/jdom/register";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 import ConnectAlert from "../alert/ConnectAlert";
-import { JDField } from "../../../../src/jdom/field";
-import { jdpack, jdpackEqual, jdunpack } from "../../../../src/jdom/pack";
+import { JDField } from "../../../jacdac-ts/src/jdom/field";
+import { jdpack, jdpackEqual, jdunpack } from "../../../jacdac-ts/src/jdom/pack";
 import DeviceName from "../DeviceName";
 import DeviceActions from "../DeviceActions";
 import useEffectAsync from "../useEffectAsync";
 import TestCard from "../TestCard";
-import Packet from "../../../../src/jdom/packet";
-import { JDEvent } from "../../../../src/jdom/event";
+import Packet from "../../../jacdac-ts/src/jdom/packet";
+import { JDEvent } from "../../../jacdac-ts/src/jdom/event";
 import { AlertTitle } from "@material-ui/lab";
 import Alert from "../ui/Alert";
-import JDDeviceHost from "../../../../src/jdom/devicehost";
-import ProtocolTestServiceHost from "../../../../src/jdom/protocoltestservicehost"
+import JDDeviceHost from "../../../jacdac-ts/src/jdom/devicehost";
+import ProtocolTestServiceHost from "../../../jacdac-ts/src/jdom/protocoltestservicehost"
 
 function randomFieldPayload(field: JDField) {
     const { specification } = field;

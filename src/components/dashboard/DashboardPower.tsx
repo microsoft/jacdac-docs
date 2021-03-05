@@ -1,11 +1,11 @@
 import React, { } from "react";
-import { PowerReg } from "../../../../src/jdom/constants";
+import { PowerReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import SvgWidget from "../widgets/SvgWidget";
 import useServiceHost from "../hooks/useServiceHost";
 import useWidgetSize from "../widgets/useWidgetSize";
-import ReflectedLightServiceHost from "../../../../src/hosts/reflectedlightservicehost";
+import ReflectedLightServiceHost from "../../../jacdac-ts/src/hosts/reflectedlightservicehost";
 import PowerButton from "../widgets/PowerButton";
 import { Grid, Typography } from "@material-ui/core";
 import useWidgetTheme from "../widgets/useWidgetTheme";

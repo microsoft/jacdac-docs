@@ -5,10 +5,10 @@ import useServiceHost from "../hooks/useServiceHost";
 import { Grid, Slider } from "@material-ui/core";
 import RegisterTrend from "../RegisterTrend";
 import MicIcon from '@material-ui/icons/Mic';
-import { REFRESH, SoundLevelReg } from "../../../../src/jdom/constants";
-import AnalogSensorServiceHost from "../../../../src/hosts/analogsensorservicehost";
+import { REFRESH, SoundLevelReg } from "../../../jacdac-ts/src/jdom/constants";
+import AnalogSensorServiceHost from "../../../jacdac-ts/src/hosts/analogsensorservicehost";
 import IconButtonWithProgress from "../ui/IconButtonWithProgress";
-import { JDService } from "../../../../src/jdom/service";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
 import useMicrophoneVolume from "../hooks/useMicrophoneVolume"
 import TrendWidget from "../widgets/TrendWidget";
 import useWidgetSize from "../widgets/useWidgetSize";

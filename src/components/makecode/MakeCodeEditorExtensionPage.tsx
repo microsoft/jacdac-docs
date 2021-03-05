@@ -4,7 +4,7 @@ import ThemedLayout from "../../components/ui/ThemedLayout";
 import MakeCodeEditorExtension from "../../components/makecode/MakeCodeEditorExtension"
 import { makeStyles } from '@material-ui/core';
 import PaperBox from "../../components/ui/PaperBox";
-import Flags from "../../../../src/jdom/flags";
+import Flags from "../../../jacdac-ts/src/jdom/flags";
 import RoleManager from "../../components/tools/RoleManager";
 import DarkModeContext from "../ui/DarkModeContext";
 

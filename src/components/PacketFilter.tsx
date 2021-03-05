@@ -25,7 +25,7 @@ import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
 import useChange from "../jacdac/useChange"
 import DeviceName from "./DeviceName"
 import { useDebounce } from "use-debounce"
-import { arrayConcatMany, uniqueMap } from "../../../src/jdom/utils"
+import { arrayConcatMany, uniqueMap } from "../../jacdac-ts/src/jdom/utils"
 import TraceTimeFilterRangeSlider from "./TraceTimeFilterRangeSlider"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 import { IconButton } from "gatsby-theme-material-ui"
@@ -36,7 +36,7 @@ import {
     isEvent,
     isPipeReport,
     isRegister,
-} from "../../../src/jdom/spec"
+} from "../../jacdac-ts/src/jdom/spec"
 import Tooltip from "./ui/Tooltip"
 import { useId } from "react-use-id-hook"
 

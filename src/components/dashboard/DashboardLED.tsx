@@ -9,9 +9,9 @@ import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useAnimationFrame from "../hooks/useAnimationFrame";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import { Grid, Slider } from "@material-ui/core";
-import LEDServiceHost, { LedAnimation, LedAnimationData } from "../../../../src/hosts/ledservicehost";
-import { LedReg } from "../../../../src/jdom/constants";
-import { hsvToCss } from "../../../../src/jdom/color";
+import LEDServiceHost, { LedAnimation, LedAnimationData } from "../../../jacdac-ts/src/hosts/ledservicehost";
+import { LedReg } from "../../../jacdac-ts/src/jdom/constants";
+import { hsvToCss } from "../../../jacdac-ts/src/jdom/color";
 
 export default function DashboardLED(props: DashboardServiceProps) {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)

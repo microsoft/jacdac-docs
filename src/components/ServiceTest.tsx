@@ -30,9 +30,9 @@ import {
     addHost,
     hostDefinitionFromServiceClass,
 } from "../../../src/hosts/hosts"
-import Flags from "../../../src/jdom/flags"
-import { JDService } from "../../../src/jdom/service"
-import { serviceTestFromServiceSpec } from "../../../src/jdom/spec"
+import Flags from "../../jacdac-ts/src/jdom/flags"
+import { JDService } from "../../jacdac-ts/src/jdom/service"
+import { serviceTestFromServiceSpec } from "../../jacdac-ts/src/jdom/spec"
 import { cmdToPrompt, JDServiceTestRunner, JDTestRunner, JDTestStatus } from "../../../src/test/testrunner"
 import SelectService from "./SelectService"
 import ErrorIcon from '@material-ui/icons/Error';

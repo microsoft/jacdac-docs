@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Grid } from '@material-ui/core';
 import useLocalStorage from '../useLocalStorage';
-import { clone, unique } from '../../../../src/jdom/utils';
+import { clone, unique } from '../../../jacdac-ts/src/jdom/utils';
 import { Box, Chip, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
 import { ChangeEvent } from 'react';
-import { deviceSpecifications, serviceSpecificationFromClassIdentifier } from '../../../../src/jdom/spec';
+import { deviceSpecifications, serviceSpecificationFromClassIdentifier } from '../../../jacdac-ts/src/jdom/spec';
 import PaperBox from "../ui/PaperBox"
 import { uniqueFirmwareId } from '../RandomGenerator';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
@@ -20,7 +20,7 @@ import FirmwareCard from "../firmware/FirmwareCard"
 // tslint:disable-next-line: no-submodule-imports
 import { Autocomplete } from '@material-ui/lab/';
 import { useFirmwareBlob } from '../firmware/useFirmwareBlobs';
-import { FirmwareBlob } from '../../../../src/jdom/flashing';
+import { FirmwareBlob } from '../../../jacdac-ts/src/jdom/flashing';
 import { useId } from "react-use-id-hook"
 import AddServiceIconButton from "../AddServiceIconButton";
 

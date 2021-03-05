@@ -1,5 +1,5 @@
 import React, { } from "react";
-import { SevenSegmentDisplayReg } from "../../../../src/jdom/constants";
+import { SevenSegmentDisplayReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetSize from "../widgets/useWidgetSize";

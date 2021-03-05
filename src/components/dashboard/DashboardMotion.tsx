@@ -7,8 +7,8 @@ import useServiceHost from "../hooks/useServiceHost";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
-import { MotionReg } from "../../../../src/jdom/constants";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
+import { MotionReg } from "../../../jacdac-ts/src/jdom/constants";
 
 export default function DashboardMotion(props: DashboardServiceProps) {
   const { service, services, variant } = props;

@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { ListItem, Typography, ListItemIcon, Theme, makeStyles, createStyles, Chip } from '@material-ui/core';
-import Packet from '../../../src/jdom/packet';
-import { decodePacketData } from '../../../src/jdom/pretty'
+import Packet from '../../jacdac-ts/src/jdom/packet';
+import { decodePacketData } from '../../jacdac-ts/src/jdom/pretty'
 import clsx from 'clsx';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import WarningIcon from '@material-ui/icons/Warning';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import ErrorIcon from '@material-ui/icons/Error';
-import { JSONTryParse } from '../../../src/jdom/utils';
+import { JSONTryParse } from '../../jacdac-ts/src/jdom/utils';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({

@@ -14,11 +14,11 @@ import {
     SRV_SOUND_LEVEL,
     SRV_SOUND_PLAYER, SRV_SOUND_SPECTRUM, SRV_SPEECH_SYNTHESIS, SRV_SWITCH, SRV_TRAFFIC_LIGHT, SRV_WATER_LEVEL,
     SRV_WIND_DIRECTION, SystemReg,
-} from "../../../../src/jdom/constants";
-import { JDService } from "../../../../src/jdom/service";
-import { isRegister } from "../../../../src/jdom/spec";
+} from "../../../jacdac-ts/src/jdom/constants";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
+import { isRegister } from "../../../jacdac-ts/src/jdom/spec";
 import RegisterInput from "../RegisterInput";
-import { JDRegister } from "../../../../src/jdom/register";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import { CircularProgress, NoSsr } from '@material-ui/core';
 import useServiceHost from "../hooks/useServiceHost";

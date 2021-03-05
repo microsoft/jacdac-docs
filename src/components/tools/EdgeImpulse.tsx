@@ -5,28 +5,28 @@ import useDbValue from "../useDbValue";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import useChange from "../../jacdac/useChange";
 import useGridBreakpoints from "../useGridBreakpoints";
-import { JDRegister } from "../../../../src/jdom/register";
-import { JDClient } from "../../../../src/jdom/client";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
+import { JDClient } from "../../../jacdac-ts/src/jdom/client";
 import DeviceCardHeader from "../DeviceCardHeader";
 import Alert from "../ui/Alert";
 import useEffectAsync from "../useEffectAsync";
-import { CHANGE, CONNECT, CONNECTING, CONNECTION_STATE, DISCONNECT, ERROR, PROGRESS, REPORT_RECEIVE, SRV_MODEL_RUNNER, SRV_SENSOR_AGGREGATOR } from "../../../../src/jdom/constants";
+import { CHANGE, CONNECT, CONNECTING, CONNECTION_STATE, DISCONNECT, ERROR, PROGRESS, REPORT_RECEIVE, SRV_MODEL_RUNNER, SRV_SENSOR_AGGREGATOR } from "../../../jacdac-ts/src/jdom/constants";
 import FieldDataSet from "../FieldDataSet";
-import { deviceSpecificationFromFirmwareIdentifier, isSensor } from "../../../../src/jdom/spec";
+import { deviceSpecificationFromFirmwareIdentifier, isSensor } from "../../../jacdac-ts/src/jdom/spec";
 import CircularProgressWithLabel from "../ui/CircularProgressWithLabel";
 import Trend from "../Trend"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import GetAppIcon from '@material-ui/icons/GetApp';
 import ServiceList from "../ServiceList";
 import { ModelActions, ModelContent } from "./ModelUploader";
-import { readBlobToUint8Array } from "../../../../src/jdom/utils";
+import { readBlobToUint8Array } from "../../../jacdac-ts/src/jdom/utils";
 import useDeviceName from "../useDeviceName";
-import { JDService } from "../../../../src/jdom/service";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
 import ReadingFieldGrid from "../ReadingFieldGrid";
 import useChartPalette from '../useChartPalette';
-import { SensorAggregatorClient, SensorAggregatorConfig } from "../../../../src/jdom/sensoraggregatorclient";
+import { SensorAggregatorClient, SensorAggregatorConfig } from "../../../jacdac-ts/src/jdom/sensoraggregatorclient";
 import { AlertTitle } from "@material-ui/lab";
-import { serviceName } from "../../../../src/jdom/pretty";
+import { serviceName } from "../../../jacdac-ts/src/jdom/pretty";
 import ConnectAlert from "../alert/ConnectAlert";
 import ApiKeyAccordion from "../ApiKeyAccordion";
 

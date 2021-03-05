@@ -4,7 +4,7 @@ import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetSize from "../widgets/useWidgetSize";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
-import { SolenoidReg } from "../../../../src/jdom/constants";
+import { SolenoidReg } from "../../../jacdac-ts/src/jdom/constants";
 import useThrottledValue from "../hooks/useThrottledValue";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
 import useServiceHost from "../hooks/useServiceHost";

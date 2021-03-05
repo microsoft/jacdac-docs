@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Menu, MenuItem, Typography } from '@material-ui/core';
-import { isInfrastructure, serviceSpecificationFromClassIdentifier, serviceSpecifications } from '../../../src/jdom/spec';
+import { isInfrastructure, serviceSpecificationFromClassIdentifier, serviceSpecifications } from '../../jacdac-ts/src/jdom/spec';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import AddIcon from '@material-ui/icons/Add';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports

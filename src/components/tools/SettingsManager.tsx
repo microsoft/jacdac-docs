@@ -1,9 +1,9 @@
 import React, { useContext } from "react"
 import { Grid } from "@material-ui/core"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
-import { SRV_SETTINGS } from "../../../../src/jdom/constants"
+import { SRV_SETTINGS } from "../../../jacdac-ts/src/jdom/constants"
 import useChange from "../../jacdac/useChange"
-import { BusState } from "../../../../src/jdom/bus"
+import { BusState } from "../../../jacdac-ts/src/jdom/bus"
 import ConnectAlert from "../alert/ConnectAlert"
 import Alert from "../ui/Alert"
 import SettingsCard from "../SettingsCard"

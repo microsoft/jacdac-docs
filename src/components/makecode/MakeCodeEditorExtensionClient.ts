@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { JDClient } from "../../../../src/jdom/client";
-import { CHANGE, CONNECT, CONNECTING, PACKET_SEND } from "../../../../src/jdom/constants";
-import { inIFrame } from "../../../../src/jdom/iframeclient";
-import Packet from "../../../../src/jdom/packet";
-import { SMap } from "../../../../src/jdom/utils";
+import { JDClient } from "../../../jacdac-ts/src/jdom/client";
+import { CHANGE, CONNECT, CONNECTING, PACKET_SEND } from "../../../jacdac-ts/src/jdom/constants";
+import { inIFrame } from "../../../jacdac-ts/src/jdom/iframeclient";
+import Packet from "../../../jacdac-ts/src/jdom/packet";
+import { SMap } from "../../../jacdac-ts/src/jdom/utils";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 
 export const READ = "read"

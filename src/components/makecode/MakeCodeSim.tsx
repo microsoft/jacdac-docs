@@ -2,18 +2,18 @@ import React, { useContext, useEffect } from "react"
 import { Button, createMuiTheme, responsiveFontSizes } from "@material-ui/core";
 import ThemedLayout from "../../components/ui/ThemedLayout";
 import { Grid } from "@material-ui/core";
-import { JDDevice } from "../../../../src/jdom/device";
-import { isReading, isValueOrIntensity, resolveMakecodeServiceFromClassIdentifier } from "../../../../src/jdom/spec";
-import { arrayConcatMany, strcmp, unique } from "../../../../src/jdom/utils";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
+import { isReading, isValueOrIntensity, resolveMakecodeServiceFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec";
+import { arrayConcatMany, strcmp, unique } from "../../../jacdac-ts/src/jdom/utils";
 import useDevices from "../hooks/useDevices";
-import { SRV_CONTROL, SRV_LOGGER, SRV_POWER, SRV_ROLE_MANAGER, SRV_SETTINGS } from "../../../../src/jdom/constants";
+import { SRV_CONTROL, SRV_LOGGER, SRV_POWER, SRV_ROLE_MANAGER, SRV_SETTINGS } from "../../../jacdac-ts/src/jdom/constants";
 import MakeCodeIcon from "../icons/MakeCodeIcon"
 import DashboardDeviceItem from "../dashboard/DashboardDeviceItem";
 import Helmet from "react-helmet"
 import DarkModeContext from "../ui/DarkModeContext";
 import KindIcon from "../KindIcon";
 import AppContext from "../AppContext";
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../../src/jdom/constants";
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants";
 
 function deviceSort(l: JDDevice, r: JDDevice): number {
     const srvScore = (srv: jdspec.ServiceSpec) => srv.packets

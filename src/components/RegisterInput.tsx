@@ -3,8 +3,8 @@ import DeviceName from "./DeviceName";
 import Alert from "./ui/Alert";
 import React, { useContext, useEffect, useState } from "react";
 // tslint:disable-next-line: no-submodule-imports
-import { JDRegister } from "../../../src/jdom/register";
-import { REPORT_UPDATE, SystemReg } from "../../../src/jdom/constants";
+import { JDRegister } from "../../jacdac-ts/src/jdom/register";
+import { REPORT_UPDATE, SystemReg } from "../../jacdac-ts/src/jdom/constants";
 import AppContext from "./AppContext";
 import MembersInput from "./fields/MembersInput";
 import RegisterTrend from "./RegisterTrend";

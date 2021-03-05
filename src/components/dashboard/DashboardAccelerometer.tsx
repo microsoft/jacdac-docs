@@ -1,13 +1,13 @@
 import React, { lazy, Suspense, useCallback } from "react";
-import { AccelerometerReg } from "../../../../src/jdom/constants";
+import { AccelerometerReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
-import { JDRegister } from "../../../../src/jdom/register";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 import { Grid, Slider, Mark, CircularProgress, NoSsr } from "@material-ui/core";
-import { roundWithPrecision } from "../../../../src/jdom/utils";
+import { roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
 import { Vector } from "../widgets/threeutils";
 
 const CanvasWidget = lazy(() => import("../widgets/CanvasWidget"));

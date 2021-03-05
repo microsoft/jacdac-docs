@@ -1,17 +1,17 @@
 import { Grid, TextField } from "@material-ui/core"
 import React, { ChangeEvent, useMemo } from "react"
-import { clone, uniqueName } from "../../../../src/jdom/utils"
+import { clone, uniqueName } from "../../../jacdac-ts/src/jdom/utils"
 import useLocalStorage from "../useLocalStorage"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DeleteIcon from "@material-ui/icons/Delete"
-import { serviceSpecificationFromClassIdentifier } from "../../../../src/jdom/spec"
+import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
 import AddServiceIconButton from "../AddServiceIconButton"
 import ServiceSpecificationSelect from "../ServiceSpecificationSelect"
 import {
     DTDL_CONTEXT,
     escapeName,
     serviceSpecificationToComponent,
-} from "../../../../src/azure-iot/dtdl"
+} from "../../../jacdac-ts/src/azure-iot/dtdl"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import Snippet from "../ui/Snippet"
 import PaperBox from "../ui/PaperBox"

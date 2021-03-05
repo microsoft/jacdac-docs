@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import React from "react";
-import Packet from "../../../src/jdom/packet";
-import { toHex } from "../../../src/jdom/utils";
+import Packet from "../../jacdac-ts/src/jdom/packet";
+import { toHex } from "../../jacdac-ts/src/jdom/utils";
 import PaperBox from "./ui/PaperBox";
 import Tooltip from "./ui/Tooltip";
 

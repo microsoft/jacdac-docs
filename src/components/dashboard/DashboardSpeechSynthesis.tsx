@@ -2,12 +2,12 @@ import React, { useState } from "react"
 import {
     SpeechSynthesisCmd,
     SpeechSynthesisReg,
-} from "../../../../src/jdom/constants"
+} from "../../../jacdac-ts/src/jdom/constants"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import { Grid, TextField } from "@material-ui/core"
 import VoiceChatIcon from "@material-ui/icons/VoiceChat"
 import CmdButton from "../CmdButton"
-import { jdpack } from "../../../../src/jdom/pack"
+import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 import { useId } from "react-use-id-hook"
 
 export default function DashboardSpeechSynthesis(props: DashboardServiceProps) {

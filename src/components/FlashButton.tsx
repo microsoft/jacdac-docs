@@ -3,9 +3,9 @@ import React, { useContext } from "react"
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import { Badge } from "@material-ui/core";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
-import { DEVICE_CHANGE, DEVICE_FIRMWARE_INFO, FIRMWARE_BLOBS_CHANGE } from "../../../src/jdom/constants";
+import { DEVICE_CHANGE, DEVICE_FIRMWARE_INFO, FIRMWARE_BLOBS_CHANGE } from "../../jacdac-ts/src/jdom/constants";
 import useEventRaised from "../jacdac/useEventRaised";
-import { computeUpdates } from "../../../src/jdom/flashing";
+import { computeUpdates } from "../../jacdac-ts/src/jdom/flashing";
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip";
 
 export default function FlashButton(props: { className?: string }) {

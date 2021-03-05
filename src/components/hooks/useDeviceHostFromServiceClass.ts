@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { addHost, hostDefinitionFromServiceClass } from "../../../../src/hosts/hosts";
+import { addHost, hostDefinitionFromServiceClass } from "../../../jacdac-ts/src/hosts/hosts";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 
 export default function useDeviceHostFromServiceClass(serviceClass: number): void {

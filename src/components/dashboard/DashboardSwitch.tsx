@@ -1,8 +1,8 @@
-import { SwitchReg, SwitchVariant } from "../../../../src/jdom/constants";
+import { SwitchReg, SwitchVariant } from "../../../jacdac-ts/src/jdom/constants";
 import { useRegisterBoolValue, useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useServiceHost from "../hooks/useServiceHost";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
-import SwitchServiceHost from "../../../../src/hosts/switchservicehost"
+import SwitchServiceHost from "../../../jacdac-ts/src/hosts/switchservicehost"
 import React from "react";
 import { Switch } from "@material-ui/core";
 import { useId } from "react-use-id-hook"

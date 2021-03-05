@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { DecodedPacket } from "../../../src/jdom/pretty";
+import { DecodedPacket } from "../../jacdac-ts/src/jdom/pretty";
 import MembersInput from "./fields/MembersInput";
 
 export default function DecodedPacketItem(props: { pkt: DecodedPacket }) {

@@ -5,9 +5,9 @@ import {
     JD_FRAME_FLAG_IDENTIFIER_IS_SERVICE_CLASS,
     JD_SERVICE_INDEX_CRC_ACK,
     JD_SERVICE_INDEX_PIPE
-} from "../../../src/jdom/constants";
-import Packet from "../../../src/jdom/packet";
-import { fromHex, toHex } from "../../../src/jdom/utils";
+} from "../../jacdac-ts/src/jdom/constants";
+import Packet from "../../jacdac-ts/src/jdom/packet";
+import { fromHex, toHex } from "../../jacdac-ts/src/jdom/utils";
 import PaperBox from "./ui/PaperBox";
 import Tooltip from "./ui/Tooltip";
 

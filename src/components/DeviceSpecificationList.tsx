@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { createStyles, GridList, GridListTile, GridListTileBar, makeStyles, Theme, Typography, useMediaQuery, useTheme } from '@material-ui/core';
-import { deviceSpecifications, identifierToUrlPath, imageDeviceOf } from '../../../src/jdom/spec';
+import { deviceSpecifications, identifierToUrlPath, imageDeviceOf } from '../../jacdac-ts/src/jdom/spec';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import InfoIcon from '@material-ui/icons/Info';
 import Markdown from "./ui/Markdown"
 import { IconButton } from "gatsby-theme-material-ui";
-import { arrayShuffle } from '../../../src/jdom/utils';
+import { arrayShuffle } from '../../jacdac-ts/src/jdom/utils';
 import { MEDIUM_BREAKPOINT, MOBILE_BREAKPOINT } from './layout';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({

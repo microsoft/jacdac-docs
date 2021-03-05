@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { lightEncode } from '../../../../src/jdom/light'
+import { lightEncode } from '../../../jacdac-ts/src/jdom/light'
 
 export default function useLightEncode(source: string) {
     return useMemo(() => {

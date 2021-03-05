@@ -1,6 +1,6 @@
 import { createStyles, makeStyles, MenuItem, TextField, Theme } from "@material-ui/core";
 import React, { ChangeEvent, useState } from "react";
-import { serviceSpecifications } from "../../../src/jdom/spec"
+import { serviceSpecifications } from "../../jacdac-ts/src/jdom/spec"
 
 const useStyles = makeStyles(() =>
     createStyles({

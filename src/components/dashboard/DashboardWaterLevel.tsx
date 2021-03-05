@@ -1,6 +1,6 @@
 
 import React, { } from "react";
-import { WaterLevelReg } from "../../../../src/jdom/constants";
+import { WaterLevelReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
@@ -8,7 +8,7 @@ import useServiceHost from "../hooks/useServiceHost";
 import useWidgetSize from "../widgets/useWidgetSize";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import { Grid, Slider } from "@material-ui/core";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 
 export default function DashbaordWaterLevel(props: DashboardServiceProps) {
     const { service, services, variant } = props;

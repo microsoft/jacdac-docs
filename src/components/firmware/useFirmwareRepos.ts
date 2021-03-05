@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
-import { deviceSpecificationFromFirmwareIdentifier, deviceSpecifications } from "../../../../src/jdom/spec";
+import { deviceSpecificationFromFirmwareIdentifier, deviceSpecifications } from "../../../jacdac-ts/src/jdom/spec";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import useEffectAsync from "../useEffectAsync";
-import { unique } from "../../../../src/jdom/utils";
-import { BootloaderCmd, ControlReg, DEVICE_CHANGE, SRV_BOOTLOADER } from "../../../../src/jdom/constants";
+import { unique } from "../../../jacdac-ts/src/jdom/utils";
+import { BootloaderCmd, ControlReg, DEVICE_CHANGE, SRV_BOOTLOADER } from "../../../jacdac-ts/src/jdom/constants";
 import useEventRaised from "../../jacdac/useEventRaised";
-import Packet from "../../../../src/jdom/packet";
+import Packet from "../../../jacdac-ts/src/jdom/packet";
 
 export default function useFirmwareRepos(showAllRepos?: boolean) {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)

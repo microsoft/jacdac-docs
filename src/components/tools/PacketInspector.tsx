@@ -6,14 +6,14 @@ import HistoryIcon from '@material-ui/icons/History';
 import KindChip from "../KindChip"
 import { Typography } from "@material-ui/core";
 import PacketSpecification from "../PacketSpecification";
-import { printPacket } from "../../../../src/jdom/pretty";
+import { printPacket } from "../../../jacdac-ts/src/jdom/pretty";
 import PacketHeaderLayout from "../PacketHeaderLayout";
-import { META_ACK, META_GET, META_PIPE } from "../../../../src/jdom/constants";
-import Packet from "../../../../src/jdom/packet";
+import { META_ACK, META_GET, META_PIPE } from "../../../jacdac-ts/src/jdom/constants";
+import Packet from "../../../jacdac-ts/src/jdom/packet";
 import PacketBadge from "../PacketBadge";
 import PacketDataLayout from "../PacketDataLayout";
 import PacketList from "../PacketList"
-import { serviceSpecificationFromClassIdentifier } from "../../../../src/jdom/spec";
+import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec";
 import ServiceSpecificationCard from "../ServiceSpecificationCard";
 
 export default function PacketInspector() {

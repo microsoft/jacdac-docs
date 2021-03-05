@@ -1,6 +1,6 @@
 import { Card, CardActions, CardContent, CardHeader, createStyles, Grid, makeStyles, Switch, Theme } from "@material-ui/core";
 import React from "react";
-import { JDRegister } from "../../../src/jdom/register";
+import { JDRegister } from "../../jacdac-ts/src/jdom/register";
 import DeviceActions from "./DeviceActions";
 import useGridBreakpoints from "./useGridBreakpoints";
 // tslint:disable-next-line: no-submodule-imports match-default-export-name

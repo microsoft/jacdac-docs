@@ -1,5 +1,5 @@
 import React, { Fragment } from "react"
-import { serviceSpecificationFromClassIdentifier } from "../../../src/jdom/spec"
+import { serviceSpecificationFromClassIdentifier } from "../../jacdac-ts/src/jdom/spec"
 import { Chip } from "@material-ui/core"
 
 export default function EnumSpecification(props: { serviceClass: number }) {

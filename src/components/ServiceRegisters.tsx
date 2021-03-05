@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
-import { JDService } from "../../../src/jdom/service";
-import { isRegister } from "../../../src/jdom/spec";
+import { JDService } from "../../jacdac-ts/src/jdom/service";
+import { isRegister } from "../../jacdac-ts/src/jdom/spec";
 import RegisterInput from "./RegisterInput";
 import useChange from '../jacdac/useChange';
 import AutoGrid from "./ui/AutoGrid";
-import { JDRegister } from "../../../src/jdom/register";
-import { SystemReg } from "../../../src/jdom/constants";
+import { JDRegister } from "../../jacdac-ts/src/jdom/register";
+import { SystemReg } from "../../jacdac-ts/src/jdom/constants";
 
 export default function ServiceRegisters(props: {
     service: JDService,

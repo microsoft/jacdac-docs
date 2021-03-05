@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useEffect } from "react";
 import { Link } from 'gatsby-theme-material-ui';
-import { serviceSpecificationFromName, isRegister, isEvent, isCommand, isPipeReport, isReportOf, isPipeReportOf, deviceSpecificationsForService } from "../../../src/jdom/spec"
+import { serviceSpecificationFromName, isRegister, isEvent, isCommand, isPipeReport, isReportOf, isPipeReportOf, deviceSpecificationsForService } from "../../jacdac-ts/src/jdom/spec"
 import PacketSpecification from "../components/PacketSpecification"
 import IDChip from "./IDChip";
 import ServiceSpecificationSource from "./ServiceSpecificationSource"

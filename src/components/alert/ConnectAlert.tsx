@@ -3,11 +3,11 @@ import { Box, createStyles, makeStyles } from "@material-ui/core";
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "../ui/Alert";
 import React, { useContext } from "react";
-import { BusState } from "../../../../src/jdom/bus";
-import { serviceSpecificationFromClassIdentifier } from "../../../../src/jdom/spec";
+import { BusState } from "../../../jacdac-ts/src/jdom/bus";
+import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import ConnectButton from "../../jacdac/ConnectButton";
-import { isWebUSBEnabled, isWebUSBSupported } from "../../../../src/jdom/usb"
+import { isWebUSBEnabled, isWebUSBSupported } from "../../../jacdac-ts/src/jdom/usb"
 import { NoSsr } from '@material-ui/core';
 import useChange from "../../jacdac/useChange";
 

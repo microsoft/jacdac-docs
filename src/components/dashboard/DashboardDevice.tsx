@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, CardHeader, Collapse, Grid, Paper, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import React from "react";
-import { SRV_CTRL, SRV_LOGGER } from "../../../../src/jdom/constants";
-import { JDDevice } from "../../../../src/jdom/device";
+import { SRV_CTRL, SRV_LOGGER } from "../../../jacdac-ts/src/jdom/constants";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 import useChange from "../../jacdac/useChange";
 import DeviceName from "../DeviceName";
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip";

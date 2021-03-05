@@ -11,20 +11,20 @@ import TreeView from '@material-ui/lab/TreeView';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
-import { JDDevice } from '../../../src/jdom/device';
-import { JDEvent } from '../../../src/jdom/event';
-import { JDService } from '../../../src/jdom/service';
-import { JDRegister } from '../../../src/jdom/register';
+import { JDDevice } from '../../jacdac-ts/src/jdom/device';
+import { JDEvent } from '../../jacdac-ts/src/jdom/event';
+import { JDService } from '../../jacdac-ts/src/jdom/service';
+import { JDRegister } from '../../jacdac-ts/src/jdom/register';
 import useChange from "../jacdac/useChange";
-import { isRegister, isEvent } from '../../../src/jdom/spec';
+import { isRegister, isEvent } from '../../jacdac-ts/src/jdom/spec';
 import { useMediaQuery, useTheme } from '@material-ui/core';
 import { useRegisterHumanValue, useRegisterStringValue } from '../jacdac/useRegisterValue';
 import useEventCount from '../jacdac/useEventCount';
 import DeviceActions from './DeviceActions';
-import { LOST, FOUND, SRV_CTRL, SRV_LOGGER, GET_ATTEMPT, BaseReg } from '../../../src/jdom/constants';
+import { LOST, FOUND, SRV_CTRL, SRV_LOGGER, GET_ATTEMPT, BaseReg } from '../../jacdac-ts/src/jdom/constants';
 import useEventRaised from '../jacdac/useEventRaised';
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import { ellipseJoin } from '../../../src/jdom/utils';
+import { ellipseJoin } from '../../jacdac-ts/src/jdom/utils';
 import { Link } from 'gatsby-theme-material-ui';
 import useDeviceName from './useDeviceName';
 import ConnectAlert from "./alert/ConnectAlert"

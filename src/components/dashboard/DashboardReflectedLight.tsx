@@ -8,8 +8,8 @@ import useServiceHost from "../hooks/useServiceHost";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useThrottledValue from "../hooks/useThrottledValue";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
-import ReflectedLightServiceHost from "../../../../src/hosts/reflectedlightservicehost";
-import { ReflectedLightReg, ReflectedLightVariant } from "../../../../src/jdom/constants";
+import ReflectedLightServiceHost from "../../../jacdac-ts/src/hosts/reflectedlightservicehost";
+import { ReflectedLightReg, ReflectedLightVariant } from "../../../jacdac-ts/src/jdom/constants";
 
 export default function DashboardReflectedLight(props: DashboardServiceProps) {
     const { service, services, variant } = props;

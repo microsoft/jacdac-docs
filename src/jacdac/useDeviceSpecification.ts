@@ -1,6 +1,6 @@
-import { ControlReg } from "../../../src/jdom/constants";
-import { JDDevice } from "../../../src/jdom/device";
-import { deviceSpecificationFromFirmwareIdentifier, imageDeviceOf } from "../../../src/jdom/spec";
+import { ControlReg } from "../../jacdac-ts/src/jdom/constants";
+import { JDDevice } from "../../jacdac-ts/src/jdom/device";
+import { deviceSpecificationFromFirmwareIdentifier, imageDeviceOf } from "../../jacdac-ts/src/jdom/spec";
 import { useRegisterIntValue } from "./useRegisterValue";
 
 export default function useDeviceSpecification(device: JDDevice) {

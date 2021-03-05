@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import Packet from "../../../src/jdom/packet";
+import Packet from "../../jacdac-ts/src/jdom/packet";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
-import { CHANGE, PROGRESS } from "../../../src/jdom/constants";
-import Trace from "../../../src/jdom/trace";
-import TracePlayer from "../../../src/jdom/traceplayer";
+import { CHANGE, PROGRESS } from "../../jacdac-ts/src/jdom/constants";
+import Trace from "../../jacdac-ts/src/jdom/trace";
+import TracePlayer from "../../jacdac-ts/src/jdom/traceplayer";
 import useDbValue from "./useDbValue"
-import TraceRecorder from "../../../src/jdom/tracerecorder"
-import TraceView, { TracePacketProps } from "../../../src/jdom/traceview";
+import TraceRecorder from "../../jacdac-ts/src/jdom/tracerecorder"
+import TraceView, { TracePacketProps } from "../../jacdac-ts/src/jdom/traceview";
 
 export interface PacketsProps {
     trace: Trace,

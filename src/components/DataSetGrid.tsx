@@ -1,7 +1,7 @@
 import { Card, CardActions, CardContent, CardHeader, Grid } from "@material-ui/core";
 import { Button, IconButton } from "gatsby-theme-material-ui";
 import React, { useContext } from "react";
-import { prettyDuration } from "../../../src/jdom/pretty";
+import { prettyDuration } from "../../jacdac-ts/src/jdom/pretty";
 import ServiceManagerContext from "./ServiceManagerContext";
 import Trend from "./Trend";
 import useGridBreakpoints from './useGridBreakpoints';

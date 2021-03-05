@@ -1,7 +1,7 @@
 import React from "react"
 import IDChip from "./IDChip";
 import { Link } from 'gatsby-theme-material-ui';
-import { identifierToUrlPath, imageDeviceOf, serviceSpecificationFromClassIdentifier } from "../../../src/jdom/spec"
+import { identifierToUrlPath, imageDeviceOf, serviceSpecificationFromClassIdentifier } from "../../jacdac-ts/src/jdom/spec"
 import ServiceSpecificationCard from "./ServiceSpecificationCard";
 import { Grid, Typography } from "@material-ui/core";
 import useGridBreakpoints from "./useGridBreakpoints";

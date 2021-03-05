@@ -1,5 +1,5 @@
-import { JDService } from "../../../../src/jdom/service";
-import ServiceHost from "../../../../src/jdom/servicehost";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
+import ServiceHost from "../../../jacdac-ts/src/jdom/servicehost";
 import useDeviceHost from "./useDeviceHost";
 
 export default function useServiceHost<T extends ServiceHost>(service: JDService) {

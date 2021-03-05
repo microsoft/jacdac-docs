@@ -1,6 +1,6 @@
 import { Card, CardActions, CardContent, CardHeader } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { delay, toHex } from "../../../src/jdom/utils";
+import { delay, toHex } from "../../jacdac-ts/src/jdom/utils";
 import CmdButton from "./CmdButton";
 import Snippet from "./ui/Snippet"
 import useEffectAsync from "./useEffectAsync";

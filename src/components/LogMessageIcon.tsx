@@ -1,5 +1,5 @@
 import React from "react";
-import { LoggerCmd } from "../../../src/jdom/constants";
+import { LoggerCmd } from "../../jacdac-ts/src/jdom/constants";
 
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import WarningIcon from '@material-ui/icons/Warning';

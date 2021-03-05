@@ -1,7 +1,7 @@
 import { Avatar, createStyles, makeStyles, Theme } from "@material-ui/core";
 import React, { useContext } from "react";
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../../src/jdom/constants";
-import { JDDevice } from "../../../../src/jdom/device";
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 import useDeviceSpecification from "../../jacdac/useDeviceSpecification";
 import CmdButton from "../CmdButton";
 import useDeviceHost from "../hooks/useDeviceHost";

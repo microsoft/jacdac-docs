@@ -3,9 +3,9 @@ import { DashboardServiceProps } from "./DashboardServiceWidget";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useServiceHost from "../hooks/useServiceHost";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
-import JoystickSensorServiceHost from "../../../../src/hosts/joystickservicehost";
+import JoystickSensorServiceHost from "../../../jacdac-ts/src/hosts/joystickservicehost";
 import JoystickWidget from "../widgets/JoystickWidget";
-import { JoystickReg } from "../../../../src/jdom/constants";
+import { JoystickReg } from "../../../jacdac-ts/src/jdom/constants";
 
 export default function DashboardJoystick(props: DashboardServiceProps) {
     const { service, services, variant } = props;

@@ -5,7 +5,7 @@ import {
     JSONTryParse,
     SMap,
     uniqueName,
-} from "../../../../src/jdom/utils"
+} from "../../../jacdac-ts/src/jdom/utils"
 import useChange from "../../jacdac/useChange"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DeleteIcon from "@material-ui/icons/Delete"
@@ -13,10 +13,10 @@ import {
     resolveMakecodeService,
     resolveMakecodeServiceFromClassIdentifier,
     serviceSpecifications,
-} from "../../../../src/jdom/spec"
+} from "../../../jacdac-ts/src/jdom/spec"
 import AddServiceIconButton from "../AddServiceIconButton"
 import ServiceSpecificationSelect from "../ServiceSpecificationSelect"
-import { escapeName } from "../../../../src/azure-iot/dtdl"
+import { escapeName } from "../../../jacdac-ts/src/azure-iot/dtdl"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import useMakeCodeEditorExtensionClient, {
     READ,

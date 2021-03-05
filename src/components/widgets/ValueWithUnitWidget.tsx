@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Slider, Typography } from "@material-ui/core";
-import { isSet, roundWithPrecision } from "../../../../src/jdom/utils";
+import { isSet, roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
 import { CSSProperties } from "@material-ui/core/styles/withStyles";
 
 export default function ValueWithUnitWidget(props: {

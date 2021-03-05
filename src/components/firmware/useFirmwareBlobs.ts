@@ -1,13 +1,13 @@
 import { useContext } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import { FirmwareBlob, parseFirmwareFile } from "../../../../src/jdom/flashing"
+import { FirmwareBlob, parseFirmwareFile } from "../../../jacdac-ts/src/jdom/flashing"
 import useEffectAsync from "../useEffectAsync"
 import DbContext, { DbContextProps } from "../DbContext"
 import { useChangeAsync } from "../../jacdac/useChange"
-import { deviceSpecifications } from "../../../../src/jdom/spec"
-import { delay, unique } from "../../../../src/jdom/utils"
+import { deviceSpecifications } from "../../../jacdac-ts/src/jdom/spec"
+import { delay, unique } from "../../../jacdac-ts/src/jdom/utils"
 import { fetchLatestRelease, fetchReleaseBinary } from "../github"
-import { BusState } from "../../../../src/jdom/bus"
+import { BusState } from "../../../jacdac-ts/src/jdom/bus"
 
 export default function useFirmwareBlobs() {
     const { bus, connectionState } = useContext<JacdacContextProps>(

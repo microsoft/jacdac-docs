@@ -1,6 +1,6 @@
-import { LedAnimationData, LedAnimationFrame } from "../../../../src/hosts/ledservicehost";
-import { ControlReg, SRV_BOOTLOADER } from "../../../../src/jdom/constants";
-import { JDDevice } from "../../../../src/jdom/device";
+import { LedAnimationData, LedAnimationFrame } from "../../../jacdac-ts/src/hosts/ledservicehost";
+import { ControlReg, SRV_BOOTLOADER } from "../../../jacdac-ts/src/jdom/constants";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 import useChange from "../../jacdac/useChange";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useLedAnimationStyle, { LedAnimationProps } from "../hooks/useLedAnimationStyle";

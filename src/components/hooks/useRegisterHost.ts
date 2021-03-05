@@ -1,4 +1,4 @@
-import { JDRegister } from "../../../../src/jdom/register";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 import useServiceHost from "./useServiceHost";
 
 export default function useRegisterHost(register: JDRegister) {

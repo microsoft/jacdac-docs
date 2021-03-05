@@ -16,7 +16,7 @@ import DarkModeContext from "./ui/DarkModeContext";
 import KindIcon from "./KindIcon";
 import MakeCodeIcon from "./icons/MakeCodeIcon";
 import JupyterIcon from "./icons/JupyterIcon";
-import { VIRTUAL_DEVICE_NODE_NAME } from "../../../src/jdom/constants";
+import { VIRTUAL_DEVICE_NODE_NAME } from "../../jacdac-ts/src/jdom/constants";
 
 const useStyles = makeStyles((theme) => createStyles({
     drawer: {

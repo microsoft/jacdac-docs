@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
-import { CHANGE } from "../../../../src/jdom/constants";
-import { JDRegister } from "../../../../src/jdom/register";
+import { CHANGE } from "../../../jacdac-ts/src/jdom/constants";
+import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 import useServiceHost from "../hooks/useServiceHost";
 import SvgWidget from "./SvgWidget";
 import useWidgetTheme from "./useWidgetTheme";

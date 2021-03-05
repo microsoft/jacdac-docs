@@ -1,12 +1,12 @@
 import React, { } from "react";
-import { SoilMoistureReg } from "../../../../src/jdom/constants";
+import { SoilMoistureReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useServiceHost from "../hooks/useServiceHost";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
-import SensorServiceHost from "../../../../src/hosts/sensorservicehost";
+import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 import { useId } from "react-use-id-hook";
 import { Grid, Slider } from "@material-ui/core";
 

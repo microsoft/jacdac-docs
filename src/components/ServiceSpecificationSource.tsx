@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, Tab } from '@material-ui/core';
-import { serviceSpecificationFromClassIdentifier } from '../../../src/jdom/spec';
+import { serviceSpecificationFromClassIdentifier } from '../../jacdac-ts/src/jdom/spec';
 import { Paper, createStyles, makeStyles, Theme } from '@material-ui/core';
 import TabPanel, { a11yProps } from './ui/TabPanel';
 import Snippet from './ui/Snippet';

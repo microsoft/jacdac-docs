@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { JDService } from "../../../src/jdom/service";
+import { JDService } from "../../jacdac-ts/src/jdom/service";
 // tslint:disable-next-line: no-submodule-imports
 import { makeStyles } from '@material-ui/core/styles';
 // tslint:disable-next-line: no-submodule-imports
@@ -11,12 +11,12 @@ import Typography from '@material-ui/core/Typography';
 import { Link } from 'gatsby-theme-material-ui';
 import ServiceRegisters from './ServiceRegisters';
 import ServiceEvents from './ServiceEvents';
-import { isCommand } from '../../../src/jdom/spec';
+import { isCommand } from '../../jacdac-ts/src/jdom/spec';
 import { CardActions, List, ListItem } from '@material-ui/core';
 import DeviceCardHeader from './DeviceCardHeader';
 import { DeviceLostAlert } from './alert/DeviceLostAlert';
 import CommandInput from './CommandInput';
-import { DecodedPacket } from '../../../src/jdom/pretty';
+import { DecodedPacket } from '../../jacdac-ts/src/jdom/pretty';
 import DecodedPacketItem from './DecodedPacketItem';
 import ServiceSpecificationStatusAlert from './ServiceSpecificationStatusAlert'
 import MembersInput from './fields/MembersInput';

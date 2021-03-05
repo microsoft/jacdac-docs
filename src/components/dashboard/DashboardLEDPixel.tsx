@@ -1,10 +1,10 @@
 import { Grid, MenuItem, TextField, Typography } from "@material-ui/core";
 import React, { ChangeEvent, useMemo, useState } from "react";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
-import { lightEncode } from "../../../../src/jdom/light";
+import { lightEncode } from "../../../jacdac-ts/src/jdom/light";
 import ColorInput from "../ui/ColorInput";
 import SelectWithLabel from "../ui/SelectWithLabel";
-import { JDService } from "../../../../src/jdom/service";
+import { JDService } from "../../../jacdac-ts/src/jdom/service";
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import RemoveIcon from '@material-ui/icons/Remove';
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -13,9 +13,9 @@ import AddIcon from '@material-ui/icons/Add';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip";
 import useServiceHost from "../hooks/useServiceHost";
-import LedPixelServiceHost from "../../../../src/hosts/ledpixelservicehost";
+import LedPixelServiceHost from "../../../jacdac-ts/src/hosts/ledpixelservicehost";
 import LightWidget from "../widgets/LightWidget";
-import { LedPixelCmd } from "../../../../src/jdom/constants";
+import { LedPixelCmd } from "../../../jacdac-ts/src/jdom/constants";
 /*
 0xD6: range P=0 N=length W=1 S=0- range from pixel P, Npixels long (currently unsupported: every Wpixels skip Spixels)
 */

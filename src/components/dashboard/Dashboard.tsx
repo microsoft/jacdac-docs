@@ -1,9 +1,9 @@
 import { Grid, useMediaQuery, useTheme } from "@material-ui/core";
 import React, { useContext } from "react";
-import { JDDevice } from "../../../../src/jdom/device";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 import useSelectedNodes from "../../jacdac/useSelectedNodes";
-import { isReading, isValueOrIntensity } from "../../../../src/jdom/spec";
-import { splitFilter, strcmp } from "../../../../src/jdom/utils";
+import { isReading, isValueOrIntensity } from "../../../jacdac-ts/src/jdom/spec";
+import { splitFilter, strcmp } from "../../../jacdac-ts/src/jdom/utils";
 import Alert from "../ui/Alert";
 import useDevices from "../hooks/useDevices";
 import { MOBILE_BREAKPOINT } from "../layout";

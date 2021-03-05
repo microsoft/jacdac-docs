@@ -4,8 +4,8 @@ import JacdacIcon from "../icons/JacdacIcon";
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip";
 import useDeviceCount from "../hooks/useDeviceCount"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
-import { DEVICE_ANNOUNCE, DEVICE_DISCONNECT } from "../../../../src/jdom/constants";
-import { JDDevice } from "../../../../src/jdom/device";
+import { DEVICE_ANNOUNCE, DEVICE_DISCONNECT } from "../../../jacdac-ts/src/jdom/constants";
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 
 
 export default function OpenDashboardButton(props: { className?: string }) {

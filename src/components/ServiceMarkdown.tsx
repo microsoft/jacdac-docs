@@ -3,7 +3,7 @@ import Markdown from "./ui/Markdown";
 import ServiceSpecificationStatusAlert from "./ServiceSpecificationStatusAlert"
 import { Button, Link } from "gatsby-theme-material-ui";
 import DeviceSpecificationList from "./DeviceSpecificationList";
-import { serviceSpecificationFromClassIdentifier, serviceTestFromServiceSpec } from "../../../src/jdom/spec";
+import { serviceSpecificationFromClassIdentifier, serviceTestFromServiceSpec } from "../../jacdac-ts/src/jdom/spec";
 import { Grid } from "@material-ui/core";
 
 export default function ServiceMarkdown(props: {
