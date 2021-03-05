@@ -78,13 +78,17 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "gatsby build",
-    "develop": "gatsby develop",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "start": "npm run develop",
-    "serve": "gatsby serve",
-    "clean": "gatsby clean",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
+    "pullsubmodules": "git submodule update --init --recursive",
+    "lint": "node node_modules/eslint/bin/eslint.js src/**/*.ts src/**/*.tsx",
+    "predistdocs": "node node_modules/gatsby/cli.js clean && cd .. && node ./tools/prepare.js",
+    "distdocs": "node node_modules/gatsby/cli.js build --prefix-paths --no-uglify",
+    "tools": "npx http-server . -c-1",
+    "cleandocs": "node node_modules/gatsby/cli.js clean",
+    "docs": "node node_modules/gatsby/cli.js develop",
+    "docsbuild": "node node_modules/gatsby/cli.js build",
+    "docsserve": "node node_modules/gatsby/cli.js serve",
+    "dockerdocs": "node node_modules/gatsby/cli.js develop --host:0.0.0.0",
+    "builddtdl": "node dist/jacdac-cli.js --dtdl dist/dtdl --rm=on"
   },
   "repository": {
     "type": "git",
