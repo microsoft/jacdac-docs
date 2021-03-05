@@ -81,7 +81,7 @@
     "postinstall": "cd jacdac-ts && npm run dist",
     "pullsubmodules": "git submodule update --init --recursive",
     "lint": "node node_modules/eslint/bin/eslint.js src/**/*.ts src/**/*.tsx",
-    "predistdocs": "node node_modules/gatsby/cli.js clean && cd .. && node ./tools/prepare.js",
+    "predistdocs": "node node_modules/gatsby/cli.js clean",
     "distdocs": "node node_modules/gatsby/cli.js build --prefix-paths --no-uglify",
     "tools": "npx http-server . -c-1",
     "cleandocs": "node node_modules/gatsby/cli.js clean",
