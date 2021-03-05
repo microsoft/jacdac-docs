@@ -1,6 +1,6 @@
 import React, { } from 'react';
 // tslint:disable-next-line: no-submodule-imports
-import { Box, CardHeader, Typography } from '@material-ui/core';
+import { Box, CardHeader, CircularProgress, Typography } from '@material-ui/core';
 import { useLatestRelease, useRepository } from './github';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { Link } from 'gatsby-theme-material-ui';
@@ -11,7 +11,7 @@ export default function GithubRepositoryCardHeader(props: {
     showRelease?: boolean
 }) {
     const { slug, showRelease } = props;
-    const { response: repo, loading: repoLoading } = useRepository(slug);
+    const { response: repo, loading: repoLoading, status } = useRepository(slug);
     const { response: release } = useLatestRelease(showRelease && slug);
     const iframe = inIFrame();
     const target = iframe ? "_blank" : ""
@@ -28,7 +28,8 @@ export default function GithubRepositoryCardHeader(props: {
         </> : <><Link href={`https://github.com/${slug}`} target={target}>
             <Typography component="span" variant="h6">{slug}</Typography>
         </Link>
-            {!repoLoading && <Typography variant="caption">Unable to find repository</Typography>}
+            {repoLoading && <CircularProgress disableShrink variant="indeterminate" size="1em" /> }
+            {status !== 403 && !repoLoading && !repo && <Typography component="p" variant="caption">Unable to find repository.</Typography>}
         </>;
 
     return <CardHeader
