@@ -29,7 +29,7 @@ import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 import {
     addHost,
     hostDefinitionFromServiceClass,
-} from "../../../src/hosts/hosts"
+} from "../../jacdac-ts/src/hosts/hosts"
 import Flags from "../../jacdac-ts/src/jdom/flags"
 import { JDService } from "../../jacdac-ts/src/jdom/service"
 import { serviceTestFromServiceSpec } from "../../jacdac-ts/src/jdom/spec"

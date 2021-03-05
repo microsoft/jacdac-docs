@@ -6,7 +6,7 @@ import GridHeader from "./ui/GridHeader"
 import { Link } from "gatsby-theme-material-ui";
 import MakeCodeIcon from "./icons/MakeCodeIcon"
 import { VIRTUAL_DEVICE_NODE_NAME } from "../../jacdac-ts/src/jdom/constants";
-import { hostDefinitionFromServiceClass } from "../../../src/hosts/hosts"
+import { hostDefinitionFromServiceClass } from "../../jacdac-ts/src/hosts/hosts"
 import KindIcon from "./KindIcon"
 import ChipList from "./ui/ChipList"
 import JacdacIcon from "./icons/JacdacIcon";

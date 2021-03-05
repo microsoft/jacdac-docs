@@ -5,7 +5,7 @@ import { createUSBBus } from "../../jacdac-ts/src/jdom/usb";
 import { CONNECTION_STATE } from "../../jacdac-ts/src/jdom/constants";
 import IFrameBridgeClient from "../../jacdac-ts/src/jdom/iframebridgeclient"
 import Flags from "../../jacdac-ts/src/jdom/flags"
-import GamepadHostManager from "../../../src/hosts/gamepadhostmanager"
+import GamepadHostManager from "../../jacdac-ts/src/hosts/gamepadhostmanager"
 
 function sniffQueryArguments() {
     if (typeof window === "undefined" || typeof URLSearchParams === "undefined")

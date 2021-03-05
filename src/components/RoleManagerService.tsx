@@ -9,7 +9,7 @@ import useServiceClient from "./useServiceClient"
 import SelectWithLabel from "./ui/SelectWithLabel"
 import DeviceName from "./DeviceName"
 import { serviceName } from "../../jacdac-ts/src/jdom/pretty"
-import { addHost, hostDefinitionFromServiceClass } from "../../../src/hosts/hosts"
+import { addHost, hostDefinitionFromServiceClass } from "../../jacdac-ts/src/hosts/hosts"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 
 const START_SIMULATOR = "__start_simulator"
