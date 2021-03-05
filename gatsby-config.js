@@ -4,7 +4,7 @@ module.exports = {
     title: `Jacdac`,
     description: `plug-n-play for microcontrollers.`,
     author: `Microsoft`,
-    siteUrl: `https://microsoft.github.io/jacdac-ts`
+    siteUrl: `https://microsoft.github.io/jacdac-docs`
   },
   pathPrefix: "/jacdac-docs",
   flags: {
