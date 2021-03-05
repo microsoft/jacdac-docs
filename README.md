@@ -30,7 +30,7 @@ yarn docs
 
 * clone this repository and pull all submodules
 ```
-git clone https://github.com/microsoft/jacdac-ts
+git clone https://github.com/microsoft/jacdac-docs
 git submodule update --init --recursive
 git pull
 ```
@@ -41,7 +41,7 @@ npm install -g yarn
 ```
 * install dependencies
 ```
-yarn installdev
+yarn install
 ```
 
 ### VS Code
