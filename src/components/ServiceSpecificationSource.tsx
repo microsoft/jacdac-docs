@@ -4,7 +4,7 @@ import { serviceSpecificationFromClassIdentifier } from '../../jacdac-ts/src/jdo
 import { Paper, createStyles, makeStyles, Theme } from '@material-ui/core';
 import TabPanel, { a11yProps } from './ui/TabPanel';
 import Snippet from './ui/Snippet';
-import { converters } from '../../../jacdac-spec/spectool/jdspec'
+import { converters } from '../../jacdac-ts/jacdac-spec/spectool/jdspec'
 import ServiceSpecification from './ServiceSpecification';
 import { DTMIToRoute, serviceSpecificationDTMI, serviceSpecificationToDTDL } from '../../jacdac-ts/src/azure-iot/dtdl'
 import { Link } from 'gatsby-theme-material-ui';

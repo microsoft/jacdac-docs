@@ -14,7 +14,7 @@ import CreateIcon from '@material-ui/icons/Create';
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import { parseRepoUrl } from '../github'
 import GithubPullRequestButton from '../GithubPullRequestButton'
-import { DEVICE_IMAGE_HEIGHT, DEVICE_IMAGE_WIDTH, escapeDeviceIdentifier, escapeDeviceNameIdentifier, normalizeDeviceSpecification } from "../../../../jacdac-spec/spectool/jdspec"
+import { DEVICE_IMAGE_HEIGHT, DEVICE_IMAGE_WIDTH, escapeDeviceIdentifier, escapeDeviceNameIdentifier, normalizeDeviceSpecification } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import ImportImageCanvas from '../ImageImportCanvas';
 import FirmwareCard from "../firmware/FirmwareCard"
 // tslint:disable-next-line: no-submodule-imports

@@ -1,6 +1,6 @@
 import React, { useContext, useMemo, useState } from "react"
 import { Button, Grid } from "@material-ui/core"
-import { parseSpecificationTestMarkdownToJSON } from "../../../../jacdac-spec/spectool/jdtest"
+import { parseSpecificationTestMarkdownToJSON } from "../../../jacdac-ts/jacdac-spec/spectool/jdtest"
 import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
 import useLocalStorage from "../useLocalStorage"
 import HighlightTextField from "../ui/HighlightTextField"

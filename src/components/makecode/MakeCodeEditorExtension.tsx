@@ -25,7 +25,7 @@ import useMakeCodeEditorExtensionClient, {
 import CmdButton from "../CmdButton"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import SaveIcon from "@material-ui/icons/Save"
-import { camelize } from "../../../../jacdac-spec/spectool/jdspec"
+import { camelize } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import { useId } from "react-use-id-hook"
 
 interface ClientRole {

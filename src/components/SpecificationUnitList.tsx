@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Typography } from "@material-ui/core";
-import { units } from "../../../jacdac-spec/spectool/jdspec"
+import { units } from "../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import PaperBox from "./ui/PaperBox";
 
 export default function SpecificationUnitList() {
