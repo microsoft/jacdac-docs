@@ -6,7 +6,7 @@ import TabPanel, { a11yProps } from './ui/TabPanel';
 import Snippet from './ui/Snippet';
 import { converters } from '../../../jacdac-spec/spectool/jdspec'
 import ServiceSpecification from './ServiceSpecification';
-import { DTMIToRoute, serviceSpecificationDTMI, serviceSpecificationToDTDL } from '../../../src/azure-iot/dtdl'
+import { DTMIToRoute, serviceSpecificationDTMI, serviceSpecificationToDTDL } from '../../jacdac-ts/src/azure-iot/dtdl'
 import { Link } from 'gatsby-theme-material-ui';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({

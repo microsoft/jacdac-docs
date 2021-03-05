@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { JSONTryParse, SMap } from "../../jacdac-ts/src/jdom/utils";
-import { BrowserFileStorage, HostedFileStorage, IFileStorage } from '../../../src/embed/filestorage'
-import { IThemeMessage } from "../../../src/embed/protocol";
-import { ModelStore, HostedModelStore } from "../../../src/embed/modelstore";
-import { IFrameTransport } from "../../../src/embed/transport";
+import { BrowserFileStorage, HostedFileStorage, IFileStorage } from '../../jacdac-ts/src/embed/filestorage'
+import { IThemeMessage } from "../../jacdac-ts/src/embed/protocol";
+import { ModelStore, HostedModelStore } from "../../jacdac-ts/src/embed/modelstore";
+import { IFrameTransport } from "../../jacdac-ts/src/embed/transport";
 import DarkModeContext from "./ui/DarkModeContext";
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
 import { JDDevice } from "../../jacdac-ts/src/jdom/device";
