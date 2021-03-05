@@ -6,7 +6,7 @@ module.exports = {
     author: `Microsoft`,
     siteUrl: `https://microsoft.github.io/jacdac-ts`
   },
-  pathPrefix: "/jacdac-ts",
+  pathPrefix: "/jacdac-docs",
   flags: {
     PRESERVE_FILE_DOWNLOAD_CACHE: true,
     PRESERVE_WEBPACK_CACHE: true
