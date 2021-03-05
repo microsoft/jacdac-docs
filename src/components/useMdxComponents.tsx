@@ -30,7 +30,6 @@ export default function useMdxComponents() {
         others["to"] = href;
       else
         others["href"] = href;
-      console.log(`href`, { href, others })
       return <Link color="textPrimary" {...others} rel="noopener noreferrer" />
     },
     pre: props => <Box mb={theme.spacing(0.5)}><Paper>
