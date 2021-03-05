@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "gatsby-theme-material-ui";
 import CodeBlock from './CodeBlock';
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useTheme } from "@material-ui/core";
@@ -22,16 +22,9 @@ import ServiceCatalog from "./ServiceCatalog";
 
 export default function useMdxComponents() {
   const theme = useTheme();
-  const mdxComponents: any = {
+  const mdxComponents: any = useMemo(() => ({
     Link: (props: any) => <Link color="textPrimary" {...props} />,
-    a: (props: { href: string }) => {
-      /*const { href, ...others } = props;
-      if (/^\.?\//.test(href))
-        others["to"] = href;
-      else
-        others["href"] = href;*/
-      return <Link color="textPrimary" {...props} rel="noopener noreferrer" />
-    },
+    a: (props: { href: string }) => <Link color="textPrimary" {...props} rel="noopener noreferrer" />,
     pre: props => <Box mb={theme.spacing(0.5)}><Paper>
       <div {...props} />
     </Paper></Box>,
@@ -61,7 +54,7 @@ export default function useMdxComponents() {
     GithubRepositoryList: props => <GithubRepositoryList {...props} />,
     SpecificationUnitList: props => <SpecificationUnitList {...props} />,
     StatusLEDAnimation: props => <StatusLEDAnimation {...props} />,
-  };
+  }), []);
 
   return mdxComponents;
 }
