@@ -41,6 +41,7 @@
     "gatsby-remark-embedder": "^4.1.0",
     "gatsby-remark-external-links": "0.0.4",
     "gatsby-remark-images": "^3.11.0",
+    "gatsby-remark-makecode": "../gatsby-remark-makecode",
     "gatsby-remark-prismjs": "^3.13.0",
     "gatsby-remark-static-images": "^1.2.1",
     "gatsby-source-filesystem": "^2.11.0",
