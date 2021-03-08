@@ -7125,15 +7125,6 @@ gatsby-plugin-material-ui@^2.1.9:
     clean-css "^4.2.1"
     postcss "^7.0.17"
 
-gatsby-plugin-mdx-code-demo@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/gatsby-plugin-mdx-code-demo/-/gatsby-plugin-mdx-code-demo-2.0.0.tgz#f02e262f3c45c5a8899c7a20e8648565987d54c4"
-  integrity sha512-TcGn0HlFulVMbQDnMp3C6PGMTWGzYqmtFFWIHqtA1hOZbYAQ2HAPfUsrBR13sYOITlsT+D2jAu8zgm80Vx8pBA==
-  dependencies:
-    mkdirp "^1.0.4"
-    normalize-path "^3.0.0"
-    unist-util-visit "^2.0.3"
-
 gatsby-plugin-mdx@^1.10.0:
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/gatsby-plugin-mdx/-/gatsby-plugin-mdx-1.10.1.tgz#44d175b8f339955ca2119b73c9ac55ec2a2f1c6f"
@@ -7455,13 +7446,6 @@ gatsby-remark-images@^3.11.0:
     query-string "^6.13.3"
     unist-util-select "^1.5.0"
     unist-util-visit-parents "^2.1.2"
-
-gatsby-remark-numbered-footnotes@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/gatsby-remark-numbered-footnotes/-/gatsby-remark-numbered-footnotes-1.0.1.tgz#b922357d44b953dfb9b8754676f161e048a98f02"
-  integrity sha512-eqb/vxhniIASyoNYRbATpHVD1owtRAM2vTLyUJTz5pe3RugU99n1xNyeYHeg6eb98iyoWi2EaEskI4+reytN4A==
-  dependencies:
-    remark-numbered-footnotes "^1.0.1"
 
 gatsby-remark-prismjs@^3.13.0:
   version "3.13.0"
@@ -13598,13 +13582,6 @@ remark-mdxjs@^2.0.0-next.4:
     "@babel/plugin-syntax-jsx" "7.10.4"
     "@mdx-js/util" "^2.0.0-next.8"
 
-remark-numbered-footnotes@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/remark-numbered-footnotes/-/remark-numbered-footnotes-1.1.0.tgz#6c2f825488dd9fc7f691beb5e6f989880c004437"
-  integrity sha512-1clY6IdWs3Ppv/IsdEVzvM9HxUNDkIicEU0lhdqmxDv2I/qaqDufSYSXmtsNti7j8/B1z93WamT6iDWGzkiTpA==
-  dependencies:
-    unist-util-visit "^1.3.1"
-
 remark-parse@8.0.3:
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/remark-parse/-/remark-parse-8.0.3.tgz#9c62aa3b35b79a486454c690472906075f40c7e1"
@@ -16037,7 +16014,7 @@ unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-
     unist-util-is "^4.0.0"
     unist-util-visit-parents "^3.0.0"
 
-unist-util-visit@^1.0.0, unist-util-visit@^1.1.0, unist-util-visit@^1.1.3, unist-util-visit@^1.3.1, unist-util-visit@^1.4.1:
+unist-util-visit@^1.0.0, unist-util-visit@^1.1.0, unist-util-visit@^1.1.3, unist-util-visit@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/unist-util-visit/-/unist-util-visit-1.4.1.tgz#4724aaa8486e6ee6e26d7ff3c8685960d560b1e3"
   integrity sha512-AvGNk7Bb//EmJZyhtRUnNMEpId/AZ5Ph/KUpTI09WHQuDZHKovQ1oEv3mfmKpWKtoMzyMC4GLBm1Zy5k12fjIw==
