@@ -1,13 +1,12 @@
 import React, { useState, useMemo, useContext } from "react";
-import useEffectAsync from "../useEffectAsync"
 import PaperBox from "../ui/PaperBox"
-import { createStyles, makeStyles, NoSsr, Tab, Tabs, useTheme } from '@material-ui/core';
+import { Tab, Tabs } from '@material-ui/core';
 import CodeBlock from "../CodeBlock";
 import TabPanel from '../ui/TabPanel';
-import { Skeleton } from "@material-ui/lab";
 import MakeCodeSnippetContext from "./MakeCodeSnippetContext";
-import { MakeCodeSnippetRendered, MakeCodeSnippetSource, parseMakeCodeSnippet, useMakeCodeRenderer } from "./useMakeCodeRenderer";
+import { parseMakeCodeSnippet } from "./useMakeCodeRenderer";
 import MakeCodeSimulator from "./MakeCodeSimulator";
+import { withPrefix } from "gatsby"
 interface Rendered {
     url: string;
     width: number;
@@ -29,8 +28,7 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
     const snippet = useMemo(() => parseMakeCodeSnippet(source), [source]);
     const { code } = snippet;
 
-    const prefixPath = (global as any).__PATH_PREFIX__;
-    const prefixedUrl = prefixPath ? `${prefixPath}/${url}` : url;
+    console.log({ purl: withPrefix(url) })
     return <PaperBox>
         <Tabs value={tab} onChange={handleTabChange} aria-label="Select MakeCode editor">
             <Tab label={"Blocks"} />
@@ -38,7 +36,7 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
             <Tab label={"Simulator"} />
         </Tabs>
         <TabPanel value={tab} index={0}>
-            <img src={prefixedUrl} alt={source} />
+            <img src={withPrefix(url)} alt={source} />
         </TabPanel>
         <TabPanel value={tab} index={1}>
             <CodeBlock className="typescript">{code}</CodeBlock>
