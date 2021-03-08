@@ -96,10 +96,8 @@ module.exports = {
                     default: require.resolve("./src/components/Page.tsx"),
                 },
                 gatsbyRemarkPlugins: [
-                    {
-                        resolve: `../gatsby-remark-makecode`,  
-                    },          
-                    `gatsby-remark-autolink-headers`,
+                    "gatsby-remark-makecode",
+                    "gatsby-remark-autolink-headers",
                     "gatsby-remark-external-links",
                     "gatsby-remark-embedder",
                     {
@@ -121,9 +119,9 @@ module.exports = {
             resolve: `gatsby-transformer-remark`,
             options: {
                 plugins: [
-                    `gatsby-remark-autolink-headers`,
+                    "gatsby-remark-makecode",
+                    "gatsby-remark-autolink-headers",
                     "gatsby-remark-external-links",
-                    "gatsby-remark-numbered-footnotes",
                     "gatsby-remark-embedder",
                     {
                         resolve: `gatsby-remark-images`,
