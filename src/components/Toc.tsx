@@ -104,21 +104,24 @@ export default function Toc(props: { pagePath: string }) {
       }
     }
 
-    allServicesJson {
+  }
+`)
+
+/**
+ *
+  allServicesJson {
       nodes {
         name
         shortId
       }
-    }
-
-    allDevicesJson {
+    } 
+  allDevicesJson {
       nodes {
         id
         name
       }
     }
-  }
-`)
+ */
 
   const handleClick = () => {
     setDrawerType(DrawerType.None)
