@@ -2,13 +2,14 @@ import React, { SVGProps, useRef } from "react";
 import { MatrixKeypadReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
-import useWidgetSize from "../widgets/useWidgetSize";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import useFireKey from "../hooks/useFireKey";
 import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps";
 import MatrixKeypadServiceHost from "../../../jacdac-ts/src/hosts/matrixkeypadservicehost";
+import LoadingProgress from "../ui/LoadingProgress";
+import useWidgetSize from "../widgets/useWidgetSize";
 
 export default function DashboardMatrixKeypad(props: DashboardServiceProps) {
     const { service, services, variant } = props;
@@ -22,10 +23,11 @@ export default function DashboardMatrixKeypad(props: DashboardServiceProps) {
     const host = useServiceHost<MatrixKeypadServiceHost>(service);
     const color = host ? "secondary" : "primary";
     const { background, controlBackground, active, textProps } = useWidgetTheme(color)
+    const widgetSize = useWidgetSize(variant, services.length)
 
     // no data about layout
     if (rows === undefined || columns === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const clickeable = !!host;
     // compute size
@@ -91,7 +93,7 @@ export default function DashboardMatrixKeypad(props: DashboardServiceProps) {
 
     const { ledEls } = render();
     const navProps = useKeyboardNavigationProps(widgetRef.current)
-    return <SvgWidget width={w} height={h}>
+    return <SvgWidget width={w} height={h} size={widgetSize}>
         <rect x={0} y={0} width={w} height={h} rx={pr} ry={pr} fill={background} />
         <g ref={widgetRef} {...navProps}>
             {ledEls}

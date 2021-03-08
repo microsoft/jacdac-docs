@@ -6,10 +6,11 @@ import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
-import { CircularProgress, Grid, Mark, NoSsr, Slider } from "@material-ui/core";
+import { Grid, Mark, NoSsr, Slider } from "@material-ui/core";
 import { roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
 import CanvasWidget from "../widgets/CanvasWidget";
 import { Vector } from "../widgets/threeutils";
+import LoadingProgress from "../ui/LoadingProgress";
 
 function Sliders(props: { host: SensorServiceHost<[number, number, number]>, register: JDRegister }) {
     const { host, register } = props;
@@ -35,7 +36,7 @@ function Sliders(props: { host: SensorServiceHost<[number, number, number]>, reg
     const valueDisplay = (v: number) => `${roundWithPrecision(v, 1)}°/s`
 
     if (!rates?.length)
-        return null;
+        return <LoadingProgress />;
     const [x, y, z] = rates;
     const step = 1
     const marks: Mark[] = [
@@ -96,7 +97,7 @@ export default function DashboardGyroscope(props: DashboardServiceProps) {
 
     return <Grid container direction="row">
         <Grid item style={({ height: "20vh", width: "20vh" })}>
-            <NoSsr><Suspense fallback={<CircularProgress disableShrink variant="indeterminate" size="1rem" />}>
+            <NoSsr><Suspense fallback={<LoadingProgress />}>
                 <CanvasWidget color={active} rotator={rotator} />
             </Suspense></NoSsr>
         </Grid>

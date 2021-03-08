@@ -2,13 +2,12 @@ import React from "react";
 import { ColorReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
-import useWidgetSize from "../widgets/useWidgetSize";
 import useServiceHost from "../hooks/useServiceHost";
 import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 import { BlockPicker } from "react-color"
-import ColorInput from "../ui/ColorInput";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function DashboardColor(props: DashboardServiceProps) {
     const { service, services, variant } = props;
@@ -19,7 +18,7 @@ export default function DashboardColor(props: DashboardServiceProps) {
     const { background, textProps } = useWidgetTheme(color)
 
     if (r === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const value = `rgb(${(r * 0xff) >> 0}, ${(g * 0xff) >> 0}, ${(b * 0xff) >> 0})`
     const handleChange = (color: { rgb: { r: number, g: number, b: number } }) => {

@@ -9,6 +9,7 @@ import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
 import { Grid, Slider, Mark, CircularProgress, NoSsr } from "@material-ui/core";
 import { roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
 import { Vector } from "../widgets/threeutils";
+import LoadingProgress from "../ui/LoadingProgress";
 
 const CanvasWidget = lazy(() => import("../widgets/CanvasWidget"));
 
@@ -32,7 +33,7 @@ function Sliders(props: { host: SensorServiceHost<[number, number, number]>, reg
     }, [host, register])
 
     if (!forces?.length)
-        return null;
+        return <LoadingProgress />;
     const [x, y] = forces;
     const min = -2
     const max = 2
@@ -98,7 +99,7 @@ export default function DashboardAccelerometer(props: DashboardServiceProps) {
 
     return <Grid container direction="row">
         <Grid item style={({ height: "20vh", width: "20vw" })}>
-            <NoSsr><Suspense fallback={<CircularProgress disableShrink variant="indeterminate" size="1rem" />}>
+            <NoSsr><Suspense fallback={<LoadingProgress />}>
                 <CanvasWidget showAxes={true} color={active} rotator={rotator} />
             </Suspense></NoSsr>
         </Grid>

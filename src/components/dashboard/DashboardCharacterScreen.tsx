@@ -6,6 +6,7 @@ import useWidgetSize from "../widgets/useWidgetSize";
 import SvgWidget from "../widgets/SvgWidget";
 import { createStyles, makeStyles } from "@material-ui/core";
 import useWidgetTheme from "../widgets/useWidgetTheme";
+import LoadingProgress from "../ui/LoadingProgress";
 
 const useStyles = makeStyles(() => createStyles({
     text: {
@@ -26,7 +27,7 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
     const { textPrimary, background, controlBackground } = useWidgetTheme("primary");
 
     if (rows === undefined || columns === undefined)
-        return null; // size unknown
+        return <LoadingProgress />; // size unknown
 
     const cw = 8
     const ch = 10;

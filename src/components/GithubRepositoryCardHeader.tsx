@@ -5,6 +5,7 @@ import { useLatestRelease, useRepository } from './github';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { Link } from 'gatsby-theme-material-ui';
 import { inIFrame } from '../../jacdac-ts/src/jdom/iframeclient';
+import LoadingProgress from './ui/LoadingProgress';
 
 export default function GithubRepositoryCardHeader(props: {
     slug: string,
@@ -28,7 +29,7 @@ export default function GithubRepositoryCardHeader(props: {
         </> : <><Link href={`https://github.com/${slug}`} target={target}>
             <Typography component="span" variant="h6">{slug}</Typography>
         </Link>
-            {repoLoading && <CircularProgress disableShrink variant="indeterminate" size="1em" /> }
+            {repoLoading && <LoadingProgress /> }
             {status !== 403 && !repoLoading && !repo && <Typography component="p" variant="caption">Unable to find repository.</Typography>}
         </>;
 

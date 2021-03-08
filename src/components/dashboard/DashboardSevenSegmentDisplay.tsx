@@ -8,6 +8,7 @@ import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import { Grid } from "@material-ui/core";
 import RegisterInput from "../RegisterInput";
+import LoadingProgress from "../ui/LoadingProgress";
 
 
 export default function DashboardSevenSegmentDisplay(props: DashboardServiceProps) {
@@ -25,7 +26,7 @@ export default function DashboardSevenSegmentDisplay(props: DashboardServiceProp
     const { active, background } = useWidgetTheme(color);
 
     if (digitCount === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const md = 4;
     const rs = 4;

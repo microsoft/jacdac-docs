@@ -9,6 +9,7 @@ import useServiceHost from "../hooks/useServiceHost";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import ArcadeGamepadServiceHost from "../../../jacdac-ts/src/hosts/arcadegamepadservicehost";
 import useSvgButtonProps from "../hooks/useSvgButtonProps";
+import LoadingProgress from "../ui/LoadingProgress";
 
 const buttonLabels = {
     [ArcadeGamepadButton.Left]: "\u25C0",
@@ -67,7 +68,7 @@ export default function DashboardArcadeGamepad(props: DashboardServiceProps) {
     const { background } = useWidgetTheme(color);
 
     if (!available?.length)
-        return null
+        return <LoadingProgress />
 
     const w = 256
     const h = 128

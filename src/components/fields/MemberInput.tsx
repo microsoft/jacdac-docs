@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 // tslint:disable-next-line: no-submodule-imports
-import { CircularProgress, FormControlLabel, Slider } from "@material-ui/core"
+import { FormControlLabel, Slider } from "@material-ui/core"
 import { MenuItem, Select, Switch, TextField } from "@material-ui/core"
 import {
     flagsToValue,
@@ -23,6 +23,7 @@ import ValueWithUnitWidget from "../widgets/ValueWithUnitWidget"
 import useUnitIcon from "../hooks/useUnitIcon"
 import { PackedSimpleValue } from "../../../jacdac-ts/src/jdom/pack"
 import { useId } from "react-use-id-hook"
+import LoadingProgress from "../ui/LoadingProgress"
 
 export default function MemberInput(props: {
     specification: jdspec.PacketMember
@@ -154,13 +155,7 @@ export default function MemberInput(props: {
     // value hasn't been loaded yet
     if (serviceMemberSpecification.kind !== "command" && value === undefined) {
         if (showLoading)
-            return (
-                <CircularProgress
-                    disableShrink
-                    variant="indeterminate"
-                    size="1rem"
-                />
-            )
+            return <LoadingProgress />
         else return null
     }
 

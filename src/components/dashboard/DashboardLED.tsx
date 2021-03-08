@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import useWidgetSize from "../widgets/useWidgetSize";
 import useServiceHost from "../hooks/useServiceHost";
@@ -12,6 +12,7 @@ import { Grid, Slider } from "@material-ui/core";
 import LEDServiceHost, { LedAnimation, LedAnimationData } from "../../../jacdac-ts/src/hosts/ledservicehost";
 import { LedReg } from "../../../jacdac-ts/src/jdom/constants";
 import { hsvToCss } from "../../../jacdac-ts/src/jdom/color";
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function DashboardLED(props: DashboardServiceProps) {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -41,7 +42,7 @@ export default function DashboardLED(props: DashboardServiceProps) {
 
     // nothing to see
     if (hsv === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const opacity = brightness;
     const fill = hsvToCss(hsv[0], hsv[1], hsv[2], brightness * 0xff, waveLength !== undefined);

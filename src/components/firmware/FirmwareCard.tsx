@@ -7,6 +7,7 @@ import Alert from "../ui/Alert";
 import { Link } from "gatsby-theme-material-ui";
 import SelectWithLabel from "../ui/SelectWithLabel";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function FirmwareCard(props: { slug: string }) {
     const { slug } = props
@@ -91,7 +92,7 @@ export default function FirmwareCard(props: { slug: string }) {
             {!downloading && firmwareBlobs?.length && <Button disabled={disabled} variant="text" arial-label={"Clear"} onClick={handleClear}>
                 Clear
             </Button>}
-            {downloading && <CircularProgress disableShrink variant="indeterminate" size="1rem" />}
+            {downloading && <LoadingProgress />}
         </CardActions>
     </Card>
 }

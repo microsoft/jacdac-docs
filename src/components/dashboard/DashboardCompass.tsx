@@ -4,11 +4,11 @@ import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
-import useWidgetSize from "../widgets/useWidgetSize";
 import { Grid, Slider } from "@material-ui/core";
 import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
 import { CompassReg, SystemStatusCodes } from "../../../jacdac-ts/src/jdom/constants";
 import PowerButton from "../widgets/PowerButton";
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function DashboardCompass(props: DashboardServiceProps) {
     const { service, services, variant } = props;
@@ -25,7 +25,7 @@ export default function DashboardCompass(props: DashboardServiceProps) {
     const { background, controlBackground, active, textProps } = useWidgetTheme(color)
 
     if (heading === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const calibrating = status === SystemStatusCodes.Calibrating;
 

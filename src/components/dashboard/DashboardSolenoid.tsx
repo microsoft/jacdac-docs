@@ -36,7 +36,7 @@ export default function DashboardSolenoid(props: DashboardServiceProps) {
 
     return <SvgWidget width={w} height={h} background={background} >
         <rect x={m + pos} y={m + (bh - bsh) / 2} width={bw} height={bsh} rx={m} ry={m} fill={active} stroke={controlBackground} />
-        <rect x={m} y={m} width={bw} height={bh} rx={m} ry={m} stroke={controlBackground} fill={background} {...buttonProps} />
+        <rect x={m} y={m} width={bw} height={bh} rx={m} ry={m} stroke={background} fill={controlBackground} {...buttonProps} />
         <text {...textProps} x={m + bw / 2} y={m + bh / 2}>{pulled ? "pulled" : "pushed"}</text>
     </SvgWidget>
 }

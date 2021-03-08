@@ -2,13 +2,13 @@ import React, { SVGProps, useRef } from "react";
 import { LedMatrixReg } from "../../../jacdac-ts/src/jdom/constants";
 import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
-import useWidgetSize from "../widgets/useWidgetSize";
 import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import useServiceHost from "../hooks/useServiceHost";
 import useFireKey from "../hooks/useFireKey";
 import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps";
 import { toggle } from "../../../jacdac-ts/src/hosts/ledmatrixservicehost";
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function DashboardLEDMatrixDisplay(props: DashboardServiceProps) {
     const { service, services, variant } = props;
@@ -25,7 +25,7 @@ export default function DashboardLEDMatrixDisplay(props: DashboardServiceProps) 
 
     // no data about layout
     if (rows === undefined || columns === undefined)
-        return null;
+        return <LoadingProgress />;
 
     // compute size
     const minOpacity = 0.3;

@@ -7,7 +7,7 @@ import React from "react";
 import { Switch } from "@material-ui/core";
 import { useId } from "react-use-id-hook"
 import ButtonWidget from "../widgets/ButtonWidget";
-import useWidgetSize from "../widgets/useWidgetSize";
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function DashboardSwitch(props: DashboardServiceProps) {
     const { service, services, variant } = props;
@@ -22,7 +22,7 @@ export default function DashboardSwitch(props: DashboardServiceProps) {
     const handleToggle = () => host?.toggle();
 
     if (on === undefined)
-        return null;
+        return <LoadingProgress />;
 
     switch (switchVariant) {
         case SwitchVariant.PushButton:

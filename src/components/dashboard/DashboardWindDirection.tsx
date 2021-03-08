@@ -10,6 +10,7 @@ import { useId } from "react-use-id-hook"
 import useThrottledValue from "../hooks/useThrottledValue";
 import { Grid, Slider } from "@material-ui/core";
 import SensorServiceHost from "../../../jacdac-ts/src/hosts/sensorservicehost";
+import LoadingProgress from "../ui/LoadingProgress";
 
 export default function DashboardWindDirection(props: DashboardServiceProps) {
     const { service, services, variant } = props;
@@ -25,7 +26,7 @@ export default function DashboardWindDirection(props: DashboardServiceProps) {
     const a = useThrottledValue(direction, 360);
 
     if (direction === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const w = 64
     const h = 64

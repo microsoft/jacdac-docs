@@ -11,6 +11,7 @@ import DeviceName from "./DeviceName"
 import { serviceName } from "../../jacdac-ts/src/jdom/pretty"
 import { addHost, hostDefinitionFromServiceClass } from "../../jacdac-ts/src/hosts/hosts"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context";
+import LoadingProgress from "./ui/LoadingProgress"
 
 const START_SIMULATOR = "__start_simulator"
 const NO_CANDIDATES = "__no_candidates"
@@ -88,7 +89,7 @@ export default function RoleManagerService(props: {
     return <Card>
         <DeviceCardHeader device={service.device} showMedia={true} />
         <CardContent>
-            {!requestedRoles?.length && <CircularProgress disableShrink variant="indeterminate" size="1rem" />}
+            {!requestedRoles?.length && <LoadingProgress />}
             <Grid container spacing={1}>
                 {requestedRoles?.map(rdev => <RequestedRoleView
                     key={rdev.name} requestedRole={rdev} client={client} />)}

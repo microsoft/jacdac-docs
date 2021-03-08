@@ -7,6 +7,7 @@ import SvgWidget from "../widgets/SvgWidget";
 import useWidgetTheme from "../widgets/useWidgetTheme";
 import { JDService } from "../../../jacdac-ts/src/jdom/service";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
+import LoadingProgress from "../ui/LoadingProgress";
 
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     const [r$, g$, b$] = [r / 255, g / 255, b / 255];
@@ -260,8 +261,11 @@ export default function LightWidget(props: { variant?: "icon" | "", service: JDS
     const [numColumns] = useRegisterUnpackedValue<[number]>(service.register(LedPixelReg.NumColumns))
     const host = useServiceHost<LedPixelServiceHost>(service);
 
+    if (numPixels === undefined || actualBrightness === undefined)
+        return <LoadingProgress />; // nothing to render
+
     if (!numPixels)
-        return null; // nothing to render
+        return null;
 
     if (lightVariant === LedPixelVariant.Matrix) {
         const columns = numColumns || Math.floor(Math.sqrt(numPixels));

@@ -10,6 +10,7 @@ import { useSnackbar } from "notistack";
 import GitHubIcon from '@material-ui/icons/GitHub';
 import ApiKeyAccordion from "./ApiKeyAccordion";
 import { useId } from "react-use-id-hook";
+import LoadingProgress from "./ui/LoadingProgress";
 
 export interface GithubPullRequestButtonProps {
     title: string,
@@ -96,7 +97,7 @@ export default function GithubPullRequestButton(props: GithubPullRequestButtonPr
             </Grid>}
             <Grid item xs={12}>
                 <Button disabled={disabled} color="primary" variant="contained" onClick={handleOpenConfirm}
-                    startIcon={busy ? <CircularProgress disableShrink variant="indeterminate" size="1em" /> : <GitHubIcon />}>
+                    startIcon={busy ? <LoadingProgress /> : <GitHubIcon />}>
                     {label}
                 </Button>
             </Grid>

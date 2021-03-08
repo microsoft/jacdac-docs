@@ -4,21 +4,9 @@ import { DashboardServiceProps } from "./DashboardServiceWidget";
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue";
 import SvgWidget from "../widgets/SvgWidget";
 import useServiceHost from "../hooks/useServiceHost";
-import useWidgetSize from "../widgets/useWidgetSize";
 import ReflectedLightServiceHost from "../../../jacdac-ts/src/hosts/reflectedlightservicehost";
 import PowerButton from "../widgets/PowerButton";
-import { Grid, Typography } from "@material-ui/core";
 import useWidgetTheme from "../widgets/useWidgetTheme";
-
-function DataWidget(props: { value: number, name: string, unit: string }) {
-    const { value, name, unit } = props;
-    if (value === undefined || isNaN(value))
-        return null;
-    const svalue = value === undefined ? "--" : value.toString();
-    return <Grid item>
-        <Typography variant="caption">{`${name}: ${svalue} ${unit}`}</Typography>
-    </Grid>
-}
 
 export default function DashboardPower(props: DashboardServiceProps) {
     const { service, services, variant } = props;

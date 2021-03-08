@@ -12,6 +12,7 @@ import { JDService } from "../../../jacdac-ts/src/jdom/service";
 import useMicrophoneVolume from "../hooks/useMicrophoneVolume"
 import TrendWidget from "../widgets/TrendWidget";
 import useWidgetSize from "../widgets/useWidgetSize";
+import LoadingProgress from "../ui/LoadingProgress";
 
 function HostMicrophoneButton(props: { service: JDService, host?: AnalogSensorServiceHost }) {
     const { host, service } = props;
@@ -59,7 +60,7 @@ export default function DashboardSoundLevel(props: DashboardServiceProps) {
     }
 
     if (soundLevel === undefined)
-        return null;
+        return <LoadingProgress />;
 
     return <Grid container direction="column">
         <Grid item>

@@ -10,6 +10,7 @@ import useWidgetTheme from "../widgets/useWidgetTheme";
 import { describeArc } from "../widgets/svgutils";
 import AnalogSensorServiceHost from "../../../jacdac-ts/src/hosts/analogsensorservicehost";
 import useAnimationFrame from "../hooks/useAnimationFrame";
+import LoadingProgress from "../ui/LoadingProgress";
 
 const ACTIVE_SPEED = 0.05
 const INACTIVE_SPEED = 0.1
@@ -56,7 +57,7 @@ export default function DashboardAnalogButton(props: DashboardServiceProps) {
     }, [down])
 
     if (pressure === undefined)
-        return null;
+        return <LoadingProgress />;
 
     const buttonActive = pressure > activeThreshold;
     const w = 64;
