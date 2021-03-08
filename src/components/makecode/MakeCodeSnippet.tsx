@@ -29,6 +29,8 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
     const snippet = useMemo(() => parseMakeCodeSnippet(source), [source]);
     const { code } = snippet;
 
+    const prefixPath = (global as any).__PATH_PREFIX__;
+    const prefixedUrl = prefixPath ? `${prefixPath}/${url}` : url;
     return <PaperBox>
         <Tabs value={tab} onChange={handleTabChange} aria-label="Select MakeCode editor">
             <Tab label={"Blocks"} />
@@ -36,7 +38,7 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
             <Tab label={"Simulator"} />
         </Tabs>
         <TabPanel value={tab} index={0}>
-            <img src={url} alt={source} />
+            <img src={prefixedUrl} alt={source} />
         </TabPanel>
         <TabPanel value={tab} index={1}>
             <CodeBlock className="typescript">{code}</CodeBlock>
