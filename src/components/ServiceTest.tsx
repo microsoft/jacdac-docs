@@ -12,6 +12,7 @@ import {
     ListItemText,
     ListItem,
     ListItemIcon,
+    ListItemSecondaryAction,
     Typography,
     Card,
     CardContent,
@@ -33,7 +34,15 @@ import {
 import Flags from "../../jacdac-ts/src/jdom/flags"
 import { JDService } from "../../jacdac-ts/src/jdom/service"
 import { serviceTestFromServiceSpec } from "../../jacdac-ts/src/jdom/spec"
-import { cmdToPrompt, JDServiceTestRunner, JDTestRunner, JDTestStatus } from "../../jacdac-ts/src/test/testrunner"
+import { 
+    cmdToPrompt, 
+    cmdToTestFunction, 
+    JDServiceTestRunner, 
+    JDTestRunner, 
+    JDTestStatus,
+    JDCommandRunner,
+    JDCommandStatus,
+} from "../../jacdac-ts/src/test/testrunner"
 import SelectService from "./SelectService"
 import ErrorIcon from '@material-ui/icons/Error';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -100,35 +109,80 @@ function TestList(props: { testRunner: JDServiceTestRunner }) {
     </Card>
 }
 
+function CommandStatusIcon(props: { command: JDCommandRunner }) {
+    const { command } = props;
+    const status = useChange(command, c => c.status);
+
+    switch (status) {
+        case JDCommandStatus.Active: 
+        case JDCommandStatus.RequiresUserInput: 
+            return <PlayCircleFilledIcon color="action" />
+        case JDCommandStatus.Failed: return <ErrorIcon color="error" />
+        case JDCommandStatus.Passed: return <CheckCircleIcon color="primary" />
+        default: return <HourglassEmptyIcon color="disabled" />
+    }
+}
+
+function CommandListItem(props: { command: JDCommandRunner }) {
+    const { command } = props;
+    const { prompt, progress } = useChange(command, c => c.output);
+    const status = useChange(command, c => c.status);
+    const handleAnswer = (status: JDCommandStatus) => () => command.finish(status)
+    return <ListItem>
+        <ListItemIcon>
+            <CommandStatusIcon command={command} />
+        </ListItemIcon>
+        <ListItemText primary={prompt} secondary={progress.toString()} />
+        {status === JDCommandStatus.RequiresUserInput &&
+            <ListItemSecondaryAction>
+                <Button variant="outlined" onClick={handleAnswer(JDCommandStatus.Passed)}>Yes</Button>
+                <Button variant="outlined" onClick={handleAnswer(JDCommandStatus.Failed)}>No</Button>
+            </ListItemSecondaryAction>
+        }
+    </ListItem>
+}
+
+// TODO: cancel button (fails current command and test)
+function CommandList(props: { test: JDTestRunner }) {
+    const { test } = props;
+    const { commands } = test;
+
+    return <Card>
+        <CardContent>
+            <List dense={false}>
+                {commands.map((cmd, i) => <CommandListItem key={i} command={cmd} />)}
+            </List>
+        </CardContent>
+    </Card>
+}
+
+/*
 function TestStepper(props: { test: JDTestRunner }) {
     const { test } = props
-    const { specification } = test;
-    const { commands } = specification;
-    const [activeCommand, setActiveCommand] = useState(0);
-    const handleNext = () => {
-        setActiveCommand((prev) => prev + 1);
-    };
-    const handleClose = (status: JDTestStatus) => () => test.finish(status)
-    return <Stepper activeStep={activeCommand} orientation="vertical">
+    const { commands } = test;
+
+    return 
+}
+<Stepper activeStep={activeCommand} orientation="vertical">
         {commands.map((cmd, index) => <Step key={index}>
-            <StepLabel>{cmdToPrompt(cmd) || "no prompt"}</StepLabel>
+            <StepLabel>{cmd.output.prompt || "no prompt"}</StepLabel>
             <StepContent>
                 <Grid container spacing={1} direction="row">
                     <Grid item>
                         <Button variant="outlined" onClick={handleNext}>Next</Button>
                     </Grid>
-                    <Grid item>
-                        <Button variant="outlined" onClick={handleClose(JDTestStatus.Passed)}>Yes</Button>
-                    </Grid>
-                    <Grid item>
-                        <Button variant="outlined" onClick={handleClose(JDTestStatus.Failed)}>No</Button>
-                    </Grid>
+
                 </Grid>
             </StepContent>
         </Step>)
         }
     </Stepper>;
-}
+        const [activeCommand, setActiveCommand] = useState(0);
+    const handleNext = () => {
+        setActiveCommand((prev) => prev + 1);
+    };
+    
+*/
 
 function ActiveTest(props: { test: JDTestRunner }) {
     const { test } = props;
@@ -138,7 +192,7 @@ function ActiveTest(props: { test: JDTestRunner }) {
     return <Card>
         <CardContent>
             <Typography variant="h5" component="h2">{description}</Typography>
-            <TestStepper
+            <CommandList
                 test={test}
             />
         </CardContent>
