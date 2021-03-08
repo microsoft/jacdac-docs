@@ -21,34 +21,32 @@ export default function CodeBlock(props: { children: ReactNode, className?: stri
     const theme = (darkMode === "dark" ? DARK_THEME : LIGHT_THEME) as PrismTheme;
     const valueUri = !!downloadText && `data:application/json;charset=UTF-8,${encodeURIComponent(downloadText)}`
 
-    if (language === "blocks")
-        return <MakeCodeSnippet source={children} />
-    else if (language === "trace")
+    if (language === "trace")
         return <TraceSnippet source={children} />
-
-    return (
-        <Highlight {...defaultProps}
-            code={children}
-            language={language as Language}
-            theme={theme}
-        >
-            {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre className={className} style={{ ...style }}>
-                    {!!url && <Link style={({ float: "right" })} href={url}><Tooltip title={`Open ${url}`}><IconButton><LaunchIcon /></IconButton></Tooltip></Link>}
-                    {!!downloadText && <Link style={({ float: "right" })} href={valueUri} download={downloadName || "download"}><Tooltip title="Download"><IconButton><GetAppIcon /></IconButton></Tooltip></Link>}
-                    {tokens?.map((line, index) => {
-                        const lineProps = getLineProps({ line, key: index })
-                        return (
-                            <div key={index} {...lineProps}>
-                                {line.map((token, key) => (
-                                    <span key={key}{...getTokenProps({ token, key })} />
-                                ))}
-                            </div>
-                        )
-                    }
-                    )}
-                </pre>
-            )}
-        </Highlight>
-    )
+    else
+        return (
+            <Highlight {...defaultProps}
+                code={children}
+                language={language as Language}
+                theme={theme}
+            >
+                {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                    <pre className={className} style={{ ...style }}>
+                        {!!url && <Link style={({ float: "right" })} href={url}><Tooltip title={`Open ${url}`}><IconButton><LaunchIcon /></IconButton></Tooltip></Link>}
+                        {!!downloadText && <Link style={({ float: "right" })} href={valueUri} download={downloadName || "download"}><Tooltip title="Download"><IconButton><GetAppIcon /></IconButton></Tooltip></Link>}
+                        {tokens?.map((line, index) => {
+                            const lineProps = getLineProps({ line, key: index })
+                            return (
+                                <div key={index} {...lineProps}>
+                                    {line.map((token, key) => (
+                                        <span key={key}{...getTokenProps({ token, key })} />
+                                    ))}
+                                </div>
+                            )
+                        }
+                        )}
+                    </pre>
+                )}
+            </Highlight>
+        )
 }
