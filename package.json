@@ -41,7 +41,7 @@
     "gatsby-remark-embedder": "^4.1.0",
     "gatsby-remark-external-links": "0.0.4",
     "gatsby-remark-images": "^3.11.0",
-    "gatsby-remark-makecode": "^1.0.3",
+    "gatsby-remark-makecode": "^1.0.9",
     "gatsby-remark-prismjs": "^3.13.0",
     "gatsby-remark-static-images": "^1.2.1",
     "gatsby-source-filesystem": "^2.11.0",
@@ -96,9 +96,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/gatsby-remark-makecode"
+    "url": "https://github.com/microsoft/jacdac-docs"
   },
   "bugs": {
-    "url": "https://github.com/microsoft/gatsby-remark-makecode/issues"
+    "url": "https://github.com/microsoft/jacdac-docs/issues"
   }
 }

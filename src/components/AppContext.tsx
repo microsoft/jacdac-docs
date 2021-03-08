@@ -10,8 +10,7 @@ export enum DrawerType {
     None,
     Toc,
     Packets,
-    Dom,
-    ServiceSpecification
+    Dom
 }
 
 export interface AppProps {
