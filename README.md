@@ -21,19 +21,25 @@ Edit this project directly from your browser using GitHub Codespaces. If you hav
 
 * open project in a new codespace
 * launch the docs server
+
 ```
 yarn docs
 ```
+
 * click on the generated URL in the terminal output and voila!
 
 ### Local Setup
 
 * install node.js
 * install yarn
+
 ```
 npm install -g yarn
 ```
+
 * setup repo
+
+```
 yarn setup
 ```
 
@@ -43,9 +49,11 @@ You are welcome to use any editor you want! Visual Studio Code
 provides seamless support for git sub-modules and is our preferred editor.
 
 * open [Visual Studio Code](https://code.visualstudio.com/)
+
 ```
 code .
 ```
+
 * install the recommended extensions (**MDX**, **ESLint** and **Prettier** extensions)
 * in the Git view, click on the ``jacdac`` branch and select ``main`` so that changes are automatically synched
 
