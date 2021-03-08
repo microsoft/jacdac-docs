@@ -14,7 +14,7 @@ import Tooltip from './ui/Tooltip';
 import MakeCodeSnippet from './makecode/MakeCodeSnippet';
 import TraceSnippet from './TraceSnippet';
 
-export default function CodeBlock(props: { children: ReactNode, className?: string, downloadName?: string; downloadText?: string; url?: string; }) {
+export default function CodeBlock(props: { children: string, className?: string, downloadName?: string; downloadText?: string; url?: string; }) {
     const { children, className, downloadName, downloadText, url } = props;
     const { darkMode } = useContext(DarkModeContext)
     const language = className?.replace(/language-/, '') || ""
@@ -23,6 +23,8 @@ export default function CodeBlock(props: { children: ReactNode, className?: stri
 
     if (language === "trace")
         return <TraceSnippet source={children} />
+    else if (language === "blocks")
+        return <MakeCodeSnippet renderedSource={children} />
     else
         return (
             <Highlight {...defaultProps}
