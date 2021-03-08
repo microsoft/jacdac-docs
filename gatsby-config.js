@@ -7,6 +7,7 @@ module.exports = {
         siteUrl: `https://microsoft.github.io/jacdac-docs`,
     },
     pathPrefix: "/jacdac-docs",
+    assetPrefix: `https://microsoft.github.io/jacdac-docs`,    
     flags: {
         PRESERVE_FILE_DOWNLOAD_CACHE: true,
         PRESERVE_WEBPACK_CACHE: true,
