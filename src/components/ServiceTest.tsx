@@ -125,7 +125,7 @@ function CommandListItem(props: { command: JDCommandRunner }) {
         <ListItemIcon>
             <CommandStatusIcon command={command} />
         </ListItemIcon>
-        <ListItemText primary={prompt} secondary={progress.toString()} />
+        <ListItemText primary={prompt} secondary={!progress ? "" : progress.toString()} />
         {status === JDCommandStatus.RequiresUserInput &&
             <ListItemSecondaryAction>
                 <Button variant="outlined" onClick={handleAnswer(JDCommandStatus.Passed)}>Yes</Button>
