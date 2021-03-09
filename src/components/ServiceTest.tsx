@@ -156,34 +156,6 @@ function CommandList(props: { test: JDTestRunner }) {
     </Card>
 }
 
-/*
-function TestStepper(props: { test: JDTestRunner }) {
-    const { test } = props
-    const { commands } = test;
-
-    return 
-}
-<Stepper activeStep={activeCommand} orientation="vertical">
-        {commands.map((cmd, index) => <Step key={index}>
-            <StepLabel>{cmd.output.prompt || "no prompt"}</StepLabel>
-            <StepContent>
-                <Grid container spacing={1} direction="row">
-                    <Grid item>
-                        <Button variant="outlined" onClick={handleNext}>Next</Button>
-                    </Grid>
-
-                </Grid>
-            </StepContent>
-        </Step>)
-        }
-    </Stepper>;
-        const [activeCommand, setActiveCommand] = useState(0);
-    const handleNext = () => {
-        setActiveCommand((prev) => prev + 1);
-    };
-    
-*/
-
 function ActiveTest(props: { test: JDTestRunner }) {
     const { test } = props;
     const { specification } = test;
