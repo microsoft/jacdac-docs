@@ -1,13 +1,15 @@
 const path = require(`path`)
 const fs = require(`fs-extra`)
+const sharp = require(`sharp`)
 const { slash } = require(`gatsby-core-utils`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
-const { serviceSpecifications } = require(`./jacdac-ts/dist/jacdac-jdom.cjs`)
+const { serviceSpecifications, identifierToUrlPath } = require(`./jacdac-ts/dist/jacdac-jdom.cjs`)
 const {
     serviceSpecificationToDTDL,
     DTMIToRoute,
 } = require(`./jacdac-ts/dist/jacdac-azure-iot.cjs`)
 const { IgnorePlugin } = require("webpack")
+const AVATAR_SIZE = 64
 
 async function createServicePages(graphql, actions, reporter) {
     const { createPage, createRedirect } = actions
@@ -139,11 +141,20 @@ async function createDevicePages(graphql, actions, reporter) {
                 })
             })
         // copy device image to static
-        const imgpath = node.id.replace(/-/g, "/") + ".jpg"
+        const imgpath = identifierToUrlPath(node.id) + ".jpg"
+        const imgsrc = `./jacdac-ts/jacdac-spec/devices/${imgpath}`
         await fs.copy(
-            `./jacdac-ts/jacdac-spec/devices/${imgpath}`,
+            imgsrc,
             `./public/images/devices/${imgpath}`
-        )
+        );
+        await sharp(imgsrc)
+            .resize(AVATAR_SIZE, AVATAR_SIZE, { fit: sharp.fit.cover })
+            .toFormat('jpeg')
+            .toFile(
+                `./public/images/devices/${
+                    identifierToUrlPath(node.id) + ".avatar.jpg"
+                }`
+            );
     }
 
     const snakify = name => {
