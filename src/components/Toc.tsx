@@ -3,7 +3,6 @@ import { makeStyles, createStyles, Theme, List, ListItem, Typography, useTheme, 
 import { Link } from 'gatsby-theme-material-ui';
 // tslint:disable-next-line: no-submodule-imports
 import ListItemText from '@material-ui/core/ListItemText';
-import { useStaticQuery, graphql } from "gatsby"
 import AppContext, { DrawerType } from "./AppContext"
 
 interface TocNode {
@@ -71,6 +70,7 @@ export default function Toc(props: { pagePath: string }) {
   const { setDrawerType } = useContext(AppContext)
   const theme = useTheme();
   const classes = useStyles();
+  /*
   const data = useStaticQuery(graphql`
   query {
     site {
@@ -79,7 +79,11 @@ export default function Toc(props: { pagePath: string }) {
       }
     }
 
-    allMdx {
+  }
+`)
+*/
+/**
+     allMdx {
       edges {
         node {
           headings {
@@ -103,12 +107,6 @@ export default function Toc(props: { pagePath: string }) {
         }
       }
     }
-
-  }
-`)
-
-/**
- *
   allServicesJson {
       nodes {
         name
@@ -158,6 +156,8 @@ export default function Toc(props: { pagePath: string }) {
       path: "/clients/",
       order: 5
     }]
+
+    /*
     data.allMdx.edges.map(node => node.node)
       .filter(node => !!node.frontmatter?.title || (!!node.headings.length && !/404/.test(node.headings[0].value)))
       .filter(node => !node.frontmatter?.hideToc)
@@ -170,6 +170,7 @@ export default function Toc(props: { pagePath: string }) {
         return r;
       })
       .forEach(node => toc.push(node))
+      */
 
     /*
     data.allServicesJson.nodes.map(node => {
