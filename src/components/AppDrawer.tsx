@@ -1,18 +1,20 @@
-import React, { useContext } from "react";
+import React, { lazy, useContext } from "react";
 import { Drawer, Divider, makeStyles, createStyles } from "@material-ui/core";
+import Suspense from "./ui/Suspense"
 import { IconButton } from "gatsby-theme-material-ui";
 // tslint:disable-next-line: no-submodule-imports
-import PacketView from "./tools/PacketView";
-import Toc from "./Toc";
-import JDomTreeView from "./JDomTreeView";
 import { DRAWER_WIDTH, MOBILE_BREAKPOINT, TOC_DRAWER_WIDTH } from "./layout";
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import AppContext, { DrawerType } from "./AppContext";
 import PacketRecorder from "./PacketRecorder";
-import DrawerSearchInput from "./DrawerSearchInput";
-import DrawerSearchResults from "./DrawerSearchResults";
 import DrawerToolsButtonGroup from "./DrawerToolsButtonGroup";
+
+const Toc = lazy(() => import("./Toc"));
+const PacketView = lazy(() => import("./tools/PacketView"));
+const JDomTreeView = lazy(() => import("./JDomTreeView"));
+const DrawerSearchResults = lazy(() => import("./DrawerSearchResults"));
+const DrawerSearchInput = lazy(() => import("./DrawerSearchInput"));
 
 const useStyles = makeStyles((theme) => createStyles({
     drawer: {
@@ -81,7 +83,10 @@ export default function AppDrawer(props: {
         }}
     >
         <div className={classes.drawerHeader}>
-            {toc && <div className={classes.fluid}><DrawerSearchInput /></div>}
+            {toc && <div className={classes.fluid}>
+                <Suspense>
+                    <DrawerSearchInput />
+                </Suspense></div>}
             {!toc && <><PacketRecorder />
                 <span className={classes.fluid} />
                 <DrawerToolsButtonGroup showConnect={true} />
@@ -91,10 +96,12 @@ export default function AppDrawer(props: {
             </IconButton>
         </div>
         <Divider />
-        {showSearchResults && <DrawerSearchResults />}
-        {!showSearchResults && drawerType === DrawerType.Toc && <Toc pagePath={pagePath} />}
+        {showSearchResults && <Suspense><DrawerSearchResults /></Suspense>}
+        {!showSearchResults && drawerType === DrawerType.Toc && <Suspense>
+            <Toc pagePath={pagePath} />
+        </Suspense>}
         {!showSearchResults && drawerType === DrawerType.Packets
-            ? <PacketView showTime={true} />
-            : drawerType === DrawerType.Dom ? <JDomTreeView /> : undefined}
+            ? <Suspense><PacketView showTime={true} /></Suspense>
+            : drawerType === DrawerType.Dom ? <Suspense><JDomTreeView /></Suspense> : undefined}
     </Drawer>
 }

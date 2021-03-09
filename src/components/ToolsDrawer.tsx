@@ -137,7 +137,7 @@ export default function ToolsDrawer() {
     ]
 
     if (!toolsMenu)
-        return <></>
+        return null
 
     return <Drawer
         className={classes.drawer}

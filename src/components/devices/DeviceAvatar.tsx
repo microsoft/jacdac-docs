@@ -1,5 +1,5 @@
 import { Avatar, createStyles, makeStyles, Theme } from "@material-ui/core";
-import React, { useContext } from "react";
+import React from "react";
 import { VIRTUAL_DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants";
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device";
 import useDeviceSpecification from "../../jacdac/useDeviceSpecification";
@@ -9,7 +9,7 @@ import KindIcon from "../KindIcon"
 import useDeviceStatusLightStyle from "./useDeviceStatusLightStyle";
 import Helmet from "react-helmet"
 import useDeviceName from "../useDeviceName";
-import AppContext from "../AppContext";
+import useDeviceImage from "./useDeviceImage";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,7 +29,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function DeviceAvatar(props: { device: JDDevice, showMissing?: boolean, size?: "small" | "large" }) {
   const { device, showMissing, size } = props;
-  const { specification, imageUrl } = useDeviceSpecification(device);
+  const specification = useDeviceSpecification(device);
+  const imageUrl = useDeviceImage(specification, "avatar")
   const name = useDeviceName(device);
   const classes = useStyles();
   const sizeClassName = size === "small" ? classes.small : size === "large" ? classes.large : undefined;

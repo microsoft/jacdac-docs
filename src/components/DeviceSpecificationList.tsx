@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { createStyles, GridList, GridListTile, GridListTileBar, makeStyles, Theme, Typography, useMediaQuery, useTheme } from '@material-ui/core';
-import { deviceSpecifications, identifierToUrlPath, imageDeviceOf } from '../../jacdac-ts/src/jdom/spec';
+import { deviceSpecifications, identifierToUrlPath } from '../../jacdac-ts/src/jdom/spec';
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import InfoIcon from '@material-ui/icons/Info';
 import Markdown from "./ui/Markdown"
 import { IconButton } from "gatsby-theme-material-ui";
 import { arrayShuffle } from '../../jacdac-ts/src/jdom/utils';
 import { MEDIUM_BREAKPOINT, MOBILE_BREAKPOINT } from './layout';
+import useDeviceImage from './devices/useDeviceImage';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     root: {
@@ -55,18 +56,21 @@ export default function DeviceSpecificationList(props: {
         return <Typography variant="body1">No device registered yet.</Typography>
 
     return <GridList className={classes.root} cols={cols}>
-        {specs.map(spec => <GridListTile key={spec.id}>
-            <img src={imageDeviceOf(spec)} alt={spec.name} />
-            <GridListTileBar
-                title={spec.name}
-                subtitle={<Markdown className={classes.ellipsis} source={spec.description.split('.', 1)[0]} />}
-                actionIcon={<>
-                    <IconButton to={`/devices/${identifierToUrlPath(spec.id)}`} aria-label={`info about ${spec.name}`} className={classes.icon}>
-                        <InfoIcon />
-                    </IconButton>
-                </>
-                }
-            />
-        </GridListTile>)}
+        {specs.map(spec => {
+            const imageUrl = useDeviceImage(spec);
+            return <GridListTile key={spec.id}>
+                <img src={imageUrl} alt={spec.name} loading="lazy" />
+                <GridListTileBar
+                    title={spec.name}
+                    subtitle={<Markdown className={classes.ellipsis} source={spec.description.split('.', 1)[0]} />}
+                    actionIcon={<>
+                        <IconButton to={`/devices/${identifierToUrlPath(spec.id)}`} aria-label={`info about ${spec.name}`} className={classes.icon}>
+                            <InfoIcon />
+                        </IconButton>
+                    </>
+                    }
+                />
+            </GridListTile>;
+        })}
     </GridList>
 }

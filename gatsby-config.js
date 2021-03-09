@@ -69,13 +69,6 @@ module.exports = {
                 path: `${__dirname}/jacdac-ts/jacdac-spec/traces`,
             },
         },
-        {
-            resolve: `gatsby-source-filesystem`,
-            options: {
-                name: `package`,
-                path: `${__dirname}/jacdac-ts/package.json`,
-            },
-        },
         `gatsby-plugin-optimize-svgs`,
         `gatsby-transformer-json`,
         `gatsby-theme-material-ui`,

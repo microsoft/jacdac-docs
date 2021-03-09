@@ -59,7 +59,7 @@ export default function useLedAnimationStyle(animation: LedAnimationData, option
                 const percent = (t8ms * 8 / 1000) / totals * 100;
                 kf += `  ${roundWithPrecision(percent, 5)}% { ${property}: ${csscolor}); }\n`
                 t8ms += duration;
-                console.log({ total8ms, totals, t8ms, duration, percent })
+               // console.log({ total8ms, totals, t8ms, duration, percent })
             })
         } else {
             // 30fps
