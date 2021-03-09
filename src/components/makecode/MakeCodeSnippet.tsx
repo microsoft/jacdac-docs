@@ -28,7 +28,6 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
     const snippet = useMemo(() => parseMakeCodeSnippet(source), [source]);
     const { code } = snippet;
 
-    console.log({ purl: withPrefix(url) })
     return <PaperBox>
         <Tabs value={tab} onChange={handleTabChange} aria-label="Select MakeCode editor">
             <Tab label={"Blocks"} />
@@ -36,7 +35,7 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
             <Tab label={"Simulator"} />
         </Tabs>
         <TabPanel value={tab} index={0}>
-            <img src={withPrefix(url)} alt={source} />
+            <img src={withPrefix(url)} alt={source} loading="lazy" />
         </TabPanel>
         <TabPanel value={tab} index={1}>
             <CodeBlock className="typescript">{code}</CodeBlock>
