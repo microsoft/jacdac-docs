@@ -4,10 +4,6 @@ import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
 import {
     Grid,
     Button,
-    Step,
-    StepContent,
-    StepLabel,
-    Stepper,
     List,
     ListItemText,
     ListItem,
@@ -34,9 +30,7 @@ import {
 import Flags from "../../jacdac-ts/src/jdom/flags"
 import { JDService } from "../../jacdac-ts/src/jdom/service"
 import { serviceTestFromServiceSpec } from "../../jacdac-ts/src/jdom/spec"
-import { 
-    cmdToPrompt, 
-    cmdToTestFunction, 
+import {
     JDServiceTestRunner, 
     JDTestRunner, 
     JDTestStatus,
@@ -85,14 +79,13 @@ function TestStatusIcon(props: { test: JDTestRunner }) {
 
 function TestListItem(props: { test: JDTestRunner }) {
     const { test } = props;
-    const { specification } = test;
-    const { description } = specification;
+    const { output } = test;
 
     return <ListItem>
         <ListItemIcon>
             <TestStatusIcon test={test} />
         </ListItemIcon>
-        <ListItemText primary={description} />
+        <ListItemText primary={output} />
     </ListItem>
 }
 
@@ -158,12 +151,11 @@ function CommandList(props: { test: JDTestRunner }) {
 
 function ActiveTest(props: { test: JDTestRunner }) {
     const { test } = props;
-    const { specification } = test;
-    const { description } = specification;
+    const { output } = test;
 
     return <Card>
         <CardContent>
-            <Typography variant="h5" component="h2">{description}</Typography>
+            <Typography variant="h5" component="h2">{output}</Typography>
             <CommandList
                 test={test}
             />
