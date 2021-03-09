@@ -36,7 +36,7 @@ export default function DeviceCardHeader(props: {
     showMedia?: boolean
 }) {
     const { device, showFirmware, showTemperature, showMedia, showDeviceId, showAvatar } = props;
-    const { specification } = useDeviceSpecification(device);
+    const specification = useDeviceSpecification(device);
 
     return <>
         {showMedia && <DeviceCardMedia device={device} />}

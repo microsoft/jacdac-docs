@@ -35,7 +35,7 @@ export default function DashboardDevice(props: {
     const services = useChange(device, () => device.services()
         .filter(service => ignoredServices.indexOf(service.serviceClass) < 0
             && !!service.specification));
-    const { specification } = useDeviceSpecification(device);
+    const specification = useDeviceSpecification(device);
     const theme = useTheme();
     const mobile = useMediaQuery(theme.breakpoints.down(MOBILE_BREAKPOINT));
 
