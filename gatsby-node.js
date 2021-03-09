@@ -270,6 +270,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     })
   }
   // make sure axe is not part of the final build
+  /*
   if (stage === 'build-javascript') {
     setWebpackConfig({
       plugins: [
@@ -279,6 +280,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
       ],
     })
   }
+  */
 
   // enable verbose logging
   const config = getConfig()

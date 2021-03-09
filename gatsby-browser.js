@@ -11,6 +11,7 @@ export const wrapPageElement = Layout
 const activeEnv = process.env.GATSBY_ACTIVE_ENV || process.env.NODE_ENV || 'development'
 const isDev = activeEnv === 'development'
 
+/*
 export const onInitialClientRender = () => {
   if (isDev) {
     import("@axe-core/react").then(reactAxe => {
@@ -18,3 +19,4 @@ export const onInitialClientRender = () => {
     });
   }
 }
+*/
