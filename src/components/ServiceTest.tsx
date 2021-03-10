@@ -140,11 +140,19 @@ function CommandList(props: { test: JDTestRunner }) {
     const { test } = props;
     const { commands } = test;
     const status = useChange(test, t => t.status);
-    const handleRun =  () => test.start();
+    const handleRun = () => test.start();
+    const handleReset = () => { test.reset(); test.ready(); }
+    const handleCancel = () => { test.cancel() }
     return <Card>
         <CardContent>
             {status === JDTestStatus.ReadyToRun &&
                 <Button variant="outlined" onClick={handleRun}>Run</Button>
+            }
+            {status === JDTestStatus.Active &&
+                <Button variant="outlined" onClick={handleReset}>Reset</Button>
+            }
+            {status === JDTestStatus.Active &&
+                <Button variant="outlined" onClick={handleCancel}>Cancel</Button>
             }
             <List dense={false}>
                 {commands.map((cmd, i) => <CommandListItem key={i} command={cmd} />)}
