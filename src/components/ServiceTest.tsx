@@ -70,6 +70,7 @@ function TestStatusIcon(props: { test: JDTestRunner }) {
     const status = useChange(test, t => t.status);
 
     switch (status) {
+        case JDTestStatus.ReadyToRun: return <PlayCircleFilledIcon color="action" />
         case JDTestStatus.Active: return <PlayCircleFilledIcon color="action" />
         case JDTestStatus.Failed: return <ErrorIcon color="error" />
         case JDTestStatus.Passed: return <CheckCircleIcon color="primary" />
@@ -138,9 +139,13 @@ function CommandListItem(props: { command: JDCommandRunner }) {
 function CommandList(props: { test: JDTestRunner }) {
     const { test } = props;
     const { commands } = test;
-
+    const status = useChange(test, t => t.status);
+    const handleRun =  () => test.start();
     return <Card>
         <CardContent>
+            {status === JDTestStatus.ReadyToRun &&
+                <Button variant="outlined" onClick={handleRun}>Run</Button>
+            }
             <List dense={false}>
                 {commands.map((cmd, i) => <CommandListItem key={i} command={cmd} />)}
             </List>
