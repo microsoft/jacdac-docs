@@ -80,13 +80,13 @@ function TestStatusIcon(props: { test: JDTestRunner }) {
 
 function TestListItem(props: { test: JDTestRunner }) {
     const { test } = props;
-    const { output } = test;
+    const description = useChange(test, t => t.description);
 
     return <ListItem>
         <ListItemIcon>
             <TestStatusIcon test={test} />
         </ListItemIcon>
-        <ListItemText primary={output} />
+        <ListItemText primary={description} />
     </ListItem>
 }
 
@@ -136,6 +136,7 @@ function CommandListItem(props: { command: JDCommandRunner }) {
     </ListItem>
 }
 
+// TODO: end of test
 function CommandList(props: { test: JDTestRunner }) {
     const { test } = props;
     const { commands } = test;
@@ -165,11 +166,11 @@ function CommandList(props: { test: JDTestRunner }) {
 
 function ActiveTest(props: { test: JDTestRunner }) {
     const { test } = props;
-    const { output } = test;
+    const description = useChange(test, t => t.description);
 
     return <Card>
         <CardContent>
-            <Typography variant="h5" component="h2">{output}</Typography>
+            <Typography variant="h5" component="h2">{description}</Typography>
             <CommandList
                 test={test}
             />
