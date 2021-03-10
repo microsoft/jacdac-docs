@@ -119,14 +119,14 @@ function CommandStatusIcon(props: { command: JDCommandRunner }) {
 
 function CommandListItem(props: { command: JDCommandRunner }) {
     const { command } = props;
-    const { prompt, progress } = useChange(command, c => c.output);
+    const { message, progress } = useChange(command, c => c.output);
     const status = useChange(command, c => c.status);
     const handleAnswer = (status: JDCommandStatus) => () => command.finish(status)
     return <ListItem>
         <ListItemIcon>
             <CommandStatusIcon command={command} />
         </ListItemIcon>
-        <ListItemText primary={prompt} secondary={!progress ? "" : progress.toString()} />
+        <ListItemText primary={message} secondary={!progress ? "" : progress.toString()} />
         {status === JDCommandStatus.RequiresUserInput &&
             <ListItemSecondaryAction>
                 <Button variant="outlined" onClick={handleAnswer(JDCommandStatus.Passed)}>Yes</Button>
