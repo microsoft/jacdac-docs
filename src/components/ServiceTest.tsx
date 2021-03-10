@@ -154,15 +154,15 @@ function CommandList(props: { test: JDTestRunner }) {
             {status === JDTestStatus.Active &&
                 <Button variant="outlined" onClick={handleCancel}>Cancel</Button>
             }
-            <List dense={false}>
-                {commands.map((cmd, i) => <CommandListItem key={i} command={cmd} />)}
-            </List>
+            {status === JDTestStatus.Active &&
+                <List dense={false}>
+                    {commands.map((cmd, i) => <CommandListItem key={i} command={cmd} />)}
+                </List>
+            }
         </CardContent>
     </Card>
 }
 
-// TODO: start test (try again)
-// TODO: cancel button 
 function ActiveTest(props: { test: JDTestRunner }) {
     const { test } = props;
     const { output } = test;
