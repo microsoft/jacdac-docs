@@ -231,7 +231,6 @@ export default function ServiceTestRunner(props: {
     const testRunner = useServiceClient(service, factory)
     const currentTest = useChange(testRunner, t => t?.currentTest)
     const handleSelectTest = (test: JDTestRunner) => {
-        console.log({ test })
         testRunner.currentTest = test
     }
 
