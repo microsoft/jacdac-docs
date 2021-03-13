@@ -1,17 +1,22 @@
-import React, { useContext } from "react"
+import React from "react"
 import { Button } from "gatsby-theme-material-ui"
-import { BusState, JDTransport } from "../../jacdac-ts/src/jdom/bus"
+import {
+    ConnectionState,
+    JDTransport,
+} from "../../jacdac-ts/src/jdom/transport"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import UsbIcon from "@material-ui/icons/Usb"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import BluetoothIcon from '@material-ui/icons/Bluetooth';
+import BluetoothIcon from "@material-ui/icons/Bluetooth"
 import { Badge, useMediaQuery, useTheme } from "@material-ui/core"
 import IconButtonWithProgress from "../components/ui/IconButtonWithProgress"
 import { MOBILE_BREAKPOINT } from "../components/layout"
-import JacdacContext, { JacdacContextProps } from "./Context"
-import { BLE_TRANSPORT, USB_TRANSPORT } from "../../jacdac-ts/src/jdom/constants"
+import {
+    BLE_TRANSPORT,
+    USB_TRANSPORT,
+} from "../../jacdac-ts/src/jdom/constants"
 
-function TransportConnectButton(props: {
+export default function ConnectButton(props: {
     full?: boolean
     className?: string
     transparent?: boolean
@@ -21,17 +26,17 @@ function TransportConnectButton(props: {
     const { connectionState, connect, disconnect, type } = transport
     const theme = useTheme()
     const showDisconnect =
-        connectionState == BusState.Connected ||
-        connectionState == BusState.Disconnecting
+        connectionState == ConnectionState.Connected ||
+        connectionState == ConnectionState.Disconnecting
     const inProgress =
-        connectionState == BusState.Connecting ||
-        connectionState == BusState.Disconnecting
+        connectionState == ConnectionState.Connecting ||
+        connectionState == ConnectionState.Disconnecting
     const small =
         full !== true &&
         (!full || useMediaQuery(theme.breakpoints.down(MOBILE_BREAKPOINT)))
     const disabled =
-        connectionState != BusState.Connected &&
-        connectionState != BusState.Disconnected
+        connectionState != ConnectionState.Connected &&
+        connectionState != ConnectionState.Disconnected
     const onClick = showDisconnect ? disconnect : () => connect()
     const icon = (
         <Badge color="primary" variant="dot" invisible={!showDisconnect}>
@@ -76,24 +81,4 @@ function TransportConnectButton(props: {
                 {title}
             </Button>
         )
-}
-
-export default function ConnectButton(props: {
-    full?: boolean
-    className?: string
-    transparent?: boolean
-}) {
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const { transports } = bus
-    return (
-        <>
-            {transports.map(transport => (
-                <TransportConnectButton
-                    key={transport.type}
-                    transport={transport}
-                    {...props}
-                />
-            ))}
-        </>
-    )
 }
