@@ -3,7 +3,7 @@ import { Box, createStyles, makeStyles } from "@material-ui/core";
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "../ui/Alert";
 import React, { useContext } from "react";
-import { BusState } from "../../../jacdac-ts/src/jdom/bus";
+import { BusState, JDTransport } from "../../../jacdac-ts/src/jdom/bus";
 import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec";
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context";
 import ConnectButton from "../../jacdac/ConnectButton";
@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => createStyles({
     }
 }))
 
-function NoSsrConnectAlert(props: { serviceClass?: number }) {
+function NoSsrConnectAlert(props: { serviceClass?: number, transport: JDTransport }) {
     const classes = useStyles()
     const { bus, connectionState } = useContext<JacdacContextProps>(JacdacContext)
     const { serviceClass } = props
