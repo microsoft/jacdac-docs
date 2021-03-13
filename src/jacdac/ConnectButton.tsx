@@ -4,17 +4,10 @@ import {
     ConnectionState,
     JDTransport,
 } from "../../jacdac-ts/src/jdom/transport"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
-import UsbIcon from "@material-ui/icons/Usb"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
-import BluetoothIcon from "@material-ui/icons/Bluetooth"
 import { Badge, useMediaQuery, useTheme } from "@material-ui/core"
 import IconButtonWithProgress from "../components/ui/IconButtonWithProgress"
 import { MOBILE_BREAKPOINT } from "../components/layout"
-import {
-    BLE_TRANSPORT,
-    USB_TRANSPORT,
-} from "../../jacdac-ts/src/jdom/constants"
+import TransportIcon from "../components/icons/TransportIcon"
 
 export default function ConnectButton(props: {
     full?: boolean
@@ -40,8 +33,7 @@ export default function ConnectButton(props: {
     const onClick = showDisconnect ? disconnect : () => connect()
     const icon = (
         <Badge color="primary" variant="dot" invisible={!showDisconnect}>
-            {type === USB_TRANSPORT && <UsbIcon />}
-            {type === BLE_TRANSPORT && <BluetoothIcon />}
+            <TransportIcon transport={transport} />
         </Badge>
     )
     const label = showDisconnect
