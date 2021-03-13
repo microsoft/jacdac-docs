@@ -16,7 +16,7 @@ export default function ConnectButton(props: {
     transport: JDTransport
 }) {
     const { full, className, transparent, transport } = props
-    const { connectionState, connect, disconnect, type } = transport
+    const { connectionState, type } = transport
     const theme = useTheme()
     const showDisconnect =
         connectionState == ConnectionState.Connected ||
@@ -30,7 +30,7 @@ export default function ConnectButton(props: {
     const disabled =
         connectionState != ConnectionState.Connected &&
         connectionState != ConnectionState.Disconnected
-    const onClick = showDisconnect ? disconnect : () => connect()
+    const onClick = showDisconnect ? () => transport.disconnect() : () => transport.connect()
     const icon = (
         <Badge color="primary" variant="dot" invisible={!showDisconnect}>
             <TransportIcon transport={transport} />
@@ -38,8 +38,8 @@ export default function ConnectButton(props: {
     )
     const label = showDisconnect
         ? `disconnect from ${type}`
-        : `connect to a Jacdac device via ${type}`
-    const title = showDisconnect ? "disconnect" : "connect"
+        : `connect to a Jacdac device with ${type}`
+    const title = showDisconnect ? `disconnect ${type}` : `connect ${type}`
 
     if (small)
         return (
