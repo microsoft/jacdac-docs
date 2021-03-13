@@ -3,10 +3,6 @@ import { Box, createStyles, makeStyles } from "@material-ui/core"
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "../ui/Alert"
 import React, { useContext } from "react"
-import {
-    ConnectionState,
-    JDTransport,
-} from "../../../jacdac-ts/src/jdom/transport"
 import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import ConnectButton from "../../jacdac/ConnectButton"
@@ -21,29 +17,30 @@ const useStyles = makeStyles(theme =>
     })
 )
 
-function NoSsrConnectAlert(props: {
-    serviceClass?: number
-    transport: JDTransport
-}) {
+function NoSsrConnectAlert(props: { serviceClass?: number }) {
     const classes = useStyles()
-    const { serviceClass, transport } = props
+    const { serviceClass } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { transports } = bus
     const devices = useChange(bus, b => b.devices({ serviceClass }))
     const spec = serviceSpecificationFromClassIdentifier(serviceClass)
-    const connectionState = useChange(transport, t => t.connectionState)
+    const disconnected = useChange(bus, t => t.disconnected)
 
-    if (!devices?.length && connectionState === ConnectionState.Disconnected)
+    if (!devices?.length && disconnected)
         return (
             <Box displayPrint="none">
                 <Alert severity="info" closeable={true}>
                     {!spec && <span>Did you connect your device?</span>}
                     {spec && <span>Did you connect a {spec.name} device?</span>}
-                    <ConnectButton
-                        transport={transport}
-                        className={classes.button}
-                        full={true}
-                        transparent={true}
-                    />
+                    {transports.map(transport => (
+                        <ConnectButton
+                            key={transport.type}
+                            transport={transport}
+                            className={classes.button}
+                            full={true}
+                            transparent={true}
+                        />
+                    ))}
                 </Alert>
             </Box>
         )
@@ -51,17 +48,9 @@ function NoSsrConnectAlert(props: {
 }
 
 export default function ConnectAlert(props: { serviceClass?: number }) {
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const { transports } = bus
     return (
         <NoSsr>
-            {transports.map(transport => (
-                <NoSsrConnectAlert
-                    key={transport.type}
-                    transport={transport}
-                    {...props}
-                />
-            ))}
+            <NoSsrConnectAlert {...props} />
         </NoSsr>
     )
 }
