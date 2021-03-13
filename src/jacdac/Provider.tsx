@@ -1,7 +1,14 @@
 import React, { useState, useEffect, ReactNode } from "react"
 import JacdacContext from "./Context"
 import { JDBus } from "../../jacdac-ts/src/jdom/bus"
-import { createUSBTransport, isWebUSBSupported } from "../../jacdac-ts/src/jdom/usb"
+import {
+    createUSBTransport,
+    isWebUSBSupported,
+} from "../../jacdac-ts/src/jdom/usb"
+import {
+    createBluetoothTransport,
+    isWebBluetoothSupported,
+} from "../../jacdac-ts/src/jdom/bluetooth"
 import IFrameBridgeClient from "../../jacdac-ts/src/jdom/iframebridgeclient"
 import Flags from "../../jacdac-ts/src/jdom/flags"
 import GamepadHostManager from "../../jacdac-ts/src/hosts/gamepadhostmanager"
@@ -11,12 +18,14 @@ function sniffQueryArguments() {
         return {
             diagnostic: false,
             webUSB: isWebUSBSupported(),
+            webBluetooth: isWebBluetoothSupported(),
         }
 
     const params = new URLSearchParams(window.location.search)
     return {
         diagnostics: params.get(`dbg`) === "1",
         webUSB: isWebUSBSupported() && params.get(`webusb`) !== "0",
+        webBluetooth: isWebBluetoothSupported() && params.get(`webble`) !== "0",
         parentOrigin: params.get("parentOrigin"),
         frameId: window.location.hash?.slice(1),
     }
@@ -25,10 +34,17 @@ function sniffQueryArguments() {
 const args = sniffQueryArguments()
 Flags.diagnostics = args.diagnostics
 Flags.webUSB = args.webUSB
+Flags.webBluetooth = args.webBluetooth
 
-const bus = new JDBus([Flags.webUSB && createUSBTransport()], {
-    parentOrigin: args.parentOrigin,
-})
+const bus = new JDBus(
+    [
+        Flags.webUSB && createUSBTransport(),
+        Flags.webBluetooth && createBluetoothTransport(),
+    ],
+    {
+        parentOrigin: args.parentOrigin,
+    }
+)
 bus.setBackgroundFirmwareScans(true)
 GamepadHostManager.start(bus)
 
