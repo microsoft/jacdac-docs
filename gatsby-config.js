@@ -96,7 +96,6 @@ module.exports = {
                     "gatsby-remark-makecode",
                     "gatsby-remark-autolink-headers",
                     "gatsby-remark-external-links",
-                    "gatsby-remark-embedder",
                     {
                         resolve: `gatsby-remark-images`,
                         options: {
@@ -119,7 +118,6 @@ module.exports = {
                     "gatsby-remark-makecode",
                     "gatsby-remark-autolink-headers",
                     "gatsby-remark-external-links",
-                    "gatsby-remark-embedder",
                     {
                         resolve: `gatsby-remark-images`,
                         options: {
