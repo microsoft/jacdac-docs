@@ -125,12 +125,14 @@ const useStyles = makeStyles(theme =>
             minHeight: "100vh",
             minWidth: "10rem",
             flexDirection: "column",
-            padding: theme.spacing(3),
             transition: theme.transitions.create("margin", {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
             }),
             flexGrow: 1,
+        },
+        container: {
+            padding: theme.spacing(3),
         },
         mainContent: {
             flexGrow: 1,
@@ -323,9 +325,11 @@ function LayoutWithContext(props: LayoutProps) {
     const drawerOpen = drawerType !== DrawerType.None
     const theme = useTheme()
     const medium = useMediaQuery(theme.breakpoints.down(MEDIUM_BREAKPOINT))
-    const container = !medium && !/^\/(tools\/|dashboard)/.test(path)
+    const container = !medium && !/^\/(tools\/|dashboard)/.test(path) && path !== "/"
+    console.log({ path, container, medium })
 
     const mainClasses = clsx(classes.content, {
+        [classes.container]: container,
         [classes.contentShift]: drawerOpen,
         [classes.toolsContentShift]: toolsMenu,
     })
