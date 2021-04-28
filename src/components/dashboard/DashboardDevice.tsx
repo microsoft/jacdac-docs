@@ -77,11 +77,11 @@ export default function DashboardDevice(
                 alignItems="flex-end"
                 alignContent="space-between"
             >
-                {serviceGroups?.map(({ service, configurations }) => (
+                {serviceGroups?.map(({ service, mixins }) => (
                     <DashboardServiceWidgetItem
                         key={service.id}
                         service={service}
-                        configurations={configurations}
+                        mixins={mixins}
                         expanded={expanded}
                         services={services}
                         variant={variant}

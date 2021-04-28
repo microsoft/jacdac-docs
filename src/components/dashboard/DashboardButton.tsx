@@ -9,7 +9,10 @@ import ButtonServer from "../../../jacdac-ts/src/servers/buttonserver"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import ButtonWidget from "../widgets/ButtonWidget"
 import useServiceServer from "../hooks/useServiceServer"
-import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
+import {
+    useRegisterBoolValue,
+    useRegisterUnpackedValue,
+} from "../../jacdac/useRegisterValue"
 import SvgWidget from "../widgets/SvgWidget"
 import useSvgButtonProps from "../hooks/useSvgButtonProps"
 import useWidgetTheme from "../widgets/useWidgetTheme"
@@ -17,17 +20,12 @@ import { describeArc } from "../widgets/svgutils"
 import useAnimationFrame from "../hooks/useAnimationFrame"
 
 export default function DashboardButton(props: DashboardServiceProps) {
-    const { service, configurations, visible } = props
+    const { service } = props
     const [pressed, setPressed] = useState<boolean>(false)
+    const analog = useRegisterBoolValue(service.register(ButtonReg.Analog))
     // don't track reading, use events only
-    // track event up/down events
     const downEvent = service.event(ButtonEvent.Down)
     const upEvent = service.event(ButtonEvent.Up)
-    // find threshold if any
-    const thresholdRegister = configurations
-        .find(cfg => !!cfg.register(SystemReg.ActiveThreshold))
-        ?.register(SystemReg.ActiveThreshold)
-    const [threshold] = useRegisterUnpackedValue(thresholdRegister, { visible })
     useEffect(() => downEvent.subscribe(EVENT, () => setPressed(true)), [
         downEvent,
     ])
@@ -35,12 +33,8 @@ export default function DashboardButton(props: DashboardServiceProps) {
         upEvent,
     ])
 
-    if (threshold === undefined)
-        return <BinaryButton {...props} pressed={pressed} />
-    else
-        return (
-            <AnalogButton {...props} pressed={pressed} threshold={threshold} />
-        )
+    if (!analog) return <BinaryButton {...props} pressed={pressed} />
+    else return <AnalogButton {...props} pressed={pressed} />
 }
 
 function BinaryButton(props: { pressed: boolean } & DashboardServiceProps) {
@@ -68,14 +62,18 @@ function BinaryButton(props: { pressed: boolean } & DashboardServiceProps) {
 const ACTIVE_SPEED = 0.05
 const INACTIVE_SPEED = 0.1
 
-function AnalogButton(
-    props: { pressed: boolean; threshold: number } & DashboardServiceProps
-) {
-    const { service, pressed, threshold, visible } = props
+function AnalogButton(props: { pressed: boolean } & DashboardServiceProps) {
+    const { service, pressed, mixins, visible } = props
     const pressureRegister = service.register(ButtonReg.Pressure)
     const [pressure] = useRegisterUnpackedValue<[number]>(pressureRegister, {
         visible,
     })
+    // find threshold if any
+    const thresholdRegister = mixins
+        .find(cfg => !!cfg.register(SystemReg.ActiveThreshold))
+        ?.register(SystemReg.ActiveThreshold)
+    const [threshold] = useRegisterUnpackedValue(thresholdRegister, { visible })
+
     //const [buttonVariant] = useRegisterUnpackedValue<[AnalogButtonVariant]>(service.register(AnalogButtonReg.Variant));
     const widgetSize = `clamp(3rem, 10vw, 16vw)`
     const server = useServiceServer<ButtonServer>(service)
@@ -152,14 +150,16 @@ function AnalogButton(
                     strokeWidth={ps}
                 />
             )}
-            <circle
-                cx={cx}
-                cy={mo}
-                r={mo / 3}
-                aria-label={`active threshold ${threshold}`}
-                fill={controlBackground}
-                transform={`rotate(${range * threshold}, ${cx}, ${cy})`}
-            />
+            {threshold !== undefined && (
+                <circle
+                    cx={cx}
+                    cy={mo}
+                    r={mo / 3}
+                    aria-label={`active threshold ${threshold}`}
+                    fill={controlBackground}
+                    transform={`rotate(${range * threshold}, ${cx}, ${cy})`}
+                />
+            )}
             <circle
                 cx={cx}
                 cy={cy}

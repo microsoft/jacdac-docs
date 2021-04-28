@@ -103,7 +103,7 @@ export interface DashboardServiceProps {
     service: JDService
     expanded?: boolean
     // associated configuration services
-    configurations?: JDService[],
+    mixins?: JDService[],
     // all widget services
     services?: JDService[]
     variant?: "icon" | ""
