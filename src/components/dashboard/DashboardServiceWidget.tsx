@@ -102,6 +102,8 @@ const DashboardBitRadio = lazy(() => import("./DashboardBitRadio"))
 export interface DashboardServiceProps {
     service: JDService
     expanded?: boolean
+    // associated configuration services
+    configurations?: JDService[],
     // all widget services
     services?: JDService[]
     variant?: "icon" | ""

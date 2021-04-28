@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core"
 import React, { useCallback, useRef } from "react"
 import { SRV_CTRL, SRV_LOGGER } from "../../../jacdac-ts/src/jdom/constants"
-import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import { groupServices, JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import useChange from "../../jacdac/useChange"
 import DeviceName from "../devices/DeviceName"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
@@ -28,6 +28,7 @@ import useDeviceName from "../devices/useDeviceName"
 import { DashboardDeviceProps } from "./Dashboard"
 import useIntersectionObserver from "../hooks/useIntersectionObserver"
 import { dependencyId } from "../../../jacdac-ts/src/jdom/node"
+import { isConfigurationService } from "../../../jacdac-ts/jacdac-spec/spectool/jdutils"
 
 const ignoredServices = [SRV_CTRL, SRV_LOGGER]
 
@@ -57,6 +58,7 @@ export default function DashboardDevice(
                     !!service.specification
             )
     )
+    const serviceGroups = groupServices(services)
     const specification = useDeviceSpecification(device)
     const theme = useTheme()
     const mobile = useMediaQuery(theme.breakpoints.down(MOBILE_BREAKPOINT))
@@ -64,28 +66,32 @@ export default function DashboardDevice(
     const intersection = useIntersectionObserver(serviceGridRef)
     const visible = !!intersection?.isIntersecting
 
-    const ServiceWidgets = useCallback(() => (
-        <Grid
-            ref={serviceGridRef}
-            component="div"
-            container
-            spacing={2}
-            justify="center"
-            alignItems="flex-end"
-            alignContent="space-between"
-        >
-            {services?.map(service => (
-                <DashboardServiceWidgetItem
-                    key={service.id}
-                    service={service}
-                    expanded={expanded}
-                    services={services}
-                    variant={variant}
-                    visible={visible}
-                />
-            ))}
-        </Grid>
-    ), [dependencyId(services), expanded, variant, visible])
+    const ServiceWidgets = useCallback(
+        () => (
+            <Grid
+                ref={serviceGridRef}
+                component="div"
+                container
+                spacing={2}
+                justify="center"
+                alignItems="flex-end"
+                alignContent="space-between"
+            >
+                {serviceGroups?.map(({ service, configurations }) => (
+                    <DashboardServiceWidgetItem
+                        key={service.id}
+                        service={service}
+                        configurations={configurations}
+                        expanded={expanded}
+                        services={services}
+                        variant={variant}
+                        visible={visible}
+                    />
+                ))}
+            </Grid>
+        ),
+        [dependencyId(services), expanded, variant, visible]
+    )
 
     if (!showHeader)
         return (
