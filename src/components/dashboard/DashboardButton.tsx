@@ -24,11 +24,10 @@ export default function DashboardButton(props: DashboardServiceProps) {
     const downEvent = service.event(ButtonEvent.Down)
     const upEvent = service.event(ButtonEvent.Up)
     // find threshold if any
-    const thresholdRegister = configurations.find(cfg => !!cfg.register(SystemReg.ActiveThreshold))?.register(SystemReg.ActiveThreshold)
-    const [threshold] = useRegisterUnpackedValue(
-        thresholdRegister,
-        { visible }
-    )
+    const thresholdRegister = configurations
+        .find(cfg => !!cfg.register(SystemReg.ActiveThreshold))
+        ?.register(SystemReg.ActiveThreshold)
+    const [threshold] = useRegisterUnpackedValue(thresholdRegister, { visible })
     useEffect(() => downEvent.subscribe(EVENT, () => setPressed(true)), [
         downEvent,
     ])
@@ -83,8 +82,13 @@ function AnalogButton(
     const color = server ? "secondary" : "primary"
     const label = `button pressure ${pressure}`
     const { background, controlBackground, active } = useWidgetTheme(color)
-    const handleDown = () => server?.down()
-    const handleUp = () => server?.up()
+    const [down, setDown] = useState(false)
+    const handleDown = () => {
+        setDown(true)
+    }
+    const handleUp = () => {
+        setDown(false)
+    }
     const buttonProps = useSvgButtonProps<SVGCircleElement>(
         label,
         server && handleDown,
@@ -95,7 +99,7 @@ function AnalogButton(
         if (!server) return false
         const [p] = server.reading.values()
         let keepAnimating = true
-        if (pressed) {
+        if (down) {
             if (p > 1 - ACTIVE_SPEED) {
                 server.reading.setValues([1])
                 keepAnimating = false
@@ -108,7 +112,7 @@ function AnalogButton(
         }
         server.reading.sendGetAsync() // refresh ui
         return keepAnimating
-    }, [pressed])
+    }, [down])
 
     const w = 64
     const mo = pressed ? 3 : 5
