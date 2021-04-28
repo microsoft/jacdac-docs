@@ -63,7 +63,8 @@ const ACTIVE_SPEED = 0.05
 const INACTIVE_SPEED = 0.1
 
 function AnalogButton(props: { pressed: boolean } & DashboardServiceProps) {
-    const { service, pressed, mixins, visible } = props
+    const { service, pressed, visible } = props
+    const { mixins } = service
     const pressureRegister = service.register(ButtonReg.Pressure)
     const [pressure] = useRegisterUnpackedValue<[number]>(pressureRegister, {
         visible,
