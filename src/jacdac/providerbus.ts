@@ -48,7 +48,7 @@ JacdacFlags.peers = args.peers
 // defeat react fast-refresh
 function createBus(): JDBus {
     const worker =
-        typeof window !== "undefined" && new Worker("./jacdac-serviceworker.js")
+        typeof window !== "undefined" && new Worker("/jacdac-serviceworker.js")
     const b = new JDBus(
         [
             Flags.webUSB && worker && createUSBWorkerTransport(worker),
