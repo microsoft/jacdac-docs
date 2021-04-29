@@ -1,5 +1,5 @@
 const maxImageWidth = 800
-const siteUrl = 'https://microsoft.github.io';
+const siteUrl = "https://microsoft.github.io"
 const pathPrefix = "/jacdac-docs"
 
 module.exports = {
@@ -249,7 +249,6 @@ module.exports = {
                     `/devices/**`,
                     `/tools/**`,
                 ],
-                appendScript: require.resolve(`./jacdac-ts/dist/jacdac-serviceworker.js`),
             },
         },
         "gatsby-plugin-robots-txt",
