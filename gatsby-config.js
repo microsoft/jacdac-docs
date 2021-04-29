@@ -249,6 +249,7 @@ module.exports = {
                     `/devices/**`,
                     `/tools/**`,
                 ],
+                appendScript: require.resolve(`./jacdac-ts/dist/jacdac-serviceworker.js`),
             },
         },
         "gatsby-plugin-robots-txt",
