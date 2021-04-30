@@ -1,8 +1,6 @@
 import { JDBus } from "../../jacdac-ts/src/jdom/bus"
-import {
-    createUSBTransport,
-    isWebUSBSupported,
-} from "../../jacdac-ts/src/jdom/transport/usb"
+import { withPrefix } from "gatsby"
+import { isWebUSBSupported } from "../../jacdac-ts/src/jdom/transport/usb"
 import { createUSBWorkerTransport } from "../../jacdac-ts/src/jdom/transport/workertransport"
 import {
     createBluetoothTransport,
@@ -48,7 +46,8 @@ JacdacFlags.peers = args.peers
 // defeat react fast-refresh
 function createBus(): JDBus {
     const worker =
-        typeof window !== "undefined" && new Worker("/jacdac-serviceworker.js")
+        typeof window !== "undefined" &&
+        new Worker(withPrefix("/jacdac-serviceworker.js"))
     const b = new JDBus(
         [
             Flags.webUSB && worker && createUSBWorkerTransport(worker),
