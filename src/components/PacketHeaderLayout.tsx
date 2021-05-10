@@ -9,7 +9,11 @@ import {
     useTheme,
 } from "@material-ui/core"
 import React from "react"
+import { getNumber, NumberFormat } from "../../jacdac-ts/src/jdom/buffer"
 import {
+    CMD_EVENT_MASK,
+    CMD_GET_REG,
+    CMD_SET_REG,
     JD_FRAME_FLAG_ACK_REQUESTED,
     JD_FRAME_FLAG_COMMAND,
     JD_FRAME_FLAG_IDENTIFIER_IS_SERVICE_CLASS,
@@ -21,28 +25,53 @@ import { fromHex, toHex } from "../../jacdac-ts/src/jdom/utils"
 import PaperBox from "./ui/PaperBox"
 import Tooltip from "./ui/Tooltip"
 
+interface SlotProps {
+    offset: number
+    size: number
+    format?: NumberFormat
+    formatHex?: boolean
+    name: string
+    description: string
+    know?: { [index: string]: string | number }
+}
+
+function HeaderMap(props: { header: Uint8Array } & SlotProps) {
+    const { header, offset, size, name } = props
+    const bytes = header.slice(offset, offset + size)
+    return (
+        <Tooltip title={name}>
+            <span>{toHex(bytes)}</span>
+        </Tooltip>
+    )
+}
+
 export default function PacketHeaderLayout(props: {
     packet?: Packet
     data?: string
     showSlots?: boolean
     showFlags?: boolean
+    showCommands?: boolean
 }) {
-    const { packet, data, showSlots, showFlags } = props
+    const { packet, data, showSlots, showFlags, showCommands } = props
     const theme = useTheme()
     const pkt = packet || Packet.fromBinary(fromHex(data))
     const { header } = pkt
     const frameFlags = header[3]
+    const serviceCommand = pkt.serviceCommand
 
-    const slots = [
+    const slots: SlotProps[] = [
         {
             offset: 0,
             size: 2,
+            format: NumberFormat.UInt16LE,
+            formatHex: true,
             name: "frame_crc",
             description: "CRC",
         },
         {
             offset: 2,
             size: 1,
+            format: NumberFormat.UInt8LE,
             name: "frame_size",
             description: "Size of the data field in bytes.",
         },
@@ -55,6 +84,7 @@ export default function PacketHeaderLayout(props: {
         {
             offset: 4,
             size: 8,
+            formatHex: true,
             name: "device_identifiter",
             description: "64-bit device identifier",
         },
@@ -62,6 +92,7 @@ export default function PacketHeaderLayout(props: {
         {
             offset: 12,
             size: 1,
+            format: NumberFormat.UInt8LE,
             name: "packet_size",
             description:
                 "The size of the payload field. Maximum size is 236 bytes.",
@@ -69,6 +100,7 @@ export default function PacketHeaderLayout(props: {
         {
             offset: 13,
             size: 1,
+            format: NumberFormat.UInt8LE,
             name: "service_number",
             know: {
                 [JD_SERVICE_INDEX_PIPE.toString(16)]: "pipe",
@@ -80,6 +112,8 @@ export default function PacketHeaderLayout(props: {
         {
             offset: 14,
             size: 2,
+            format: NumberFormat.UInt16LE,
+            formatHex: true,
             name: "service_command",
             description: "Identifier for the command",
         },
@@ -107,7 +141,28 @@ export default function PacketHeaderLayout(props: {
             description:
                 "The packet is a multi command. The service class is the first 4 bytes of the device id.",
         },
-    ].filter(f => frameFlags & f.flag)
+    ].filter(f => (frameFlags & f.flag) === f.flag)
+
+    const commandFlags = [
+        {
+            flag: CMD_GET_REG,
+            active: (serviceCommand & CMD_GET_REG) === CMD_GET_REG,
+            name: "CMD_GET_REG",
+            description: "Get register value",
+        },
+        {
+            flag: CMD_SET_REG,
+            active: (serviceCommand & CMD_SET_REG) === CMD_SET_REG,
+            name: "CMD_SET_REG",
+            description: "Set register value",
+        },
+        {
+            flag: CMD_EVENT_MASK,
+            active: (serviceCommand & CMD_EVENT_MASK) !== 0,
+            name: "CMD_EVENT_MASK",
+            description: "Command is an event",
+        },
+    ].filter(f => f.active)
 
     return (
         <>
@@ -120,16 +175,7 @@ export default function PacketHeaderLayout(props: {
                                 key={slot.name}
                                 mr={theme.spacing(0.1)}
                             >
-                                <Tooltip title={slot.name}>
-                                    <span>
-                                        {toHex(
-                                            header.slice(
-                                                slot.offset,
-                                                slot.offset + slot.size
-                                            )
-                                        )}
-                                    </span>
-                                </Tooltip>
+                                <HeaderMap header={header} {...slot} />
                             </Box>
                         ))}
                     </code>
@@ -141,6 +187,7 @@ export default function PacketHeaderLayout(props: {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>Bytes</TableCell>
                                     <TableCell>Value</TableCell>
                                     <TableCell>Offset</TableCell>
                                     <TableCell>Size</TableCell>
@@ -154,11 +201,20 @@ export default function PacketHeaderLayout(props: {
                                         slot.offset,
                                         slot.offset + slot.size
                                     )
+                                    const value =
+                                        slot.format &&
+                                        getNumber(buf, slot.format, 0)
                                     const known = slot.know?.[toHex(buf)]
                                     return (
                                         <TableRow key={slot.name}>
                                             <TableCell>
                                                 <code>{toHex(buf)}</code>
+                                            </TableCell>
+                                            <TableCell>
+                                                {value !== undefined &&
+                                                slot.formatHex
+                                                    ? `0x${value.toString(16)}`
+                                                    : value}
                                                 {known && (
                                                     <code>({known})</code>
                                                 )}
@@ -177,11 +233,54 @@ export default function PacketHeaderLayout(props: {
                     </TableContainer>
                 </PaperBox>
             )}
+            {showCommands && !!commandFlags.length && (
+                <PaperBox key="commandflags">
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell colSpan={3}>
+                                        Service command
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Flag</TableCell>
+                                    <TableCell>Name</TableCell>
+                                    <TableCell>Description</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {commandFlags.map(flag => (
+                                    <TableRow key={flag.name}>
+                                        <TableCell>
+                                            <code>
+                                                {(
+                                                    "0000" +
+                                                    flag.flag.toString(16)
+                                                ).slice(-4)}
+                                            </code>
+                                        </TableCell>
+                                        <TableCell>{flag.name}</TableCell>
+                                        <TableCell>
+                                            {flag.description}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </PaperBox>
+            )}
             {showFlags && !!flags.length && (
                 <PaperBox key="flags">
                     <TableContainer>
                         <Table size="small">
                             <TableHead>
+                                <TableRow>
+                                    <TableCell colSpan={3}>
+                                        Frame flags
+                                    </TableCell>
+                                </TableRow>
                                 <TableRow>
                                     <TableCell>Flag</TableCell>
                                     <TableCell>Name</TableCell>

@@ -1,12 +1,6 @@
 import React, { lazy, useContext } from "react"
 import clsx from "clsx"
-import {
-    makeStyles,
-    Container,
-    Hidden,
-    Box,
-    useMediaQuery,
-} from "@material-ui/core"
+import { makeStyles, Container, Hidden, Box } from "@material-ui/core"
 // tslint:disable-next-line: no-submodule-imports
 // tslint:disable-next-line: no-submodule-imports
 import AppBar from "@material-ui/core/AppBar"
@@ -19,32 +13,32 @@ import MoreIcon from "@material-ui/icons/MoreVert"
 // tslint:disable-next-line: no-import-side-effect
 import "./layout.css"
 import SEO from "./seo"
-import FlashButton from "./FlashButton"
 // tslint:disable-next-line: no-submodule-imports
 import {
     createMuiTheme,
     responsiveFontSizes,
     createStyles,
-    useTheme,
     ThemeOptions,
 } from "@material-ui/core/styles"
 import AppContext, { DrawerType } from "./AppContext"
-import useFirmwareBlobs from "./firmware/useFirmwareBlobs"
-import { MDXProvider } from "@mdx-js/react"
 import DarkModeProvider from "./ui/DarkModeProvider"
 import DarkModeContext from "./ui/DarkModeContext"
 import Alert from "./ui/Alert"
-import GitHubButton from "./GitHubButton"
-import useMdxComponents from "./useMdxComponents"
+import GitHubButton from "./buttons/GitHubButton"
 import Footer from "./ui/Footer"
 import DrawerToolsButtonGroup from "./DrawerToolsButtonGroup"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 import Flags from "../../jacdac-ts/src/jdom/flags"
-import ThemedLayout from "./ui/ThemedLayout"
 import OpenDashboardButton from "./buttons/OpenDashboardButton"
 import PacketStats from "./PacketStats"
-
+import { WindowLocation } from "@reach/router"
 import Suspense from "./ui/Suspense"
+import ThemedMdxLayout from "./ui/ThemedMdxLayout"
+import { Link } from "gatsby-theme-material-ui"
+import Breadcrumbs from "./ui/Breadcrumbs"
+import ForumIcon from "@material-ui/icons/Forum"
+import useMediaQueries from "./hooks/useMediaQueries"
+
 const WebDiagnostics = lazy(() => import("./WebDiagnostics"))
 const AppDrawer = lazy(() => import("./AppDrawer"))
 const ToolsDrawer = lazy(() => import("./ToolsDrawer"))
@@ -172,6 +166,7 @@ export interface LayoutProps {
         pageContext?: any
         path?: string
         uri?: string
+        location?: WindowLocation
     }
 }
 
@@ -191,7 +186,15 @@ function LayoutWithDarkMode(props: LayoutProps) {
     const { fullScreen } = frontmatter || {
         fullScreen: makeCodeTool,
     }
-    const { darkMode, darkModeMounted } = useContext(DarkModeContext)
+    const { darkModeMounted } = useContext(DarkModeContext)
+
+    if (!darkModeMounted) return <div />
+    else if (fullScreen) return element
+    else return <LayoutWithMdx {...props} />
+}
+
+function LayoutWithMdx(props: LayoutProps) {
+    const { darkMode } = useContext(DarkModeContext)
     const isDark = darkMode === "dark"
     const themeDef: ThemeOptions = {
         palette: {
@@ -207,19 +210,11 @@ function LayoutWithDarkMode(props: LayoutProps) {
     }
     const rawTheme = createMuiTheme(themeDef)
     const theme = responsiveFontSizes(rawTheme)
-    const mdxComponents = useMdxComponents()
-
-    if (!darkModeMounted) return <div />
-
-    if (fullScreen)
-        return <MDXProvider components={mdxComponents}>{element}</MDXProvider>
 
     return (
-        <ThemedLayout theme={theme}>
-            <MDXProvider components={mdxComponents}>
-                <LayoutWithContext {...props} />
-            </MDXProvider>
-        </ThemedLayout>
+        <ThemedMdxLayout theme={theme}>
+            <LayoutWithContext {...props} />
+        </ThemedMdxLayout>
     )
 }
 
@@ -263,7 +258,9 @@ function MainAppBar(props: LayoutProps) {
                     />
                     <Hidden implementation="css" xsDown={true}>
                         <Typography component="h1" variant="h6">
-                            Jacdac{" "}
+                            <Link style={{ color: "white" }} to="/">
+                                Jacdac
+                            </Link>{" "}
                             {pageTitle &&
                                 pageTitle !== "Jacdac" &&
                                 `/ ${pageTitle}`}
@@ -272,18 +269,25 @@ function MainAppBar(props: LayoutProps) {
                     <div className={classes.grow} />
                     <PacketStats />
                     <OpenDashboardButton className={clsx(classes.menuButton)} />
+                    <IconButtonWithTooltip
+                        className={clsx(
+                            classes.menuButton,
+                            drawerOpen && classes.hideMobile
+                        )}
+                        aria-label="Discussions"
+                        title="Discussions"
+                        edge="start"
+                        color="inherit"
+                        to="https://github.com/microsoft/jacdac/discussions"
+                    >
+                        <ForumIcon />
+                    </IconButtonWithTooltip>
                     <GitHubButton
                         className={clsx(
                             classes.menuButton,
                             drawerOpen && classes.hideMobile
                         )}
                         repo={"/github"}
-                    />
-                    <FlashButton
-                        className={clsx(
-                            classes.menuButton,
-                            drawerOpen && classes.hideMobile
-                        )}
                     />
                     <IconButtonWithTooltip
                         className={clsx(
@@ -306,7 +310,7 @@ function MainAppBar(props: LayoutProps) {
 
 function LayoutWithContext(props: LayoutProps) {
     const { element, props: pageProps } = props
-    const { pageContext, path } = pageProps
+    const { pageContext, path, location } = pageProps
     const { frontmatter } = pageContext || {}
     const makeCodeTool = /tools\/makecode-/.test(path)
     const {
@@ -321,37 +325,47 @@ function LayoutWithContext(props: LayoutProps) {
 
     const { darkMode } = useContext(DarkModeContext)
     const { drawerType, toolsMenu } = useContext(AppContext)
-    useFirmwareBlobs()
     const drawerOpen = drawerType !== DrawerType.None
-    const theme = useTheme()
-    const medium = useMediaQuery(theme.breakpoints.down(MEDIUM_BREAKPOINT))
+    const { medium } = useMediaQueries()
     const container = !medium && !/^\/(tools\/|dashboard)/.test(path) && path !== "/"
-    console.log({ path, container, medium })
 
     const mainClasses = clsx(classes.content, {
         [classes.container]: container,
         [classes.contentShift]: drawerOpen,
         [classes.toolsContentShift]: toolsMenu,
     })
+
+    const InnerMainSection = () => (
+        <>
+            {!hideUnderConstruction && (
+                <Alert closeable={true} severity="warning">
+                    UNDER CONSTRUCTION - We are still working and changing the
+                    Jacdac specification. Do not build devices using Jacdac.
+                </Alert>
+            )}
+            {Flags.diagnostics && (
+                <Suspense>
+                    <WebDiagnostics />
+                </Suspense>
+            )}
+            {container && location && <Breadcrumbs location={location} />}
+            <Typography className={"markdown"} component="span">
+                {element}
+            </Typography>
+        </>
+    )
+
     const MainSection = () => (
         <>
             <main className={classes.mainContent}>
                 <div className={classes.drawerHeader} />
-                {!hideUnderConstruction && (
-                    <Alert closeable={true} severity="warning">
-                        UNDER CONSTRUCTION - We are still working and changing
-                        the Jacdac specification. Do not build devices using
-                        Jacdac.
-                    </Alert>
+                {container ? (
+                    <Container>
+                        <InnerMainSection />
+                    </Container>
+                ) : (
+                    <InnerMainSection />
                 )}
-                {Flags.diagnostics && (
-                    <Suspense>
-                        <WebDiagnostics />
-                    </Suspense>
-                )}
-                <Typography className={"markdown"} component="span">
-                    {container ? <Container>{element}</Container> : element}
-                </Typography>
             </main>
             <Footer />
         </>

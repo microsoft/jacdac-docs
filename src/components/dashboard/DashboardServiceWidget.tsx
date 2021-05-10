@@ -7,8 +7,6 @@ import React, {
 } from "react"
 import {
     SRV_ACCELEROMETER,
-    SRV_ANALOG_BUTTON,
-    SRV_ARCADE_GAMEPAD,
     SRV_BUTTON,
     SRV_BUZZER,
     SRV_CHARACTER_SCREEN,
@@ -71,7 +69,6 @@ const DashboardCharacterScreen = lazy(
 )
 const DashboardRainGauge = lazy(() => import("./DashboardRainGauge"))
 const DashboardLEDMatrix = lazy(() => import("./DashboardLEDMatrix"))
-const DashboardArcadeGamepad = lazy(() => import("./DashboardArcadeGamepad"))
 const DashboardWindDirection = lazy(() => import("./DashboardWindDirection"))
 const DashboardMatrixKeypad = lazy(() => import("./DashboardMatrixKeypad"))
 const DashboardReflectedLight = lazy(() => import("./DashboardReflectedLight"))
@@ -90,7 +87,6 @@ const DashboardMotion = lazy(() => import("./DashboardMotion"))
 const DashboardWaterLevel = lazy(() => import("./DashboardWaterLevel"))
 const DashboardColor = lazy(() => import("./DashboardColor"))
 const DashboardSoundPlayer = lazy(() => import("./DashboardSoundPlayer"))
-const DashboardAnalogButton = lazy(() => import("./DashboardAnalogButton"))
 const DashboardSoundLevel = lazy(() => import("./DashboardSoundLevel"))
 const DashboardSoundSpectrum = lazy(() => import("./DashboardSoundSpectrum"))
 const DashboardRandomNumberGenerator = lazy(
@@ -166,10 +162,6 @@ const serviceViews: {
         component: DashboardLEDMatrix,
         weight: () => 3,
     },
-    [SRV_ARCADE_GAMEPAD]: {
-        component: DashboardArcadeGamepad,
-        weight: () => 3,
-    },
     [SRV_WIND_DIRECTION]: {
         component: DashboardWindDirection,
     },
@@ -196,6 +188,7 @@ const serviceViews: {
     },
     [SRV_JOYSTICK]: {
         component: DashboardJoystick,
+        weight: () => 3,
     },
     [SRV_SEVEN_SEGMENT_DISPLAY]: {
         component: DashboardSevenSegmentDisplay,
@@ -213,9 +206,6 @@ const serviceViews: {
     [SRV_SOUND_PLAYER]: {
         component: DashboardSoundPlayer,
         weight: () => 2,
-    },
-    [SRV_ANALOG_BUTTON]: {
-        component: DashboardAnalogButton,
     },
     [SRV_SOUND_LEVEL]: {
         component: DashboardSoundLevel,
@@ -345,6 +335,10 @@ function DefaultWidget(props: DashboardServiceProps) {
             visible={visible}
         />
     )
+}
+
+export function hasServiceView(serviceClass: number) {
+    return !!serviceViews[serviceClass]
 }
 
 export default function DashboardServiceWidget(

@@ -3,7 +3,12 @@ const fs = require(`fs-extra`)
 const sharp = require(`sharp`)
 const { slash } = require(`gatsby-core-utils`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
-const { serviceSpecifications, identifierToUrlPath, serviceSpecificationToDTDL, DTMIToRoute } = require(`./jacdac-ts/dist/jacdac.cjs`)
+const {
+    serviceSpecifications,
+    identifierToUrlPath,
+    serviceSpecificationToDTDL,
+    DTMIToRoute,
+} = require(`./jacdac-ts/dist/jacdac.cjs`)
 const { IgnorePlugin } = require("webpack")
 const AVATAR_SIZE = 64
 
@@ -135,18 +140,15 @@ async function createDevicePages(graphql, actions, reporter) {
         // copy device image to static
         const imgpath = identifierToUrlPath(node.id) + ".jpg"
         const imgsrc = `./jacdac-ts/jacdac-spec/devices/${imgpath}`
-        await fs.copy(
-            imgsrc,
-            `./public/images/devices/${imgpath}`
-        );
+        await fs.copy(imgsrc, `./public/images/devices/${imgpath}`)
         await sharp(imgsrc)
             .resize(AVATAR_SIZE, AVATAR_SIZE, { fit: sharp.fit.cover })
-            .toFormat('jpeg')
+            .toFormat("jpeg")
             .toFile(
                 `./public/images/devices/${
                     identifierToUrlPath(node.id) + ".avatar.jpg"
                 }`
-            );
+            )
     }
 
     const snakify = name => {
@@ -261,6 +263,11 @@ async function generateServicesJSON() {
     }
 }
 
+async function createWorkers() {
+    // copy jacdac-serviceworker.js to static
+    await fs.copy(`./jacdac-ts/dist/jacdac-serviceworker.js`, `./public/jacdac-serviceworker.js`)
+}
+
 // Implement the Gatsby API “createPages”. This is
 // called after the Gatsby bootstrap is finished so you have
 // access to any information necessary to programmatically
@@ -271,6 +278,7 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
     await createDevicePages(graphql, actions, reporter)
     // generate JSON for Services/DTMI models
     await generateServicesJSON()
+    await createWorkers()
 }
 
 exports.onCreateNode = ({ node, actions, getNode }) => {
@@ -319,4 +327,29 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     config.stats = "verbose"
     config.performance.hints = "warning"
     actions.replaceWebpackConfig(config)
+}
+
+// generate a full list of pages for compliance
+exports.onPostBuild = async ({ graphql }) => {
+    const { data } = await graphql(`
+        {
+            pages: allSitePage {
+                nodes {
+                    path
+                }
+            }
+        }
+    `)
+
+    return fs.writeFile(
+        path.resolve(__dirname, ".cache/all-pages.csv"),
+        data.pages.nodes
+            .map(
+                node =>
+                    `${
+                        "https://microsoft.github.io/jacdac-docs" + node.path
+                    }, ${node.path.slice(1)}`
+            )
+            .join("\n")
+    )
 }

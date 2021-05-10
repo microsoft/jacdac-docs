@@ -14,7 +14,6 @@ import { JDService } from "../../jacdac-ts/src/jdom/service"
 import { JDRegister } from "../../jacdac-ts/src/jdom/register"
 import useChange from "../jacdac/useChange"
 import { isRegister, isEvent } from "../../jacdac-ts/src/jdom/spec"
-import { useMediaQuery, useTheme } from "@material-ui/core"
 import {
     useRegisterHumanValue,
     useRegisterUnpackedValue,
@@ -28,6 +27,11 @@ import {
     SRV_LOGGER,
     GET_ATTEMPT,
     BaseReg,
+    SERVICE_NODE_NAME,
+    REGISTER_NODE_NAME,
+    EVENT_NODE_NAME,
+    SERVICE_MIXIN_NODE_NAME,
+    ControlAnnounceFlags,
 } from "../../jacdac-ts/src/jdom/constants"
 import useEventRaised from "../jacdac/useEventRaised"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -43,8 +47,8 @@ import {
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import LaunchIcon from "@material-ui/icons/Launch"
 import AppContext, { DrawerType } from "./AppContext"
-import { MOBILE_BREAKPOINT } from "./layout"
 import useDevices from "./hooks/useDevices"
+import useMediaQueries from "./hooks/useMediaQueries"
 
 function DeviceTreeItem(
     props: { device: JDDevice } & StyledTreeViewItemProps & JDomTreeViewProps
@@ -63,10 +67,12 @@ function DeviceTreeItem(
     const kind = physical ? "device" : "virtualdevice"
     const lost = useEventRaised([LOST, FOUND], device, dev => !!dev?.lost)
     const services = useChange(device, () =>
-        device.services().filter(srv => !serviceFilter || serviceFilter(srv))
+        device
+            .services({ mixins: false })
+            .filter(srv => !serviceFilter || serviceFilter(srv))
     )
-    const theme = useTheme()
-    const showActions = useMediaQuery(theme.breakpoints.up("sm"))
+    const { mobile } = useMediaQueries()
+    const showActions = !mobile
     const dropped = useChange(device.qos, qos => qos.dropped)
 
     const serviceNames = ellipseJoin(
@@ -83,9 +89,9 @@ function DeviceTreeItem(
     const alert = lost
         ? `lost device...`
         : dropped > 2
-            ? `${dropped} pkt lost`
-            : undefined
-    const labelInfo = [!!dropped && `${dropped} lost`, serviceNames]
+        ? `${dropped} pkt lost`
+        : undefined
+    const labelInfo = [dropped > 1 && `${dropped} lost`, serviceNames]
         .filter(r => !!r)
         .join(", ")
 
@@ -110,6 +116,7 @@ function DeviceTreeItem(
                 )
             }
         >
+            <AnnounceFlagsTreeItem device={device} />
             {services?.map(service => (
                 <ServiceTreeItem
                     key={service.id}
@@ -121,6 +128,34 @@ function DeviceTreeItem(
                 />
             ))}
         </StyledTreeItem>
+    )
+}
+
+function AnnounceFlagsTreeItem(props: { device: JDDevice }) {
+    const { device } = props
+    const { announceFlags, id } = device
+
+    const text = [
+        announceFlags & ControlAnnounceFlags.IsClient && "client",
+        announceFlags & ControlAnnounceFlags.SupportsACK && "acks",
+        announceFlags & ControlAnnounceFlags.SupportsBroadcast && "broadcast",
+        announceFlags & ControlAnnounceFlags.SupportsFrames && "frames",
+        (announceFlags & ControlAnnounceFlags.StatusLightRgbFade) ===
+            ControlAnnounceFlags.StatusLightMono && "mono status LED",
+        (announceFlags & ControlAnnounceFlags.StatusLightRgbFade) ===
+            ControlAnnounceFlags.StatusLightRgbNoFade &&
+            "rgb no fade status LED",
+        (announceFlags & ControlAnnounceFlags.StatusLightRgbFade) ===
+            ControlAnnounceFlags.StatusLightRgbFade && "rgb fade status LED",
+    ]
+        .filter(f => !!f)
+        .join(", ")
+    return (
+        <StyledTreeItem
+            nodeId={`${id}:flags`}
+            labelText={text}
+            labelInfo={`0x${announceFlags.toString(16)}`}
+        ></StyledTreeItem>
     )
 }
 
@@ -136,7 +171,7 @@ function ServiceTreeItem(
         eventFilter,
         ...other
     } = props
-    const specification = service.specification
+    const { specification, mixins, isMixin } = service
     const showSpecificationAction = false
     const id = service.id
     const open = checked?.indexOf(id) > -1
@@ -157,8 +192,7 @@ function ServiceTreeItem(
     const reading = useRegisterHumanValue(readingRegister)
 
     const name = service.name + (instanceName ? ` ${instanceName}` : "")
-    const theme = useTheme()
-    const mobile = useMediaQuery(theme.breakpoints.down(MOBILE_BREAKPOINT))
+    const { mobile } = useMediaQueries()
     const { setDrawerType } = useContext(AppContext)
 
     const handleSpecClick = () => {
@@ -171,7 +205,7 @@ function ServiceTreeItem(
             nodeId={id}
             labelText={name}
             labelInfo={reading}
-            kind={"service"}
+            kind={isMixin ? SERVICE_MIXIN_NODE_NAME : SERVICE_NODE_NAME}
             checked={open}
             setChecked={
                 checkboxes?.indexOf("service") > -1 &&
@@ -211,6 +245,16 @@ function ServiceTreeItem(
                     {...other}
                 />
             ))}
+            {mixins?.map(mixin => (
+                <ServiceTreeItem
+                    key={mixin.id}
+                    service={mixin}
+                    checked={checked}
+                    setChecked={setChecked}
+                    checkboxes={checkboxes}
+                    {...other}
+                />
+            ))}
         </StyledTreeItem>
     )
 }
@@ -224,10 +268,11 @@ function RegisterTreeItem(
     const [attempts, setAttempts] = useState(register.lastGetAttempts)
     const optional = !!specification?.optional
     const failedGet = attempts > 2
-    const labelText = `${specification?.name || register.id}${optional ? "?" : ""
-        }`
+    const labelText = `${specification?.name || register.id}${
+        optional ? "?" : ""
+    }`
     const humanValue = useRegisterHumanValue(register, { visible: true })
-    const handleClick = () => register.sendGetAsync();
+    const handleClick = () => register.sendGetAsync()
 
     useEffect(
         () =>
@@ -249,7 +294,7 @@ function RegisterTreeItem(
             nodeId={id}
             labelText={labelText}
             labelInfo={humanValue || (attempts > 0 && `#${attempts}`) || ""}
-            kind={specification?.kind || "register"}
+            kind={specification?.kind || REGISTER_NODE_NAME}
             alert={failedGet && !optional && humanValue === undefined && `???`}
             checked={checked?.indexOf(id) > -1}
             onClick={handleClick}
@@ -277,7 +322,7 @@ function EventTreeItem(
             nodeId={id}
             labelText={specification?.name || event.id}
             labelInfo={(count || "") + ""}
-            kind="event"
+            kind={EVENT_NODE_NAME}
             checked={checked?.indexOf(id) > -1}
             setChecked={
                 checkboxes?.indexOf("event") > -1 && setChecked && handleChecked

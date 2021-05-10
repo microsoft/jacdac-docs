@@ -5,11 +5,14 @@ import {
     Grid,
     Paper,
     Typography,
-    useMediaQuery,
-    useTheme,
 } from "@material-ui/core"
 import React, { useCallback, useRef } from "react"
-import { SRV_CTRL, SRV_LOGGER } from "../../../jacdac-ts/src/jdom/constants"
+import {
+    SRV_CTRL,
+    SRV_LOGGER,
+    SRV_PROTO_TEST,
+    SRV_SETTINGS,
+} from "../../../jacdac-ts/src/jdom/constants"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import useChange from "../../jacdac/useChange"
 import DeviceName from "../devices/DeviceName"
@@ -23,13 +26,13 @@ import DeviceAvatar from "../devices/DeviceAvatar"
 import DashboardServiceWidgetItem from "./DashboardServiceWidgetItem"
 import DeviceActions from "../DeviceActions"
 import DashboardServiceDetails from "./DashboardServiceDetails"
-import { MOBILE_BREAKPOINT } from "../layout"
 import useDeviceName from "../devices/useDeviceName"
 import { DashboardDeviceProps } from "./Dashboard"
 import useIntersectionObserver from "../hooks/useIntersectionObserver"
 import { dependencyId } from "../../../jacdac-ts/src/jdom/node"
+import useMediaQueries from "../hooks/useMediaQueries"
 
-const ignoredServices = [SRV_CTRL, SRV_LOGGER]
+const ignoredServices = [SRV_CTRL, SRV_LOGGER, SRV_SETTINGS, SRV_PROTO_TEST]
 
 export default function DashboardDevice(
     props: {
@@ -50,42 +53,44 @@ export default function DashboardDevice(
     const name = useDeviceName(device)
     const services = useChange(device, () =>
         device
-            .services()
+            .services({ specification: true })
             .filter(
-                service =>
-                    ignoredServices.indexOf(service.serviceClass) < 0 &&
-                    !!service.specification
+                service => ignoredServices.indexOf(service.serviceClass) < 0
             )
     )
     const specification = useDeviceSpecification(device)
-    const theme = useTheme()
-    const mobile = useMediaQuery(theme.breakpoints.down(MOBILE_BREAKPOINT))
+    const { mobile } = useMediaQueries()
     const serviceGridRef = useRef<HTMLDivElement>()
     const intersection = useIntersectionObserver(serviceGridRef)
     const visible = !!intersection?.isIntersecting
 
-    const ServiceWidgets = useCallback(() => (
-        <Grid
-            ref={serviceGridRef}
-            component="div"
-            container
-            spacing={2}
-            justify="center"
-            alignItems="flex-end"
-            alignContent="space-between"
-        >
-            {services?.map(service => (
-                <DashboardServiceWidgetItem
-                    key={service.id}
-                    service={service}
-                    expanded={expanded}
-                    services={services}
-                    variant={variant}
-                    visible={visible}
-                />
-            ))}
-        </Grid>
-    ), [dependencyId(services), expanded, variant, visible])
+    const ServiceWidgets = useCallback(
+        () => (
+            <Grid
+                ref={serviceGridRef}
+                component="div"
+                container
+                spacing={2}
+                justify="center"
+                alignItems="flex-end"
+                alignContent="space-between"
+            >
+                {services
+                    ?.filter(srv => expanded || !srv.isMixin)
+                    ?.map(service => (
+                        <DashboardServiceWidgetItem
+                            key={service.id}
+                            service={service}
+                            expanded={expanded}
+                            services={services}
+                            variant={variant}
+                            visible={visible}
+                        />
+                    ))}
+            </Grid>
+        ),
+        [dependencyId(services), expanded, variant, visible]
+    )
 
     if (!showHeader)
         return (
@@ -103,8 +108,9 @@ export default function DashboardDevice(
                     <DeviceActions
                         device={device}
                         showStop={expanded}
-                        hideIdentity={true}
+                        hideIdentity={!expanded}
                         showReset={expanded && !mobile}
+                        showSettings={expanded && !mobile}
                     >
                         {toggleExpanded && (
                             <IconButtonWithTooltip
@@ -144,7 +150,10 @@ export default function DashboardDevice(
                             <DashboardServiceDetails
                                 key={"details" + service.serviceIndex}
                                 service={service}
+                                services={services}
                                 expanded={expanded}
+                                variant={variant}
+                                visible={visible}
                             />
                         ))}
                     </Grid>

@@ -1,8 +1,6 @@
 # Jacdac Documentation
 
-**Jacdac** is a bus-based plug-and-play hardware/software stack 
-for **microcontrollers** and their peripherals (sensors/actuators), 
-with applications to rapid prototyping, making, and physical computing. 
+**Jacdac** is a bus-based plug-and-play hardware and software stack for microcontrollers and their peripherals such as sensors and actuators. Jacdac is primarily designed for “modular electronics” scenarios that support rapid prototyping, creative exploration, making and learning through physical computing. Jacdac is designed to be cheap, flexible and extensible.
 
 This repository contains sources of [Jacdac](https://aka.ms/jacdac).
 
@@ -91,22 +89,6 @@ If the build fails after pulling, try
 yarn clean
 ```
 
-### Updating jacdac.github.io
-
-jacdac.github.io is the stable release of the jacdac web site. To integrate the changes,
-pull the changes in ``jacdac-docs/main`` into ``jacdac.github.io/main``.
-
-* create a local clone of ``jacdac.github.io``
-```
-git clone https://github.com/jacdac/jacdac.github.io
-cd jacdac.github.io
-git remote add jadcac-docs https://github.com/microsoft/jacdac-docs
-```
-
-* pull changes from jacdac-docs into jacdac.github.io
-```
-sh update.sh
-```
 ### Jacdac + MakeCode
 
 ### Local build
