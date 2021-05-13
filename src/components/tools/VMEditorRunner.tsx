@@ -1,15 +1,18 @@
-import { useContext, useMemo } from "react"
+import { useMemo, useContext } from "react"
 import { parseITTTMarkdownToJSON } from "../../../jacdac-ts/src/vm/markdown"
 import useLocalStorage from "../useLocalStorage"
-import AppContext from "../AppContext"
 import HighlightTextField from "../ui/HighlightTextField"
 import { Button, Grid } from "@material-ui/core"
 import GridHeader from "../ui/GridHeader"
+import VMRunner from "../vm/VMRunner"
+import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
+import useChange from "../../jacdac/useChange"
 
 const VM_MARKDOWN_SOURCE_STORAGE_KEY = "jacdac:vmeditorsource:markdown"
 
 export default function VMEditorRunner() {
-    const { setError } = useContext(AppContext)
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { roleManager } = useChange(bus)
     const [source, setSource] = useLocalStorage(
         VM_MARKDOWN_SOURCE_STORAGE_KEY,
         `# VM Handler program\n\n`
@@ -31,9 +34,12 @@ export default function VMEditorRunner() {
                 </Grid>
             </Grid>
             <GridHeader title="Preview" />
-            {json && (
+            {json && roleManager (
                 <Grid item xs={12} xl={7}>
-
+                    <VMRunner
+                        json={json}
+                        roleManager={roleManager}
+                    />
                 </Grid>
             )}
         </Grid>
