@@ -7,7 +7,7 @@ import GridHeader from "../ui/GridHeader"
 import Alert from "../ui/Alert"
 import VMRunner from "../vm/VMRunner"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import useChange from "../../jacdac/useChange"
+import DashBoard from "../dashboard/Dashboard"
 
 const VM_MARKDOWN_SOURCE_STORAGE_KEY = "jacdac:vmeditorsource:markdown"
 
@@ -48,6 +48,7 @@ export default function VMEditorRunner() {
                     />
                 </Grid>
             )}
+            <DashBoard/>
         </Grid>
     )
 }
