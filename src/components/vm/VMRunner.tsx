@@ -26,25 +26,21 @@ export default function VMRunner(props: {
     const handleRun = () => testRunner.start()
     const handleCancel = () => testRunner.cancel()
 
-    // TODO: some GUI to show status of each handler
     if (!testRunner) return <LoadingProgress />
 
     return (
         <Grid container spacing={2}>
             <Grid item xs={3}>
             <Button
-                    variant={
-                        status === VMStatus.Completed
-                            ? "contained"
-                            : "outlined"
-                    }
+                    variant="outlined"
+                    color={status !== VMStatus.Ready ? "primary" : "default"}
                     onClick={handleRun}
                 >
                     Run
                 </Button>
-                <Button variant="outlined" onClick={handleCancel}>
+            <Button variant="outlined" onClick={handleCancel}>
                     Cancel
-                </Button>
+            </Button>
             </Grid>
         </Grid>
     )
