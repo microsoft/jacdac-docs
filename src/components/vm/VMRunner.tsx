@@ -25,8 +25,8 @@ export default function VMRunner(props: {
         [roleManager, json]
     )
     const testRunner = useServiceClient(roleManager, factory)
-    const status = useChange(testRunner, t => t.status)
-    const handleRun = () => testRunner.run()
+    const status = useChange(testRunner, t => t?.status)
+    const handleRun = () => testRunner.start()
     const handleCancel = () => testRunner.cancel()
 
     // TODO: some GUI to show status of each handler

@@ -36,7 +36,7 @@ export default function VMEditorRunner() {
             </Grid>
             {json && roleManager === undefined && (
                 <Alert severity="warning">
-                    Cannot run VM without a RoleManager present.
+                    Cannot run VM without a RoleManager present on the Jacdac bus.
                 </Alert>
             )
             }
