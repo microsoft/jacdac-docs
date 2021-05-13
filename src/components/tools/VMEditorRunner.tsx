@@ -1,9 +1,10 @@
-import { useMemo, useContext } from "react"
+import React, { useMemo, useContext } from "react"
 import { parseITTTMarkdownToJSON } from "../../../jacdac-ts/src/vm/markdown"
 import useLocalStorage from "../useLocalStorage"
 import HighlightTextField from "../ui/HighlightTextField"
-import { Button, Grid } from "@material-ui/core"
+import { Grid } from "@material-ui/core"
 import GridHeader from "../ui/GridHeader"
+import Alert from "../ui/Alert"
 import VMRunner from "../vm/VMRunner"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import useChange from "../../jacdac/useChange"
@@ -12,7 +13,7 @@ const VM_MARKDOWN_SOURCE_STORAGE_KEY = "jacdac:vmeditorsource:markdown"
 
 export default function VMEditorRunner() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const { roleManager } = useChange(bus)
+    const roleManager = useChange(bus, b => b.roleManager)
     const [source, setSource] = useLocalStorage(
         VM_MARKDOWN_SOURCE_STORAGE_KEY,
         `# VM Handler program\n\n`
@@ -33,12 +34,18 @@ export default function VMEditorRunner() {
                     />
                 </Grid>
             </Grid>
+            {json && roleManager === undefined && (
+                <Alert severity="warning">
+                    Cannot run VM without a RoleManager present.
+                </Alert>
+            )
+            }
             <GridHeader title="Preview" />
-            {json && roleManager (
+            {json && roleManager && (
                 <Grid item xs={12} xl={7}>
                     <VMRunner
                         json={json}
-                        roleManager={roleManager}
+                        roleManager={roleManager.service}
                     />
                 </Grid>
             )}
