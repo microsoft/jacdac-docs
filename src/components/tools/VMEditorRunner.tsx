@@ -13,7 +13,6 @@ const VM_MARKDOWN_SOURCE_STORAGE_KEY = "jacdac:vmeditorsource:markdown"
 
 export default function VMEditorRunner() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const roleManager = useChange(bus, b => b.roleManager)
     const [source, setSource] = useLocalStorage(
         VM_MARKDOWN_SOURCE_STORAGE_KEY,
         `# VM Handler program\n\n`
@@ -34,18 +33,18 @@ export default function VMEditorRunner() {
                     />
                 </Grid>
             </Grid>
-            {json && roleManager === undefined && (
+            {json && bus === undefined && (
                 <Alert severity="warning">
-                    Cannot run VM without a RoleManager present on the Jacdac bus.
+                    Cannot run VM without a bus!
                 </Alert>
             )
             }
             <GridHeader title="Preview" />
-            {json && roleManager && (
+            {json && bus && (
                 <Grid item xs={12} xl={7}>
                     <VMRunner
                         json={json}
-                        roleManager={roleManager.service}
+                        bus={bus}
                     />
                 </Grid>
             )}

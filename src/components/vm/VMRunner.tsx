@@ -1,30 +1,27 @@
-import React, { useCallback, useEffect } from "react"
-import useServiceClient from "../useServiceClient"
+import React, { useCallback } from "react"
 import {
     Grid,
     Button
 } from "@material-ui/core"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import Alert from "../ui/Alert"
 import { IT4Program } from "../../../jacdac-ts/src/vm/ir"
 import { IT4ProgramRunner, VMStatus } from "../../../jacdac-ts/src/vm/vmrunner"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
-import useChange from "../../jacdac/useChange"
-import DashboardDevice from "../dashboard/DashboardDevice"
+import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import LoadingProgress from "../ui/LoadingProgress"
+import useChange from "../../jacdac/useChange"
 
 export default function VMRunner(props: {
     json: IT4Program
-    roleManager: JDService
+    bus: JDBus
 }) {
     const {
-        json, roleManager
+        json, bus
     } = props
     const factory = useCallback(
-        (service:JDService) => json && new IT4ProgramRunner(json, service),
-        [roleManager, json]
+        (bus) => json && new IT4ProgramRunner(json, bus),
+        [bus, json]
     )
-    const testRunner = useServiceClient(roleManager, factory)
+    const testRunner = useChange(bus, factory)
     const status = useChange(testRunner, t => t?.status)
     const handleRun = () => testRunner.start()
     const handleCancel = () => testRunner.cancel()
@@ -49,15 +46,6 @@ export default function VMRunner(props: {
                     Cancel
                 </Button>
             </Grid>
-            {roleManager && (
-                <Grid item xs={3}>
-                    <DashboardDevice
-                        showAvatar={true}
-                        showHeader={true}
-                        device={roleManager.device}
-                    />
-                </Grid>
-            )}
         </Grid>
     )
 }
