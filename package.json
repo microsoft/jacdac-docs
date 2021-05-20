@@ -6,6 +6,7 @@
   "author": "Microsoft",
   "dependencies": {
     "@axe-core/react": "^4.2.0",
+    "@blockly/theme-modern": "^2.1.16",
     "@gatsby-contrib/gatsby-plugin-elasticlunr-search": "^3.0.2",
     "@hot-loader/react-dom": "^17.0.1",
     "@material-ui/core": "^4.11.4",

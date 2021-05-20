@@ -1058,6 +1058,11 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@blockly/theme-modern@^2.1.16":
+  version "2.1.16"
+  resolved "https://registry.yarnpkg.com/@blockly/theme-modern/-/theme-modern-2.1.16.tgz#5f95d6adc18043a8b0f75eb767aa1752950846bb"
+  integrity sha512-3S2Cf2nxIheD8VwnTuCPQw1tcx60HxAYCWKV58xuTkqqjGymkce8Q4GP876JRR0d9pP/x0RSBBK7AKIGQspy/g==
+
 "@chevrotain/types@^9.0.1":
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/@chevrotain/types/-/types-9.0.1.tgz#db8361d8e28c687f4dfbbae2523155b4b1d13321"
