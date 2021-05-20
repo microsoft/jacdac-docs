@@ -5,6 +5,7 @@ import {
     SRV_PROTO_TEST,
     SRV_ROLE_MANAGER,
     SRV_SETTINGS,
+    SystemEvent,
     SystemReg,
 } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import {
@@ -12,9 +13,11 @@ import {
     isNumericType,
 } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import {
+    isEvent,
     isRegister,
     serviceSpecifications,
 } from "../../../jacdac-ts/src/jdom/spec"
+import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
@@ -23,19 +26,22 @@ let blocks: any[]
 function loadBlocks() {
     if (blocks) return blocks
 
+    const variableName = (srv: jdspec.ServiceSpec) => `${srv.camelName} 1`
+
     const ignoredServices = [
         SRV_CONTROL,
         SRV_ROLE_MANAGER,
         SRV_PROTO_TEST,
         SRV_SETTINGS,
     ]
-    const specs = serviceSpecifications()
-        .filter(spec => !/^_/.test(spec.shortId))
-        .filter(spec => ignoredServices.indexOf(spec.classIdentifier) < 0)
-    const readings = specs
-        .map(spec => ({
-            service: spec,
-            reading: spec.packets.find(
+    const ignoredEvents = [SystemEvent.StatusCodeChanged]
+    const services = serviceSpecifications()
+        .filter(service => !/^_/.test(service.shortId))
+        .filter(service => ignoredServices.indexOf(service.classIdentifier) < 0)
+    const readings = services
+        .map(service => ({
+            service,
+            reading: service.packets.find(
                 pkt =>
                     isRegister(pkt) &&
                     pkt.identifier === SystemReg.Reading &&
@@ -44,6 +50,14 @@ function loadBlocks() {
             ),
         }))
         .filter(kv => !!kv.reading)
+    const events = services
+        .map(service => ({
+            service,
+            events: service.packets.filter(
+                pkt => isEvent(pkt) && ignoredEvents.indexOf(pkt.identifier) < 0
+            ),
+        }))
+        .filter(kv => !!kv.events.length)
 
     // generate blocks
     blocks = [
@@ -61,13 +75,13 @@ function loadBlocks() {
                 {
                     type: "field_variable",
                     name: "NAME",
-                    variable: `${specs[0].camelName} 1`,
+                    variable: variableName(services[0]),
                     defaultType: "Service",
                 },
                 {
                     type: "field_dropdown",
                     name: "SERVICE",
-                    options: specs.map(spec => [
+                    options: services.map(spec => [
                         humanify(spec.shortName),
                         spec.shortId,
                     ]),
@@ -77,26 +91,14 @@ function loadBlocks() {
             previousStatement: "Role",
             nextStatement: "Role",
         },
-        {
-            type: "jacdac_button_event",
-            message0: "when %1 %2 %3",
+        ...events.map(({ service, event }) => ({
+            type: `jacdac_${service.shortId}_event_${event.name}`,
+            message0: `when %1 ${humanify(event.name)}`,
             args0: [
                 {
                     type: "field_variable",
                     name: "ROLE",
-                    variable: "button",
-                },
-                {
-                    type: "input_dummy",
-                },
-                {
-                    type: "field_dropdown",
-                    name: "EVENT",
-                    options: [
-                        ["down", "down"],
-                        ["up", "up"],
-                        ["press", "press"],
-                    ],
+                    variable: variableName(service),
                 },
             ],
             style: "logic_blocks",
@@ -104,7 +106,7 @@ function loadBlocks() {
             nextStatement: null,
             tooltip: "",
             helpUrl: "",
-        },
+        })),
         ...readings.map(({ service, reading }) => ({
             type: `jacdac_${service.shortId}_reading`,
             message0: `%1 ${humanify(reading.name)}`,
@@ -112,7 +114,7 @@ function loadBlocks() {
                 {
                     type: "field_variable",
                     name: "ROLE",
-                    variable: `${service.camelName} 1`,
+                    variable: variableName(service),
                 },
             ],
             inputsInline: true,
@@ -128,7 +130,7 @@ function loadBlocks() {
                 {
                     type: "field_variable",
                     name: "ROLE",
-                    variable: `${service.camelName} 1`,
+                    variable: variableName(service),
                 },
             ],
             inputsInline: true,
