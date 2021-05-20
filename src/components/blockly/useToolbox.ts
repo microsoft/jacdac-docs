@@ -26,7 +26,7 @@ let blocks: any[]
 function loadBlocks() {
     if (blocks) return blocks
 
-    const variableName = (srv: jdspec.ServiceSpec) => `${srv.camelName} 1`
+    const variableName = (srv: jdspec.ServiceSpec) => `${humanify(srv.name)} 1`
 
     const ignoredServices = [
         SRV_CONTROL,
@@ -91,14 +91,19 @@ function loadBlocks() {
             previousStatement: "Role",
             nextStatement: "Role",
         },
-        ...events.map(({ service, event }) => ({
-            type: `jacdac_${service.shortId}_event_${event.name}`,
-            message0: `when %1 ${humanify(event.name)}`,
+        ...events.map(({ service, events }) => ({
+            type: `jacdac_${service.shortId}_events`,
+            message0: `when %1 %2`,
             args0: [
                 {
                     type: "field_variable",
                     name: "ROLE",
                     variable: variableName(service),
+                },
+                {
+                    type: "field_dropdown",
+                    name: "EVENT",
+                    options: events.map(event => [event.name, event.name]),
                 },
             ],
             style: "logic_blocks",
