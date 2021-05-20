@@ -12,15 +12,29 @@ const useStyles = makeStyles(() =>
     })
 )
 
-const initialXml = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
+const initialXml =
+    '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
 const blocks = [
     {
-        type: "jacdac_declare_service",
-        message0: "service %1",
+        type: "jacdac_configuration",
+        message0: "configuration",
+        inputsInline: true,
+        nextStatement: "Role",
+        style: "variable_blocks",
+    },
+    {
+        type: "jacdac_declare_role",
+        message0: "define role %1 as %2",
         args0: [
             {
+                type: "field_variable",
+                name: "NAME",
+                variable: "button 1",
+                defaultType: "Service",
+            },
+            {
                 type: "field_dropdown",
-                name: "TYPE",
+                name: "SERVICE",
                 options: [
                     ["button", "button"],
                     ["servo", "servo"],
@@ -28,11 +42,9 @@ const blocks = [
                 ],
             },
         ],
-        inputsInline: true,
         style: "variable_blocks",
-        tooltip: "declares a new service",
-        output: "button",
-        helpUrl: "",
+        previousStatement: "Role",
+        nextStatement: "Role",
     },
     {
         type: "jacdac_button_event",
@@ -73,14 +85,14 @@ const blocks = [
             },
         ],
         inputsInline: true,
-        nextStatement: null,
+        nextStatement: "Statement",
         style: "logic_blocks",
         tooltip: "",
         helpUrl: "",
     },
     {
         type: "jacdac_await_condition",
-        message0: "when %1",
+        message0: "while %1",
         args0: [
             {
                 type: "input_value",
@@ -90,7 +102,26 @@ const blocks = [
         ],
         style: "logic_blocks",
         inputsInline: true,
-        nextStatement: null,
+        nextStatement: "Statement",
+        tooltip: "",
+        helpUrl: "",
+    },
+    {
+        type: "jacdac_wait_ms",
+        message0: "wait %1 ms",
+        args0: [
+            {
+                type: "field_number",
+                name: "NAME",
+                value: 0,
+                min: 0,
+                max: 5000,
+            },
+        ],
+        inputsInline: true,
+        previousStatement: "Statement",
+        nextStatement: "Statement",
+        colour: 230,
         tooltip: "",
         helpUrl: "",
     },
@@ -145,15 +176,15 @@ const blocks = [
             },
         ],
         inputsInline: true,
-        previousStatement: null,
-        nextStatement: null,
+        previousStatement: "Statement",
+        nextStatement: "Statement",
         colour: 230,
         tooltip: "",
         helpUrl: "",
     },
     {
         type: "jacdac_servo_enable",
-        message0: "%1 %2",
+        message0: "set %1 %2",
         args0: [
             {
                 type: "field_variable",
@@ -172,6 +203,8 @@ const blocks = [
         colour: 230,
         tooltip: "",
         helpUrl: "",
+        previousStatement: "Statement",
+        nextStatement: "Statement",
     },
 ]
 blocks.map(
@@ -183,14 +216,13 @@ blocks.map(
         })
 )
 const toolboxBlocks = [
-    { type: "variables_set" },
     ...blocks.map(block => ({ type: block.type })),
-    { type: "text" },
     { type: "math_number" },
     { type: "math_arithmetic" },
-    { type: "math_single" },
     { type: "logic_boolean" },
     { type: "logic_compare" },
+    { type: "logic_operation" },
+    { type: "logic_negate" },
 ]
 
 export default function VMEditor() {
