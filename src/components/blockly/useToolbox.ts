@@ -1,7 +1,20 @@
 import Blockly from "blockly"
 import { useMemo } from "react"
-import { SRV_CONTROL, SRV_PROTO_TEST, SRV_ROLE_MANAGER, SRV_SETTINGS } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
-import { serviceSpecifications } from "../../../jacdac-ts/src/jdom/spec"
+import {
+    SRV_CONTROL,
+    SRV_PROTO_TEST,
+    SRV_ROLE_MANAGER,
+    SRV_SETTINGS,
+    SystemReg,
+} from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import {
+    humanify,
+    isNumericType,
+} from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
+import {
+    isRegister,
+    serviceSpecifications,
+} from "../../../jacdac-ts/src/jdom/spec"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
@@ -10,10 +23,27 @@ let blocks: any[]
 function loadBlocks() {
     if (blocks) return blocks
 
-    const ignoredServices = [SRV_CONTROL, SRV_ROLE_MANAGER, SRV_PROTO_TEST, SRV_SETTINGS]
+    const ignoredServices = [
+        SRV_CONTROL,
+        SRV_ROLE_MANAGER,
+        SRV_PROTO_TEST,
+        SRV_SETTINGS,
+    ]
     const specs = serviceSpecifications()
         .filter(spec => !/^_/.test(spec.shortId))
         .filter(spec => ignoredServices.indexOf(spec.classIdentifier) < 0)
+    const readings = specs
+        .map(spec => ({
+            service: spec,
+            reading: spec.packets.find(
+                pkt =>
+                    isRegister(pkt) &&
+                    pkt.identifier === SystemReg.Reading &&
+                    pkt.fields.length == 1 &&
+                    isNumericType(pkt.fields[0])
+            ),
+        }))
+        .filter(kv => !!kv.reading)
 
     // generate blocks
     blocks = [
@@ -37,7 +67,10 @@ function loadBlocks() {
                 {
                     type: "field_dropdown",
                     name: "SERVICE",
-                    options: specs.map(spec => [spec.shortName, spec.shortId]),
+                    options: specs.map(spec => [
+                        humanify(spec.shortName),
+                        spec.shortId,
+                    ]),
                 },
             ],
             style: "variable_blocks",
@@ -72,14 +105,30 @@ function loadBlocks() {
             tooltip: "",
             helpUrl: "",
         },
-        {
-            type: "jacdac_reading_change",
-            message0: "when %1 change",
+        ...readings.map(({ service, reading }) => ({
+            type: `jacdac_${service.shortId}_reading`,
+            message0: `%1 ${humanify(reading.name)}`,
             args0: [
                 {
                     type: "field_variable",
                     name: "ROLE",
-                    variable: "humidity",
+                    variable: `${service.camelName} 1`,
+                },
+            ],
+            inputsInline: true,
+            output: "Number",
+            colour: 230,
+            tooltip: "",
+            helpUrl: "",
+        })),
+        ...readings.map(({ service, reading }) => ({
+            type: `jacdac_${service.shortId}_reading_change`,
+            message0: `when %1 ${humanify(reading.name)} change`,
+            args0: [
+                {
+                    type: "field_variable",
+                    name: "ROLE",
+                    variable: `${service.camelName} 1`,
                 },
             ],
             inputsInline: true,
@@ -87,7 +136,7 @@ function loadBlocks() {
             style: "logic_blocks",
             tooltip: "",
             helpUrl: "",
-        },
+        })),
         {
             type: "jacdac_await_condition",
             message0: "while %1",
@@ -119,38 +168,6 @@ function loadBlocks() {
             inputsInline: true,
             previousStatement: "Statement",
             nextStatement: "Statement",
-            colour: 230,
-            tooltip: "",
-            helpUrl: "",
-        },
-        {
-            type: "jacdac_button_reading",
-            message0: "%1 pressure",
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "ROLE",
-                    variable: "button",
-                },
-            ],
-            inputsInline: true,
-            output: "Number",
-            colour: 230,
-            tooltip: "",
-            helpUrl: "",
-        },
-        {
-            type: "jacdac_humidity_reading",
-            message0: "%1 humidity",
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "ROLE",
-                    variable: "humidity",
-                },
-            ],
-            inputsInline: true,
-            output: "Number",
             colour: 230,
             tooltip: "",
             helpUrl: "",

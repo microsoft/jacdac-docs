@@ -6,10 +6,10 @@ import Dashboard from "../../components/dashboard/Dashboard"
 export default function Page() {
     return (
         <Grid container spacing={1}>
-            <Grid item xs={12} sm={5} lg={4} xl={3}>
+            <Grid item xs={12} sm={5} lg={3} xl={12}>
                 <Dashboard />
             </Grid>
-            <Grid item xs={12} sm={7} lg={8} xl={9}>
+            <Grid item xs={12} sm={7} lg={9} xl={10}>
                 <VmEditor />
             </Grid>
         </Grid>
