@@ -7,7 +7,7 @@ import Theme from "@blockly/theme-modern"
 const useStyles = makeStyles(() =>
     createStyles({
         editor: {
-            height: "calc(100vh - 114px)",
+            height: "calc(100vh - 10rem)",
         },
     })
 )
