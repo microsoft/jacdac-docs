@@ -305,6 +305,7 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
 
 exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     const { setWebpackConfig, replaceWebpackConfig } = actions
+    console.log({ stage })
     const plugins = [
         new IgnorePlugin({
             resourceRegExp: /^canvas|@axe-core\/react$/,
@@ -320,7 +321,8 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
             plugins,
         })
     }
-    if (stage === "build-javascript") {
+    if (stage === "build-javascript" || stage === "build-html") {
+        console.log(`enabling ignore filters`)
         setWebpackConfig({
             plugins,
         })
@@ -331,6 +333,9 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     config.stats = "verbose"
     config.performance.hints = "warning"
     replaceWebpackConfig(config)
+
+    // final webpack
+    console.log({ webpack: getConfig() })
 }
 
 // generate a full list of pages for compliance
