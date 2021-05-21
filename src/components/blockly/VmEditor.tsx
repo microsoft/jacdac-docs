@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
 import ReactBlockly from "react-blockly"
 import Blockly from "blockly"
 import Theme from "@blockly/theme-modern"
@@ -10,7 +10,7 @@ import {
     ContinuousMetrics,
 } from "@blockly/continuous-toolbox"
 */
-import useToolbox from "./useToolbox"
+import useToolbox, { scanServices } from "./useToolbox"
 
 export default function VmEditor(props: {
     className?: string
@@ -18,11 +18,14 @@ export default function VmEditor(props: {
     onXmlChange?: (xml: string) => void
 }) {
     const { className, onXmlChange, initialXml } = props
+    const [services, setServices] = useState<string[]>([])
     const {
         toolboxBlocks,
         toolboxCategories,
         initialXml: defaultInitialXml,
-    } = useToolbox()
+    } = useToolbox(services)
+    // ReactBlockly
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const reactBlockly = useRef<any>()
     const workspaceReady = useRef(false)
 
@@ -47,15 +50,14 @@ export default function VmEditor(props: {
             Blockly.Xml.workspaceToDom(workspace)
         )
         onXmlChange?.(newXml)
+
+        // update toolbox with declared roles
+        const allBlocks = workspace.getAllBlocks(false)
+        const newServices = scanServices(allBlocks)
+        if (JSON.stringify(services) !== JSON.stringify(newServices))
+            setServices(newServices)
     }
 
-    /**
-     *                 plugins: {
-                    toolbox: ContinuousToolbox,
-                    flyoutsVerticalToolbox: ContinuousFlyout,
-                    metricsManager: ContinuousMetrics,
-                },
-     */
     return (
         <ReactBlockly
             ref={reactBlockly}

@@ -1,6 +1,7 @@
 import Blockly from "blockly"
 import { useMemo } from "react"
 import {
+    SRV_BOOTLOADER,
     SRV_CONTROL,
     SRV_PROTO_TEST,
     SRV_ROLE_MANAGER,
@@ -17,10 +18,19 @@ import {
     isRegister,
     serviceSpecifications,
 } from "../../../jacdac-ts/src/jdom/spec"
-import { groupBy, SMap, uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
+import {
+    groupBy,
+    SMap,
+    unique,
+    uniqueMap,
+} from "../../../jacdac-ts/src/jdom/utils"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
+
+const DECLARE_ROLE_TYPE = "jacdac_declare_role"
+const DECLARE_ROLE_SERVICE_VALUE = "SERVICE"
+const MISSING_GROUP = "Miscellanous"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlockDefinition = any
@@ -42,12 +52,13 @@ function loadBlocks(): CachedBlockDefinitions {
         SRV_ROLE_MANAGER,
         SRV_PROTO_TEST,
         SRV_SETTINGS,
+        SRV_BOOTLOADER,
     ]
     const ignoredEvents = [SystemEvent.StatusCodeChanged]
-    const services = serviceSpecifications()
+    const allServices = serviceSpecifications()
         .filter(service => !/^_/.test(service.shortId))
         .filter(service => ignoredServices.indexOf(service.classIdentifier) < 0)
-    const readings = services
+    const readings = allServices
         .map(service => ({
             service,
             reading: service.packets.find(
@@ -59,7 +70,7 @@ function loadBlocks(): CachedBlockDefinitions {
             ),
         }))
         .filter(kv => !!kv.reading)
-    const events = services
+    const events = allServices
         .map(service => ({
             service,
             events: service.packets.filter(
@@ -69,6 +80,7 @@ function loadBlocks(): CachedBlockDefinitions {
         .filter(kv => !!kv.events.length)
 
     // generate blocks
+    let declareRoleBlock: BlockDefinition
     const blocks: BlockDefinition[] = [
         {
             type: "jacdac_configuration",
@@ -77,29 +89,14 @@ function loadBlocks(): CachedBlockDefinitions {
             nextStatement: "Role",
             style: "variable_blocks",
         },
-        {
-            type: "jacdac_declare_role",
+        (declareRoleBlock = {
+            type: DECLARE_ROLE_TYPE,
             message0: "define role %1 as %2",
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "NAME",
-                    variable: variableName(services[0]),
-                    defaultType: "Service",
-                },
-                {
-                    type: "field_dropdown",
-                    name: "SERVICE",
-                    options: services.map(spec => [
-                        humanify(spec.shortName),
-                        spec.shortId,
-                    ]),
-                },
-            ],
+            // arg0 filled in later
             style: "variable_blocks",
             previousStatement: "Role",
             nextStatement: "Role",
-        },
+        }),
         ...events.map(({ service, events }) => ({
             type: `jacdac_${service.shortId}_events`,
             message0: `when %1 %2`,
@@ -254,39 +251,80 @@ function loadBlocks(): CachedBlockDefinitions {
                 },
             })
     )
-
     const jdBlocks = blocks.filter(block => !!block.service)
+    const services = uniqueMap(
+        jdBlocks,
+        block => block.service.shortId,
+        block => block.service
+    )
 
-    return (cachedBlocks = {
+    declareRoleBlock.args0 = [
+        {
+            type: "field_variable",
+            name: "NAME",
+            variable: variableName(services[0]),
+            defaultType: "Service",
+        },
+        {
+            type: "field_dropdown",
+            name: DECLARE_ROLE_SERVICE_VALUE,
+            options: services.map(spec => [
+                humanify(spec.shortName),
+                spec.shortId,
+            ]),
+        },
+    ]
+
+    cachedBlocks = {
         blocks,
-        services: uniqueMap(
+        services,
+        groups: groupBy(
             jdBlocks,
-            block => block.service.shortId,
-            block => block.service
+            block => block.service.group || MISSING_GROUP
         ),
-        groups: groupBy(jdBlocks, block => block.service.group || "Miscellanous"),
-    })
+    }
+
+    return cachedBlocks
 }
 
-export default function useToolbox() {
+export function scanServices(blocks: Blockly.Block[]) {
+    const declarers = blocks.filter(
+        b => b.isEnabled() && b.type === DECLARE_ROLE_TYPE
+    )
+    const services = unique(
+        declarers.map(b => b.getFieldValue(DECLARE_ROLE_SERVICE_VALUE))
+    )
+        .filter(srv => !!srv)
+        .sort()
+
+    return services
+}
+
+export default function useToolbox(services?: string[]) {
     const { blocks, groups } = useMemo(() => loadBlocks(), [])
 
     const toolboxBlocks = [...blocks.map(block => ({ type: block.type }))]
     const toolboxCategories = [
         {
             name: "Configuration",
-            style: "variable_blocks",
+            colour: "#0f00ff",
             blocks: [
                 { type: "jacdac_configuration" },
-                { type: "jacdac_declare_role" },
+                { type: DECLARE_ROLE_TYPE },
             ],
         },
         ...Object.keys(groups).map(group => ({
             name: group,
             colour: "#5CA699",
-            blocks: groups[group].map(block => ({
-                type: block.type,
-            })),
+            blocks: groups[group]
+                .filter(
+                    block =>
+                        !services ||
+                        services.indexOf(block.service.shortId) > -1
+                )
+                .map(block => ({
+                    type: block.type,
+                })),
         })),
         {
             name: "Logic",
@@ -303,7 +341,8 @@ export default function useToolbox() {
             style: "math_blocks",
             blocks: [{ type: "math_arithmetic" }, { type: "math_number" }],
         },
-    ]
+    ].filter(cat => !!cat.blocks?.length)
+
     return {
         toolboxBlocks,
         toolboxCategories,
