@@ -25,7 +25,7 @@ export default function Page() {
     return (
         <Grid container direction="column" spacing={1}>
             <Grid item xs={12}>
-                <Alert severity="info">
+                <Alert severity="info" closeable={true}>
                     Start a simulator or connect a device to load the blocks
                     automatically.
                 </Alert>
