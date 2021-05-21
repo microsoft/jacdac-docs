@@ -26,6 +26,7 @@ import {
     uniqueMap,
 } from "../../../jacdac-ts/src/jdom/utils"
 import useServices from "../hooks/useServices"
+import { Minimize } from "@material-ui/icons"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
@@ -82,6 +83,22 @@ function loadBlocks(): CachedBlockDefinitions {
             ),
         }))
         .filter(kv => !!kv.reading)
+    const intensities = allServices
+        .map(service => ({
+            service,
+            intensity: service.packets.find(
+                pkt => isRegister(pkt) && pkt.identifier === SystemReg.Intensity
+            ),
+        }))
+        .filter(kv => !!kv.intensity)
+    const values = allServices
+        .map(service => ({
+            service,
+            value: service.packets.find(
+                pkt => isRegister(pkt) && pkt.identifier === SystemReg.Value
+            ),
+        }))
+        .filter(kv => !!kv.value)
     const events = allServices
         .map(service => ({
             service,
@@ -140,6 +157,87 @@ function loadBlocks(): CachedBlockDefinitions {
             service,
             reading,
         })),
+        ...intensities.map(({ service, intensity }) => ({
+            type: `jacdac_${service.shortId}_intensity_set`,
+            message0: "set %1 %2",
+            args0: [
+                fieldVariable(service),
+                ...intensity.fields.map(field =>
+                    field.type === "bool"
+                        ? {
+                              type: "field_dropdown",
+                              name: "VALUE",
+                              options: [
+                                  ["on", "ON"],
+                                  ["off", "OFF"],
+                              ],
+                          }
+                        : {
+                              type: "math_number",
+                              min: 0,
+                              max: 1,
+                              precision: 0.1,
+                          }
+                ),
+            ],
+            inputsInline: true,
+            colour: 230,
+            tooltip: "",
+            helpUrl: "",
+            service,
+            intensity,
+            previousStatement: "Statement",
+            nextStatement: "Statement",
+        })),
+        ...values.map(({ service, value }) => ({
+            type: `jacdac_${service.shortId}_value_set`,
+            message0: `set %1 ${humanify(value.name)} to ${value.fields
+                .map((_, i) => `%${2 + i}`)
+                .join(" ")}`,
+            args0: [
+                fieldVariable(service),
+                ...value.fields.map(field =>
+                    field.type === "bool"
+                        ? {
+                              type: "field_dropdown",
+                              name: "VALUE",
+                              options: [
+                                  ["on", "ON"],
+                                  ["off", "OFF"],
+                              ],
+                          }
+                        : {
+                              type: "field_number",
+                              name: "VALUE",
+                              value: field.defaultValue || 0,
+                              min: field.absoluteMin,
+                              max: field.absoluteMax,
+                          }
+                ),
+            ],
+            inputsInline: true,
+            colour: 230,
+            tooltip: "",
+            helpUrl: "",
+            service,
+            value,
+            previousStatement: "Statement",
+            nextStatement: "Statement",
+        })),
+        ...values
+            .filter(v => v.value.fields.length === 1)
+            .map(({ service, value }) => ({
+                type: `jacdac_${service.shortId}_value_get`,
+                message0: `%1 ${humanify(value.name)}`,
+                args0: [fieldVariable(service)],
+                inputsInline: true,
+                output: value.fields[0].type === "bool" ? "Boolean" : "Number",
+                colour: 230,
+                tooltip: "",
+                helpUrl: "",
+                service,
+                value,
+            })),
         ...readings.map(({ service, reading }) => ({
             type: `jacdac_${service.shortId}_reading_change`,
             message0: `when %1 ${humanify(reading.name)} change`,
@@ -212,31 +310,9 @@ function loadBlocks(): CachedBlockDefinitions {
             tooltip: "",
             helpUrl: "",
         },
-        {
-            type: "jacdac_servo_enable",
-            message0: "set %1 %2",
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "ROLE",
-                    variable: "servo",
-                },
-                {
-                    type: "field_dropdown",
-                    name: "ENABLED",
-                    options: [
-                        ["on", "ON"],
-                        ["off", "OFF"],
-                    ],
-                },
-            ],
-            colour: 230,
-            tooltip: "",
-            helpUrl: "",
-            previousStatement: "Statement",
-            nextStatement: "Statement",
-        },
     ]
+
+    console.log({ blocks })
 
     // register blocks with Blockly, happens once
     blocks.map(
