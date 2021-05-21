@@ -28,8 +28,9 @@ import {
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
 
+export const START_SIMULATOR_CALLBACK_KEY = "jacdac_start_simulator"
+    
 const DECLARE_ROLE_TYPE = "jacdac_declare_role"
-export const DECLARE_ROLE_CALLBACK_KEY = "jacdac_declare_role_button"
 const DECLARE_ROLE_SERVICE_VALUE = "SERVICE"
 const MISSING_GROUP = "Miscellanous"
 
@@ -312,8 +313,8 @@ export default function useToolbox(services?: string[]) {
             colour: "#0f00ff",
             button: [
                 {
-                    text: "Add role",
-                    callbackKey: DECLARE_ROLE_CALLBACK_KEY,
+                    text: "Start simulator",
+                    callbackKey: START_SIMULATOR_CALLBACK_KEY,
                 },
             ],
             blocks: [
