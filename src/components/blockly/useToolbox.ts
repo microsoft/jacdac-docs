@@ -3,6 +3,7 @@ import { useMemo } from "react"
 import {
     SRV_BOOTLOADER,
     SRV_CONTROL,
+    SRV_LOGGER,
     SRV_PROTO_TEST,
     SRV_ROLE_MANAGER,
     SRV_SETTINGS,
@@ -24,15 +25,24 @@ import {
     unique,
     uniqueMap,
 } from "../../../jacdac-ts/src/jdom/utils"
+import useServices from "../hooks/useServices"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
 
 export const START_SIMULATOR_CALLBACK_KEY = "jacdac_start_simulator"
-    
-const DECLARE_ROLE_TYPE = "jacdac_declare_role"
-const DECLARE_ROLE_SERVICE_VALUE = "SERVICE"
+
+const DECLARE_ROLE_TYPE_PREFIX = `jacdac_role_set_`
 const MISSING_GROUP = "Miscellanous"
+const ignoredServices = [
+    SRV_CONTROL,
+    SRV_LOGGER,
+    SRV_ROLE_MANAGER,
+    SRV_PROTO_TEST,
+    SRV_SETTINGS,
+    SRV_BOOTLOADER,
+]
+const ignoredEvents = [SystemEvent.StatusCodeChanged]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlockDefinition = any
@@ -50,14 +60,6 @@ function loadBlocks(): CachedBlockDefinitions {
     const variableName = (srv: jdspec.ServiceSpec) =>
         `${humanify(srv.camelName).toLowerCase()} 1`
 
-    const ignoredServices = [
-        SRV_CONTROL,
-        SRV_ROLE_MANAGER,
-        SRV_PROTO_TEST,
-        SRV_SETTINGS,
-        SRV_BOOTLOADER,
-    ]
-    const ignoredEvents = [SystemEvent.StatusCodeChanged]
     const allServices = serviceSpecifications()
         .filter(service => !/^_/.test(service.shortId))
         .filter(service => ignoredServices.indexOf(service.classIdentifier) < 0)
@@ -83,7 +85,6 @@ function loadBlocks(): CachedBlockDefinitions {
         .filter(kv => !!kv.events.length)
 
     // generate blocks
-    let declareRoleBlock: BlockDefinition
     const blocks: BlockDefinition[] = [
         {
             type: "jacdac_configuration",
@@ -92,14 +93,22 @@ function loadBlocks(): CachedBlockDefinitions {
             nextStatement: "Role",
             style: "variable_blocks",
         },
-        (declareRoleBlock = {
-            type: DECLARE_ROLE_TYPE,
-            message0: "define role %1 as %2",
-            // arg0 filled in later
+        ...allServices.map(service => ({
+            type: `${DECLARE_ROLE_TYPE_PREFIX}${service.shortId}`,
+            message0: `define ${humanify(service.shortName)} %1`,
+            args0: [
+                {
+                    type: "field_variable",
+                    name: "NAME",
+                    variable: variableName(service),
+                    defaultType: service.shortId,
+                },
+            ],
             style: "variable_blocks",
             previousStatement: "Role",
             nextStatement: "Role",
-        }),
+            service,
+        })),
         ...events.map(({ service, events }) => ({
             type: `jacdac_${service.shortId}_events`,
             message0: `when %1 %2`,
@@ -261,23 +270,6 @@ function loadBlocks(): CachedBlockDefinitions {
         block => block.service
     )
 
-    declareRoleBlock.args0 = [
-        {
-            type: "field_variable",
-            name: "NAME",
-            variable: variableName(services[0]),
-            defaultType: "Service",
-        },
-        {
-            type: "field_dropdown",
-            name: DECLARE_ROLE_SERVICE_VALUE,
-            options: services.map(spec => [
-                humanify(spec.shortName),
-                spec.shortId,
-            ]),
-        },
-    ]
-
     cachedBlocks = {
         blocks,
         services,
@@ -292,10 +284,10 @@ function loadBlocks(): CachedBlockDefinitions {
 
 export function scanServices(blocks: Blockly.Block[]) {
     const declarers = blocks.filter(
-        b => b.isEnabled() && b.type === DECLARE_ROLE_TYPE
+        b => b.isEnabled() && b.type.startsWith(DECLARE_ROLE_TYPE_PREFIX)
     )
     const services = unique(
-        declarers.map(b => b.getFieldValue(DECLARE_ROLE_SERVICE_VALUE))
+        declarers.map(b => b.type.substring(DECLARE_ROLE_TYPE_PREFIX.length))
     )
         .filter(srv => !!srv)
         .sort()
@@ -303,8 +295,16 @@ export function scanServices(blocks: Blockly.Block[]) {
     return services
 }
 
-export default function useToolbox(services?: string[]) {
+export default function useToolbox(blockServices?: string[]) {
     const { blocks, groups } = useMemo(() => loadBlocks(), [])
+    const liveServices = useServices({ specification: true })
+
+    const services = unique([
+        ...blockServices,
+        ...liveServices
+            .filter(srv => ignoredServices.indexOf(srv.serviceClass) < 0)
+            .map(service => service.specification?.shortId),
+    ])
 
     const toolboxBlocks = [...blocks.map(block => ({ type: block.type }))]
     const toolboxCategories = [
@@ -317,10 +317,7 @@ export default function useToolbox(services?: string[]) {
                     callbackKey: START_SIMULATOR_CALLBACK_KEY,
                 },
             ],
-            blocks: [
-                { type: "jacdac_configuration" },
-                { type: DECLARE_ROLE_TYPE },
-            ],
+            blocks: [{ type: "jacdac_configuration" }],
         },
         ...Object.keys(groups).map(group => ({
             name: group,
