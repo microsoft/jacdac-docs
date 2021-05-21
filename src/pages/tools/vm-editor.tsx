@@ -40,7 +40,7 @@ export default function Page() {
                 </NoSsr>
             </Grid>
             <Grid item xs={12}>
-                <Dashboard />
+                <Dashboard showStartSimulators={true} />
             </Grid>
         </Grid>
     )
