@@ -45,7 +45,7 @@ let cachedBlocks: CachedBlockDefinitions
 function loadBlocks(): CachedBlockDefinitions {
     if (cachedBlocks) return cachedBlocks
 
-    const variableName = (srv: jdspec.ServiceSpec) => `${humanify(srv.name)} 1`
+    const variableName = (srv: jdspec.ServiceSpec) => `${humanify(srv.camelName).toLowerCase()} 1`
 
     const ignoredServices = [
         SRV_CONTROL,
