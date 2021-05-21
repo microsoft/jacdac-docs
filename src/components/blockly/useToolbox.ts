@@ -59,6 +59,13 @@ function loadBlocks(): CachedBlockDefinitions {
 
     const variableName = (srv: jdspec.ServiceSpec) =>
         `${humanify(srv.camelName).toLowerCase()} 1`
+    const fieldVariable = (service: jdspec.ServiceSpec) => ({
+        type: "field_variable",
+        name: "ROLE",
+        variable: variableName(service),
+        variableTypes: [service.shortId],
+        defaultType: service.shortId,
+    })
 
     const allServices = serviceSpecifications()
         .filter(service => !/^_/.test(service.shortId))
@@ -96,14 +103,7 @@ function loadBlocks(): CachedBlockDefinitions {
         ...allServices.map(service => ({
             type: `${DECLARE_ROLE_TYPE_PREFIX}${service.shortId}`,
             message0: `define ${humanify(service.shortName)} %1`,
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "NAME",
-                    variable: variableName(service),
-                    defaultType: service.shortId,
-                },
-            ],
+            args0: [fieldVariable(service)],
             style: "variable_blocks",
             previousStatement: "Role",
             nextStatement: "Role",
@@ -113,11 +113,7 @@ function loadBlocks(): CachedBlockDefinitions {
             type: `jacdac_${service.shortId}_events`,
             message0: `when %1 %2`,
             args0: [
-                {
-                    type: "field_variable",
-                    name: "ROLE",
-                    variable: variableName(service),
-                },
+                fieldVariable(service),
                 {
                     type: "field_dropdown",
                     name: "EVENT",
@@ -135,13 +131,7 @@ function loadBlocks(): CachedBlockDefinitions {
         ...readings.map(({ service, reading }) => ({
             type: `jacdac_${service.shortId}_reading`,
             message0: `%1 ${humanify(reading.name)}`,
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "ROLE",
-                    variable: variableName(service),
-                },
-            ],
+            args0: [fieldVariable(service)],
             inputsInline: true,
             output: "Number",
             colour: 230,
@@ -153,13 +143,7 @@ function loadBlocks(): CachedBlockDefinitions {
         ...readings.map(({ service, reading }) => ({
             type: `jacdac_${service.shortId}_reading_change`,
             message0: `when %1 ${humanify(reading.name)} change`,
-            args0: [
-                {
-                    type: "field_variable",
-                    name: "ROLE",
-                    variable: variableName(service),
-                },
-            ],
+            args0: [fieldVariable(service)],
             inputsInline: true,
             nextStatement: "Statement",
             style: "logic_blocks",
