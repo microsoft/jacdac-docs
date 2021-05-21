@@ -17,14 +17,20 @@ import {
     isRegister,
     serviceSpecifications,
 } from "../../../jacdac-ts/src/jdom/spec"
-import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
+import { unique, uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
 
-let blocks: any[]
-function loadBlocks() {
-    if (blocks) return blocks
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type BlockDefinition = any
+
+let cachedBlocks: { blocks: BlockDefinition[]; services: jdspec.ServiceSpec[] }
+function loadBlocks(): {
+    blocks: BlockDefinition[]
+    services: jdspec.ServiceSpec[]
+} {
+    if (cachedBlocks) return cachedBlocks
 
     const variableName = (srv: jdspec.ServiceSpec) => `${humanify(srv.name)} 1`
 
@@ -60,7 +66,7 @@ function loadBlocks() {
         .filter(kv => !!kv.events.length)
 
     // generate blocks
-    blocks = [
+    const blocks: BlockDefinition[] = [
         {
             type: "jacdac_configuration",
             message0: "configuration",
@@ -111,6 +117,8 @@ function loadBlocks() {
             nextStatement: null,
             tooltip: "",
             helpUrl: "",
+            service,
+            events,
         })),
         ...readings.map(({ service, reading }) => ({
             type: `jacdac_${service.shortId}_reading`,
@@ -127,6 +135,8 @@ function loadBlocks() {
             colour: 230,
             tooltip: "",
             helpUrl: "",
+            service,
+            reading,
         })),
         ...readings.map(({ service, reading }) => ({
             type: `jacdac_${service.shortId}_reading_change`,
@@ -143,6 +153,8 @@ function loadBlocks() {
             style: "logic_blocks",
             tooltip: "",
             helpUrl: "",
+            service,
+            reading,
         })),
         {
             type: "jacdac_await_condition",
@@ -239,21 +251,53 @@ function loadBlocks() {
                 },
             })
     )
-    return blocks
+    return {
+        blocks,
+        services: uniqueMap(
+            blocks.filter(block => !!block.service),
+            block => block.service.shortId,
+            block => block.service
+        ),
+    }
 }
 
 export default function useToolbox() {
-    const blocks = useMemo(() => loadBlocks(), [])
-    const toolboxBlocks = [
-        ...blocks.map(block => ({ type: block.type })),
-        { type: "math_number" },
-        { type: "math_arithmetic" },
-        { type: "logic_boolean" },
-        { type: "logic_compare" },
-        { type: "logic_operation" },
-        { type: "logic_negate" },
+    const { blocks, services } = useMemo(() => loadBlocks(), [])
+    const toolboxBlocks = [...blocks.map(block => ({ type: block.type }))]
+    const toolboxCategories = [
+        {
+            name: "Configuration",
+            style: "variable_blocks",
+            blocks: [
+                { type: "jacdac_configuration" },
+                { type: "jacdac_declare_role" },
+            ],
+        },
+        ...services.map(service => ({
+            name: service.name,
+            colour: 230,
+            blocks: blocks
+                .filter(block => block.service === service)
+                .map(block => ({
+                    type: block.type,
+                })),
+        })),
+        {
+            name: "Logic",
+            style: "logic_blocks",
+            blocks: [
+                { type: "logic_compare" },
+                { type: "logic_operation" },
+                { type: "logic_negate" },
+                { type: "logic_boolean" },
+            ],
+        },
+        {
+            name: "Math",
+            style: "math_blocks",
+            blocks: [{ type: "math_arithmetic" }, { type: "math_number" }],
+        },
     ]
-    const toolboxCategories = undefined
     return {
         toolboxBlocks,
         toolboxCategories,

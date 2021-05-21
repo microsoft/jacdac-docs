@@ -1,20 +1,11 @@
-import { createStyles, makeStyles } from "@material-ui/core"
 import React from "react"
 import ReactBlockly from "react-blockly"
 import Blockly from "blockly"
 import Theme from "@blockly/theme-modern"
 import useToolbox from "./useToolbox"
 
-const useStyles = makeStyles(() =>
-    createStyles({
-        editor: {
-            height: "calc(100vh - 10rem)",
-        },
-    })
-)
-
-export default function VmEditor() {
-    const classes = useStyles()
+export default function VmEditor(props: { className?: string }) {
+    const { className } = props
     const { toolboxBlocks, toolboxCategories, initialXml } = useToolbox()
 
     const handleChange = (workspace: Blockly.WorkspaceSvg) => {
@@ -49,7 +40,7 @@ export default function VmEditor() {
                 wrapperDivClassName={classes.editor}
                 workspaceDidChange={handleChange}
             />
-            <pre id="generated-xml"></pre>
+            <pre id="generated-xml" className={className}></pre>
         </>
     )
 }
