@@ -1068,6 +1068,11 @@
   resolved "https://registry.yarnpkg.com/@blockly/disable-top-blocks/-/disable-top-blocks-0.1.9.tgz#dd753fea376db9bed3080b84daaa42af24bcc785"
   integrity sha512-IFG+/l1PllibVsfYEVxu3vvytjpPuSfiW9aN9QLr0rrAkPSan/tLEYXpgbEy6vt6dGcqfOv4oORREU43stxeEA==
 
+"@blockly/field-slider@^2.1.17":
+  version "2.1.17"
+  resolved "https://registry.yarnpkg.com/@blockly/field-slider/-/field-slider-2.1.17.tgz#e0e124f2a2e95b65ff9f8a3932e30de5e5904ff0"
+  integrity sha512-KCr0iPsKAsNCrLGN9718+KCl4GWwlw71xAkL1ngbDjDYJiP7O22jPGS9GtlKX7TEijDWIEq0iIJ2uRMi6RHfAQ==
+
 "@blockly/theme-modern@^2.1.16":
   version "2.1.16"
   resolved "https://registry.yarnpkg.com/@blockly/theme-modern/-/theme-modern-2.1.16.tgz#5f95d6adc18043a8b0f75eb767aa1752950846bb"

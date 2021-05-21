@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useContext, useRef, useState } from "react"
 import ReactBlockly from "react-blockly"
 import Blockly from "blockly"
 import Theme from "@blockly/theme-modern"
@@ -10,7 +10,11 @@ import {
     ContinuousMetrics,
 } from "@blockly/continuous-toolbox"
 */
-import useToolbox, { scanServices } from "./useToolbox"
+import useToolbox, {
+    DECLARE_ROLE_CALLBACK_KEY,
+    scanServices,
+} from "./useToolbox"
+import AppContext from "../AppContext"
 
 export default function VmEditor(props: {
     className?: string
@@ -18,6 +22,7 @@ export default function VmEditor(props: {
     onXmlChange?: (xml: string) => void
 }) {
     const { className, onXmlChange, initialXml } = props
+    const { toggleShowDeviceHostsDialog } = useContext(AppContext)
     const [services, setServices] = useState<string[]>([])
     const {
         toolboxBlocks,
@@ -29,10 +34,12 @@ export default function VmEditor(props: {
     const reactBlockly = useRef<any>()
     const workspaceReady = useRef(false)
 
+    const resolveWorkspace = (): Blockly.WorkspaceSvg =>
+        reactBlockly.current?.workspace?.state?.workspace
+
     const initWorkspace = () => {
         if (workspaceReady.current) return
-        const workspace: Blockly.WorkspaceSvg =
-            reactBlockly.current?.workspace?.state?.workspace
+        const workspace = resolveWorkspace()
         if (!workspace) return
         workspaceReady.current = true
         // Add the disableOrphans event handler. This is not done automatically by
@@ -42,10 +49,19 @@ export default function VmEditor(props: {
         // The plugin must be initialized before it has any effect.
         const disableTopBlocksPlugin = new DisableTopBlocks()
         disableTopBlocksPlugin.init()
+
+        // buttons
+        workspace.registerButtonCallback(
+            DECLARE_ROLE_CALLBACK_KEY,
+            function () {
+                toggleShowDeviceHostsDialog()
+            }
+        )
     }
 
     const handleChange = (workspace: Blockly.WorkspaceSvg) => {
         initWorkspace()
+
         const newXml = Blockly.Xml.domToText(
             Blockly.Xml.workspaceToDom(workspace)
         )
@@ -66,6 +82,7 @@ export default function VmEditor(props: {
             workspaceConfiguration={{
                 comments: false,
                 css: true,
+                trash: false,
                 grid: {
                     spacing: 25,
                     length: 1,

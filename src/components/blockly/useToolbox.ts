@@ -29,6 +29,7 @@ const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
 
 const DECLARE_ROLE_TYPE = "jacdac_declare_role"
+export const DECLARE_ROLE_CALLBACK_KEY = "jacdac_declare_role_button"
 const DECLARE_ROLE_SERVICE_VALUE = "SERVICE"
 const MISSING_GROUP = "Miscellanous"
 
@@ -45,7 +46,8 @@ let cachedBlocks: CachedBlockDefinitions
 function loadBlocks(): CachedBlockDefinitions {
     if (cachedBlocks) return cachedBlocks
 
-    const variableName = (srv: jdspec.ServiceSpec) => `${humanify(srv.camelName).toLowerCase()} 1`
+    const variableName = (srv: jdspec.ServiceSpec) =>
+        `${humanify(srv.camelName).toLowerCase()} 1`
 
     const ignoredServices = [
         SRV_CONTROL,
@@ -308,6 +310,12 @@ export default function useToolbox(services?: string[]) {
         {
             name: "Configuration",
             colour: "#0f00ff",
+            button: [
+                {
+                    text: "Add role",
+                    callbackKey: DECLARE_ROLE_CALLBACK_KEY,
+                },
+            ],
             blocks: [
                 { type: "jacdac_configuration" },
                 { type: DECLARE_ROLE_TYPE },
