@@ -3,17 +3,33 @@ import ReactBlockly from "react-blockly"
 import Blockly from "blockly"
 import Theme from "@blockly/theme-modern"
 import { DisableTopBlocks } from "@blockly/disable-top-blocks"
+/*
+import {
+    ContinuousToolbox,
+    ContinuousFlyout,
+    ContinuousMetrics,
+} from "@blockly/continuous-toolbox"
+*/
 import useToolbox from "./useToolbox"
 
-export default function VmEditor(props: { className?: string }) {
-    const { className } = props
-    const { toolboxBlocks, toolboxCategories, initialXml } = useToolbox()
-    const reactBlockly = useRef<ReactBlockly>()
+export default function VmEditor(props: {
+    className?: string
+    initialXml?: string
+    onXmlChange?: (xml: string) => void
+}) {
+    const { className, onXmlChange, initialXml } = props
+    const {
+        toolboxBlocks,
+        toolboxCategories,
+        initialXml: defaultInitialXml,
+    } = useToolbox()
+    const reactBlockly = useRef<any>()
     const workspaceReady = useRef(false)
 
     const initWorkspace = () => {
         if (workspaceReady.current) return
-        const workspace: Blockly.WorkspaceSvg = reactBlockly.current?.workspace?.state?.workspace
+        const workspace: Blockly.WorkspaceSvg =
+            reactBlockly.current?.workspace?.state?.workspace
         if (!workspace) return
         workspaceReady.current = true
         // Add the disableOrphans event handler. This is not done automatically by
@@ -30,10 +46,16 @@ export default function VmEditor(props: { className?: string }) {
         const newXml = Blockly.Xml.domToText(
             Blockly.Xml.workspaceToDom(workspace)
         )
-        console.debug(newXml)
+        onXmlChange?.(newXml)
     }
 
-    console.log({ current: reactBlockly.current })
+    /**
+     *                 plugins: {
+                    toolbox: ContinuousToolbox,
+                    flyoutsVerticalToolbox: ContinuousFlyout,
+                    metricsManager: ContinuousMetrics,
+                },
+     */
     return (
         <ReactBlockly
             ref={reactBlockly}
@@ -58,7 +80,7 @@ export default function VmEditor(props: { className?: string }) {
                     },
                 },
             }}
-            initialXml={initialXml}
+            initialXml={initialXml || defaultInitialXml}
             wrapperDivClassName={className}
             workspaceDidChange={handleChange}
         />

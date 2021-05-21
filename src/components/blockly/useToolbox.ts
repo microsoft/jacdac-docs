@@ -17,7 +17,7 @@ import {
     isRegister,
     serviceSpecifications,
 } from "../../../jacdac-ts/src/jdom/spec"
-import { uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
+import { groupBy, SMap, uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
@@ -25,11 +25,14 @@ const initialXml =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlockDefinition = any
 
-let cachedBlocks: { blocks: BlockDefinition[]; services: jdspec.ServiceSpec[] }
-function loadBlocks(): {
+type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
     services: jdspec.ServiceSpec[]
-} {
+    groups: SMap<BlockDefinition[]>
+}
+
+let cachedBlocks: CachedBlockDefinitions
+function loadBlocks(): CachedBlockDefinitions {
     if (cachedBlocks) return cachedBlocks
 
     const variableName = (srv: jdspec.ServiceSpec) => `${humanify(srv.name)} 1`
@@ -251,18 +254,23 @@ function loadBlocks(): {
                 },
             })
     )
-    return {
+
+    const jdBlocks = blocks.filter(block => !!block.service)
+
+    return (cachedBlocks = {
         blocks,
         services: uniqueMap(
-            blocks.filter(block => !!block.service),
+            jdBlocks,
             block => block.service.shortId,
             block => block.service
         ),
-    }
+        groups: groupBy(jdBlocks, block => block.service.group || "Miscellanous"),
+    })
 }
 
 export default function useToolbox() {
-    const { blocks, services } = useMemo(() => loadBlocks(), [])
+    const { blocks, groups } = useMemo(() => loadBlocks(), [])
+
     const toolboxBlocks = [...blocks.map(block => ({ type: block.type }))]
     const toolboxCategories = [
         {
@@ -273,14 +281,12 @@ export default function useToolbox() {
                 { type: "jacdac_declare_role" },
             ],
         },
-        ...services.map(service => ({
-            name: service.name,
+        ...Object.keys(groups).map(group => ({
+            name: group,
             colour: "#5CA699",
-            blocks: blocks
-                .filter(block => block.service === service)
-                .map(block => ({
-                    type: block.type,
-                })),
+            blocks: groups[group].map(block => ({
+                type: block.type,
+            })),
         })),
         {
             name: "Logic",

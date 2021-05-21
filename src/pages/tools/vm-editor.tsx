@@ -2,6 +2,7 @@ import { createStyles, Grid, makeStyles, NoSsr } from "@material-ui/core"
 import React from "react"
 import VmEditor from "../../components/blockly/VmEditor"
 import Dashboard from "../../components/dashboard/Dashboard"
+import useLocalStorage from "../../components/useLocalStorage"
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -11,13 +12,20 @@ const useStyles = makeStyles(() =>
     })
 )
 
+const VM_SOURCE_STORAGE_KEY = "jacdac:vmeditor:xml"
 export default function Page() {
     const classes = useStyles()
+    const [xml, setXml] = useLocalStorage(VM_SOURCE_STORAGE_KEY, "")
+
+    const handleXml = (xml: string) => {
+        setXml(xml)
+    }
+
     return (
         <Grid container direction="column" spacing={1}>
             <Grid item xs={12}>
                 <NoSsr>
-                    <VmEditor className={classes.editor} />
+                    <VmEditor className={classes.editor} initialXml={xml} onXmlChange={handleXml} />
                 </NoSsr>
             </Grid>
             <Grid item xs={12}>

@@ -1058,6 +1058,11 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@blockly/continuous-toolbox@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@blockly/continuous-toolbox/-/continuous-toolbox-1.0.5.tgz#aeda57a13ac195c7dc26885745ec5ae8fc49b3f3"
+  integrity sha512-43CxwVPOdtaEN2qfDdggJ8qFQ00QOpntI4qIzrxd1URv91sISojahQrlxNU88Vw1dI4uuNzXOekfKbfbOJMaNg==
+
 "@blockly/disable-top-blocks@^0.1.9":
   version "0.1.9"
   resolved "https://registry.yarnpkg.com/@blockly/disable-top-blocks/-/disable-top-blocks-0.1.9.tgz#dd753fea376db9bed3080b84daaa42af24bcc785"

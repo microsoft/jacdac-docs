@@ -6,6 +6,7 @@
   "author": "Microsoft",
   "dependencies": {
     "@axe-core/react": "^4.2.0",
+    "@blockly/continuous-toolbox": "^1.0.5",
     "@blockly/disable-top-blocks": "^0.1.9",
     "@blockly/theme-modern": "^2.1.16",
     "@gatsby-contrib/gatsby-plugin-elasticlunr-search": "^3.0.2",
