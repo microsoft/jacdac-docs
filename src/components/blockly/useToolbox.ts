@@ -8,7 +8,7 @@ import {
     SRV_SETTINGS,
     SystemEvent,
     SystemReg,
-} from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
+} from "../../../jacdac-ts/src/jdom/constants"
 import {
     humanify,
     isNumericType,
