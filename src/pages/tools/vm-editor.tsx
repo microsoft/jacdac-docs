@@ -6,7 +6,7 @@ import Dashboard from "../../components/dashboard/Dashboard"
 const useStyles = makeStyles(() =>
     createStyles({
         editor: {
-            height: "calc(50h)",
+            height: "calc(50vh)",
         },
     })
 )

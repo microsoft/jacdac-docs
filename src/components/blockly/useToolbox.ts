@@ -275,7 +275,7 @@ export default function useToolbox() {
         },
         ...services.map(service => ({
             name: service.name,
-            colour: 230,
+            colour: '#5CA699',
             blocks: blocks
                 .filter(block => block.service === service)
                 .map(block => ({
