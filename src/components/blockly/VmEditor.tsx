@@ -1,32 +1,21 @@
-import React, { useContext, useEffect, useRef } from "react"
+import React, { useRef } from "react"
 import ReactBlockly from "react-blockly"
 import Blockly from "blockly"
 import Theme from "@blockly/theme-modern"
-import DarkTheme from "@blockly/theme-dark"
 import { DisableTopBlocks } from "@blockly/disable-top-blocks"
 import useToolbox from "./useToolbox"
-import DarkModeContext from "../ui/DarkModeContext"
 
 export default function VmEditor(props: { className?: string }) {
     const { className } = props
-    const { darkMode } = useContext(DarkModeContext)
     const { toolboxBlocks, toolboxCategories, initialXml } = useToolbox()
     const reactBlockly = useRef<ReactBlockly>()
-    const theme = darkMode == "dark" ? DarkTheme : Theme
-    const workspace: Blockly.WorkspaceSvg = reactBlockly.current?.workspace
+    const workspaceReady = useRef(false)
 
-    const handleChange = (workspace: Blockly.WorkspaceSvg) => {
-        const newXml = Blockly.Xml.domToText(
-            Blockly.Xml.workspaceToDom(workspace)
-        )
-        console.debug(newXml)
-    }
-
-    useEffect(() => {
-        if (!workspace) {
-            return
-        }
-        console.log({ current: reactBlockly.current, workspace })
+    const initWorkspace = () => {
+        if (workspaceReady.current) return
+        const workspace: Blockly.WorkspaceSvg = reactBlockly.current?.workspace?.state?.workspace
+        if (!workspace) return
+        workspaceReady.current = true
         // Add the disableOrphans event handler. This is not done automatically by
         // the plugin and should be handled by your application.
         workspace.addChangeListener(Blockly.Events.disableOrphans)
@@ -34,7 +23,15 @@ export default function VmEditor(props: { className?: string }) {
         // The plugin must be initialized before it has any effect.
         const disableTopBlocksPlugin = new DisableTopBlocks()
         disableTopBlocksPlugin.init()
-    }, [workspace])
+    }
+
+    const handleChange = (workspace: Blockly.WorkspaceSvg) => {
+        initWorkspace()
+        const newXml = Blockly.Xml.domToText(
+            Blockly.Xml.workspaceToDom(workspace)
+        )
+        console.debug(newXml)
+    }
 
     console.log({ current: reactBlockly.current })
     return (
@@ -52,8 +49,14 @@ export default function VmEditor(props: { className?: string }) {
                     snap: true,
                 },
                 renderer: "zelos",
-                theme,
+                theme: Theme,
                 oneBasedIndex: false,
+                move: {
+                    scrollbars: {
+                        vertical: false,
+                        horizontal: true,
+                    },
+                },
             }}
             initialXml={initialXml}
             wrapperDivClassName={className}

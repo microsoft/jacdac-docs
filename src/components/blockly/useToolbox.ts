@@ -17,7 +17,7 @@ import {
     isRegister,
     serviceSpecifications,
 } from "../../../jacdac-ts/src/jdom/spec"
-import { unique, uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
+import { uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
 
 const initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="jacdac_configuration"></block></xml>'
@@ -275,7 +275,7 @@ export default function useToolbox() {
         },
         ...services.map(service => ({
             name: service.name,
-            colour: '#5CA699',
+            colour: "#5CA699",
             blocks: blocks
                 .filter(block => block.service === service)
                 .map(block => ({

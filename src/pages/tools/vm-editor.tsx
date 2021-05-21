@@ -1,4 +1,4 @@
-import { createStyles, Grid, makeStyles } from "@material-ui/core"
+import { createStyles, Grid, makeStyles, NoSsr } from "@material-ui/core"
 import React from "react"
 import VmEditor from "../../components/blockly/VmEditor"
 import Dashboard from "../../components/dashboard/Dashboard"
@@ -16,7 +16,9 @@ export default function Page() {
     return (
         <Grid container direction="column" spacing={1}>
             <Grid item xs={12}>
-                <VmEditor className={classes.editor} />
+                <NoSsr>
+                    <VmEditor className={classes.editor} />
+                </NoSsr>
             </Grid>
             <Grid item xs={12}>
                 <Dashboard />
