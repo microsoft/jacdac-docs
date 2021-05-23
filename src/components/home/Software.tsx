@@ -19,25 +19,26 @@ export default function Protocol() {
         >
             <SplitGrid
                 title="Software"
-                subtitle3="Integrate Jacdac into your (web) applications."
+                subtitle3="Integrate Jacdac into your web, Node.JS or embedded apps."
                 imageColumns={6}
-                image={
-                    <StaticImage
-                        src="./pcbfootprint.png"
-                        alt="PCB connector footprint"
-                    />
-                }
+                image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
             />
 
             <CenterGrid
+                subtitle2="Low-Code Hardware."
+                description="Jacdac client libraries empower developers without embedded or event coding experience."
+            />
+
+            <SplitGrid
+                right={true}
                 subtitle="JavaScript and TypeScript."
-                description="From the browser or Node.JS, use our JavaScript/TypeScript library to interact with physical Jacdac devices."
+                description="From the browser or Node.JS, use our JavaScript/TypeScript library to interact with physical Jacdac devices. If you can build a web page, you can program Jacdac."
                 buttonText="JavaScript library"
                 buttonVariant="link"
                 buttonUrl="/clients/javascript"
                 image={
                     <StaticImage
-                        src="./rhtempvertical.png"
+                        src="./html5.png"
                         alt="A Jacdac humidity module plugging into a Jacdac cable"
                     />
                 }
@@ -45,7 +46,7 @@ export default function Protocol() {
 
             <SplitGrid
                 right={false}
-                subtitle="Web USB, Web Bluetooth, ..."
+                subtitle="Web USB and Web Bluetooth"
                 description="No driver installation needed to access the Jacdac devices from your web applications thanks to Web USB or Web Bluetooth."
                 image={
                     <StaticImage src="./bustopology.png" alt="Bus topology" />
@@ -54,8 +55,57 @@ export default function Protocol() {
 
             <SplitGrid
                 right={true}
-                subtitle="React support"
-                description="Our evented library is designed to integrate with React, Vue, and other UI frameworks."
+                subtitle="MakeCode."
+                description="Add Jacdac to your micro:bit V2, Arcade or Maker board."
+                buttonText="MakeCode library"
+                buttonVariant="link"
+                buttonUrl="/clients/makecode"
+                image={
+                    <StaticImage
+                        src="./html5.png"
+                        alt="A Jacdac humidity module plugging into a Jacdac cable"
+                    />
+                }
+            />
+
+            <CenterGrid
+                subtitle2="Developer tools."
+                description="Investigate and diagnose issues through our debugging tools."
+            />
+
+            <SplitGrid
+                right={true}
+                subtitle="Dashboard"
+                description="Visualize and interact with physical or simulated devices in the dashboard."
+                imageColumns={8}
+                image={
+                    <StaticImage
+                        src="./rotarysim.png"
+                        alt="A rotary encoder dashboard"
+                    />
+                }
+                buttonText="Try the dashboard"
+                buttonVariant="link"
+                buttonUrl="/dashboard/"
+            />
+
+            <SplitGrid
+                right={false}
+                subtitle="Simulators."
+                description="Spin up virtual device and services to test your client software. Both physical and simulated devices can interact together."
+                imageColumns={8}
+                image={
+                    <StaticImage
+                        src="./dashboardlight.png"
+                        alt="A simulated light strip"
+                    />
+                }
+            />
+
+            <SplitGrid
+                right={true}
+                subtitle="Device Tree"
+                description="Inspect devices, services, registers and events in the device tree."
                 imageColumns={8}
                 image={
                     <StaticImage
@@ -65,9 +115,24 @@ export default function Protocol() {
                 }
                 buttonText="Device Development Kit"
                 buttonVariant="link"
-                buttonUrl="https://github.com/microsoft/jacdac-ts"
+                buttonUrl="/"
             />
 
+            <SplitGrid
+                right={false}
+                subtitle="Packet Console"
+                description="Sniff the packet traffic, record and replay traces in the packet console."
+                imageColumns={8}
+                image={
+                    <StaticImage
+                        src="./jacdacsinglergbledmodule.png"
+                        alt="A LED module"
+                    />
+                }
+                buttonText="Device Development Kit"
+                buttonVariant="link"
+                buttonUrl="/"
+            />
 
             <CarouselGrid>
                 <Grid item xs={12} sm={4}>
