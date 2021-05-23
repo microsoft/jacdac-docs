@@ -39,7 +39,6 @@ export default function Protocol() {
                 subtitle3="Integrate Jacdac into your web, Node.JS or embedded apps."
                 imageColumns={6}
                 image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
-                centered={true}
             />
 
             <CenterGrid

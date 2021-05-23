@@ -22,8 +22,6 @@ export default function Home() {
             <SplitGrid
                 title="Jacdac"
                 subtitle="plug-and-play for microcontrollers"
-                buttonText="Try the dashboard"
-                buttonUrl="/dashboard"
                 imageColumns={6}
                 image={
                     <StaticImage
@@ -69,20 +67,34 @@ export default function Home() {
             />
             <SplitGrid
                 right={true}
-                subtitle="Services."
+                subtitle="Protocol."
+                description="Bus topology, dynamic discovery, standardized services for micro-controllers."
+                buttonText="Learn more"
+                buttonVariant="link"
+                buttonUrl="/protocol/"
+                image={
+                    <StaticImage
+                        src="./packetconsole.png"
+                        alt="Web simulator of a rotary encoder"
+                    />
+                }
+            />            
+            <SplitGrid
+                right={false}
+                subtitle="Standardized Services."
                 description="Jacdac services are specified to abstract the hardware device from the software implementation. The services are comprised of registers, commands and events, along with precise data layout information for each packet."
                 buttonText="Explore services"
                 buttonVariant="link"
                 buttonUrl="/services/"
                 image={
                     <StaticImage
-                        src="./rotarysim.png"
-                        alt="Web simulator of a rotary encoder"
+                        src="./dashboard.png"
+                        alt="Dashboard of devices"
                     />
                 }
             />
             <SplitGrid
-                right={false}
+                right={true}
                 subtitle="Client Software."
                 description="Integrate Jacdac in your web or Node.JS using our Javascript library."
                 buttonText="Add Jacdac to your apps."
