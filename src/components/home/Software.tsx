@@ -1,6 +1,6 @@
 import { Grid } from "@material-ui/core"
 import { StaticImage } from "gatsby-plugin-image"
-import React from "react"
+import React, { useContext } from "react"
 import CarouselGrid from "./CarouselGrid"
 import CenterGrid from "./CenterGrid"
 import FeatureItem from "./FeatureItem"
@@ -8,7 +8,24 @@ import SplitGrid from "./SplitGrid"
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
 import CameraIcon from "@material-ui/icons/Camera"
 import TelegramIcon from "@material-ui/icons/Telegram"
+import { SRV_SOIL_MOISTURE } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import {
+    addServiceProvider,
+    serviceProviderDefinitionFromServiceClass,
+} from "../../../jacdac-ts/src/servers/servers"
+import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
+import AppContext, { DrawerType } from "../AppContext"
+
 export default function Protocol() {
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { setDrawerType } = useContext(AppContext)
+    const handleStartSimulator = () => {
+        const provider =
+            serviceProviderDefinitionFromServiceClass(SRV_SOIL_MOISTURE)
+        addServiceProvider(bus, provider)
+    }
+    const handleShowDeviceTree = () => setDrawerType(DrawerType.Dom)
+    const handleShowPacketConsole = () => setDrawerType(DrawerType.Packets)
     return (
         <Grid
             container
@@ -22,6 +39,7 @@ export default function Protocol() {
                 subtitle3="Integrate Jacdac into your web, Node.JS or embedded apps."
                 imageColumns={6}
                 image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
+                centered={true}
             />
 
             <CenterGrid
@@ -46,7 +64,8 @@ export default function Protocol() {
 
             <SplitGrid
                 right={false}
-                subtitle="Web USB and Web Bluetooth"
+                subtitle="Web USB"
+                subtitle3="and Web Bluetooth"
                 description="No driver installation needed to access the Jacdac devices from your web applications thanks to Web USB or Web Bluetooth."
                 image={
                     <StaticImage src="./bustopology.png" alt="Bus topology" />
@@ -62,8 +81,8 @@ export default function Protocol() {
                 buttonUrl="/clients/makecode"
                 image={
                     <StaticImage
-                        src="./html5.png"
-                        alt="A Jacdac humidity module plugging into a Jacdac cable"
+                        src="./makecode.png"
+                        alt="Block code to swipe a servo"
                     />
                 }
             />
@@ -77,7 +96,6 @@ export default function Protocol() {
                 right={true}
                 subtitle="Dashboard"
                 description="Visualize and interact with physical or simulated devices in the dashboard."
-                imageColumns={8}
                 image={
                     <StaticImage
                         src="./rotarysim.png"
@@ -93,78 +111,84 @@ export default function Protocol() {
                 right={false}
                 subtitle="Simulators."
                 description="Spin up virtual device and services to test your client software. Both physical and simulated devices can interact together."
-                imageColumns={8}
                 image={
                     <StaticImage
                         src="./dashboardlight.png"
                         alt="A simulated light strip"
                     />
                 }
+                buttonText="Start a simulator"
+                buttonVariant="link"
+                onButtonClick={handleStartSimulator}
             />
 
             <SplitGrid
                 right={true}
                 subtitle="Device Tree"
                 description="Inspect devices, services, registers and events in the device tree."
-                imageColumns={8}
                 image={
                     <StaticImage
-                        src="./jacdacsinglergbledmodule.png"
-                        alt="A LED module"
+                        src="./devicetree.png"
+                        alt="A tree of devices, services and registers"
                     />
                 }
-                buttonText="Device Development Kit"
+                buttonText="Open Device Tree"
                 buttonVariant="link"
-                buttonUrl="/"
+                onButtonClick={handleShowDeviceTree}
             />
 
             <SplitGrid
                 right={false}
                 subtitle="Packet Console"
                 description="Sniff the packet traffic, record and replay traces in the packet console."
-                imageColumns={8}
                 image={
                     <StaticImage
-                        src="./jacdacsinglergbledmodule.png"
-                        alt="A LED module"
+                        src="./packetconsole.png"
+                        alt="A list of packet"
                     />
                 }
-                buttonText="Device Development Kit"
+                buttonText="Open Packet Console"
                 buttonVariant="link"
-                buttonUrl="/"
+                onButtonClick={handleShowPacketConsole}
             />
+            <CenterGrid
+                subtitle2="Can I add Jacdac to my web app?"
+                description="Absolutely! You can embed our dashboard or add our JavaScript package."
+                buttonText="Integrate Jacdac into your web app"
+                buttonVariant="link"
+                buttonUrl="/clients/web"
+            />
+        </Grid>
+    )
+}
+
+/*
+
 
             <CarouselGrid>
                 <Grid item xs={12} sm={4}>
                     <FeatureItem
                         startImage={<TelegramIcon fontSize="large" />}
-                        description="Web USB."
+                        description="Web first."
                         caption="Access physical devices from the browser without driver installation."
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <FeatureItem
                         startImage={<CameraIcon fontSize="large" />}
-                        description="React."
-                        caption="."
+                        description="NPM or GitHub."
+                        caption="Grab it on NPM or rebuild it from our GitHub repositories."
+                        buttonText="GitHub"
+                        buttonUrl="/github/"
+                        buttonVariant="link"
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <FeatureItem
                         startImage={<PowerSettingsNewIcon fontSize="large" />}
-                        description="Extensible."
+                        description="."
                         caption="Specify your own services and deploy them on your devices."
                     />
                 </Grid>
             </CarouselGrid>
-
-            <CenterGrid
-                subtitle2="Can I add Jacdac to my web app?"
-                description="Absolutely. Add our JavaScript package to your web application and start talking Jacdac!"
-                buttonText="Integrate Jacdac into your web app"
-                buttonVariant="link"
-                buttonUrl="/clients/javascript"
-            />
-        </Grid>
-    )
-}
+*/
