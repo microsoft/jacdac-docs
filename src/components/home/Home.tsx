@@ -33,7 +33,7 @@ export default function Home() {
                 }
             />
             <CenterGrid
-                subtitle3="Not only a new protocol designed for easier physical connectivity. It is an entire stack that bridges the world of the low cost microcontroller to the web browser and beyond."
+                subtitle3="A protocol designed for easier physical connectivity. It is an entire stack that bridges the world of the low cost microcontroller to the web browser and beyond."
                 description="Cheap, flexible and extensible."
             />
             <Grid item xs={12}>
@@ -55,7 +55,7 @@ export default function Home() {
             </CarouselGrid>
             <SplitGrid
                 right={false}
-                subtitle="Plug it in."
+                subtitle="Hardware."
                 description="Jacdac relies on a 3-wire bus for power delivery and data transfer. A purpose-built connector is used to interface with the Jacdac PCB edge connector."
                 image={
                     <StaticImage
@@ -69,11 +69,11 @@ export default function Home() {
             />
             <SplitGrid
                 right={true}
-                subtitle="Visualize it."
+                subtitle="Services."
                 description="Jacdac services are specified to abstract the hardware device from the software implementation. The services are comprised of registers, commands and events, along with precise data layout information for each packet."
-                buttonText="Try the dashboard web simulator"
+                buttonText="Explore services"
                 buttonVariant="link"
-                buttonUrl="/dashboard"
+                buttonUrl="/services/"
                 image={
                     <StaticImage
                         src="./rotarysim.png"
@@ -83,18 +83,12 @@ export default function Home() {
             />
             <SplitGrid
                 right={false}
-                subtitle="Record it."
-                description="Instantly start to collect streaming data from Jacdac devices into various output formats. Yes, it’s as easy as it sounds."
-                buttonText="Try the data collector"
+                subtitle="Client Software."
+                description="Integrate Jacdac in your web or Node.JS using our Javascript library."
+                buttonText="Add Jacdac to your apps."
                 buttonVariant="link"
-                buttonUrl="/tools/data-collector"
-                imageColumns={8}
-                image={
-                    <StaticImage
-                        src="./recordit.png"
-                        alt="Charts of recorded data"
-                    />
-                }
+                buttonUrl="/software/"
+                image={<StaticImage src="./html5.png" alt="HTML5 logo" />}
             />
 
             <CenterGrid
@@ -231,6 +225,14 @@ export default function Home() {
                 buttonText="Integrate Jacdac into your hardware"
                 buttonVariant="link"
                 buttonUrl="/hardware/"
+            />
+
+            <CenterGrid
+                subtitle="Can I add Jacdac to my app?"
+                description="Absolutely! Use our client software to integrate into your apps."
+                buttonText="Integrate Jacdac into your apps"
+                buttonVariant="link"
+                buttonUrl="/software/"
             />
         </Grid>
     )
