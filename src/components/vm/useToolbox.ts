@@ -85,6 +85,13 @@ export interface BlockDefinition extends BlockReference {
     template?: BlockTemplate
 }
 
+export interface ButtonDefinition {
+    kind: "button"
+    text: string
+    callbackKey: string
+    service: jdspec.ServiceSpec
+}
+
 export interface ServiceBlockDefinition extends BlockDefinition {
     template: BlockTemplate
     service: jdspec.ServiceSpec
@@ -115,12 +122,8 @@ export interface CategoryDefinition {
     custom?: string
     colour?: string
     categorystyle?: string
-    contents?: BlockDefinition[]
-    button?: {
-        text: string
-        callbackKey: string
-        service: jdspec.ServiceSpec
-    }[]
+    contents?: (BlockDefinition | ButtonDefinition)[]
+    button?: ButtonDefinition
 }
 
 export interface ToolboxConfiguration {
@@ -658,22 +661,22 @@ export default function useToolbox(blockServices?: string[]): {
                     kind: "category",
                     name: service.name,
                     colour: "#5CA699",
-                    blocks: serviceBlocks.map(block => ({
+                    contents: serviceBlocks.map(block => ({
+                        kind: "block",
                         type: block.type,
                         values: block.values,
                     })),
-                    button: Object.values(
-                        uniqueMap(
-                            serviceBlocks,
-                            block => block.service.shortId,
-                            block => block.service
-                        )
-                    ).map(service => ({
+                    button: {
+                        kind: "button",
                         text: `Add ${service.name}`,
                         callbackKey: `jacdac_add_role_callback_${service.shortId}`,
                         service,
-                    })),
-                })),
+                    },
+                }))
+                .map(cat => {
+                    if (cat.button) cat.contents.unshift(cat.button)
+                    return cat
+                }),
             <CategoryDefinition>{
                 kind: "category",
                 name: "Commands",
@@ -761,6 +764,8 @@ export default function useToolbox(blockServices?: string[]): {
             },
         ].filter(cat => !!cat.contents?.length),
     }
+
+    console.log({ toolboxConfiguration })
 
     return {
         toolboxConfiguration,

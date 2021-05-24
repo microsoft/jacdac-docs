@@ -6,7 +6,7 @@ import "@blockly/block-dynamic-connection"
 import Theme from "@blockly/theme-modern"
 import DarkTheme from "@blockly/theme-dark"
 import { DisableTopBlocks } from "@blockly/disable-top-blocks"
-import useToolbox, { scanServices } from "./useToolbox"
+import useToolbox, { ButtonDefinition, scanServices } from "./useToolbox"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import BlocklyModalDialogs from "./BlocklyModalDialogs"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
@@ -108,10 +108,8 @@ export default function VmEditor(props: {
         if (!workspace) return;
         
         // collect buttons
-        const buttons = arrayConcatMany(
-            toolboxConfiguration?.contents?.filter(cat => cat.button).map(cat => cat.button)
-        )
-        buttons.forEach(button =>
+        const buttons: ButtonDefinition[] = toolboxConfiguration?.contents?.map(cat => cat.button).filter(btn => !!btn)
+        buttons?.forEach(button =>
             workspace.registerButtonCallback(button.callbackKey, () =>
                 Blockly.Variables.createVariableButtonHandler(
                     workspace,
