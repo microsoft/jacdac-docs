@@ -112,6 +112,7 @@ export interface RegisterBlockDefinition extends ServiceBlockDefinition {
 }
 
 export interface CommandBlockDefinition extends ServiceBlockDefinition {
+    kind: "block"
     template: CommandTemplate
     command: jdspec.PacketInfo
 }
@@ -130,9 +131,15 @@ export interface CategoryDefinition {
     button?: ButtonDefinition
 }
 
+export interface SeparatorDefinition {
+    kind: "sep"
+}
+
+export type ToolboxNode = SeparatorDefinition | CategoryDefinition
+
 export interface ToolboxConfiguration {
     kind: "categoryToolbox"
-    contents: CategoryDefinition[]
+    contents: ToolboxNode[]
 }
 
 type CachedBlockDefinitions = {
@@ -632,9 +639,12 @@ export function scanServices(workspace: Blockly.Workspace) {
 }
 
 function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
-    if (cat.button) cat.contents.unshift(cat.button)
+    if (cat.button) {
+        if (!cat.contents) cat.contents = []
+        cat.contents.unshift(cat.button)
+    }
     cat.contents
-        .filter(node => node.kind === "block")
+        ?.filter(node => node.kind === "block")
         .map(node => <BlockReference>node)
         .filter(block => !!block.values)
         .forEach(block => {
@@ -649,7 +659,7 @@ function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
                 .join("\n")}</block>`
             delete block.type
         })
-    return cat;
+    return cat
 }
 
 export default function useToolbox(blockServices?: string[]): {
@@ -669,121 +679,141 @@ export default function useToolbox(blockServices?: string[]): {
             services.find(service => service.shortId === serviceShortId)
         )
         .filter(srv => !!srv)
+        .sort((l, r) => l.name.localeCompare(r.name))
+
+    const servicesCategories: CategoryDefinition[] = toolboxServices
+        .map(service => ({
+            service,
+            serviceBlocks: serviceBlocks.filter(
+                block => block.service === service
+            ),
+        }))
+        .map<CategoryDefinition>(({ service, serviceBlocks }) => ({
+            kind: "category",
+            name: service.name,
+            colour: "#5CA699",
+            contents: serviceBlocks.map(block => ({
+                kind: "block",
+                type: block.type,
+                values: block.values,
+            })),
+            button: {
+                kind: "button",
+                text: `Add ${service.name}`,
+                callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+                service,
+            },
+        }))
+        .filter(cat => !!cat.contents?.length)
+
+    const commandsCategory: CategoryDefinition = {
+        kind: "category",
+        name: "Commands",
+        colour: "%{BKY_LISTS_HUE}",
+        contents: [
+            {
+                kind: "block",
+                type: WHILE_CONDITION_BLOCK,
+            },
+            {
+                kind: "block",
+                type: "jacdac_wait",
+                values: {
+                    TIME: { kind: "block", type: "jacdac_time_picker" },
+                },
+            },
+        ],
+    }
+
+    const logicCategory: CategoryDefinition = {
+        kind: "category",
+        name: "Logic",
+        colour: "%{BKY_LOGIC_HUE}",
+        contents: [
+            {
+                kind: "block",
+                type: "dynamic_if",
+            },
+            {
+                kind: "block",
+                type: "logic_compare",
+                values: {
+                    A: { kind: "block", type: "math_number" },
+                    B: { kind: "block", type: "math_number" },
+                },
+            },
+            {
+                kind: "block",
+                type: "logic_operation",
+                values: {
+                    A: { kind: "block", type: "logic_boolean" },
+                    B: { kind: "block", type: "logic_boolean" },
+                },
+            },
+            {
+                kind: "block",
+                type: "logic_negate",
+                values: {
+                    BOOL: { kind: "block", type: "logic_boolean" },
+                },
+            },
+            {
+                kind: "block",
+                type: "logic_boolean",
+            },
+        ],
+    }
+
+    const mathCategory: CategoryDefinition = {
+        kind: "category",
+        name: "Math",
+        colour: "%{BKY_MATH_HUE}",
+        contents: [
+            {
+                kind: "block",
+                type: "jacdac_math_arithmetic",
+                values: {
+                    A: { kind: "block", type: "math_number" },
+                    B: { kind: "block", type: "math_number" },
+                },
+            },
+            {
+                kind: "block",
+                type: "jacdac_math_single",
+                values: {
+                    NUM: {
+                        kind: "block",
+                        type: "math_number",
+                    },
+                },
+            },
+            { kind: "block", type: "math_number" },
+        ],
+    }
+
+    const variablesCategory: CategoryDefinition = {
+        kind: "category",
+        name: "Variables",
+        colour: "%{BKY_VARIABLES_HUE}",
+        custom: "VARIABLE",
+    }
 
     const toolboxConfiguration: ToolboxConfiguration = {
         kind: "categoryToolbox",
         contents: [
-            ...toolboxServices
-                .map(service => ({
-                    service,
-                    serviceBlocks: serviceBlocks.filter(
-                        block => block.service === service
-                    ),
-                }))
-                .map<CategoryDefinition>(({ service, serviceBlocks }) => ({
-                    kind: "category",
-                    name: service.name,
-                    colour: "#5CA699",
-                    contents: serviceBlocks.map(block => ({
-                        kind: "block",
-                        type: block.type,
-                        values: block.values,
-                    })),
-                    button: {
-                        kind: "button",
-                        text: `Add ${service.name}`,
-                        callbackKey: `jacdac_add_role_callback_${service.shortId}`,
-                        service,
-                    },
-                })),
-            <CategoryDefinition>{
-                kind: "category",
-                name: "Commands",
-                colour: "%{BKY_LISTS_HUE}",
-                contents: [
-                    {
-                        kind: "block",
-                        type: WHILE_CONDITION_BLOCK,
-                    },
-                    {
-                        kind: "block",
-                        type: "jacdac_wait",
-                        values: {
-                            TIME: { type: "jacdac_time_picker" },
-                        },
-                    },
-                ],
+            ...servicesCategories,
+            <SeparatorDefinition>{
+                kind: "sep",
             },
-            <CategoryDefinition>{
-                kind: "category",
-                name: "Logic",
-                colour: "%{BKY_LOGIC_HUE}",
-                contents: [
-                    {
-                        kind: "block",
-                        type: "dynamic_if",
-                    },
-                    {
-                        kind: "block",
-                        type: "logic_compare",
-                        values: {
-                            A: { type: "math_number" },
-                            B: { type: "math_number" },
-                        },
-                    },
-                    {
-                        kind: "block",
-                        type: "logic_operation",
-                        values: {
-                            A: { type: "logic_boolean" },
-                            B: { type: "logic_boolean" },
-                        },
-                    },
-                    {
-                        kind: "block",
-                        type: "logic_negate",
-                        values: {
-                            BOOL: { type: "logic_boolean" },
-                        },
-                    },
-                    {
-                        kind: "block",
-                        type: "logic_boolean",
-                    },
-                ],
-            },
-            <CategoryDefinition>{
-                kind: "category",
-                name: "Math",
-                colour: "%{BKY_MATH_HUE}",
-                contents: [
-                    {
-                        kind: "block",
-                        type: "jacdac_math_arithmetic",
-                        values: {
-                            A: { type: "math_number" },
-                            B: { type: "math_number" },
-                        },
-                    },
-                    {
-                        kind: "block",
-                        type: "jacdac_math_single",
-                        values: {
-                            NUM: { type: "math_number" },
-                        },
-                    },
-                    { kind: "block", type: "math_number" },
-                ],
-            },
-            <CategoryDefinition>{
-                kind: "category",
-                name: "Variables",
-                colour: "%{BKY_VARIABLES_HUE}",
-                custom: "VARIABLE",
-            },
-        ]
-            .filter(cat => !!cat.contents?.length)
-            .map(patchCategoryJSONtoXML),
+            commandsCategory,
+            logicCategory,
+            mathCategory,
+            variablesCategory,
+        ].map(node =>
+            node.kind === "category"
+                ? patchCategoryJSONtoXML(node as CategoryDefinition)
+                : node
+        ),
     }
 
     return {
