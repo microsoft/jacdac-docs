@@ -56,7 +56,11 @@ export interface BlockReference {
     kind: "block"
     type: string
     values?: SMap<BlockReference>
-    shadow?: boolean
+    blockxml?: string
+
+    value?: number
+    min?: number
+    max?: number
 }
 
 export type EventTemplate = "event"
@@ -174,24 +178,22 @@ export function loadBlocks(): CachedBlockDefinitions {
         field.name === "_" ? reg.name : field.name
     const fieldToShadow = (field: jdspec.PacketMember): BlockReference =>
         isBooleanField(field)
-            ? { kind: "block", type: "jacdac_on_off", shadow: true }
+            ? { kind: "block", type: "jacdac_on_off" }
             : isStringField(field)
-            ? { kind: "block", type: "text", shadow: true }
+            ? { kind: "block", type: "text" }
             : field.unit === "°"
             ? {
                   kind: "block",
                   type: "jacdac_angle",
-                  shadow: true,
               }
             : field.unit === "/"
-            ? { kind: "block", type: "jacdac_percent", shadow: true }
+            ? { kind: "block", type: "jacdac_percent" }
             : {
                   kind: "block",
                   type: "math_number",
                   value: field.defaultValue || 0,
                   min: field.typicalMin || field.absoluteMin,
                   max: field.typicalMax || field.absoluteMax,
-                  shadow: true,
               }
     const variableName = (srv: jdspec.ServiceSpec) =>
         `${humanify(srv.camelName).toLowerCase()} 1`
@@ -674,7 +676,24 @@ export default function useToolbox(blockServices?: string[]): {
                     },
                 }))
                 .map(cat => {
+                    // patch JSON structure to match blockly
                     if (cat.button) cat.contents.unshift(cat.button)
+                    cat.contents
+                        .filter(node => node.kind === "block")
+                        .map(node => <BlockReference>node)
+                        .filter(block => !!block.values)
+                        .forEach(block => {
+                            // yup, this suck but we have to go through it
+                            block.blockxml = `<block type="${
+                                block.type
+                            }">${Object.keys(block.values)
+                                .map(name => {
+                                    const { type } = block.values[name]
+                                    return `<value name="${name}"><shadow type="${type}" /></value>`
+                                })
+                                .join("\n")}</block>`
+                            delete block.type
+                        })
                     return cat
                 }),
             <CategoryDefinition>{
@@ -690,7 +709,7 @@ export default function useToolbox(blockServices?: string[]): {
                         kind: "block",
                         type: "jacdac_wait",
                         values: {
-                            TIME: { type: "jacdac_time_picker", shadow: true },
+                            TIME: { type: "jacdac_time_picker" },
                         },
                     },
                 ],
@@ -708,23 +727,23 @@ export default function useToolbox(blockServices?: string[]): {
                         kind: "block",
                         type: "logic_compare",
                         values: {
-                            A: { type: "math_number", shadow: true },
-                            B: { type: "math_number", shadow: true },
+                            A: { type: "math_number" },
+                            B: { type: "math_number" },
                         },
                     },
                     {
                         kind: "block",
                         type: "logic_operation",
                         values: {
-                            A: { type: "logic_boolean", shadow: true },
-                            B: { type: "logic_boolean", shadow: true },
+                            A: { type: "logic_boolean" },
+                            B: { type: "logic_boolean" },
                         },
                     },
                     {
                         kind: "block",
                         type: "logic_negate",
                         values: {
-                            BOOL: { type: "logic_boolean", shadow: true },
+                            BOOL: { type: "logic_boolean" },
                         },
                     },
                     {
@@ -742,15 +761,15 @@ export default function useToolbox(blockServices?: string[]): {
                         kind: "block",
                         type: "jacdac_math_arithmetic",
                         values: {
-                            A: { type: "math_number", shadow: true },
-                            B: { type: "math_number", shadow: true },
+                            A: { type: "math_number" },
+                            B: { type: "math_number" },
                         },
                     },
                     {
                         kind: "block",
                         type: "jacdac_math_single",
                         values: {
-                            NUM: { type: "math_number", shadow: true },
+                            NUM: { type: "math_number" },
                         },
                     },
                     { kind: "block", type: "math_number" },
