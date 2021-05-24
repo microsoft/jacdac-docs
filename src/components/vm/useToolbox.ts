@@ -646,7 +646,7 @@ function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
     cat.contents
         ?.filter(node => node.kind === "block")
         .map(node => <BlockReference>node)
-        .filter(block => !!block.values)
+        .filter(block => !!block.values && Blockly.Blocks[block.type]) // avoid broken blocks
         .forEach(block => {
             // yup, this suck but we have to go through it
             block.blockxml = `<block type="${block.type}">${Object.keys(
