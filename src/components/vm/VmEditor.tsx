@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import ReactBlockly from "react-blockly"
+import { useBlocklyWorkspace } from "react-blockly"
 import Blockly from "blockly"
 import "@blockly/field-slider"
 import "@blockly/block-dynamic-connection"
@@ -31,22 +31,41 @@ export default function VmEditor(props: {
     const { darkMode } = useContext(DarkModeContext)
     const [services, setServices] = useState<string[]>([])
     const { toolboxCategories, newProjectXml } = useToolbox(services)
-    // ReactBlockly
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const reactBlockly = useRef<any>()
-    const workspaceReady = useRef(false)
-
     const theme = darkMode === "dark" ? DarkTheme : Theme
     const gridColor = darkMode === "dark" ? "#555" : "#ccc"
 
-    const resolveWorkspace = (): Blockly.WorkspaceSvg =>
-        reactBlockly.current?.workspace?.state?.workspace
+    // ReactBlockly
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const blocklyRef = useRef(null)
+    const { workspace, xml } = useBlocklyWorkspace({
+        ref: blocklyRef,
+        toolboxCategories,
+        workspaceConfiguration: {
+            comments: false,
+            css: true,
+            trashcan: false,
+            sounds: false,
+            grid: {
+                spacing: 25,
+                length: 1,
+                colour: gridColor,
+                snap: true,
+            },
+            renderer: "zelos",
+            theme,
+            oneBasedIndex: false,
+            move: {
+                scrollbars: {
+                    vertical: false,
+                    horizontal: true,
+                },
+            },
+        },
+        initialXml: initialXml || newProjectXml,
+    })
 
-    const initWorkspace = () => {
-        if (workspaceReady.current) return
-        const workspace = resolveWorkspace()
+    useEffect(() => {
         if (!workspace) return
-        workspaceReady.current = true
         // Add the disableOrphans event handler. This is not done automatically by
         // the plugin and should be handled by your application.
         workspace.addChangeListener(Blockly.Events.disableOrphans)
@@ -54,19 +73,13 @@ export default function VmEditor(props: {
         // The plugin must be initialized before it has any effect.
         const disableTopBlocksPlugin = new DisableTopBlocks()
         disableTopBlocksPlugin.init()
-    }
+    }, [workspace])
 
     // blockly did a change
-    const handleChange = (workspace: Blockly.WorkspaceSvg) => {
-        initWorkspace()
+    useEffect(() => {
+        if (!workspace) return;
 
-        // save xml
-        if (onXmlChange) {
-            const newXml = Blockly.Xml.domToText(
-                Blockly.Xml.workspaceToDom(workspace)
-            )
-            onXmlChange(newXml)
-        }
+        onXmlChange?.(xml)
 
         // save json
         if (onJSONChange || onIT4ProgramChange) {
@@ -88,14 +101,15 @@ export default function VmEditor(props: {
         const newServices = scanServices(workspace)
         if (JSON.stringify(services) !== JSON.stringify(newServices))
             setServices(newServices)
-    }
+    }, [workspace, xml])
 
     // track workspace changes and update callbacks
     useEffect(() => {
+        if (!workspace) return;
+        
         // collect buttons
-        const workspace = resolveWorkspace()
         const buttons = arrayConcatMany(
-            toolboxCategories?.filter(cat => cat.button).map(cat => cat.button)
+            toolboxCategories?.contents?.filter(cat => cat.button).map(cat => cat.button)
         )
         buttons.forEach(button =>
             workspace.registerButtonCallback(button.callbackKey, () =>
@@ -106,39 +120,12 @@ export default function VmEditor(props: {
                 )
             )
         )
-    }, [JSON.stringify(toolboxCategories)])
+    }, [workspace, JSON.stringify(toolboxCategories)])
 
     return (
         <>
             <BlocklyModalDialogs />
-            <ReactBlockly
-                ref={reactBlockly}
-                toolboxCategories={toolboxCategories}
-                workspaceConfiguration={{
-                    comments: false,
-                    css: true,
-                    trashcan: false,
-                    sounds: false,
-                    grid: {
-                        spacing: 25,
-                        length: 1,
-                        colour: gridColor,
-                        snap: true,
-                    },
-                    renderer: "zelos",
-                    theme,
-                    oneBasedIndex: false,
-                    move: {
-                        scrollbars: {
-                            vertical: false,
-                            horizontal: true,
-                        },
-                    },
-                }}
-                initialXml={initialXml || newProjectXml}
-                wrapperDivClassName={className}
-                workspaceDidChange={handleChange}
-            />
+            <div className={className} ref={blocklyRef} />
         </>
     )
 }

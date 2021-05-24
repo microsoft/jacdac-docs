@@ -53,6 +53,7 @@ export interface NumberInputDefinition extends InputDefinition {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface BlockReference {
+    kind: "block"
     type: string
     values?: SMap<BlockReference>
     shadow?: boolean
@@ -109,16 +110,22 @@ export const WHILE_CONDITION_BLOCK_CONDITION = "condition"
 export const WAIT_BLOCK = "jacdac_wait"
 
 export interface CategoryDefinition {
+    kind: "category"
     name: string
     custom?: string
     colour?: string
     categorystyle?: string
-    blocks?: BlockDefinition[]
+    contents?: BlockDefinition[]
     button?: {
         text: string
         callbackKey: string
         service: jdspec.ServiceSpec
     }[]
+}
+
+export interface ToolboxDefinition {
+    kind: "categoryToolbox"
+    contents: CategoryDefinition[]
 }
 
 type CachedBlockDefinitions = {
@@ -162,19 +169,21 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const fieldName = (reg: jdspec.PacketInfo, field: jdspec.PacketMember) =>
         field.name === "_" ? reg.name : field.name
-    const fieldToShadow = (field: jdspec.PacketMember) =>
+    const fieldToShadow = (field: jdspec.PacketMember): BlockReference =>
         isBooleanField(field)
-            ? { type: "jacdac_on_off", shadow: true }
+            ? { kind: "block", type: "jacdac_on_off", shadow: true }
             : isStringField(field)
-            ? { type: "text", shadow: true }
+            ? { kind: "block", type: "text", shadow: true }
             : field.unit === "°"
             ? {
+                  kind: "block",
                   type: "jacdac_angle",
                   shadow: true,
               }
             : field.unit === "/"
-            ? { type: "jacdac_percent", shadow: true }
+            ? { kind: "block", type: "jacdac_percent", shadow: true }
             : {
+                  kind: "block",
                   type: "math_number",
                   value: field.defaultValue || 0,
                   min: field.typicalMin || field.absoluteMin,
@@ -197,7 +206,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             check: toBlocklyType(field),
         }))
     const fieldsToValues = (info: jdspec.PacketInfo) =>
-        toMap<jdspec.PacketMember, BlockReference>(
+        toMap<jdspec.PacketMember, BlockReference | BlockDefinition>(
             info.fields,
             field => fieldName(info, field),
             field => fieldToShadow(field)
@@ -242,6 +251,7 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const eventBlocks = events.map<EventBlockDefinition>(
         ({ service, events }) => ({
+            kind: "block",
             type: `jacdac_${service.shortId}_events`,
             message0: `when %1 %2`,
             args0: [
@@ -281,6 +291,7 @@ export function loadBlocks(): CachedBlockDefinitions {
                 isNumericType(register.fields[0])
         )
         .map<RegisterBlockDefinition>(({ service, register }) => ({
+            kind: "block",
             type: `jacdac_${service.shortId}_${register.name}_change_by_event`,
             message0: `when %1 ${humanify(register.name)} change by %2`,
             args0: [
@@ -307,6 +318,7 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const registerGetBlocks = registers.map<RegisterBlockDefinition>(
         ({ service, register }) => ({
+            kind: "block",
             type: `jacdac_${service.shortId}_${register.name}_get`,
             message0: `%1 ${humanify(register.name)}${
                 register.fields.length > 1 ? ` %2` : ""
@@ -339,6 +351,7 @@ export function loadBlocks(): CachedBlockDefinitions {
     const registerSetBlocks = registers
         .filter(({ register }) => register.kind === "rw")
         .map<RegisterBlockDefinition>(({ service, register }) => ({
+            kind: "block",
             type: `jacdac_${service.shortId}_${register.name}_set`,
             message0: `set %1 ${register.name} to ${
                 register.fields.length === 1 ? "%2" : fieldsToMessage(register)
@@ -359,6 +372,7 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const commandBlocks = commands.map<CommandBlockDefinition>(
         ({ service, command }) => ({
+            kind: "block",
             type: `jacdac_${service.shortId}_value_get`,
             message0: `${humanify(command.name)} %1 with ${fieldsToMessage(
                 command
@@ -388,6 +402,7 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const shadowBlocks: BlockDefinition[] = [
         {
+            kind: "block",
             type: `jacdac_on_off`,
             message0: `%1`,
             args0: [
@@ -404,6 +419,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             output: "Boolean",
         },
         {
+            kind: "block",
             type: `jacdac_time_picker`,
             message0: `%1`,
             args0: [
@@ -423,6 +439,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             output: "Number",
         },
         {
+            kind: "block",
             type: `jacdac_angle`,
             message0: `%1`,
             args0: [
@@ -438,6 +455,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             output: "Number",
         },
         {
+            kind: "block",
             type: `jacdac_percent`,
             message0: `%1 %`,
             args0: [
@@ -453,6 +471,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             output: "Number",
         },
         {
+            kind: "block",
             type: `jacdac_ratio`,
             message0: `%1`,
             args0: [
@@ -471,6 +490,7 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const runtimeBlocks: BlockDefinition[] = [
         {
+            kind: "block",
             type: WHILE_CONDITION_BLOCK,
             message0: "while %1",
             args0: [
@@ -487,6 +507,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             helpUrl: "",
         },
         {
+            kind: "block",
             type: WAIT_BLOCK,
             message0: "wait %1 s",
             args0: [
@@ -507,6 +528,7 @@ export function loadBlocks(): CachedBlockDefinitions {
 
     const mathBlocks: BlockDefinition[] = [
         {
+            kind: "block",
             type: "jacdac_math_arithmetic",
             message0: "%1 %2 %3",
             args0: [
@@ -538,6 +560,7 @@ export function loadBlocks(): CachedBlockDefinitions {
             extensions: ["math_op_tooltip"],
         },
         {
+            kind: "block",
             type: "jacdac_math_single",
             message0: "%1 %2",
             args0: [
@@ -604,7 +627,7 @@ export function scanServices(workspace: Blockly.Workspace) {
 }
 
 export default function useToolbox(blockServices?: string[]): {
-    toolboxCategories: CategoryDefinition[]
+    toolboxCategories: ToolboxDefinition
     newProjectXml: string
 } {
     const { serviceBlocks, services } = useMemo(() => loadBlocks(), [])
@@ -621,102 +644,123 @@ export default function useToolbox(blockServices?: string[]): {
         )
         .filter(srv => !!srv)
 
-    const toolboxCategories = [
-        ...toolboxServices
-            .map(service => ({
-                service,
-                serviceBlocks: serviceBlocks.filter(
-                    block => block.service === service
-                ),
-            }))
-            .map(({ service, serviceBlocks }) => ({
-                name: service.name,
-                colour: "#5CA699",
-                blocks: serviceBlocks.map(block => ({
-                    type: block.type,
-                    values: block.values,
-                })),
-                button: Object.values(
-                    uniqueMap(
-                        serviceBlocks,
-                        block => block.service.shortId,
-                        block => block.service
-                    )
-                ).map(service => ({
-                    text: `Add ${service.name}`,
-                    callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+    const toolboxCategories: ToolboxDefinition = {
+        kind: "categoryToolbox",
+        contents: [
+            ...toolboxServices
+                .map(service => ({
                     service,
+                    serviceBlocks: serviceBlocks.filter(
+                        block => block.service === service
+                    ),
+                }))
+                .map<CategoryDefinition>(({ service, serviceBlocks }) => ({
+                    kind: "category",
+                    name: service.name,
+                    colour: "#5CA699",
+                    blocks: serviceBlocks.map(block => ({
+                        type: block.type,
+                        values: block.values,
+                    })),
+                    button: Object.values(
+                        uniqueMap(
+                            serviceBlocks,
+                            block => block.service.shortId,
+                            block => block.service
+                        )
+                    ).map(service => ({
+                        text: `Add ${service.name}`,
+                        callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+                        service,
+                    })),
                 })),
-            })),
-        {
-            name: "Commands",
-            colour: "%{BKY_LISTS_HUE}",
-            blocks: [
-                {
-                    type: WHILE_CONDITION_BLOCK,
-                },
-                {
-                    type: "jacdac_wait",
-                    values: {
-                        TIME: { type: "jacdac_time_picker", shadow: true },
+            <CategoryDefinition>{
+                kind: "category",
+                name: "Commands",
+                colour: "%{BKY_LISTS_HUE}",
+                contents: [
+                    {
+                        kind: "block",
+                        type: WHILE_CONDITION_BLOCK,
                     },
-                },
-            ],
-        },
-        {
-            name: "Logic",
-            colour: "%{BKY_LOGIC_HUE}",
-            blocks: [
-                { type: "dynamic_if" },
-                {
-                    type: "logic_compare",
-                    values: {
-                        A: { type: "math_number", shadow: true },
-                        B: { type: "math_number", shadow: true },
+                    {
+                        kind: "block",
+                        type: "jacdac_wait",
+                        values: {
+                            TIME: { type: "jacdac_time_picker", shadow: true },
+                        },
                     },
-                },
-                {
-                    type: "logic_operation",
-                    values: {
-                        A: { type: "logic_boolean", shadow: true },
-                        B: { type: "logic_boolean", shadow: true },
+                ],
+            },
+            <CategoryDefinition>{
+                kind: "category",
+                name: "Logic",
+                colour: "%{BKY_LOGIC_HUE}",
+                contents: [
+                    {
+                        kind: "block",
+                        type: "dynamic_if",
                     },
-                },
-                {
-                    type: "logic_negate",
-                    values: {
-                        BOOL: { type: "logic_boolean", shadow: true },
+                    {
+                        kind: "block",
+                        type: "logic_compare",
+                        values: {
+                            A: { type: "math_number", shadow: true },
+                            B: { type: "math_number", shadow: true },
+                        },
                     },
-                },
-                { type: "logic_boolean" },
-            ],
-        },
-        {
-            name: "Math",
-            colour: "%{BKY_MATH_HUE}",
-            blocks: [
-                {
-                    type: "jacdac_math_arithmetic",
-                    values: {
-                        A: { type: "math_number", shadow: true },
-                        B: { type: "math_number", shadow: true },
+                    {
+                        kind: "block",
+                        type: "logic_operation",
+                        values: {
+                            A: { type: "logic_boolean", shadow: true },
+                            B: { type: "logic_boolean", shadow: true },
+                        },
                     },
-                },
-                {
-                    type: "jacdac_math_single",
-                    values: {
-                        NUM: { type: "math_number", shadow: true },
+                    {
+                        kind: "block",
+                        type: "logic_negate",
+                        values: {
+                            BOOL: { type: "logic_boolean", shadow: true },
+                        },
                     },
-                },
-                { type: "math_number" },
-            ],
-        },
-        {
-            name: "Variables",
-            colour: "%{BKY_VARIABLES_HUE}",
-            custom: "VARIABLE",
-        },
-    ].filter(cat => !!cat.blocks?.length)
+                    {
+                        kind: "block",
+                        type: "logic_boolean",
+                    },
+                ],
+            },
+            <CategoryDefinition>{
+                kind: "category",
+                name: "Math",
+                colour: "%{BKY_MATH_HUE}",
+                contents: [
+                    {
+                        kind: "block",
+                        type: "jacdac_math_arithmetic",
+                        values: {
+                            A: { type: "math_number", shadow: true },
+                            B: { type: "math_number", shadow: true },
+                        },
+                    },
+                    {
+                        kind: "block",
+                        type: "jacdac_math_single",
+                        values: {
+                            NUM: { type: "math_number", shadow: true },
+                        },
+                    },
+                    { kind: "block", type: "math_number" },
+                ],
+            },
+            <CategoryDefinition>{
+                kind: "category",
+                name: "Variables",
+                colour: "%{BKY_VARIABLES_HUE}",
+                custom: "VARIABLE",
+            },
+        ].filter(cat => !!cat.contents?.length),
+    }
 
     return {
         toolboxCategories,
