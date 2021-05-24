@@ -786,8 +786,6 @@ export default function useToolbox(blockServices?: string[]): {
             .map(patchCategoryJSONtoXML),
     }
 
-    console.log({ toolboxConfiguration })
-
     return {
         toolboxConfiguration,
         newProjectXml: NEW_PROJET_XML,
