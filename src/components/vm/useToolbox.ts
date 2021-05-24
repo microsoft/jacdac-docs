@@ -631,6 +631,27 @@ export function scanServices(workspace: Blockly.Workspace) {
     return services
 }
 
+function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
+    if (cat.button) cat.contents.unshift(cat.button)
+    cat.contents
+        .filter(node => node.kind === "block")
+        .map(node => <BlockReference>node)
+        .filter(block => !!block.values)
+        .forEach(block => {
+            // yup, this suck but we have to go through it
+            block.blockxml = `<block type="${block.type}">${Object.keys(
+                block.values
+            )
+                .map(name => {
+                    const { type } = block.values[name]
+                    return `<value name="${name}"><shadow type="${type}" /></value>`
+                })
+                .join("\n")}</block>`
+            delete block.type
+        })
+    return cat;
+}
+
 export default function useToolbox(blockServices?: string[]): {
     toolboxConfiguration: ToolboxConfiguration
     newProjectXml: string
@@ -674,28 +695,7 @@ export default function useToolbox(blockServices?: string[]): {
                         callbackKey: `jacdac_add_role_callback_${service.shortId}`,
                         service,
                     },
-                }))
-                .map(cat => {
-                    // patch JSON structure to match blockly
-                    if (cat.button) cat.contents.unshift(cat.button)
-                    cat.contents
-                        .filter(node => node.kind === "block")
-                        .map(node => <BlockReference>node)
-                        .filter(block => !!block.values)
-                        .forEach(block => {
-                            // yup, this suck but we have to go through it
-                            block.blockxml = `<block type="${
-                                block.type
-                            }">${Object.keys(block.values)
-                                .map(name => {
-                                    const { type } = block.values[name]
-                                    return `<value name="${name}"><shadow type="${type}" /></value>`
-                                })
-                                .join("\n")}</block>`
-                            delete block.type
-                        })
-                    return cat
-                }),
+                })),
             <CategoryDefinition>{
                 kind: "category",
                 name: "Commands",
@@ -781,7 +781,9 @@ export default function useToolbox(blockServices?: string[]): {
                 colour: "%{BKY_VARIABLES_HUE}",
                 custom: "VARIABLE",
             },
-        ].filter(cat => !!cat.contents?.length),
+        ]
+            .filter(cat => !!cat.contents?.length)
+            .map(patchCategoryJSONtoXML),
     }
 
     console.log({ toolboxConfiguration })
