@@ -7,12 +7,12 @@ import Theme from "@blockly/theme-modern"
 import DarkTheme from "@blockly/theme-dark"
 import { DisableTopBlocks } from "@blockly/disable-top-blocks"
 import useToolbox, { ButtonDefinition, scanServices } from "./useToolbox"
-import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import BlocklyModalDialogs from "./BlocklyModalDialogs"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
 import DarkModeContext from "../ui/DarkModeContext"
 import { IT4Program } from "../../../jacdac-ts/src/vm/ir"
 import workspaceJSONToIT4Program from "./it4generator"
+import AppContext from "../AppContext"
 
 export default function VmEditor(props: {
     className?: string
@@ -29,6 +29,7 @@ export default function VmEditor(props: {
         initialXml,
     } = props
     const { darkMode } = useContext(DarkModeContext)
+    const { setError } = useContext(AppContext)
     const [services, setServices] = useState<string[]>([])
     const { toolboxConfiguration, newProjectXml } = useToolbox(services)
     const theme = darkMode === "dark" ? DarkTheme : Theme
@@ -62,6 +63,7 @@ export default function VmEditor(props: {
             },
         },
         initialXml: initialXml || newProjectXml,
+        onImportXmlError: () => setError("Error loading blocks..."),
     })
 
     useEffect(() => {
@@ -77,7 +79,7 @@ export default function VmEditor(props: {
 
     // blockly did a change
     useEffect(() => {
-        if (!workspace) return;
+        if (!workspace) return
 
         onXmlChange?.(xml)
 
@@ -105,10 +107,12 @@ export default function VmEditor(props: {
 
     // track workspace changes and update callbacks
     useEffect(() => {
-        if (!workspace) return;
-        
+        if (!workspace) return
+
         // collect buttons
-        const buttons: ButtonDefinition[] = toolboxConfiguration?.contents?.map(cat => cat.button).filter(btn => !!btn)
+        const buttons: ButtonDefinition[] = toolboxConfiguration?.contents
+            ?.map(cat => cat.button)
+            .filter(btn => !!btn)
         buttons?.forEach(button =>
             workspace.registerButtonCallback(button.callbackKey, () =>
                 Blockly.Variables.createVariableButtonHandler(
