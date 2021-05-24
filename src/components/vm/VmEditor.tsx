@@ -30,7 +30,7 @@ export default function VmEditor(props: {
     } = props
     const { darkMode } = useContext(DarkModeContext)
     const [services, setServices] = useState<string[]>([])
-    const { toolboxCategories, newProjectXml } = useToolbox(services)
+    const { toolboxConfiguration, newProjectXml } = useToolbox(services)
     const theme = darkMode === "dark" ? DarkTheme : Theme
     const gridColor = darkMode === "dark" ? "#555" : "#ccc"
 
@@ -39,7 +39,7 @@ export default function VmEditor(props: {
     const blocklyRef = useRef(null)
     const { workspace, xml } = useBlocklyWorkspace({
         ref: blocklyRef,
-        toolboxCategories,
+        toolboxConfiguration,
         workspaceConfiguration: {
             comments: false,
             css: true,
@@ -109,7 +109,7 @@ export default function VmEditor(props: {
         
         // collect buttons
         const buttons = arrayConcatMany(
-            toolboxCategories?.contents?.filter(cat => cat.button).map(cat => cat.button)
+            toolboxConfiguration?.contents?.filter(cat => cat.button).map(cat => cat.button)
         )
         buttons.forEach(button =>
             workspace.registerButtonCallback(button.callbackKey, () =>
@@ -120,7 +120,7 @@ export default function VmEditor(props: {
                 )
             )
         )
-    }, [workspace, JSON.stringify(toolboxCategories)])
+    }, [workspace, JSON.stringify(toolboxConfiguration)])
 
     return (
         <>

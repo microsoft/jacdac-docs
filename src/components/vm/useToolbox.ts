@@ -123,7 +123,7 @@ export interface CategoryDefinition {
     }[]
 }
 
-export interface ToolboxDefinition {
+export interface ToolboxConfiguration {
     kind: "categoryToolbox"
     contents: CategoryDefinition[]
 }
@@ -627,7 +627,7 @@ export function scanServices(workspace: Blockly.Workspace) {
 }
 
 export default function useToolbox(blockServices?: string[]): {
-    toolboxCategories: ToolboxDefinition
+    toolboxConfiguration: ToolboxConfiguration
     newProjectXml: string
 } {
     const { serviceBlocks, services } = useMemo(() => loadBlocks(), [])
@@ -644,7 +644,7 @@ export default function useToolbox(blockServices?: string[]): {
         )
         .filter(srv => !!srv)
 
-    const toolboxCategories: ToolboxDefinition = {
+    const toolboxConfiguration: ToolboxConfiguration = {
         kind: "categoryToolbox",
         contents: [
             ...toolboxServices
@@ -763,7 +763,7 @@ export default function useToolbox(blockServices?: string[]): {
     }
 
     return {
-        toolboxCategories,
+        toolboxConfiguration,
         newProjectXml: NEW_PROJET_XML,
     }
 }
