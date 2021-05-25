@@ -1,6 +1,12 @@
-import React, { KeyboardEvent } from "react"
+import React, {
+    KeyboardEvent,
+    useEffect,
+    useRef,
+} from "react"
 import { createStyles, makeStyles } from "@material-ui/core"
 import { HidKeyboardModifiers } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import Keyboard from "react-simple-keyboard"
+import "react-simple-keyboard/build/css/index.css"
 
 const selectors = {
     a: 0x04,
@@ -181,6 +187,10 @@ const useStyles = makeStyles(theme =>
                 borderColor: theme.palette.action.active,
             },
         },
+        buttonSelected: {
+            background: "red !important",
+            color: "white !important"
+        },
     })
 )
 
@@ -211,6 +221,7 @@ export default function KeyboardKeyInput(props: {
     modifiers: HidKeyboardModifiers
     onChange: (newSelector: number, newModifiers: HidKeyboardModifiers) => void
 }) {
+    const keyboardRef = useRef<any>()
     const { selector, modifiers, onChange } = props
     const classes = useStyles()
 
@@ -233,16 +244,36 @@ export default function KeyboardKeyInput(props: {
         ev.stopPropagation()
         ev.preventDefault()
     }
+    const handleKeyboardKeyPress = (button: string) => {
+        console.log(`key press`, { button })
+    }
+
     const value = renderKey(selector, modifiers)
+    useEffect(() => {
+        keyboardRef.current?.addButtonTheme(value, classes.buttonSelected)
+        console.log(`bind ${value}`, keyboardRef.current)
+        return () =>
+            keyboardRef.current?.removeButtonTheme(
+                value,
+                classes.buttonSelected
+            )
+    }, [value])
+
     return (
-        <pre
-            style={{ minWidth: "18rem" }}
-            className={classes.capture}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-        >
-            {value || "focus and type your key combo"}
-        </pre>
+        <>
+            <pre
+                style={{ minWidth: "18rem" }}
+                className={classes.capture}
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onKeyUp={handleKeyUp}
+            >
+                {value || "focus and type your key combo"}
+            </pre>
+            <Keyboard
+                keyboardRef={r => (keyboardRef.current = r)}
+                onKeyPress={handleKeyboardKeyPress}
+            />
+        </>
     )
 }
