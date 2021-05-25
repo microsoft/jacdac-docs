@@ -6,7 +6,11 @@ import "@blockly/block-dynamic-connection"
 import Theme from "@blockly/theme-modern"
 import DarkTheme from "@blockly/theme-dark"
 import { DisableTopBlocks } from "@blockly/disable-top-blocks"
-import useToolbox, { ButtonDefinition, scanServices } from "./useToolbox"
+import useToolbox, {
+    ButtonDefinition,
+    CategoryDefinition,
+    scanServices,
+} from "./useToolbox"
 import BlocklyModalDialogs from "./BlocklyModalDialogs"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
 import DarkModeContext from "../ui/DarkModeContext"
@@ -61,6 +65,15 @@ export default function VmEditor(props: {
                     horizontal: true,
                 },
             },
+            zoom: {
+                controls: true,
+                wheel: true,
+                startScale: 1.0,
+                maxScale: 3,
+                minScale: 0.3,
+                scaleSpeed: 1.2,
+                pinch: true,
+            },
         },
         initialXml: initialXml || newProjectXml,
         onImportXmlError: () => setError("Error loading blocks..."),
@@ -111,7 +124,8 @@ export default function VmEditor(props: {
 
         // collect buttons
         const buttons: ButtonDefinition[] = toolboxConfiguration?.contents
-            ?.map(cat => cat.button)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map(cat => (cat as CategoryDefinition).button)
             .filter(btn => !!btn)
         buttons?.forEach(button =>
             workspace.registerButtonCallback(button.callbackKey, () =>

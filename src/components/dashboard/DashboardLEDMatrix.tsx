@@ -9,6 +9,7 @@ import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps"
 import { toggle } from "../../../jacdac-ts/src/servers/ledmatrixserver"
 import LoadingProgress from "../ui/LoadingProgress"
 import useServiceServer from "../hooks/useServiceServer"
+import useChange from "../../jacdac/useChange"
 
 export default function DashboardLEDMatrixDisplay(
     props: DashboardServiceProps
@@ -34,6 +35,10 @@ export default function DashboardLEDMatrixDisplay(
     const color = server ? "secondary" : "primary"
     const { background, controlBackground, active } = useWidgetTheme(color)
 
+    // render immediately if the server rendered again
+    useChange(server)
+    const navProps = useKeyboardNavigationProps(widgetRef.current)
+
     // no data about layout
     if (rows === undefined || columns === undefined) return <LoadingProgress />
 
@@ -48,14 +53,13 @@ export default function DashboardLEDMatrixDisplay(
     const h = rows * ph + (rows + 1) * m
 
     const columnspadded = columns + (8 - (columns % 8))
-    const handleLedClick = (bitindex: number) => (
-        ev: React.PointerEvent<SVGRectElement>
-    ) => {
-        if (ev && !ev.buttons) return
-        const newLeds = leds.slice(0)
-        toggle(newLeds, bitindex)
-        ledsRegister.sendSetAsync(newLeds, true)
-    }
+    const handleLedClick =
+        (bitindex: number) => (ev: React.PointerEvent<SVGRectElement>) => {
+            if (ev && !ev.buttons) return
+            const newLeds = leds.slice(0)
+            toggle(newLeds, bitindex)
+            ledsRegister.sendSetAsync(newLeds, true)
+        }
 
     // add leds
     const render = () => {
@@ -123,7 +127,6 @@ export default function DashboardLEDMatrixDisplay(
     }
 
     const { boxEls, ledEls } = render()
-    const navProps = useKeyboardNavigationProps(widgetRef.current)
     return (
         <SvgWidget width={w} height={h}>
             <rect
