@@ -150,7 +150,7 @@ export default function workspaceJSONToIT4Program(
                 command = {
                     type: "CallExpression",
                     arguments: [time],
-                    callee: undefined, // TODO
+                    callee:  toIdentifier("wait")
                 }
                 break
             }
@@ -172,9 +172,14 @@ export default function workspaceJSONToIT4Program(
                             break
                         }
                         case "command": {
-                            const { service, command } =
+                            const { service, command: serviceCommand } =
                                 def as CommandBlockDefinition
-                            // TODO
+                            const { value: role } = inputs[0].fields.role
+                            command = {
+                                type: "CallExpression",
+                                arguments: inputs.map(a =>  blockToExpression(a.child)), 
+                                callee: toMemberExpression(role as string, serviceCommand.name)
+                            }
                             break
                         }
                     }
