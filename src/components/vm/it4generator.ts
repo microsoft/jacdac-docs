@@ -130,8 +130,8 @@ export default function workspaceJSONToIT4Program(
                         case "register_get": {
                             const { service, register } =
                                 def as RegisterBlockDefinition
-                            console.log(`register_get`, { service, register })
-                            break
+                            const { value: role } = inputs[0].fields["role"]
+                            return toMemberExpression(role as string, register.identifierName)
                         }
                     }
                     break
@@ -161,9 +161,14 @@ export default function workspaceJSONToIT4Program(
                     const { template } = def
                     switch (template) {
                         case "register_set": {
-                            const { service, register } =
-                                def as RegisterBlockDefinition
-                            // TODO
+                            const { register } = def as RegisterBlockDefinition
+                            const val = blockToExpression(inputs[0].child)
+                            const { value: role } = inputs[0].fields.role
+                            command = {
+                                type: "CallExpression",
+                                arguments: [toMemberExpression(role as string, register.name),val],
+                                callee: toIdentifier("writeRegister")
+                            }
                             break
                         }
                         case "command": {
