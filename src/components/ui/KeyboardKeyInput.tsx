@@ -162,13 +162,19 @@ const reverseSelectors: { [index: number]: string } = Object.keys(
     return r
 }, {})
 const modifierCodes = {
+    control: HidKeyboardModifiers.LeftControl,
+    alt: HidKeyboardModifiers.LeftAlt,
+    shift: HidKeyboardModifiers.LeftShift,
+    meta: HidKeyboardModifiers.LeftGUI,
+
     controlleft: HidKeyboardModifiers.LeftControl,
-    controlright: HidKeyboardModifiers.RightControl,
     altleft: HidKeyboardModifiers.LeftAlt,
-    altright: HidKeyboardModifiers.RightAlt,
     shiftleft: HidKeyboardModifiers.LeftShift,
-    shiftright: HidKeyboardModifiers.RightShift,
     metaleft: HidKeyboardModifiers.LeftGUI,
+
+    controlright: HidKeyboardModifiers.RightControl,
+    altright: HidKeyboardModifiers.RightAlt,
+    shiftright: HidKeyboardModifiers.RightShift,
     metaright: HidKeyboardModifiers.RightGUI,
 }
 
@@ -204,11 +210,11 @@ export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
     const values = []
     flags.forEach((flag, i) => {
         if (modifiers & (1 << i)) {
-            values.push(flag)
+            values.push(`{${flag}}`)
         }
     })
     values.push(reverseSelectors[selector])
-    const value = values.filter(v => !!v).join(" + ")
+    const value = values.filter(v => !!v).join(" ")
     return value
 }
 
@@ -223,14 +229,20 @@ export default function KeyboardKeyInput(props: {
 
     const handleKeyboardKeyPress = (code: string) => {
         console.log(`key press`, { code })
-        // todo: map button to selector/modifiers toggling
-        const newSelector = selectors[code.toLowerCase()] || 0
+        let newSelector = selector
         let newModifiers = modifiers
+        const msel = selectors[code.toLowerCase()]
         const mcode = modifierCodes[code.toLowerCase().replace(/[{}]/g, "")]
-        if (mcode) {
-            if (newModifiers & mcode) newModifiers &= ~mcode
-            else newModifiers |= mcode
+        if (msel) {
+            if (msel === selector) newSelector = undefined
+            else newSelector = msel
+        } else {
+            if (mcode) {
+                if (newModifiers & mcode) newModifiers &= ~mcode
+                else newModifiers |= mcode
+            }
         }
+        console.log({ newSelector, msel, mcode })
         onChange(newSelector, newModifiers)
     }
 
