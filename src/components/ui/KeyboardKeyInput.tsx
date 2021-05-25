@@ -185,7 +185,7 @@ const useStyles = makeStyles(theme =>
             },
         },
         buttonSelected: {
-            background: "red !important",
+            background: `${theme.palette.primary.dark} !important`,
             color: "white !important",
         },
     })
