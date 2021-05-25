@@ -1,8 +1,4 @@
-import React, {
-    KeyboardEvent,
-    useEffect,
-    useRef,
-} from "react"
+import React, { useEffect, useRef } from "react"
 import { createStyles, makeStyles } from "@material-ui/core"
 import { HidKeyboardModifiers } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import Keyboard from "react-simple-keyboard"
@@ -189,7 +185,7 @@ const useStyles = makeStyles(theme =>
         },
         buttonSelected: {
             background: "red !important",
-            color: "white !important"
+            color: "white !important",
         },
     })
 )
@@ -225,29 +221,20 @@ export default function KeyboardKeyInput(props: {
     const { selector, modifiers, onChange } = props
     const classes = useStyles()
 
-    const handleKeyDown = (ev: KeyboardEvent<HTMLInputElement>) => {
-        ev.stopPropagation()
-        ev.preventDefault()
-        const { key, code } = ev
-
-        const newSelector =
-            selectors[code.toLowerCase()] || selectors[key.toLowerCase()] || 0
+    const handleKeyboardKeyPress = (code: string) => {
+        console.log(`key press`, { code })
+        // todo: map button to selector/modifiers toggling
+        const newSelector = selectors[code.toLowerCase()] || 0
         let newModifiers = modifiers
-        const mcode = modifierCodes[code.toLowerCase()]
+        const mcode = modifierCodes[code.toLowerCase().replace(/[{}]/g, "")]
         if (mcode) {
             if (newModifiers & mcode) newModifiers &= ~mcode
             else newModifiers |= mcode
         }
         onChange(newSelector, newModifiers)
     }
-    const handleKeyUp = (ev: KeyboardEvent<HTMLInputElement>) => {
-        ev.stopPropagation()
-        ev.preventDefault()
-    }
-    const handleKeyboardKeyPress = (button: string) => {
-        console.log(`key press`, { button })
-    }
 
+    // todo: render value to simple-keyboard selectors
     const value = renderKey(selector, modifiers)
     useEffect(() => {
         keyboardRef.current?.addButtonTheme(value, classes.buttonSelected)
@@ -260,20 +247,9 @@ export default function KeyboardKeyInput(props: {
     }, [value])
 
     return (
-        <>
-            <pre
-                style={{ minWidth: "18rem" }}
-                className={classes.capture}
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
-                onKeyUp={handleKeyUp}
-            >
-                {value || "focus and type your key combo"}
-            </pre>
-            <Keyboard
-                keyboardRef={r => (keyboardRef.current = r)}
-                onKeyPress={handleKeyboardKeyPress}
-            />
-        </>
+        <Keyboard
+            keyboardRef={r => (keyboardRef.current = r)}
+            onKeyPress={handleKeyboardKeyPress}
+        />
     )
 }
