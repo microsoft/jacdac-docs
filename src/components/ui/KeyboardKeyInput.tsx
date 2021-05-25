@@ -162,11 +162,6 @@ const reverseSelectors: { [index: number]: string } = Object.keys(
     return r
 }, {})
 const modifierCodes = {
-    control: HidKeyboardModifiers.LeftControl,
-    alt: HidKeyboardModifiers.LeftAlt,
-    shift: HidKeyboardModifiers.LeftShift,
-    meta: HidKeyboardModifiers.LeftGUI,
-
     controlleft: HidKeyboardModifiers.LeftControl,
     altleft: HidKeyboardModifiers.LeftAlt,
     shiftleft: HidKeyboardModifiers.LeftShift,
@@ -198,14 +193,14 @@ const useStyles = makeStyles(theme =>
 
 export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
     const flags = [
-        "ctrl",
-        "shift",
-        "alt",
-        "cmd",
-        "right ctrl",
-        "right shift",
-        "right alt",
-        "right cmd",
+        "controlleft",
+        "shiftleft",
+        "altleft",
+        "metaleft",
+        "controlright",
+        "shiftright",
+        "altright",
+        "metaright",
     ]
     const values = []
     flags.forEach((flag, i) => {
@@ -227,12 +222,38 @@ export default function KeyboardKeyInput(props: {
     const { selector, modifiers, onChange } = props
     const classes = useStyles()
 
+    const layout = {
+        default: [
+            "{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}",
+            "` 1 2 3 4 5 6 7 8 9 0 - = {backspace}",
+            "{tab} q w e r t y u i o p [ ] \\",
+            "{capslock} a s d f g h j k l ; ' {enter}",
+            "{shiftleft} z x c v b n m , . / {shiftright}",
+            "{controlleft} {altleft} {metaleft} {space} {metaright} {altright}",
+        ],
+    }
+    const display = {
+        "{escape}": "esc ⎋",
+        "{tab}": "tab ⇥",
+        "{backspace}": "backspace ⌫",
+        "{enter}": "enter ↵",
+        "{capslock}": "caps lock ⇪",
+        "{shiftleft}": "shift ⇧",
+        "{shiftright}": "shift ⇧",
+        "{controlleft}": "ctrl ⌃",
+        "{controlright}": "ctrl ⌃",
+        "{altleft}": "alt ⌥",
+        "{altright}": "alt ⌥",
+        "{metaleft}": "cmd ⌘",
+        "{metaright}": "cmd ⌘",
+    }
     const handleKeyboardKeyPress = (code: string) => {
+        code = code.toLowerCase().replace(/[{}]/g, "")
         console.log(`key press`, { code })
         let newSelector = selector
         let newModifiers = modifiers
-        const msel = selectors[code.toLowerCase()]
-        const mcode = modifierCodes[code.toLowerCase().replace(/[{}]/g, "")]
+        const msel = selectors[code]
+        const mcode = modifierCodes[code]
         if (msel) {
             if (msel === selector) newSelector = undefined
             else newSelector = msel
@@ -262,6 +283,9 @@ export default function KeyboardKeyInput(props: {
         <Keyboard
             keyboardRef={r => (keyboardRef.current = r)}
             onKeyPress={handleKeyboardKeyPress}
+            layout={layout}
+            display={display}
+            mergeDisplay={true}
         />
     )
 }
