@@ -38,11 +38,11 @@ function toIdentifier(id: string) {
     } as jsep.Identifier
 }
 
-function toMemberExpression(root: string, field:string) {
+function toMemberExpression(root: string, field:string | jsep.Expression) {
     return {
         type: "MemberExpression",
         object: toIdentifier(root),
-        property: toIdentifier(field),
+        property: typeof(field) === "string" ? toIdentifier(field) : field,
         computed: false,
     } as jsep.MemberExpression
 }
@@ -128,10 +128,13 @@ export default function workspaceJSONToIT4Program(
                     const { template } = def
                     switch (template) {
                         case "register_get": {
-                            const { service, register } =
-                                def as RegisterBlockDefinition
+                            const { register } = def as RegisterBlockDefinition
                             const { value: role } = inputs[0].fields["role"]
-                            return toMemberExpression(role as string, register.identifierName)
+                            const field = inputs[0].fields["field"]
+                            return toMemberExpression(
+                                role as string, 
+                                field ? toMemberExpression(register.name, field.value as string) : register.name
+                            )
                         }
                     }
                     break
@@ -172,8 +175,7 @@ export default function workspaceJSONToIT4Program(
                             break
                         }
                         case "command": {
-                            const { service, command: serviceCommand } =
-                                def as CommandBlockDefinition
+                            const { command: serviceCommand } = def as CommandBlockDefinition
                             const { value: role } = inputs[0].fields.role
                             command = {
                                 type: "CallExpression",
@@ -195,24 +197,6 @@ export default function workspaceJSONToIT4Program(
     // visit all the nodes in the blockly tree
     const registers: string[] = []
     const events: string[] = []
-
-    // collect registers and events
-    // TODO: this can be done after creating the program
-    visitWorkspace(workspace, {
-        visitBlock: b => {
-            const def =
-                /^jacdac_/.test(b.type) &&
-                serviceBlocks.find(d => d.type === b.type)
-            if (!def) return
-            const { service } = def
-            const { register } = def as RegisterBlockDefinition
-            const { events: defEvents } = def as EventBlockDefinition
-            if (register) registers.push(`${service.shortId}.${register.name}`)
-            if (defEvents)
-                for (const event of defEvents)
-                    events.push(`${service.shortId}.${event.name}`)
-        },
-    })
 
     const handlers: IT4Handler[] = workspace.blocks.map(top => {
         const { type, inputs } = top
@@ -238,8 +222,6 @@ export default function workspaceJSONToIT4Program(
                         inputs[0].fields["role"]
                     const { value: eventName } = inputs[0].fields["event"]
 
-                    console.log({ role, eventName, serviceShortId })
-
                     commands.push({
                         command: {
                             type: "CallExpression",
@@ -253,10 +235,6 @@ export default function workspaceJSONToIT4Program(
                 case "register_change_event": {
                     const { service, register } = def as RegisterBlockDefinition
                     // TODO
-                    break
-                }
-                case "command": {
-                    const { service, command } = def as CommandBlockDefinition
                     break
                 }
             }
