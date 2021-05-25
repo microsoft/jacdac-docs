@@ -208,7 +208,9 @@ export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
             values.push(`{${flag}}`)
         }
     })
-    values.push(reverseSelectors[selector])
+    const sel = reverseSelectors[selector]
+    if (sel !== undefined)
+        values.push(sel.length > 1 ? `{${sel}}` : sel)
     const value = values.filter(v => !!v).join(" ")
     return value
 }
@@ -218,6 +220,7 @@ export default function KeyboardKeyInput(props: {
     modifiers: HidKeyboardModifiers
     onChange: (newSelector: number, newModifiers: HidKeyboardModifiers) => void
 }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const keyboardRef = useRef<any>()
     const { selector, modifiers, onChange } = props
     const classes = useStyles()
