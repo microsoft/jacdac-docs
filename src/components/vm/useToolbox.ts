@@ -112,6 +112,7 @@ export interface EventBlockDefinition extends ServiceBlockDefinition {
 export interface RegisterBlockDefinition extends ServiceBlockDefinition {
     template: RegisterTemplate
     register: jdspec.PacketInfo
+    field?: jdspec.PacketMember
 }
 
 export interface CommandBlockDefinition extends ServiceBlockDefinition {
@@ -268,7 +269,7 @@ export function loadBlocks(): CachedBlockDefinitions {
         )
 
     const allServices = serviceSpecifications()
-        .filter(service => !/^_/.test(service.shortId))
+        .filter(service => !/^_/.test(service.shortId) && service.status !== "deprecated")
         .filter(service => ignoredServices.indexOf(service.classIdentifier) < 0)
     const registers = allServices
         .map(service => ({
@@ -387,6 +388,7 @@ export function loadBlocks(): CachedBlockDefinitions {
                 helpUrl: "",
                 service,
                 register,
+                field: register.fields[0],
 
                 template: "register_get",
             })
@@ -442,6 +444,7 @@ export function loadBlocks(): CachedBlockDefinitions {
         helpUrl: "",
         service,
         register,
+        field,
 
         template: "register_get",
     }))
@@ -511,9 +514,11 @@ export function loadBlocks(): CachedBlockDefinitions {
         ({ service, command }) => ({
             kind: "block",
             type: `jacdac_command_${service.shortId}_${command.name}`,
-            message0: `${humanify(command.name)} %1 with ${fieldsToMessage(
-                command
-            )}`,
+            message0: !command.fields.length
+                ? `${humanify(command.name)} %1`
+                : `${humanify(command.name)} %1 with ${fieldsToMessage(
+                      command
+                  )}`,
             args0: [fieldVariable(service), ...fieldsToFieldInputs(command)],
             values: fieldsToValues(command),
             inputsInline: true,
