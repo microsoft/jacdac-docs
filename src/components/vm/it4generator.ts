@@ -7,6 +7,7 @@ import {
 } from "../../../jacdac-ts/src/vm/ir"
 import {
     BUILTIN_TYPES,
+    CommandBlockDefinition,
     EventBlockDefinition,
     loadBlocks,
     RegisterBlockDefinition,
@@ -33,6 +34,8 @@ const ops = {
 function blockToExpression(block: BlockJSON) {
     if (!block) return undefined
     const { type, value, inputs } = block
+    console.log(`block`, type, value, inputs)
+    
     if (value !== undefined)
         // literal
         return <jsep.Literal>{
@@ -41,7 +44,13 @@ function blockToExpression(block: BlockJSON) {
             raw: value + "",
         }
 
-    console.log(`block`, block)
+    if (/^jacdac_get/.test(type)) {
+        console.log("HERE")
+        const { value: role } = inputs[0].fields["role"]
+        const { value: fieldName } = inputs[0].fields["field"]
+        return toMemberExpression(role as string, fieldName as string)
+    }
+
     switch (type) {
         case "jacdac_math_single": {
             const argument = blockToExpression(inputs[0].child)
@@ -118,6 +127,22 @@ function blockToCommand(block: BlockJSON): IT4GuardedCommand {
     }
 }
 
+function toIdentifier(id: string) {
+    return {
+        type: "Identifier",
+        name: id
+    } as jsep.Identifier
+}
+
+function toMemberExpression(root: string, field:string) {
+    return {
+        type: "MemberExpression",
+        object: toIdentifier(root),
+        property: toIdentifier(field),
+        computed: false,
+    } as jsep.MemberExpression
+}
+
 export default function workspaceJSONToIT4Program(
     workspace: WorkspaceJSON
 ): IT4Program {
@@ -133,6 +158,7 @@ export default function workspaceJSONToIT4Program(
     const events: string[] = []
 
     // collect registers and events
+    // TODO: this can be done after creating the program
     visitWorkspace(workspace, {
         visitBlock: b => {
             const def =
@@ -159,7 +185,7 @@ export default function workspaceJSONToIT4Program(
                 command: {
                     type: "CallExpression",
                     arguments: [blockToExpression(condition)],
-                    callee: undefined, // TODO
+                    callee: toIdentifier("awaitCondition")
                 },
             })
         } else {
@@ -169,6 +195,19 @@ export default function workspaceJSONToIT4Program(
             switch (template) {
                 case "event": {
                     const { service, events } = def as EventBlockDefinition
+                    const { value: role, variabletype: serviceShortId } =
+                        inputs[0].fields["role"]
+                    const { value: eventName } = inputs[0].fields["event"]
+
+                    console.log({ role, eventName, serviceShortId })
+
+                    commands.push({
+                        command: {
+                            type: "CallExpression",
+                            arguments: [ toMemberExpression(role.toString(), eventName.toString()) ],
+                            callee: toIdentifier("awaitEvent")
+                        },
+                    })
                     // TODO
                     break
                 }
@@ -177,6 +216,10 @@ export default function workspaceJSONToIT4Program(
                 case "register_get": {
                     const { service, register } = def as RegisterBlockDefinition
                     // TODO
+                    break
+                }
+                case "command": {
+                    const { service, command } = def as CommandBlockDefinition
                     break
                 }
             }
