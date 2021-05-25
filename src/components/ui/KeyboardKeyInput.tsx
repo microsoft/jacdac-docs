@@ -209,8 +209,7 @@ export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
         }
     })
     const sel = reverseSelectors[selector]
-    if (sel !== undefined)
-        values.push(sel.length > 1 ? `{${sel}}` : sel)
+    if (sel !== undefined) values.push(sel.length > 1 ? `{${sel}}` : sel)
     const value = values.filter(v => !!v).join(" ")
     return value
 }
@@ -252,7 +251,6 @@ export default function KeyboardKeyInput(props: {
     }
     const handleKeyboardKeyPress = (code: string) => {
         code = code.toLowerCase().replace(/[{}]/g, "")
-        console.log(`key press`, { code })
         let newSelector = selector
         let newModifiers = modifiers
         const msel = selectors[code]
@@ -266,7 +264,6 @@ export default function KeyboardKeyInput(props: {
                 else newModifiers |= mcode
             }
         }
-        console.log({ newSelector, msel, mcode })
         onChange(newSelector, newModifiers)
     }
 
@@ -274,7 +271,6 @@ export default function KeyboardKeyInput(props: {
     const value = renderKey(selector, modifiers)
     useEffect(() => {
         keyboardRef.current?.addButtonTheme(value, classes.buttonSelected)
-        console.log(`bind ${value}`, keyboardRef.current)
         return () =>
             keyboardRef.current?.removeButtonTheme(
                 value,
