@@ -6,19 +6,19 @@ import "react-simple-keyboard/build/css/index.css"
 import DarkModeContext from "./DarkModeContext"
 
 const display = {
-    "{escape}": "esc ⎋",
-    "{tab}": "tab ⇥",
-    "{backspace}": "backspace ⌫",
-    "{enter}": "enter ↵",
-    "{capslock}": "caps lock ⇪",
-    "{shiftleft}": "shift ⇧",
-    "{shiftright}": "shift ⇧",
-    "{controlleft}": "ctrl ⌃",
-    "{controlright}": "ctrl ⌃",
-    "{altleft}": "alt ⌥",
-    "{altright}": "alt ⌥",
-    "{metaleft}": "cmd ⌘",
-    "{metaright}": "cmd ⌘",
+    "{escape}": "esc (⎋)",
+    "{tab}": "tab (⇥)",
+    "{backspace}": "backspace (⌫)",
+    "{enter}": "enter (↵)",
+    "{capslock}": "caps lock (⇪)",
+    "{shiftleft}": "shift (⇧)",
+    "{shiftright}": "shift (⇧)",
+    "{controlleft}": "ctrl (⌃)",
+    "{controlright}": "ctrl (⌃)",
+    "{altleft}": "alt (⌥)",
+    "{altright}": "alt (⌥)",
+    "{metaleft}": "cmd (⌘)",
+    "{metaright}": "cmd (⌘)",
 }
 
 const selectors = {
@@ -246,7 +246,7 @@ export function renderKey(selector: number, modifiers: HidKeyboardModifiers, con
     })
     const sel = reverseSelectors[selector]
     if (sel !== undefined) values.push(sel.length > 1 ? `{${sel}}` : sel)
-    const value = values.filter(v => !!v).join(" ")
+    const value = values.filter(v => !!v).join(" + ")
     return value
 }
 
