@@ -34,8 +34,8 @@ export default class KeyboardKeyField extends ReactField<{
         }
         return (
             <KeyboardKeyInput
-                selector={selector}
-                modifiers={modifiers}
+                initialSelector={selector}
+                initialModifiers={modifiers}
                 onChange={handleChange}
             />
         )

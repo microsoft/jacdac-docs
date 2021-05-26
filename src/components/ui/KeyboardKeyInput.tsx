@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react"
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { createStyles, makeStyles } from "@material-ui/core"
 import { HidKeyboardModifiers } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import Keyboard from "react-simple-keyboard"
@@ -249,14 +249,25 @@ export function renderKeyboardKey(
 }
 
 export default function KeyboardKeyInput(props: {
-    selector: number
-    modifiers: HidKeyboardModifiers
+    initialSelector?: number
+    initialModifiers?: HidKeyboardModifiers
+    selector?: number
+    modifiers?: HidKeyboardModifiers
     onChange: (newSelector: number, newModifiers: HidKeyboardModifiers) => void
 }) {
+    const { initialSelector, initialModifiers, selector, modifiers, onChange } =
+        props
+    const uncontrolled = useMemo(
+        () => selector === undefined || modifiers === undefined,
+        []
+    )
+    const [selector_, setSelector_] = useState<number>(initialSelector || 0)
+    const [modifiers_, setModifiters_] = useState<HidKeyboardModifiers>(
+        initialModifiers || HidKeyboardModifiers.None
+    )
+    const { darkMode } = useContext(DarkModeContext)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const keyboardRef = useRef<any>()
-    const { selector, modifiers, onChange } = props
-    const { darkMode } = useContext(DarkModeContext)
     const classes = useStyles()
     const theme = `hg-theme-default hg-layout-default ${
         darkMode === "dark" ? classes.darkKeyboard : classes.keyboard
@@ -290,8 +301,8 @@ export default function KeyboardKeyInput(props: {
     }
     const handleKeyboardKeyPress = (code: string) => {
         code = code.toLowerCase().replace(/[{}]/g, "")
-        let newSelector = selector
-        let newModifiers = modifiers
+        let newSelector = selector_
+        let newModifiers = modifiers_
         const msel = selectors[code]
         const mcode = modifierCodes[code]
         if (msel) {
@@ -303,11 +314,28 @@ export default function KeyboardKeyInput(props: {
                 else newModifiers |= mcode
             }
         }
+        setSelector_(newSelector)
+        setModifiters_(newModifiers)
         onChange(newSelector, newModifiers)
     }
 
-    // todo: render value to simple-keyboard selectors
-    const value = renderKeyboardKey(selector, modifiers, false)
+    // update external values
+    useEffect(() => {
+        if (selector !== undefined) {
+            if (uncontrolled)
+                console.warn(`trying to set an uncontrolled selector`)
+            setSelector_(selector)
+        }
+    }, [selector])
+    useEffect(() => {
+        if (modifiers !== undefined) {
+            if (uncontrolled)
+                console.warn(`trying to set an uncontrolled modifier`)
+            setModifiters_(modifiers)
+        }
+    }, [modifiers])
+
+    const value = renderKeyboardKey(selector_, modifiers_, false)
     useEffect(() => {
         keyboardRef.current?.addButtonTheme(value, "buttonSelected")
         return () =>
