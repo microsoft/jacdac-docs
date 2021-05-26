@@ -5,6 +5,22 @@ import Keyboard from "react-simple-keyboard"
 import "react-simple-keyboard/build/css/index.css"
 import DarkModeContext from "./DarkModeContext"
 
+const display = {
+    "{escape}": "esc ⎋",
+    "{tab}": "tab ⇥",
+    "{backspace}": "backspace ⌫",
+    "{enter}": "enter ↵",
+    "{capslock}": "caps lock ⇪",
+    "{shiftleft}": "shift ⇧",
+    "{shiftright}": "shift ⇧",
+    "{controlleft}": "ctrl ⌃",
+    "{controlright}": "ctrl ⌃",
+    "{altleft}": "alt ⌥",
+    "{altright}": "alt ⌥",
+    "{metaleft}": "cmd ⌘",
+    "{metaright}": "cmd ⌘",
+}
+
 const selectors = {
     a: 0x04,
     b: 0x05,
@@ -207,7 +223,7 @@ const useStyles = makeStyles(theme =>
     })
 )
 
-export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
+export function renderKey(selector: number, modifiers: HidKeyboardModifiers, convertToText:boolean = false) {
     const flags = [
         "controlleft",
         "shiftleft",
@@ -221,7 +237,11 @@ export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
     const values = []
     flags.forEach((flag, i) => {
         if (modifiers & (1 << i)) {
-            values.push(`{${flag}}`)
+            const flagText:string = `{${flag}}`
+            if (!convertToText)
+                values.push(flagText)
+            else 
+                values.push(`${display[flagText]}`)
         }
     })
     const sel = reverseSelectors[selector]
@@ -254,21 +274,7 @@ export default function KeyboardKeyInput(props: {
             "{controlleft} {altleft} {metaleft} {space} {metaright} {altright}",
         ],
     }
-    const display = {
-        "{escape}": "esc ⎋",
-        "{tab}": "tab ⇥",
-        "{backspace}": "backspace ⌫",
-        "{enter}": "enter ↵",
-        "{capslock}": "caps lock ⇪",
-        "{shiftleft}": "shift ⇧",
-        "{shiftright}": "shift ⇧",
-        "{controlleft}": "ctrl ⌃",
-        "{controlright}": "ctrl ⌃",
-        "{altleft}": "alt ⌥",
-        "{altright}": "alt ⌥",
-        "{metaleft}": "cmd ⌘",
-        "{metaright}": "cmd ⌘",
-    }
+
     const handleKeyboardKeyPress = (code: string) => {
         code = code.toLowerCase().replace(/[{}]/g, "")
         let newSelector = selector

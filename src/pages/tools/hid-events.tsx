@@ -280,7 +280,8 @@ export default function HIDEvents() {
                                                     <code>
                                                         {renderKey(
                                                             selector,
-                                                            modifiers
+                                                            modifiers,
+                                                            true
                                                         )}
                                                     </code>
                                                 </TableCell>
