@@ -243,7 +243,13 @@ export function renderKeyboardKey(
     })
     const sel = reverseSelectors[selector]
     if (sel !== undefined)
-        values.push(!pretty && sel.length > 1 ? `{${sel}}` : sel)
+        values.push(
+            pretty
+                ? sel.toUpperCase()
+                : !pretty && sel.length > 1
+                ? `{${sel}}`
+                : sel
+        )
     const value = values.filter(v => !!v).join(sep)
     return value
 }

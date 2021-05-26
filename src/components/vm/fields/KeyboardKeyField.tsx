@@ -30,7 +30,7 @@ export default class KeyboardKeyField extends ReactField<{
             newSelector: number,
             newModifiers: HidKeyboardModifiers
         ) => {
-            this.setValue({ selector: newSelector, modifiers: newModifiers })
+            this.value = { selector: newSelector, modifiers: newModifiers }
         }
         return (
             <KeyboardKeyInput

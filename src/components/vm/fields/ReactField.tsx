@@ -38,7 +38,17 @@ export class ReactField<T> extends Blockly.Field {
     }
 
     get value(): T {
-        return (this.getValue() || {}) as T
+        try {
+            const v = JSON.parse(this.getValue())
+            return (v || {}) as T
+        } catch (e) {
+            console.warn(e)
+            return {} as T
+        }
+    }
+
+    set value(v: T) {
+        this.setValue(JSON.stringify(v))
     }
 
     getText_() {
