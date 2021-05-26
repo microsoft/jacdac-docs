@@ -302,7 +302,7 @@ export default function KeyboardKeyInput(props: {
             layout={layout}
             theme={theme}
             display={display}
-            mergeDisplay={true}
+            mergeDisplay={false}
         />
     )
 }
