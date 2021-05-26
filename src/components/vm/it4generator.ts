@@ -14,7 +14,7 @@ import {
     WAIT_BLOCK,
     WHILE_CONDITION_BLOCK,
 } from "./useToolbox"
-import { assert, unique } from "../../../jacdac-ts/src/jdom/utils"
+import { assert } from "../../../jacdac-ts/src/jdom/utils"
 
 const ops = {
     AND: "&&",
@@ -60,6 +60,9 @@ export default function workspaceJSONToIT4Program(
     const blockToExpression = (block: BlockJSON) => {
         if (!block) return undefined
         const { type, value, inputs } = block
+
+        console.log(`block`, type, value, inputs)
+
         if (value !== undefined)
             // literal
             return <jsep.Literal>{
@@ -68,7 +71,6 @@ export default function workspaceJSONToIT4Program(
                 raw: value + "",
             }
 
-        console.log(`block`, block)
         switch (type) {
             case "jacdac_math_single": {
                 const argument = blockToExpression(inputs[0].child)
@@ -194,10 +196,6 @@ export default function workspaceJSONToIT4Program(
         }
     }
 
-    // visit all the nodes in the blockly tree
-    const registers: string[] = []
-    const events: string[] = []
-
     const handlers: IT4Handler[] = workspace.blocks.map(top => {
         const { type, inputs } = top
         const commands: IT4GuardedCommand[] = []
@@ -217,11 +215,8 @@ export default function workspaceJSONToIT4Program(
             const { template } = def
             switch (template) {
                 case "event": {
-                    const { service, events } = def as EventBlockDefinition
-                    const { value: role, variabletype: serviceShortId } =
-                        inputs[0].fields["role"]
+                    const { value: role } = inputs[0].fields["role"]
                     const { value: eventName } = inputs[0].fields["event"]
-
                     commands.push({
                         command: {
                             type: "CallExpression",
@@ -244,16 +239,12 @@ export default function workspaceJSONToIT4Program(
         top.children?.forEach(child => commands.push(blockToCommand(child)))
 
         return {
-            description: type,
             commands,
         }
     })
 
     return {
-        description: "not required?",
         roles,
-        registers: unique(registers),
-        events: unique(events),
         handlers,
     }
 }
