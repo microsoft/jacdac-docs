@@ -77,16 +77,19 @@ export class ReactField<T> extends Blockly.Field {
     }
 
     dropdownDispose_() {
-        ReactDOM.unmountComponentAtNode(this.div_)
+        // this blows on hot reloads
+        try {
+            ReactDOM.unmountComponentAtNode(this.div_)
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     render() {
         return (
             <DarkModeProvider>
                 <IdProvider>
-                    <JacdacProvider>
-                        <div>{this.renderField()}</div>
-                    </JacdacProvider>
+                    <JacdacProvider>{this.renderField()}</JacdacProvider>
                 </IdProvider>
             </DarkModeProvider>
         )
