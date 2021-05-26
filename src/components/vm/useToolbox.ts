@@ -354,6 +354,7 @@ function loadBlocks(
                     ],
                     colour: serviceColor(service),
                     inputsInline: true,
+                    previousStatement: null,
                     nextStatement: null,
                     tooltip: `Send a keyboard key combo`,
                     helpUrl: serviceHelp(service),
