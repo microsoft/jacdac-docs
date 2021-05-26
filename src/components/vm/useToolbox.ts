@@ -4,6 +4,7 @@ import {
     JoystickReg,
     SRV_BOOTLOADER,
     SRV_CONTROL,
+    SRV_HID_KEYBOARD,
     SRV_JOYSTICK,
     SRV_LOGGER,
     SRV_PROTO_TEST,
@@ -34,6 +35,8 @@ import useServices from "../hooks/useServices"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import { Theme, useTheme } from "@material-ui/core"
 import { withPrefix } from "gatsby-link"
+import { registerFields } from "./fields/fields"
+import { FIELD_KEYBOARD_KEY } from "./fields/KeyboardField"
 
 const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -81,7 +84,13 @@ export type RegisterTemplate =
 
 export type CommandTemplate = "command"
 
-export type BlockTemplate = EventTemplate | RegisterTemplate | CommandTemplate
+export type CustomTemplate = "custom"
+
+export type BlockTemplate =
+    | EventTemplate
+    | RegisterTemplate
+    | CommandTemplate
+    | CustomTemplate
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
@@ -125,6 +134,12 @@ export interface CommandBlockDefinition extends ServiceBlockDefinition {
     kind: "block"
     template: CommandTemplate
     command: jdspec.PacketInfo
+}
+
+export interface CustomBlockDefinition extends ServiceBlockDefinition {
+    kind: "block"
+    template: CustomTemplate
+    command: string
 }
 
 export const WHILE_CONDITION_BLOCK = "jacdac_while_event"
@@ -292,6 +307,8 @@ function loadBlocks(
                 !/^_/.test(service.shortId) && service.status !== "deprecated"
         )
         .filter(service => ignoredServices.indexOf(service.classIdentifier) < 0)
+    const resolveService = (cls: number): jdspec.ServiceSpec[] =>
+        allServices.filter(srv => srv.classIdentifier === cls)
     const registers = allServices
         .map(service => ({
             service,
@@ -321,7 +338,31 @@ function loadBlocks(
         )
     )
 
-    const HUE = 230
+    const customBlockDefinitions: CustomBlockDefinition[] = [
+        ...resolveService(SRV_HID_KEYBOARD).map(service => (<CustomBlockDefinition>{
+            kind: "block",
+            type: ``, // filled up later
+            message0: `send %1 key %2`,
+            args0: [
+                fieldVariable(service),
+                {
+                    type: FIELD_KEYBOARD_KEY,
+                    name: "key",
+                },
+            ],
+            colour: serviceColor(service),
+            inputsInline: true,
+            nextStatement: null,
+            tooltip: `Send a keyboard key combo`,
+            helpUrl: serviceHelp(service),
+            service,
+            command: "send_key",
+            template: "custom",
+        })),
+    ].map(def => {
+        def.type = `jacdac_custom_${def.service.shortId}_${def.command}`
+        return def
+    })
 
     const eventBlocks = events.map<EventBlockDefinition>(
         ({ service, events }) => ({
@@ -563,6 +604,7 @@ function loadBlocks(
         ...registerNumericsGetBlocks,
         ...registerSetBlocks,
         ...commandBlocks,
+        ...customBlockDefinitions,
     ]
 
     const shadowBlocks: BlockDefinition[] = [
@@ -648,7 +690,7 @@ function loadBlocks(
                     precision: 1,
                 },
             ],
-            colour: HUE,
+            style: "math_blocks",
             output: "Number",
         },
         {
@@ -834,7 +876,9 @@ function loadBlocks(
         ...mathBlocks,
     ]
 
-    // register blocks with Blockly, happens once
+    // register field editors
+    registerFields()
+    // re-register blocks with blocklys
     blocks.map(
         block =>
             (Blockly.Blocks[block.type] = {
@@ -843,6 +887,8 @@ function loadBlocks(
                 },
             })
     )
+
+    // final mapping
     const jdBlocks = serviceBlocks.filter(block => !!block.service)
     const services = uniqueMap(
         jdBlocks,
