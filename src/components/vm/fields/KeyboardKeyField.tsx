@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react"
 import { HidKeyboardModifiers } from "../../../../jacdac-ts/src/jdom/constants"
 import { ReactField } from "./ReactField"
-import KeyboardKeyInput, { renderKey } from "../../ui/KeyboardKeyInput"
+import KeyboardKeyInput, { renderKeyboardKey } from "../../ui/KeyboardKeyInput"
 
 export interface KeyboardFieldValue {
     selector: number
@@ -21,7 +21,7 @@ export default class KeyboardKeyField extends ReactField<{
 
     getText_() {
         const { selector, modifiers } = this.value
-        return renderKey(selector, modifiers)
+        return renderKeyboardKey(selector, modifiers, true)
     }
 
     renderField(): ReactNode {

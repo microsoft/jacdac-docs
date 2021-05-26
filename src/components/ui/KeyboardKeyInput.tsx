@@ -208,26 +208,43 @@ const useStyles = makeStyles(theme =>
     })
 )
 
-export function renderKey(selector: number, modifiers: HidKeyboardModifiers) {
-    const flags = [
-        "controlleft",
-        "shiftleft",
-        "altleft",
-        "metaleft",
-        "controlright",
-        "shiftright",
-        "altright",
-        "metaright",
-    ]
+export function renderKeyboardKey(
+    selector: number,
+    modifiers: HidKeyboardModifiers,
+    pretty: boolean
+) {
+    const flags = pretty
+        ? [
+              "Ctrl",
+              "Shift",
+              "Alt",
+              "Cmd",
+              "Ctrl Right",
+              "Shift Right",
+              "AltRight",
+              "Cmd Right",
+          ]
+        : [
+              "{controlleft}",
+              "{shiftleft}",
+              "{altleft}",
+              "{metaleft}",
+              "{controlright}",
+              "{shiftright}",
+              "{altright}",
+              "{metaright}",
+          ]
+    const sep = pretty ? " + " : " "
     const values = []
     flags.forEach((flag, i) => {
         if (modifiers & (1 << i)) {
-            values.push(`{${flag}}`)
+            values.push(flag)
         }
     })
     const sel = reverseSelectors[selector]
-    if (sel !== undefined) values.push(sel.length > 1 ? `{${sel}}` : sel)
-    const value = values.filter(v => !!v).join(" ")
+    if (sel !== undefined)
+        values.push(!pretty && sel.length > 1 ? `{${sel}}` : sel)
+    const value = values.filter(v => !!v).join(sep)
     return value
 }
 
@@ -290,7 +307,7 @@ export default function KeyboardKeyInput(props: {
     }
 
     // todo: render value to simple-keyboard selectors
-    const value = renderKey(selector, modifiers)
+    const value = renderKeyboardKey(selector, modifiers, false)
     useEffect(() => {
         keyboardRef.current?.addButtonTheme(value, "buttonSelected")
         return () =>
