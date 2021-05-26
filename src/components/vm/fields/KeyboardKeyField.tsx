@@ -1,22 +1,27 @@
 import React, { ReactNode } from "react"
 import { HidKeyboardModifiers } from "../../../../jacdac-ts/src/jdom/constants"
 import { ReactField } from "./ReactField"
-import KeyboardKeyInput from "../../ui/KeyboardKeyInput"
+import KeyboardKeyInput, { renderKey } from "../../ui/KeyboardKeyInput"
 
 export interface KeyboardFieldValue {
     selector: number
     modifiers: HidKeyboardModifiers
 }
 
-export const FIELD_KEYBOARD_KEY = "jacdac_field_keyboard_key"
-
-export class KeyboardField extends ReactField<{
+export default class KeyboardKeyField extends ReactField<{
     selector: number
     modifiers: HidKeyboardModifiers
 }> {
+    static KEY = "jacdac_field_keyboard_key"
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static fromJson(options: any) {
-        return new KeyboardField(options)
+        return new KeyboardKeyField(options)
+    }
+
+    getText_() {
+        const { selector, modifiers } = this.value
+        return renderKey(selector, modifiers)
     }
 
     renderField(): ReactNode {
@@ -24,7 +29,9 @@ export class KeyboardField extends ReactField<{
         const handleChange = (
             newSelector: number,
             newModifiers: HidKeyboardModifiers
-        ) => this.setValue({ newSelector, newModifiers })
+        ) => {
+            this.setValue({ selector: newSelector, modifiers: newModifiers })
+        }
         return (
             <KeyboardKeyInput
                 selector={selector}

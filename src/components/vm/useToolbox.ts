@@ -36,7 +36,7 @@ import Flags from "../../../jacdac-ts/src/jdom/flags"
 import { Theme, useTheme } from "@material-ui/core"
 import { withPrefix } from "gatsby-link"
 import { registerFields } from "./fields/fields"
-import { FIELD_KEYBOARD_KEY } from "./fields/KeyboardField"
+import KeyboardKeyField from "./fields/KeyboardKeyField"
 
 const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -339,26 +339,29 @@ function loadBlocks(
     )
 
     const customBlockDefinitions: CustomBlockDefinition[] = [
-        ...resolveService(SRV_HID_KEYBOARD).map(service => (<CustomBlockDefinition>{
-            kind: "block",
-            type: ``, // filled up later
-            message0: `send %1 key %2`,
-            args0: [
-                fieldVariable(service),
-                {
-                    type: FIELD_KEYBOARD_KEY,
-                    name: "key",
-                },
-            ],
-            colour: serviceColor(service),
-            inputsInline: true,
-            nextStatement: null,
-            tooltip: `Send a keyboard key combo`,
-            helpUrl: serviceHelp(service),
-            service,
-            command: "send_key",
-            template: "custom",
-        })),
+        ...resolveService(SRV_HID_KEYBOARD).map(
+            service =>
+                <CustomBlockDefinition>{
+                    kind: "block",
+                    type: ``, // filled up later
+                    message0: `send %1 key %2`,
+                    args0: [
+                        fieldVariable(service),
+                        {
+                            type: KeyboardKeyField.KEY,
+                            name: "key",
+                        },
+                    ],
+                    colour: serviceColor(service),
+                    inputsInline: true,
+                    nextStatement: null,
+                    tooltip: `Send a keyboard key combo`,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    command: "send_key",
+                    template: "custom",
+                }
+        ),
     ].map(def => {
         def.type = `jacdac_custom_${def.service.shortId}_${def.command}`
         return def

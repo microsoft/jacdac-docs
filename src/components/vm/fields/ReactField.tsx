@@ -3,6 +3,8 @@ import ReactDOM from "react-dom"
 import Blockly from "blockly/core"
 import JacdacProvider from "../../../jacdac/Provider"
 import { ReactNode } from "react"
+import { IdProvider } from "react-use-id-hook"
+import DarkModeProvider from "../../ui/DarkModeProvider"
 
 /**
  * A base class for react-based field
@@ -64,7 +66,6 @@ export class ReactField<T> extends Blockly.Field {
             this.sourceBlock_.getColour(),
             borderColour
         )
-
         Blockly.DropDownDiv.showPositionedByField(
             this,
             this.dropdownDispose_.bind(this)
@@ -80,7 +81,15 @@ export class ReactField<T> extends Blockly.Field {
     }
 
     render() {
-        return <JacdacProvider>{this.renderField()}</JacdacProvider>
+        return (
+            <DarkModeProvider>
+                <IdProvider>
+                    <JacdacProvider>
+                        <div>{this.renderField()}</div>
+                    </JacdacProvider>
+                </IdProvider>
+            </DarkModeProvider>
+        )
     }
 
     renderField(): ReactNode {

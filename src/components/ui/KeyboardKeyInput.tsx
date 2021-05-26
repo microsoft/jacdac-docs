@@ -4,6 +4,7 @@ import { HidKeyboardModifiers } from "../../../jacdac-ts/jacdac-spec/dist/specco
 import Keyboard from "react-simple-keyboard"
 import "react-simple-keyboard/build/css/index.css"
 import DarkModeContext from "./DarkModeContext"
+import { useId } from "react-use-id-hook"
 
 const selectors = {
     a: 0x04,
@@ -197,7 +198,7 @@ const useStyles = makeStyles(theme =>
                 background: `${theme.palette.primary.dark} !important`,
                 color: "white !important",
             },
-    },
+        },
         keyboard: {
             "& .buttonSelected": {
                 background: `${theme.palette.primary.dark} !important`,
@@ -243,6 +244,7 @@ export default function KeyboardKeyInput(props: {
     const theme = `hg-theme-default hg-layout-default ${
         darkMode === "dark" ? classes.darkKeyboard : classes.keyboard
     }`
+    const keyboardId = useId()
 
     const layout = {
         default: [
@@ -297,12 +299,13 @@ export default function KeyboardKeyInput(props: {
 
     return (
         <Keyboard
+            baseClass={keyboardId}
             keyboardRef={r => (keyboardRef.current = r)}
             onKeyPress={handleKeyboardKeyPress}
             layout={layout}
             theme={theme}
             display={display}
-            mergeDisplay={false}
+            mergeDisplay={true}
         />
     )
 }

@@ -1,10 +1,10 @@
 import Blockly from "blockly"
-import { FIELD_KEYBOARD_KEY, KeyboardField } from "./KeyboardField"
+import KeyboardKeyField from "./KeyboardKeyField"
 
 let registered = false
 export function registerFields() {
     if (registered) return
 
     registered = true
-    Blockly.fieldRegistry.register(FIELD_KEYBOARD_KEY, KeyboardField)
+    Blockly.fieldRegistry.register(KeyboardKeyField.KEY, KeyboardKeyField)
 }
