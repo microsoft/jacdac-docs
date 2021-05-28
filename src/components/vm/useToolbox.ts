@@ -68,6 +68,7 @@ import {
 import NoteField from "./fields/NoteField"
 import ServoAngleField from "./fields/ServoAngleField"
 import LEDColorField from "./fields/LEDColorField"
+import DashboardServiceField from "./fields/DashboardServiceField"
 
 type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
@@ -130,7 +131,8 @@ function createBlockTheme(theme: Theme) {
 
 function loadBlocks(
     serviceColor: (srv: jdspec.ServiceSpec) => string,
-    commandColor: string
+    commandColor: string,
+    dashboardColor: string
 ): CachedBlockDefinitions {
     const customShadows = [
         {
@@ -456,6 +458,30 @@ function loadBlocks(
         return def
     })
 
+    const bashboardBlocks: ServiceBlockDefinition[] = allServices.map(
+        service => ({
+            kind: "block",
+            type: `jacdac_dashboard_service_${service.shortId}`,
+            message0: `%1 %2 %3`,
+            args0: [
+                fieldVariable(service),
+                {
+                    type: "input_dummy",
+                },
+                <InputDefinition>{
+                    type: DashboardServiceField.KEY,
+                    name: "dashboard",
+                },
+            ],
+            colour: serviceColor(service),
+            inputsInline: false,
+            tooltip: `Dashboard of the service`,
+            helpUrl: `A view on the servive`,
+            service,
+            template: "blocksonly",
+        })
+    )
+
     const eventBlocks = events.map<EventBlockDefinition>(
         ({ service, events }) => ({
             kind: "block",
@@ -733,6 +759,7 @@ function loadBlocks(
         ...registerSetBlocks,
         ...customBlockDefinitions,
         ...commandBlocks,
+        ...bashboardBlocks,
     ]
 
     const shadowBlocks: BlockDefinition[] = [
@@ -1083,9 +1110,10 @@ export default function useToolbox(props: {
     const { blockServices, serviceClass } = props
 
     const theme = useTheme()
-    const { serviceColor, commandColor } = createBlockTheme(theme)
+    const { serviceColor, commandColor, dashboardColor } =
+        createBlockTheme(theme)
     const { serviceBlocks, services } = useMemo(
-        () => loadBlocks(serviceColor, commandColor),
+        () => loadBlocks(serviceColor, commandColor, dashboardColor),
         [theme]
     )
     const liveServices = useServices({ specification: true })

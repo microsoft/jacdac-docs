@@ -30,7 +30,7 @@ ReactFieldContext.displayName = "ReactField"
 
 export function ReactFieldProvider(props: {
     value: any
-    onValueChange: (newValue: any) => any
+    onValueChange?: (newValue: any) => any
     children: ReactNode
 }) {
     const {
@@ -41,7 +41,7 @@ export function ReactFieldProvider(props: {
     const [value, setValue] = useState<any>(initialValue)
     const onValueChange = (newValue: any) => {
         setValue(newValue)
-        onFieldValueChange(newValue)
+        onFieldValueChange?.(newValue)
     }
     return (
         <ReactFieldContext.Provider value={{ value, onValueChange }}>
@@ -196,6 +196,11 @@ export default class ReactField<T> extends Blockly.Field {
 
     renderField(): ReactNode {
         return <span>not implemented</span>
+    }
+
+    dispose() {
+        this.view = undefined
+        super.dispose()
     }
 }
 

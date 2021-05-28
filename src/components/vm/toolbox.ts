@@ -4,7 +4,7 @@ export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
 export interface InputDefinition {
     type: string
-    name: string
+    name?: string
     variable?: string
     variableTypes?: string[]
     defaultType?: string
@@ -52,6 +52,8 @@ export type CustomTemplate = "custom"
 
 export type ShadowTemplate = "shadow"
 
+export type BlocksOnlyTemplate = "blocksonly"
+
 export type BlockTemplate =
     | EventTemplate
     | EventFieldTemplate
@@ -59,6 +61,7 @@ export type BlockTemplate =
     | CommandTemplate
     | CustomTemplate
     | ShadowTemplate
+    | BlocksOnlyTemplate
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
