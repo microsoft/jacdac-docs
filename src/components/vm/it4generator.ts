@@ -161,14 +161,10 @@ export default function workspaceJSONToIT4Program(
                     then: [],
                     else: [],
                 }
-                addCommands(ret.then, [
-                    inputs[1].child,
-                    ...inputs[1].child?.children,
-                ])
-                addCommands(ret.else, [
-                    inputs[2].child,
-                    ...inputs[2].child?.children,
-                ])
+                const t = inputs[1].child
+                const e = inputs[2].child
+                addCommands(ret.then, [ t, ...(t.children ? t.children : [])])
+                addCommands(ret.else, [ e, ...(e.children ? e.children : [])])
                 return ret
             }
             // more builts

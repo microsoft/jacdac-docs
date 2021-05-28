@@ -97,7 +97,7 @@ export default function VMEditor(props: {
             <Grid item xs={12}>
                 <VMRunner
                     program={program}
-                    autoStart={true}
+                    autoStart={false}
                     runnerRef={runnerRef}
                 />
             </Grid>
