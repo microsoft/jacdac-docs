@@ -1,9 +1,11 @@
 import { BlockJSON, WorkspaceJSON } from "./jsongenerator"
 import {
-    IT4GuardedCommand,
+    IT4Base,
     IT4Handler,
     IT4Program,
     IT4Role,
+    toMemberExpression,
+    toIdentifier
 } from "../../../jacdac-ts/src/vm/ir"
 import {
     BlockDefinition,
@@ -29,22 +31,6 @@ const ops = {
     MUL: "*",
     DIV: "/",
     MINUS: "-",
-}
-
-function toIdentifier(id: string) {
-    return {
-        type: "Identifier",
-        name: id,
-    } as jsep.Identifier
-}
-
-function toMemberExpression(root: string, field: string | jsep.Expression) {
-    return {
-        type: "MemberExpression",
-        object: toIdentifier(root),
-        property: typeof field === "string" ? toIdentifier(field) : field,
-        computed: false,
-    } as jsep.MemberExpression
 }
 
 export default function workspaceJSONToIT4Program(
@@ -151,7 +137,7 @@ export default function workspaceJSONToIT4Program(
         return undefined
     }
 
-    const blockToCommand = (block: BlockJSON): IT4GuardedCommand => {
+    const blockToCommand = (block: BlockJSON): IT4Base => {
         let command: jsep.CallExpression
         const { type, inputs } = block
         switch (type) {
@@ -210,13 +196,14 @@ export default function workspaceJSONToIT4Program(
         // for linking back
         return {
             sourceId: block.id,
+            type: "cmd",
             command,
-        }
+        } as IT4Base
     }
 
     const handlers: IT4Handler[] = workspace.blocks.map(top => {
         const { type, inputs } = top
-        const commands: IT4GuardedCommand[] = []
+        const commands: IT4Base[] = []
         let command: jsep.CallExpression = undefined
         if (type === WHILE_CONDITION_BLOCK) {
             // this is while (...)
@@ -266,8 +253,9 @@ export default function workspaceJSONToIT4Program(
         }
         commands.push({
             sourceId: top.id,
+            type: "cmd",
             command
-        })
+        } as IT4Base)
         // process children
         top.children?.forEach(child => commands.push(blockToCommand(child)))
 
