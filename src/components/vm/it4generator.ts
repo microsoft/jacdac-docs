@@ -47,7 +47,7 @@ export default function workspaceJSONToIT4Program(
     const blockToExpression: (block: BlockJSON) => jsep.Expression = (
         block: BlockJSON
     ) => {
-        if (!block) return toIdentifier("NOCODE")
+        if (!block) return toIdentifier("%%NOCODE%%")
         const { type, value, inputs } = block
 
         console.debug(`block`, type, value, inputs)
@@ -137,7 +137,7 @@ export default function workspaceJSONToIT4Program(
                 }
             }
         }
-        return toIdentifier("NOCODE")
+        return toIdentifier("%%NOCODE%%")
     }
 
     const blockToCommand = (block: BlockJSON): IT4Base => {
