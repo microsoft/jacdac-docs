@@ -5,7 +5,8 @@ import {
     IT4Program,
     IT4Role,
     toMemberExpression,
-    toIdentifier
+    toIdentifier,
+    IT4IfThenElse,
 } from "../../../jacdac-ts/src/vm/ir"
 import {
     BlockDefinition,
@@ -43,8 +44,10 @@ export default function workspaceJSONToIT4Program(
         .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
         .map(v => ({ role: v.name, serviceShortId: v.type }))
 
-    const blockToExpression = (block: BlockJSON) => {
-        if (!block) return undefined
+    const blockToExpression: (block: BlockJSON) => jsep.Expression = (
+        block: BlockJSON
+    ) => {
+        if (!block) return toIdentifier("NOCODE")
         const { type, value, inputs } = block
 
         console.debug(`block`, type, value, inputs)
@@ -134,7 +137,7 @@ export default function workspaceJSONToIT4Program(
                 }
             }
         }
-        return undefined
+        return toIdentifier("NOCODE")
     }
 
     const blockToCommand = (block: BlockJSON): IT4Base => {
@@ -149,6 +152,24 @@ export default function workspaceJSONToIT4Program(
                     callee: toIdentifier("wait"),
                 }
                 break
+            }
+            case "dynamic_if": {
+                let ret: IT4IfThenElse = {
+                    sourceId: block.id,
+                    type: "ite",
+                    expr: blockToExpression(inputs[0]?.child),
+                    then: [],
+                    else: [],
+                }
+                addCommands(ret.then, [
+                    inputs[1].child,
+                    ...inputs[1].child?.children,
+                ])
+                addCommands(ret.else, [
+                    inputs[2].child,
+                    ...inputs[2].child?.children,
+                ])
+                return ret
             }
             // more builts
             default: {
@@ -201,6 +222,12 @@ export default function workspaceJSONToIT4Program(
         } as IT4Base
     }
 
+    const addCommands = (acc: IT4Base[], blocks: BlockJSON[]) => {
+        blocks?.forEach(child => {
+            if (child) acc.push(blockToCommand(child))
+        })
+    }
+
     const handlers: IT4Handler[] = workspace.blocks.map(top => {
         const { type, inputs } = top
         const commands: IT4Base[] = []
@@ -239,10 +266,7 @@ export default function workspaceJSONToIT4Program(
                     command = {
                         type: "CallExpression",
                         arguments: [
-                            toMemberExpression(
-                                role.toString(),
-                                register.name
-                            ),
+                            toMemberExpression(role.toString(), register.name),
                             argument,
                         ],
                         callee: toIdentifier("awaitChange"),
@@ -251,13 +275,14 @@ export default function workspaceJSONToIT4Program(
                 }
             }
         }
+
         commands.push({
             sourceId: top.id,
             type: "cmd",
-            command
+            command,
         } as IT4Base)
-        // process children
-        top.children?.forEach(child => commands.push(blockToCommand(child)))
+
+        addCommands(commands, top.children)
 
         return {
             commands,
