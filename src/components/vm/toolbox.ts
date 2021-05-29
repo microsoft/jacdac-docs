@@ -52,7 +52,7 @@ export type CustomTemplate = "custom"
 
 export type ShadowTemplate = "shadow"
 
-export type BlocksOnlyTemplate = "blocksonly"
+export type TwinTemplate = "twin"
 
 export type BlockTemplate =
     | EventTemplate
@@ -61,7 +61,7 @@ export type BlockTemplate =
     | CommandTemplate
     | CustomTemplate
     | ShadowTemplate
-    | BlocksOnlyTemplate
+    | TwinTemplate
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
@@ -88,6 +88,11 @@ export interface ButtonDefinition {
 export interface ServiceBlockDefinition extends BlockDefinition {
     template: BlockTemplate
     service: jdspec.ServiceSpec
+}
+
+export interface ServiceBlockDefinitionFactory {
+    jacdacDefinition: ServiceBlockDefinition
+    init: () => void
 }
 
 export interface EventBlockDefinition extends ServiceBlockDefinition {

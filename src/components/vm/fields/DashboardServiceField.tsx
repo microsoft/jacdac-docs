@@ -161,12 +161,16 @@ export default class DashboardServiceField extends ReactField<number> {
 
     // track current role
     onSourceBlockChanged() {
+        this.updateRole();
+    }
+
+    updateRole() {
         const source = this.getSourceBlock()
         const field = source?.inputList[0].fieldRow[0] as Blockly.FieldVariable
         // force model geneartion
         const xml = document.createElement("xml")
         field?.toXml(xml)
         const role = field?.getVariable()
-        console.log("source change", { source, field, role })
+        console.log("updated role", { source, field, role })
     }
 }

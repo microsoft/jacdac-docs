@@ -1,5 +1,5 @@
 import Blockly from "blockly"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import {
     JoystickReg,
     ServoReg,
@@ -46,6 +46,7 @@ import LEDMatrixField from "./fields/LEDMatrixField"
 import {
     BlockDefinition,
     BlockReference,
+    ButtonDefinition,
     CategoryDefinition,
     ColorInputDefnition,
     CommandBlockDefinition,
@@ -59,6 +60,7 @@ import {
     RegisterBlockDefinition,
     SeparatorDefinition,
     ServiceBlockDefinition,
+    ServiceBlockDefinitionFactory,
     SET_STATUS_LIGHT_BLOCK,
     ToolboxConfiguration,
     WAIT_BLOCK,
@@ -478,7 +480,7 @@ function loadBlocks(
             tooltip: `Dashboard of the service`,
             helpUrl: serviceHelp(service),
             service,
-            template: "blocksonly",
+            template: "twin",
         })
     )
 
@@ -1043,7 +1045,8 @@ function loadBlocks(
     // re-register blocks with blocklys
     blocks.map(
         block =>
-            (Blockly.Blocks[block.type] = {
+            (Blockly.Blocks[block.type] = <ServiceBlockDefinitionFactory>{
+                jacdacDefinition: block,
                 init: function () {
                     this.jsonInit(block)
                 },
@@ -1293,4 +1296,29 @@ export default function useToolbox(props: {
         toolboxConfiguration,
         newProjectXml: NEW_PROJET_XML,
     }
+}
+
+export function useToolboxButtons(
+    workspace: Blockly.WorkspaceSvg,
+    toolboxConfiguration: ToolboxConfiguration
+) {
+    // track workspace changes and update callbacks
+    useEffect(() => {
+        if (!workspace) return
+
+        // collect buttons
+        const buttons: ButtonDefinition[] = toolboxConfiguration?.contents
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map(cat => (cat as CategoryDefinition).button)
+            .filter(btn => !!btn)
+        buttons?.forEach(button =>
+            workspace.registerButtonCallback(button.callbackKey, () =>
+                Blockly.Variables.createVariableButtonHandler(
+                    workspace,
+                    null,
+                    button.service.shortId
+                )
+            )
+        )
+    }, [workspace, JSON.stringify(toolboxConfiguration)])
 }
