@@ -24,7 +24,7 @@ import { IT4ProgramRunner } from "../../../jacdac-ts/src/vm/vmrunner"
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         editor: {
-            height: "40vh",
+            height: "calc(100vh - 10rem)",
             "& .blocklyTreeLabel": {
                 fontFamily: theme.typography.fontFamily,
             },
@@ -52,7 +52,6 @@ export default function VMBlockEditor(props: {
         onIT4ProgramChange,
         initialXml,
         serviceClass,
-        runner,
     } = props
     const classes = useStyles()
     const { darkMode } = useContext(DarkModeContext)
