@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react"
+import React, { ReactNode, useContext } from "react"
 import ReactDOM from "react-dom"
 import ReactField, { ReactFieldJSON, ReactFieldProvider } from "./ReactField"
 import { child } from "../../widgets/svg"
@@ -6,17 +6,24 @@ import DarkModeProvider from "../../ui/DarkModeProvider"
 import { IdProvider } from "react-use-id-hook"
 import JacdacProvider from "../../../jacdac/Provider"
 import AppTheme from "../../ui/AppTheme"
-import { Grid } from "@material-ui/core"
+import { Button, Grid } from "@material-ui/core"
 import useServices from "../../hooks/useServices"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
-import { SRV_BUTTON } from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import {
+    SRV_BUTTON,
+    SRV_SERVO,
+} from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import AddIcon from "@material-ui/icons/Add"
+import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/servers/servers"
+import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 
 function DashboardServiceFieldWidget() {
-    const services = useServices({ ignoreSelf: true, serviceClass: SRV_BUTTON })
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const serviceClass = SRV_SERVO
+    const services = useServices({ ignoreSelf: true, serviceClass })
     const service = services?.[0]
-    if (!service) {
-        return null
-    }
+    const handleStartSimulator = () =>
+        startServiceProviderFromServiceClass(bus, serviceClass)
     return (
         <Grid
             container
@@ -24,11 +31,22 @@ function DashboardServiceFieldWidget() {
             alignContent="center"
             justify="center"
         >
-            <DashboardServiceWidget
-                service={service}
-                visible={true}
-                variant="icon"
-            />
+            {service ? (
+                <DashboardServiceWidget
+                    service={service}
+                    visible={true}
+                    variant="icon"
+                />
+            ) : (
+                <Button
+                    variant="contained"
+                    color="default"
+                    startIcon={<AddIcon />}
+                    onClick={handleStartSimulator}
+                >
+                    start simulator
+                </Button>
+            )}
         </Grid>
     )
 }
@@ -90,5 +108,9 @@ export default class DashboardServiceField extends ReactField<number> {
     renderBlockView(): ReactNode {
         console.log(`render field view`)
         return <DashboardServiceFieldWidget />
+    }
+
+    showEditor_() {
+        // don't do anything
     }
 }
