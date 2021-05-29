@@ -10,12 +10,13 @@ import { Button, Grid } from "@material-ui/core"
 import useServices from "../../hooks/useServices"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
 import {
-    SRV_BUTTON,
     SRV_SERVO,
 } from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import AddIcon from "@material-ui/icons/Add"
 import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/servers/servers"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
+import Alert from "../../ui/Alert"
+import { AlertTitle } from "@material-ui/lab"
 
 function DashboardServiceFieldWidget() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -30,6 +31,7 @@ function DashboardServiceFieldWidget() {
             alignItems="center"
             alignContent="center"
             justify="center"
+            spacing={1}
         >
             {service ? (
                 <DashboardServiceWidget
@@ -38,14 +40,20 @@ function DashboardServiceFieldWidget() {
                     variant="icon"
                 />
             ) : (
-                <Button
-                    variant="contained"
-                    color="default"
-                    startIcon={<AddIcon />}
-                    onClick={handleStartSimulator}
-                >
-                    start simulator
-                </Button>
+                <Grid item>
+                    <Alert severity="info">
+                        <AlertTitle>No service...</AlertTitle>
+                        Start a simulator test your code.
+                    </Alert>
+                    <Button
+                        variant="contained"
+                        color="default"
+                        startIcon={<AddIcon />}
+                        onClick={handleStartSimulator}
+                    >
+                        start simulator
+                    </Button>
+                </Grid>
             )}
         </Grid>
     )
