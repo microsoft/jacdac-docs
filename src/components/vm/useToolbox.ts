@@ -131,8 +131,7 @@ function createBlockTheme(theme: Theme) {
 
 function loadBlocks(
     serviceColor: (srv: jdspec.ServiceSpec) => string,
-    commandColor: string,
-    dashboardColor: string
+    commandColor: string
 ): CachedBlockDefinitions {
     const customShadows = [
         {
@@ -1111,10 +1110,9 @@ export default function useToolbox(props: {
     const { blockServices, serviceClass } = props
 
     const theme = useTheme()
-    const { serviceColor, commandColor, dashboardColor } =
-        createBlockTheme(theme)
+    const { serviceColor, commandColor } = createBlockTheme(theme)
     const { serviceBlocks, services } = useMemo(
-        () => loadBlocks(serviceColor, commandColor, dashboardColor),
+        () => loadBlocks(serviceColor, commandColor),
         [theme]
     )
     const liveServices = useServices({ specification: true })
