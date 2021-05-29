@@ -171,7 +171,7 @@ export default class ReactField<T> extends Blockly.Field {
     render() {
         const onValueChange = (newValue: any) => (this.value = newValue)
         return (
-            <DarkModeProvider fixedDarkMode={"light"}>
+            <DarkModeProvider fixedDarkMode={"dark"}>
                 <IdProvider>
                     <JacdacProvider>
                         <AppTheme>

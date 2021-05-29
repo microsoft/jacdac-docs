@@ -132,7 +132,7 @@ export default class DashboardServiceField extends ReactField<number> {
             event.stopPropagation()
         }
         return (
-            <DarkModeProvider fixedDarkMode="light">
+            <DarkModeProvider fixedDarkMode="dark">
                 <IdProvider>
                     <JacdacProvider>
                         <AppTheme>
