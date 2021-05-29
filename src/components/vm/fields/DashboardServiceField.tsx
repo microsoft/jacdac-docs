@@ -132,26 +132,24 @@ export default class DashboardServiceField extends ReactField<number> {
             event.stopPropagation()
         }
         return (
-            <ReactFieldProvider value={this.value}>
-                <DarkModeProvider>
-                    <IdProvider>
-                        <JacdacProvider>
-                            <AppTheme>
-                                <div
-                                    style={{ cursor: "default" }}
-                                    onPointerDown={onPointer}
-                                    onPointerUp={onPointer}
-                                    onPointerMove={onPointer}
-                                >
-                                    <DashboardServiceFieldWidget
-                                        serviceClass={this.serviceClass}
-                                    />
-                                </div>
-                            </AppTheme>
-                        </JacdacProvider>
-                    </IdProvider>
-                </DarkModeProvider>
-            </ReactFieldProvider>
+            <DarkModeProvider fixedDarkMode="light">
+                <IdProvider>
+                    <JacdacProvider>
+                        <AppTheme>
+                            <div
+                                style={{ cursor: "default" }}
+                                onPointerDown={onPointer}
+                                onPointerUp={onPointer}
+                                onPointerMove={onPointer}
+                            >
+                                <DashboardServiceFieldWidget
+                                    serviceClass={this.serviceClass}
+                                />
+                            </div>
+                        </AppTheme>
+                    </JacdacProvider>
+                </IdProvider>
+            </DarkModeProvider>
         )
     }
 
