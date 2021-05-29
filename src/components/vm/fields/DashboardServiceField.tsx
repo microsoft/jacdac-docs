@@ -30,6 +30,11 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
     const service = services?.[0]
     const handleStartSimulator = () =>
         startServiceProviderFromServiceClass(bus, serviceClass)
+    const onPointerStopPropagation = (event: PointerEvent<HTMLDivElement>) => {
+        // make sure blockly does not handle drags when interacting with UI
+        event.stopPropagation()
+    }
+
     return (
         <Grid
             container
@@ -40,11 +45,18 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
         >
             {service ? (
                 <Grid item>
-                    <DashboardServiceWidget
-                        service={service}
-                        visible={true}
-                        variant="icon"
-                    />
+                    <div
+                        style={{ cursor: "inherit" }}
+                        onPointerDown={onPointerStopPropagation}
+                        onPointerUp={onPointerStopPropagation}
+                        onPointerMove={onPointerStopPropagation}
+                    >
+                        <DashboardServiceWidget
+                            service={service}
+                            visible={true}
+                            variant="icon"
+                        />
+                    </div>
                 </Grid>
             ) : (
                 <Grid item>
@@ -127,25 +139,14 @@ export default class DashboardServiceField extends ReactField<number> {
     }
 
     renderBlock(): ReactNode {
-        const onPointer = (event: PointerEvent<HTMLDivElement>) => {
-            // make sure blockly does not handle drags when interacting with UI
-            event.stopPropagation()
-        }
         return (
             <DarkModeProvider fixedDarkMode="dark">
                 <IdProvider>
                     <JacdacProvider>
                         <AppTheme>
-                            <div
-                                style={{ cursor: "default" }}
-                                onPointerDown={onPointer}
-                                onPointerUp={onPointer}
-                                onPointerMove={onPointer}
-                            >
-                                <DashboardServiceFieldWidget
-                                    serviceClass={this.serviceClass}
-                                />
-                            </div>
+                            <DashboardServiceFieldWidget
+                                serviceClass={this.serviceClass}
+                            />
                         </AppTheme>
                     </JacdacProvider>
                 </IdProvider>
