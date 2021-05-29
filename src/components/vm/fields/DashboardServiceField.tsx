@@ -158,4 +158,15 @@ export default class DashboardServiceField extends ReactField<number> {
     bindEvents_() {
         Blockly.Tooltip.bindMouseEvents(this.getClickTarget_())
     }
+
+    // track current role
+    onSourceBlockChanged() {
+        const source = this.getSourceBlock()
+        const field = source?.inputList[0].fieldRow[0] as Blockly.FieldVariable
+        // force model geneartion
+        const xml = document.createElement("xml")
+        field?.toXml(xml)
+        const role = field?.getVariable()
+        console.log("source change", { source, field, role })
+    }
 }
