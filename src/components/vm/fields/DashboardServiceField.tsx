@@ -9,7 +9,10 @@ import AppTheme from "../../ui/AppTheme"
 import { Button, Grid } from "@material-ui/core"
 import useServices from "../../hooks/useServices"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
-import { SRV_SERVO } from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import {
+    SRV_SERVO,
+    SRV_SOIL_MOISTURE,
+} from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import AddIcon from "@material-ui/icons/Add"
 import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/servers/servers"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
@@ -19,7 +22,7 @@ import Blockly from "blockly"
 
 function DashboardServiceFieldWidget() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const serviceClass = SRV_SERVO
+    const serviceClass = SRV_SOIL_MOISTURE
     const services = useServices({ ignoreSelf: true, serviceClass })
     const service = services?.[0]
     const handleStartSimulator = () =>
@@ -33,11 +36,13 @@ function DashboardServiceFieldWidget() {
             spacing={1}
         >
             {service ? (
-                <DashboardServiceWidget
-                    service={service}
-                    visible={true}
-                    variant="icon"
-                />
+                <Grid item>
+                    <DashboardServiceWidget
+                        service={service}
+                        visible={true}
+                        variant="icon"
+                    />
+                </Grid>
             ) : (
                 <Grid item>
                     <Alert severity="info">
