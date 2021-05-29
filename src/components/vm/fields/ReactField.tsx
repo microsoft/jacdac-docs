@@ -171,14 +171,14 @@ export default class ReactField<T> extends Blockly.Field {
     render() {
         const onValueChange = (newValue: any) => (this.value = newValue)
         return (
-            <ReactFieldProvider
-                value={this.value}
-                onValueChange={onValueChange}
-            >
-                <DarkModeProvider>
-                    <IdProvider>
-                        <JacdacProvider>
-                            <AppTheme>
+            <DarkModeProvider>
+                <IdProvider>
+                    <JacdacProvider>
+                        <AppTheme>
+                            <ReactFieldProvider
+                                value={this.value}
+                                onValueChange={onValueChange}
+                            >
                                 <Box
                                     m={0.5}
                                     borderRadius={"0.25rem"}
@@ -186,11 +186,11 @@ export default class ReactField<T> extends Blockly.Field {
                                 >
                                     {this.renderField()}
                                 </Box>
-                            </AppTheme>
-                        </JacdacProvider>
-                    </IdProvider>
-                </DarkModeProvider>
-            </ReactFieldProvider>
+                            </ReactFieldProvider>
+                        </AppTheme>
+                    </JacdacProvider>
+                </IdProvider>
+            </DarkModeProvider>
         )
     }
 

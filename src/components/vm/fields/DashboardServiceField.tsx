@@ -127,9 +127,8 @@ export default class DashboardServiceField extends ReactField<number> {
     }
 
     renderBlock(): ReactNode {
-        // make sure blockly does not handle drags when interacting with UI
         const onPointer = (event: PointerEvent<HTMLDivElement>) => {
-            console.log("pointer")
+            // make sure blockly does not handle drags when interacting with UI
             event.stopPropagation()
         }
         return (
