@@ -1,16 +1,19 @@
 import Blockly from "blockly"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import {
     JoystickReg,
+    ServoReg,
     SRV_BOOTLOADER,
     SRV_BUZZER,
     SRV_CONTROL,
     SRV_HID_KEYBOARD,
     SRV_JOYSTICK,
+    SRV_LED,
     SRV_LED_MATRIX,
     SRV_LOGGER,
     SRV_PROTO_TEST,
     SRV_ROLE_MANAGER,
+    SRV_SERVO,
     SRV_SETTINGS,
     SRV_SEVEN_SEGMENT_DISPLAY,
     SystemEvent,
@@ -29,7 +32,6 @@ import {
 } from "../../../jacdac-ts/src/jdom/spec"
 import {
     arrayConcatMany,
-    SMap,
     splitFilter,
     toMap,
     uniqueMap,
@@ -38,148 +40,37 @@ import useServices from "../hooks/useServices"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import { Theme, useTheme } from "@material-ui/core"
 import { withPrefix } from "gatsby-link"
-import { registerFields } from "./fields/fields"
+import { fieldShadows, registerFields } from "./fields/fields"
 import KeyboardKeyField from "./fields/KeyboardKeyField"
-import NoteField from "./fields/NoteField"
 import LEDMatrixField from "./fields/LEDMatrixField"
-
-const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
-
-export interface InputDefinition {
-    type: string
-    name: string
-    variable?: string
-    variableTypes?: string[]
-    defaultType?: string
-    check?: string | string[]
-}
-
-export interface OptionsInputDefinition extends InputDefinition {
-    options?: [string, string][]
-}
-
-export interface NumberInputDefinition extends InputDefinition {
-    min?: number
-    max?: number
-    precision?: number
-}
-
-export interface ColorInputDefnition extends InputDefinition {
-    color?: string
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface BlockReference {
-    kind: "block"
-    type: string
-    values?: SMap<BlockReference>
-    blockxml?: string
-
-    value?: number
-    min?: number
-    max?: number
-}
-
-export type EventTemplate = "event"
-
-export type EventFieldTemplate = "event_field"
-
-export type RegisterTemplate =
-    | "register_change_event"
-    | "register_set"
-    | "register_get"
-
-export type CommandTemplate = "command"
-
-export type CustomTemplate = "custom"
-
-export type BlockTemplate =
-    | EventTemplate
-    | EventFieldTemplate
-    | RegisterTemplate
-    | CommandTemplate
-    | CustomTemplate
-
-export interface BlockDefinition extends BlockReference {
-    message0?: string
-    args0?: InputDefinition[]
-    colour?: number | string
-    inputsInline?: boolean
-    previousStatement?: string | string[]
-    nextStatement?: string | string[]
-    tooltip?: string
-    helpUrl?: string
-    style?: string
-    output?: string
-    extensions?: string[]
-    template?: BlockTemplate
-}
-
-export interface ButtonDefinition {
-    kind: "button"
-    text: string
-    callbackKey: string
-    service: jdspec.ServiceSpec
-}
-
-export interface ServiceBlockDefinition extends BlockDefinition {
-    template: BlockTemplate
-    service: jdspec.ServiceSpec
-}
-
-export interface EventBlockDefinition extends ServiceBlockDefinition {
-    template: EventTemplate
-    events: jdspec.PacketInfo[]
-}
-
-export interface EventFieldDefinition extends ServiceBlockDefinition {
-    template: EventFieldTemplate
-    event: jdspec.PacketInfo
-}
-
-export interface RegisterBlockDefinition extends ServiceBlockDefinition {
-    template: RegisterTemplate
-    register: jdspec.PacketInfo
-    field?: jdspec.PacketMember
-}
-
-export interface CommandBlockDefinition extends ServiceBlockDefinition {
-    kind: "block"
-    template: CommandTemplate
-    command: jdspec.PacketInfo
-}
-
-export interface CustomBlockDefinition extends ServiceBlockDefinition {
-    kind: "block"
-    template: CustomTemplate
-    expression?: string
-}
-
-export const WHILE_CONDITION_BLOCK = "jacdac_while_event"
-export const WHILE_CONDITION_BLOCK_CONDITION = "condition"
-export const WAIT_BLOCK = "jacdac_wait"
-export const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
-
-export interface CategoryDefinition {
-    kind: "category"
-    name: string
-    custom?: string
-    colour?: string
-    categorystyle?: string
-    contents?: (BlockDefinition | ButtonDefinition)[]
-    button?: ButtonDefinition
-}
-
-export interface SeparatorDefinition {
-    kind: "sep"
-}
-
-export type ToolboxNode = SeparatorDefinition | CategoryDefinition
-
-export interface ToolboxConfiguration {
-    kind: "categoryToolbox"
-    contents: ToolboxNode[]
-}
+import {
+    BlockDefinition,
+    BlockReference,
+    ButtonDefinition,
+    CategoryDefinition,
+    ColorInputDefnition,
+    CommandBlockDefinition,
+    CustomBlockDefinition,
+    EventBlockDefinition,
+    EventFieldDefinition,
+    InputDefinition,
+    NEW_PROJET_XML,
+    NumberInputDefinition,
+    OptionsInputDefinition,
+    RegisterBlockDefinition,
+    SeparatorDefinition,
+    ServiceBlockDefinition,
+    ServiceBlockDefinitionFactory,
+    SET_STATUS_LIGHT_BLOCK,
+    ToolboxConfiguration,
+    WAIT_BLOCK,
+    WHILE_CONDITION_BLOCK,
+    WHILE_CONDITION_BLOCK_CONDITION,
+} from "./toolbox"
+import NoteField from "./fields/NoteField"
+import ServoAngleField from "./fields/ServoAngleField"
+import LEDColorField from "./fields/LEDColorField"
+import TwinField from "./fields/TwinField"
 
 type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
@@ -244,14 +135,44 @@ function loadBlocks(
     serviceColor: (srv: jdspec.ServiceSpec) => string,
     commandColor: string
 ): CachedBlockDefinitions {
+    const customShadows = [
+        {
+            serviceClass: SRV_SERVO,
+            kind: "rw",
+            identifier: ServoReg.Angle,
+            field: "_",
+            shadow: <BlockDefinition>{
+                kind: "block",
+                type: ServoAngleField.SHADOW.type,
+            },
+        },
+    ]
+    const lookupCustomShadow = (
+        service: jdspec.ServiceSpec,
+        info: jdspec.PacketInfo,
+        field: jdspec.PacketMember
+    ) =>
+        customShadows.find(
+            cs =>
+                cs.serviceClass === service.classIdentifier &&
+                cs.kind == info.kind &&
+                cs.identifier === info.identifier &&
+                cs.field == field.name
+        )?.shadow
+
     const serviceHelp = (service: jdspec.ServiceSpec) =>
         withPrefix(`/services/${service.shortId}`)
     const fieldsSupported = (pkt: jdspec.PacketInfo) =>
         pkt.fields.every(toBlocklyType)
     const fieldName = (reg: jdspec.PacketInfo, field: jdspec.PacketMember) =>
         field.name === "_" ? reg.name : field.name
-    const fieldToShadow = (field: jdspec.PacketMember): BlockReference =>
-        isBooleanField(field)
+    const fieldToShadow = (
+        service: jdspec.ServiceSpec,
+        info: jdspec.PacketInfo,
+        field: jdspec.PacketMember
+    ): BlockReference =>
+        lookupCustomShadow(service, info, field) ||
+        (isBooleanField(field)
             ? { kind: "block", type: "jacdac_on_off" }
             : isStringField(field)
             ? { kind: "block", type: "text" }
@@ -272,7 +193,7 @@ function loadBlocks(
                   value: field.defaultValue || 0,
                   min: field.typicalMin || field.absoluteMin,
                   max: field.typicalMax || field.absoluteMax,
-              }
+              })
     const variableName = (srv: jdspec.ServiceSpec) =>
         `${humanify(srv.camelName).toLowerCase()} 1`
     const fieldVariable = (service: jdspec.ServiceSpec): InputDefinition => ({
@@ -288,11 +209,14 @@ function loadBlocks(
             name: fieldName(info, field),
             check: toBlocklyType(field),
         }))
-    const fieldsToValues = (info: jdspec.PacketInfo) =>
+    const fieldsToValues = (
+        service: jdspec.ServiceSpec,
+        info: jdspec.PacketInfo
+    ) =>
         toMap<jdspec.PacketMember, BlockReference | BlockDefinition>(
             info.fields,
             field => fieldName(info, field),
-            field => fieldToShadow(field)
+            field => fieldToShadow(service, info, field)
         )
     const fieldsToMessage = (info: jdspec.PacketInfo) =>
         info.fields
@@ -381,6 +305,47 @@ function loadBlocks(
                     template: "custom",
                 }
         ),
+        ...resolveService(SRV_LED).map(
+            service =>
+                <CustomBlockDefinition>{
+                    kind: "block",
+                    type: `fade`,
+                    message0: `fade %1 to %2 at speed %3`,
+                    args0: [
+                        fieldVariable(service),
+                        {
+                            type: "input_value",
+                            name: "color",
+                            check: "Number",
+                        },
+                        {
+                            type: "input_value",
+                            name: "speed",
+                            check: "Number",
+                        },
+                    ],
+                    values: {
+                        color: {
+                            kind: "block",
+                            type: LEDColorField.SHADOW.type,
+                        },
+                        speed: {
+                            kind: "block",
+                            type: "jacdac_ratio",
+                            shadow: true,
+                        },
+                    },
+                    colour: serviceColor(service),
+                    inputsInline: true,
+                    previousStatement: null,
+                    nextStatement: null,
+                    tooltip: `Fade LED color`,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    expression: `role.animate((color >> 16) & 0xff, (color >> 8) & 0xff, (color >> 0) & 0xff, speed * 0xff)`,
+                    template: "custom",
+                }
+        ),
         ...resolveService(SRV_BUZZER).map(
             service =>
                 <CustomBlockDefinition>{
@@ -408,7 +373,7 @@ function loadBlocks(
                     values: {
                         frequency: {
                             kind: "block",
-                            type: "jacdac_note",
+                            type: NoteField.SHADOW.type,
                             shadow: true,
                         },
                         duration: {
@@ -493,6 +458,31 @@ function loadBlocks(
         def.type = `jacdac_custom_${def.service.shortId}_${def.type}`
         return def
     })
+
+    const bashboardBlocks: ServiceBlockDefinition[] = allServices.map(
+        service => ({
+            kind: "block",
+            type: `jacdac_dashboard_service_${service.shortId}`,
+            message0: `%1 %2 %3`,
+            args0: [
+                fieldVariable(service),
+                {
+                    type: "input_dummy",
+                },
+                <InputDefinition>{
+                    type: TwinField.KEY,
+                    name: "dashboard",
+                    serviceClass: service.classIdentifier,
+                },
+            ],
+            colour: serviceColor(service),
+            inputsInline: false,
+            tooltip: `Dashboard of the service`,
+            helpUrl: serviceHelp(service),
+            service,
+            template: "twin",
+        })
+    )
 
     const eventBlocks = events.map<EventBlockDefinition>(
         ({ service, events }) => ({
@@ -579,7 +569,7 @@ function loadBlocks(
                 fieldVariable(service),
                 ...fieldsToFieldInputs(register),
             ].filter(v => !!v),
-            values: fieldsToValues(register),
+            values: fieldsToValues(service, register),
             inputsInline: true,
             nextStatement: null,
             colour: serviceColor(service),
@@ -724,7 +714,7 @@ function loadBlocks(
                           : fieldsToMessage(register)
                   }`,
             args0: [fieldVariable(service), ...fieldsToFieldInputs(register)],
-            values: fieldsToValues(register),
+            values: fieldsToValues(service, register),
             inputsInline: true,
             colour: serviceColor(service),
             tooltip: register.description,
@@ -747,7 +737,7 @@ function loadBlocks(
                       command
                   )}`,
             args0: [fieldVariable(service), ...fieldsToFieldInputs(command)],
-            values: fieldsToValues(command),
+            values: fieldsToValues(service, command),
             inputsInline: true,
             colour: serviceColor(service),
             tooltip: command.description,
@@ -771,22 +761,11 @@ function loadBlocks(
         ...registerSetBlocks,
         ...customBlockDefinitions,
         ...commandBlocks,
+        ...bashboardBlocks,
     ]
 
     const shadowBlocks: BlockDefinition[] = [
-        {
-            kind: "block",
-            type: `jacdac_note`,
-            message0: `%1`,
-            args0: [
-                {
-                    type: NoteField.KEY,
-                    name: "note",
-                },
-            ],
-            style: "math_blocks",
-            output: "Number",
-        },
+        ...fieldShadows(),
         {
             kind: "block",
             type: `jacdac_on_off`,
@@ -977,9 +956,15 @@ function loadBlocks(
                 {
                     type: "input_value",
                     name: "color",
-                    check: "Color",
+                    check: "Number",
                 },
             ],
+            values: {
+                color: {
+                    kind: "block",
+                    type: LEDColorField.SHADOW.type,
+                },
+            },
             inputsInline: true,
             previousStatement: "Statement",
             nextStatement: "Statement",
@@ -1060,7 +1045,8 @@ function loadBlocks(
     // re-register blocks with blocklys
     blocks.map(
         block =>
-            (Blockly.Blocks[block.type] = {
+            (Blockly.Blocks[block.type] = <ServiceBlockDefinitionFactory>{
+                jacdacDefinition: block,
                 init: function () {
                     this.jsonInit(block)
                 },
@@ -1199,7 +1185,10 @@ export default function useToolbox(props: {
                     kind: "block",
                     type: SET_STATUS_LIGHT_BLOCK,
                     values: {
-                        color: { kind: "block", type: "jacdac_color" },
+                        color: {
+                            kind: "block",
+                            type: LEDColorField.SHADOW.type,
+                        },
                     },
                 },
         ].filter(b => !!b),
@@ -1307,4 +1296,29 @@ export default function useToolbox(props: {
         toolboxConfiguration,
         newProjectXml: NEW_PROJET_XML,
     }
+}
+
+export function useToolboxButtons(
+    workspace: Blockly.WorkspaceSvg,
+    toolboxConfiguration: ToolboxConfiguration
+) {
+    // track workspace changes and update callbacks
+    useEffect(() => {
+        if (!workspace) return
+
+        // collect buttons
+        const buttons: ButtonDefinition[] = toolboxConfiguration?.contents
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map(cat => (cat as CategoryDefinition).button)
+            .filter(btn => !!btn)
+        buttons?.forEach(button =>
+            workspace.registerButtonCallback(button.callbackKey, () =>
+                Blockly.Variables.createVariableButtonHandler(
+                    workspace,
+                    null,
+                    button.service.shortId
+                )
+            )
+        )
+    }, [workspace, JSON.stringify(toolboxConfiguration)])
 }

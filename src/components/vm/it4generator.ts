@@ -242,6 +242,8 @@ export default function workspaceJSONToIT4Program(
             const { template } = def
             const { value: role } = inputs[0].fields["role"]
             switch (template) {
+                case "twin":
+                    break // ignore
                 case "event": {
                     const { value: eventName } = inputs[0].fields["event"]
                     command = {

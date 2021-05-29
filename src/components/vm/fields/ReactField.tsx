@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react"
 import ReactDOM from "react-dom"
 import Blockly from "blockly"
@@ -6,6 +7,10 @@ import { ReactNode } from "react"
 import { IdProvider } from "react-use-id-hook"
 import DarkModeProvider from "../../ui/DarkModeProvider"
 import AppTheme from "../../ui/AppTheme"
+import { Box } from "@material-ui/core"
+import { BlockDefinition } from "../toolbox"
+import { assert } from "../../../../jacdac-ts/src/jdom/utils"
+import { ValueProvider } from "./ValueContext"
 
 declare module "blockly" {
     interface Block {
@@ -13,36 +18,22 @@ declare module "blockly" {
     }
 }
 
-/**
- * A base class for react-based field
- * TODO:
- 
-```
-  static fromJson(options) {
-    return new ReactDateField(new Date(options['date']));
-  }
-  
-  onDateSelected_ = (date) => {
-    this.setValue(new Date(date));
-    Blockly.DropDownDiv.hideIfOwner(this, true);
-  }
+export type ReactFieldJSON = any
 
-  getText_() {
-    return this.value_.toLocaleDateString();
-  };
-
-  fromXml(fieldElement) {
-    this.setValue(new Date(fieldElement.textContent));
-  }
-```
-*/
-export class ReactField<T> extends Blockly.Field {
+export default class ReactField<T> extends Blockly.Field {
     SERIALIZABLE = true
     protected div_: Element
+    protected view: SVGElement
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(value: string, validator?: any, options?: any) {
+    constructor(
+        value: string,
+        validator?: any,
+        options?: any,
+        size?: { width: number; height: number }
+    ) {
         super(value, validator, options)
+        if (size) this.size_ = new Blockly.utils.Size(size.width, size.height)
     }
 
     get defaultValue(): T {
@@ -62,6 +53,20 @@ export class ReactField<T> extends Blockly.Field {
     set value(v: T) {
         this.setValue(JSON.stringify(v))
     }
+
+    // override to listen for mounting events
+    onMount() {}
+
+    // override to listen for unmounting
+    onUnmount() {}
+
+    // override to support custom view
+    protected initCustomView(): SVGElement {
+        return null
+    }
+
+    // override to update view
+    protected updateView() {}
 
     getText_() {
         return JSON.stringify(this.value)
@@ -84,9 +89,22 @@ export class ReactField<T> extends Blockly.Field {
 
     onSourceBlockChanged() {}
 
-    onMount() {}
+    initView() {
+        this.view = this.initCustomView()
+        if (this.view) this.updateView()
+        else super.initView()
+    }
 
-    onUnmount() {}
+    updateSize_() {
+        if (!this.view) super.updateSize_()
+    }
+
+    doValueUpdate_(newValue: string) {
+        if (this.view) {
+            this.value_ = newValue
+            this.updateView()
+        } else super.doValueUpdate_(newValue)
+    }
 
     showEditor_() {
         this.div_ = Blockly.DropDownDiv.getContentDiv()
@@ -119,11 +137,25 @@ export class ReactField<T> extends Blockly.Field {
     }
 
     render() {
+        const onValueChange = (newValue: any) => (this.value = newValue)
         return (
-            <DarkModeProvider>
+            <DarkModeProvider fixedDarkMode={"dark"}>
                 <IdProvider>
                     <JacdacProvider>
-                        <AppTheme>{this.renderField()}</AppTheme>
+                        <AppTheme>
+                            <ValueProvider
+                                value={this.value}
+                                onValueChange={onValueChange}
+                            >
+                                <Box
+                                    m={0.5}
+                                    borderRadius={"0.25rem"}
+                                    bgcolor="background.paper"
+                                >
+                                    {this.renderField()}
+                                </Box>
+                            </ValueProvider>
+                        </AppTheme>
                     </JacdacProvider>
                 </IdProvider>
             </DarkModeProvider>
@@ -132,5 +164,30 @@ export class ReactField<T> extends Blockly.Field {
 
     renderField(): ReactNode {
         return <span>not implemented</span>
+    }
+
+    dispose() {
+        this.view = undefined
+        super.dispose()
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function toShadowDefinition(fieldType: any): BlockDefinition {
+    assert(!!fieldType.KEY)
+    const type = fieldType.KEY + "_shadow"
+    return {
+        kind: "block",
+        type,
+        message0: `%1`,
+        args0: [
+            {
+                type: fieldType.KEY,
+                name: "value",
+            },
+        ],
+        style: "math_blocks",
+        output: "Number",
+        template: "shadow",
     }
 }
