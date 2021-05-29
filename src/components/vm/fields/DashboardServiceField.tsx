@@ -55,6 +55,7 @@ export default class DashboardServiceField extends ReactField<number> {
     static KEY = "jacdac_field_dashboard_service"
     static EDITABLE = false
     protected container: HTMLDivElement
+    protected resizeObserver: ResizeObserver
 
     static fromJson(options: ReactFieldJSON) {
         return new DashboardServiceField(options)
@@ -75,6 +76,20 @@ export default class DashboardServiceField extends ReactField<number> {
 
         this.container = document.createElement("div")
         fo.appendChild(this.container)
+
+        this.resizeObserver = new ResizeObserver(
+            (entries: ResizeObserverEntry[]) => {
+                const entry = entries[0]
+                const { contentRect } = entry
+                this.size_.width = contentRect.width
+                this.size_.height = contentRect.height
+                fo.setAttribute("width", this.size_.width + "")
+                fo.setAttribute("height", this.size_.height + "")
+                this.forceRerender()
+            }
+        )
+        this.resizeObserver.observe(this.container)
+
         ReactDOM.render(this.renderBlock(), this.container)
         return fo
     }
@@ -83,6 +98,10 @@ export default class DashboardServiceField extends ReactField<number> {
         if (this.container) {
             ReactDOM.unmountComponentAtNode(this.container)
             this.container = undefined
+        }
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect()
+            this.resizeObserver = undefined
         }
         super.dispose()
     }
