@@ -1,12 +1,6 @@
-import React, {
-    MouseEvent,
-    TouchEvent,
-    PointerEvent,
-    ReactNode,
-    useContext,
-} from "react"
+import React, { PointerEvent, ReactNode, useContext } from "react"
 import ReactDOM from "react-dom"
-import ReactField, { ReactFieldJSON, ReactFieldProvider } from "./ReactField"
+import ReactField, { ReactFieldJSON } from "./ReactField"
 import { child } from "../../widgets/svg"
 import DarkModeProvider from "../../ui/DarkModeProvider"
 import { IdProvider } from "react-use-id-hook"
@@ -77,15 +71,15 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
     )
 }
 
-export default class DashboardServiceField extends ReactField<number> {
-    static KEY = "jacdac_field_dashboard_service"
+export default class TwinField extends ReactField<number> {
+    static KEY = "jacdac_field_twin"
     static EDITABLE = false
     protected serviceClass: number
     protected container: HTMLDivElement
     protected resizeObserver: ResizeObserver
 
     static fromJson(options: ReactFieldJSON) {
-        return new DashboardServiceField(options)
+        return new TwinField(options)
     }
 
     constructor(options?: any) {
@@ -161,7 +155,7 @@ export default class DashboardServiceField extends ReactField<number> {
 
     // track current role
     onSourceBlockChanged() {
-        this.updateRole();
+        this.updateRole()
     }
 
     updateRole() {

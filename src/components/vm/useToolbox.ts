@@ -70,7 +70,7 @@ import {
 import NoteField from "./fields/NoteField"
 import ServoAngleField from "./fields/ServoAngleField"
 import LEDColorField from "./fields/LEDColorField"
-import DashboardServiceField from "./fields/DashboardServiceField"
+import TwinField from "./fields/TwinField"
 
 type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
@@ -470,7 +470,7 @@ function loadBlocks(
                     type: "input_dummy",
                 },
                 <InputDefinition>{
-                    type: DashboardServiceField.KEY,
+                    type: TwinField.KEY,
                     name: "dashboard",
                     serviceClass: service.classIdentifier,
                 },

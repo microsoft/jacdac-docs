@@ -2,7 +2,7 @@ import Blockly from "blockly"
 import { useEffect } from "react"
 import { DisableTopBlocks } from "@blockly/disable-top-blocks"
 import { BlockTemplate, ServiceBlockDefinition, ServiceBlockDefinitionFactory } from "./toolbox"
-import DashboardServiceField from "./fields/DashboardServiceField"
+import TwinField from "./fields/TwinField"
 
 export default function useBlocklyEvents(workspace: Blockly.WorkspaceSvg) {
     const handleChange = (
@@ -19,7 +19,7 @@ export default function useBlocklyEvents(workspace: Blockly.WorkspaceSvg) {
                 if (template === "twin") {
                     // notify twin that the value changed
                     const twinField = block.inputList[1]
-                        .fieldRow[0] as DashboardServiceField
+                        .fieldRow[0] as TwinField
                     twinField.updateRole()
                 }
                 break
