@@ -1,9 +1,7 @@
 import { Grid, Slider } from "@material-ui/core"
 import React, { ReactNode, useContext } from "react"
-import ReactField, {
-    ReactFieldContext,
-    ReactFieldContextProps,
-} from "./ReactField"
+import ReactField from "./ReactField"
+import ReactFieldContext, { ReactFieldContextProps } from "./ReactFieldContext"
 
 function FieldWithSlider(props: { children: ReactNode }) {
     const { children } = props

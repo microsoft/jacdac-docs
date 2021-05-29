@@ -1,12 +1,8 @@
 import React, { lazy, ReactNode, useContext } from "react"
 import SliderField from "./SliderField"
 import Suspense from "../../ui/Suspense"
-import {
-    ReactFieldContext,
-    ReactFieldContextProps,
-    ReactFieldJSON,
-    toShadowDefinition,
-} from "./ReactField"
+import { ReactFieldJSON, toShadowDefinition } from "./ReactField"
+import ReactFieldContext, { ReactFieldContextProps } from "./ReactFieldContext"
 
 const ServoWidget = lazy(() => import("../../widgets/ServoWidget"))
 
