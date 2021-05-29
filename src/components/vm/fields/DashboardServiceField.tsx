@@ -15,6 +15,7 @@ import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import Alert from "../../ui/Alert"
 import { AlertTitle } from "@material-ui/lab"
+import Blockly from "blockly"
 
 function DashboardServiceFieldWidget() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -132,11 +133,8 @@ export default class DashboardServiceField extends ReactField<number> {
         )
     }
 
-    onMouseDown_() {
-        // don't handle mouse
-    }
-
-    showEditor_() {
-        // don't do anything
+    // don't bind any mouse event
+    bindEvents_() {
+        Blockly.Tooltip.bindMouseEvents(this.getClickTarget_())
     }
 }
