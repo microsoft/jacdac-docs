@@ -10,7 +10,7 @@ import AppTheme from "../../ui/AppTheme"
 import { Box } from "@material-ui/core"
 import { BlockDefinition } from "../toolbox"
 import { assert } from "../../../../jacdac-ts/src/jdom/utils"
-import { ReactFieldProvider } from "./ReactFieldContext"
+import { ValueProvider } from "./ValueContext"
 
 declare module "blockly" {
     interface Block {
@@ -143,7 +143,7 @@ export default class ReactField<T> extends Blockly.Field {
                 <IdProvider>
                     <JacdacProvider>
                         <AppTheme>
-                            <ReactFieldProvider
+                            <ValueProvider
                                 value={this.value}
                                 onValueChange={onValueChange}
                             >
@@ -154,7 +154,7 @@ export default class ReactField<T> extends Blockly.Field {
                                 >
                                     {this.renderField()}
                                 </Box>
-                            </ReactFieldProvider>
+                            </ValueProvider>
                         </AppTheme>
                     </JacdacProvider>
                 </IdProvider>
