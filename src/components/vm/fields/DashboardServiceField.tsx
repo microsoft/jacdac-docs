@@ -1,4 +1,10 @@
-import React, { ReactNode, useContext } from "react"
+import React, {
+    MouseEvent,
+    TouchEvent,
+    PointerEvent,
+    ReactNode,
+    useContext,
+} from "react"
 import ReactDOM from "react-dom"
 import ReactField, { ReactFieldJSON, ReactFieldProvider } from "./ReactField"
 import { child } from "../../widgets/svg"
@@ -121,15 +127,27 @@ export default class DashboardServiceField extends ReactField<number> {
     }
 
     renderBlock(): ReactNode {
+        // make sure blockly does not handle drags when interacting with UI
+        const onPointer = (event: PointerEvent<HTMLDivElement>) => {
+            console.log("pointer")
+            event.stopPropagation()
+        }
         return (
             <ReactFieldProvider value={this.value}>
                 <DarkModeProvider>
                     <IdProvider>
                         <JacdacProvider>
                             <AppTheme>
-                                <DashboardServiceFieldWidget
-                                    serviceClass={this.serviceClass}
-                                />
+                                <div
+                                    style={{ cursor: "default" }}
+                                    onPointerDown={onPointer}
+                                    onPointerUp={onPointer}
+                                    onPointerMove={onPointer}
+                                >
+                                    <DashboardServiceFieldWidget
+                                        serviceClass={this.serviceClass}
+                                    />
+                                </div>
                             </AppTheme>
                         </JacdacProvider>
                     </IdProvider>
