@@ -477,7 +477,7 @@ function loadBlocks(
             colour: serviceColor(service),
             inputsInline: false,
             tooltip: `Dashboard of the service`,
-            helpUrl: `A view on the servive`,
+            helpUrl: serviceHelp(service),
             service,
             template: "blocksonly",
         })

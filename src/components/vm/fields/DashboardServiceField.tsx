@@ -127,7 +127,9 @@ export default class DashboardServiceField extends ReactField<number> {
                     <IdProvider>
                         <JacdacProvider>
                             <AppTheme>
-                                <DashboardServiceFieldWidget />
+                                <DashboardServiceFieldWidget
+                                    serviceClass={this.serviceClass}
+                                />
                             </AppTheme>
                         </JacdacProvider>
                     </IdProvider>
