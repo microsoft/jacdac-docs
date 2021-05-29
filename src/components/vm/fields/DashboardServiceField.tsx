@@ -9,20 +9,17 @@ import AppTheme from "../../ui/AppTheme"
 import { Button, Grid } from "@material-ui/core"
 import useServices from "../../hooks/useServices"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
-import {
-    SRV_SERVO,
-    SRV_SOIL_MOISTURE,
-} from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import AddIcon from "@material-ui/icons/Add"
 import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/servers/servers"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import Alert from "../../ui/Alert"
-import { AlertTitle } from "@material-ui/lab"
 import Blockly from "blockly"
+import { serviceSpecificationFromClassIdentifier } from "../../../../jacdac-ts/src/jdom/spec"
 
-function DashboardServiceFieldWidget() {
+function DashboardServiceFieldWidget(props: { serviceClass: number }) {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const serviceClass = SRV_SOIL_MOISTURE
+    const { serviceClass } = props
+    const specification = serviceSpecificationFromClassIdentifier(serviceClass)
     const services = useServices({ ignoreSelf: true, serviceClass })
     const service = services?.[0]
     const handleStartSimulator = () =>
@@ -46,8 +43,7 @@ function DashboardServiceFieldWidget() {
             ) : (
                 <Grid item>
                     <Alert severity="info">
-                        <AlertTitle>No service...</AlertTitle>
-                        Start a simulator test your code.
+                        No {specification?.name || "service"}...
                     </Alert>
                     <Button
                         variant="contained"
@@ -66,6 +62,7 @@ function DashboardServiceFieldWidget() {
 export default class DashboardServiceField extends ReactField<number> {
     static KEY = "jacdac_field_dashboard_service"
     static EDITABLE = false
+    protected serviceClass: number
     protected container: HTMLDivElement
     protected resizeObserver: ResizeObserver
 
@@ -75,6 +72,7 @@ export default class DashboardServiceField extends ReactField<number> {
 
     constructor(options?: any) {
         super(options?.value, undefined, options, { width: 240, height: 160 })
+        this.serviceClass = options.serviceClass
     }
 
     protected initCustomView() {

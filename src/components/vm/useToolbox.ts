@@ -471,6 +471,7 @@ function loadBlocks(
                 <InputDefinition>{
                     type: DashboardServiceField.KEY,
                     name: "dashboard",
+                    serviceClass: service.classIdentifier,
                 },
             ],
             colour: serviceColor(service),
