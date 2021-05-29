@@ -9,9 +9,7 @@ import AppTheme from "../../ui/AppTheme"
 import { Button, Grid } from "@material-ui/core"
 import useServices from "../../hooks/useServices"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
-import {
-    SRV_SERVO,
-} from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
+import { SRV_SERVO } from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import AddIcon from "@material-ui/icons/Add"
 import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/servers/servers"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
@@ -124,7 +122,9 @@ export default class DashboardServiceField extends ReactField<number> {
                 <DarkModeProvider>
                     <IdProvider>
                         <JacdacProvider>
-                            <AppTheme>{this.renderBlockView()}</AppTheme>
+                            <AppTheme>
+                                <DashboardServiceFieldWidget />
+                            </AppTheme>
                         </JacdacProvider>
                     </IdProvider>
                 </DarkModeProvider>
@@ -132,9 +132,8 @@ export default class DashboardServiceField extends ReactField<number> {
         )
     }
 
-    renderBlockView(): ReactNode {
-        console.log(`render field view`)
-        return <DashboardServiceFieldWidget />
+    onMouseDown_() {
+        // don't handle mouse
     }
 
     showEditor_() {
