@@ -1,8 +1,9 @@
-import Blockly from "blockly"
+import Blockly, { FieldVariable } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import { assert } from "../../../jacdac-ts/src/jdom/utils"
 import { IT4ProgramRunner } from "../../../jacdac-ts/src/vm/vmrunner"
 import ReactField, { SOURCE_BLOCK_CHANGE } from "./fields/ReactField"
 
@@ -38,12 +39,16 @@ export interface WorkspaceContextProps {
     sourceBlock?: Blockly.Block
     workspace?: Blockly.Workspace
     services: WorkspaceServices
+    role?: string
+    roleService?: JDService
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
     sourceBlock: undefined,
     workspace: undefined,
     services: undefined,
+    role: undefined,
+    roleService: undefined,
 })
 WorkspaceContext.displayName = "Workspace"
 
@@ -60,21 +65,47 @@ export function WorkspaceProvider(props: {
 }) {
     const { field, children } = props
     const [sourceBlock, setSourceBlock] = useState<Blockly.Block>(undefined)
+    const [role, setRole] = useState<string>()
+    const [roleService, setRoleService] = useState<JDService>()
     const workspace = sourceBlock?.workspace
     const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
+    const runner = services?.runner
 
     useEffect(
         () =>
             field?.events.subscribe(
                 SOURCE_BLOCK_CHANGE,
-                (block: Blockly.Block) => setSourceBlock(block)
+                (newBlock: Blockly.Block) => {
+                    const roleField = sourceBlock?.inputList[0]
+                        ?.fieldRow[0] as FieldVariable
+                    {
+                        assert(!roleField || roleField?.name === "role")
+                        const xml = document.createElement("xml")
+                        roleField?.toXml(xml)
+                    }
+                    const newRole = roleField?.getVariable()?.name
+                    const newRoleService = role && runner?.resolveService(role)
+
+                    setSourceBlock(newBlock)
+                    setRole(newRole)
+                    setRoleService(newRoleService)
+                }
             ),
-        [field]
+        [
+            field,
+            workspace,
+            runner,
+            ...(services?.roles || []).map(
+                ({ name, service }) => `${name}:${service?.id}`
+            ),
+        ]
     )
 
     return (
         // eslint-disable-next-line react/react-in-jsx-scope
-        <WorkspaceContext.Provider value={{ sourceBlock, services }}>
+        <WorkspaceContext.Provider
+            value={{ sourceBlock, services, role, roleService }}
+        >
             {children}
         </WorkspaceContext.Provider>
     )

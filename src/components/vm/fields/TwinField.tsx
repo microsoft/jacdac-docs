@@ -1,13 +1,12 @@
 import React, { PointerEvent, ReactNode, useContext } from "react"
 import ReactDOM from "react-dom"
-import ReactField, { ReactFieldJSON, SOURCE_BLOCK_CHANGE } from "./ReactField"
+import ReactField, { ReactFieldJSON } from "./ReactField"
 import { child } from "../../widgets/svg"
 import DarkModeProvider from "../../ui/DarkModeProvider"
 import { IdProvider } from "react-use-id-hook"
 import JacdacProvider from "../../../jacdac/Provider"
 import AppTheme from "../../ui/AppTheme"
 import { Button, Grid } from "@material-ui/core"
-import useServices from "../../hooks/useServices"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
 import AddIcon from "@material-ui/icons/Add"
 import { startServiceProviderFromServiceClass } from "../../../../jacdac-ts/src/servers/servers"
@@ -18,11 +17,10 @@ import { serviceSpecificationFromClassIdentifier } from "../../../../jacdac-ts/s
 import WorkspaceContext, { WorkspaceProvider } from "../WorkspaceContext"
 
 function DashboardServiceFieldWidget(props: { serviceClass: number }) {
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { serviceClass } = props
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { roleService } = useContext(WorkspaceContext)
     const specification = serviceSpecificationFromClassIdentifier(serviceClass)
-    const services = useServices({ ignoreSelf: true, serviceClass })
-    const service = services?.[0]
     const handleStartSimulator = () =>
         startServiceProviderFromServiceClass(bus, serviceClass)
     const onPointerStopPropagation = (event: PointerEvent<HTMLDivElement>) => {
@@ -38,7 +36,7 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
             justify="center"
             spacing={1}
         >
-            {service ? (
+            {roleService ? (
                 <Grid item>
                     <div
                         style={{ cursor: "inherit" }}
@@ -47,7 +45,7 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
                         onPointerMove={onPointerStopPropagation}
                     >
                         <DashboardServiceWidget
-                            service={service}
+                            service={roleService}
                             visible={true}
                             variant="icon"
                         />
@@ -87,8 +85,6 @@ export default class TwinField extends ReactField<number> {
     constructor(options?: any) {
         super(options?.value, undefined, options, { width: 240, height: 160 })
         this.serviceClass = options.serviceClass
-
-        this.events.on(SOURCE_BLOCK_CHANGE, this.updateRole.bind(this))
     }
 
     protected initCustomView() {
@@ -157,15 +153,5 @@ export default class TwinField extends ReactField<number> {
     // don't bind any mouse event
     bindEvents_() {
         Blockly.Tooltip.bindMouseEvents(this.getClickTarget_())
-    }
-
-    updateRole() {
-        const source = this.getSourceBlock()
-        const field = source?.inputList[0].fieldRow[0] as Blockly.FieldVariable
-        // force model geneartion
-        const xml = document.createElement("xml")
-        field?.toXml(xml)
-        const role = field?.getVariable()
-        console.log("updated role", { source, field, role })
     }
 }

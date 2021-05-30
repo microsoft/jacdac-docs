@@ -109,7 +109,7 @@ export default function VMBlockEditor(props: {
     // surface state to react
     useEffect(() => {
         const ws = workspace as any as BlocklyWorkspaceWithServices
-        ws.jacdacServices = new WorkspaceServices()
+        if (ws) ws.jacdacServices = new WorkspaceServices()
     }, [workspace])
     useEffect(() => {
         const ws = workspace as any as BlocklyWorkspaceWithServices
