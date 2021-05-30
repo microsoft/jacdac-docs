@@ -1,6 +1,6 @@
 import React, { PointerEvent, ReactNode, useContext } from "react"
 import ReactDOM from "react-dom"
-import ReactField, { ReactFieldJSON } from "./ReactField"
+import ReactField, { ReactFieldJSON, SOURCE_BLOCK_CHANGE } from "./ReactField"
 import { child } from "../../widgets/svg"
 import DarkModeProvider from "../../ui/DarkModeProvider"
 import { IdProvider } from "react-use-id-hook"
@@ -15,6 +15,7 @@ import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import Alert from "../../ui/Alert"
 import Blockly from "blockly"
 import { serviceSpecificationFromClassIdentifier } from "../../../../jacdac-ts/src/jdom/spec"
+import WorkspaceContext, { WorkspaceProvider } from "../WorkspaceContext"
 
 function DashboardServiceFieldWidget(props: { serviceClass: number }) {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -82,9 +83,12 @@ export default class TwinField extends ReactField<number> {
         return new TwinField(options)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(options?: any) {
         super(options?.value, undefined, options, { width: 240, height: 160 })
         this.serviceClass = options.serviceClass
+
+        this.events.on(SOURCE_BLOCK_CHANGE, this.updateRole.bind(this))
     }
 
     protected initCustomView() {
@@ -134,28 +138,25 @@ export default class TwinField extends ReactField<number> {
 
     renderBlock(): ReactNode {
         return (
-            <DarkModeProvider fixedDarkMode="dark">
-                <IdProvider>
-                    <JacdacProvider>
-                        <AppTheme>
-                            <DashboardServiceFieldWidget
-                                serviceClass={this.serviceClass}
-                            />
-                        </AppTheme>
-                    </JacdacProvider>
-                </IdProvider>
-            </DarkModeProvider>
+            <WorkspaceProvider field={this}>
+                <DarkModeProvider fixedDarkMode="dark">
+                    <IdProvider>
+                        <JacdacProvider>
+                            <AppTheme>
+                                <DashboardServiceFieldWidget
+                                    serviceClass={this.serviceClass}
+                                />
+                            </AppTheme>
+                        </JacdacProvider>
+                    </IdProvider>
+                </DarkModeProvider>
+            </WorkspaceProvider>
         )
     }
 
     // don't bind any mouse event
     bindEvents_() {
         Blockly.Tooltip.bindMouseEvents(this.getClickTarget_())
-    }
-
-    // track current role
-    onSourceBlockChanged() {
-        this.updateRole()
     }
 
     updateRole() {
