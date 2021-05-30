@@ -86,13 +86,17 @@ export default class ReactField<T> extends Blockly.Field {
         }
     }
 
+    emitChange() {
+        this.events.emit(CHANGE)
+    }
+
     setSourceBlock(block: Blockly.Block) {
         const changed = block !== this.sourceBlock_
         super.setSourceBlock(block)
         if (changed) {
             console.log(`set source block`, { block, current: this.sourceBlock_ })
             this.events.emit(SOURCE_BLOCK_CHANGE, block)
-            this.events.emit(CHANGE)
+            this.emitChange()
         }
     }
 
@@ -114,7 +118,7 @@ export default class ReactField<T> extends Blockly.Field {
         } else super.doValueUpdate_(newValue)
         if (change) {
             this.events.emit(VALUE_CHANGE, this.value)
-            this.events.emit(CHANGE)
+            this.emitChange()
         }
     }
 

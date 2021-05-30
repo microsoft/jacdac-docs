@@ -16,10 +16,10 @@ import Blockly from "blockly"
 import { serviceSpecificationFromClassIdentifier } from "../../../../jacdac-ts/src/jdom/spec"
 import WorkspaceContext, { WorkspaceProvider } from "../WorkspaceContext"
 
-function DashboardServiceFieldWidget(props: { serviceClass: number }) {
+function TwinWidget(props: { serviceClass: number }) {
     const { serviceClass } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const { roleService } = useContext(WorkspaceContext)
+    const { roleService, flyout } = useContext(WorkspaceContext)
     const specification = serviceSpecificationFromClassIdentifier(serviceClass)
     const handleStartSimulator = () =>
         startServiceProviderFromServiceClass(bus, serviceClass)
@@ -27,6 +27,8 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
         // make sure blockly does not handle drags when interacting with UI
         event.stopPropagation()
     }
+
+    console.log(`twin`, { roleService, flyout })
 
     return (
         <Grid
@@ -56,14 +58,16 @@ function DashboardServiceFieldWidget(props: { serviceClass: number }) {
                     <Alert severity="info">
                         No {specification?.name || "service"}...
                     </Alert>
-                    <Button
-                        variant="contained"
-                        color="default"
-                        startIcon={<AddIcon />}
-                        onClick={handleStartSimulator}
-                    >
-                        start simulator
-                    </Button>
+                    {!flyout && (
+                        <Button
+                            variant="contained"
+                            color="default"
+                            startIcon={<AddIcon />}
+                            onClick={handleStartSimulator}
+                        >
+                            start simulator
+                        </Button>
+                    )}
                 </Grid>
             )}
         </Grid>
@@ -139,9 +143,7 @@ export default class TwinField extends ReactField<number> {
                     <IdProvider>
                         <JacdacProvider>
                             <AppTheme>
-                                <DashboardServiceFieldWidget
-                                    serviceClass={this.serviceClass}
-                                />
+                                <TwinWidget serviceClass={this.serviceClass} />
                             </AppTheme>
                         </JacdacProvider>
                     </IdProvider>

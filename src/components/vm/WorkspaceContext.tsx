@@ -5,7 +5,7 @@ import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
 import { IT4ProgramRunner } from "../../../jacdac-ts/src/vm/vmrunner"
-import ReactField, { SOURCE_BLOCK_CHANGE } from "./fields/ReactField"
+import ReactField from "./fields/ReactField"
 
 export class WorkspaceServices extends JDEventSource {
     private _runner: IT4ProgramRunner
@@ -31,21 +31,23 @@ export class WorkspaceServices extends JDEventSource {
         serviceShortId: string
     }[] {
         const roles = this._runner?.roles
-        return Object.keys(roles).map(name => ({ name, ...roles[name] }))
+        return roles
+            ? Object.keys(roles).map(name => ({ name, ...roles[name] }))
+            : []
     }
 }
 
 export interface WorkspaceContextProps {
-    sourceBlock?: Blockly.Block
     workspace?: Blockly.Workspace
     services: WorkspaceServices
+    flyout?: boolean
     role?: string
     roleService?: JDService
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
-    sourceBlock: undefined,
     workspace: undefined,
+    flyout: false,
     services: undefined,
     role: undefined,
     roleService: undefined,
@@ -64,35 +66,13 @@ export function WorkspaceProvider(props: {
     children: ReactNode
 }) {
     const { field, children } = props
-    const [sourceBlock, setSourceBlock] = useState<Blockly.Block>(undefined)
-    const [role, setRole] = useState<string>()
-    const [roleService, setRoleService] = useState<JDService>()
-    const workspace = sourceBlock?.workspace
-    const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
-    const runner = services?.runner
+    const [sourceBlock, setSourceBlock] = useState<Blockly.Block>(
+        field?.getSourceBlock()
+    )
 
-    // resolve source block
-    useEffect(() => {
-        console.log(`updated field`, { field })
-        return field?.events.subscribe(
-            SOURCE_BLOCK_CHANGE,
-            (newBlock: Blockly.Block) => {
-                console.log("source block change", newBlock)
-                const roleField = newBlock?.inputList[0]
-                    ?.fieldRow[0] as FieldVariable
-                {
-                    assert(!roleField || roleField?.name === "role")
-                    const xml = document.createElement("xml")
-                    roleField?.toXml(xml)
-                }
-                setSourceBlock(newBlock)
-            }
-        )
-    }, [field, workspace, runner])
-
-    // resolve current role
-    useEffect(() => {
-        const roleField = sourceBlock?.inputList[0]
+    const resolveRole = () => {
+        const newSourceBlock = field.getSourceBlock()
+        const roleField = newSourceBlock?.inputList[0]
             ?.fieldRow[0] as FieldVariable
         {
             assert(!roleField || roleField?.name === "role")
@@ -100,17 +80,53 @@ export function WorkspaceProvider(props: {
             roleField?.toXml(xml)
         }
         const newRole = roleField?.getVariable()?.name
-        const newRoleService = role && runner?.resolveService(role)
+        console.log(`resolved role`, { newSourceBlock, newRole })
+        return newRole
+    }
 
-        setRole(newRole)
+    const [role, setRole] = useState<string>(resolveRole())
+    const [roleService, setRoleService] = useState<JDService>()
+    const [flyout, setFlyout] = useState(!!sourceBlock?.isInFlyout)
+    const workspace = sourceBlock?.workspace
+    const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
+    const runner = services?.runner
+
+    console.log(`workspace context`, {
+        field,
+        sourceBlock,
+        flyout,
+        role,
+        roleService,
+        services,
+        runner,
+    })
+
+    // resolve role
+    useEffect(() => {
+        console.log(`updated field`, { field })
+        return field?.events.subscribe(CHANGE, () => {
+            const newSourceBlock = field.getSourceBlock()
+            console.log(`field change`, { newSourceBlock })
+            setSourceBlock(newSourceBlock)
+            setRole(resolveRole())
+            setFlyout(!!newSourceBlock?.isInFlyout)
+        })
+    }, [field, workspace, runner])
+
+    // resolve current role service
+    useEffect(() => {
+        const newRoleService = role && runner?.resolveService(role)
+        console.log(`resolve role service`, {
+            role,
+            newRoleService,
+            roles: services?.roles,
+        })
         setRoleService(newRoleService)
-    }, [sourceBlock])
+    }, [role, runner])
 
     return (
         // eslint-disable-next-line react/react-in-jsx-scope
-        <WorkspaceContext.Provider
-            value={{ sourceBlock, services, role, roleService }}
-        >
+        <WorkspaceContext.Provider value={{ services, role, roleService, flyout }}>
             {children}
         </WorkspaceContext.Provider>
     )
