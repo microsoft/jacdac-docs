@@ -43,6 +43,7 @@ export default class ReactField<T> extends Blockly.Field {
     ) {
         super(value, validator, options)
         if (size) this.size_ = new Blockly.utils.Size(size.width, size.height)
+        console.log('new field')
     }
 
     get defaultValue(): T {
@@ -89,6 +90,7 @@ export default class ReactField<T> extends Blockly.Field {
         const changed = block !== this.sourceBlock_
         super.setSourceBlock(block)
         if (changed) {
+            console.log(`set source block`, { block, current: this.sourceBlock_ })
             this.events.emit(SOURCE_BLOCK_CHANGE, block)
             this.events.emit(CHANGE)
         }

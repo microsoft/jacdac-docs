@@ -71,35 +71,40 @@ export function WorkspaceProvider(props: {
     const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
     const runner = services?.runner
 
-    useEffect(
-        () =>
-            field?.events.subscribe(
-                SOURCE_BLOCK_CHANGE,
-                (newBlock: Blockly.Block) => {
-                    const roleField = sourceBlock?.inputList[0]
-                        ?.fieldRow[0] as FieldVariable
-                    {
-                        assert(!roleField || roleField?.name === "role")
-                        const xml = document.createElement("xml")
-                        roleField?.toXml(xml)
-                    }
-                    const newRole = roleField?.getVariable()?.name
-                    const newRoleService = role && runner?.resolveService(role)
-
-                    setSourceBlock(newBlock)
-                    setRole(newRole)
-                    setRoleService(newRoleService)
+    // resolve source block
+    useEffect(() => {
+        console.log(`updated field`, { field })
+        return field?.events.subscribe(
+            SOURCE_BLOCK_CHANGE,
+            (newBlock: Blockly.Block) => {
+                console.log("source block change", newBlock)
+                const roleField = newBlock?.inputList[0]
+                    ?.fieldRow[0] as FieldVariable
+                {
+                    assert(!roleField || roleField?.name === "role")
+                    const xml = document.createElement("xml")
+                    roleField?.toXml(xml)
                 }
-            ),
-        [
-            field,
-            workspace,
-            runner,
-            ...(services?.roles || []).map(
-                ({ name, service }) => `${name}:${service?.id}`
-            ),
-        ]
-    )
+                setSourceBlock(newBlock)
+            }
+        )
+    }, [field, workspace, runner])
+
+    // resolve current role
+    useEffect(() => {
+        const roleField = sourceBlock?.inputList[0]
+            ?.fieldRow[0] as FieldVariable
+        {
+            assert(!roleField || roleField?.name === "role")
+            const xml = document.createElement("xml")
+            roleField?.toXml(xml)
+        }
+        const newRole = roleField?.getVariable()?.name
+        const newRoleService = role && runner?.resolveService(role)
+
+        setRole(newRole)
+        setRoleService(newRoleService)
+    }, [sourceBlock])
 
     return (
         // eslint-disable-next-line react/react-in-jsx-scope
