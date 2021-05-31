@@ -140,8 +140,12 @@ export default function workspaceJSONToIT4Program(
                             )
                         }
                         case "event_field": {
-                            // TODO: ev.event === event.identifierName
                             const { event } = def as EventFieldDefinition
+                            if (ev.event !== event.identifierName) {
+                                // TODO: we need to raise an error to the user in Blockly
+                                // TODO: the field that they referenced in the block 
+                                // TODO: doesn't belong to the event that fired
+                            }
                             const field = inputs[0].fields["field"]
                             return toMemberExpression(
                                 ev.role,
