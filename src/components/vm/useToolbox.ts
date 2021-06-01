@@ -1,5 +1,5 @@
 import Blockly from "blockly"
-import { useEffect, useMemo } from "react"
+import { useContext, useEffect, useMemo } from "react"
 import {
     JoystickReg,
     ServoReg,
@@ -54,6 +54,7 @@ import {
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
+    INSPECT_BLOCK,
     NEW_PROJET_XML,
     NumberInputDefinition,
     OptionsInputDefinition,
@@ -62,6 +63,7 @@ import {
     ServiceBlockDefinition,
     ServiceBlockDefinitionFactory,
     SET_STATUS_LIGHT_BLOCK,
+    START_SIMULATOR_CALLBACK_KEY,
     ToolboxConfiguration,
     WAIT_BLOCK,
     WHILE_CONDITION_BLOCK,
@@ -71,6 +73,8 @@ import NoteField from "./fields/NoteField"
 import ServoAngleField from "./fields/ServoAngleField"
 import LEDColorField from "./fields/LEDColorField"
 import TwinField from "./fields/TwinField"
+import JDomTreeField from "./fields/JDomTreeField"
+import AppContext from "../AppContext"
 
 type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
@@ -126,14 +130,16 @@ function createBlockTheme(theme: Theme) {
     const sensorColor = theme.palette.success.main
     const otherColor = theme.palette.info.main
     const commandColor = theme.palette.warning.main
+    const modulesColor = theme.palette.grey[600]
     const serviceColor = (srv: jdspec.ServiceSpec) =>
         isSensor(srv) ? sensorColor : otherColor
-    return { serviceColor, sensorColor, commandColor, otherColor }
+    return { serviceColor, sensorColor, commandColor, modulesColor, otherColor }
 }
 
 function loadBlocks(
     serviceColor: (srv: jdspec.ServiceSpec) => string,
-    commandColor: string
+    commandColor: string,
+    modulesColor: string
 ): CachedBlockDefinitions {
     const customShadows = [
         {
@@ -459,30 +465,28 @@ function loadBlocks(
         return def
     })
 
-    const twinBlocks: ServiceBlockDefinition[] = allServices.map(
-        service => ({
-            kind: "block",
-            type: `jacdac_twin_${service.shortId}`,
-            message0: `%1 %2 %3`,
-            args0: [
-                fieldVariable(service),
-                {
-                    type: "input_dummy",
-                },
-                <InputDefinition>{
-                    type: TwinField.KEY,
-                    name: "twin",
-                    serviceClass: service.classIdentifier,
-                },
-            ],
-            colour: serviceColor(service),
-            inputsInline: false,
-            tooltip: `Twin of the service`,
-            helpUrl: serviceHelp(service),
-            service,
-            template: "twin",
-        })
-    )
+    const twinBlocks: ServiceBlockDefinition[] = allServices.map(service => ({
+        kind: "block",
+        type: `jacdac_twin_${service.shortId}`,
+        message0: `twin of %1 %2 %3`,
+        args0: [
+            fieldVariable(service),
+            {
+                type: "input_dummy",
+            },
+            <InputDefinition>{
+                type: TwinField.KEY,
+                name: "twin",
+                serviceClass: service.classIdentifier,
+            },
+        ],
+        colour: serviceColor(service),
+        inputsInline: false,
+        tooltip: `Twin of the service`,
+        helpUrl: serviceHelp(service),
+        service,
+        template: "twin",
+    }))
 
     const eventBlocks = events.map<EventBlockDefinition>(
         ({ service, events }) => ({
@@ -972,6 +976,35 @@ function loadBlocks(
             tooltip: "Sets the color on the status light",
             helpUrl: "",
         },
+        {
+            kind: "block",
+            type: INSPECT_BLOCK,
+            message0: `inspect %1 %2 %3`,
+            args0: [
+                {
+                    type: "field_variable",
+                    name: "role",
+                    variable: "none",
+                    variableTypes: [
+                        "client",
+                        ...allServices.map(service => service.shortId),
+                    ],
+                    defaultType: "client",
+                },
+                {
+                    type: "input_dummy",
+                },
+                <InputDefinition>{
+                    type: JDomTreeField.KEY,
+                    name: "twin",
+                },
+            ],
+            colour: modulesColor,
+            inputsInline: false,
+            tooltip: `Inspect a service`,
+            helpUrl: "",
+            template: "twin",
+        },
     ]
 
     const mathBlocks: BlockDefinition[] = [
@@ -1113,9 +1146,9 @@ export default function useToolbox(props: {
     const { blockServices, serviceClass } = props
 
     const theme = useTheme()
-    const { serviceColor, commandColor } = createBlockTheme(theme)
+    const { serviceColor, commandColor, modulesColor } = createBlockTheme(theme)
     const { serviceBlocks, services } = useMemo(
-        () => loadBlocks(serviceColor, commandColor),
+        () => loadBlocks(serviceColor, commandColor, modulesColor),
         [theme]
     )
     const liveServices = useServices({ specification: true })
@@ -1157,13 +1190,14 @@ export default function useToolbox(props: {
             })),
             button: {
                 kind: "button",
-                text: `Add ${service.name}`,
+                text: `Add ${service.name} role`,
                 callbackKey: `jacdac_add_role_callback_${service.shortId}`,
                 service,
             },
         }))
         .filter(cat => !!cat.contents?.length)
 
+    const hasServices = !!toolboxServices.length
     const commandsCategory: CategoryDefinition = {
         kind: "category",
         name: "Commands",
@@ -1180,17 +1214,33 @@ export default function useToolbox(props: {
                     time: { kind: "block", type: "jacdac_time_picker" },
                 },
             },
-            !!toolboxServices.length &&
-                <BlockDefinition>{
-                    kind: "block",
-                    type: SET_STATUS_LIGHT_BLOCK,
-                    values: {
-                        color: {
-                            kind: "block",
-                            type: LEDColorField.SHADOW.type,
-                        },
+            <BlockDefinition>{
+                kind: "block",
+                type: SET_STATUS_LIGHT_BLOCK,
+                values: {
+                    color: {
+                        kind: "block",
+                        type: LEDColorField.SHADOW.type,
                     },
                 },
+            },
+        ].filter(b => !!b),
+    }
+
+    const modulesCategory: CategoryDefinition = {
+        kind: "category",
+        name: "Modules",
+        colour: modulesColor,
+        contents: [
+            <ButtonDefinition>{
+                kind: "button",
+                text: "start simulator",
+                callbackKey: START_SIMULATOR_CALLBACK_KEY,
+            },
+            <BlockDefinition>{
+                kind: "block",
+                type: INSPECT_BLOCK,
+            },
         ].filter(b => !!b),
     }
 
@@ -1279,9 +1329,16 @@ export default function useToolbox(props: {
             <SeparatorDefinition>{
                 kind: "sep",
             },
+            modulesCategory,
+            <SeparatorDefinition>{
+                kind: "sep",
+            },
             logicCategory,
             mathCategory,
             variablesCategory,
+            <SeparatorDefinition>{
+                kind: "sep",
+            },
         ]
             .filter(cat => !!cat)
             .map(node =>
@@ -1302,6 +1359,15 @@ export function useToolboxButtons(
     workspace: Blockly.WorkspaceSvg,
     toolboxConfiguration: ToolboxConfiguration
 ) {
+    const { toggleShowDeviceHostsDialog } = useContext(AppContext)
+
+    useEffect(() => {
+        workspace?.registerButtonCallback(
+            START_SIMULATOR_CALLBACK_KEY,
+            toggleShowDeviceHostsDialog
+        )
+    }, [workspace])
+
     // track workspace changes and update callbacks
     useEffect(() => {
         if (!workspace) return

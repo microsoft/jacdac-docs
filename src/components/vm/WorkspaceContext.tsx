@@ -3,10 +3,8 @@ import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
-import { assert } from "../../../jacdac-ts/src/jdom/utils"
 import { RoleManager } from "../../../jacdac-ts/src/vm/rolemanager"
 import { IT4ProgramRunner } from "../../../jacdac-ts/src/vm/vmrunner"
-import useChange from "../../jacdac/useChange"
 import ReactField from "./fields/ReactField"
 
 export class WorkspaceServices extends JDEventSource {
@@ -79,9 +77,11 @@ export function WorkspaceProvider(props: {
 
     const resolveRole = () => {
         const newSourceBlock = field.getSourceBlock()
-        const roleField = newSourceBlock?.inputList[0]
-            ?.fieldRow[0] as FieldVariable
-        if (roleField?.name === "role" && roleField instanceof FieldVariable) {
+        const roleInput = newSourceBlock?.inputList[0]
+        const roleField = roleInput?.fieldRow.find(
+            f => f.name === "role" && f instanceof FieldVariable
+        ) as FieldVariable
+        if (roleField) {
             const xml = document.createElement("xml")
             roleField?.toXml(xml)
             const newRole = roleField?.getVariable()?.name
