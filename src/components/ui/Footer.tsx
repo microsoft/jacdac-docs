@@ -4,7 +4,7 @@ import React from "react"
 const useStyles = makeStyles(theme =>
     createStyles({
         footer: {
-            marginTop: theme.spacing(3),
+            textAlign: "center",
             "& *": {
                 fontSize: `${theme.typography.fontSize * 0.7}px`,
                 textDecoration: "none",
