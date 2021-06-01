@@ -30,8 +30,8 @@ const ops = {
     GTE: ">=",
     NEG: "-",
     ADD: "+",
-    MUL: "*",
-    DIV: "/",
+    MULTIPLY: "*",
+    DIVIDE: "/",
     MINUS: "-",
 }
 
