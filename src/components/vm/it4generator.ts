@@ -10,14 +10,12 @@ import {
     RoleEvent,
     IT4Error,
 } from "../../../jacdac-ts/src/vm/ir"
-import { BUILTIN_TYPES } from "./useToolbox"
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
 import {
-    BlockDefinition,
     CommandBlockDefinition,
     EventFieldDefinition,
     RegisterBlockDefinition,
-    ServiceBlockDefinitionFactory,
+    resolveServiceBlockDefinition,
     WAIT_BLOCK,
     WHILE_CONDITION_BLOCK,
 } from "./toolbox"
@@ -39,8 +37,9 @@ const ops = {
     MINUS: "-",
 }
 
+const BUILTIN_TYPES = ["", "Boolean", "Number", "String"]
+
 export default function workspaceJSONToIT4Program(
-    serviceBlocks: BlockDefinition[],
     workspace: WorkspaceJSON
 ): IT4Program {
     console.debug(`compile it4`, { workspace })
@@ -133,9 +132,7 @@ export default function workspaceJSONToIT4Program(
                     }
                 }
                 default: {
-                    const def = (
-                        Blockly.Blocks[type] as ServiceBlockDefinitionFactory
-                    )?.jacdacDefinition
+                    const def = resolveServiceBlockDefinition(type)
                     if (!def) {
                         console.warn(`unknown block ${type}`, {
                             type,
@@ -292,16 +289,16 @@ export default function workspaceJSONToIT4Program(
                 }
                 return {
                     cmd: ifThenElse,
-                    errors: processErrors(errors
-                        .concat(thenHandler.errors)
-                        .concat(elseHandler.errors)),
+                    errors: processErrors(
+                        errors
+                            .concat(thenHandler.errors)
+                            .concat(elseHandler.errors)
+                    ),
                 }
             }
             // more builts
             default: {
-                const def = (
-                    Blockly.Blocks[type] as ServiceBlockDefinitionFactory
-                )?.jacdacDefinition
+                const def = resolveServiceBlockDefinition(type)
                 if (def) {
                     const { template } = def
                     switch (template) {
@@ -343,7 +340,9 @@ export default function workspaceJSONToIT4Program(
                                         serviceCommand.name
                                     ),
                                 }),
-                                errors: processErrors(exprsErrors.flatMap(p => p.errors)),
+                                errors: processErrors(
+                                    exprsErrors.flatMap(p => p.errors)
+                                ),
                             }
                         }
                         default: {
@@ -389,8 +388,7 @@ export default function workspaceJSONToIT4Program(
             }
             topErrors = errors
         } else {
-            const def = (Blockly.Blocks[type] as ServiceBlockDefinitionFactory)
-                ?.jacdacDefinition
+            const def = resolveServiceBlockDefinition(type)
             assert(!!def)
             const { template } = def
             const { value: role } = inputs[0].fields["role"]

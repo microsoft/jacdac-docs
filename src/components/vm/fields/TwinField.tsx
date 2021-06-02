@@ -1,18 +1,16 @@
-import React, { PointerEvent, useContext } from "react"
+import React, { useContext } from "react"
 import { ReactFieldJSON } from "./ReactField"
 import { Grid } from "@material-ui/core"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
 import WorkspaceContext from "../WorkspaceContext"
 import ReactInlineField from "./ReactInlineField"
 import NoServiceAlert from "./NoServiceAlert"
+import { PointerBoundary } from "./PointerBoundary"
 
 function TwinWidget() {
     const { roleService, flyout } = useContext(WorkspaceContext)
-    const onPointerStopPropagation = (event: PointerEvent<HTMLDivElement>) => {
-        // make sure blockly does not handle drags when interacting with UI
-        event.stopPropagation()
-    }
     if (flyout) return null
+    if (!roleService) return <NoServiceAlert />
 
     return (
         <Grid
@@ -23,21 +21,13 @@ function TwinWidget() {
             spacing={1}
         >
             <Grid item>
-                <NoServiceAlert />
-                {roleService && (
-                    <div
-                        style={{ cursor: "inherit" }}
-                        onPointerDown={onPointerStopPropagation}
-                        onPointerUp={onPointerStopPropagation}
-                        onPointerMove={onPointerStopPropagation}
-                    >
-                        <DashboardServiceWidget
-                            service={roleService}
-                            visible={true}
-                            variant="icon"
-                        />
-                    </div>
-                )}
+                <PointerBoundary>
+                    <DashboardServiceWidget
+                        service={roleService}
+                        visible={true}
+                        variant="icon"
+                    />
+                </PointerBoundary>
             </Grid>
         </Grid>
     )

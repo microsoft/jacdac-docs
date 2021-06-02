@@ -1,5 +1,5 @@
 import Blockly from "blockly"
-import { useContext, useEffect, useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import {
     JoystickReg,
     ServoReg,
@@ -59,6 +59,7 @@ import {
     NumberInputDefinition,
     OptionsInputDefinition,
     RegisterBlockDefinition,
+    resolveServiceBlockDefinition,
     SeparatorDefinition,
     ServiceBlockDefinition,
     ServiceBlockDefinitionFactory,
@@ -75,10 +76,13 @@ import ServoAngleField from "./fields/ServoAngleField"
 import LEDColorField from "./fields/LEDColorField"
 import TwinField from "./fields/TwinField"
 import JDomTreeField from "./fields/JDomTreeField"
+import { WorkspaceJSON } from "./jsongenerator"
+import { IT4Program } from "../../../jacdac-ts/src/vm/ir"
 
 type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
     serviceBlocks: ServiceBlockDefinition[]
+    eventFieldBlocks: EventFieldDefinition[]
     services: jdspec.ServiceSpec[]
 }
 
@@ -740,7 +744,6 @@ function loadBlocks(
 
     const serviceBlocks: ServiceBlockDefinition[] = [
         ...eventBlocks,
-        ...eventFieldBlocks,
         ...registerChangeByEventBlocks,
         ...registerSimplesGetBlocks,
         ...registerEnumGetBlocks,
@@ -927,7 +930,7 @@ function loadBlocks(
         {
             kind: "block",
             type: SET_STATUS_LIGHT_BLOCK,
-            message0: "set %1 status to %2",
+            message0: "set %1 status light to %2",
             args0: [
                 {
                     type: "field_variable",
@@ -983,7 +986,7 @@ function loadBlocks(
             ],
             colour: debuggerColor,
             inputsInline: false,
-            tooltip: `Twin of the service`,
+            tooltip: `Twin of the selected service`,
             helpUrl: "",
             template: "twin",
         },
@@ -1098,6 +1101,7 @@ function loadBlocks(
 
     const blocks: BlockDefinition[] = [
         ...serviceBlocks,
+        ...eventFieldBlocks,
         ...runtimeBlocks,
         ...shadowBlocks,
         ...mathBlocks,
@@ -1128,17 +1132,9 @@ function loadBlocks(
     return {
         blocks,
         serviceBlocks,
+        eventFieldBlocks,
         services,
     }
-}
-
-export const BUILTIN_TYPES = ["", "Boolean", "Number", "String"]
-export function scanServices(workspace: Blockly.Workspace) {
-    const variables = Blockly.Variables.allUsedVarModels(workspace).filter(
-        v => BUILTIN_TYPES.indexOf(v.type) < 0
-    ) // remove buildins
-    const services = variables.map(v => v.type)
-    return services
 }
 
 function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
@@ -1175,21 +1171,43 @@ function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
 export default function useToolbox(props: {
     blockServices?: string[]
     serviceClass?: number
+    source?: WorkspaceJSON
+    program?: IT4Program
 }): {
     serviceBlocks: BlockDefinition[]
     toolboxConfiguration: ToolboxConfiguration
     newProjectXml: string
 } {
-    const { blockServices, serviceClass } = props
+    const { serviceClass, source, program } = props
 
     const theme = useTheme()
     const { serviceColor, commandColor, debuggerColor } =
         createBlockTheme(theme)
-    const { serviceBlocks, services } = useMemo(
+    const { serviceBlocks, eventFieldBlocks, services } = useMemo(
         () => loadBlocks(serviceColor, commandColor, debuggerColor),
         [theme]
     )
+    const blockServices =
+        program?.roles.map(r => r.serviceShortId) ||
+        source?.variables.map(v => v.type) ||
+        []
     const liveServices = useServices({ specification: true })
+    const usedEvents: Set<jdspec.PacketInfo> = new Set(
+        source?.blocks
+            ?.map(block => ({
+                block,
+                definition: resolveServiceBlockDefinition(block.type),
+            }))
+            .filter(({ definition }) => definition.template === "event")
+            .map(({ block, definition }) => {
+                const eventName = block.inputs[0].fields["event"]
+                    .value as string
+                return (definition as EventBlockDefinition).events.find(
+                    ev => ev.name === eventName
+                )
+            })
+            .filter(ev => !!ev)
+    )
 
     const toolboxServices: jdspec.ServiceSpec[] = uniqueMap(
         Flags.diagnostics
@@ -1221,11 +1239,22 @@ export default function useToolbox(props: {
             kind: "category",
             name: service.name,
             colour: serviceColor(service),
-            contents: serviceBlocks.map(block => ({
-                kind: "block",
-                type: block.type,
-                values: block.values,
-            })),
+            contents: [
+                ...serviceBlocks.map<BlockDefinition>(block => ({
+                    kind: "block",
+                    type: block.type,
+                    values: block.values,
+                })),
+                ...eventFieldBlocks
+                    .filter(
+                        ev => ev.service === service && usedEvents.has(ev.event)
+                    )
+                    .map<BlockDefinition>(block => ({
+                        kind: "block",
+                        type: block.type,
+                        values: block.values,
+                    })),
+            ],
             button: {
                 kind: "button",
                 text: `Add ${service.name} role`,

@@ -4,17 +4,13 @@ import DashboardServiceWidget, {
     DashboardServiceProps,
 } from "./DashboardServiceWidget"
 import ServiceRole from "../services/ServiceRole"
-import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
-import { SystemReg } from "../../../jacdac-ts/src/jdom/constants"
+import useInstanceName from "../services/useInstanceName"
 
 export default function DashboardServiceWidgetItem(
     props: React.Attributes & DashboardServiceProps
 ): JSX.Element {
-    const { service } = props
-    const [instanceName] = useRegisterUnpackedValue<[number]>(
-        service.register(SystemReg.InstanceName),
-        props
-    )
+    const { service, ...rest } = props
+    const instanceName = useInstanceName(service, rest)
 
     return (
         <Grid item>
