@@ -8,6 +8,7 @@ import {
     toIdentifier,
     IT4IfThenElse,
     RoleEvent,
+    IT4Error,
 } from "../../../jacdac-ts/src/vm/ir"
 import { BUILTIN_TYPES } from "./useToolbox"
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
@@ -38,11 +39,6 @@ const ops = {
     MINUS: "-",
 }
 
-type ExpressionWithErrors = {
-    expr: jsep.Expression
-    errors: jdspec.Diagnostic[]
-}
-
 export default function workspaceJSONToIT4Program(
     serviceBlocks: BlockDefinition[],
     workspace: WorkspaceJSON
@@ -53,11 +49,16 @@ export default function workspaceJSONToIT4Program(
         .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
         .map(v => ({ role: v.name, serviceShortId: v.type }))
 
+    type ExpressionWithErrors = {
+        expr: jsep.Expression
+        errors: IT4Error[]
+    }
+
     const blockToExpression: (
         ev: RoleEvent,
         block: BlockJSON
     ) => ExpressionWithErrors = (ev: RoleEvent, block: BlockJSON) => {
-        const errors: jdspec.Diagnostic[] = []
+        const errors: IT4Error[] = []
 
         const blockToExpressionInner = (ev: RoleEvent, block: BlockJSON) => {
             if (!block) return toIdentifier("%%NOCODE%%")
@@ -138,8 +139,7 @@ export default function workspaceJSONToIT4Program(
                             block,
                             d: Blockly.Blocks[type],
                         })
-                    }
-                    if (def) {
+                    } else {
                         const { template } = def
                         console.log("get", { type, def, template })
                         switch (template) {
@@ -162,8 +162,7 @@ export default function workspaceJSONToIT4Program(
                                 const { event } = def as EventFieldDefinition
                                 if (ev.event !== event.identifierName) {
                                     errors.push({
-                                        file: block.id,
-                                        line: 0,
+                                        sourceId: block.id,
                                         message: `Event ${event} is not available in this handler.`,
                                     })
                                 }
@@ -205,41 +204,81 @@ export default function workspaceJSONToIT4Program(
         }
     }
 
-    const blockToCommand = (event: RoleEvent, block: BlockJSON): IT4Base => {
-        let command: jsep.CallExpression
+    type CmdWithErrors = {
+        cmd: IT4Base
+        errors: IT4Error[]
+    }
+
+    const blockToCommand = (
+        event: RoleEvent,
+        block: BlockJSON
+    ): CmdWithErrors => {
+        const makeIT4Base = (command: jsep.CallExpression) => {
+            return {
+                sourceId: block.id,
+                type: "cmd",
+                command,
+            } as IT4Base
+        }
+
         const { type, inputs } = block
         switch (type) {
             case WAIT_BLOCK: {
-                const { expr:time, errors} = blockToExpression(event, inputs[0].child)
-                command = {
-                    type: "CallExpression",
-                    arguments: [time],
-                    callee: toIdentifier("wait"),
+                const { expr: time, errors } = blockToExpression(
+                    event,
+                    inputs[0].child
+                )
+                return {
+                    cmd: makeIT4Base({
+                        type: "CallExpression",
+                        arguments: [time],
+                        callee: toIdentifier("wait"),
+                    }),
+                    errors,
                 }
-                break
             }
             case "dynamic_if": {
-                const { expr, errors} = blockToExpression(event, inputs[0]?.child)
-                const ret: IT4IfThenElse = {
-                    sourceId: block.id,
-                    type: "ite",
-                    expr,
-                    then: [],
-                    else: [],
+                const { expr, errors } = blockToExpression(
+                    event,
+                    inputs[0]?.child
+                )
+                const thenHandler: IT4Handler = {
+                    commands: [],
+                    errors: [],
+                }
+                const elseHandler: IT4Handler = {
+                    commands: [],
+                    errors: [],
                 }
                 const t = inputs[1]?.child
                 const e = inputs[2]?.child
-                if (t)
-                    addCommands(event, ret.then, [
-                        t,
-                        ...(t.children ? t.children : []),
-                    ])
-                if (e)
-                    addCommands(event, ret.else, [
-                        e,
-                        ...(e.children ? e.children : []),
-                    ])
-                return ret
+                if (t) {
+                    addCommands(
+                        event,
+                        [t, ...(t.children ? t.children : [])],
+                        thenHandler
+                    )
+                }
+                if (e) {
+                    addCommands(
+                        event,
+                        [e, ...(e.children ? e.children : [])],
+                        elseHandler
+                    )
+                }
+                const ifThenElse: IT4IfThenElse = {
+                    sourceId: block.id,
+                    type: "ite",
+                    expr,
+                    then: thenHandler.commands,
+                    else: elseHandler.commands,
+                }
+                return {
+                    cmd: ifThenElse,
+                    errors: errors
+                        .concat(thenHandler.errors)
+                        .concat(elseHandler.errors),
+                }
             }
             // more builts
             default: {
@@ -256,18 +295,20 @@ export default function workspaceJSONToIT4Program(
                                 inputs[0].child
                             )
                             const { value: role } = inputs[0].fields.role
-                            command = {
-                                type: "CallExpression",
-                                arguments: [
-                                    toMemberExpression(
-                                        role as string,
-                                        register.name
-                                    ),
-                                    expr,
-                                ],
-                                callee: toIdentifier("writeRegister"),
+                            return {
+                                cmd: makeIT4Base({
+                                    type: "CallExpression",
+                                    arguments: [
+                                        toMemberExpression(
+                                            role as string,
+                                            register.name
+                                        ),
+                                        expr,
+                                    ],
+                                    callee: toIdentifier("writeRegister"),
+                                }),
+                                errors,
                             }
-                            break
                         }
                         case "command": {
                             const { command: serviceCommand } =
@@ -276,51 +317,50 @@ export default function workspaceJSONToIT4Program(
                             const exprsErrors = inputs.map(a =>
                                 blockToExpression(event, a.child)
                             )
-                            // TODO: collect up the errors
-                            command = {
-                                type: "CallExpression",
-                                arguments: exprsErrors.map(p => p.expr),
-                                callee: toMemberExpression(
-                                    role as string,
-                                    serviceCommand.name
-                                ),
+                            return {
+                                cmd: makeIT4Base({
+                                    type: "CallExpression",
+                                    arguments: exprsErrors.map(p => p.expr),
+                                    callee: toMemberExpression(
+                                        role as string,
+                                        serviceCommand.name
+                                    ),
+                                }),
+                                errors: exprsErrors.flatMap(p => p.errors)
                             }
-                            break
                         }
                         default: {
                             console.warn(
                                 `unsupported command template ${template} for ${type}`,
                                 { event, block }
                             )
-                            break
                         }
                     }
                 }
             }
         }
-        // for linking back
-        return {
-            sourceId: block.id,
-            type: "cmd",
-            command,
-        } as IT4Base
+        return undefined
     }
 
     const addCommands = (
         event: RoleEvent,
-        acc: IT4Base[],
-        blocks: BlockJSON[]
+        blocks: BlockJSON[],
+        handler: IT4Handler
     ) => {
         blocks?.forEach(child => {
-            if (child) acc.push(blockToCommand(event, child))
+            if (child) {
+                let { cmd, errors } = blockToCommand(event, child)
+                handler.commands.push(cmd)
+                errors.forEach(e => handler.errors.push(e))
+            }
         })
     }
 
     const handlers: IT4Handler[] = workspace.blocks.map(top => {
         const { type, inputs } = top
-        const commands: IT4Base[] = []
         let command: jsep.CallExpression = undefined
         let topEvent: RoleEvent = undefined
+        let topErrors: IT4Error[] = []
         if (type === WHILE_CONDITION_BLOCK) {
             // this is while (...)
             const { child: condition } = inputs[0]
@@ -330,6 +370,7 @@ export default function workspaceJSONToIT4Program(
                 arguments: [expr],
                 callee: toIdentifier("awaitCondition"),
             }
+            topErrors = errors
         } else {
             const def = (Blockly.Blocks[type] as ServiceBlockDefinitionFactory)
                 ?.jacdacDefinition
@@ -371,6 +412,7 @@ export default function workspaceJSONToIT4Program(
                         ],
                         callee: toIdentifier("awaitChange"),
                     }
+                    topErrors = errors
                     break
                 }
                 default: {
@@ -383,17 +425,20 @@ export default function workspaceJSONToIT4Program(
             }
         }
 
-        commands.push({
-            sourceId: top.id,
-            type: "cmd",
-            command,
-        } as IT4Base)
-
-        addCommands(topEvent, commands, top.children)
-
-        return {
-            commands,
+        const handler: IT4Handler = {
+            commands: [
+                {
+                    sourceId: top.id,
+                    type: "cmd",
+                    command,
+                } as IT4Base,
+            ],
+            errors: topErrors,
         }
+
+        addCommands(topEvent, top.children, handler)
+        
+        return handler
     })
 
     return {
