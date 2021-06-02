@@ -7,6 +7,7 @@ import {
     toMemberExpression,
     toIdentifier,
     IT4IfThenElse,
+    RoleEvent,
 } from "../../../jacdac-ts/src/vm/ir"
 import { BUILTIN_TYPES } from "./useToolbox"
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
@@ -37,9 +38,9 @@ const ops = {
     MINUS: "-",
 }
 
-type RoleEvent = {
-    role: string
-    event: string
+type ExpressionWithErrors = {
+    expr: jsep.Expression
+    errors: jdspec.Diagnostic[]
 }
 
 export default function workspaceJSONToIT4Program(
@@ -55,142 +56,153 @@ export default function workspaceJSONToIT4Program(
     const blockToExpression: (
         ev: RoleEvent,
         block: BlockJSON
-    ) => jsep.Expression = (ev: RoleEvent, block: BlockJSON) => {
-        if (!block) return toIdentifier("%%NOCODE%%")
-        const { type, value, inputs } = block
-        console.log(`block2e`, { ev, block, type, value, inputs })
+    ) => ExpressionWithErrors = (ev: RoleEvent, block: BlockJSON) => {
+        const errors: jdspec.Diagnostic[] = []
 
-        console.debug(`block`, type, value, inputs)
+        const blockToExpressionInner = (ev: RoleEvent, block: BlockJSON) => {
+            if (!block) return toIdentifier("%%NOCODE%%")
+            const { type, value, inputs } = block
+            console.log(`block2e`, { ev, block, type, value, inputs })
 
-        if (value !== undefined)
-            // literal
-            return <jsep.Literal>{
-                type: "Literal",
-                value: value,
-                raw: value + "",
-            }
+            console.debug(`block`, type, value, inputs)
 
-        switch (type) {
-            case "jacdac_math_single": {
-                const argument = blockToExpression(ev, inputs[0].child)
-                const op = inputs[0].fields["op"].value as string
-                return <jsep.UnaryExpression>{
-                    type: "UnaryExpression",
-                    operator: ops[op] || op,
-                    argument,
-                    prefix: false, // TODO:?
+            if (value !== undefined)
+                // literal
+                return <jsep.Literal>{
+                    type: "Literal",
+                    value: value,
+                    raw: value + "",
                 }
-            }
-            case "jacdac_math_arithmetic": {
-                const left = blockToExpression(ev, inputs[0].child)
-                const right = blockToExpression(ev, inputs[1].child)
-                const op = inputs[1].fields["op"].value as string
-                return <jsep.BinaryExpression>{
-                    type: "BinaryExpression",
-                    operator: ops[op] || op,
-                    left,
-                    right,
-                }
-            }
-            case "logic_operation": {
-                const left = blockToExpression(ev, inputs[0].child)
-                const right = blockToExpression(ev, inputs[1].child)
-                const op = inputs[1].fields["op"].value as string
-                return <jsep.LogicalExpression>{
-                    type: "LogicalExpression",
-                    operator: ops[op] || op,
-                    left,
-                    right,
-                }
-            }
-            case "logic_negate": {
-                const argument = blockToExpression(ev, inputs[0].child)
-                return <jsep.UnaryExpression>{
-                    type: "UnaryExpression",
-                    operator: "!",
-                    argument,
-                    prefix: false, // TODO:?
-                }
-            }
-            case "logic_compare": {
-                const left = blockToExpression(ev, inputs[0].child)
-                const right = blockToExpression(ev, inputs[1].child)
-                const op = inputs[1].fields["op"].value as string
-                return <jsep.BinaryExpression>{
-                    type: "BinaryExpression",
-                    operator: ops[op] || op,
-                    left,
-                    right,
-                }
-            }
-            default: {
-                const def = (
-                    Blockly.Blocks[type] as ServiceBlockDefinitionFactory
-                )?.jacdacDefinition
-                if (!def) {
-                    console.warn(`unknown block ${type}`, {
-                        type,
-                        ev,
-                        block,
-                        d: Blockly.Blocks[type],
-                    })
-                }
-                if (def) {
-                    const { template } = def
-                    console.log("get", { type, def, template })
-                    switch (template) {
-                        case "register_get": {
-                            const { register } = def as RegisterBlockDefinition
-                            const { value: role } = inputs[0].fields["role"]
-                            const field = inputs[0].fields["field"]
-                            return toMemberExpression(
-                                role as string,
-                                field
-                                    ? toMemberExpression(
-                                          register.name,
-                                          field.value as string
-                                      )
-                                    : register.name
-                            )
-                        }
-                        case "event_field": {
-                            const { event } = def as EventFieldDefinition
-                            if (ev.event !== event.identifierName) {
-                                // TODO: we need to raise an error to the user in Blockly
-                                // TODO: the field that they referenced in the block
-                                // TODO: doesn't belong to the event that fired
-                            }
-                            const field = inputs[0].fields["field"]
-                            return toMemberExpression(
-                                ev.role,
-                                toMemberExpression(
-                                    ev.event,
-                                    field.value as string
-                                )
-                            )
-                        }
-                        case "shadow": {
-                            const field = inputs[0].fields["value"]
-                            const { value } = field
-                            return <jsep.Literal>{
-                                type: "Literal",
-                                value: value,
-                                raw: value + "",
-                            }
-                        }
-                        default: {
-                            console.warn(
-                                `unsupported block template ${template} for ${type}`,
-                                { ev, block }
-                            )
-                            break
-                        }
+
+            switch (type) {
+                case "jacdac_math_single": {
+                    const argument = blockToExpressionInner(ev, inputs[0].child)
+                    const op = inputs[0].fields["op"].value as string
+                    return <jsep.UnaryExpression>{
+                        type: "UnaryExpression",
+                        operator: ops[op] || op,
+                        argument,
+                        prefix: false, // TODO:?
                     }
-                    break
+                }
+                case "jacdac_math_arithmetic": {
+                    const left = blockToExpressionInner(ev, inputs[0].child)
+                    const right = blockToExpressionInner(ev, inputs[1].child)
+                    const op = inputs[1].fields["op"].value as string
+                    return <jsep.BinaryExpression>{
+                        type: "BinaryExpression",
+                        operator: ops[op] || op,
+                        left,
+                        right,
+                    }
+                }
+                case "logic_operation": {
+                    const left = blockToExpressionInner(ev, inputs[0].child)
+                    const right = blockToExpressionInner(ev, inputs[1].child)
+                    const op = inputs[1].fields["op"].value as string
+                    return <jsep.LogicalExpression>{
+                        type: "LogicalExpression",
+                        operator: ops[op] || op,
+                        left,
+                        right,
+                    }
+                }
+                case "logic_negate": {
+                    const argument = blockToExpressionInner(ev, inputs[0].child)
+                    return <jsep.UnaryExpression>{
+                        type: "UnaryExpression",
+                        operator: "!",
+                        argument,
+                        prefix: false, // TODO:?
+                    }
+                }
+                case "logic_compare": {
+                    const left = blockToExpressionInner(ev, inputs[0].child)
+                    const right = blockToExpressionInner(ev, inputs[1].child)
+                    const op = inputs[1].fields["op"].value as string
+                    return <jsep.BinaryExpression>{
+                        type: "BinaryExpression",
+                        operator: ops[op] || op,
+                        left,
+                        right,
+                    }
+                }
+                default: {
+                    const def = (
+                        Blockly.Blocks[type] as ServiceBlockDefinitionFactory
+                    )?.jacdacDefinition
+                    if (!def) {
+                        console.warn(`unknown block ${type}`, {
+                            type,
+                            ev,
+                            block,
+                            d: Blockly.Blocks[type],
+                        })
+                    }
+                    if (def) {
+                        const { template } = def
+                        console.log("get", { type, def, template })
+                        switch (template) {
+                            case "register_get": {
+                                const { register } =
+                                    def as RegisterBlockDefinition
+                                const { value: role } = inputs[0].fields["role"]
+                                const field = inputs[0].fields["field"]
+                                return toMemberExpression(
+                                    role as string,
+                                    field
+                                        ? toMemberExpression(
+                                              register.name,
+                                              field.value as string
+                                          )
+                                        : register.name
+                                )
+                            }
+                            case "event_field": {
+                                const { event } = def as EventFieldDefinition
+                                if (ev.event !== event.identifierName) {
+                                    errors.push({
+                                        file: block.id,
+                                        line: 0,
+                                        message: `Event ${event} is not available in this handler.`,
+                                    })
+                                }
+                                const field = inputs[0].fields["field"]
+                                return toMemberExpression(
+                                    ev.role,
+                                    toMemberExpression(
+                                        ev.event,
+                                        field.value as string
+                                    )
+                                )
+                            }
+                            case "shadow": {
+                                const field = inputs[0].fields["value"]
+                                const { value } = field
+                                return <jsep.Literal>{
+                                    type: "Literal",
+                                    value: value,
+                                    raw: value + "",
+                                }
+                            }
+                            default: {
+                                console.warn(
+                                    `unsupported block template ${template} for ${type}`,
+                                    { ev, block }
+                                )
+                                break
+                            }
+                        }
+                        break
+                    }
                 }
             }
+            return toIdentifier("%%NOCODE%%")
         }
-        return toIdentifier("%%NOCODE%%")
+        return {
+            expr: blockToExpressionInner(ev, block),
+            errors,
+        }
     }
 
     const blockToCommand = (event: RoleEvent, block: BlockJSON): IT4Base => {
@@ -198,7 +210,7 @@ export default function workspaceJSONToIT4Program(
         const { type, inputs } = block
         switch (type) {
             case WAIT_BLOCK: {
-                const time = blockToExpression(event, inputs[0].child)
+                const { expr:time, errors} = blockToExpression(event, inputs[0].child)
                 command = {
                     type: "CallExpression",
                     arguments: [time],
@@ -207,10 +219,11 @@ export default function workspaceJSONToIT4Program(
                 break
             }
             case "dynamic_if": {
+                const { expr, errors} = blockToExpression(event, inputs[0]?.child)
                 const ret: IT4IfThenElse = {
                     sourceId: block.id,
                     type: "ite",
-                    expr: blockToExpression(event, inputs[0]?.child),
+                    expr,
                     then: [],
                     else: [],
                 }
@@ -238,7 +251,7 @@ export default function workspaceJSONToIT4Program(
                     switch (template) {
                         case "register_set": {
                             const { register } = def as RegisterBlockDefinition
-                            const val = blockToExpression(
+                            const { expr, errors } = blockToExpression(
                                 event,
                                 inputs[0].child
                             )
@@ -250,7 +263,7 @@ export default function workspaceJSONToIT4Program(
                                         role as string,
                                         register.name
                                     ),
-                                    val,
+                                    expr,
                                 ],
                                 callee: toIdentifier("writeRegister"),
                             }
@@ -260,11 +273,13 @@ export default function workspaceJSONToIT4Program(
                             const { command: serviceCommand } =
                                 def as CommandBlockDefinition
                             const { value: role } = inputs[0].fields.role
+                            const exprsErrors = inputs.map(a =>
+                                blockToExpression(event, a.child)
+                            )
+                            // TODO: collect up the errors
                             command = {
                                 type: "CallExpression",
-                                arguments: inputs.map(a =>
-                                    blockToExpression(event, a.child)
-                                ),
+                                arguments: exprsErrors.map(p => p.expr),
                                 callee: toMemberExpression(
                                     role as string,
                                     serviceCommand.name
@@ -309,9 +324,10 @@ export default function workspaceJSONToIT4Program(
         if (type === WHILE_CONDITION_BLOCK) {
             // this is while (...)
             const { child: condition } = inputs[0]
+            const { expr, errors } = blockToExpression(undefined, condition)
             command = {
                 type: "CallExpression",
-                arguments: [blockToExpression(undefined, condition)],
+                arguments: [expr],
                 callee: toIdentifier("awaitCondition"),
             }
         } else {
@@ -343,7 +359,7 @@ export default function workspaceJSONToIT4Program(
                 }
                 case "register_change_event": {
                     const { register } = def as RegisterBlockDefinition
-                    const argument = blockToExpression(
+                    const { expr, errors } = blockToExpression(
                         undefined,
                         inputs[0].child
                     )
@@ -351,7 +367,7 @@ export default function workspaceJSONToIT4Program(
                         type: "CallExpression",
                         arguments: [
                             toMemberExpression(role.toString(), register.name),
-                            argument,
+                            expr,
                         ],
                         callee: toIdentifier("awaitChange"),
                     }
