@@ -161,13 +161,12 @@ export default function workspaceJSONToIT4Program(
                             }
                             case "event_field": {
                                 const { event } = def as EventFieldDefinition
-                                /*  SOMETHING WRONG HERE: def is not well-formed. event is wrong
-                                    if (ev.event !== event.identifierName) {
+                                if (ev.event !== event.name) {
                                     errors.push({
                                         sourceId: block.id,
-                                        message: `Event ${event.identifierName} is not available in this handler.`,
+                                        message: `Event ${event.name} is not available in this handler.`,
                                     })
-                                }*/
+                                }
                                 const field = inputs[0].fields["field"]
                                 return toMemberExpression(
                                     ev.role,
