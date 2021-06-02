@@ -57,15 +57,19 @@ export default function workspaceJSONToIT4Program(
     const blockToExpression: (
         ev: RoleEvent,
         block: BlockJSON
-    ) => ExpressionWithErrors = (ev: RoleEvent, block: BlockJSON) => {
+    ) => ExpressionWithErrors = (ev: RoleEvent, blockIn: BlockJSON) => {
         const errors: IT4Error[] = []
 
         const blockToExpressionInner = (ev: RoleEvent, block: BlockJSON) => {
-            if (!block) return toIdentifier("%%NOCODE%%")
+            if (!block) {
+                errors.push({
+                    sourceId: blockIn?.id,
+                    message: `Incomplete code under this block.`,
+                })
+                return toIdentifier("%%NOCODE%%")
+            }
             const { type, value, inputs } = block
             console.log(`block2e`, { ev, block, type, value, inputs })
-
-            console.debug(`block`, type, value, inputs)
 
             if (value !== undefined)
                 // literal
@@ -160,12 +164,13 @@ export default function workspaceJSONToIT4Program(
                             }
                             case "event_field": {
                                 const { event } = def as EventFieldDefinition
-                                if (ev.event !== event.identifierName) {
+                                /*  SOMETHING WRONG HERE: def is not well-formed. event is wrong
+                                    if (ev.event !== event.identifierName) {
                                     errors.push({
                                         sourceId: block.id,
-                                        message: `Event ${event} is not available in this handler.`,
+                                        message: `Event ${event.identifierName} is not available in this handler.`,
                                     })
-                                }
+                                }*/
                                 const field = inputs[0].fields["field"]
                                 return toMemberExpression(
                                     ev.role,
@@ -196,10 +201,14 @@ export default function workspaceJSONToIT4Program(
                     }
                 }
             }
+            errors.push({
+                sourceId: block.id,
+                message: `Incomplete code.`,
+            })
             return toIdentifier("%%NOCODE%%")
         }
         return {
-            expr: blockToExpressionInner(ev, block),
+            expr: blockToExpressionInner(ev, blockIn),
             errors,
         }
     }
@@ -220,6 +229,14 @@ export default function workspaceJSONToIT4Program(
                 command,
             } as IT4Base
         }
+        const processErrors = (errors: IT4Error[]) => {
+            return errors.map((e: IT4Error) => {
+                return {
+                    sourceId: e.sourceId ? e.sourceId : block.id,
+                    message: e.message,
+                }
+            })
+        }
 
         const { type, inputs } = block
         switch (type) {
@@ -234,7 +251,7 @@ export default function workspaceJSONToIT4Program(
                         arguments: [time],
                         callee: toIdentifier("wait"),
                     }),
-                    errors,
+                    errors: processErrors(errors),
                 }
             }
             case "dynamic_if": {
@@ -275,9 +292,9 @@ export default function workspaceJSONToIT4Program(
                 }
                 return {
                     cmd: ifThenElse,
-                    errors: errors
+                    errors: processErrors(errors
                         .concat(thenHandler.errors)
-                        .concat(elseHandler.errors),
+                        .concat(elseHandler.errors)),
                 }
             }
             // more builts
@@ -307,7 +324,7 @@ export default function workspaceJSONToIT4Program(
                                     ],
                                     callee: toIdentifier("writeRegister"),
                                 }),
-                                errors,
+                                errors: processErrors(errors),
                             }
                         }
                         case "command": {
@@ -326,7 +343,7 @@ export default function workspaceJSONToIT4Program(
                                         serviceCommand.name
                                     ),
                                 }),
-                                errors: exprsErrors.flatMap(p => p.errors)
+                                errors: processErrors(exprsErrors.flatMap(p => p.errors)),
                             }
                         }
                         default: {
@@ -437,7 +454,7 @@ export default function workspaceJSONToIT4Program(
         }
 
         addCommands(topEvent, top.children, handler)
-        
+
         return handler
     })
 
