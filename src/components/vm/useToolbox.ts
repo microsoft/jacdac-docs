@@ -1,6 +1,7 @@
 import Blockly from "blockly"
 import { useEffect, useMemo } from "react"
 import {
+    BuzzerCmd,
     JoystickReg,
     ServoReg,
     SRV_BOOTLOADER,
@@ -50,6 +51,7 @@ import {
     CategoryDefinition,
     ColorInputDefnition,
     CommandBlockDefinition,
+    CONNECTED_BLOCK,
     CONNECTION_BLOCK,
     CustomBlockDefinition,
     EventBlockDefinition,
@@ -163,6 +165,16 @@ function loadBlocks(
                 type: ServoAngleField.SHADOW.type,
             },
         },
+        {
+            serviceClass: SRV_BUZZER,
+            kind: "command",
+            identifier: BuzzerCmd.PlayNote,
+            field: "frequency",
+            shadow: <BlockDefinition>{
+                kind: "block",
+                type: NoteField.SHADOW.type,
+            },
+        },
     ]
     const lookupCustomShadow = (
         service: jdspec.ServiceSpec,
@@ -269,6 +281,7 @@ function loadBlocks(
                 .filter(
                     pkt =>
                         isRegister(pkt) &&
+                        !pkt.lowLevel &&
                         includedRegisters.indexOf(pkt.identifier) > -1
                 )
                 .map(register => ({
@@ -281,14 +294,20 @@ function loadBlocks(
         .map(service => ({
             service,
             events: service.packets.filter(
-                pkt => isEvent(pkt) && ignoredEvents.indexOf(pkt.identifier) < 0
+                pkt =>
+                    isEvent(pkt) &&
+                    !pkt.lowLevel &&
+                    ignoredEvents.indexOf(pkt.identifier) < 0
             ),
         }))
         .filter(kv => !!kv.events.length)
     const commands = arrayConcatMany(
         allServices.map(service =>
             service.packets
-                .filter(pkt => isCommand(pkt) && fieldsSupported(pkt))
+                .filter(
+                    pkt =>
+                        isCommand(pkt) && !pkt.lowLevel && fieldsSupported(pkt)
+                )
                 .map(pkt => ({
                     service,
                     command: pkt,
@@ -318,7 +337,6 @@ function loadBlocks(
                     helpUrl: serviceHelp(service),
                     service,
                     expression: `role.key(combo.selectors, combo.modifiers)`,
-                    //expression: `play_tone(frequency, duration) => role.send_pulse(frequency / 10000, duration)`,
                     template: "custom",
                 }
         ),
@@ -360,59 +378,6 @@ function loadBlocks(
                     helpUrl: serviceHelp(service),
                     service,
                     expression: `role.animate((color >> 16) & 0xff, (color >> 8) & 0xff, (color >> 0) & 0xff, speed * 0xff)`,
-                    template: "custom",
-                }
-        ),
-        ...resolveService(SRV_BUZZER).map(
-            service =>
-                <CustomBlockDefinition>{
-                    kind: "block",
-                    type: `play_note`,
-                    message0: `play %1 note %2 for %3 s at volume %4`,
-                    args0: [
-                        fieldVariable(service),
-                        {
-                            type: "input_value",
-                            name: "frequency",
-                            check: "Number",
-                        },
-                        {
-                            type: "input_value",
-                            name: "duration",
-                            check: "Number",
-                        },
-                        {
-                            type: "input_value",
-                            name: "volume",
-                            check: "Number",
-                        },
-                    ],
-                    values: {
-                        frequency: {
-                            kind: "block",
-                            type: NoteField.SHADOW.type,
-                            shadow: true,
-                        },
-                        duration: {
-                            kind: "block",
-                            type: "jacdac_time_picker",
-                            shadow: true,
-                        },
-                        volume: {
-                            kind: "block",
-                            type: "jacdac_ratio",
-                            value: 0.5,
-                            shadow: true,
-                        },
-                    },
-                    colour: serviceColor(service),
-                    inputsInline: true,
-                    previousStatement: null,
-                    nextStatement: null,
-                    tooltip: `Send a keyboard key combo`,
-                    helpUrl: serviceHelp(service),
-                    service,
-                    expression: `role.play_tone(frequency / 10000, duration) TODO`,
                     template: "custom",
                 }
         ),
@@ -935,18 +900,35 @@ function loadBlocks(
                     ],
                 },
             ],
-            values: {
-                color: {
-                    kind: "block",
-                    type: LEDColorField.SHADOW.type,
-                },
-            },
             inputsInline: true,
             nextStatement: null,
             colour: commandColor,
             tooltip: "Runs code when a role is connected or disconnected",
             helpUrl: "",
             template: "connection",
+        },
+        {
+            kind: "block",
+            type: CONNECTED_BLOCK,
+            message0: "%1 connected",
+            args0: [
+                {
+                    type: "field_variable",
+                    name: "role",
+                    variable: "any",
+                    variableTypes: [
+                        "client",
+                        ...allServices.map(service => service.shortId),
+                    ],
+                    defaultType: "client",
+                },
+            ],
+            output: "Boolean",
+            inputsInline: true,
+            colour: commandColor,
+            tooltip: "Runs code when a role is connected or disconnected",
+            helpUrl: "",
+            template: "connected",
         },
         {
             kind: "block",
@@ -1327,6 +1309,10 @@ export default function useToolbox(props: {
             <BlockDefinition>{
                 kind: "block",
                 type: CONNECTION_BLOCK,
+            },
+            <BlockDefinition>{
+                kind: "block",
+                type: CONNECTED_BLOCK,
             },
             <BlockDefinition>{
                 kind: "block",
