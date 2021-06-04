@@ -1,7 +1,7 @@
 import { Grid, NoSsr } from "@material-ui/core"
 import React, { useRef, useState } from "react"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
-import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
+import { VMProgram } from "../../../jacdac-ts/src/vm/VMir"
 import { WorkspaceJSON } from "../../components/vm/jsongenerator"
 import VMBlockEditor from "../../components/vm/VMBlockEditor"
 import useLocalStorage from "../../components/useLocalStorage"
