@@ -56,7 +56,9 @@ import {
     CustomBlockDefinition,
     DEVICE_TWIN_DEFINITION_BLOCK,
     DEVICE_TWIN_PROPERTY_BLOCK,
+    DEVICE_TWIN_PROPERTY_TYPE,
     DEVICE_TWIN_TELEMETRY_BLOCK,
+    DEVICE_TWIN_TELEMETRY_TYPE,
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
@@ -1228,11 +1230,11 @@ function loadBlocks(
         {
             kind: "block",
             type: DEVICE_TWIN_DEFINITION_BLOCK,
-            message0: "device twin %1",
+            message0: "device twin id %1",
             args0: [
                 {
                     type: "field_input",
-                    name: "di",
+                    name: "id",
                 },
             ],
             inputsInline: true,
@@ -1243,19 +1245,29 @@ function loadBlocks(
         {
             kind: "block",
             type: DEVICE_TWIN_PROPERTY_BLOCK,
-            message0: "property %1 schema %2 writeable %3",
+            message0: "property %1 = %2 unit %3 %4 writeable %5",
             args0: [
                 {
-                    type: "field_input",
+                    type: "field_variable",
                     name: "name",
+                    variable: "property 1",
+                    variableTypes: [DEVICE_TWIN_PROPERTY_TYPE],
+                    defaultType: DEVICE_TWIN_PROPERTY_TYPE,
+                },
+                {
+                    type: "input_value",
+                    name: "value",
                 },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
-                    name: "schema",
+                    name: "unit",
                     options: [
-                        ["double", "double"],
-                        ["string", "string"],
+                        ["degC", "degreeCelsius"],
+                        ["degF", "degreeFahrenheit"],
                     ],
+                },
+                {
+                    type: "input_dummy",
                 },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -1270,6 +1282,7 @@ function loadBlocks(
             nextStatement: deviceTwinStatementType,
             template: "dtdl",
             colour: deviceTwinColor,
+            inputsInline: false,
         },
         {
             kind: "block",
@@ -1277,8 +1290,11 @@ function loadBlocks(
             message0: "telemetry %1 schema %2",
             args0: [
                 {
-                    type: "field_input",
+                    type: "field_variable",
                     name: "name",
+                    variable: "telemetry 1",
+                    variableTypes: [DEVICE_TWIN_TELEMETRY_TYPE],
+                    defaultType: DEVICE_TWIN_TELEMETRY_TYPE,
                 },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -1293,6 +1309,36 @@ function loadBlocks(
             nextStatement: deviceTwinStatementType,
             template: "dtdl",
             colour: deviceTwinColor,
+            inputsInline: false,
+        },
+        {
+            kind: "block",
+            type: "device_twin_set_comment",
+            message0: "comment %1 %2 %3",
+            args0: [
+                {
+                    type: "field_variable",
+                    name: "name",
+                    variable: "property 1",
+                    variableTypes: [
+                        DEVICE_TWIN_PROPERTY_TYPE,
+                        DEVICE_TWIN_TELEMETRY_TYPE,
+                    ],
+                    defaultType: DEVICE_TWIN_TELEMETRY_TYPE,
+                },
+                {
+                    type: "input_dummy",
+                },
+                {
+                    type: "field_multilinetext",
+                    name: "text",
+                },
+            ],
+            previousStatement: deviceTwinStatementType,
+            nextStatement: deviceTwinStatementType,
+            template: "dtdl",
+            colour: deviceTwinColor,
+            inputsInline: false,
         },
     ]
 
