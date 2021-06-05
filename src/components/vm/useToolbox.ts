@@ -1,4 +1,4 @@
-import Blockly from "blockly"
+import Blockly, { Block } from "blockly"
 import { useEffect, useMemo } from "react"
 import {
     BuzzerCmd,
@@ -54,6 +54,9 @@ import {
     CONNECTED_BLOCK,
     CONNECTION_BLOCK,
     CustomBlockDefinition,
+    DEVICE_TWIN_DEFINITION_BLOCK,
+    DEVICE_TWIN_PROPERTY_BLOCK,
+    DEVICE_TWIN_TELEMETRY_BLOCK,
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
@@ -98,6 +101,7 @@ type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
     serviceBlocks: ServiceBlockDefinition[]
     eventFieldBlocks: EventFieldDefinition[]
+    deviceTwinsBlocks: BlockDefinition[]
     services: jdspec.ServiceSpec[]
 }
 
@@ -150,6 +154,7 @@ function createBlockTheme(theme: Theme) {
     const otherColor = theme.palette.info.main
     const commandColor = theme.palette.warning.main
     const debuggerColor = theme.palette.grey[600]
+    const deviceTwinColor = theme.palette.error.light
     const serviceColor = (srv: jdspec.ServiceSpec) =>
         isSensor(srv) ? sensorColor : otherColor
     return {
@@ -158,13 +163,18 @@ function createBlockTheme(theme: Theme) {
         commandColor,
         debuggerColor,
         otherColor,
+        deviceTwinColor,
     }
 }
+
+const codeStatementType = "Code"
+const deviceTwinStatementType = ["DeviceTwinContent", "Comment"]
 
 function loadBlocks(
     serviceColor: (srv: jdspec.ServiceSpec) => string,
     commandColor: string,
-    debuggerColor: string
+    debuggerColor: string,
+    deviceTwinColor: string
 ): CachedBlockDefinitions {
     // blocks
     const customShadows = [
@@ -344,8 +354,8 @@ function loadBlocks(
                     ],
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: null,
-                    nextStatement: null,
+                    previousStatement: codeStatementType,
+                    nextStatement: codeStatementType,
                     tooltip: `Send a keyboard key combo`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -385,8 +395,8 @@ function loadBlocks(
                     },
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: null,
-                    nextStatement: null,
+                    previousStatement: codeStatementType,
+                    nextStatement: codeStatementType,
                     tooltip: `Fade LED color`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -416,8 +426,8 @@ function loadBlocks(
                     },
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: null,
-                    nextStatement: null,
+                    previousStatement: codeStatementType,
+                    nextStatement: codeStatementType,
                     tooltip: `Display a number of the screen`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -440,8 +450,8 @@ function loadBlocks(
                     ],
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: null,
-                    nextStatement: null,
+                    previousStatement: codeStatementType,
+                    nextStatement: codeStatementType,
                     tooltip: `Display LEDs on the LED matrix`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -472,7 +482,7 @@ function loadBlocks(
             ],
             colour: serviceColor(service),
             inputsInline: true,
-            nextStatement: null,
+            nextStatement: codeStatementType,
             tooltip: `Events for the ${service.name} service`,
             helpUrl: serviceHelp(service),
             service,
@@ -541,7 +551,7 @@ function loadBlocks(
             ].filter(v => !!v),
             values: fieldsToValues(service, register),
             inputsInline: true,
-            nextStatement: null,
+            nextStatement: codeStatementType,
             colour: serviceColor(service),
             tooltip: `Event raised when ${register.name} changes`,
             helpUrl: serviceHelp(service),
@@ -691,8 +701,8 @@ function loadBlocks(
             helpUrl: serviceHelp(service),
             service,
             register,
-            previousStatement: null,
-            nextStatement: null,
+            previousStatement: codeStatementType,
+            nextStatement: codeStatementType,
 
             template: "register_set",
         }))
@@ -714,8 +724,8 @@ function loadBlocks(
             helpUrl: serviceHelp(service),
             service,
             command,
-            previousStatement: null,
-            nextStatement: null,
+            previousStatement: codeStatementType,
+            nextStatement: codeStatementType,
 
             template: "command",
         })
@@ -745,6 +755,23 @@ function loadBlocks(
                     options: [
                         ["enabled", "on"],
                         ["disabled", "off"],
+                    ],
+                },
+            ],
+            style: "logic_blocks",
+            output: "Boolean",
+        },
+        {
+            kind: "block",
+            type: `jacdac_yes_no`,
+            message0: `%1`,
+            args0: [
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "value",
+                    options: [
+                        ["yes", "on"],
+                        ["no", "off"],
                     ],
                 },
             ],
@@ -883,8 +910,8 @@ function loadBlocks(
                 },
             ],
             inputsInline: true,
-            previousStatement: null,
-            nextStatement: null,
+            previousStatement: codeStatementType,
+            nextStatement: codeStatementType,
             colour: commandColor,
             tooltip: "Wait the desired time",
             helpUrl: "",
@@ -914,7 +941,7 @@ function loadBlocks(
                 },
             ],
             inputsInline: true,
-            nextStatement: null,
+            nextStatement: codeStatementType,
             colour: commandColor,
             tooltip: "Runs code when a role is connected or disconnected",
             helpUrl: "",
@@ -971,8 +998,8 @@ function loadBlocks(
                 },
             },
             inputsInline: true,
-            previousStatement: null,
-            nextStatement: null,
+            previousStatement: codeStatementType,
+            nextStatement: codeStatementType,
             colour: commandColor,
             tooltip: "Sets the color on the status light",
             helpUrl: "",
@@ -1072,7 +1099,7 @@ function loadBlocks(
             tooltip: `Repeats code at a given interval in seconds`,
             helpUrl: "",
             template: "every",
-            nextStatement: null,
+            nextStatement: codeStatementType,
         },
     ]
 
@@ -1197,12 +1224,85 @@ function loadBlocks(
         },
     ]
 
+    const deviceTwinsBlocks: BlockDefinition[] = [
+        {
+            kind: "block",
+            type: DEVICE_TWIN_DEFINITION_BLOCK,
+            message0: "device twin %1",
+            args0: [
+                {
+                    type: "field_input",
+                    name: "di",
+                },
+            ],
+            inputsInline: true,
+            nextStatement: deviceTwinStatementType,
+            template: "dtdl",
+            colour: deviceTwinColor,
+        },
+        {
+            kind: "block",
+            type: DEVICE_TWIN_PROPERTY_BLOCK,
+            message0: "property %1 schema %2 writeable %3",
+            args0: [
+                {
+                    type: "field_input",
+                    name: "name",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "schema",
+                    options: [
+                        ["double", "double"],
+                        ["string", "string"],
+                    ],
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "writeable",
+                    options: [
+                        ["yes", "on"],
+                        ["no", "off"],
+                    ],
+                },
+            ],
+            previousStatement: deviceTwinStatementType,
+            nextStatement: deviceTwinStatementType,
+            template: "dtdl",
+            colour: deviceTwinColor,
+        },
+        {
+            kind: "block",
+            type: DEVICE_TWIN_TELEMETRY_BLOCK,
+            message0: "telemetry %1 schema %2",
+            args0: [
+                {
+                    type: "field_input",
+                    name: "name",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "schema",
+                    options: [
+                        ["double", "double"],
+                        ["string", "string"],
+                    ],
+                },
+            ],
+            previousStatement: deviceTwinStatementType,
+            nextStatement: deviceTwinStatementType,
+            template: "dtdl",
+            colour: deviceTwinColor,
+        },
+    ]
+
     const blocks: BlockDefinition[] = [
         ...serviceBlocks,
         ...eventFieldBlocks,
         ...runtimeBlocks,
         ...shadowBlocks,
         ...mathBlocks,
+        ...deviceTwinsBlocks,
     ]
 
     // register field editors
@@ -1231,6 +1331,7 @@ function loadBlocks(
         blocks,
         serviceBlocks,
         eventFieldBlocks,
+        deviceTwinsBlocks,
         services,
     }
 }
@@ -1279,12 +1380,19 @@ export default function useToolbox(props: {
     const { serviceClass, source, program } = props
 
     const theme = useTheme()
-    const { serviceColor, commandColor, debuggerColor } =
+    const { serviceColor, commandColor, debuggerColor, deviceTwinColor } =
         createBlockTheme(theme)
-    const { serviceBlocks, eventFieldBlocks, services } = useMemo(
-        () => loadBlocks(serviceColor, commandColor, debuggerColor),
-        [theme]
-    )
+    const { serviceBlocks, eventFieldBlocks, deviceTwinsBlocks, services } =
+        useMemo(
+            () =>
+                loadBlocks(
+                    serviceColor,
+                    commandColor,
+                    debuggerColor,
+                    deviceTwinColor
+                ),
+            [theme]
+        )
     const blockServices =
         program?.roles.map(r => r.serviceShortId) ||
         source?.variables.map(v => v.type) ||
@@ -1402,7 +1510,7 @@ export default function useToolbox(props: {
         ].filter(b => !!b),
     }
 
-    const modulesCategory: CategoryDefinition = {
+    const toolsCategory: CategoryDefinition = {
         kind: "category",
         name: "Tools",
         colour: debuggerColor,
@@ -1498,9 +1606,25 @@ export default function useToolbox(props: {
         custom: "VARIABLE",
     }
 
+    const deviceTwinsCategory: CategoryDefinition = {
+        kind: "category",
+        name: "Device Twin",
+        colour: deviceTwinColor,
+        contents: [
+            ...deviceTwinsBlocks.map(
+                ({ type }) =>
+                    <BlockDefinition>{
+                        kind: "block",
+                        type,
+                    }
+            ),
+        ],
+    }
+
     const toolboxConfiguration: ToolboxConfiguration = {
         kind: "categoryToolbox",
         contents: [
+            deviceTwinsCategory,
             ...servicesCategories,
             servicesCategories?.length &&
                 <SeparatorDefinition>{
@@ -1513,7 +1637,7 @@ export default function useToolbox(props: {
             <SeparatorDefinition>{
                 kind: "sep",
             },
-            modulesCategory,
+            toolsCategory,
         ]
             .filter(cat => !!cat)
             .map(node =>

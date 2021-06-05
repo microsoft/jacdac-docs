@@ -63,6 +63,7 @@ export type BlockTemplate =
     | "every"
     | "connection"
     | "connected"
+    | "dtdl"
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
@@ -137,6 +138,10 @@ export const WATCH_BLOCK = "jacdac_watch"
 export const REPEAT_EVERY_BLOCK = "jacdac_repeat_every"
 export const CONNECTION_BLOCK = "jacdac_connection"
 export const CONNECTED_BLOCK = "jacdac_connected"
+
+export const DEVICE_TWIN_DEFINITION_BLOCK = "device_twin_definition"
+export const DEVICE_TWIN_PROPERTY_BLOCK = "device_twin_property"
+export const DEVICE_TWIN_TELEMETRY_BLOCK = "device_twin_telemetry"
 
 export interface CategoryDefinition {
     kind: "category"
