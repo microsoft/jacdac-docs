@@ -1366,9 +1366,18 @@ function loadBlocks(
         },
         {
             kind: "block",
-            type: "device_twin_option_set_comment",
-            message0: "comment %1",
+            type: "device_twin_option_comment",
+            message0: "%1 %2",
             args0: [
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "type",
+                    options: [
+                        ["comment", "comment"],
+                        ["description", "description"],
+                        ["display name", "displayName"],
+                    ],
+                },
                 {
                     type: "field_multilinetext",
                     name: "text",
