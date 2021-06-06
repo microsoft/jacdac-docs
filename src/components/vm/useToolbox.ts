@@ -84,7 +84,7 @@ import LEDColorField from "./fields/LEDColorField"
 import TwinField from "./fields/TwinField"
 import JDomTreeField from "./fields/JDomTreeField"
 import { WorkspaceJSON } from "./jsongenerator"
-import { VMProgram } from "../../../jacdac-ts/src/vm/VMir"
+import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import WatchValueField from "./fields/WatchValueField"
 
 // overrides blockly emboss filter for svg elements
