@@ -6,13 +6,32 @@ export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 export interface InputDefinition {
     type: string
     name?: string
-    variable?: string
-    variableTypes?: string[]
-    defaultType?: string
+}
+
+export interface ValueInputDefinition extends InputDefinition {
+    type: "input_value"
     check?: string | string[]
 }
 
+export interface StatementInputDefinition extends InputDefinition {
+    type: "input_statement"
+    check?: string | string[]
+}
+
+export interface VariableInputDefinition extends InputDefinition {
+    type: "field_variable"
+    variable?: string
+    variableTypes?: string[]
+    defaultType?: string
+}
+
+export interface TextInputDefinition extends InputDefinition {
+    type: "field_text"
+    text?: string
+}
+
 export interface OptionsInputDefinition extends InputDefinition {
+    type: "field_dropdown"
     options?: [string, string][]
 }
 

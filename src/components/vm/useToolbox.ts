@@ -74,8 +74,11 @@ import {
     ServiceBlockDefinition,
     ServiceBlockDefinitionFactory,
     SET_STATUS_LIGHT_BLOCK,
+    StatementInputDefinition,
     ToolboxConfiguration,
     TWIN_BLOCK,
+    ValueInputDefinition,
+    VariableInputDefinition,
     WAIT_BLOCK,
     WATCH_BLOCK,
 } from "./toolbox"
@@ -176,7 +179,6 @@ const deviceTwinContentType = "DeviceTwinContent"
 const deviceTwinCommonOptionType = "DeviceTwinCommonOption"
 const deviceTwinPropertyOptionType = "DeviceTwinPropertyOption"
 const deviceTwinTelemetryOptionType = "DeviceTwinTelemetryOption"
-const deviceTwinSchemaType = "DeviceTwinSchema"
 const deviceTwinStatementType = [deviceTwinContentType]
 const deviceTwinCommonOptionStatementType = [deviceTwinCommonOptionType]
 const deviceTwinPropertyOptionStatementType = [
@@ -266,7 +268,9 @@ function loadBlocks(
               })
     const variableName = (srv: jdspec.ServiceSpec) =>
         `${humanify(srv.camelName).toLowerCase()} 1`
-    const fieldVariable = (service: jdspec.ServiceSpec): InputDefinition => ({
+    const fieldVariable = (
+        service: jdspec.ServiceSpec
+    ): VariableInputDefinition => ({
         type: "field_variable",
         name: "role",
         variable: variableName(service),
@@ -921,7 +925,7 @@ function loadBlocks(
             type: WAIT_BLOCK,
             message0: "wait %1 s",
             args0: [
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "time",
                     check: "Number",
@@ -939,7 +943,7 @@ function loadBlocks(
             type: CONNECTION_BLOCK,
             message0: "when %1 %2",
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "role",
                     variable: "any",
@@ -970,7 +974,7 @@ function loadBlocks(
             type: CONNECTED_BLOCK,
             message0: "%1 connected",
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "role",
                     variable: "any",
@@ -993,7 +997,7 @@ function loadBlocks(
             type: SET_STATUS_LIGHT_BLOCK,
             message0: "set %1 status light to %2",
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "role",
                     variable: "all",
@@ -1003,7 +1007,7 @@ function loadBlocks(
                     ],
                     defaultType: "client",
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "color",
                     check: "Number",
@@ -1027,7 +1031,7 @@ function loadBlocks(
             type: TWIN_BLOCK,
             message0: `view %1 %2 %3`,
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "role",
                     variable: "none",
@@ -1056,7 +1060,7 @@ function loadBlocks(
             type: INSPECT_BLOCK,
             message0: `inspect %1 %2 %3`,
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "role",
                     variable: "none",
@@ -1127,7 +1131,7 @@ function loadBlocks(
             type: "jacdac_math_arithmetic",
             message0: "%1 %2 %3",
             args0: [
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "A",
                     check: "Number",
@@ -1142,7 +1146,7 @@ function loadBlocks(
                         ["%{BKY_MATH_DIVISION_SYMBOL}", "DIVIDE"],
                     ],
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "B",
                     check: "Number",
@@ -1167,7 +1171,7 @@ function loadBlocks(
                         ["%{BKY_MATH_SINGLE_OP_ABSOLUTE}", "ABS"],
                     ],
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "NUM",
                     check: "Number",
@@ -1191,12 +1195,12 @@ function loadBlocks(
             type: "jacdac_math_random_range",
             message0: "random from %1 to %2",
             args0: [
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "min",
                     check: "Number",
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "max",
                     check: "Number",
@@ -1211,27 +1215,27 @@ function loadBlocks(
             type: "jacdac_math_map",
             message0: "map %1 from [%2, %3] to [%4, %5]",
             args0: [
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "value",
                     check: "Number",
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "fromMin",
                     check: "Number",
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "fromMax",
                     check: "Number",
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "toMin",
                     check: "Number",
                 },
-                {
+                <ValueInputDefinition>{
                     type: "input_value",
                     name: "toMax",
                     check: "Number",
@@ -1263,14 +1267,14 @@ function loadBlocks(
             type: DEVICE_TWIN_PROPERTY_BLOCK,
             message0: "property %1 %2",
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "name",
                     variable: "property 1",
                     variableTypes: [DEVICE_TWIN_PROPERTY_TYPE],
                     defaultType: DEVICE_TWIN_PROPERTY_TYPE,
                 },
-                {
+                <StatementInputDefinition>{
                     type: "input_statement",
                     name: "options",
                     check: deviceTwinPropertyOptionStatementType,
@@ -1286,14 +1290,14 @@ function loadBlocks(
             type: DEVICE_TWIN_TELEMETRY_BLOCK,
             message0: "telemetry %1 %2",
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "name",
                     variable: "telemetry 1",
                     variableTypes: [DEVICE_TWIN_TELEMETRY_TYPE],
                     defaultType: DEVICE_TWIN_TELEMETRY_TYPE,
                 },
-                {
+                <StatementInputDefinition>{
                     type: "input_statement",
                     name: "options",
                     check: deviceTwinTelemetryOptionStatementType,
@@ -1327,10 +1331,10 @@ function loadBlocks(
         },
         {
             kind: "block",
-            type: "device_twin_option_schema_value",
-            message0: "%1: %2 = %3 (%4)",
+            type: "device_twin_option_value",
+            message0: "value %1 %2 %3 %4",
             args0: [
-                {
+                <VariableInputDefinition>{
                     type: "field_variable",
                     name: "variable",
                     variable: "value 1",
@@ -1344,14 +1348,14 @@ function loadBlocks(
                         unit => [unit, unit]
                     ),
                 },
-                {
-                    type: "input_value",
-                    name: "value",
-                },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
                     name: "unit",
                     options: DTDLUnits().map(unit => [unit, unit]),
+                },
+                {
+                    type: "input_value",
+                    name: "value",
                 },
             ],
             previousStatement: deviceTwinCommonOptionStatementType,
