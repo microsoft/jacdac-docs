@@ -1,4 +1,4 @@
-import Blockly, { Block } from "blockly"
+import Blockly from "blockly"
 import { useEffect, useMemo } from "react"
 import {
     BuzzerCmd,
@@ -86,6 +86,7 @@ import JDomTreeField from "./fields/JDomTreeField"
 import { WorkspaceJSON } from "./jsongenerator"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import WatchValueField from "./fields/WatchValueField"
+import { DTDLUnits } from "../../../jacdac-ts/src/azure-iot/dtdl"
 
 // overrides blockly emboss filter for svg elements
 Blockly.BlockSvg.prototype.setHighlighted = function (highlighted) {
@@ -170,7 +171,21 @@ function createBlockTheme(theme: Theme) {
 }
 
 const codeStatementType = "Code"
-const deviceTwinStatementType = ["DeviceTwinContent", "Comment"]
+const deviceTwinContentType = "DeviceTwinContent"
+const deviceTwinCommonOptionType = "DeviceTwinCommonOption"
+const deviceTwinPropertyOptionType = "DeviceTwinPropertyOption"
+const deviceTwinTelemetryOptionType = "DeviceTwinTelemetryOption"
+const deviceTwinSchemaType = "DeviceTwinSchema"
+const deviceTwinStatementType = [deviceTwinContentType]
+const deviceTwinCommonOptionStatementType = [deviceTwinCommonOptionType]
+const deviceTwinPropertyOptionStatementType = [
+    deviceTwinPropertyOptionType,
+    ...deviceTwinCommonOptionStatementType,
+]
+const deviceTwinTelemetryOptionStatementType = [
+    deviceTwinTelemetryOptionType,
+    ...deviceTwinCommonOptionStatementType,
+]
 
 function loadBlocks(
     serviceColor: (srv: jdspec.ServiceSpec) => string,
@@ -1245,7 +1260,7 @@ function loadBlocks(
         {
             kind: "block",
             type: DEVICE_TWIN_PROPERTY_BLOCK,
-            message0: "property %1 = %2 unit %3 %4 writeable %5",
+            message0: "property %1 %2",
             args0: [
                 {
                     type: "field_variable",
@@ -1255,39 +1270,20 @@ function loadBlocks(
                     defaultType: DEVICE_TWIN_PROPERTY_TYPE,
                 },
                 {
-                    type: "input_value",
-                    name: "value",
-                },
-                <OptionsInputDefinition>{
-                    type: "field_dropdown",
-                    name: "unit",
-                    options: [
-                        ["degC", "degreeCelsius"],
-                        ["degF", "degreeFahrenheit"],
-                    ],
-                },
-                {
-                    type: "input_dummy",
-                },
-                <OptionsInputDefinition>{
-                    type: "field_dropdown",
-                    name: "writeable",
-                    options: [
-                        ["yes", "on"],
-                        ["no", "off"],
-                    ],
+                    type: "input_statement",
+                    name: "options",
+                    check: deviceTwinPropertyOptionStatementType,
                 },
             ],
             previousStatement: deviceTwinStatementType,
             nextStatement: deviceTwinStatementType,
             template: "dtdl",
             colour: deviceTwinColor,
-            inputsInline: false,
         },
         {
             kind: "block",
             type: DEVICE_TWIN_TELEMETRY_BLOCK,
-            message0: "telemetry %1 schema %2",
+            message0: "telemetry %1 %2",
             args0: [
                 {
                     type: "field_variable",
@@ -1296,47 +1292,91 @@ function loadBlocks(
                     variableTypes: [DEVICE_TWIN_TELEMETRY_TYPE],
                     defaultType: DEVICE_TWIN_TELEMETRY_TYPE,
                 },
-                <OptionsInputDefinition>{
-                    type: "field_dropdown",
-                    name: "schema",
-                    options: [
-                        ["double", "double"],
-                        ["string", "string"],
-                    ],
+                {
+                    type: "input_statement",
+                    name: "options",
+                    check: deviceTwinTelemetryOptionStatementType,
                 },
             ],
             previousStatement: deviceTwinStatementType,
             nextStatement: deviceTwinStatementType,
             template: "dtdl",
             colour: deviceTwinColor,
+        },
+        // options
+        {
+            kind: "block",
+            type: "device_twin_option_unit",
+            message0: "unit %1",
+            args0: [
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "unit",
+                    options: DTDLUnits().map(unit => [unit, unit]),
+                },
+            ],
+            previousStatement: deviceTwinPropertyOptionStatementType,
+            nextStatement: deviceTwinPropertyOptionStatementType,
+            template: "dtdlOption",
+            colour: deviceTwinColor,
             inputsInline: false,
         },
         {
             kind: "block",
-            type: "device_twin_set_comment",
-            message0: "comment %1 %2 %3",
+            type: "device_twin_option_writeable",
+            message0: "writeable %1",
             args0: [
-                {
-                    type: "field_variable",
-                    name: "name",
-                    variable: "property 1",
-                    variableTypes: [
-                        DEVICE_TWIN_PROPERTY_TYPE,
-                        DEVICE_TWIN_TELEMETRY_TYPE,
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "value",
+                    options: [
+                        ["yes", "on"],
+                        ["no", "off"],
                     ],
-                    defaultType: DEVICE_TWIN_TELEMETRY_TYPE,
+                },
+            ],
+            previousStatement: deviceTwinPropertyOptionStatementType,
+            nextStatement: deviceTwinPropertyOptionStatementType,
+            template: "dtdlOption",
+            colour: deviceTwinColor,
+            inputsInline: false,
+        },
+        {
+            kind: "block",
+            type: "device_twin_option_schema_primitive",
+            message0: "value: %1 = %2",
+            args0: [
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "type",
+                    options: ["float", "boolean", "string", "integer"].map(
+                        unit => [unit, unit]
+                    ),
                 },
                 {
-                    type: "input_dummy",
+                    type: "input_value",
+                    name: "value",
                 },
+            ],
+            previousStatement: deviceTwinCommonOptionStatementType,
+            nextStatement: deviceTwinCommonOptionStatementType,
+            template: "dtdlOption",
+            colour: deviceTwinColor,
+            inputsInline: false,
+        },
+        {
+            kind: "block",
+            type: "device_twin_option_set_comment",
+            message0: "comment %1",
+            args0: [
                 {
                     type: "field_multilinetext",
                     name: "text",
                 },
             ],
-            previousStatement: deviceTwinStatementType,
-            nextStatement: deviceTwinStatementType,
-            template: "dtdl",
+            previousStatement: deviceTwinCommonOptionStatementType,
+            nextStatement: deviceTwinCommonOptionStatementType,
+            template: "dtdlOption",
             colour: deviceTwinColor,
             inputsInline: false,
         },

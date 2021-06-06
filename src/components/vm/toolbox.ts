@@ -64,6 +64,7 @@ export type BlockTemplate =
     | "connection"
     | "connected"
     | "dtdl"
+    | "dtdlOption"
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
