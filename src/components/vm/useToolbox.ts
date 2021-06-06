@@ -59,6 +59,7 @@ import {
     DEVICE_TWIN_PROPERTY_TYPE,
     DEVICE_TWIN_TELEMETRY_BLOCK,
     DEVICE_TWIN_TELEMETRY_TYPE,
+    DEVICE_TWIN_VALUE_TYPE,
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
@@ -1306,23 +1307,6 @@ function loadBlocks(
         // options
         {
             kind: "block",
-            type: "device_twin_option_unit",
-            message0: "unit %1",
-            args0: [
-                <OptionsInputDefinition>{
-                    type: "field_dropdown",
-                    name: "unit",
-                    options: DTDLUnits().map(unit => [unit, unit]),
-                },
-            ],
-            previousStatement: deviceTwinPropertyOptionStatementType,
-            nextStatement: deviceTwinPropertyOptionStatementType,
-            template: "dtdlOption",
-            colour: deviceTwinColor,
-            inputsInline: false,
-        },
-        {
-            kind: "block",
             type: "device_twin_option_writeable",
             message0: "writeable %1",
             args0: [
@@ -1343,9 +1327,16 @@ function loadBlocks(
         },
         {
             kind: "block",
-            type: "device_twin_option_schema_primitive",
-            message0: "value: %1 = %2",
+            type: "device_twin_option_schema_value",
+            message0: "%1: %2 = %3 (%4)",
             args0: [
+                {
+                    type: "field_variable",
+                    name: "variable",
+                    variable: "value 1",
+                    variableTypes: [DEVICE_TWIN_VALUE_TYPE],
+                    defaultType: DEVICE_TWIN_VALUE_TYPE,
+                },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
                     name: "type",
@@ -1356,6 +1347,11 @@ function loadBlocks(
                 {
                     type: "input_value",
                     name: "value",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "unit",
+                    options: DTDLUnits().map(unit => [unit, unit]),
                 },
             ],
             previousStatement: deviceTwinCommonOptionStatementType,

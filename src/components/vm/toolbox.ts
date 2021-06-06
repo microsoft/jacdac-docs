@@ -146,6 +146,7 @@ export const DEVICE_TWIN_TELEMETRY_BLOCK = "device_twin_telemetry"
 
 export const DEVICE_TWIN_PROPERTY_TYPE = "DeviceTwinProperty"
 export const DEVICE_TWIN_TELEMETRY_TYPE = "DeviceTwinTelemetry"
+export const DEVICE_TWIN_VALUE_TYPE = "DeviceTwinValue"
 
 export interface CategoryDefinition {
     kind: "category"
