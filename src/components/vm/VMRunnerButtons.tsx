@@ -5,10 +5,10 @@ import { VMProgramRunner, VMStatus } from "../../../jacdac-ts/src/vm/runner"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 import StopIcon from "@material-ui/icons/Stop"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
-import { Chip, Grid, Typography } from "@material-ui/core"
+import { Chip, Grid } from "@material-ui/core"
 import PauseIcon from "@material-ui/icons/Pause"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
-import { VM_BREAKPOINT } from "../../../jacdac-ts/src/vm/utils"
+import { VM_EVENT, VMCode } from "../../../jacdac-ts/src/vm/events"
 import { VMHandler, VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import { WorkspaceSvg } from "blockly"
 import PlayForWorkIcon from "@material-ui/icons/PlayForWork"
@@ -101,10 +101,12 @@ export default function VMRunnerButtons(props: {
     useEffect(
         () =>
             runner?.subscribe(
-                VM_BREAKPOINT,
-                (_: VMHandler, sourceId?: string) => {
-                    console.log("breakpoint", { sourceId, mounted: mounted() })
-                    if (mounted()) setBreakpoint(sourceId)
+                VM_EVENT,
+                (code: VMCode, _?: VMHandler, sourceId?: string) => {
+                    if (code === VMCode.Breakpoint) {
+                        console.log("breakpoint", { sourceId, mounted: mounted() })
+                        if (mounted()) setBreakpoint(sourceId)
+                    }
                 }
             ),
         [runner]
