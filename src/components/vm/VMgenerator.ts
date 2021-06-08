@@ -449,47 +449,6 @@ export default function workspaceJSONToVMProgram(
                         topErrors = errors
                         break
                     }
-                    case "event": {
-                        const { value: role } = inputs[0].fields["role"]
-                        const { value: eventName } = inputs[0].fields["event"]
-                        command = {
-                            type: "CallExpression",
-                            arguments: [
-                                toMemberExpression(
-                                    role.toString(),
-                                    eventName.toString()
-                                ),
-                            ],
-                            callee: toIdentifier("awaitEvent"),
-                        }
-                        topEvent = {
-                            role: role.toString(),
-                            event: eventName.toString(),
-                        }
-                        break
-                    }
-                    case "register_change_event": {
-                        const { value: role } = inputs[0].fields["role"]
-                        const { register } =
-                            definition as RegisterBlockDefinition
-                        const { expr, errors } = blockToExpression(
-                            undefined,
-                            inputs[0].child
-                        )
-                        command = {
-                            type: "CallExpression",
-                            arguments: [
-                                toMemberExpression(
-                                    role.toString(),
-                                    register.name
-                                ),
-                                expr,
-                            ],
-                            callee: toIdentifier("awaitChange"),
-                        }
-                        topErrors = errors
-                        break
-                    }
                     default: {
                         console.warn(
                             `unsupported handler template ${template} for ${type}`,
