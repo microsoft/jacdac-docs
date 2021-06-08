@@ -892,12 +892,12 @@ export class ServicesBlockDomainSpecificLanguage
                     block => block.service === service
                 ),
             }))
-            .map<CategoryDefinition>(({ service }) => ({
+            .map<CategoryDefinition>(({ service, serviceBlocks }) => ({
                 kind: "category",
                 name: service.name,
                 colour: serviceColor(service),
                 contents: [
-                    ...this._serviceBlocks.map<BlockDefinition>(block => ({
+                    ...serviceBlocks.map<BlockDefinition>(block => ({
                         kind: "block",
                         type: block.type,
                         values: block.values,
