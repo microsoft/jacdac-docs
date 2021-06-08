@@ -55,10 +55,6 @@ import {
     CONNECTED_BLOCK,
     CONNECTION_BLOCK,
     CustomBlockDefinition,
-    DEVICE_TWIN_DEFINITION_BLOCK,
-    DEVICE_TWIN_PROPERTY_BLOCK,
-    DEVICE_TWIN_PROPERTY_TYPE,
-    DEVICE_TWIN_VALUE_TYPE,
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
@@ -73,7 +69,6 @@ import {
     ServiceBlockDefinition,
     ServiceBlockDefinitionFactory,
     SET_STATUS_LIGHT_BLOCK,
-    StatementInputDefinition,
     TextInputDefinition,
     ToolboxConfiguration,
     ValueInputDefinition,
@@ -85,7 +80,6 @@ import ServoAngleField from "./fields/ServoAngleField"
 import LEDColorField from "./fields/LEDColorField"
 import { WorkspaceJSON } from "./jsongenerator"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
-import { DTDLUnits } from "../../../jacdac-ts/src/azure-iot/dtdl"
 import DslContext from "./dsl/DslContext"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 
@@ -105,7 +99,6 @@ type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
     serviceBlocks: ServiceBlockDefinition[]
     eventFieldBlocks: EventFieldDefinition[]
-    deviceTwinsBlocks: BlockDefinition[]
     services: jdspec.ServiceSpec[]
 }
 
@@ -157,7 +150,6 @@ function createBlockTheme(theme: Theme) {
     const sensorColor = theme.palette.success.main
     const otherColor = theme.palette.info.main
     const commandColor = theme.palette.warning.main
-    const deviceTwinColor = theme.palette.error.light
     const serviceColor = (srv: jdspec.ServiceSpec) =>
         isSensor(srv) ? sensorColor : otherColor
     return {
@@ -165,26 +157,14 @@ function createBlockTheme(theme: Theme) {
         sensorColor,
         commandColor,
         otherColor,
-        deviceTwinColor,
     }
 }
-
-const deviceTwinContentType = "DeviceTwinContent"
-const deviceTwinCommonOptionType = "DeviceTwinCommonOption"
-const deviceTwinPropertyOptionType = "DeviceTwinPropertyOption"
-const deviceTwinStatementType = [deviceTwinContentType]
-const deviceTwinCommonOptionStatementType = [deviceTwinCommonOptionType]
-const deviceTwinPropertyOptionStatementType = [
-    deviceTwinPropertyOptionType,
-    ...deviceTwinCommonOptionStatementType,
-]
 
 function loadBlocks(
     dsls: BlockDomainSpecificLanguage[],
     theme: Theme,
     serviceColor: (srv: jdspec.ServiceSpec) => string,
-    commandColor: string,
-    deviceTwinColor: string
+    commandColor: string
 ): CachedBlockDefinitions {
     // blocks
     const customShadows = [
@@ -1212,92 +1192,6 @@ function loadBlocks(
         },
     ]
 
-    const deviceTwinsBlocks: BlockDefinition[] = [
-        {
-            kind: "block",
-            type: DEVICE_TWIN_DEFINITION_BLOCK,
-            message0: "device twin id",
-            args0: [],
-            inputsInline: true,
-            nextStatement: deviceTwinStatementType,
-            template: "dtdl",
-            colour: deviceTwinColor,
-        },
-        {
-            kind: "block",
-            type: DEVICE_TWIN_PROPERTY_BLOCK,
-            message0: "property %1 %2 %3",
-            args0: [
-                <VariableInputDefinition>{
-                    type: "field_variable",
-                    name: "name",
-                    variable: "property 1",
-                    variableTypes: [DEVICE_TWIN_PROPERTY_TYPE],
-                    defaultType: DEVICE_TWIN_PROPERTY_TYPE,
-                },
-                {
-                    type: "input_dummy",
-                },
-                <StatementInputDefinition>{
-                    type: "input_statement",
-                    name: "options",
-                    check: deviceTwinPropertyOptionStatementType,
-                },
-            ],
-            previousStatement: deviceTwinStatementType,
-            nextStatement: deviceTwinStatementType,
-            template: "dtdl",
-            colour: deviceTwinColor,
-            inputsInline: false,
-        },
-        // options
-        {
-            kind: "block",
-            type: "device_twin_option_property_field",
-            message0: "field %1 %2 %3",
-            args0: [
-                <VariableInputDefinition>{
-                    type: "field_variable",
-                    name: "variable",
-                    variable: "value 1",
-                    variableTypes: [DEVICE_TWIN_VALUE_TYPE],
-                    defaultType: DEVICE_TWIN_VALUE_TYPE,
-                },
-                <OptionsInputDefinition>{
-                    type: "field_dropdown",
-                    name: "unit",
-                    options: DTDLUnits().map(unit => [unit, unit]),
-                },
-                {
-                    type: "input_value",
-                    name: "value",
-                },
-            ],
-            previousStatement: deviceTwinCommonOptionStatementType,
-            nextStatement: deviceTwinCommonOptionStatementType,
-            template: "dtdlOption",
-            colour: deviceTwinColor,
-            inputsInline: false,
-        },
-        // events
-        {
-            kind: "block",
-            type: "device_twin_property_change",
-            message0: "on property %1 change",
-            args0: [
-                <VariableInputDefinition>{
-                    type: "field_variable",
-                    name: "name",
-                    variable: "property 1",
-                    variableTypes: [DEVICE_TWIN_PROPERTY_TYPE],
-                    defaultType: DEVICE_TWIN_PROPERTY_TYPE,
-                },
-            ],
-            nextStatement: CODE_STATEMENT_TYPE,
-            colour: deviceTwinColor,
-        },
-    ]
-
     const dslsBlocks = arrayConcatMany(
         dsls.map(dsl =>
             dsl.createBlocks({ theme, supportedServices }).map(b => {
@@ -1313,7 +1207,6 @@ function loadBlocks(
         ...runtimeBlocks,
         ...shadowBlocks,
         ...mathBlocks,
-        ...deviceTwinsBlocks,
         ...dslsBlocks,
     ]
 
@@ -1343,7 +1236,6 @@ function loadBlocks(
         blocks,
         serviceBlocks,
         eventFieldBlocks,
-        deviceTwinsBlocks,
         services,
     }
 }
@@ -1393,20 +1285,11 @@ export default function useToolbox(props: {
 
     const { dsls } = useContext(DslContext)
     const theme = useTheme()
-    const { serviceColor, commandColor, deviceTwinColor } =
-        createBlockTheme(theme)
-    const { serviceBlocks, eventFieldBlocks, deviceTwinsBlocks, services } =
-        useMemo(
-            () =>
-                loadBlocks(
-                    dsls,
-                    theme,
-                    serviceColor,
-                    commandColor,
-                    deviceTwinColor
-                ),
-            [theme, dsls]
-        )
+    const { serviceColor, commandColor } = createBlockTheme(theme)
+    const { serviceBlocks, eventFieldBlocks, services } = useMemo(
+        () => loadBlocks(dsls, theme, serviceColor, commandColor),
+        [theme, dsls]
+    )
     const blockServices =
         program?.roles.map(r => r.serviceShortId) ||
         source?.variables.map(v => v.type) ||
@@ -1605,21 +1488,6 @@ export default function useToolbox(props: {
         custom: "VARIABLE",
     }
 
-    const deviceTwinsCategory: CategoryDefinition = {
-        kind: "category",
-        name: "Device Twin",
-        colour: deviceTwinColor,
-        contents: [
-            ...deviceTwinsBlocks.map(
-                ({ type }) =>
-                    <BlockDefinition>{
-                        kind: "block",
-                        type,
-                    }
-            ),
-        ],
-    }
-
     const dslsCategories = arrayConcatMany(
         dsls.map(dsl => dsl.createCategory({ theme, source }))
     )
@@ -1640,10 +1508,6 @@ export default function useToolbox(props: {
             logicCategory,
             mathCategory,
             variablesCategory,
-            <SeparatorDefinition>{
-                kind: "sep",
-            },
-            deviceTwinsCategory,
             <SeparatorDefinition>{
                 kind: "sep",
             },
