@@ -81,13 +81,10 @@ export type BlockTemplate =
     | CommandTemplate
     | CustomTemplate
     | "shadow"
-    | "twin"
-    | "watch"
     | "every"
     | "connection"
     | "connected"
-    | "dtdl"
-    | "dtdlOption"
+    | "meta"
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
@@ -102,6 +99,7 @@ export interface BlockDefinition extends BlockReference {
     output?: string
     extensions?: string[]
     template?: BlockTemplate
+    dsl?: string
 }
 
 export interface ButtonDefinition {
@@ -162,18 +160,16 @@ export const WATCH_BLOCK = "jacdac_watch"
 export const REPEAT_EVERY_BLOCK = "jacdac_repeat_every"
 export const CONNECTION_BLOCK = "jacdac_connection"
 export const CONNECTED_BLOCK = "jacdac_connected"
-export const LOG_BLOCK = "jacdac_custom_logger_log"
 
-export const DEVICE_TWIN_DEFINITION_BLOCK = "device_twin_definition"
-export const DEVICE_TWIN_DESIRED_PROPERTY_BLOCK = "device_twin_desired_property"
-export const DEVICE_TWIN_REPORTED_PROPERTY_BLOCK = "device_twin_reported_property"
+export const PRIMITIVE_TYPES = ["String", "Boolean", "Number"]
+export const BUILTIN_TYPES = ["", ...PRIMITIVE_TYPES]
 
-export const DEVICE_TWIN_PROPERTY_TYPE = "DeviceTwinProperty"
-export const DEVICE_TWIN_VALUE_TYPE = "DeviceTwinValue"
+export const CODE_STATEMENT_TYPE = "Code"
 
 export interface CategoryDefinition {
     kind: "category"
     name: string
+    order?: number
     custom?: string
     colour?: string
     categorystyle?: string

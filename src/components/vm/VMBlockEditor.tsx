@@ -28,6 +28,7 @@ import {
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import { withPrefix } from "gatsby"
+import DslContext from "./dsl/DslContext"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -66,6 +67,7 @@ export default function VMBlockEditor(props: {
         roleManager,
         workspaceRef,
     } = props
+    const { dsls } = useContext(DslContext)
     const classes = useStyles()
     const { darkMode } = useContext(DarkModeContext)
     const { setError } = useContext(AppContext)
@@ -167,13 +169,16 @@ export default function VMBlockEditor(props: {
         // save json
         if (onJSONChange || onVMProgramChange) {
             // emit json
-            const newSource = domToJSON(workspace)
+            const newSource = domToJSON(workspace, dsls)
             if (JSON.stringify(newSource) !== JSON.stringify(source)) {
                 setSource(newSource)
                 onJSONChange?.(newSource)
                 if (onVMProgramChange) {
                     try {
-                        const newProgram = workspaceJSONToVMProgram(newSource)
+                        const newProgram = workspaceJSONToVMProgram(
+                            newSource,
+                            dsls
+                        )
                         if (
                             JSON.stringify(newProgram) !==
                             JSON.stringify(program)
@@ -188,7 +193,7 @@ export default function VMBlockEditor(props: {
                 }
             }
         }
-    }, [workspace, xml])
+    }, [dsls, workspace, xml])
 
     // apply errors
     useEffect(() => {

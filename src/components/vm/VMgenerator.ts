@@ -16,6 +16,7 @@ import {
 
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
 import {
+    BUILTIN_TYPES,
     CommandBlockDefinition,
     EventFieldDefinition,
     RegisterBlockDefinition,
@@ -23,6 +24,7 @@ import {
     WAIT_BLOCK,
 } from "./toolbox"
 import Blockly from "blockly"
+import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 const ops = {
     AND: "&&",
@@ -40,21 +42,20 @@ const ops = {
     MINUS: "-",
 }
 
-const BUILTIN_TYPES = ["", "Boolean", "Number", "String"]
+export interface ExpressionWithErrors {
+    expr: jsep.Expression
+    errors: VMError[]
+}
 
 export default function workspaceJSONToVMProgram(
-    workspace: WorkspaceJSON
+    workspace: WorkspaceJSON,
+    dsls: BlockDomainSpecificLanguage[]
 ): VMProgram {
-    console.debug(`compile vm`, { workspace })
+    console.debug(`compile vm`, { workspace, dsls })
 
     const roles: VMRole[] = workspace.variables
         .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
         .map(v => ({ role: v.name, serviceShortId: v.type }))
-
-    type ExpressionWithErrors = {
-        expr: jsep.Expression
-        errors: VMError[]
-    }
 
     class EmptyExpression extends Error {}
 
@@ -252,7 +253,7 @@ export default function workspaceJSONToVMProgram(
     ): CmdWithErrors => {
         const { type, inputs } = block
         switch (type) {
-            case WAIT_BLOCK: 
+            case WAIT_BLOCK:
                 return makeWait(event, block)
             case "dynamic_if": {
                 const thenHandler: VMHandler = {
@@ -416,78 +417,90 @@ export default function workspaceJSONToVMProgram(
         let command: jsep.CallExpression = undefined
         let topEvent: RoleEvent = undefined
         let topErrors: VMError[] = []
-        const def = resolveServiceBlockDefinition(type)
-        assert(!!def)
-        const { template } = def
+        const definition = resolveServiceBlockDefinition(type)
+        assert(!!definition)
+        const { template, dsl: dslName } = definition
+        const dsl = dslName && dsls?.find(d => d.id === dslName)
+        console.log(`template`, { template, dsl, dslName, dsls })
+
         try {
-            switch (template) {
-                case "twin":
-                    break // ignore
-                case "every": {
-                    const { cmd, errors} = makeWait(undefined, top)
-                    command = (cmd as VMCommand).command
-                    topErrors = errors
-                    break
-                }
-                case "event": {
-                    const { value: role } = inputs[0].fields["role"]
-                    const { value: eventName } = inputs[0].fields["event"]
-                    command = {
-                        type: "CallExpression",
-                        arguments: [
-                            toMemberExpression(
-                                role.toString(),
-                                eventName.toString()
-                            ),
-                        ],
-                        callee: toIdentifier("awaitEvent"),
+            if (dsl?.compileToVM) {
+                console.log(`compile to vm`, { dsl, top, definition })
+                const { expression, errors, event } =
+                    dsl?.compileToVM({
+                        block: top,
+                        definition,
+                        blockToExpression,
+                    }) || {}
+                command = expression as jsep.CallExpression
+                topErrors = errors
+                topEvent = event
+            }
+
+            // if dsl didn't compile anything try again
+            if (!command && !topErrors?.length) {
+                switch (template) {
+                    case "meta": {
+                        break
                     }
-                    topEvent = {
-                        role: role.toString(),
-                        event: eventName.toString(),
+                    case "every": {
+                        const { cmd, errors } = makeWait(undefined, top)
+                        command = (cmd as VMCommand).command
+                        topErrors = errors
+                        break
                     }
-                    break
-                }
-                case "register_change_event": {
-                    const { value: role } = inputs[0].fields["role"]
-                    const { register } = def as RegisterBlockDefinition
-                    const { expr, errors } = blockToExpression(
-                        undefined,
-                        inputs[0].child
-                    )
-                    command = {
-                        type: "CallExpression",
-                        arguments: [
-                            toMemberExpression(role.toString(), register.name),
-                            expr,
-                        ],
-                        callee: toIdentifier("awaitChange"),
+                    case "event": {
+                        const { value: role } = inputs[0].fields["role"]
+                        const { value: eventName } = inputs[0].fields["event"]
+                        command = {
+                            type: "CallExpression",
+                            arguments: [
+                                toMemberExpression(
+                                    role.toString(),
+                                    eventName.toString()
+                                ),
+                            ],
+                            callee: toIdentifier("awaitEvent"),
+                        }
+                        topEvent = {
+                            role: role.toString(),
+                            event: eventName.toString(),
+                        }
+                        break
                     }
-                    topErrors = errors
-                    break
-                }
-                case "watch": {
-                    const { expr, errors } = blockToExpression(
-                        undefined,
-                        inputs[0].child
-                    )
-                    command = {
-                        type: "CallExpression",
-                        arguments: [expr],
-                        callee: toIdentifier("watch"),
+                    case "register_change_event": {
+                        const { value: role } = inputs[0].fields["role"]
+                        const { register } =
+                            definition as RegisterBlockDefinition
+                        const { expr, errors } = blockToExpression(
+                            undefined,
+                            inputs[0].child
+                        )
+                        command = {
+                            type: "CallExpression",
+                            arguments: [
+                                toMemberExpression(
+                                    role.toString(),
+                                    register.name
+                                ),
+                                expr,
+                            ],
+                            callee: toIdentifier("awaitChange"),
+                        }
+                        topErrors = errors
+                        break
                     }
-                    topErrors = errors
-                    break
-                }
-                default: {
-                    console.warn(
-                        `unsupported handler template ${template} for ${type}`,
-                        { top }
-                    )
-                    break
+                    default: {
+                        console.warn(
+                            `unsupported handler template ${template} for ${type}`,
+                            { top }
+                        )
+                        break
+                    }
                 }
             }
         } catch (e) {
+            console.debug(e)
             if (e instanceof EmptyExpression) {
                 command = nop
                 topErrors = []
@@ -504,7 +517,7 @@ export default function workspaceJSONToVMProgram(
                     command,
                 } as VMBase,
             ],
-            errors: topErrors,
+            errors: topErrors || [],
         }
 
         addCommands(topEvent, top.children, handler)
