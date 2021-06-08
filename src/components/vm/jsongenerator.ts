@@ -1,7 +1,7 @@
 import Blockly from "blockly"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import { SMap, toMap } from "../../../jacdac-ts/src/jdom/utils"
-import { BlockDomainSpecificLanguage } from "./dsl/DslContext"
+import BlockDomainSpecificLanguage from "./dsl/dsl"
 import ReactField from "./fields/ReactField"
 import { resolveServiceBlockDefinition } from "./toolbox"
 
@@ -142,8 +142,12 @@ export function domToJSON(
             const definition = resolveServiceBlockDefinition(block.type)
             const dsl =
                 definition?.dsl && dsls.find(d => d.id === definition.dsl)
-            if (dsl?.convertToJSON)
-                return dsl.convertToJSON({ workspace, block, definition })
+            const dslConverted = dsl?.convertToJSON?.({
+                workspace,
+                block,
+                definition,
+            })
+            if (dslConverted) return dslConverted
 
             // dump object
             const value = builtins[block.type]?.(block)
