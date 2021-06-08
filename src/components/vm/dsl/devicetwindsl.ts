@@ -37,7 +37,7 @@ class DeviceTwinBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: DEVICE_TWIN_DEFINITION_BLOCK,
-                message0: "device twin id",
+                message0: "device twin",
                 args0: [],
                 inputsInline: true,
                 nextStatement: deviceTwinStatementType,
