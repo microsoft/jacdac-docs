@@ -960,9 +960,10 @@ export class ServicesBlockDomainSpecificLanguage
 
     compileToVM(options: CompileToVMOptions): CompileToVMResult {
         const { block, definition, blockToExpression } = options
-        const { inputs, type } = block
+        const { inputs } = block
+        const { template } = definition
 
-        switch (type) {
+        switch (template) {
             case "event": {
                 const { value: role } = inputs[0].fields["role"]
                 const { value: eventName } = inputs[0].fields["event"]
@@ -1002,9 +1003,9 @@ export class ServicesBlockDomainSpecificLanguage
                     errors,
                 }
             }
-            default:
-                return undefined
         }
+
+        return undefined
     }
 }
 const servicesDSL = new ServicesBlockDomainSpecificLanguage()
