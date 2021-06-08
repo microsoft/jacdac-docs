@@ -9,11 +9,11 @@ import {
     VariableInputDefinition,
     WATCH_BLOCK,
 } from "../toolbox"
-import { BlockDomainSpecificLanguage } from "./DslContext"
+import BlockDomainSpecificLanguage from "./dsl"
 
 const colour = "#888"
 
-export const toolsDSL: BlockDomainSpecificLanguage = {
+const toolsDSL: BlockDomainSpecificLanguage = {
     id: "tools",
     createBlocks: ({ supportedServices }) => [
         {
@@ -115,3 +115,5 @@ export const toolsDSL: BlockDomainSpecificLanguage = {
 
     convertToJSON: () => undefined,
 }
+
+export default toolsDSL

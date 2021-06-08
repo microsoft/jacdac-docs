@@ -1,5 +1,5 @@
 import Blockly from "blockly"
-import React, { useContext, useEffect, useMemo } from "react"
+import { useContext, useEffect, useMemo } from "react"
 import {
     BuzzerCmd,
     JoystickReg,
@@ -49,6 +49,7 @@ import {
     BlockReference,
     ButtonDefinition,
     CategoryDefinition,
+    CODE_STATEMENT_TYPE,
     ColorInputDefnition,
     CommandBlockDefinition,
     CONNECTED_BLOCK,
@@ -58,7 +59,6 @@ import {
     DEVICE_TWIN_PROPERTY_BLOCK,
     DEVICE_TWIN_PROPERTY_TYPE,
     DEVICE_TWIN_VALUE_TYPE,
-    DummyInputDefinition,
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
@@ -86,7 +86,8 @@ import LEDColorField from "./fields/LEDColorField"
 import { WorkspaceJSON } from "./jsongenerator"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import { DTDLUnits } from "../../../jacdac-ts/src/azure-iot/dtdl"
-import DslContext, { BlockDomainSpecificLanguage } from "./dsl/DslContext"
+import DslContext from "./dsl/DslContext"
+import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 // overrides blockly emboss filter for svg elements
 Blockly.BlockSvg.prototype.setHighlighted = function (highlighted) {
@@ -104,7 +105,6 @@ type CachedBlockDefinitions = {
     blocks: BlockDefinition[]
     serviceBlocks: ServiceBlockDefinition[]
     eventFieldBlocks: EventFieldDefinition[]
-    azureIoTHubBlocks: BlockDefinition[]
     deviceTwinsBlocks: BlockDefinition[]
     services: jdspec.ServiceSpec[]
 }
@@ -157,7 +157,6 @@ function createBlockTheme(theme: Theme) {
     const sensorColor = theme.palette.success.main
     const otherColor = theme.palette.info.main
     const commandColor = theme.palette.warning.main
-    const azureIoTHubColor = theme.palette.error.main
     const deviceTwinColor = theme.palette.error.light
     const serviceColor = (srv: jdspec.ServiceSpec) =>
         isSensor(srv) ? sensorColor : otherColor
@@ -166,12 +165,10 @@ function createBlockTheme(theme: Theme) {
         sensorColor,
         commandColor,
         otherColor,
-        azureIoTHubColor,
         deviceTwinColor,
     }
 }
 
-const codeStatementType = "Code"
 const deviceTwinContentType = "DeviceTwinContent"
 const deviceTwinCommonOptionType = "DeviceTwinCommonOption"
 const deviceTwinPropertyOptionType = "DeviceTwinPropertyOption"
@@ -187,7 +184,6 @@ function loadBlocks(
     theme: Theme,
     serviceColor: (srv: jdspec.ServiceSpec) => string,
     commandColor: string,
-    azureIoTHubColor: string,
     deviceTwinColor: string
 ): CachedBlockDefinitions {
     // blocks
@@ -374,8 +370,8 @@ function loadBlocks(
                     ],
                     colour: commandColor,
                     inputsInline: true,
-                    previousStatement: codeStatementType,
-                    nextStatement: codeStatementType,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
                     tooltip: `Logs a message and an optional value to the logger`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -397,8 +393,8 @@ function loadBlocks(
                     ],
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: codeStatementType,
-                    nextStatement: codeStatementType,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
                     tooltip: `Send a keyboard key combo`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -438,8 +434,8 @@ function loadBlocks(
                     },
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: codeStatementType,
-                    nextStatement: codeStatementType,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
                     tooltip: `Fade LED color`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -469,8 +465,8 @@ function loadBlocks(
                     },
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: codeStatementType,
-                    nextStatement: codeStatementType,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
                     tooltip: `Display a number of the screen`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -493,8 +489,8 @@ function loadBlocks(
                     ],
                     colour: serviceColor(service),
                     inputsInline: true,
-                    previousStatement: codeStatementType,
-                    nextStatement: codeStatementType,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
                     tooltip: `Display LEDs on the LED matrix`,
                     helpUrl: serviceHelp(service),
                     service,
@@ -529,7 +525,7 @@ function loadBlocks(
             ],
             colour: serviceColor(service),
             inputsInline: true,
-            nextStatement: codeStatementType,
+            nextStatement: CODE_STATEMENT_TYPE,
             tooltip: `Events for the ${service.name} service`,
             helpUrl: serviceHelp(service),
             service,
@@ -598,7 +594,7 @@ function loadBlocks(
             ].filter(v => !!v),
             values: fieldsToValues(service, register),
             inputsInline: true,
-            nextStatement: codeStatementType,
+            nextStatement: CODE_STATEMENT_TYPE,
             colour: serviceColor(service),
             tooltip: `Event raised when ${register.name} changes`,
             helpUrl: serviceHelp(service),
@@ -748,8 +744,8 @@ function loadBlocks(
             helpUrl: serviceHelp(service),
             service,
             register,
-            previousStatement: codeStatementType,
-            nextStatement: codeStatementType,
+            previousStatement: CODE_STATEMENT_TYPE,
+            nextStatement: CODE_STATEMENT_TYPE,
 
             template: "register_set",
         }))
@@ -771,8 +767,8 @@ function loadBlocks(
             helpUrl: serviceHelp(service),
             service,
             command,
-            previousStatement: codeStatementType,
-            nextStatement: codeStatementType,
+            previousStatement: CODE_STATEMENT_TYPE,
+            nextStatement: CODE_STATEMENT_TYPE,
 
             template: "command",
         })
@@ -957,8 +953,8 @@ function loadBlocks(
                 },
             ],
             inputsInline: true,
-            previousStatement: codeStatementType,
-            nextStatement: codeStatementType,
+            previousStatement: CODE_STATEMENT_TYPE,
+            nextStatement: CODE_STATEMENT_TYPE,
             colour: commandColor,
             tooltip: "Wait the desired time",
             helpUrl: "",
@@ -988,7 +984,7 @@ function loadBlocks(
                 },
             ],
             inputsInline: true,
-            nextStatement: codeStatementType,
+            nextStatement: CODE_STATEMENT_TYPE,
             colour: commandColor,
             tooltip: "Runs code when a role is connected or disconnected",
             helpUrl: "",
@@ -1045,8 +1041,8 @@ function loadBlocks(
                 },
             },
             inputsInline: true,
-            previousStatement: codeStatementType,
-            nextStatement: codeStatementType,
+            previousStatement: CODE_STATEMENT_TYPE,
+            nextStatement: CODE_STATEMENT_TYPE,
             colour: commandColor,
             tooltip: "Sets the color on the status light",
             helpUrl: "",
@@ -1067,7 +1063,7 @@ function loadBlocks(
             tooltip: `Repeats code at a given interval in seconds`,
             helpUrl: "",
             template: "every",
-            nextStatement: codeStatementType,
+            nextStatement: CODE_STATEMENT_TYPE,
         },
     ]
 
@@ -1216,82 +1212,6 @@ function loadBlocks(
         },
     ]
 
-    const azureIoTHubBlocks: BlockDefinition[] = [
-        {
-            kind: "block",
-            type: "device_twin_receive_telemetry",
-            message0: "on receive cloud-to-device message",
-            args0: [],
-            nextStatement: codeStatementType,
-            colour: azureIoTHubColor,
-        },
-        {
-            kind: "block",
-            type: "device_twin_receive_telemetry_number",
-            message0: "received number %1",
-            args0: [
-                <TextInputDefinition>{
-                    type: "field_input",
-                    name: "name",
-                    text: "value",
-                },
-            ],
-            output: "Number",
-            colour: azureIoTHubColor,
-        },
-        {
-            kind: "block",
-            type: "device_twin_receive_telemetry_string",
-            message0: "received string %1",
-            args0: [
-                <TextInputDefinition>{
-                    type: "field_input",
-                    name: "name",
-                    text: "value",
-                },
-            ],
-            output: "String",
-            colour: azureIoTHubColor,
-        },
-        {
-            kind: "block",
-            type: "device_twin_send_telemetry",
-            message0: "send device-to-cloud message %1 %2",
-            args0: [
-                <DummyInputDefinition>{
-                    type: "input_dummy",
-                },
-                <StatementInputDefinition>{
-                    type: "input_statement",
-                    name: "fields",
-                },
-            ],
-            previousStatement: codeStatementType,
-            nextStatement: codeStatementType,
-            colour: azureIoTHubColor,
-        },
-        {
-            kind: "block",
-            type: "device_twin_send_telemetry_value",
-            message0: "with %1 = %2",
-            args0: [
-                <TextInputDefinition>{
-                    type: "field_input",
-                    name: "name",
-                    text: "value",
-                },
-                <ValueInputDefinition>{
-                    type: "input_value",
-                    name: "value",
-                    check: ["String", "Boolean", "Number"],
-                },
-            ],
-            previousStatement: codeStatementType,
-            nextStatement: codeStatementType,
-            colour: azureIoTHubColor,
-        },
-    ]
-
     const deviceTwinsBlocks: BlockDefinition[] = [
         {
             kind: "block",
@@ -1373,7 +1293,7 @@ function loadBlocks(
                     defaultType: DEVICE_TWIN_PROPERTY_TYPE,
                 },
             ],
-            nextStatement: codeStatementType,
+            nextStatement: CODE_STATEMENT_TYPE,
             colour: deviceTwinColor,
         },
     ]
@@ -1393,7 +1313,6 @@ function loadBlocks(
         ...runtimeBlocks,
         ...shadowBlocks,
         ...mathBlocks,
-        ...azureIoTHubBlocks,
         ...deviceTwinsBlocks,
         ...dslsBlocks,
     ]
@@ -1424,7 +1343,6 @@ function loadBlocks(
         blocks,
         serviceBlocks,
         eventFieldBlocks,
-        azureIoTHubBlocks,
         deviceTwinsBlocks,
         services,
     }
@@ -1475,26 +1393,20 @@ export default function useToolbox(props: {
 
     const { dsls } = useContext(DslContext)
     const theme = useTheme()
-    const { serviceColor, commandColor, azureIoTHubColor, deviceTwinColor } =
+    const { serviceColor, commandColor, deviceTwinColor } =
         createBlockTheme(theme)
-    const {
-        serviceBlocks,
-        eventFieldBlocks,
-        azureIoTHubBlocks,
-        deviceTwinsBlocks,
-        services,
-    } = useMemo(
-        () =>
-            loadBlocks(
-                dsls,
-                theme,
-                serviceColor,
-                commandColor,
-                azureIoTHubColor,
-                deviceTwinColor
-            ),
-        [theme, dsls]
-    )
+    const { serviceBlocks, eventFieldBlocks, deviceTwinsBlocks, services } =
+        useMemo(
+            () =>
+                loadBlocks(
+                    dsls,
+                    theme,
+                    serviceColor,
+                    commandColor,
+                    deviceTwinColor
+                ),
+            [theme, dsls]
+        )
     const blockServices =
         program?.roles.map(r => r.serviceShortId) ||
         source?.variables.map(v => v.type) ||
@@ -1693,20 +1605,6 @@ export default function useToolbox(props: {
         custom: "VARIABLE",
     }
 
-    const azureIoTHubCategory: CategoryDefinition = {
-        kind: "category",
-        name: "Azure IoT Hub",
-        colour: azureIoTHubColor,
-        contents: [
-            ...azureIoTHubBlocks.map(
-                ({ type }) =>
-                    <BlockDefinition>{
-                        kind: "block",
-                        type,
-                    }
-            ),
-        ],
-    }
     const deviceTwinsCategory: CategoryDefinition = {
         kind: "category",
         name: "Device Twin",
@@ -1744,7 +1642,6 @@ export default function useToolbox(props: {
             <SeparatorDefinition>{
                 kind: "sep",
             },
-            azureIoTHubCategory,
             deviceTwinsCategory,
             <SeparatorDefinition>{
                 kind: "sep",

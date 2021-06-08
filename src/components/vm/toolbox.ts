@@ -85,8 +85,6 @@ export type BlockTemplate =
     | "every"
     | "connection"
     | "connected"
-    | "dtdl"
-    | "dtdlOption"
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
@@ -167,6 +165,9 @@ export const LOG_BLOCK = "jacdac_custom_logger_log"
 export const DEVICE_TWIN_SEND_TELEMETRY = "device_twin_send_telemetry"
 export const DEVICE_TWIN_DEFINITION_BLOCK = "device_twin_definition"
 export const DEVICE_TWIN_PROPERTY_BLOCK = "device_twin_property"
+
+export const PRIMITIVE_TYPES = ["String", "Boolean", "Number"]
+export const CODE_STATEMENT_TYPE = "Code"
 
 export const DEVICE_TWIN_PROPERTY_TYPE = "DeviceTwinProperty"
 export const DEVICE_TWIN_VALUE_TYPE = "DeviceTwinValue"
