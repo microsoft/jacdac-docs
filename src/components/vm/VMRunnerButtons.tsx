@@ -95,7 +95,7 @@ export default function VMRunnerButtons(props: {
             if (mounted()) setIndeterminate(false)
         }
     }
-    const handleStep = () => runner.step()
+    const handleStep = () => runner.stepAsync()
 
     // register breakpoint handler
     useEffect(
