@@ -93,25 +93,27 @@ const toolsDSL: BlockDomainSpecificLanguage = {
             helpUrl: "",
         },
     ],
-    createCategory: () => ({
-        kind: "category",
-        name: "Tools",
-        colour: colour,
-        contents: [
-            <BlockDefinition>{
-                kind: "block",
-                type: WATCH_BLOCK,
-            },
-            <BlockDefinition>{
-                kind: "block",
-                type: TWIN_BLOCK,
-            },
-            <BlockDefinition>{
-                kind: "block",
-                type: INSPECT_BLOCK,
-            },
-        ],
-    }),
+    createCategory: () => [
+        {
+            kind: "category",
+            name: "Tools",
+            colour: colour,
+            contents: [
+                <BlockDefinition>{
+                    kind: "block",
+                    type: WATCH_BLOCK,
+                },
+                <BlockDefinition>{
+                    kind: "block",
+                    type: TWIN_BLOCK,
+                },
+                <BlockDefinition>{
+                    kind: "block",
+                    type: INSPECT_BLOCK,
+                },
+            ],
+        },
+    ],
 
     convertToJSON: () => undefined,
 }

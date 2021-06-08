@@ -93,21 +93,23 @@ class AzureIoTHubBlockDomainSpecificLanguage
             },
         ])
     }
-    createCategory(): CategoryDefinition {
-        return {
-            kind: "category",
-            name: "Azure IoT Hub",
-            colour,
-            contents: [
-                ...this._blocks.map(
-                    ({ type }) =>
-                        <BlockDefinition>{
-                            kind: "block",
-                            type,
-                        }
-                ),
-            ],
-        }
+    createCategory(): CategoryDefinition[] {
+        return [
+            {
+                kind: "category",
+                name: "Azure IoT Hub",
+                colour,
+                contents: [
+                    ...this._blocks.map(
+                        ({ type }) =>
+                            <BlockDefinition>{
+                                kind: "block",
+                                type,
+                            }
+                    ),
+                ],
+            },
+        ]
     }
 }
 

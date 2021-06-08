@@ -1620,8 +1620,9 @@ export default function useToolbox(props: {
         ],
     }
 
-    const dslsCategories = dsls
-        .map(dsl => dsl.createCategory({ theme, source }))
+    const dslsCategories = arrayConcatMany(
+        dsls.map(dsl => dsl.createCategory({ theme, source }))
+    )
         .filter(cat => !!cat)
         .sort((l, r) => -(l.order - r.order))
 

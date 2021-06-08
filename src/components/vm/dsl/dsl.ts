@@ -13,7 +13,7 @@ export default interface BlockDomainSpecificLanguage {
     createCategory(options: {
         theme: Theme
         source: WorkspaceJSON
-    }): CategoryDefinition
+    }): CategoryDefinition[]
 
     convertToJSON?: (options: {
         workspace: Workspace
