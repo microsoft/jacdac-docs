@@ -1,5 +1,5 @@
 import Blockly from "blockly"
-import { useEffect, useMemo } from "react"
+import React, { useContext, useEffect, useMemo } from "react"
 import {
     BuzzerCmd,
     JoystickReg,
@@ -62,7 +62,6 @@ import {
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
-    INSPECT_BLOCK,
     LOG_BLOCK,
     NEW_PROJET_XML,
     NumberInputDefinition,
@@ -77,21 +76,17 @@ import {
     StatementInputDefinition,
     TextInputDefinition,
     ToolboxConfiguration,
-    TWIN_BLOCK,
     ValueInputDefinition,
     VariableInputDefinition,
     WAIT_BLOCK,
-    WATCH_BLOCK,
 } from "./toolbox"
 import NoteField from "./fields/NoteField"
 import ServoAngleField from "./fields/ServoAngleField"
 import LEDColorField from "./fields/LEDColorField"
-import TwinField from "./fields/TwinField"
-import JDomTreeField from "./fields/JDomTreeField"
 import { WorkspaceJSON } from "./jsongenerator"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
-import WatchValueField from "./fields/WatchValueField"
 import { DTDLUnits } from "../../../jacdac-ts/src/azure-iot/dtdl"
+import DslContext, { BlockDomainSpecificLanguage } from "./dsl/DslContext"
 
 // overrides blockly emboss filter for svg elements
 Blockly.BlockSvg.prototype.setHighlighted = function (highlighted) {
@@ -162,7 +157,6 @@ function createBlockTheme(theme: Theme) {
     const sensorColor = theme.palette.success.main
     const otherColor = theme.palette.info.main
     const commandColor = theme.palette.warning.main
-    const debuggerColor = theme.palette.grey[600]
     const azureIoTHubColor = theme.palette.error.main
     const deviceTwinColor = theme.palette.error.light
     const serviceColor = (srv: jdspec.ServiceSpec) =>
@@ -171,7 +165,6 @@ function createBlockTheme(theme: Theme) {
         serviceColor,
         sensorColor,
         commandColor,
-        debuggerColor,
         otherColor,
         azureIoTHubColor,
         deviceTwinColor,
@@ -190,9 +183,10 @@ const deviceTwinPropertyOptionStatementType = [
 ]
 
 function loadBlocks(
+    dsls: BlockDomainSpecificLanguage[],
+    theme: Theme,
     serviceColor: (srv: jdspec.ServiceSpec) => string,
     commandColor: string,
-    debuggerColor: string,
     azureIoTHubColor: string,
     deviceTwinColor: string
 ): CachedBlockDefinitions {
@@ -1059,85 +1053,6 @@ function loadBlocks(
         },
         {
             kind: "block",
-            type: TWIN_BLOCK,
-            message0: `view %1 %2 %3`,
-            args0: [
-                <VariableInputDefinition>{
-                    type: "field_variable",
-                    name: "role",
-                    variable: "none",
-                    variableTypes: [
-                        "client",
-                        ...supportedServices.map(service => service.shortId),
-                    ],
-                    defaultType: "client",
-                },
-                {
-                    type: "input_dummy",
-                },
-                <InputDefinition>{
-                    type: TwinField.KEY,
-                    name: "twin",
-                },
-            ],
-            colour: debuggerColor,
-            inputsInline: false,
-            tooltip: `Twin of the selected service`,
-            helpUrl: "",
-            template: "twin",
-        },
-        {
-            kind: "block",
-            type: INSPECT_BLOCK,
-            message0: `inspect %1 %2 %3`,
-            args0: [
-                <VariableInputDefinition>{
-                    type: "field_variable",
-                    name: "role",
-                    variable: "none",
-                    variableTypes: [
-                        "client",
-                        ...supportedServices.map(service => service.shortId),
-                    ],
-                    defaultType: "client",
-                },
-                {
-                    type: "input_dummy",
-                },
-                <InputDefinition>{
-                    type: JDomTreeField.KEY,
-                    name: "twin",
-                },
-            ],
-            colour: debuggerColor,
-            inputsInline: false,
-            tooltip: `Inspect a service`,
-            helpUrl: "",
-            template: "twin",
-        },
-        {
-            kind: "block",
-            type: WATCH_BLOCK,
-            message0: `watch %1 %2`,
-            args0: [
-                <InputDefinition>{
-                    type: "input_value",
-                    name: "value",
-                    check: ["Number", "Boolean", "String"],
-                },
-                <InputDefinition>{
-                    type: WatchValueField.KEY,
-                    name: "watch",
-                },
-            ],
-            colour: debuggerColor,
-            inputsInline: true,
-            tooltip: `Watch a value in the editor`,
-            helpUrl: "",
-            template: "watch",
-        },
-        {
-            kind: "block",
             type: REPEAT_EVERY_BLOCK,
             message0: `repeat every %1s`,
             args0: [
@@ -1463,6 +1378,15 @@ function loadBlocks(
         },
     ]
 
+    const dslsBlocks = arrayConcatMany(
+        dsls.map(dsl =>
+            dsl.createBlocks({ theme, supportedServices }).map(b => {
+                b.dsl = dsl.id
+                return b
+            })
+        )
+    )
+
     const blocks: BlockDefinition[] = [
         ...serviceBlocks,
         ...eventFieldBlocks,
@@ -1471,6 +1395,7 @@ function loadBlocks(
         ...mathBlocks,
         ...azureIoTHubBlocks,
         ...deviceTwinsBlocks,
+        ...dslsBlocks,
     ]
 
     // register field editors
@@ -1548,14 +1473,10 @@ export default function useToolbox(props: {
 } {
     const { serviceClass, source, program } = props
 
+    const { dsls } = useContext(DslContext)
     const theme = useTheme()
-    const {
-        serviceColor,
-        commandColor,
-        debuggerColor,
-        azureIoTHubColor,
-        deviceTwinColor,
-    } = createBlockTheme(theme)
+    const { serviceColor, commandColor, azureIoTHubColor, deviceTwinColor } =
+        createBlockTheme(theme)
     const {
         serviceBlocks,
         eventFieldBlocks,
@@ -1565,13 +1486,14 @@ export default function useToolbox(props: {
     } = useMemo(
         () =>
             loadBlocks(
+                dsls,
+                theme,
                 serviceColor,
                 commandColor,
-                debuggerColor,
                 azureIoTHubColor,
                 deviceTwinColor
             ),
-        [theme]
+        [theme, dsls]
     )
     const blockServices =
         program?.roles.map(r => r.serviceShortId) ||
@@ -1653,6 +1575,7 @@ export default function useToolbox(props: {
     const commandsCategory: CategoryDefinition = {
         kind: "category",
         name: "Commands",
+        order: 4,
         colour: commandColor,
         contents: [
             <BlockDefinition>{
@@ -1690,26 +1613,6 @@ export default function useToolbox(props: {
             <BlockDefinition>{
                 kind: "block",
                 type: LOG_BLOCK,
-            },
-        ].filter(b => !!b),
-    }
-
-    const toolsCategory: CategoryDefinition = {
-        kind: "category",
-        name: "Tools",
-        colour: debuggerColor,
-        contents: [
-            <BlockDefinition>{
-                kind: "block",
-                type: WATCH_BLOCK,
-            },
-            <BlockDefinition>{
-                kind: "block",
-                type: TWIN_BLOCK,
-            },
-            <BlockDefinition>{
-                kind: "block",
-                type: INSPECT_BLOCK,
             },
         ].filter(b => !!b),
     }
@@ -1819,6 +1722,13 @@ export default function useToolbox(props: {
         ],
     }
 
+    const dslsCategories = dsls
+        .map(dsl => dsl.createCategory({ theme, source }))
+        .filter(cat => !!cat)
+        .sort((l, r) => -(l.order - r.order))
+
+    console.log(`DSL categories`, dslsCategories)
+
     const toolboxConfiguration: ToolboxConfiguration = {
         kind: "categoryToolbox",
         contents: [
@@ -1839,7 +1749,7 @@ export default function useToolbox(props: {
             <SeparatorDefinition>{
                 kind: "sep",
             },
-            toolsCategory,
+            ...dslsCategories,
         ]
             .filter(cat => !!cat)
             .map(node =>

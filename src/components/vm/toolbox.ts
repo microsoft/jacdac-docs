@@ -81,7 +81,6 @@ export type BlockTemplate =
     | CommandTemplate
     | CustomTemplate
     | "shadow"
-    | "twin"
     | "watch"
     | "every"
     | "connection"
@@ -102,6 +101,7 @@ export interface BlockDefinition extends BlockReference {
     output?: string
     extensions?: string[]
     template?: BlockTemplate
+    dsl?: string
 }
 
 export interface ButtonDefinition {
@@ -164,7 +164,7 @@ export const CONNECTION_BLOCK = "jacdac_connection"
 export const CONNECTED_BLOCK = "jacdac_connected"
 export const LOG_BLOCK = "jacdac_custom_logger_log"
 
-export const DEVICE_TWIN_SEND_TELEMETRY  = "device_twin_send_telemetry"
+export const DEVICE_TWIN_SEND_TELEMETRY = "device_twin_send_telemetry"
 export const DEVICE_TWIN_DEFINITION_BLOCK = "device_twin_definition"
 export const DEVICE_TWIN_PROPERTY_BLOCK = "device_twin_property"
 
@@ -174,6 +174,7 @@ export const DEVICE_TWIN_VALUE_TYPE = "DeviceTwinValue"
 export interface CategoryDefinition {
     kind: "category"
     name: string
+    order?: number
     custom?: string
     colour?: string
     categorystyle?: string
