@@ -69,6 +69,7 @@ export default function VMRunnerButtons(props: {
     const handleCancel = async () => {
         try {
             setIndeterminate(true)
+            await runner.clearBreakpointsAsync()
             setBreakpoint(undefined)
             await cancel()
         } finally {
