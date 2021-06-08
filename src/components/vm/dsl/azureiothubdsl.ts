@@ -10,7 +10,7 @@ import {
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 
-const colour = "#7521d1"
+const colour = "#8a57c2"
 class AzureIoTHubBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
 {
