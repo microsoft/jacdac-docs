@@ -1195,7 +1195,7 @@ function loadBlocks(
     const dslsBlocks = arrayConcatMany(
         dsls.map(dsl =>
             dsl.createBlocks({ theme, supportedServices }).map(b => {
-                b.dsl = dsl.id
+                b.dsl = b.dsl || dsl.id // ensure DSL is set
                 return b
             })
         )
