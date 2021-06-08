@@ -400,7 +400,7 @@ function loadBlocks(
     const dslsBlocks = arrayConcatMany(
         dsls.map(dsl =>
             dsl?.createBlocks({ theme }).map(b => {
-                b.dsl = b.dsl || dsl.id // ensure DSL is set
+                b.dsl = dsl.id // ensure DSL is set
                 return b
             })
         )
@@ -412,6 +412,8 @@ function loadBlocks(
         ...mathBlocks,
         ...dslsBlocks,
     ]
+
+    console.log(`blocks`, { blocks })
 
     // register field editors
     registerFields()

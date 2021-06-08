@@ -11,6 +11,23 @@ import {
 } from "../toolbox"
 import { ExpressionWithErrors } from "../VMgenerator"
 
+export interface CreateBlocksOptions {
+    theme: Theme
+}
+
+export interface CreateCategoryOptions {
+    theme: Theme
+    source: WorkspaceJSON
+    program: VMProgram
+    liveServices: JDService[]
+}
+
+export interface ConvertToJSONOptions {
+    workspace: Workspace
+    block: Block
+    definition: BlockDefinition
+}
+
 export interface CompileToVMOptions {
     block: BlockJSON
     definition: ServiceBlockDefinition
@@ -25,23 +42,11 @@ export interface CompileToVMResult {
 
 export default interface BlockDomainSpecificLanguage {
     id: string
-    createBlocks?: (options: {
-        theme: Theme
-        supportedServices
-    }) => BlockDefinition[]
+    createBlocks?: (options: CreateBlocksOptions) => BlockDefinition[]
 
-    createCategory?: (options: {
-        theme: Theme
-        source: WorkspaceJSON
-        program: VMProgram
-        liveServices: JDService[]
-    }) => ContentDefinition[]
+    createCategory?: (options: CreateCategoryOptions) => ContentDefinition[]
 
-    convertToJSON?: (options: {
-        workspace: Workspace
-        block: Block
-        definition: BlockDefinition
-    }) => BlockJSON
+    convertToJSON?: (options: ConvertToJSONOptions) => BlockJSON
 
     compileToVM?: (options: CompileToVMOptions) => CompileToVMResult
 }

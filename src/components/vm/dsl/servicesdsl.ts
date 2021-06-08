@@ -39,7 +39,6 @@ import {
     uniqueMap,
 } from "../../../../jacdac-ts/src/jdom/utils"
 import {
-    RoleEvent,
     toIdentifier,
     toMemberExpression,
 } from "../../../../jacdac-ts/src/vm/compile"
@@ -48,7 +47,6 @@ import LEDColorField from "../fields/LEDColorField"
 import LEDMatrixField from "../fields/LEDMatrixField"
 import NoteField from "../fields/NoteField"
 import ServoAngleField from "../fields/ServoAngleField"
-import { BlockJSON } from "../jsongenerator"
 import {
     BlockDefinition,
     BlockReference,
@@ -70,10 +68,11 @@ import {
     ValueInputDefinition,
     VariableInputDefinition,
 } from "../toolbox"
-import { ExpressionWithErrors } from "../VMgenerator"
 import BlockDomainSpecificLanguage, {
     CompileToVMOptions,
     CompileToVMResult,
+    CreateBlocksOptions,
+    CreateCategoryOptions,
 } from "./dsl"
 
 function isBooleanField(field: jdspec.PacketMember) {
@@ -125,7 +124,7 @@ const commandColor = "#8c6a1d"
 export class ServicesBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
 {
-    id: "jacdacServices"
+    id = "jacdacServices"
     supportedServices: jdspec.ServiceSpec[] = []
     private _serviceBlocks: ServiceBlockDefinition[]
     private _eventFieldBlocks: EventFieldDefinition[]
@@ -139,7 +138,8 @@ export class ServicesBlockDomainSpecificLanguage
         return serviceColor
     }
 
-    createBlocks({ theme }) {
+    createBlocks(options: CreateBlocksOptions) {
+        const { theme } = options
         const serviceColor = this.createServiceColor(theme)
         // blocks
         const customShadows = [
@@ -834,7 +834,8 @@ export class ServicesBlockDomainSpecificLanguage
         ]
     }
 
-    createCategory({ theme, program, source, liveServices }) {
+    createCategory(options: CreateCategoryOptions) {
+        const { theme, program, source, liveServices } = options
         const serviceColor = this.createServiceColor(theme)
 
         const blockServices =
@@ -962,6 +963,8 @@ export class ServicesBlockDomainSpecificLanguage
         const { block, definition, blockToExpression } = options
         const { inputs } = block
         const { template } = definition
+
+        console.log("services compile to vm", { template, inputs })
 
         switch (template) {
             case "event": {

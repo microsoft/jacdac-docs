@@ -413,7 +413,7 @@ export default function workspaceJSONToVMProgram(
     }
 
     const handlers: VMHandler[] = workspace.blocks.map(top => {
-        const { type, inputs } = top
+        const { type } = top
         let command: jsep.CallExpression = undefined
         let topEvent: RoleEvent = undefined
         let topErrors: VMError[] = []
@@ -421,7 +421,14 @@ export default function workspaceJSONToVMProgram(
         assert(!!definition)
         const { template, dsl: dslName } = definition
         const dsl = dslName && dsls?.find(d => d.id === dslName)
-        console.log(`template`, { template, dsl, dslName, dsls })
+        console.log(`compile handler`, {
+            top,
+            definition,
+            template,
+            dsl,
+            dslName,
+            dsls,
+        })
 
         try {
             if (dsl?.compileToVM) {
