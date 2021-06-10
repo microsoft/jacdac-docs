@@ -1,5 +1,5 @@
 import Blockly from "blockly"
-import { useContext, useEffect, useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import useServices from "../hooks/useServices"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
@@ -10,13 +10,11 @@ import {
     BlockReference,
     ButtonDefinition,
     CategoryDefinition,
-    NEW_PROJET_XML,
     ServiceBlockDefinitionFactory,
     ToolboxConfiguration,
 } from "./toolbox"
 import { WorkspaceJSON } from "./jsongenerator"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
-import BlockContext from "./BlockContext"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 // overrides blockly emboss filter for svg elements
@@ -99,14 +97,14 @@ function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
 }
 
 export default function useToolbox(props: {
+    dsls: BlockDomainSpecificLanguage[]
     blockServices?: string[]
     source?: WorkspaceJSON
     program?: VMProgram
 }): ToolboxConfiguration {
-    const { source, program } = props
+    const { dsls, source, program } = props
     const liveServices = useServices({ specification: true })
 
-    const { dsls } = useContext(BlockContext)
     const theme = useTheme()
     useMemo(() => loadBlocks(dsls, theme), [theme, dsls])
 
@@ -131,6 +129,8 @@ export default function useToolbox(props: {
 
     return toolboxConfiguration
 }
+
+// do not use block context
 
 export function useToolboxButtons(
     workspace: Blockly.WorkspaceSvg,

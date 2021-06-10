@@ -79,6 +79,7 @@ export function BlockProvider(props: {
     }
 
     const toolboxConfiguration = useToolbox({
+        dsls,
         source: workspaceJSON,
     })
 

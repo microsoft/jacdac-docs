@@ -2,6 +2,8 @@ import Blockly from "blockly"
 import { useEffect } from "react"
 import ReactField from "./fields/ReactField"
 
+// do not use block context
+
 export default function useBlocklyEvents(workspace: Blockly.WorkspaceSvg) {
     const handleChange = (
         event: Blockly.Events.Abstract & { type: string }
