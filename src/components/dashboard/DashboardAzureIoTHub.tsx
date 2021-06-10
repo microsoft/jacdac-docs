@@ -7,11 +7,13 @@ import { Grid, List, ListItem, Switch, Typography } from "@material-ui/core"
 import useRegister from "../hooks/useRegister"
 import {
     AzureIotHubCmd,
+    AzureIotHubEvent,
     AzureIotHubReg,
 } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import { useId } from "react-use-id-hook"
-import CmdButton from "../CmdButton"
+import useEvent from "../hooks/useEvent"
+import useChange from "../../jacdac/useChange"
 
 export default function DashboardAzureIoTHub(props: DashboardServiceProps) {
     const { service } = props
@@ -33,36 +35,33 @@ export default function DashboardAzureIoTHub(props: DashboardServiceProps) {
         connectionStatusRegister,
         props
     )
+    const changeEvent = useEvent(service, AzureIotHubEvent.Change)
+    useChange(changeEvent, () => hubNameRegister?.refresh())
+
     const connected = connectionStatus === "ok"
     const server = useServiceServer<AzureIoTHubServer>(service)
     const messages = server?.messages || []
 
-    const handleConnect = async () =>
+    const handleConnect = async () => {
         await service.sendCmdAsync(
             connected ? AzureIotHubCmd.Disconnect : AzureIotHubCmd.Connect
         )
+    }
 
     return (
         <Grid container spacing={1}>
             <Grid item xs={12}>
-                <Typography variant="caption">
+                <Typography component="span" variant="body1">
                     hub: {hubName}, device: {deviceId}
                 </Typography>
-            </Grid>
-            <Grid item>
                 <Switch
-                    value={connected}
+                    checked={connected}
                     aria-labelledby={connectId}
-                    disabled={true}
-                />
-                <label id={connectId}>connected</label>
-            </Grid>
-            <Grid item>
-                <CmdButton
-                    variant="outlined"
-                    title={connected ? " disconnect" : "connect"}
                     onClick={handleConnect}
                 />
+                <label id={connectId}>
+                    {connected ? "connected" : "disconnected"}
+                </label>
             </Grid>
             <Grid item xs={12}>
                 <List>
