@@ -1,12 +1,12 @@
 import { useMemo } from "react"
-import { WorkspaceJSON } from "../vm/jsongenerator"
+import { WorkspaceJSON } from "../blockly/jsongenerator"
 import {
     BlockDefinition,
     CategoryDefinition,
     OptionsInputDefinition,
     ServiceBlockDefinitionFactory,
     ToolboxConfiguration,
-} from "../vm/toolbox"
+} from "../blockly/toolbox"
 import Blockly from "blockly"
 
 function loadBlocks() {

@@ -1,7 +1,6 @@
 import Blockly from "blockly"
 import { useEffect } from "react"
 import ReactField from "./fields/ReactField"
-import { BlockTemplate, resolveServiceBlockDefinition } from "./toolbox"
 
 export default function useBlocklyEvents(workspace: Blockly.WorkspaceSvg) {
     const handleChange = (

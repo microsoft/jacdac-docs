@@ -8,8 +8,8 @@ import {
     BlockDefinition,
     ContentDefinition,
     ServiceBlockDefinition,
-} from "../toolbox"
-import { CmdWithErrors, ExpressionWithErrors } from "../VMgenerator"
+} from "../../vm/toolbox"
+import { CmdWithErrors, ExpressionWithErrors } from "../../vm/VMgenerator"
 
 export interface CreateBlocksOptions {
     theme: Theme

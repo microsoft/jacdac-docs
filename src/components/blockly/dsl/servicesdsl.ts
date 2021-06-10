@@ -69,7 +69,7 @@ import {
     ValueInputDefinition,
     VariableInputDefinition,
 } from "../toolbox"
-import { ExpressionWithErrors, makeVMBase } from "../VMgenerator"
+import { ExpressionWithErrors, makeVMBase } from "../../vm/VMgenerator"
 import BlockDomainSpecificLanguage, {
     CompileCommandToVMOptions,
     CompileEventToVMOptions,

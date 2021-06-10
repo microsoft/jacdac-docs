@@ -12,7 +12,7 @@ import {
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import useChange from "../../jacdac/useChange"
 import { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
-import { TWIN_BLOCK } from "./toolbox"
+import { TWIN_BLOCK } from "../blockly/toolbox"
 import useServiceServer from "../hooks/useServiceServer"
 import CancelIcon from "@material-ui/icons/Cancel"
 

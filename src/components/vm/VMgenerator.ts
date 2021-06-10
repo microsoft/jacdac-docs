@@ -1,4 +1,4 @@
-import { BlockJSON, WorkspaceJSON } from "./jsongenerator"
+import { BlockJSON, WorkspaceJSON } from "../blockly/jsongenerator"
 import {
     VMBase,
     VMHandler,
@@ -7,21 +7,11 @@ import {
     VMIfThenElse,
     VMError,
 } from "../../../jacdac-ts/src/vm/ir"
-import {
-    toMemberExpression,
-    toIdentifier,
-    RoleEvent,
-} from "../../../jacdac-ts/src/vm/compile"
+import { toIdentifier, RoleEvent } from "../../../jacdac-ts/src/vm/compile"
 
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
-import {
-    BUILTIN_TYPES,
-    CommandBlockDefinition,
-    RegisterBlockDefinition,
-    resolveServiceBlockDefinition,
-} from "./toolbox"
+import { BUILTIN_TYPES, resolveServiceBlockDefinition } from "../blockly/toolbox"
 import Blockly from "blockly"
-import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 const ops = {
     AND: "&&",
@@ -397,7 +387,7 @@ export default function workspaceJSONToVMProgram(
                     } as VMBase,
                 ],
                 errors: topErrors || [],
-                meta: !!topMeta
+                meta: !!topMeta,
             }
 
             addCommands(topEvent, top.children, handler)

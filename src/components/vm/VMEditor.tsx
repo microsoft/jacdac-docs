@@ -1,16 +1,17 @@
 import { Grid, NoSsr } from "@material-ui/core"
 import React, { useRef, useState } from "react"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
-import { WorkspaceJSON } from "../../components/vm/jsongenerator"
-import VMBlockEditor from "../../components/vm/VMBlockEditor"
-import useLocalStorage from "../../components/useLocalStorage"
+import { WorkspaceJSON } from "../blockly/jsongenerator"
+import VMBlockEditor from "./VMBlockEditor"
+import useLocalStorage from "../useLocalStorage"
 import useVMRunner from "./useVMRunner"
-import useRoleManager from "./useRoleManager"
+import useRoleManager from "../hooks/useRoleManager"
 import VMDiagnostics from "./VMDiagnostics"
 import VMToolbar from "./VMToolbar"
 import { WorkspaceSvg } from "blockly"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
-import { DslProvider } from "./dsl/DslContext"
+import { DslProvider } from "../blockly/dsl/DslContext"
+import BlockDiagnostics from "../blockly/BlockDiagnostics"
 
 const VM_SOURCE_STORAGE_KEY = "jacdac:tools:vmeditor"
 export default function VMEditor(props: { storageKey?: string }) {
@@ -61,11 +62,10 @@ export default function VMEditor(props: { storageKey?: string }) {
                     </NoSsr>
                 </Grid>
                 {Flags.diagnostics && (
-                    <VMDiagnostics
-                        program={program}
-                        source={source}
-                        xml={xml}
-                    />
+                    <>
+                        <VMDiagnostics program={program} />
+                        <BlockDiagnostics source={source} xml={xml} />
+                    </>
                 )}
             </Grid>
         </DslProvider>
