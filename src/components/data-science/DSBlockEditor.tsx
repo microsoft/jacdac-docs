@@ -1,40 +1,21 @@
-import React, {
-    MutableRefObject,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react"
-import { useBlocklyWorkspace } from "react-blockly"
-import { WorkspaceSvg } from "blockly"
-import Theme from "@blockly/theme-modern"
-import DarkTheme from "@blockly/theme-dark"
-import BlocklyModalDialogs from "../blockly/BlocklyModalDialogs"
-import { domToJSON, WorkspaceJSON } from "../blockly/jsongenerator"
-import DarkModeContext from "../ui/DarkModeContext"
-import AppContext from "../AppContext"
-import { createStyles, makeStyles } from "@material-ui/core"
-import clsx from "clsx"
-import useBlocklyEvents from "../blockly/useBlocklyEvents"
-import useBlocklyPlugins from "../blockly/useBlocklyPlugins"
-import { withPrefix } from "gatsby"
-import useDataToolbox from "./useDataToolbox"
+import React, { useMemo } from "react"
+import { NoSsr } from "@material-ui/core"
+import { BlockProvider } from "../blockly/BlockContext"
+import BlockEditor from "../blockly/BlockEditor"
+import variablesDsl from "../blockly/dsl/variablesdsl"
+import shadowDsl from "../blockly/dsl/shadowdsl"
+import dataDsl from "./datadsl"
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        editor: {
-            height: "calc(100vh - 10rem)",
-            "& .blocklyTreeLabel": {
-                fontFamily: theme.typography.fontFamily,
-            },
-            "& .blocklyText": {
-                fontWeight: `normal !important`,
-                fontFamily: `${theme.typography.fontFamily} !important`,
-            },
-        },
-    })
-)
-
-export default function DSBlockEditor() {
-    return null
+const DS_SOURCE_STORAGE_KEY = "data-science-blockly-xml"
+export default function VMEditor() {
+    const dsls = useMemo(() => {
+        return [dataDsl, variablesDsl, shadowDsl]
+    }, [])
+    return (
+        <NoSsr>
+            <BlockProvider storageKey={DS_SOURCE_STORAGE_KEY} dsls={dsls}>
+                <BlockEditor />
+            </BlockProvider>
+        </NoSsr>
+    )
 }
