@@ -1,5 +1,5 @@
 import { Grid, NoSsr } from "@material-ui/core"
-import React, { useRef, useState } from "react"
+import React, { useMemo, useRef, useState } from "react"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import { WorkspaceJSON } from "../blockly/jsongenerator"
 import VMBlockEditor from "./VMBlockEditor"
@@ -12,6 +12,15 @@ import { WorkspaceSvg } from "blockly"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import { DslProvider } from "../blockly/dsl/DslContext"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
+import servicesDSL from "../blockly/dsl/servicesdsl"
+import azureIoTHubDSL from "../blockly/dsl/azureiothubdsl"
+import deviceTwinDSL from "../blockly/dsl/devicetwindsl"
+import toolsDSL from "../blockly/dsl/toolsdsl"
+import loopsDsl from "../blockly/dsl/loopsdsl"
+import logicDsl from "../blockly/dsl/logicdsl"
+import mathDSL from "../blockly/dsl/mathdsl"
+import variablesDsl from "../blockly/dsl/variablesdsl"
+import shadowDsl from "../blockly/dsl/shadowdsl"
 
 const VM_SOURCE_STORAGE_KEY = "jacdac:tools:vmeditor"
 export default function VMEditor(props: { storageKey?: string }) {
@@ -33,9 +42,22 @@ export default function VMEditor(props: { storageKey?: string }) {
         if (json) roleManager.setRoles(json.roles)
         setProgram(json)
     }
+    const dsls = useMemo(() => {
+        return [
+            servicesDSL,
+            azureIoTHubDSL,
+            deviceTwinDSL,
+            toolsDSL,
+            loopsDsl,
+            logicDsl,
+            mathDSL,
+            variablesDsl,
+            shadowDsl,
+        ]
+    }, [])
 
     return (
-        <DslProvider>
+        <DslProvider dsls={dsls}>
             <Grid container direction="column" spacing={1}>
                 <Grid item xs={12}>
                     <VMToolbar
