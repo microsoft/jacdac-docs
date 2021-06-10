@@ -59,19 +59,10 @@ export function BlockProvider(props: {
         NEW_PROJET_XML
     )
     const roleManager = useRoleManager()
-    const [workspace, _setWorkspace] = useState<WorkspaceSvg>(undefined)
+    const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
     const [workspaceJSON, setWorkspaceJSON] = useState<WorkspaceJSON>(undefined)
     const [warnings, setWarnings] = useState<BlockWarning[]>([])
-
-    const setWorkspace = (ws: WorkspaceSvg) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const wws = workspace as any as BlocklyWorkspaceWithServices
-        if (wws && !wws.jacdacServices)
-            wws.jacdacServices = new WorkspaceServices()
-
-        _setWorkspace(ws)
-    }
 
     const setWorkspaceXml = (xml: string) => {
         setStoredXml(xml)
@@ -90,12 +81,17 @@ export function BlockProvider(props: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ws = workspace as any as BlocklyWorkspaceWithServices
         const services = ws?.jacdacServices
-        if (services) {
-            services.roleManager = roleManager
-        }
+        if (services) services.roleManager = roleManager
     }, [workspace, roleManager])
 
-    // blockly did a change
+    useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const wws = workspace as any as BlocklyWorkspaceWithServices
+        if (wws && !wws.jacdacServices) {
+            wws.jacdacServices = new WorkspaceServices()
+            wws.jacdacServices.roleManager = roleManager
+        }
+    }, [workspace])
     useEffect(() => {
         if (!workspace || workspace.isDragging()) return
 
