@@ -1,35 +1,16 @@
-import React, {
-    MutableRefObject,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react"
+import React, { useContext, useEffect, useRef } from "react"
 import { useBlocklyWorkspace } from "react-blockly"
 import { WorkspaceSvg } from "blockly"
 import Theme from "@blockly/theme-modern"
 import DarkTheme from "@blockly/theme-dark"
-import useToolbox, { useToolboxButtons } from "./useToolbox"
 import BlocklyModalDialogs from "./BlocklyModalDialogs"
-import { domToJSON, WorkspaceJSON } from "./jsongenerator"
 import DarkModeContext from "../ui/DarkModeContext"
-import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
-import workspaceJSONToVMProgram from "./VMgenerator"
 import AppContext from "../AppContext"
 import { createStyles, makeStyles } from "@material-ui/core"
 import clsx from "clsx"
-import { VMProgramRunner } from "../../../jacdac-ts/src/vm/runner"
-import useBlocklyEvents from "./useBlocklyEvents"
-import useBlocklyPlugins from "./useBlocklyPlugins"
-import {
-    BlocklyWorkspaceWithServices,
-    WorkspaceServices,
-} from "./WorkspaceContext"
-import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
-import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import { withPrefix } from "gatsby"
-import DslContext from "./dsl/DslContext"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
+import BlockContext from "./BlockContext"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -46,30 +27,17 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
-export default function VMBlockEditor(props: {
-    className?: string
-    initialXml?: string
-    onXmlChange?: (xml: string) => void
-    onJSONChange?: (json: WorkspaceJSON) => void
-    roleManager?: RoleManager
-    workspaceRef?: MutableRefObject<WorkspaceSvg>
-}) {
+export default function BlockEditor(props: { className?: string }) {
+    const { className } = props
     const {
-        className,
-        onXmlChange,
-        onJSONChange,
-        initialXml,
-        roleManager,
-        workspaceRef,
-    } = props
-    const { dsls } = useContext(DslContext)
+        toolboxConfiguration,
+        workspaceXml,
+        setWorkspace,
+        setWorkspaceXml,
+    } = useContext(BlockContext)
     const classes = useStyles()
     const { darkMode } = useContext(DarkModeContext)
     const { setError } = useContext(AppContext)
-    const [source, setSource] = useState<WorkspaceJSON>()
-    const { toolboxConfiguration, newProjectXml } = useToolbox({
-        source,
-    })
     const theme = darkMode === "dark" ? DarkTheme : Theme
     const gridColor = darkMode === "dark" ? "#555" : "#ccc"
 
@@ -112,56 +80,13 @@ export default function VMBlockEditor(props: {
                 pinch: true,
             },
         },
-        initialXml: initialXml || newProjectXml,
+        initialXml: workspaceXml,
         onImportXmlError: () => setError("Error loading blocks..."),
     }) as { workspace: WorkspaceSvg; xml: string }
 
     // store ref
-    useEffect(() => {
-        if (workspaceRef) {
-            workspaceRef.current = workspace
-            return () => (workspaceRef.current = undefined)
-        }
-    }, [workspace, workspaceRef])
-
-    // surface state to react
-    useEffect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = workspace as any as BlocklyWorkspaceWithServices
-        if (ws) ws.jacdacServices = new WorkspaceServices()
-    }, [workspace])
-    useEffect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = workspace as any as BlocklyWorkspaceWithServices
-        const services = ws?.jacdacServices
-        if (services) {
-            services.roleManager = roleManager
-        }
-    }, [workspace, roleManager])
-
-    // plugins
-    useBlocklyPlugins(workspace)
-    useBlocklyEvents(workspace)
-    useToolboxButtons(workspace, toolboxConfiguration)
-
-    // blockly did a change
-    useEffect(() => {
-        if (!workspace || workspace.isDragging()) return
-
-        onXmlChange?.(xml)
-
-        // save json
-        if (onJSONChange) {
-            // emit json
-            const newSource = domToJSON(workspace, dsls)
-            if (JSON.stringify(newSource) !== JSON.stringify(source)) {
-                setSource(newSource)
-                onJSONChange?.(newSource)
-            }
-        }
-    }, [dsls, workspace, xml])
-
-    // TODO: apply errors
+    useEffect(() => setWorkspace(workspace), [workspace])
+    useEffect(() => setWorkspaceXml(xml), [xml])
 
     // resize blockly
     useEffect(() => {

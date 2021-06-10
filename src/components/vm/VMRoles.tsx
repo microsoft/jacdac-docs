@@ -9,20 +9,20 @@ import {
     addServiceProvider,
     serviceProviderDefinitionFromServiceClass,
 } from "../../../jacdac-ts/src/servers/servers"
-import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import useChange from "../../jacdac/useChange"
-import { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
+import { BlockSvg, FieldVariable } from "blockly"
 import { TWIN_BLOCK } from "../blockly/toolbox"
 import useServiceServer from "../hooks/useServiceServer"
 import CancelIcon from "@material-ui/icons/Cancel"
+import BlockContext from "../blockly/BlockContext"
 
 function RoleChip(props: {
     role: string
     service: JDService
     serviceShortId: string
-    workspace: WorkspaceSvg
 }) {
-    const { role, service, serviceShortId, workspace } = props
+    const { workspace } = useContext(BlockContext)
+    const { role, service, serviceShortId } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const server = useServiceServer(service)
     const handleRoleClick = () => {
@@ -84,11 +84,8 @@ function RoleChip(props: {
     )
 }
 
-export default function VMRoles(props: {
-    roleManager: RoleManager
-    workspace?: WorkspaceSvg
-}) {
-    const { roleManager, workspace } = props
+export default function VMRoles() {
+    const { roleManager } = useContext(BlockContext)
     const roles = useChange(roleManager, _ => _?.roles)
 
     return (
@@ -99,7 +96,6 @@ export default function VMRoles(props: {
                         role={role}
                         service={service}
                         serviceShortId={serviceShortId}
-                        workspace={workspace}
                     />
                 </Grid>
             ))}

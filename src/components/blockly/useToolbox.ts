@@ -16,7 +16,7 @@ import {
 } from "./toolbox"
 import { WorkspaceJSON } from "./jsongenerator"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
-import DslContext from "./dsl/DslContext"
+import BlockContext from "./BlockContext"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 // overrides blockly emboss filter for svg elements
@@ -102,14 +102,11 @@ export default function useToolbox(props: {
     blockServices?: string[]
     source?: WorkspaceJSON
     program?: VMProgram
-}): {
-    toolboxConfiguration: ToolboxConfiguration
-    newProjectXml: string
-} {
+}): ToolboxConfiguration {
     const { source, program } = props
     const liveServices = useServices({ specification: true })
 
-    const { dsls } = useContext(DslContext)
+    const { dsls } = useContext(BlockContext)
     const theme = useTheme()
     useMemo(() => loadBlocks(dsls, theme), [theme, dsls])
 
@@ -132,10 +129,7 @@ export default function useToolbox(props: {
             ),
     }
 
-    return {
-        toolboxConfiguration,
-        newProjectXml: NEW_PROJET_XML,
-    }
+    return toolboxConfiguration
 }
 
 export function useToolboxButtons(

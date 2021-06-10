@@ -1,13 +1,10 @@
 import { Grid, Typography } from "@material-ui/core"
-import React from "react"
-import { WorkspaceJSON } from "./jsongenerator"
+import React, { useContext } from "react"
 import CodeBlock from "../CodeBlock"
+import BlockContext from "./BlockContext"
 
-export default function BlockDiagnostics(props: {
-    source: WorkspaceJSON
-    xml: string
-}) {
-    const { source, xml } = props
+export default function BlockDiagnostics() {
+    const { workspaceXml, workspaceJSON } = useContext(BlockContext)
     return (
         <>
             <Grid item xs={12}>
@@ -15,14 +12,14 @@ export default function BlockDiagnostics(props: {
                 <CodeBlock
                     className="json"
                     downloadName={"test.json"}
-                    downloadText={JSON.stringify(source, null, 2)}
+                    downloadText={JSON.stringify(workspaceJSON, null, 2)}
                 >
-                    {JSON.stringify(source, null, 2)}
+                    {JSON.stringify(workspaceJSON, null, 2)}
                 </CodeBlock>
             </Grid>
             <Grid item xs={12}>
                 <Typography variant="subtitle1">Blockly XML</Typography>
-                <CodeBlock className="xml">{xml}</CodeBlock>
+                <CodeBlock className="xml">{workspaceXml}</CodeBlock>
             </Grid>
         </>
     )
