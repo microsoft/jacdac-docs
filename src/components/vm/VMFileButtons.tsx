@@ -49,7 +49,7 @@ function VMLoadButton() {
 function VMSaveButton() {
     const { workspaceXml } = useContext(BlockContext)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const json: VMFile = {
+    const json = {
         xml: workspaceXml,
     }
 
