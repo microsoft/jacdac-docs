@@ -3,8 +3,7 @@ import {
     toIdentifier,
     toMemberExpression,
 } from "../../../../jacdac-ts/src/vm/compile"
-import { VMError } from "../../../../jacdac-ts/src/vm/ir"
-import { ExpressionWithErrors, makeVMBase } from "../../vm/VMgenerator"
+import { makeVMBase } from "../../vm/VMgenerator"
 
 const variablesDsl: BlockDomainSpecificLanguage = {
     id: "variables",
@@ -16,27 +15,29 @@ const variablesDsl: BlockDomainSpecificLanguage = {
             custom: "VARIABLE",
         },
     ],
-    compileExpressionToVM: ({ block, /*definition*/ }) => {
+    compileExpressionToVM: ({ block /*definition*/ }) => {
         const { type, inputs } = block
+        console.log("HERE")
         if (type === "variables_get") {
             const { value: variable } = inputs[0].fields.var
-            return {
-                expr: toMemberExpression(
-                    "$",
-                    variable.toString()
-                ),
+            const ret = {
+                expr: toMemberExpression("$", variable.toString()),
                 errors: [],
             }
+            console.log(ret)
+            return ret
         }
         return undefined
     },
-    compileCommandToVM: ({ event, block, /*definition,*/ blockToExpression }) => {
+    compileCommandToVM: ({
+        event,
+        block,
+        /*definition,*/ blockToExpression,
+    }) => {
+        console.log("THERE")
         const { type, inputs } = block
         if (type === "variables_set") {
-            const { expr, errors } = blockToExpression(
-                event,
-                inputs[0].child
-            )
+            const { expr, errors } = blockToExpression(event, inputs[0].child)
             const { value: variable } = inputs[0].fields.var
             return {
                 cmd: makeVMBase(block, {
