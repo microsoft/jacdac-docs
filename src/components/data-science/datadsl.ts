@@ -1,6 +1,7 @@
-import { BlockDefinition, OptionsInputDefinition } from "../blockly/toolbox"
+import { BlockDefinition, CategoryDefinition } from "../blockly/toolbox"
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
+const colour = "#123456"
 export class DataScienceBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
 {
@@ -9,38 +10,31 @@ export class DataScienceBlockDomainSpecificLanguage
         const blocks: BlockDefinition[] = [
             {
                 kind: "block",
-                type: "ds_plus",
-                message0: "%1 %2 %3",
-                args0: [
-                    {
-                        type: "input_value",
-                        name: "A",
-                        check: "Number",
-                    },
-                    {
-                        type: "field_dropdown",
-                        name: "OP",
-                        options: [
-                            ["%{BKY_MATH_ADDITION_SYMBOL}", "ADD"],
-                            ["%{BKY_MATH_SUBTRACTION_SYMBOL}", "MINUS"],
-                            ["%{BKY_MATH_MULTIPLICATION_SYMBOL}", "MULTIPLY"],
-                            ["%{BKY_MATH_DIVISION_SYMBOL}", "DIVIDE"],
-                        ],
-                    } as OptionsInputDefinition,
-                    {
-                        type: "input_value",
-                        name: "B",
-                        check: "Number",
-                    },
-                ],
+                type: "ds_some_block",
+                message0: "some block data",
+                args0: [],
                 inputsInline: true,
                 output: "Number",
-                style: "math_blocks",
-                helpUrl: "%{BKY_MATH_ARITHMETIC_HELPURL}",
-                extensions: ["math_op_tooltip"],
+                colour,
             } as BlockDefinition,
         ]
         return blocks
+    }
+
+    createCategory() {
+        return [
+            <CategoryDefinition>{
+                kind: "category",
+                name: "Data Science",
+                colour,
+                contents: [
+                    {
+                        kind: "block",
+                        type: "ds_some_block",
+                    },
+                ],
+            },
+        ]
     }
 }
 
