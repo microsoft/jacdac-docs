@@ -11,15 +11,16 @@ import {
 } from "../../../jacdac-ts/src/servers/servers"
 import useChange from "../../jacdac/useChange"
 import { BlockSvg, FieldVariable } from "blockly"
-import { TWIN_BLOCK } from "../blockly/toolbox"
+import { TWIN_BLOCK } from "./toolbox"
 import useServiceServer from "../hooks/useServiceServer"
 import CancelIcon from "@material-ui/icons/Cancel"
-import BlockContext from "../blockly/BlockContext"
+import BlockContext from "./BlockContext"
 
 function RoleChip(props: {
     role: string
     service: JDService
     serviceShortId: string
+    handleRoleClick: () => void
 }) {
     const { workspace } = useContext(BlockContext)
     const { role, service, serviceShortId } = props
@@ -84,7 +85,7 @@ function RoleChip(props: {
     )
 }
 
-export default function VMRoles() {
+export default function BlockRoles() {
     const { roleManager } = useContext(BlockContext)
     const roles = useChange(roleManager, _ => _?.roles)
 

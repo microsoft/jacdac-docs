@@ -6,9 +6,9 @@ import ImportButton from "../ImportButton"
 import AppContext from "../AppContext"
 import { Xml } from "blockly"
 import VMFile from "../../../jacdac-ts/src/vm/file"
-import BlockContext from "../blockly/BlockContext"
+import BlockContext from "./BlockContext"
 
-function VMLoadButton() {
+function LoadButton() {
     const { workspace } = useContext(BlockContext)
     const { setError } = useContext(AppContext)
     const disabled = !workspace
@@ -46,7 +46,7 @@ function VMLoadButton() {
     )
 }
 
-function VMSaveButton() {
+function SaveButton() {
     const { workspaceXml } = useContext(BlockContext)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const json = {
@@ -68,14 +68,14 @@ function VMSaveButton() {
     )
 }
 
-export default function VMFileButtons() {
+export default function BlockFileButtons() {
     return (
         <>
             <Grid item>
-                <VMSaveButton />
+                <SaveButton />
             </Grid>
             <Grid item>
-                <VMLoadButton />
+                <LoadButton />
             </Grid>
         </>
     )
