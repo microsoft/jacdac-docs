@@ -1,4 +1,4 @@
-import { Workspace, WorkspaceSvg } from "blockly"
+import { WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
@@ -78,10 +78,7 @@ export function BlockProvider(props: {
         _setWorkspaceXml(xml)
     }
 
-    const toolboxConfiguration = useToolbox({
-        dsls,
-        source: workspaceJSON,
-    })
+    const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
 
     // plugins
     useBlocklyPlugins(workspace)

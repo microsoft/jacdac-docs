@@ -96,22 +96,17 @@ function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
     return cat
 }
 
-export default function useToolbox(props: {
-    dsls: BlockDomainSpecificLanguage[]
-    blockServices?: string[]
-    source?: WorkspaceJSON
-    program?: VMProgram
-}): ToolboxConfiguration {
-    const { dsls, source, program } = props
+export default function useToolbox(
+    dsls: BlockDomainSpecificLanguage[],
+    source: WorkspaceJSON
+): ToolboxConfiguration {
     const liveServices = useServices({ specification: true })
 
     const theme = useTheme()
     useMemo(() => loadBlocks(dsls, theme), [theme, dsls])
 
     const dslsCategories = arrayConcatMany(
-        dsls.map(dsl =>
-            dsl?.createCategory?.({ theme, source, program, liveServices })
-        )
+        dsls.map(dsl => dsl?.createCategory?.({ theme, source, liveServices }))
     )
         .filter(cat => !!cat)
         .sort((l, r) => -(l.order - r.order))
