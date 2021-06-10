@@ -18,7 +18,6 @@ const variablesDsl: BlockDomainSpecificLanguage = {
     ],
     compileExpressionToVM: ({ block /*definition*/ }) => {
         const { type, inputs } = block
-        console.log("HERE")
         if (type === "variables_get") {
             const { value: variable } = inputs[0].fields.var
             const ret = {
@@ -35,7 +34,6 @@ const variablesDsl: BlockDomainSpecificLanguage = {
         block,
         /*definition,*/ blockToExpression,
     }) => {
-        console.log("THERE")
         const { type, inputs } = block
         if (type === "variables_set") {
             const { expr, errors } = blockToExpression(event, inputs[0].child)
