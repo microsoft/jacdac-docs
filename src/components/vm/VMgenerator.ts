@@ -10,8 +10,12 @@ import {
 import { toIdentifier, RoleEvent } from "../../../jacdac-ts/src/vm/compile"
 
 import { assert } from "../../../jacdac-ts/src/jdom/utils"
-import { BUILTIN_TYPES, resolveServiceBlockDefinition } from "../blockly/toolbox"
+import {
+    BUILTIN_TYPES,
+    resolveServiceBlockDefinition,
+} from "../blockly/toolbox"
 import Blockly from "blockly"
+import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
 const ops = {
     AND: "&&",
@@ -61,6 +65,8 @@ export default function workspaceJSONToVMProgram(
     dsls: BlockDomainSpecificLanguage[]
 ): VMProgram {
     console.debug(`compile vm`, { workspace, dsls })
+
+    if (!workspace) return undefined
 
     const roles: VMRole[] = workspace.variables
         .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
