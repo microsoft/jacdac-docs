@@ -7,6 +7,7 @@ import { makeVMBase } from "../../vm/VMgenerator"
 
 const variablesDsl: BlockDomainSpecificLanguage = {
     id: "variables",
+    types: ["variables_get", "variables_set"],
     createCategory: () => [
         {
             kind: "category",
