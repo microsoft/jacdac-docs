@@ -1044,8 +1044,16 @@ export class ServicesBlockDomainSpecificLanguage
                     errors,
                 }
             }
+            default: {
+                const { type } = block
+                switch(type) {
+                    case ROLE_BOUND_EVENT_BLOCK: {
+                        console.log("ROLE_BOUND_EVENT")
+                        break
+                    }
+                }
+            }
         }
-
         return undefined
     }
 
@@ -1091,9 +1099,17 @@ export class ServicesBlockDomainSpecificLanguage
                     errors,
                 }
             }
-            default:
-                return undefined
+            default: {
+                const { type } = block
+                switch(type) {
+                    case ROLE_BOUND_BLOCK: {
+                        console.log("ROLE_BOUND")
+                        break
+                    }
+                }
+            }
         }
+        return undefined
     }
 
     compileCommandToVM(options: CompileCommandToVMOptions) {
@@ -1137,6 +1153,14 @@ export class ServicesBlockDomainSpecificLanguage
                         ),
                     }),
                     errors: exprsErrors.flatMap(p => p.errors),
+                }
+            }
+            default: {
+                const { type } = block
+                switch(type) {
+                    case SET_STATUS_LIGHT_BLOCK: {
+                        console.log("SET_STATUS")
+                    }
                 }
             }
         }
