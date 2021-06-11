@@ -9,6 +9,8 @@ import LEDColorField from "./LEDColorField"
 import TwinField from "./TwinField"
 import JDomTreeField from "./JDomTreeField"
 import WatchValueField from "./WatchValueField"
+import LogViewField from "./LogViewField"
+import VariablesField from "./VariablesFields"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -36,6 +38,8 @@ export function registerFields() {
         TwinField,
         JDomTreeField,
         WatchValueField,
+        LogViewField,
+        VariablesField,
     ]
     fieldTypes.forEach(registerType)
 }

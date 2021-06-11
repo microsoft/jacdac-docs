@@ -1,4 +1,4 @@
-import Blockly, { FieldVariable } from "blockly"
+import { Block, FieldVariable, WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
@@ -7,13 +7,24 @@ import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import { VMProgramRunner } from "../../../jacdac-ts/src/vm/runner"
 import useChange from "../../jacdac/useChange"
 import ReactField from "./fields/ReactField"
+import { WorkspaceJSON } from "./jsongenerator"
 
 export class WorkspaceServices extends JDEventSource {
+    private _workspaceJSON: WorkspaceJSON
     private _runner: VMProgramRunner
     private _roleManager: RoleManager
 
     constructor() {
         super()
+    }
+
+    get workspaceJSON() {
+        return this._workspaceJSON
+    }
+
+    set workspaceJSON(value: WorkspaceJSON) {
+        this._workspaceJSON = value;
+        this.emit(CHANGE)
     }
 
     get runner() {
@@ -40,7 +51,9 @@ export class WorkspaceServices extends JDEventSource {
 }
 
 export interface WorkspaceContextProps {
-    workspace?: Blockly.Workspace
+    workspace?: WorkspaceSvg
+    workspaceJSON?: WorkspaceJSON
+    sourceBlock?: Block
     sourceId?: string
     services: WorkspaceServices
     flyout?: boolean
@@ -52,6 +65,8 @@ export interface WorkspaceContextProps {
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
     workspace: undefined,
+    workspaceJSON: undefined,
+    sourceBlock: undefined,
     flyout: false,
     sourceId: undefined,
     services: undefined,
@@ -64,7 +79,7 @@ WorkspaceContext.displayName = "Workspace"
 
 export default WorkspaceContext
 
-export interface BlocklyWorkspaceWithServices extends Blockly.Workspace {
+export interface BlocklyWorkspaceWithServices extends WorkspaceSvg {
     jacdacServices: WorkspaceServices
 }
 
@@ -74,7 +89,7 @@ export function WorkspaceProvider(props: {
     children: ReactNode
 }) {
     const { field, children } = props
-    const [sourceBlock, setSourceBlock] = useState<Blockly.Block>(
+    const [sourceBlock, setSourceBlock] = useState<Block>(
         field?.getSourceBlock()
     )
     const sourceId = sourceBlock?.id
@@ -82,6 +97,7 @@ export function WorkspaceProvider(props: {
     const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
     const roleManager = useChange(services, _ => _?.roleManager)
     const runner = useChange(services, _ => _?.runner)
+    const workspaceJSON = useChange(services, _ => _?.workspaceJSON)
 
     const resolveRole = () => {
         const newSourceBlock = field.getSourceBlock()
@@ -135,6 +151,8 @@ export function WorkspaceProvider(props: {
         // eslint-disable-next-line react/react-in-jsx-scope
         <WorkspaceContext.Provider
             value={{
+                sourceBlock,
+                workspaceJSON,
                 sourceId,
                 services,
                 role,

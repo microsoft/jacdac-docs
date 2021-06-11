@@ -17,22 +17,6 @@ import {
 import Blockly from "blockly"
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
-const ops = {
-    AND: "&&",
-    OR: "||",
-    EQ: "===",
-    NEQ: "!==",
-    LT: "<",
-    GT: ">",
-    LTE: "<=",
-    GTE: ">=",
-    NEG: "-",
-    ADD: "+",
-    MULTIPLY: "*",
-    DIVIDE: "/",
-    MINUS: "-",
-}
-
 export interface ExpressionWithErrors {
     expr: jsep.Expression
     errors: VMError[]
@@ -68,6 +52,18 @@ export default function workspaceJSONToVMProgram(
 
     if (!workspace) return undefined
 
+    const resolveDsl = (type: string) => {
+        const dsl = dsls.find(dsl => dsl.types?.indexOf(type) > -1)
+        if (dsl) return dsl
+
+        const { dsl: dslName } = resolveServiceBlockDefinition(type)
+        if (!dslName) {
+            console.warn(`unknown dsl for ${type}`)
+            return undefined
+        }
+        return dsls?.find(dsl => dsl.id === dslName)
+    }
+
     const roles: VMRole[] = workspace.variables
         .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
         .map(v => ({ role: v.name, serviceShortId: v.type }))
@@ -95,108 +91,51 @@ export default function workspaceJSONToVMProgram(
                     raw: value + "",
                 }
 
-            switch (type) {
-                case "math_single": // built-in blockly
-                case "jacdac_math_single": {
-                    const argument = blockToExpressionInner(ev, inputs[0].child)
-                    const op = inputs[0].fields["op"].value as string
-                    return <jsep.UnaryExpression>{
-                        type: "UnaryExpression",
-                        operator: ops[op] || op,
-                        argument,
-                        prefix: false, // TODO:?
-                    }
+            const dsl = resolveDsl(type)
+            if (!dsl) {
+                console.warn(`unknown block ${type}`, {
+                    type,
+                    ev,
+                    block,
+                    d: Blockly.Blocks[type],
+                })
+                errors.push({
+                    sourceId: block.id,
+                    message: `unknown block ${type}`,
+                })
+            } else {
+                const definition = resolveServiceBlockDefinition(type)
+                const res = dsl.compileExpressionToVM?.({
+                    event: ev,
+                    definition,
+                    block,
+                    blockToExpressionInner,
+                })
+                if (res) {
+                    if (res.errors) res.errors.forEach(e => errors.push(e))
+                    return res.expr
                 }
-                case "math_arithmetic": // built-in blockly
-                case "jacdac_math_arithmetic": {
-                    const left = blockToExpressionInner(ev, inputs[0].child)
-                    const right = blockToExpressionInner(ev, inputs[1].child)
-                    const op = inputs[1].fields["op"].value as string
-                    return <jsep.BinaryExpression>{
-                        type: "BinaryExpression",
-                        operator: ops[op] || op,
-                        left,
-                        right,
-                    }
-                }
-                case "logic_operation": {
-                    const left = blockToExpressionInner(ev, inputs[0].child)
-                    const right = blockToExpressionInner(ev, inputs[1].child)
-                    const op = inputs[1].fields["op"].value as string
-                    return <jsep.LogicalExpression>{
-                        type: "LogicalExpression",
-                        operator: ops[op] || op,
-                        left,
-                        right,
-                    }
-                }
-                case "logic_negate": {
-                    const argument = blockToExpressionInner(ev, inputs[0].child)
-                    return <jsep.UnaryExpression>{
-                        type: "UnaryExpression",
-                        operator: "!",
-                        argument,
-                        prefix: false, // TODO:?
-                    }
-                }
-                case "logic_compare": {
-                    const left = blockToExpressionInner(ev, inputs[0].child)
-                    const right = blockToExpressionInner(ev, inputs[1].child)
-                    const op = inputs[1].fields["op"].value as string
-                    return <jsep.BinaryExpression>{
-                        type: "BinaryExpression",
-                        operator: ops[op] || op,
-                        left,
-                        right,
-                    }
-                }
-                default: {
-                    const definition = resolveServiceBlockDefinition(type)
-                    if (!definition) {
-                        console.warn(`unknown block ${type}`, {
-                            type,
-                            ev,
-                            block,
-                            d: Blockly.Blocks[type],
-                        })
-                    } else {
-                        // try any DSL
-                        const { dsl: dslName } = definition
-                        const dsl = dsls.find(d => d.id === dslName)
-                        const res = dsl?.compileExpressionToVM?.({
-                            event: ev,
-                            definition,
-                            block,
-                            blockToExpressionInner,
-                        })
-                        if (res) {
-                            if (res.errors)
-                                res.errors.forEach(e => errors.push(e))
-                            return res.expr
-                        }
 
-                        const { template } = definition
-                        switch (template) {
-                            case "shadow": {
-                                const field = inputs[0].fields["value"]
-                                const v = field.value
-                                return <jsep.Literal>{
-                                    type: "Literal",
-                                    value: v,
-                                    raw: v + "",
-                                }
-                            }
-                            default: {
-                                console.warn(
-                                    `unsupported block template ${template} for ${type}`,
-                                    { ev, block }
-                                )
-                                break
-                            }
-                        }
-                        break
+                const { template } = definition
+                if (template === "shadow") {
+                    const field = inputs[0].fields["value"]
+                    const v = field.value
+                    return <jsep.Literal>{
+                        type: "Literal",
+                        value: v,
+                        raw: v + "",
                     }
                 }
+
+                errors.push({
+                    sourceId: block.id,
+                    message: `unknown block ${type}`,
+                })
+                console.warn(`unsupported block ${type}`, {
+                    ev,
+                    block,
+                    definition,
+                })
             }
             throw new EmptyExpression()
         }
@@ -276,11 +215,10 @@ export default function workspaceJSONToVMProgram(
             }
             // more builts
             default: {
-                const definition = resolveServiceBlockDefinition(type)
-                if (definition) {
-                    const { dsl: dslName } = definition
-                    const dsl = dsls.find(dsl => dsl.id === dslName)
-                    const dslRes = dsl?.compileCommandToVM?.({
+                const dsl = resolveDsl(type)
+                if (dsl) {
+                    const definition = resolveServiceBlockDefinition(type)
+                    const dslRes = dsl.compileCommandToVM?.({
                         event,
                         block,
                         definition,
@@ -290,12 +228,16 @@ export default function workspaceJSONToVMProgram(
                         dslRes.errors = processErrors(block, dslRes.errors)
                         return dslRes
                     }
-
-                    console.warn(`unsupported block ${type}`, { block })
-                    return {
-                        cmd: undefined,
-                        errors: [],
-                    }
+                }
+                console.warn(`unsupported block ${type}`, { block })
+                return {
+                    cmd: undefined,
+                    errors: [
+                        {
+                            sourceId: block.id,
+                            message: `unsupported block ${type}`,
+                        },
+                    ],
                 }
             }
         }
@@ -312,8 +254,9 @@ export default function workspaceJSONToVMProgram(
         blocks: BlockJSON[],
         handler: VMHandler
     ) => {
-        blocks?.forEach(child => {
-            if (child) {
+        blocks
+            ?.filter(child => !!child)
+            .forEach(child => {
                 try {
                     const { cmd, errors } = blockToCommand(event, child)
                     if (cmd) handler.commands.push(cmd)
@@ -329,8 +272,7 @@ export default function workspaceJSONToVMProgram(
                         console.debug(e)
                     }
                 }
-            }
-        })
+            })
     }
 
     const handlers: VMHandler[] = workspace.blocks
@@ -340,12 +282,10 @@ export default function workspaceJSONToVMProgram(
             let topEvent: RoleEvent
             let topErrors: VMError[]
             let topMeta = false
-            const definition = resolveServiceBlockDefinition(type)
-            assert(!!definition)
-            const { template, dsl: dslName } = definition
-            const dsl = dslName && dsls?.find(d => d.id === dslName)
 
             try {
+                const dsl = resolveDsl(type)
+                const definition = resolveServiceBlockDefinition(type)
                 const { expression, errors, event, meta } =
                     dsl?.compileEventToVM?.({
                         block: top,
@@ -358,13 +298,20 @@ export default function workspaceJSONToVMProgram(
                 topMeta = meta
 
                 // if dsl didn't compile anything try again
+                const { template } = definition || {}
                 if (!command && !topErrors?.length) {
                     switch (template) {
                         case "meta": {
                             break
                         }
                         default: {
-                            console.warn(
+                            topErrors = [
+                                {
+                                    sourceId: top.id,
+                                    message: `unsupported block ${type}`,
+                                },
+                            ]
+                            console.debug(
                                 `unsupported handler template ${template} for ${type}`,
                                 { top }
                             )

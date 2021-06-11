@@ -52,21 +52,21 @@ import ServoAngleField from "../fields/ServoAngleField"
 import {
     BlockDefinition,
     BlockReference,
+    BOOLEAN_TYPE,
     CategoryDefinition,
     CODE_STATEMENT_TYPE,
     CommandBlockDefinition,
-    CONNECTED_BLOCK,
-    CONNECTION_BLOCK,
     CustomBlockDefinition,
     EventBlockDefinition,
     EventFieldDefinition,
     InputDefinition,
+    JSON_TYPE,
+    NUMBER_TYPE,
     OptionsInputDefinition,
     RegisterBlockDefinition,
     resolveServiceBlockDefinition,
-    SeparatorDefinition,
     ServiceBlockDefinition,
-    SET_STATUS_LIGHT_BLOCK,
+    STRING_TYPE,
     ValueInputDefinition,
     VariableInputDefinition,
 } from "../toolbox"
@@ -80,6 +80,10 @@ import BlockDomainSpecificLanguage, {
     CreateCategoryOptions,
 } from "./dsl"
 
+const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
+const ROLE_BOUND_EVENT_BLOCK = "jacdac_role_bound_event"
+const ROLE_BOUND_BLOCK = "jacdac_role_bound"
+
 function isBooleanField(field: jdspec.PacketMember) {
     return field.type === "bool"
 }
@@ -87,12 +91,14 @@ function isStringField(field: jdspec.PacketMember) {
     return field.type === "string"
 }
 function toBlocklyType(field: jdspec.PacketMember) {
-    return isBooleanField(field)
-        ? "Boolean"
+    return field.encoding === "JSON"
+        ? JSON_TYPE
+        : isBooleanField(field)
+        ? BOOLEAN_TYPE
         : isStringField(field)
-        ? "String"
+        ? STRING_TYPE
         : isNumericType(field)
-        ? "Number"
+        ? NUMBER_TYPE
         : undefined
 }
 function enumInfo(srv: jdspec.ServiceSpec, field: jdspec.PacketMember) {
@@ -105,7 +111,6 @@ const ignoredServices = [
     SRV_LOGGER,
     SRV_ROLE_MANAGER,
     SRV_PROTO_TEST,
-    SRV_SETTINGS,
     SRV_BOOTLOADER,
 ]
 const ignoredEvents = [SystemEvent.StatusCodeChanged]
@@ -324,9 +329,18 @@ export class ServicesBlockDomainSpecificLanguage
                     <CustomBlockDefinition>{
                         kind: "block",
                         type: `key`,
-                        message0: `send %1 key %2`,
+                        message0: `%1 %2 key %3`,
                         args0: [
                             fieldVariable(service),
+                            <OptionsInputDefinition>{
+                                type: "field_dropdown",
+                                name: "action",
+                                options: [
+                                    ["press", "press"],
+                                    ["down", "down"],
+                                    ["up", "up"],
+                                ],
+                            },
                             {
                                 type: KeyboardKeyField.KEY,
                                 name: "combo",
@@ -339,7 +353,7 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: `Send a keyboard key combo`,
                         helpUrl: serviceHelp(service),
                         service,
-                        expression: `role.key(combo.selectors, combo.modifiers)`,
+                        expression: `role.key(combo.selectors, combo.modifiers, action)`,
                         template: "custom",
                     }
             ),
@@ -370,7 +384,6 @@ export class ServicesBlockDomainSpecificLanguage
                             speed: {
                                 kind: "block",
                                 type: "jacdac_ratio",
-                                shadow: true,
                             },
                         },
                         colour: serviceColor(service),
@@ -698,47 +711,75 @@ export class ServicesBlockDomainSpecificLanguage
             ...commandBlocks,
         ]
 
+        const eventFieldGroups = [
+            {
+                output: NUMBER_TYPE,
+                filter: isNumericType,
+            },
+            {
+                output: BOOLEAN_TYPE,
+                filter: isBooleanField,
+            },
+            {
+                output: STRING_TYPE,
+                filter: (f: jdspec.PacketMember) =>
+                    isStringField(f) && f.encoding !== "JSON",
+            },
+            {
+                output: JSON_TYPE,
+                filter: (f: jdspec.PacketMember) =>
+                    isStringField(f) && f.encoding === "JSON",
+            },
+        ]
         // generate accessor blocks for event data with numbers
         this._eventFieldBlocks = arrayConcatMany(
-            events.map(({ service, events }) =>
-                events
-                    .filter(
-                        event => event.fields.filter(isNumericType).length > 0
+            arrayConcatMany(
+                eventFieldGroups.map(({ output, filter }) =>
+                    events.map(({ service, events }) =>
+                        events
+                            .filter(
+                                event => event.fields.filter(filter).length > 0
+                            )
+                            .map(event => ({ service, event }))
+                            .map(
+                                ({ service, event }) =>
+                                    <EventFieldDefinition>{
+                                        kind: "block",
+                                        type: `jacdac_event_field_${output.toLowerCase()}_${
+                                            service.shortId
+                                        }_${event.name}`,
+                                        message0: `${event.name} %1`,
+                                        args0: [
+                                            <InputDefinition>{
+                                                type: "field_dropdown",
+                                                name: "field",
+                                                options: event.fields.map(
+                                                    field => [
+                                                        humanify(field.name),
+                                                        field.name,
+                                                    ]
+                                                ),
+                                            },
+                                        ],
+                                        colour: serviceColor(service),
+                                        inputsInline: true,
+                                        tooltip: `Data fields of the ${event.name} event`,
+                                        helpUrl: serviceHelp(service),
+                                        service,
+                                        event,
+                                        output,
+                                        template: "event_field",
+                                    }
+                            )
                     )
-                    .map(event => ({ service, event }))
-                    .map(
-                        ({ service, event }) =>
-                            <EventFieldDefinition>{
-                                kind: "block",
-                                type: `jacdac_event_field_${service.shortId}_${event.name}`,
-                                message0: `${event.name} %1`,
-                                args0: [
-                                    <InputDefinition>{
-                                        type: "field_dropdown",
-                                        name: "field",
-                                        options: event.fields.map(field => [
-                                            humanify(field.name),
-                                            field.name,
-                                        ]),
-                                    },
-                                ],
-                                colour: serviceColor(service),
-                                inputsInline: true,
-                                tooltip: `Data fields of the ${event.name} event`,
-                                helpUrl: serviceHelp(service),
-                                service,
-                                event,
-                                output: "Number",
-                                template: "event_field",
-                            }
-                    )
+                )
             )
         )
 
         this._runtimeBlocks = [
             {
                 kind: "block",
-                type: CONNECTION_BLOCK,
+                type: ROLE_BOUND_EVENT_BLOCK,
                 message0: "on %1 %2",
                 args0: [
                     <VariableInputDefinition>{
@@ -757,8 +798,8 @@ export class ServicesBlockDomainSpecificLanguage
                         type: "field_dropdown",
                         name: "event",
                         options: [
-                            ["connected", "connected"],
-                            ["disconnected", "disconnected"],
+                            ["bound", "bound"],
+                            ["unbound", "unbound"],
                         ],
                     },
                 ],
@@ -767,12 +808,12 @@ export class ServicesBlockDomainSpecificLanguage
                 colour: commandColor,
                 tooltip: "Runs code when a role is connected or disconnected",
                 helpUrl: "",
-                template: "connection",
+                template: "role_binding_event",
             },
             {
                 kind: "block",
-                type: CONNECTED_BLOCK,
-                message0: "%1 connected",
+                type: ROLE_BOUND_BLOCK,
+                message0: "%1 bound",
                 args0: [
                     <VariableInputDefinition>{
                         type: "field_variable",
@@ -792,7 +833,7 @@ export class ServicesBlockDomainSpecificLanguage
                 colour: commandColor,
                 tooltip: "Runs code when a role is connected or disconnected",
                 helpUrl: "",
-                template: "connected",
+                template: "role_bound",
             },
             {
                 kind: "block",
@@ -853,7 +894,7 @@ export class ServicesBlockDomainSpecificLanguage
                     block,
                     definition: resolveServiceBlockDefinition(block.type),
                 }))
-                .filter(({ definition }) => definition.template === "event")
+                .filter(({ definition }) => definition?.template === "event")
                 .map(({ block, definition }) => {
                     const eventName = block.inputs[0].fields["event"]
                         .value as string
@@ -903,7 +944,7 @@ export class ServicesBlockDomainSpecificLanguage
                 name: service.name,
                 colour: serviceColor(service),
                 contents: [
-                    ...serviceBlocks.map<BlockDefinition>(block => ({
+                    ...serviceBlocks.map<BlockReference>(block => ({
                         kind: "block",
                         type: block.type,
                         values: block.values,
@@ -914,7 +955,7 @@ export class ServicesBlockDomainSpecificLanguage
                                 ev.service === service &&
                                 usedEvents.has(ev.event)
                         )
-                        .map<BlockDefinition>(block => ({
+                        .map<BlockReference>(block => ({
                             kind: "block",
                             type: block.type,
                             values: block.values,
@@ -931,18 +972,18 @@ export class ServicesBlockDomainSpecificLanguage
 
         const commonCategory: CategoryDefinition = {
             kind: "category",
-            name: "Services",
+            name: "Roles",
             colour: commandColor,
             contents: [
-                <BlockDefinition>{
+                <BlockReference>{
                     kind: "block",
-                    type: CONNECTION_BLOCK,
+                    type: ROLE_BOUND_EVENT_BLOCK,
                 },
-                <BlockDefinition>{
+                <BlockReference>{
                     kind: "block",
-                    type: CONNECTED_BLOCK,
+                    type: ROLE_BOUND_BLOCK,
                 },
-                <BlockDefinition>{
+                <BlockReference>{
                     kind: "block",
                     type: SET_STATUS_LIGHT_BLOCK,
                     values: {
@@ -955,13 +996,7 @@ export class ServicesBlockDomainSpecificLanguage
             ],
         }
 
-        return [
-            ...servicesCategories,
-            commonCategory,
-            <SeparatorDefinition>{
-                kind: "sep",
-            },
-        ]
+        return [...servicesCategories, commonCategory]
     }
 
     compileEventToVM(options: CompileEventToVMOptions): CompileEventToVMResult {

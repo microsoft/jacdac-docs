@@ -1,9 +1,19 @@
+import { ExpressionWithErrors } from "../../vm/VMgenerator"
 import {
+    BlockDefinition,
     CategoryDefinition,
     OptionsInputDefinition,
     ValueInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
+
+const ops = {
+    NEG: "-",
+    ADD: "+",
+    MULTIPLY: "*",
+    DIVIDE: "/",
+    MINUS: "-",
+}
 
 const mathDSL: BlockDomainSpecificLanguage = {
     id: "jacdacmath",
@@ -71,28 +81,11 @@ const mathDSL: BlockDomainSpecificLanguage = {
             args0: [],
             output: "Number",
             style: "math_blocks",
+            vm: function () {
+                return Math.random()
+            },
         },
-        {
-            kind: "block",
-            type: "jacdac_math_random_range",
-            message0: "random from %1 to %2",
-            args0: [
-                <ValueInputDefinition>{
-                    type: "input_value",
-                    name: "min",
-                    check: "Number",
-                },
-                <ValueInputDefinition>{
-                    type: "input_value",
-                    name: "max",
-                    check: "Number",
-                },
-            ],
-            output: "Number",
-            style: "math_blocks",
-            inputsInline: true,
-        },
-        {
+        <BlockDefinition>{
             kind: "block",
             type: "jacdac_math_clamp",
             message0: "clamp %1 in [%2, %3]",
@@ -115,6 +108,17 @@ const mathDSL: BlockDomainSpecificLanguage = {
             ],
             output: "Number",
             style: "math_blocks",
+            vm: function (
+                value: number,
+                minInclusive: number,
+                maxInclusive: number
+            ) {
+                return value < minInclusive
+                    ? minInclusive
+                    : value > maxInclusive
+                    ? maxInclusive
+                    : value
+            },
         },
         {
             kind: "block",
@@ -176,12 +180,50 @@ const mathDSL: BlockDomainSpecificLanguage = {
                     },
                 },
                 { kind: "block", type: "jacdac_math_random" },
-                { kind: "block", type: "jacdac_math_random_range" },
                 { kind: "block", type: "jacdac_math_map" },
                 { kind: "block", type: "math_number" },
             ],
         },
     ],
+    compileExpressionToVM: ({
+        event,
+        block,
+        blockToExpressionInner,
+    }): ExpressionWithErrors => {
+        const { type, inputs } = block
+        switch (type) {
+            case "math_single": // built-in blockly
+            case "jacdac_math_single": {
+                const argument = blockToExpressionInner(event, inputs[0].child)
+                const op = inputs[0].fields["op"].value as string
+                return {
+                    expr: <jsep.UnaryExpression>{
+                        type: "UnaryExpression",
+                        operator: ops[op] || op,
+                        argument,
+                        prefix: false, // TODO:?
+                    },
+                    errors: [],
+                }
+            }
+            case "math_arithmetic": // built-in blockly
+            case "jacdac_math_arithmetic": {
+                const left = blockToExpressionInner(event, inputs[0].child)
+                const right = blockToExpressionInner(event, inputs[1].child)
+                const op = inputs[1].fields["op"].value as string
+                return {
+                    expr: <jsep.BinaryExpression>{
+                        type: "BinaryExpression",
+                        operator: ops[op] || op,
+                        left,
+                        right,
+                    },
+                    errors: [],
+                }
+            }
+        }
+        return undefined
+    },
 }
 
 export default mathDSL

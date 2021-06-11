@@ -95,6 +95,10 @@ export interface BlockDefinition extends BlockReference {
     extensions?: string[]
     template?: BlockTemplate
     dsl?: string
+
+    // js implementation to be called by VM
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vm?: (...args: any[]) => any
 }
 
 export interface ServiceBlockDefinition extends BlockDefinition {
@@ -140,33 +144,34 @@ export interface CustomBlockDefinition extends ServiceBlockDefinition {
     expression?: string
 }
 
-export const WAIT_BLOCK = "jacdac_wait"
-export const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
-export const TWIN_BLOCK = "jacdac_twin"
-export const INSPECT_BLOCK = "jacdac_inspect"
-export const WATCH_BLOCK = "jacdac_watch"
-export const REPEAT_EVERY_BLOCK = "jacdac_repeat_every"
-export const CONNECTION_BLOCK = "jacdac_connection"
-export const CONNECTED_BLOCK = "jacdac_connected"
-
-export const PRIMITIVE_TYPES = ["String", "Boolean", "Number"]
+export const JSON_TYPE = "JSON"
+export const STRING_TYPE = "String"
+export const BOOLEAN_TYPE = "Boolean"
+export const NUMBER_TYPE = "Number"
+export const PRIMITIVE_TYPES = [STRING_TYPE, BOOLEAN_TYPE, NUMBER_TYPE]
 export const BUILTIN_TYPES = ["", ...PRIMITIVE_TYPES]
 
 export const CODE_STATEMENT_TYPE = "Code"
 
 export interface ContentDefinition {
-    kind: "category" | "sep" | "button"
+    kind: "category" | "sep" | "button" | "label"
     order?: number
+    hidden?: boolean
 }
 
 export interface CategoryDefinition extends ContentDefinition {
     kind: "category"
     name: string
-    order?: number
-    custom?: string
+    custom?: "VARIABLE" | "PROCEDURE"
+    expanded?: boolean
     colour?: string
     categorystyle?: string
-    contents?: (BlockDefinition | ContentDefinition)[]
+    contents?: (
+        | BlockReference
+        | ButtonDefinition
+        | SeparatorDefinition
+        | LabelDefinition
+    )[]
     button?: ButtonDefinition
 }
 
@@ -179,6 +184,12 @@ export interface ButtonDefinition extends ContentDefinition {
 
 export interface SeparatorDefinition extends ContentDefinition {
     kind: "sep"
+    gap?: number
+}
+
+export interface LabelDefinition extends ContentDefinition {
+    kind: "label"
+    text: string
 }
 
 export interface ToolboxConfiguration {

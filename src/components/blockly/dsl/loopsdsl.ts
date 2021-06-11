@@ -1,17 +1,19 @@
 import { toIdentifier } from "../../../../jacdac-ts/src/vm/compile"
 import { VMCommand } from "../../../../jacdac-ts/src/vm/ir"
 import {
-    BlockDefinition,
+    BlockReference,
     CategoryDefinition,
     CODE_STATEMENT_TYPE,
     InputDefinition,
-    REPEAT_EVERY_BLOCK,
     SeparatorDefinition,
     ValueInputDefinition,
-    WAIT_BLOCK,
 } from "../toolbox"
 import { makeVMBase, processErrors } from "../../vm/VMgenerator"
 import BlockDomainSpecificLanguage from "./dsl"
+
+const WAIT_BLOCK = "jacdac_wait"
+const ON_START_BLOCK = "jacdac_start"
+const REPEAT_EVERY_BLOCK = "jacdac_repeat_every"
 
 const colour = "#4fbac9"
 const loopsDsl: BlockDomainSpecificLanguage = {
@@ -34,6 +36,17 @@ const loopsDsl: BlockDomainSpecificLanguage = {
             colour,
             tooltip: "Wait the desired time",
             helpUrl: "",
+        },
+        {
+            kind: "block",
+            type: ON_START_BLOCK,
+            message0: `on start`,
+            args0: [],
+            colour,
+            inputsInline: true,
+            tooltip: `Runs code when the device starts`,
+            helpUrl: "",
+            nextStatement: CODE_STATEMENT_TYPE,
         },
         {
             kind: "block",
@@ -60,18 +73,21 @@ const loopsDsl: BlockDomainSpecificLanguage = {
         },
         <CategoryDefinition>{
             kind: "category",
-            name: "Commands",
-            order: 4,
+            name: "Events",
             colour,
             contents: [
-                <BlockDefinition>{
+                <BlockReference>{
                     kind: "block",
                     type: REPEAT_EVERY_BLOCK,
                     values: {
                         interval: { kind: "block", type: "jacdac_time_picker" },
                     },
                 },
-                <BlockDefinition>{
+                <BlockReference>{
+                    kind: "block",
+                    type: ON_START_BLOCK,
+                },
+                <BlockReference>{
                     kind: "block",
                     type: WAIT_BLOCK,
                     values: {
@@ -83,7 +99,18 @@ const loopsDsl: BlockDomainSpecificLanguage = {
     ],
     compileEventToVM: ({ block, blockToExpression }) => {
         const { type } = block
-        if (type === REPEAT_EVERY_BLOCK) {
+        if (type === ON_START_BLOCK) {
+            return {
+                expression: (
+                    makeVMBase(block, {
+                        type: "CallExpression",
+                        arguments: [],
+                        callee: toIdentifier("start"),
+                    }) as VMCommand
+                ).command,
+                errors: processErrors(block, []),
+            }
+        } else if (type === REPEAT_EVERY_BLOCK) {
             const { inputs } = block
             const { expr: time, errors } = blockToExpression(
                 undefined,

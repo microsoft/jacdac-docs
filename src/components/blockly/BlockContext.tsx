@@ -16,7 +16,7 @@ import {
 } from "./WorkspaceContext"
 
 export interface BlockWarning {
-    blockId: string
+    sourceId?: string
     message: string
 }
 
@@ -83,7 +83,6 @@ export function BlockProvider(props: {
         const services = ws?.jacdacServices
         if (services) services.roleManager = roleManager
     }, [workspace, roleManager])
-
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const wws = workspace as any as BlocklyWorkspaceWithServices
@@ -102,13 +101,19 @@ export function BlockProvider(props: {
             setWorkspaceJSON(newWorkspaceJSON)
         }
     }, [dsls, workspace, workspaceXml])
+    useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ws = workspace as any as BlocklyWorkspaceWithServices
+        const services = ws?.jacdacServices
+        if (services) services.workspaceJSON = workspaceJSON
+    }, [workspace, workspaceJSON])
 
     // apply errors
     useEffect(() => {
         if (!workspace) return
         const allErrors = toMap(
             warnings || [],
-            e => e.blockId,
+            e => e.sourceId || "",
             e => e.message
         )
         workspace
