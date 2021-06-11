@@ -18,11 +18,11 @@ export function computeBubbleLayout(
         b => b.getBoundingRectangle()
     )
     // just moved set starts with user moved bubble
-    const justMoved: string[] = [userMoved.id]
+    const marked: string[] = [userMoved.id]
 
     // determines if a bubble interset with the moved set
     const intersectWithMoved = (id: string) => {
-        return justMoved.some(oid => bubbles[oid].intersects(bubbles[id]))
+        return marked.some(oid => bubbles[oid].intersects(bubbles[id]))
     }
 
     // find unmarked bubbles that interset with userMoved
@@ -34,4 +34,13 @@ export function computeBubbleLayout(
         log("bubbles: no initial overlap")
         return []
     }
+
+    // Otherwise, the recursive case of the algorithm starts
+    
+    // generates 4 axis-aligned movements  (up, down, left, right) which move i the minimum distance such that i no longer intersects any marked bubbles.
+    const next
+
+    // Movements that are in the opposite direction to that moved by 
+    // any bubbles in J that intersect i are pruned (except on the initial call). The 2 movements with the largest Euclidian 
+    // distances are kept, the rest are pruned. 
 }
