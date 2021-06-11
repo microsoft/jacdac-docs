@@ -20,15 +20,15 @@ export function computeBubbleLayout(
     // just moved set starts with user moved bubble
     const marked: string[] = [userMoved.id]
 
-    // determines if a bubble interset with the moved set
-    const intersectWithMoved = (id: string) => {
-        return marked.some(oid => bubbles[oid].intersects(bubbles[id]))
-    }
-
     // find unmarked bubbles that interset with userMoved
     const unmarked: string[] = Object.keys(bubbles)
         .filter(id => id !== userMoved.id)
         .filter(id => intersectWithMoved(id))
+
+    // determines if a bubble interset with the moved set
+    const intersectWithMoved = (id: string) => {
+        return marked.some(oid => bubbles[oid].intersects(bubbles[id]))
+    }
 
     if (!unmarked.length) {
         log("bubbles: no initial overlap")
@@ -36,11 +36,11 @@ export function computeBubbleLayout(
     }
 
     // Otherwise, the recursive case of the algorithm starts
-    
-    // generates 4 axis-aligned movements  (up, down, left, right) which move i the minimum distance such that i no longer intersects any marked bubbles.
-    const next
 
-    // Movements that are in the opposite direction to that moved by 
-    // any bubbles in J that intersect i are pruned (except on the initial call). The 2 movements with the largest Euclidian 
-    // distances are kept, the rest are pruned. 
+    // generates 4 axis-aligned movements  (up, down, left, right) which move i the minimum distance such that i no longer intersects any marked bubbles.
+    const next = unmarked.shift()
+
+    // Movements that are in the opposite direction to that moved by
+    // any bubbles in J that intersect i are pruned (except on the initial call). The 2 movements with the largest Euclidian
+    // distances are kept, the rest are pruned.
 }
