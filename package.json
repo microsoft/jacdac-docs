@@ -22,6 +22,7 @@
     "@octokit/core": "^3.4.0",
     "@react-three/drei": "^6.0.2",
     "@react-three/fiber": "^7.0.1",
+    "@tensorflow/tfjs": "^3.7.0",
     "@tidyjs/tidy": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",
