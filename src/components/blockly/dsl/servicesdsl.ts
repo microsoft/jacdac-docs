@@ -1000,6 +1000,26 @@ export class ServicesBlockDomainSpecificLanguage
     }
 
     compileEventToVM(options: CompileEventToVMOptions): CompileEventToVMResult {
+        
+        const makeAwaitEvent = (role:string, eventName: string) => {
+            return <CompileEventToVMResult>{
+                expression: <jsep.CallExpression>{
+                    type: "CallExpression",
+                    arguments: [
+                        toMemberExpression(
+                            role.toString(),
+                            eventName.toString()
+                        ),
+                    ],
+                    callee: toIdentifier("awaitEvent"),
+                },
+                event: {
+                    role: role.toString(),
+                    event: eventName.toString(),
+                },
+            }
+        }
+
         const { block, definition, blockToExpression } = options
         const { inputs } = block
         const { template } = definition
@@ -1008,22 +1028,7 @@ export class ServicesBlockDomainSpecificLanguage
             case "event": {
                 const { value: role } = inputs[0].fields["role"]
                 const { value: eventName } = inputs[0].fields["event"]
-                return <CompileEventToVMResult>{
-                    expression: <jsep.CallExpression>{
-                        type: "CallExpression",
-                        arguments: [
-                            toMemberExpression(
-                                role.toString(),
-                                eventName.toString()
-                            ),
-                        ],
-                        callee: toIdentifier("awaitEvent"),
-                    },
-                    event: {
-                        role: role.toString(),
-                        event: eventName.toString(),
-                    },
-                }
+                return makeAwaitEvent(role.toString(), eventName.toString())
             }
             case "register_change_event": {
                 const { value: role } = inputs[0].fields["role"]
@@ -1048,8 +1053,9 @@ export class ServicesBlockDomainSpecificLanguage
                 const { type } = block
                 switch(type) {
                     case ROLE_BOUND_EVENT_BLOCK: {
-                        console.log("ROLE_BOUND_EVENT")
-                        break
+                        const { value: role } = inputs[0].fields["role"]
+                        const { value: eventName } = inputs[0].fields["event"]
+                        return makeAwaitEvent(role.toString(), "") // true ? "$bound" : "$unbound" )
                     }
                 }
             }
