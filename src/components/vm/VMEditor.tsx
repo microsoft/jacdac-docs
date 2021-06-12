@@ -21,6 +21,7 @@ import BlockEditor from "../blockly/BlockEditor"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import jsonDSL from "../blockly/dsl/jsondsl"
 import chartDSL from "../blockly/dsl/chartdsl"
+import dataScienceDSL from "../blockly/dsl/datadsl"
 
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
 function VMEditorWithContext() {
@@ -88,6 +89,7 @@ export default function VMEditor() {
             variablesDsl,
             toolsDSL,
             chartDSL,
+            dataScienceDSL,
             shadowDsl,
             fieldsDsl,
         ]

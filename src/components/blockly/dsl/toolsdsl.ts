@@ -126,7 +126,7 @@ const toolsDSL: BlockDomainSpecificLanguage = {
             tooltip: `Watch a value in the editor`,
             helpUrl: "",
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            transformData: d => d,
+            transformData: (b, data) => data,
         },
         {
             kind: "block",

@@ -82,7 +82,7 @@ export function BlockProvider(props: {
 
         const services =
             block.jacdacServices || (block.jacdacServices = new BlockServices())
-        services.initialized = true;
+        services.initialized = true
         // register data transforms
         const { transformData } = resolveBlockDefinition(block.type) || {}
         if (transformData) {
@@ -91,7 +91,7 @@ export function BlockProvider(props: {
                     block.childBlocks_?.[0]) as BlockWithServices
                 const nextServices = next?.jacdacServices
                 if (nextServices) {
-                    const newData = transformData(services.data)
+                    const newData = transformData(block, services.data)
                     nextServices.data = newData
                 }
             })
