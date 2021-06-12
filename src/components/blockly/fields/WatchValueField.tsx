@@ -25,16 +25,25 @@ function WatchValueWidget() {
 
     useEffect(() => {
         setValue(undefined)
-        return runner?.subscribe(VM_WATCH_CHANGE, (watchSourceId: string) => {
-            if (watchSourceId === sourceId) {
-                const newValue = runner.lookupWatch(sourceId)
-                setValue(newValue)
-                addTrendValue(newValue)
+        setData([])
+    }, [runner])
 
-                setData([...data, newValue].slice(-50))
-            }
-        })
-    }, [runner, sourceId])
+    useEffect(
+        () =>
+            runner?.subscribe(VM_WATCH_CHANGE, (watchSourceId: string) => {
+                console.log(`watch change`, { watchSourceId, sourceId })
+                if (watchSourceId === sourceId) {
+                    const newValue = runner.lookupWatch(sourceId)
+                    setValue(newValue)
+                    addTrendValue(newValue)
+
+                    const newData = [...(data || []), newValue].slice(-50)
+                    console.log(`newdata`, newData)
+                    setData(newData)
+                }
+            }),
+        [runner, sourceId, data]
+    )
 
     let valueNumber = typeof value === "number" ? (value as number) : undefined
     if (!isNaN(valueNumber)) {
