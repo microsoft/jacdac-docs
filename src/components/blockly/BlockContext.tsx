@@ -89,8 +89,10 @@ export function BlockProvider(props: {
             if (!block.jacdacServices) {
                 const services = (block.jacdacServices = new BlockServices())
                 // register data transforms
-                const { transformData } = resolveBlockDefinition(type) || {}
-                if (transformData)
+                const { transformData } =
+                    resolveBlockDefinition(block.type) || {}
+                if (transformData) {
+                    console.log(`register transform`, { block })
                     services.on(CHANGE, () => {
                         const next = (block.nextConnection?.targetBlock() ||
                             block.childBlocks_?.[0]) as BlockWithServices
@@ -100,8 +102,9 @@ export function BlockProvider(props: {
                             nextServices.data = newData
                         }
                     })
+                }
                 // notify dsl
-                const dsl = resolveDsl(dsls, type)
+                const dsl = resolveDsl(dsls, block.type)
                 dsl?.onBlockCreated?.(block)
             }
         }
