@@ -1,4 +1,4 @@
-import { Block, FieldVariable, WorkspaceSvg } from "blockly"
+import { Block, FieldVariable, Workspace, WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
@@ -23,7 +23,7 @@ export class WorkspaceServices extends JDEventSource {
     }
 
     set workspaceJSON(value: WorkspaceJSON) {
-        this._workspaceJSON = value;
+        this._workspaceJSON = value
         this.emit(CHANGE)
     }
 
@@ -48,6 +48,28 @@ export class WorkspaceServices extends JDEventSource {
             this.emit(CHANGE)
         }
     }
+}
+export interface BlocklyWorkspaceWithServices extends Workspace {
+    jacdacServices: WorkspaceServices
+}
+
+export class BlockServices extends JDEventSource {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private _data: any
+
+    get data() {
+        return this._data
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    set data(value: any) {
+        if (this._data !== value) {
+            this._data = value
+            this.emit(CHANGE)
+        }
+    }
+}
+export interface BlockWithServices extends Block {
+    jacdacServices: BlockServices
 }
 
 export interface WorkspaceContextProps {
@@ -78,10 +100,6 @@ export const WorkspaceContext = createContext<WorkspaceContextProps>({
 WorkspaceContext.displayName = "Workspace"
 
 export default WorkspaceContext
-
-export interface BlocklyWorkspaceWithServices extends WorkspaceSvg {
-    jacdacServices: WorkspaceServices
-}
 
 export function WorkspaceProvider(props: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

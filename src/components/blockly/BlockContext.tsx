@@ -1,6 +1,6 @@
-import { WorkspaceSvg } from "blockly"
+import Blockly, { WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
-import { toMap } from "../../../jacdac-ts/src/jdom/utils"
+import { assert, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import useRoleManager from "../hooks/useRoleManager"
 import useLocalStorage from "../useLocalStorage"
@@ -12,6 +12,8 @@ import useBlocklyPlugins from "./useBlocklyPlugins"
 import useToolbox, { useToolboxButtons } from "./useToolbox"
 import {
     BlocklyWorkspaceWithServices,
+    BlockServices,
+    BlockWithServices,
     WorkspaceServices,
 } from "./WorkspaceContext"
 
@@ -70,6 +72,19 @@ export function BlockProvider(props: {
     }
 
     const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
+    const handleNewBlock = (event: { type: string; workspaceId: string }) => {
+        const { type, workspaceId } = event
+        if (workspaceId !== workspace.id) return
+        if (type === Blockly.Events.BLOCK_CREATE) {
+            const bev = event as unknown as Blockly.Events.BlockCreate
+            const block = workspace.getBlockById(
+                bev.blockId
+            ) as BlockWithServices
+            assert(!block.jacdacServices)
+            if (!block.jacdacServices)
+                block.jacdacServices = new BlockServices()
+        }
+    }
 
     // plugins
     useBlocklyPlugins(workspace)
@@ -79,13 +94,13 @@ export function BlockProvider(props: {
     // role manager
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = workspace as any as BlocklyWorkspaceWithServices
+        const ws = workspace as unknown as BlocklyWorkspaceWithServices
         const services = ws?.jacdacServices
         if (services) services.roleManager = roleManager
     }, [workspace, roleManager])
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const wws = workspace as any as BlocklyWorkspaceWithServices
+        const wws = workspace as unknown as BlocklyWorkspaceWithServices
         if (wws && !wws.jacdacServices) {
             wws.jacdacServices = new WorkspaceServices()
             wws.jacdacServices.roleManager = roleManager
@@ -103,7 +118,7 @@ export function BlockProvider(props: {
     }, [dsls, workspace, workspaceXml])
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = workspace as any as BlocklyWorkspaceWithServices
+        const ws = workspace as unknown as BlocklyWorkspaceWithServices
         const services = ws?.jacdacServices
         if (services) services.workspaceJSON = workspaceJSON
     }, [workspace, workspaceJSON])
@@ -120,6 +135,12 @@ export function BlockProvider(props: {
             .getAllBlocks(false)
             .forEach(b => b.setWarningText(allErrors[b.id] || null))
     }, [workspace, warnings])
+
+    // register block creation
+    useEffect(() => {
+        workspace?.addChangeListener(handleNewBlock)
+        return () => workspace?.removeChangeListener(handleNewBlock)
+    }, [workspace])
 
     return (
         <BlockContext.Provider
