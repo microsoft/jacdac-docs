@@ -77,14 +77,15 @@ export function BlockProvider(props: {
     }
 
     const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
-    const registerBlockServices = (block: BlockWithServices) => {
-        if (block.jacdacServices) return
+    const initializeBlockServices = (block: BlockWithServices) => {
+        if (block.jacdacServices?.initialized) return
 
-        const services = (block.jacdacServices = new BlockServices())
+        const services =
+            block.jacdacServices || (block.jacdacServices = new BlockServices())
+        services.initialized = true;
         // register data transforms
         const { transformData } = resolveBlockDefinition(block.type) || {}
         if (transformData) {
-            console.log(`register transform`, { block })
             services.on(CHANGE, () => {
                 const next = (block.nextConnection?.targetBlock() ||
                     block.childBlocks_?.[0]) as BlockWithServices
@@ -108,13 +109,13 @@ export function BlockProvider(props: {
             console.log(`register blocks`)
             workspace
                 .getAllBlocks(false)
-                .forEach(b => registerBlockServices(b as BlockWithServices))
+                .forEach(b => initializeBlockServices(b as BlockWithServices))
         } else if (type === Blockly.Events.BLOCK_CREATE) {
             const bev = event as unknown as Blockly.Events.BlockCreate
             const block = workspace.getBlockById(
                 bev.blockId
             ) as BlockWithServices
-            registerBlockServices(block)
+            initializeBlockServices(block)
         }
     }
 

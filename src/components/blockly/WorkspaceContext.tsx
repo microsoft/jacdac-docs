@@ -1,4 +1,10 @@
-import { Block, FieldVariable, Workspace, WorkspaceSvg } from "blockly"
+import {
+    Block,
+    BlockSvg,
+    FieldVariable,
+    Workspace,
+    WorkspaceSvg,
+} from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
@@ -67,8 +73,10 @@ export class BlockServices extends JDEventSource {
             this.emit(CHANGE)
         }
     }
+
+    initialized = false
 }
-export interface BlockWithServices extends Block {
+export interface BlockWithServices extends BlockSvg {
     jacdacServices: BlockServices
 }
 
