@@ -99,6 +99,10 @@ export interface BlockDefinition extends BlockReference {
     // js implementation to be called by VM
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vm?: (...args: any[]) => any
+
+    // data transformation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transformData?: (data: any[]) => any[]
 }
 
 export interface ServiceBlockDefinition extends BlockDefinition {
@@ -106,13 +110,15 @@ export interface ServiceBlockDefinition extends BlockDefinition {
     service: jdspec.ServiceSpec
 }
 
-export interface ServiceBlockDefinitionFactory {
-    jacdacDefinition: ServiceBlockDefinition
+export interface ServiceBlockDefinitionFactory<T extends BlockDefinition> {
+    jacdacDefinition: T
     init: () => void
 }
 
-export function resolveServiceBlockDefinition(type: string) {
-    const b = Blockly.Blocks[type] as ServiceBlockDefinitionFactory
+export function resolveBlockDefinition<T extends BlockDefinition>(
+    type: string
+) {
+    const b = Blockly.Blocks[type] as ServiceBlockDefinitionFactory<T>
     return b?.jacdacDefinition
 }
 

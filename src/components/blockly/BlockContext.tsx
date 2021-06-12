@@ -1,12 +1,17 @@
 import Blockly, { WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
+import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { assert, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import useRoleManager from "../hooks/useRoleManager"
 import useLocalStorage from "../useLocalStorage"
-import BlockDomainSpecificLanguage from "./dsl/dsl"
+import BlockDomainSpecificLanguage, { resolveDsl } from "./dsl/dsl"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
-import { NEW_PROJET_XML, ToolboxConfiguration } from "./toolbox"
+import {
+    NEW_PROJET_XML,
+    resolveBlockDefinition,
+    ToolboxConfiguration,
+} from "./toolbox"
 import useBlocklyEvents from "./useBlocklyEvents"
 import useBlocklyPlugins from "./useBlocklyPlugins"
 import useToolbox, { useToolboxButtons } from "./useToolbox"
@@ -81,8 +86,24 @@ export function BlockProvider(props: {
                 bev.blockId
             ) as BlockWithServices
             assert(!block.jacdacServices)
-            if (!block.jacdacServices)
-                block.jacdacServices = new BlockServices()
+            if (!block.jacdacServices) {
+                const services = (block.jacdacServices = new BlockServices())
+                // register data transforms
+                const { transformData } = resolveBlockDefinition(type) || {}
+                if (transformData)
+                    services.on(CHANGE, () => {
+                        const next = (block.nextConnection?.targetBlock() ||
+                            block.childBlocks_?.[0]) as BlockWithServices
+                        const nextServices = next?.jacdacServices
+                        if (nextServices) {
+                            const newData = transformData(services.data)
+                            nextServices.data = newData
+                        }
+                    })
+                // notify dsl
+                const dsl = resolveDsl(dsls, type)
+                dsl?.onBlockCreated?.(block)
+            }
         }
     }
 
