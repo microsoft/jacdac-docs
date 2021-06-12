@@ -20,11 +20,6 @@ function WatchValueWidget() {
         runner?.lookupWatch(sourceId)
     )
 
-    useEffect(() => {
-        setValue(undefined)
-        setData([])
-    }, [runner])
-
     useEffect(
         () =>
             runner?.subscribe(VM_WATCH_CHANGE, (watchSourceId: string) => {
