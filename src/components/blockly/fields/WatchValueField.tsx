@@ -7,7 +7,6 @@ import { PointerBoundary } from "./PointerBoundary"
 import { WatchValueType } from "../../../../jacdac-ts/src/vm/runner"
 import { VM_WATCH_CHANGE } from "../../../../jacdac-ts/src/vm/events"
 import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
-import TrendChart, { useTrendChartData } from "../../TrendChart"
 import useBlockData from "../useBlockData"
 
 function WatchValueWidget() {
@@ -19,7 +18,6 @@ function WatchValueWidget() {
     const [value, setValue] = useState<WatchValueType>(
         runner?.lookupWatch(sourceId)
     )
-    const { trendData, addTrendValue } = useTrendChartData()
 
     useEffect(() => {
         setValue(undefined)
@@ -32,13 +30,13 @@ function WatchValueWidget() {
                 if (watchSourceId === sourceId) {
                     const newValue = runner.lookupWatch(sourceId)
                     setValue(newValue)
-                    addTrendValue(newValue)
-
-                    const newData = [
-                        ...(data || []),
-                        { value: newValue },
-                    ].slice(-50)
-                    setData(newData)
+                    if (!isNaN(newValue)) {
+                        const newData = [
+                            ...(data || []),
+                            { value: newValue },
+                        ].slice(-50)
+                        setData(newData)
+                    }
                 }
             }),
         [runner, sourceId, data]
@@ -79,18 +77,6 @@ function WatchValueWidget() {
                         )}
                     </PointerBoundary>
                 </Grid>
-                {!isNaN(valueNumber) && (
-                    <Grid item>
-                        <PointerBoundary>
-                            <TrendChart
-                                data={trendData}
-                                mini={true}
-                                dot={2}
-                                useGradient={true}
-                            />
-                        </PointerBoundary>
-                    </Grid>
-                )}
             </Grid>
         </Box>
     )
