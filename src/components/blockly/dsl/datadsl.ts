@@ -1,4 +1,3 @@
-import { arrange, desc, tidy } from "@tidyjs/tidy"
 import { BlockSvg } from "blockly"
 import {
     BlockReference,
@@ -8,9 +7,11 @@ import {
     TextInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
+import createDataScienceWorker from "./workers/datadsl"
 
 const DATA_SCIENCE_ARRANGE_BLOCK = "data_science_arrange"
 
+let worker: Worker
 const colour = "#777"
 const dataScienceDSL: BlockDomainSpecificLanguage = {
     id: "dataScience",
@@ -40,9 +41,17 @@ const dataScienceDSL: BlockDomainSpecificLanguage = {
             transformData: async (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
                 const order = b.getFieldValue("order")
-                const sort = order === "descending" ? desc(column) : column
-                const newData = tidy(data, arrange(sort))
-                return newData
+                const descending = order === "descending"
+
+                // test
+                worker.postMessage({
+                    id: Math.random(),
+                    type: "arrange",
+                    column,
+                    descending,
+                    data,
+                })
+                return undefined;
             },
             template: "meta",
         },
@@ -60,5 +69,12 @@ const dataScienceDSL: BlockDomainSpecificLanguage = {
             ],
         },
     ],
+    mount: () => {
+        if (!worker) {
+            worker = createDataScienceWorker()
+            worker.onmessage = (event) => console.log(event)
+        }
+        return () => {}
+    },
 }
 export default dataScienceDSL
