@@ -21,8 +21,6 @@ function WatchValueWidget() {
     )
     const { trendData, addTrendValue } = useTrendChartData()
 
-    console.log("watch view", { sourceBlock, data })
-
     useEffect(() => {
         setValue(undefined)
         setData([])
@@ -31,14 +29,12 @@ function WatchValueWidget() {
     useEffect(
         () =>
             runner?.subscribe(VM_WATCH_CHANGE, (watchSourceId: string) => {
-                console.log(`watch change`, { watchSourceId, sourceId })
                 if (watchSourceId === sourceId) {
                     const newValue = runner.lookupWatch(sourceId)
                     setValue(newValue)
                     addTrendValue(newValue)
 
                     const newData = [...(data || []), newValue].slice(-50)
-                    console.log(`newdata`, newData)
                     setData(newData)
                 }
             }),
