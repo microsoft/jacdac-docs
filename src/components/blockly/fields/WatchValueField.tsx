@@ -12,10 +12,7 @@ import useBlockData from "../useBlockData"
 const HORIZON = 10
 function WatchValueWidget() {
     const { runner, sourceId, sourceBlock } = useContext(WorkspaceContext)
-    const { data, setData } = useBlockData<{ id: number; value: number }>(
-        sourceBlock,
-        []
-    )
+    const { data, setData } = useBlockData<{ value: number }>(sourceBlock, [])
     const theme = useTheme()
 
     // track changes
@@ -37,7 +34,7 @@ function WatchValueWidget() {
                     if (!isNaN(newValue)) {
                         const newData = [
                             ...(data || []),
-                            { id: Math.random(), value: newValue },
+                            { value: newValue },
                         ].slice(-HORIZON)
                         setData(newData)
                     }

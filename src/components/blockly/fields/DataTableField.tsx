@@ -3,39 +3,57 @@ import { ReactFieldJSON } from "./ReactField"
 import WorkspaceContext from "../WorkspaceContext"
 import ReactInlineField from "./ReactInlineField"
 import useBlockData from "../useBlockData"
-import { DataGrid, GridColDef } from "@material-ui/data-grid"
-import { PointerBoundary } from "./PointerBoundary"
+import { createStyles, makeStyles, Theme } from "@material-ui/core"
+
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        table: {
+            padding: 0,
+            margin: 0,
+            fontSize: "0.8rem",
+            lineHeight: "1rem",
+            color: theme.palette.text.primary,
+
+            "& th": {
+                fontWeight: "normal",
+            },
+            "& td": {
+                borderColor: "#ccc",
+                borderRightStyle: "solid 1px",
+            },
+        },
+    })
+)
 
 function DataTableWidget() {
     const { sourceBlock } = useContext(WorkspaceContext)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = useBlockData<any>(sourceBlock)
+    const classes = useStyles()
 
-    console.log(`show table`, { data })
     if (!data?.length) return null
 
     const columns = Object.keys(data[0] || {})
-        .filter(h => h !== "id")
-        .map(
-            h =>
-                ({
-                    field: h,
-                    headerName: h,
-                } as GridColDef)
-        )
-
-    // add ids if needed
-    data.filter(r => !r.id).forEach(r => (r.id = Math.random()))
 
     return (
-        <PointerBoundary>
-            <DataGrid
-                autoHeight={true}
-                rows={data}
-                columns={columns}
-                pageSize={10}
-            />
-        </PointerBoundary>
+        <table className={classes.table}>
+            <thead>
+                <tr>
+                    {columns.map(c => (
+                        <th key={c}>{c}</th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                {data.map((r, i) => (
+                    <tr key={r.id || i}>
+                        {columns.map(c => (
+                            <td key={c}>{r[c]}</td>
+                        ))}
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     )
 }
 
@@ -57,6 +75,7 @@ export default class DataTableField extends ReactInlineField {
         c.style.display = "block"
         c.style.minWidth = "14rem"
         c.style.maxHeight = "60vh"
+        c.style.overflowY = "auto"
         return c
     }
 
