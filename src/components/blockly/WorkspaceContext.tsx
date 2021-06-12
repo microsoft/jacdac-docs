@@ -62,6 +62,8 @@ export interface BlocklyWorkspaceWithServices extends Workspace {
 export class BlockServices extends JDEventSource {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private _data: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private _chart: any
 
     get data() {
         return this._data
@@ -70,6 +72,17 @@ export class BlockServices extends JDEventSource {
     set data(value: any) {
         if (this._data !== value) {
             this._data = value
+            this.emit(CHANGE)
+        }
+    }
+
+    get chart() {
+        return this._chart
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    set chart(value: any) {
+        if (this._chart !== value) {
+            this._chart = value
             this.emit(CHANGE)
         }
     }
