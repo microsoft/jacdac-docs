@@ -3,12 +3,12 @@ import useChange from "../../jacdac/useChange"
 import { Block } from "blockly"
 import { useCallback, useEffect } from "react"
 
-export default function useBlockData<T>(block: Block, initialValue?: T) {
+export default function useBlockData<T>(block: Block, initialValue?: T[]) {
     const services = (block as unknown as BlockWithServices)?.jacdacServices
     // data on the current node
-    const data = useChange<BlockServices, T>(services, _ => _?.data)
+    const data = useChange<BlockServices, T[]>(services, _ => _?.data)
     const setData = useCallback(
-        (value: T) => {
+        (value: T[]) => {
             if (services) services.data = value
         },
         [services]

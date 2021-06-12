@@ -152,6 +152,7 @@ export const PRIMITIVE_TYPES = [STRING_TYPE, BOOLEAN_TYPE, NUMBER_TYPE]
 export const BUILTIN_TYPES = ["", ...PRIMITIVE_TYPES]
 
 export const CODE_STATEMENT_TYPE = "Code"
+export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
 
 export interface ContentDefinition {
     kind: "category" | "sep" | "button" | "label"

@@ -12,7 +12,7 @@ import useBlockData from "../useBlockData"
 
 function WatchValueWidget() {
     const { runner, sourceId, sourceBlock } = useContext(WorkspaceContext)
-    const { data, setData } = useBlockData<number[]>(sourceBlock, [])
+    const { data, setData } = useBlockData<{ value: number }>(sourceBlock, [])
     const theme = useTheme()
 
     // track changes
@@ -34,7 +34,10 @@ function WatchValueWidget() {
                     setValue(newValue)
                     addTrendValue(newValue)
 
-                    const newData = [...(data || []), newValue].slice(-50)
+                    const newData = [
+                        ...(data || []),
+                        { value: newValue },
+                    ].slice(-50)
                     setData(newData)
                 }
             }),
