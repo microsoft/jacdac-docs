@@ -13,7 +13,11 @@ export default function useBlockData<T>(block: Block, initialValue?: T) {
 
     // set initial value
     useEffect(() => {
-        if (services && initialValue !== undefined && services.data === undefined)
+        if (
+            services &&
+            initialValue !== undefined &&
+            services.data === undefined
+        )
             services.data = initialValue
     }, [services])
 
