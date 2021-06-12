@@ -209,7 +209,7 @@ export default function workspaceJSONToVMProgram(
                 if (dsl) {
                     const definition =
                         resolveBlockDefinition<ServiceBlockDefinition>(type)
-                    const { template } = definition
+                    const template = definition?.template
                     if (template === "meta") return undefined
                     const dslRes = dsl.compileCommandToVM?.({
                         event,
