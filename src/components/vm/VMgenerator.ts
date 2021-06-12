@@ -131,7 +131,7 @@ export default function workspaceJSONToVMProgram(
                     sourceId: block.id,
                     message: `unknown block ${type}`,
                 })
-                console.warn(`unsupported block ${type}`, {
+                console.warn(`unsupported expression block ${type}`, {
                     ev,
                     block,
                     definition,
@@ -220,6 +220,8 @@ export default function workspaceJSONToVMProgram(
                 const dsl = resolveDsl(type)
                 if (dsl) {
                     const definition = resolveServiceBlockDefinition(type)
+                    const { template } = definition
+                    if (template === "meta") return undefined
                     const dslRes = dsl.compileCommandToVM?.({
                         event,
                         block,
@@ -231,13 +233,13 @@ export default function workspaceJSONToVMProgram(
                         return dslRes
                     }
                 }
-                console.warn(`unsupported block ${type}`, { block })
+                console.warn(`unsupported command block ${type}`, { block })
                 return {
                     cmd: undefined,
                     errors: [
                         {
                             sourceId: block.id,
-                            message: `unsupported block ${type}`,
+                            message: `unsupported command block ${type}`,
                         },
                     ],
                 }
@@ -260,9 +262,9 @@ export default function workspaceJSONToVMProgram(
             ?.filter(child => !!child)
             .forEach(child => {
                 try {
-                    const { cmd, errors } = blockToCommand(event, child)
+                    const { cmd, errors } = blockToCommand(event, child) || {}
                     if (cmd) handler.commands.push(cmd)
-                    errors.forEach(e => handler.errors.push(e))
+                    errors?.forEach(e => handler.errors.push(e))
                 } catch (e) {
                     if (e instanceof EmptyExpression) {
                         handler.commands.push({
@@ -310,7 +312,7 @@ export default function workspaceJSONToVMProgram(
                             topErrors = [
                                 {
                                     sourceId: top.id,
-                                    message: `unsupported block ${type}`,
+                                    message: `unsupported handler block ${type}`,
                                 },
                             ]
                             console.debug(

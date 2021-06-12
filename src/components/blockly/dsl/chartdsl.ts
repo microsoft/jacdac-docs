@@ -7,9 +7,9 @@ import {
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 
-const SHOW_TABLE_BLOCK = "show_type"
+const SHOW_TABLE_BLOCK = "chart_show_table"
 
-const colour = "#876123"
+const colour = "#999"
 const chartDSL: BlockDomainSpecificLanguage = {
     id: "chart",
     createBlocks: () => [
@@ -41,6 +41,7 @@ const chartDSL: BlockDomainSpecificLanguage = {
             contents: [
                 <BlockReference>{ kind: "block", type: SHOW_TABLE_BLOCK },
             ],
+            colour,
         },
     ],
 }
