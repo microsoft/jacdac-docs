@@ -77,36 +77,44 @@ export function BlockProvider(props: {
     }
 
     const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
+    const registerBlockServices = (block: BlockWithServices) => {
+        if (block.jacdacServices) return
+
+        const services = (block.jacdacServices = new BlockServices())
+        // register data transforms
+        const { transformData } = resolveBlockDefinition(block.type) || {}
+        if (transformData) {
+            console.log(`register transform`, { block })
+            services.on(CHANGE, () => {
+                const next = (block.nextConnection?.targetBlock() ||
+                    block.childBlocks_?.[0]) as BlockWithServices
+                const nextServices = next?.jacdacServices
+                if (nextServices) {
+                    const newData = transformData(services.data)
+                    nextServices.data = newData
+                }
+            })
+        }
+        // notify dsl
+        const dsl = resolveDsl(dsls, block.type)
+        dsl?.onBlockCreated?.(block)
+    }
+
     const handleNewBlock = (event: { type: string; workspaceId: string }) => {
         const { type, workspaceId } = event
         if (workspaceId !== workspace.id) return
-        if (type === Blockly.Events.BLOCK_CREATE) {
+        console.log(`blockly event ${type}`)
+        if (type === Blockly.Events.FINISHED_LOADING) {
+            console.log(`register blocks`)
+            workspace
+                .getAllBlocks(false)
+                .forEach(b => registerBlockServices(b as BlockWithServices))
+        } else if (type === Blockly.Events.BLOCK_CREATE) {
             const bev = event as unknown as Blockly.Events.BlockCreate
             const block = workspace.getBlockById(
                 bev.blockId
             ) as BlockWithServices
-            assert(!block.jacdacServices)
-            if (!block.jacdacServices) {
-                const services = (block.jacdacServices = new BlockServices())
-                // register data transforms
-                const { transformData } =
-                    resolveBlockDefinition(block.type) || {}
-                if (transformData) {
-                    console.log(`register transform`, { block })
-                    services.on(CHANGE, () => {
-                        const next = (block.nextConnection?.targetBlock() ||
-                            block.childBlocks_?.[0]) as BlockWithServices
-                        const nextServices = next?.jacdacServices
-                        if (nextServices) {
-                            const newData = transformData(services.data)
-                            nextServices.data = newData
-                        }
-                    })
-                }
-                // notify dsl
-                const dsl = resolveDsl(dsls, block.type)
-                dsl?.onBlockCreated?.(block)
-            }
+            registerBlockServices(block)
         }
     }
 
