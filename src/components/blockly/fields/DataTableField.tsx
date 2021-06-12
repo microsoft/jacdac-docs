@@ -28,11 +28,14 @@ function DataTableWidget() {
     data.filter(r => !r.id).forEach(r => (r.id = Math.random()))
 
     return (
-        <div style={{ height: "20rem" }}>
-            <PointerBoundary>
-                <DataGrid rows={data} columns={columns} pageSize={10} />
-            </PointerBoundary>
-        </div>
+        <PointerBoundary>
+            <DataGrid
+                autoHeight={true}
+                rows={data}
+                columns={columns}
+                pageSize={10}
+            />
+        </PointerBoundary>
     )
 }
 
@@ -51,6 +54,9 @@ export default class DataTableField extends ReactInlineField {
 
     protected createContainer(): HTMLDivElement {
         const c = document.createElement("div")
+        c.style.display = "block"
+        c.style.minWidth = "14rem"
+        c.style.maxHeight = "60vh"
         return c
     }
 

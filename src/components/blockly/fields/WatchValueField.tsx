@@ -9,6 +9,7 @@ import { VM_WATCH_CHANGE } from "../../../../jacdac-ts/src/vm/events"
 import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
 import useBlockData from "../useBlockData"
 
+const HORIZON = 10
 function WatchValueWidget() {
     const { runner, sourceId, sourceBlock } = useContext(WorkspaceContext)
     const { data, setData } = useBlockData<{ id: number; value: number }>(
@@ -37,7 +38,7 @@ function WatchValueWidget() {
                         const newData = [
                             ...(data || []),
                             { id: Math.random(), value: newValue },
-                        ].slice(-50)
+                        ].slice(-HORIZON)
                         setData(newData)
                     }
                 }
