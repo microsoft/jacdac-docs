@@ -8,9 +8,11 @@ import { WatchValueType } from "../../../../jacdac-ts/src/vm/runner"
 import { VM_WATCH_CHANGE } from "../../../../jacdac-ts/src/vm/events"
 import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
 import TrendChart, { useTrendChartData } from "../../TrendChart"
+import useBlockData from "../useBlockData"
 
 function WatchValueWidget() {
-    const { runner, sourceId } = useContext(WorkspaceContext)
+    const { runner, sourceId, sourceBlock } = useContext(WorkspaceContext)
+    const { data, setData } = useBlockData<number[]>(sourceBlock, [])
     const theme = useTheme()
 
     // track changes
@@ -19,18 +21,19 @@ function WatchValueWidget() {
     )
     const { trendData, addTrendValue } = useTrendChartData()
 
+    console.log("watch view", { sourceBlock, data })
+
     useEffect(() => {
         setValue(undefined)
-        return runner?.subscribe(
-            VM_WATCH_CHANGE,
-            (watchSourceId: string) => {
-                if (watchSourceId === sourceId) {
-                    const newValue = runner.lookupWatch(sourceId)
-                    setValue(newValue)
-                    addTrendValue(newValue)
-                }
+        return runner?.subscribe(VM_WATCH_CHANGE, (watchSourceId: string) => {
+            if (watchSourceId === sourceId) {
+                const newValue = runner.lookupWatch(sourceId)
+                setValue(newValue)
+                addTrendValue(newValue)
+
+                setData([...data, newValue].slice(-50))
             }
-        )
+        })
     }, [runner, sourceId])
 
     let valueNumber = typeof value === "number" ? (value as number) : undefined
