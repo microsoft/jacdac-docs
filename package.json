@@ -118,8 +118,8 @@
     "buildspecs": "cd jacdac-ts && yarn buildspecs",
     "watchts": "cd jacdac-ts && yarn watch",
     "buildpxt": "cd jacdac-ts/pxt-jacdac && sh mk.sh",
-    "buildworker": "cd src/workers && node ../../node_modules/microbundle/dist/cli.js build -f modern --no-compress --types --ts-config tsconfig.json",
-    "watchworker": "cd src/workers && node ../../node_modules/microbundle/dist/cli.js watch -f modern --no-compress --types --ts-config tsconfig.json"
+    "buildworker": "cd src/workers && node ../../node_modules/microbundle/dist/cli.js build -f modern --no-compress --types --ts-config tsconfig.json --no-pkg-main --externals=none",
+    "watchworker": "cd src/workers && node ../../node_modules/microbundle/dist/cli.js watch -f modern --no-compress --types --ts-config tsconfig.json --no-pkg-main --externals=none"
   },
   "repository": {
     "type": "git",

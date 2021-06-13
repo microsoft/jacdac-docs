@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { arrange, desc, tidy } from "@tidyjs/tidy"
+import worker from "./workers"
 
 export interface DataMessage {
     id?: string // added for worker comms
@@ -32,3 +33,5 @@ export async function transformData(message: DataMessage): Promise<object[]> {
         console.debug(e)
     }
 }
+
+worker()
