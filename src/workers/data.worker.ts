@@ -40,8 +40,10 @@ async function handleMessage(message: MessageEvent) {
     const { jacdacdata } = data
     if (!jacdacdata) return
 
+    console.debug(`jacdac data: message`, data)
     const res = await transformData(data as DataMessage)
     self.postMessage(res)
 }
 
 self.addEventListener("message", handleMessage)
+console.debug(`jacdac data: worker registered`)
