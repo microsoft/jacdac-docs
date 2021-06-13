@@ -3,3 +3,6 @@ node_modules
 static/images/makecode
 public
 .DS_Store
+static/sw.*
+static/*.d.ts
+src/workers/dist

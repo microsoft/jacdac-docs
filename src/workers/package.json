@@ -1,0 +1,13 @@
+{
+  "name": "sw",
+  "type": "module",
+  "source": "workers.ts",
+  "main": "./dist/sw.umd.js",
+  "module": "./dist/sw.cjs.js",
+  "exports": "./dist/sw.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ../../node_modules/microbundle/dist/cli.js build -f modern --no-compress --types --ts-config tsconfig.json -o ../../static",
+    "dev": "node ../../node_modules/microbundle/dist/cli.js watch -f modern --no-compress --types --ts-config tsconfig.json -o ../../static"
+  }
+}

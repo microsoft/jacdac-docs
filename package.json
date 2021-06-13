@@ -65,6 +65,7 @@
     "is-svg": "^4.3.1",
     "jsep": "^0.4.0",
     "material-ui-dropzone": "^3.5.0",
+    "microbundle": "^0.13.3",
     "notistack": "^1.0.9",
     "nprogress": "^0.2.0",
     "octokit-plugin-create-pull-request": "^3.9.3",
@@ -116,7 +117,9 @@
     "builddtdl": "cd jacdac-ts && yarn builddtdl",
     "buildspecs": "cd jacdac-ts && yarn buildspecs",
     "watchts": "cd jacdac-ts && yarn watch",
-    "buildpxt": "cd jacdac-ts/pxt-jacdac && sh mk.sh"
+    "buildpxt": "cd jacdac-ts/pxt-jacdac && sh mk.sh",
+    "buildworker": "cd src/workers && node ../../node_modules/microbundle/dist/cli.js build -f modern --no-compress --types --ts-config tsconfig.json -o ../../static",
+    "watchworker": "cd src/workers && node ../../node_modules/microbundle/dist/cli.js watch -f modern --no-compress --types --ts-config tsconfig.json -o ../../static"
   },
   "repository": {
     "type": "git",
