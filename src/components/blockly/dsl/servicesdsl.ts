@@ -1124,10 +1124,18 @@ export class ServicesBlockDomainSpecificLanguage
             }
             default: {
                 const { type } = block
+                const errors: VMError[] = []
                 switch (type) {
                     case ROLE_BOUND_BLOCK: {
-                        console.log("ROLE_BOUND")
-                        break
+                        const { value: role } = inputs[0].fields["role"]
+                        return {
+                                expr: {
+                                type: "CallExpression",
+                                arguments: [ toIdentifier(role.toString()) ],
+                                callee: toIdentifier("roleBoundExpression"),
+                            } as jsep.Expression,
+                            errors,
+                        }
                     }
                 }
             }
