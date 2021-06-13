@@ -1132,7 +1132,7 @@ export class ServicesBlockDomainSpecificLanguage
                                 expr: {
                                 type: "CallExpression",
                                 arguments: [ toIdentifier(role.toString()) ],
-                                callee: toIdentifier("roleBoundExpression"),
+                                callee: toMemberExpression("$fun","roleBoundExpression"),
                             } as jsep.Expression,
                             errors,
                         }
