@@ -15,7 +15,7 @@ import {
     VariableInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
-import postTransformData from "./workers/data.worker"
+import postTransformData from "./workers/data.proxy"
 import { ArrangeMessage } from "../../../workers/dist/node_modules/data.worker"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"

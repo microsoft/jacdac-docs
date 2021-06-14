@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import Papa from "papaparse"
-import { SMap } from "../../../../../jacdac-ts/src/jdom/utils"
+import { WorkerMessage } from "./message"
+
+export interface CsvMessage extends WorkerMessage {
+    jacdaccsv: true
+    url: string
+}
 
 export interface CsvFile {
+    jacdaccsv: true
+    url: string
     data?: object[]
     errors?: {
         type: string // A generalization of the error
@@ -12,8 +19,12 @@ export interface CsvFile {
     }[]
 }
 
-const cachedCSVs: SMap<CsvFile> = {}
-export default function postLoadCSV(url: string): Promise<CsvFile> {
+export interface CsvResponse extends WorkerMessage {
+    file: CsvFile
+}
+
+const cachedCSVs: { [index: string]: CsvFile } = {}
+function downloadCSV(url: string): Promise<CsvFile> {
     const cached = cachedCSVs[url]
     if (cached) return Promise.resolve(cached)
 
@@ -30,3 +41,17 @@ export default function postLoadCSV(url: string): Promise<CsvFile> {
         return r
     })
 }
+
+async function handleMessage(event: MessageEvent) {
+    const { data: message } = event as { data: CsvMessage }
+    if (!message.jacdaccsv) return
+    const { url } = message as CsvMessage
+    const file = await downloadCSV(url)
+    self.postMessage({
+        id: message.id,
+        file,
+    })
+}
+
+self.addEventListener("message", handleMessage)
+console.debug(`jacdac csv: worker registered`)
