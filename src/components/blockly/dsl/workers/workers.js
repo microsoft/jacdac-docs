@@ -5,7 +5,8 @@ function worker() {
             typeof Window !== "undefined" &&
             new Worker(
                 new URL(
-                    "../../../../workers/dist/jacdac-docs-workers.js",
+                    // gatsby fast-refresh ignores files with node_modules in path
+                    "../../../../workers/dist/node_modules/jacdac-docs-workers.js",
                     import.meta.url
                 )
             )
