@@ -7,31 +7,41 @@ import { PointerBoundary } from "./PointerBoundary"
 import { WatchValueType } from "../../../../jacdac-ts/src/vm/runner"
 import { VM_WATCH_CHANGE } from "../../../../jacdac-ts/src/vm/events"
 import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
-import TrendChart, { useTrendChartData } from "../../TrendChart"
+import useBlockData from "../useBlockData"
+import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 
+const HORIZON = 10
 function WatchValueWidget() {
-    const { runner, sourceId } = useContext(WorkspaceContext)
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { runner, sourceId, sourceBlock } = useContext(WorkspaceContext)
+    const { data, setData } = useBlockData<{
+        time: number
+        value: number
+    }>(sourceBlock, [])
     const theme = useTheme()
 
     // track changes
     const [value, setValue] = useState<WatchValueType>(
         runner?.lookupWatch(sourceId)
     )
-    const { trendData, addTrendValue } = useTrendChartData()
 
-    useEffect(() => {
-        setValue(undefined)
-        return runner?.subscribe(
-            VM_WATCH_CHANGE,
-            (watchSourceId: string) => {
+    useEffect(
+        () =>
+            runner?.subscribe(VM_WATCH_CHANGE, (watchSourceId: string) => {
                 if (watchSourceId === sourceId) {
                     const newValue = runner.lookupWatch(sourceId)
                     setValue(newValue)
-                    addTrendValue(newValue)
+                    if (!isNaN(newValue)) {
+                        const newData = [
+                            ...(data || []),
+                            { time: bus.timestamp / 1000, value: newValue },
+                        ].slice(-HORIZON)
+                        setData(newData)
+                    }
                 }
-            }
-        )
-    }, [runner, sourceId])
+            }),
+        [runner, sourceId, data]
+    )
 
     let valueNumber = typeof value === "number" ? (value as number) : undefined
     if (!isNaN(valueNumber)) {
@@ -68,18 +78,6 @@ function WatchValueWidget() {
                         )}
                     </PointerBoundary>
                 </Grid>
-                {!isNaN(valueNumber) && (
-                    <Grid item>
-                        <PointerBoundary>
-                            <TrendChart
-                                data={trendData}
-                                mini={true}
-                                dot={2}
-                                useGradient={true}
-                            />
-                        </PointerBoundary>
-                    </Grid>
-                )}
             </Grid>
         </Box>
     )

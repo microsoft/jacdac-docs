@@ -1,5 +1,5 @@
 import { Theme } from "@material-ui/core"
-import { Block } from "blockly"
+import Blockly, { Block, WorkspaceSvg } from "blockly"
 import { JDService } from "../../../../jacdac-ts/src/jdom/service"
 import { RoleEvent } from "../../../../jacdac-ts/src/vm/compile"
 import { VMError } from "../../../../jacdac-ts/src/vm/ir"
@@ -7,6 +7,7 @@ import { BlockJSON, WorkspaceJSON } from "../jsongenerator"
 import {
     BlockDefinition,
     ContentDefinition,
+    resolveBlockDefinition,
     ServiceBlockDefinition,
 } from "../toolbox"
 import { CmdWithErrors, ExpressionWithErrors } from "../../vm/VMgenerator"
@@ -60,6 +61,11 @@ export default interface BlockDomainSpecificLanguage {
     types?: string[]
 
     /**
+     * Optional API to be called when mounted in the React context, returns unmounted
+     */
+    mount?: () => () => void
+
+    /**
      * Creates blocks for the DSL
      */
     createBlocks?: (options: CreateBlocksOptions) => BlockDefinition[]
@@ -74,6 +80,13 @@ export default interface BlockDomainSpecificLanguage {
      */
     blockToValue?: (block: Block) => string | number | boolean
 
+    /**
+     * Returns a change listener if needed
+     */
+    createWorkspaceChangeListener?: (
+        workspace: WorkspaceSvg
+    ) => (event: Blockly.Events.Abstract) => void
+
     // VM support
     compileEventToVM?: (
         options: CompileEventToVMOptions
@@ -84,4 +97,16 @@ export default interface BlockDomainSpecificLanguage {
     compileExpressionToVM?: (
         options: CompileExpressionToVMOptions
     ) => ExpressionWithErrors
+}
+
+export function resolveDsl(dsls: BlockDomainSpecificLanguage[], type: string) {
+    const dsl = dsls?.find(dsl => dsl.types?.indexOf(type) > -1)
+    if (dsl) return dsl
+
+    const { dsl: dslName } = resolveBlockDefinition(type) || {}
+    if (!dslName) {
+        console.warn(`unknown dsl for ${type}`)
+        return undefined
+    }
+    return dsls?.find(dsl => dsl.id === dslName)
 }
