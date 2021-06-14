@@ -23,10 +23,7 @@ const handlers: { [index: string]: (props: any) => object[] } = {
 }
 
 async function transformData(message: DataMessage): Promise<object[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
     try {
-        // TODO move to web worker
         const handler = handlers[message.type]
         return handler?.(message)
     } catch (e) {
@@ -36,13 +33,12 @@ async function transformData(message: DataMessage): Promise<object[]> {
 }
 
 async function handleMessage(message: MessageEvent) {
-    const { data } = message
+    const { data, ...rest } = message
     const { jacdacdata } = data
     if (!jacdacdata) return
 
-    console.debug(`jacdac data: message`, data)
-    const res = await transformData(data as DataMessage)
-    self.postMessage(res)
+    const newData = await transformData(data as DataMessage)
+    self.postMessage({ ...rest, data: newData })
 }
 
 self.addEventListener("message", handleMessage)

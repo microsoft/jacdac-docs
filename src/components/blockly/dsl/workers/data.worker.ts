@@ -1,70 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
-import { arrange, desc, tidy } from "@tidyjs/tidy"
-import worker from "./workers"
-import Papa from "papaparse"
+import { DataMessage } from "../../../../workers/dist/node_modules/data.worker"
 import { SMap } from "../../../../../jacdac-ts/src/jdom/utils"
+import createWorker from "./workers"
 
-export interface DataMessage {
-    id?: string // added for worker comms
-    type: "arrange"
-    data: object[]
-}
+class WorkerProxy {
+    readonly pendings: SMap<{
+        resolve: (res: any) => void
+        reject: (err: any) => void
+    }> = {}
+    constructor(readonly worker: Worker) {
+        this.worker.addEventListener("message", this.handleMessage.bind(this))
+    }
 
-export interface ArrangeMessage extends DataMessage {
-    type: "arrange"
-    column: string
-    descending: boolean
-}
+    private handleMessage(event: MessageEvent) {
+        const { data: message } = event
+        const { id } = message
+        console.log(`handle message`, message)
+        const pending = this.pendings[id]
+        if (pending) pending.resolve(message)
+    }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handlers: { [index: string]: (props: any) => object[] } = {
-    arrange: (props: ArrangeMessage) => {
-        const { column, descending, data } = props
-        return tidy(data, arrange(descending ? desc(column) : column))
-    },
-}
-
-export async function postTransformData(
-    message: DataMessage
-): Promise<object[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    try {
-        const { data } = message
-        if (!data) return undefined
-        const handler = handlers[message.type]
-        return handler?.(message)
-    } catch (e) {
-        console.debug(e)
+    postMessage<T, R>(message: { id?: string } & T): Promise<R> {
+        message.id = message.id || Math.random() + ""
+        console.log(`post message`, message)
+        return new Promise<R>((resolve, reject) => {
+            this.pendings[message.id] = { resolve, reject }
+            this.worker.postMessage(message)
+        })
     }
 }
+let _worker: WorkerProxy
 
-export interface CsvFile {
-    data?: object[]
-    errors?: {
-        type: string // A generalization of the error
-        code: string // Standardized error code
-        message: string // Human-readable details
-        row: number // Row index of parsed data where error is
-    }[]
+function worker() {
+    if (!_worker) _worker = new WorkerProxy(createWorker())
+    return _worker
 }
 
-const cachedCSVs: SMap<CsvFile> = {}
-export function postLoadCSV(url: string): Promise<CsvFile> {
-    const cached = cachedCSVs[url]
-    if (cached) return Promise.resolve(cached)
-
-    return new Promise<CsvFile>(resolve => {
-        Papa.parse(url, {
-            download: true,
-            header: true,
-            dynamicTyping: true,
-            transformHeader: (h: string) => h.trim().toLocaleLowerCase(),
-            complete: (r: CsvFile) => resolve(r),
-        })
-    }).then(r => {
-        cachedCSVs[url] = r
-        return r
-    })
+export default async function postTransformData(
+    message: DataMessage
+): Promise<object[]> {
+    console.log(`post transform`, { message })
+    const ws = worker()
+    message.jacdacdata = true
+    const res = await ws.postMessage<DataMessage, DataMessage>(message)
+    console.log(`receive transform`, { res })
+    return res?.data
 }
-
-worker()
