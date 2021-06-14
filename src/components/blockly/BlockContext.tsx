@@ -19,6 +19,7 @@ import {
     BlocklyWorkspaceWithServices,
     BlockServices,
     BlockWithServices,
+    FieldWithServices,
     WorkspaceServices,
 } from "./WorkspaceContext"
 
@@ -80,8 +81,17 @@ export function BlockProvider(props: {
     const initializeBlockServices = (block: BlockWithServices) => {
         if (block.jacdacServices?.initialized) return
 
-        const services =
-            block.jacdacServices || (block.jacdacServices = new BlockServices())
+        let services = block.jacdacServices
+        if (!services) {
+            services = block.jacdacServices = new BlockServices()
+            block.inputList?.forEach(i =>
+                i.fieldRow?.forEach(f =>
+                    (
+                        f as unknown as FieldWithServices
+                    ).notifyServicesChanged?.()
+                )
+            )
+        }
         services.initialized = true
         // register data transforms
         const { transformData } = resolveBlockDefinition(block.type) || {}
@@ -105,17 +115,25 @@ export function BlockProvider(props: {
                 }
             })
         }
-        // notify dsl
-        const dsl = resolveDsl(dsls, block.type)
-        dsl?.onBlockCreated?.(block)
     }
 
-    const handleNewBlock = (event: { type: string; workspaceId: string }) => {
+    const handleBlockChange = (blockId: string) => {
+        const block = workspace.getBlockById(blockId) as BlockWithServices
+        const services = block?.jacdacServices
+        if (block && !block.isEnabled()) {
+            services?.clearData()
+        } else services?.emit(CHANGE)
+    }
+
+    const handleWorkspaceEvent = (event: {
+        type: string
+        workspaceId: string
+    }) => {
         const { type, workspaceId } = event
+        console.log(`blockly: ${type}`, event)
         if (workspaceId !== workspace.id) return
-        console.log(`blockly event ${type}`)
+        //console.log(`blockly event ${type}`, event)
         if (type === Blockly.Events.FINISHED_LOADING) {
-            console.log(`register blocks`)
             workspace
                 .getAllBlocks(false)
                 .forEach(b => initializeBlockServices(b as BlockWithServices))
@@ -125,6 +143,14 @@ export function BlockProvider(props: {
                 bev.blockId
             ) as BlockWithServices
             initializeBlockServices(block)
+        } else if (type === Blockly.Events.BLOCK_MOVE) {
+            const cev = event as unknown as Blockly.Events.BlockMove
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const parentId = (cev as any).newParentId
+            if (parentId) handleBlockChange(parentId)
+        } else if (type === Blockly.Events.BLOCK_CHANGE) {
+            const cev = event as unknown as Blockly.Events.BlockChange
+            handleBlockChange(cev.blockId)
         }
     }
 
@@ -180,9 +206,16 @@ export function BlockProvider(props: {
 
     // register block creation
     useEffect(() => {
-        workspace?.addChangeListener(handleNewBlock)
-        return () => workspace?.removeChangeListener(handleNewBlock)
-    }, [workspace])
+        const handlers = [
+            handleWorkspaceEvent,
+            ...dsls.map(dsl => dsl.createWorkspaceChangeListener?.(workspace)),
+        ].filter(c => !!c)
+        handlers.forEach(handler => workspace?.addChangeListener(handler))
+        return () =>
+            handlers?.forEach(handler =>
+                workspace?.removeChangeListener(handler)
+            )
+    }, [workspace, dsls])
 
     // mounting dsts
     useEffect(() => {

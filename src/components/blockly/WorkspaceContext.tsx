@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import {
     Block,
     BlockSvg,
@@ -55,37 +56,43 @@ export class WorkspaceServices extends JDEventSource {
         }
     }
 }
+
 export interface BlocklyWorkspaceWithServices extends Workspace {
     jacdacServices: WorkspaceServices
 }
 
+export interface FieldWithServices {
+    notifyServicesChanged?: () => void
+}
+
 export class BlockServices extends JDEventSource {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private _data: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private _chartProps: any
+    private _data: object[]
+    private _chartProps: object
 
     get data() {
         return this._data
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    set data(value: any) {
-        if (this._data !== value) {
+    set data(value: object[]) {
+        if (JSON.stringify(this._data) !== JSON.stringify(value)) {
             this._data = value
             this.emit(CHANGE)
         }
+    }
+    clearData() {
+        this.data = undefined
     }
 
     get chartProps() {
         return this._chartProps
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    set chartProps(value: any) {
+    set chartProps(value: object) {
         if (this._chartProps !== value) {
             this._chartProps = value
             this.emit(CHANGE)
         }
     }
+
+    readonly cache = {}
 
     initialized = false
 }
@@ -171,7 +178,6 @@ export function WorkspaceProvider(props: {
     useEffect(() => {
         return field?.events.subscribe(CHANGE, () => {
             const newSourceBlock = field.getSourceBlock()
-            console.log(`field change`, { newSourceBlock })
             setSourceBlock(newSourceBlock)
             setRole(resolveRole())
             setFlyout(!!newSourceBlock?.isInFlyout)

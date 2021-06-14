@@ -1,5 +1,4 @@
 import ScatterPlotField from "../fields/ScatterPlotField"
-import DataTableField from "../fields/DataTableField"
 import {
     BlockReference,
     CategoryDefinition,
@@ -12,36 +11,17 @@ import BlockDomainSpecificLanguage from "./dsl"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import LinePlotField from "../fields/LinePlotField"
 import GaugeWidgetField from "../fields/GaugeWidgetField"
+import BarChartField from "../fields/BarField"
 
-const SHOW_TABLE_BLOCK = "chart_show_table"
 const SCATTERPLOT_BLOCK = "chart_scatterplot"
 const LINEPLOT_BLOCK = "chart_lineplot"
+const BARCHART_BLOCK = "chart_bar"
 const DASHBOARD_GAUGE_BLOCK = "jacdac_dashboard_gauge"
 
 const colour = "#999"
 const chartDSL: BlockDomainSpecificLanguage = {
     id: "chart",
     createBlocks: () => [
-        {
-            kind: "block",
-            type: SHOW_TABLE_BLOCK,
-            message0: "show table %1 %2",
-            args0: [
-                <DummyInputDefinition>{
-                    type: "input_dummy",
-                },
-                {
-                    type: DataTableField.KEY,
-                    name: "table",
-                },
-            ],
-            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
-            template: "meta",
-            inputsInline: false,
-            transformData: identityTransformData,
-        },
         {
             kind: "block",
             type: SCATTERPLOT_BLOCK,
@@ -60,6 +40,34 @@ const chartDSL: BlockDomainSpecificLanguage = {
                 },
                 {
                     type: ScatterPlotField.KEY,
+                    name: "plot",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            inputsInline: false,
+            transformData: identityTransformData,
+        },
+        {
+            kind: "block",
+            type: BARCHART_BLOCK,
+            message0: "bar index %1 value %2 %3 %4",
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "index",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "value",
+                },
+                <DummyInputDefinition>{
+                    type: "input_dummy",
+                },
+                {
+                    type: BarChartField.KEY,
                     name: "plot",
                 },
             ],
@@ -138,8 +146,8 @@ const chartDSL: BlockDomainSpecificLanguage = {
             kind: "category",
             name: "Charts",
             contents: [
-                <BlockReference>{ kind: "block", type: SHOW_TABLE_BLOCK },
                 <BlockReference>{ kind: "block", type: SCATTERPLOT_BLOCK },
+                <BlockReference>{ kind: "block", type: BARCHART_BLOCK },
                 <BlockReference>{ kind: "block", type: LINEPLOT_BLOCK },
                 <BlockReference>{ kind: "block", type: DASHBOARD_GAUGE_BLOCK },
             ],
