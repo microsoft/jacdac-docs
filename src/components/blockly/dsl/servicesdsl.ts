@@ -1190,7 +1190,20 @@ export class ServicesBlockDomainSpecificLanguage
                 const { type } = block
                 switch (type) {
                     case SET_STATUS_LIGHT_BLOCK: {
-                        console.log("SET_STATUS")
+                        const { expr, errors } = blockToExpression(
+                            event,
+                            inputs[0].child
+                        )
+                        return {
+                            cmd: makeVMBase(block, {
+                                type: "CallExpression",
+                                arguments: [
+                                    expr,
+                                ],
+                                callee: toIdentifier("setStatus"),
+                            }),
+                            errors,
+                        }
                     }
                 }
             }
