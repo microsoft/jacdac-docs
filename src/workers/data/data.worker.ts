@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { arrange, desc, tidy } from "@tidyjs/tidy"
+import { select, arrange, desc, tidy } from "@tidyjs/tidy"
 
 export interface DataMessage {
     worker: "data"
@@ -17,11 +17,21 @@ export interface DataArrangeRequest extends DataRequest {
     descending: boolean
 }
 
+export interface DataDropRequest extends DataRequest {
+    type: "drop"
+    column: string
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handlers: { [index: string]: (props: any) => object[] } = {
     arrange: (props: DataArrangeRequest) => {
         const { column, descending, data } = props
         return tidy(data, arrange(descending ? desc(column) : column))
+    },
+    drop: (props: DataDropRequest) => {
+        const { column, data } = props
+        const minus_sign = "-"
+        return tidy(data, select([minus_sign.concat(column.toString())]))
     },
 }
 
