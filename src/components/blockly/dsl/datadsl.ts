@@ -103,6 +103,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
+                console.log("Drop: ", { column })
                 return postTransformData(<DataDropMessage>{
                     type: "drop",
                     column,

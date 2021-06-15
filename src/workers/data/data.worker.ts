@@ -30,8 +30,8 @@ const handlers: { [index: string]: (props: any) => object[] } = {
     },
     drop: (props: DataDropRequest) => {
         const { column, data } = props
-        const minus_sign = "-"
-        return tidy(data, select([minus_sign.concat(column.toString())]))
+        if (!column) return data
+        else return tidy(data, select([`-${column}`])) 
     },
 }
 
@@ -50,9 +50,10 @@ async function handleMessage(event: MessageEvent) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { worker, data, ...rest } = message
     if (worker !== "data") return
-
+    console.debug("Jacdac data in:", {message})
     const newData = await transformData(message)
-    const resp = { jacdacdata: true, ...rest, data: newData }
+    console.debug("Jacdac data out:", {message})
+    const resp = { worker, ...rest, data: newData }
     self.postMessage(resp)
 }
 
