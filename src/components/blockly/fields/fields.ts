@@ -11,6 +11,14 @@ import JDomTreeField from "./JDomTreeField"
 import WatchValueField from "./WatchValueField"
 import LogViewField from "./LogViewField"
 import VariablesField from "./VariablesFields"
+import DataTableField from "./DataTableField"
+import ScatterPlotField from "./ScatterPlotField"
+import DataColumnChooserField from "./DataColumnChooserField"
+import LinePlotField from "./LinePlotField"
+import GaugeWidgetField from "./GaugeWidgetField"
+import BuiltinDataSetField from "./BuiltinDataSetField"
+import BarChartField from "./BarField"
+import PiePlotField from "./PieField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -35,11 +43,25 @@ export function registerFields() {
         LEDMatrixField,
         ServoAngleField,
         LEDColorField,
+
         TwinField,
         JDomTreeField,
+
+        GaugeWidgetField,
+
         WatchValueField,
         LogViewField,
+
         VariablesField,
+        DataTableField,
+        DataColumnChooserField,
+
+        BuiltinDataSetField,
+
+        ScatterPlotField,
+        LinePlotField,
+        BarChartField,
+        PiePlotField,
     ]
     fieldTypes.forEach(registerType)
 }

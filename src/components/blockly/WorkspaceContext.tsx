@@ -1,4 +1,11 @@
-import { Block, FieldVariable, WorkspaceSvg } from "blockly"
+/* eslint-disable @typescript-eslint/ban-types */
+import {
+    Block,
+    BlockSvg,
+    FieldVariable,
+    Workspace,
+    WorkspaceSvg,
+} from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
@@ -23,7 +30,7 @@ export class WorkspaceServices extends JDEventSource {
     }
 
     set workspaceJSON(value: WorkspaceJSON) {
-        this._workspaceJSON = value;
+        this._workspaceJSON = value
         this.emit(CHANGE)
     }
 
@@ -48,6 +55,49 @@ export class WorkspaceServices extends JDEventSource {
             this.emit(CHANGE)
         }
     }
+}
+
+export interface BlocklyWorkspaceWithServices extends Workspace {
+    jacdacServices: WorkspaceServices
+}
+
+export interface FieldWithServices {
+    notifyServicesChanged?: () => void
+}
+
+export class BlockServices extends JDEventSource {
+    private _data: object[]
+    private _chartProps: object
+
+    get data() {
+        return this._data
+    }
+    set data(value: object[]) {
+        if (this._data !== value) {
+            this._data = value
+            this.emit(CHANGE)
+        }
+    }
+    clearData() {
+        this.data = undefined
+    }
+
+    get chartProps() {
+        return this._chartProps
+    }
+    set chartProps(value: object) {
+        if (this._chartProps !== value) {
+            this._chartProps = value
+            this.emit(CHANGE)
+        }
+    }
+
+    readonly cache = {}
+
+    initialized = false
+}
+export interface BlockWithServices extends BlockSvg {
+    jacdacServices: BlockServices
 }
 
 export interface WorkspaceContextProps {
@@ -78,10 +128,6 @@ export const WorkspaceContext = createContext<WorkspaceContextProps>({
 WorkspaceContext.displayName = "Workspace"
 
 export default WorkspaceContext
-
-export interface BlocklyWorkspaceWithServices extends WorkspaceSvg {
-    jacdacServices: WorkspaceServices
-}
 
 export function WorkspaceProvider(props: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,7 +178,6 @@ export function WorkspaceProvider(props: {
     useEffect(() => {
         return field?.events.subscribe(CHANGE, () => {
             const newSourceBlock = field.getSourceBlock()
-            console.log(`field change`, { newSourceBlock })
             setSourceBlock(newSourceBlock)
             setRole(resolveRole())
             setFlyout(!!newSourceBlock?.isInFlyout)

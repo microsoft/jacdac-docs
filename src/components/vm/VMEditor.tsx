@@ -7,19 +7,11 @@ import VMToolbar from "./VMToolbar"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
-import servicesDSL from "../blockly/dsl/servicesdsl"
-import toolsDSL from "../blockly/dsl/toolsdsl"
-import loopsDsl from "../blockly/dsl/loopsdsl"
-import logicDsl from "../blockly/dsl/logicdsl"
-import mathDSL from "../blockly/dsl/mathdsl"
-import variablesDsl from "../blockly/dsl/variablesdsl"
-import shadowDsl from "../blockly/dsl/shadowdsl"
-import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import workspaceJSONToVMProgram from "./VMgenerator"
 import { BlocklyWorkspaceWithServices } from "../blockly/WorkspaceContext"
 import BlockEditor from "../blockly/BlockEditor"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
-import jsonDSL from "../blockly/dsl/jsondsl"
+import vmDsls from "./vmdsls"
 
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
 function VMEditorWithContext() {
@@ -78,17 +70,7 @@ function VMEditorWithContext() {
 
 export default function VMEditor() {
     const dsls = useMemo(() => {
-        return [
-            servicesDSL,
-            loopsDsl,
-            logicDsl,
-            mathDSL,
-            jsonDSL,
-            variablesDsl,
-            toolsDSL,
-            shadowDsl,
-            fieldsDsl,
-        ]
+        return vmDsls
     }, [])
 
     return (

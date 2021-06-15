@@ -1,5 +1,5 @@
 import { SMap } from "../../../jacdac-ts/src/jdom/utils"
-import Blockly from "blockly"
+import Blockly, { Block, BlockSvg } from "blockly"
 
 export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -40,6 +40,7 @@ export interface OptionsInputDefinition extends InputDefinition {
 }
 
 export interface NumberInputDefinition extends InputDefinition {
+    type: "field_number"
     min?: number
     max?: number
     precision?: number
@@ -99,20 +100,30 @@ export interface BlockDefinition extends BlockReference {
     // js implementation to be called by VM
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vm?: (...args: any[]) => any
+
+    // data transformation
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    transformData?: (block: BlockSvg, data: object[]) => Promise<object[]>
 }
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const identityTransformData = async (block: Block, data: object[]) =>
+    data
 
 export interface ServiceBlockDefinition extends BlockDefinition {
     template: BlockTemplate
     service: jdspec.ServiceSpec
 }
 
-export interface ServiceBlockDefinitionFactory {
-    jacdacDefinition: ServiceBlockDefinition
+export interface ServiceBlockDefinitionFactory<T extends BlockDefinition> {
+    jacdacDefinition: T
     init: () => void
 }
 
-export function resolveServiceBlockDefinition(type: string) {
-    const b = Blockly.Blocks[type] as ServiceBlockDefinitionFactory
+export function resolveBlockDefinition<T extends BlockDefinition>(
+    type: string
+) {
+    const b = Blockly.Blocks[type] as ServiceBlockDefinitionFactory<T>
     return b?.jacdacDefinition
 }
 
@@ -152,6 +163,11 @@ export const PRIMITIVE_TYPES = [STRING_TYPE, BOOLEAN_TYPE, NUMBER_TYPE]
 export const BUILTIN_TYPES = ["", ...PRIMITIVE_TYPES]
 
 export const CODE_STATEMENT_TYPE = "Code"
+export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
+
+export const TWIN_BLOCK = "jacdac_tools_twin"
+
+export const toolsColour = "#888"
 
 export interface ContentDefinition {
     kind: "category" | "sep" | "button" | "label"

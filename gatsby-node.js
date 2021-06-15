@@ -3,6 +3,7 @@ const fs = require(`fs-extra`)
 const sharp = require(`sharp`)
 const { slash } = require(`gatsby-core-utils`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
+const Papa = require("papaparse")
 const {
     serviceSpecifications,
     identifierToUrlPath,
@@ -14,6 +15,7 @@ const AVATAR_SIZE = 64
 const LAZY_SIZE = 96
 
 async function createServicePages(graphql, actions, reporter) {
+    console.log(`generating service pages`)
     const { createPage, createRedirect } = actions
     const result = await graphql(`
         {
@@ -86,7 +88,29 @@ async function createServicePages(graphql, actions, reporter) {
     })
 }
 
+async function createDeviceQRPages(actions) {
+    console.log(`generating device QR pages`)
+    const { createRedirect } = actions
+    const csv = fs.readFileSync(
+        "./jacdac-ts/jacdac-spec/devices/microsoft/research/qr-url-device-map.csv",
+        "utf-8"
+    )
+    const designidcol = "designid"
+    const vanitycol = "vanityname"
+    const csvData = Papa.parse(csv, { header: true })
+    const data = csvData.data.filter(d => !!d[designidcol])
+    for (const qr of data) {
+        const vanity = qr[vanitycol].trim()
+        const p = `/devices/codes/${vanity}/`
+        const r = { fromPath: p, toPath: `/devices/microsoft/research/` }
+        await createRedirect(r)
+        console.log(r)
+    }
+    console.log(`devices qr code redirect created`)
+}
+
 async function createDevicePages(graphql, actions, reporter) {
+    console.log(`generating device pages`)
     const { createPage, createRedirect } = actions
     const result = await graphql(`
         {
@@ -199,6 +223,7 @@ async function createDevicePages(graphql, actions, reporter) {
 }
 
 async function createSpecPages(graphql, actions, reporter) {
+    console.log(`generating spec pages`)
     const { createPage } = actions
     const result = await graphql(`
         {
@@ -275,12 +300,12 @@ async function generateServicesJSON() {
 }
 
 async function createWorkers() {
-    // copy jacdac-serviceworker.js to static
+    // copy jacdac-worker.js to static
     // include version number to bust out caching
     const jacdacTsPackageJson = fs.readJsonSync(`./jacdac-ts/package.json`)
     await fs.copy(
-        `./jacdac-ts/dist/jacdac-serviceworker.js`,
-        `./public/jacdac-serviceworker-${jacdacTsPackageJson.version}.js`
+        `./jacdac-ts/dist/jacdac-worker.js`,
+        `./public/jacdac-worker-${jacdacTsPackageJson.version}.js`
     )
 }
 
@@ -292,6 +317,7 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
     await createServicePages(graphql, actions, reporter)
     await createSpecPages(graphql, actions, reporter)
     await createDevicePages(graphql, actions, reporter)
+    await createDeviceQRPages(actions, reporter)
     // generate JSON for Services/DTMI models
     await generateServicesJSON()
     await createWorkers()
@@ -351,6 +377,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
 
 // generate a full list of pages for compliance
 exports.onPostBuild = async ({ graphql }) => {
+    console.log(`compliance step`)
     const { data } = await graphql(`
         {
             pages: allSitePage {
