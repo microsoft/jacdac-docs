@@ -1,13 +1,12 @@
-import { Grid } from "@material-ui/core"
+import { Grid, Button } from "@material-ui/core"
 import React, { useEffect, useState } from "react"
-import { Button } from "@material-ui/core"
 import * as tf from "@tensorflow/tfjs"
 
 export default function ModelPlayground() {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
-        document.title = `${count} clicks`;
+        document.title = `${count} click(s)`;
     });
 
     const handleIncrement = async () => {

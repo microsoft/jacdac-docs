@@ -2,17 +2,17 @@ import React, { useContext, useEffect, useMemo } from "react"
 import { NoSsr } from "@material-ui/core"
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockEditor from "../blockly/BlockEditor"
-import variablesDsl from "../blockly/dsl/variablesdsl"
+//import variablesDsl from "../blockly/dsl/variablesdsl"
 import shadowDsl from "../blockly/dsl/shadowdsl"
-import dataDsl from "./datadsl"
+import modelBlockDsl from "./modelblockdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
 import { visitWorkspace } from "../blockly/jsonvisitor"
 
-const DS_SOURCE_STORAGE_KEY = "data-science-blockly-xml"
+const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
 
-function DSEditorWithContext() {
+function ModelBlockEditorWithContext() {
     // block context handles hosting blockly
     const { workspaceJSON } = useContext(BlockContext)
 
@@ -34,14 +34,14 @@ function DSEditorWithContext() {
     )
 }
 
-export default function DScienceEditor() {
+export default function ModelBlockEditor() {
     const dsls = useMemo(() => {
-        return [dataDsl, variablesDsl, shadowDsl, fieldsDsl]
+        return [modelBlockDsl, shadowDsl, fieldsDsl]
     }, [])
     return (
         <NoSsr>
-            <BlockProvider storageKey={DS_SOURCE_STORAGE_KEY} dsls={dsls}>
-                <DSEditorWithContext />
+            <BlockProvider storageKey={MB_SOURCE_STORAGE_KEY} dsls={dsls}>
+                <ModelBlockEditorWithContext />
             </BlockProvider>
         </NoSsr>
     )
