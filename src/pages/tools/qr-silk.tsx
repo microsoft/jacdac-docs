@@ -1,15 +1,49 @@
 import { Grid, Switch, TextField } from "@material-ui/core"
-import React, { ChangeEvent, lazy, useState } from "react"
+import React, { ChangeEvent, lazy, useEffect, useState } from "react"
 import { useId } from "react-use-id-hook"
 import Suspense from "../../components/ui/Suspense"
+import { toMap } from "../../../jacdac-ts/src/jdom/utils"
 const SilkQRCode = lazy(() => import("../../components/widgets/SilkQrCode"))
 
-export default function DeviceQRCodeGenerator() {
-    const [url, setUrl] = useState(`HTTP://AKA.MS/AAAAAB`)
+import { graphql } from "gatsby"
+
+export const query = graphql`
+    {
+        allQrUrlDeviceMapCsv {
+            nodes {
+                vanityname
+                revision
+                modulename
+                designid
+            }
+        }
+    }
+`
+
+export default function DeviceQRCodeGenerator(props: {
+    data: {
+        allQrUrlDeviceMapCsv: {
+            nodes: {
+                vanityname: string
+                modulename: string
+                designid: string
+                revision: string
+            }[]
+        }
+    }
+}) {
+    const { data } = props
+    const knowns = toMap(
+        data.allQrUrlDeviceMapCsv.nodes,
+        n => n.vanityname.toUpperCase(),
+        n => n
+    )
+    const [vanity, setVanity] = useState(`AAAAAB`)
     const [mirror, setMirror] = useState(true)
     const [size, setSize] = useState(3)
     const handleUrlChange = (ev: ChangeEvent<HTMLInputElement>) => {
-        setUrl(ev.target.value?.toUpperCase())
+        const vanity = ev.target.value?.toUpperCase()
+        setVanity(vanity)
     }
     const handleSizeChange = (ev: ChangeEvent<HTMLInputElement>) => {
         const s = Number(ev.target.value)
@@ -19,19 +53,25 @@ export default function DeviceQRCodeGenerator() {
         setMirror(!!ev.target.checked)
     }
     const mirrorid = useId()
-
+    const url = !!vanity && `HTTP://AKA.MS/${vanity}`
+    const known = knowns[vanity]
+    const { modulename, designid, revision } = known || {}
     return (
         <>
             <h1>Silk QR Code generator</h1>
-            <p>Enter a short URL to be encoded as a silk compatible QR code.</p>
+            <p>
+                Enter a short URL HTTP://AKA.MS/<strong>vanity name</strong> to
+                be encoded as a silk compatible QR code.
+            </p>
             <Grid container spacing={1}>
                 <Grid item xs>
                     <TextField
                         fullWidth={true}
-                        label="url"
-                        value={url}
-                        placeholder="HTTP://AKA.MS/AAAAA"
+                        label="vanity name"
+                        value={vanity}
+                        placeholder="AAAAA"
                         onChange={handleUrlChange}
+                        helperText={"HTTP://AKA.MS/"}
                     />
                 </Grid>
                 <Grid item>
@@ -51,6 +91,14 @@ export default function DeviceQRCodeGenerator() {
                     <label id={mirrorid}>mirror</label>
                 </Grid>
             </Grid>
+            {known && (
+                <>
+                    <h2>Existing entry</h2>
+                    <p>
+                        {designid}: {modulename} v{revision}
+                    </p>
+                </>
+            )}
             <h2>{url} preview</h2>
             <p>
                 If you see bing.com for aka.ms links, it&quot;s likely to be
