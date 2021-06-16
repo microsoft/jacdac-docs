@@ -37,7 +37,10 @@ function VMEditorWithContext() {
     )
     useEffect(
         () =>
-            setWarnings(arrayConcatMany(program?.handlers.map(h => h.errors))),
+            setWarnings(
+                "vm",
+                arrayConcatMany(program?.handlers.map(h => h.errors))
+            ),
         [program]
     )
 

@@ -1,7 +1,7 @@
 import Blockly, { WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
-import { toMap } from "../../../jacdac-ts/src/jdom/utils"
+import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import useRoleManager from "../hooks/useRoleManager"
 import useLocalStorage from "../useLocalStorage"
@@ -37,7 +37,7 @@ export interface BlockProps {
     roleManager: RoleManager
     setWorkspace: (ws: WorkspaceSvg) => void
     setWorkspaceXml: (value: string) => void
-    setWarnings: (warnings: BlockWarning[]) => void
+    setWarnings: (category: string, warnings: BlockWarning[]) => void
 }
 
 const BlockContext = createContext<BlockProps>({
@@ -70,11 +70,28 @@ export function BlockProvider(props: {
     const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
     const [workspaceJSON, setWorkspaceJSON] = useState<WorkspaceJSON>(undefined)
-    const [warnings, setWarnings] = useState<BlockWarning[]>([])
+    const [warnings, _setWarnings] = useState<
+        {
+            category: string
+            entries: BlockWarning[]
+        }[]
+    >([])
 
     const setWorkspaceXml = (xml: string) => {
         setStoredXml(xml)
         _setWorkspaceXml(xml)
+    }
+
+    const setWarnings = (category: string, entries: BlockWarning[]) => {
+        const i = warnings.findIndex(w => w.category === category)
+        _setWarnings([
+            ...warnings.slice(0, i),
+            {
+                category,
+                entries,
+            },
+            ...warnings.slice(i + 1),
+        ])
     }
 
     const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
@@ -195,7 +212,11 @@ export function BlockProvider(props: {
     useEffect(() => {
         if (!workspace) return
         const allErrors = toMap(
-            warnings || [],
+            arrayConcatMany(
+                warnings
+                    .map(w => w.entries)
+                    .filter(entries => !!entries?.length)
+            ),
             e => e.sourceId || "",
             e => e.message
         )
