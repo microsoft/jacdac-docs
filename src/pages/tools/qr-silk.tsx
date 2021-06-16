@@ -91,15 +91,19 @@ export default function DeviceQRCodeGenerator(props: {
                     <label id={mirrorid}>mirror</label>
                 </Grid>
             </Grid>
+            <h2>URL</h2>
+            <pre>
+                <a href={url}>{url}</a>
+            </pre>
             {known && (
                 <>
-                    <h2>Existing entry</h2>
+                    <h2>Existing device entry</h2>
                     <p>
                         {designid}: {modulename} v{revision}
                     </p>
                 </>
             )}
-            <h2>{url} preview</h2>
+            <h2>Preview</h2>
             <p>
                 If you see bing.com for aka.ms links, it&quot;s likely to be
                 free.
