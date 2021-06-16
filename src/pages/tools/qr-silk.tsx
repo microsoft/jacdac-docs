@@ -52,7 +52,10 @@ export default function DeviceQRCodeGenerator() {
                 </Grid>
             </Grid>
             <h2>{url} preview</h2>
-            <p>If you see bing.com for aka.ms links, it&quot;s likely to be free.</p>
+            <p>
+                If you see bing.com for aka.ms links, it&quot;s likely to be
+                free.
+            </p>
             <iframe
                 style={{ width: "100%", height: "18rem", border: "none" }}
                 src={url}
