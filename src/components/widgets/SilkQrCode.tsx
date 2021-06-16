@@ -1,4 +1,4 @@
-import { Button, Grid } from "@material-ui/core"
+import { Button } from "@material-ui/core"
 import { Alert } from "@material-ui/lab"
 import QRCode from "qrcode"
 import React, { useState } from "react"
@@ -140,12 +140,14 @@ export default function SilkQRCode(props: {
                 <>
                     <h3>Original size</h3>
                     <img
+                        className="pixelated"
                         style={{ width: `${size}mm` }}
                         src={imageUri}
                         alt={`QR code of ${url}`}
                     />
                     <h3>Zoomed</h3>
                     <img
+                        className="pixelated"
                         style={{ width: `10rem` }}
                         src={imageUri}
                         alt={`QR code of ${url}`}
