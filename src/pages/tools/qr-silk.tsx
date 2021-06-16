@@ -50,7 +50,7 @@ export default function DeviceQRCodeGenerator() {
                     <label id={mirrorid}>mirror</label>
                 </Grid>
             </Grid>
-
+            <br />
             <Suspense>
                 <SilkQRCode url={url} mirror={mirror} />
             </Suspense>
