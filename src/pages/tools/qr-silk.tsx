@@ -1,5 +1,12 @@
-import { Grid, Switch, TextField } from "@material-ui/core"
-import React, { ChangeEvent, lazy, useEffect, useState } from "react"
+import {
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+    Switch,
+    TextField,
+} from "@material-ui/core"
+import React, { ChangeEvent, lazy, useState } from "react"
 import { useId } from "react-use-id-hook"
 import Suspense from "../../components/ui/Suspense"
 import { toMap } from "../../../jacdac-ts/src/jdom/utils"
@@ -33,8 +40,9 @@ export default function DeviceQRCodeGenerator(props: {
     }
 }) {
     const { data } = props
+    const { nodes } = data.allQrUrlDeviceMapCsv
     const knowns = toMap(
-        data.allQrUrlDeviceMapCsv.nodes,
+        nodes.filter(({ designid }) => !!designid),
         n => n.vanityname.toUpperCase(),
         n => n
     )
@@ -56,6 +64,7 @@ export default function DeviceQRCodeGenerator(props: {
     const url = !!vanity && `HTTP://AKA.MS/${vanity}`
     const known = knowns[vanity]
     const { modulename, designid, revision } = known || {}
+    const handleVanity = (vanityname: string) => () => setVanity(vanityname)
     return (
         <>
             <h1>Silk QR Code generator</h1>
@@ -118,6 +127,23 @@ export default function DeviceQRCodeGenerator(props: {
             <Suspense>
                 <SilkQRCode url={url} mirror={mirror} />
             </Suspense>
+            <h2>Known devices</h2>
+            <List>
+                {nodes
+                    .filter(({ designid }) => !!designid)
+                    .map(({ vanityname, designid, revision }) => (
+                        <ListItem
+                            button
+                            key={vanityname}
+                            onClick={handleVanity(vanity)}
+                        >
+                            <ListItemText
+                                primary={`${vanityname} v${revision}`}
+                                secondary={designid}
+                            />
+                        </ListItem>
+                    ))}
+            </List>
         </>
     )
 }
