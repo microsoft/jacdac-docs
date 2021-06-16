@@ -1,3 +1,4 @@
+import { Button, Grid } from "@material-ui/core"
 import { Alert } from "@material-ui/lab"
 import { Link } from "gatsby-material-ui-components"
 import QRCode from "qrcode"
@@ -28,6 +29,7 @@ function useQRCodeSCR(
     }
     const fmt = (v: number) => v.toFixed(3)
     const [image, setImage] = useState<string>(undefined)
+    const [svg, setSvg] = useState<string>(undefined)
     const [scr, setScr] = useState<string>(undefined)
     const [error, setError] = useState<string>(undefined)
     const deps = [url, layer, size, mirror, margin]
@@ -36,15 +38,17 @@ function useQRCodeSCR(
     useEffectAsync(async mounted => {
         try {
             const uri = await QRCode.toDataURI(url, QRCodeOptions)
-            if (mounted) setImage(uri)
+            if (mounted()) setImage(uri)
         } catch (e) {
-            if (mounted) setImage(undefined)
+            if (mounted()) setImage(undefined)
         }
     }, deps)
 
     useEffectAsync(async mounted => {
         try {
             const utfcode: string = await QRCode.toString(url, QRCodeOptions)
+            if (!mounted()) return
+            setSvg(utfcode)
             console.debug(`utfcode`, { utfcode })
             const lines = utfcode.split(/\n/).filter(s => !!s)
             let sz = lines[0].length
@@ -105,16 +109,16 @@ function useQRCodeSCR(
             scr += `DISPLAY LAST;\n`
 
             console.log("scr", scr)
-            if (mounted) setScr(scr)
+            setScr(scr)
         } catch (e) {
-            if (mounted) {
+            if (mounted()) {
                 setScr(undefined)
                 setError(e + "")
             }
         }
     }, deps)
 
-    return { scr, image, error }
+    return { scr, svg, image, error }
 }
 
 export default function SilkQRCode(props: {
@@ -125,15 +129,34 @@ export default function SilkQRCode(props: {
     margin?: number
 }) {
     const { url, layer = 22, mirror = true, size = 0.3, margin = 1 } = props
-    const { scr, image, error } = useQRCodeSCR(url, layer, size, mirror, margin)
+    const { scr, svg, image, error } = useQRCodeSCR(
+        url,
+        layer,
+        size,
+        mirror,
+        margin
+    )
 
     if (!url) return null
     if (error) return <Alert severity="warning">{error}</Alert>
 
     const scrUri = `data:text/plain;charset=UTF-8,${encodeURIComponent(scr)}`
+    const svgUri = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
     return (
-        <Link href={scrUri} download="qrcode.scr">
-            <img src={image} alt={`QR code of ${url}`} />
-        </Link>
+        <Grid container spacing={1}>
+            <Grid item xs={12}>
+                <img src={image} alt={`QR code of ${url}`} />
+            </Grid>
+            <Grid item xs={12}>
+                <Grid container spacing={1}>
+                    <Grid item xs>
+                        <Button href={scrUri} download="qrcode.scr"></Button>
+                    </Grid>
+                    <Grid item xs>
+                        <Button href={svgUri} download="qrcode.svg"></Button>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
     )
 }

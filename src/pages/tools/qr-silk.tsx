@@ -12,7 +12,7 @@ export default function DeviceQRCodeGenerator() {
         <>
             <h1>Silk QR Code generator</h1>
             <p>Enter a short URL to be encoded as a silk compatible QR code.</p>
-            <TextField label="url" value={url} onChange={handleUrlChange} />
+            <TextField fullWidth={true} label="url" value={url} onChange={handleUrlChange} />
 
             <h2>Generated QR code</h2>
             <SilkQRCode url={url} />
