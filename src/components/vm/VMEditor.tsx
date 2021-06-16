@@ -13,6 +13,7 @@ import BlockEditor from "../blockly/BlockEditor"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import vmDsls from "./vmdsls"
 
+const VM_WARNINGS_CATEGORY = "vm"
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
 function VMEditorWithContext() {
     const { dsls, workspace, workspaceJSON, roleManager, setWarnings } =
@@ -38,7 +39,7 @@ function VMEditorWithContext() {
     useEffect(
         () =>
             setWarnings(
-                "vm",
+                VM_WARNINGS_CATEGORY,
                 arrayConcatMany(program?.handlers.map(h => h.errors))
             ),
         [program]
