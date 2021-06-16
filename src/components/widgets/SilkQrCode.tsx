@@ -1,6 +1,5 @@
 import { Button, Grid } from "@material-ui/core"
 import { Alert } from "@material-ui/lab"
-import { Link } from "gatsby-material-ui-components"
 import QRCode from "qrcode"
 import React, { useState } from "react"
 import { useEffect } from "react"
