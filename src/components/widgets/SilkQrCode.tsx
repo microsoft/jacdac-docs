@@ -29,6 +29,9 @@ function useQRCodeSCR(
     useEffect(() => setError(undefined), deps)
 
     useEffectAsync(async mounted => {
+        setImage(undefined)
+        setScr(undefined)
+        setError(undefined)
         try {
             const utfcode: string = await QRCode.toString(url, {
                 margin: 0,
@@ -37,7 +40,7 @@ function useQRCodeSCR(
                 type: "utf8",
             })
             if (!mounted()) return
-            setImage(`url('data:image/svg+xml;utf8,${utfcode}`)
+            setImage(utfcode)
             console.debug(`utfcode`, { utfcode })
             const lines = utfcode.split(/\n/).filter(s => !!s)
             let sz = lines[0].length
@@ -101,8 +104,6 @@ function useQRCodeSCR(
             setScr(scr)
         } catch (e) {
             if (mounted()) {
-                setImage(undefined)
-                setScr(undefined)
                 setError(e + "")
             }
         }
@@ -118,35 +119,39 @@ export default function SilkQRCode(props: {
     mirror?: boolean
     margin?: number
 }) {
-    const { url, layer = 22, mirror = true, size = 0.3, margin = 1 } = props
-    const { scr, svg, image, error } = useQRCodeSCR(
-        url,
-        layer,
-        size,
-        mirror,
-        margin
-    )
+    const { url, layer = 22, mirror = true, size = 3, margin = 1 } = props
+    const { scr, image, error } = useQRCodeSCR(url, layer, size, mirror, margin)
 
     if (!url) return null
-    if (error) return <Alert severity="warning">{error}</Alert>
 
-    const scrUri = `data:text/plain;charset=UTF-8,${encodeURIComponent(scr)}`
-    const svgUri = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+    const imageUri =
+        image && `data:image/svg+xml;utf8,${encodeURIComponent(image)}`
+    const scrUri =
+        scr && `data:text/plain;charset=UTF-8,${encodeURIComponent(scr)}`
     return (
-        <Grid container spacing={1}>
-            <Grid item xs={12}>
-                <img src={image} alt={`QR code of ${url}`} />
-            </Grid>
-            <Grid item xs={12}>
-                <Grid container spacing={1}>
-                    <Grid item xs>
-                        <Button href={scrUri} download="qrcode.scr"></Button>
-                    </Grid>
-                    <Grid item xs>
-                        <Button href={svgUri} download="qrcode.svg"></Button>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
+        <>
+            {error && <Alert severity="warning">{error}</Alert>}
+            {scr && (
+                <Button href={scrUri} download="qrcode.scr">
+                    Download SCR
+                </Button>
+            )}
+            {image && (
+                <>
+                    <h3>Original size</h3>
+                    <img
+                        style={{ width: `${size}mm` }}
+                        src={imageUri}
+                        alt={`QR code of ${url}`}
+                    />
+                    <h3>Zoomed</h3>
+                    <img
+                        style={{ width: `10rem` }}
+                        src={imageUri}
+                        alt={`QR code of ${url}`}
+                    />
+                </>
+            )}
+        </>
     )
 }

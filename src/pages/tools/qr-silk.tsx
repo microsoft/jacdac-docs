@@ -51,7 +51,6 @@ export default function DeviceQRCodeGenerator() {
                 </Grid>
             </Grid>
 
-            <h2>Generated QR code</h2>
             <Suspense>
                 <SilkQRCode url={url} mirror={mirror} />
             </Suspense>
