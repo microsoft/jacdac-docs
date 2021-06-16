@@ -37,11 +37,12 @@ const handlers: { [index: string]: (props: any) => object[] } = {
     drop: (props: DataDropRequest) => {
         const { columns, data } = props
         if (!columns) return data
-        else return tidy(data, select(columns.map(column => { return `-${column}` }))) 
+        else return tidy(data, select(columns.map(column => `-${column}` ))) 
     },
     filter_columns: (props: DataFilterColumnsRequest) => {
         const { columns, logic, data } = props
-        if (!columns) { return data }
+        const [left, right] = columns
+        if (!left || !right) return data
 
         switch(logic) {
             case "gt":
