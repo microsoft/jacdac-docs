@@ -6,6 +6,7 @@ import postLoadCSV from "../dsl/workers/csv.proxy"
 const builtins = {
     dummy: withPrefix("/datasets/dummy.csv"),
     mt: withPrefix("/datasets/mt.csv"),
+    cereal: withPrefix("/datasets/cereal.csv"),
 }
 
 export default class BuiltinDataSetField
