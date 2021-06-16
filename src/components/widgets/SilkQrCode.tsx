@@ -20,34 +20,24 @@ function useQRCodeSCR(
     mirror: boolean,
     margin: number
 ) {
-    const QRCodeOptions = {
-        margin: 0,
-        scale: 1,
-        errorCorrectionLevel: "medium",
-        type: "utf8",
-    }
     const fmt = (v: number) => v.toFixed(3)
     const [image, setImage] = useState<string>(undefined)
-    const [svg, setSvg] = useState<string>(undefined)
     const [scr, setScr] = useState<string>(undefined)
     const [error, setError] = useState<string>(undefined)
     const deps = [url, layer, size, mirror, margin]
 
     useEffect(() => setError(undefined), deps)
-    useEffectAsync(async mounted => {
-        try {
-            const uri = await QRCode.toDataURI(url, QRCodeOptions)
-            if (mounted()) setImage(uri)
-        } catch (e) {
-            if (mounted()) setImage(undefined)
-        }
-    }, deps)
 
     useEffectAsync(async mounted => {
         try {
-            const utfcode: string = await QRCode.toString(url, QRCodeOptions)
+            const utfcode: string = await QRCode.toString(url, {
+                margin: 0,
+                scale: 1,
+                errorCorrectionLevel: "medium",
+                type: "utf8",
+            })
             if (!mounted()) return
-            setSvg(utfcode)
+            setImage(`url('data:image/svg+xml;utf8,${utfcode}`)
             console.debug(`utfcode`, { utfcode })
             const lines = utfcode.split(/\n/).filter(s => !!s)
             let sz = lines[0].length
@@ -111,13 +101,14 @@ function useQRCodeSCR(
             setScr(scr)
         } catch (e) {
             if (mounted()) {
+                setImage(undefined)
                 setScr(undefined)
                 setError(e + "")
             }
         }
     }, deps)
 
-    return { scr, svg, image, error }
+    return { scr, image, error }
 }
 
 export default function SilkQRCode(props: {
