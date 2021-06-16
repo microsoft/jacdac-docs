@@ -112,21 +112,20 @@ export default function DeviceQRCodeGenerator(props: {
                     </p>
                 </>
             )}
+            <h2>QR codes</h2>
+            <Suspense>
+                <SilkQRCode url={url} mirror={mirror} />
+            </Suspense>
             <h2>Preview</h2>
             <p>
                 If you see bing.com for aka.ms links, it&quot;s likely to be
                 free.
             </p>
             <iframe
-                style={{ width: "100%", height: "18rem", border: "none" }}
+                style={{ width: "100%", height: "14rem", border: "none" }}
                 src={url}
                 sandbox="allow-scripts"
             />
-
-            <h2>QR codes</h2>
-            <Suspense>
-                <SilkQRCode url={url} mirror={mirror} />
-            </Suspense>
             <h2>Known devices</h2>
             <List>
                 {nodes
