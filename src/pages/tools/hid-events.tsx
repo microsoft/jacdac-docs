@@ -9,6 +9,7 @@ import {
     DialogTitle,
     Grid,
     Typography,
+    MenuItem
 } from "@material-ui/core"
 import useChange from "../../jacdac/useChange"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
@@ -49,6 +50,7 @@ import useServiceProviderFromServiceClass from "../../components/hooks/useServic
 import AppContext from "../../components/AppContext"
 import { AlertTitle } from "@material-ui/lab"
 import { renderKeyboardKey } from "../../../jacdac-ts/src/servers/hidkeyboardserver"
+import SelectWithLabel from "../../components/ui/SelectWithLabel"
 const ImportButton = lazy(() => import("../../components/ImportButton"))
 
 // all settings keys are prefixed with this string
@@ -110,6 +112,8 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
     const [selector, setSelector] = useState(0)
     const [modifiers, setModifiers] = useState(HidKeyboardModifiers.None)
 
+    const [selected, setSelected] = useState("down")
+
     const excludedServices = [
         SRV_CONTROL,
         SRV_PROTO_TEST,
@@ -122,12 +126,15 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
     const services = useServices({ ignoreSelf: true, specification: true })
         .filter(srv => excludedServices.indexOf(srv.serviceClass) < 0)
         .filter(srv => srv.events.some(eventFilter))
-    const events = arrayConcatMany(
-        services.map(service => service.events.filter(eventFilter))
-    )
 
-    const handleClickEvent = (newEvent: JDEvent) => () =>
-        setEvent(event === newEvent ? undefined : newEvent)
+    const handleClickEvent = (service: JDService) => () => {
+        let evt = service.events.filter((event:JDEvent)=> selected == humanify(event.name))
+
+        console.log("CLICKED", evt)
+
+        if (evt.length)
+            setEvent(evt[0])
+    }
 
     const handleKeyChange = (
         newSelector: number,
@@ -138,39 +145,45 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
     }
     const disabled = !event || !selector
     const handleAdd = () => onAdd({ eventId: event.id, selector, modifiers })
+    const handleChange = (ev: React.ChangeEvent<{ value: unknown }>) => {
+        console.log("CHANGED?", ev.target.value)
+        setSelected(ev.target.value as string)
+    }
 
     return (
         <Grid container spacing={2}>
-            {!events?.length && (
+            {!services?.length && (
                 <Grid item xs={12}>
                     <Alert severity="info">
                         Connect your devices to bind keyboard commands.
                     </Alert>
                 </Grid>
             )}
-            {events
-                .filter(ev => !event || ev === event)
-                .map(ev => (
-                    <Grid item xs={12} sm={6} lg={4} xl={3} key={ev.id}>
+            {services.map(service => (
+                    <Grid item xs={12} sm={6} lg={4} xl={3} key={service.id}>
                         <Card>
                             <DeviceCardHeader
-                                device={ev.service.device}
+                                device={service.device}
                                 showAvatar={true}
                             />
                             <CardContent>
-                                <Typography variant="h5">
-                                    {ev.service.name}
-                                </Typography>
                                 <Typography variant="h4">
-                                    {humanify(ev.name)}
+                                    {service.name}
                                 </Typography>
+                                <SelectWithLabel label={"Select an event to map: "} fullWidth={true} value={selected} onChange={handleChange}>
+                                    {service.events.filter(eventFilter).map(ev => (
+                                        <MenuItem key={ev.name} value={ev.name}>
+                                            {humanify(ev.name)}
+                                        </MenuItem>
+                                    ))}
+                                </SelectWithLabel>
                             </CardContent>
                             <CardActions>
                                 <Button
-                                    onClick={handleClickEvent(ev)}
+                                    onClick={handleClickEvent(service)}
                                     variant={"outlined"}
                                 >
-                                    {ev === event ? "unselect" : "select"}
+                                    {"Set mapping"}
                                 </Button>
                             </CardActions>
                         </Card>
