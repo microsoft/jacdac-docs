@@ -48,7 +48,7 @@ export default function DeviceQRCodeGenerator(props: {
     )
     const [vanity, setVanity] = useState(`AAAAAB`)
     const [mirror, setMirror] = useState(true)
-    const [size, setSize] = useState(3)
+    const [size, setSize] = useState(0.3)
     const handleUrlChange = (ev: ChangeEvent<HTMLInputElement>) => {
         const vanity = ev.target.value?.toUpperCase()
         setVanity(vanity)
@@ -85,7 +85,7 @@ export default function DeviceQRCodeGenerator(props: {
                 </Grid>
                 <Grid item>
                     <TextField
-                        label="size (mm)"
+                        label="block size (mm)"
                         type="number"
                         value={size}
                         onChange={handleSizeChange}
@@ -114,7 +114,7 @@ export default function DeviceQRCodeGenerator(props: {
             )}
             <h2>QR codes</h2>
             <Suspense>
-                <SilkQRCode url={url} mirror={mirror} />
+                <SilkQRCode url={url} mirror={mirror} size={size} />
             </Suspense>
             <h2>Preview</h2>
             <p>
@@ -130,15 +130,15 @@ export default function DeviceQRCodeGenerator(props: {
             <List>
                 {nodes
                     .filter(({ designid }) => !!designid)
-                    .map(({ vanityname, designid, revision }) => (
+                    .map(({ vanityname, modulename, designid, revision }) => (
                         <ListItem
                             button
                             key={vanityname}
                             onClick={handleVanity(vanity)}
                         >
                             <ListItemText
-                                primary={`${vanityname} v${revision}`}
-                                secondary={designid}
+                                primary={`${designid}: ${modulename} v${revision}`}
+                                secondary={`aka.ms/${vanityname}`}
                             />
                         </ListItem>
                     ))}
