@@ -3,6 +3,8 @@ import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 //import { Block } from "@material-ui/icons"
 import ModelBlockField from "../blockly/fields/ModelBlockField"
 
+const MODEL_BLOCKS = "model_block_"
+
 const dataset_color = "#123456"
 const class_color = "#2466A8"
 const processing_color = "#ac2469"
@@ -18,12 +20,13 @@ export class ModelBlockDomainSpecificLanguage
             /* Dataset blocks */
             { // would like to make this a hat block
                 kind: "block",
-                type: "dataset_block",
+                type: MODEL_BLOCKS + "dataset",
                 message0: "dataset %1",
                 args0: [
                   {
-                    "type": "field_input", // all the names here should become a dataset variable type
-                    "name": "DATASET_NAME"
+                    "type": "field_variable", // should be a variable 'dataset' type
+                    "name": "CLASS_NAME",
+                    "text": "dataset1"
                   }
                 ],
                 message1: "%1",
@@ -41,12 +44,13 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               {
                 kind: "block",
-                type: "class_block",
+                type: MODEL_BLOCKS + "class",
                 message0: "class %1",
                 args0: [
                     {
-                      "type": "field_variable", // should be a class type
-                      "name": "CLASS_NAME"
+                      "type": "field_variable", // should be a variable 'class' type
+                      "name": "CLASS_NAME",
+                      "text": "class1"
                     }
                   ],
                   inputsInline: false,
@@ -59,8 +63,20 @@ export class ModelBlockDomainSpecificLanguage
               /* Preprocessing Blocks */
               {
                 kind: "block",
-                type: "standardize_block",
+                type: MODEL_BLOCKS + "standardize",
                 message0: "standardize dataset",
+                args0: [],
+                  inputsInline: false,
+                  previousStatement: null,
+                  nextStatement: null,
+                  colour: processing_color,
+                  tooltip: "",
+                  helpUrl: ""
+              } as BlockDefinition, 
+              {
+                kind: "block",
+                type: MODEL_BLOCKS + "smoothe",
+                message0: "smoothe dataset (moving average)",
                 args0: [],
                   inputsInline: false,
                   previousStatement: null,
@@ -72,25 +88,33 @@ export class ModelBlockDomainSpecificLanguage
               /* Learning Blocks */
               { // would like to make this a hat block
                 kind: "block",
-                type: "nn_block",
-                message0: "NN classifier",
-                args0: [],
+                type: MODEL_BLOCKS + "nn",
+                message0: "neural network classifier %1",
+                args0: [
+                    {
+                        "type": "field_input",
+                        "name": "NN_CLASSIFIER_NAME",
+                        "text": "classifier1"
+                    }
+                ],
                 message1: "training data %1",
                 args1: [
                     {
                         "type": "field_variable",
-                        "name": "NN_TRAINING"
+                        "name": "NN_TRAINING",
                         /* variable: "none",
-                        variableTypes: ["dataset"] */
+                        variableTypes: ["dataset"],
+                        defaultType: "dataset" */
                     }
                 ],
                 message2: "testing data %1",
                 args2: [
                     {
                         "type": "field_variable",
-                        "name": "NN_TESTING"
+                        "name": "NN_TESTING",
                         /* variable: "none",
-                        variableTypes: ["dataset"] */
+                        variableTypes: ["dataset"],
+                        defaultType: "dataset" */
                     }
                 ],
                 message3: "%1",
@@ -107,10 +131,10 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               {
                 kind: "block",
-                type: "conv_layer_block",
+                type: MODEL_BLOCKS + "conv_layer",
                 message0: "convolutional layer %1",
                 args0: [
-                    {/* TODO want this to be a shadow field */
+                    {/* TODO make a specific field for conv layers, should display filter size */
                         "type": ModelBlockField.KEY,
                         "name": "CONV_LAYER_SIZE"
                         /* variables: filter size NxN, number of filters M, stride size P*/
@@ -125,10 +149,10 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               {
                 kind: "block",
-                type: "max_pool_layer_block",
+                type: MODEL_BLOCKS + "max_pool_layer",
                 message0: "max pooling layer %1",
                 args0: [
-                    {/* TODO want this to be a shadow field */
+                    {/* TODO make a specific field for pooling layers, should display pool size */
                         "type": ModelBlockField.KEY,
                         "name": "MAX_POOL_LAYER_PARAMS"
                         /* variables: pool size NxN, stride size P*/
@@ -143,10 +167,10 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               {
                 kind: "block",
-                type: "dropout_layer_block",
+                type: MODEL_BLOCKS + "dropout_layer",
                 message0: "dropout layer %1",
                 args0: [
-                    {/* TODO want this to be a shadow field */
+                    {/* TODO make a specific field for dropout layers, should display dropout rate */
                         "type": ModelBlockField.KEY,
                         "name": "DROPOUT_LAYER_PARAMS"
                         /* variables: rate N*/
@@ -161,15 +185,15 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               {
                 kind: "block",
-                type: "flatten_layer_block",
-                message0: "flattening layer",
-                /*args0: [
-                    {/* TODO want this to be a shadow field */
-                        /* "type": ModelBlockField.KEY,
-                        "name": "FLATTENINGMAX_POOL_LAYER_PARAMS"
-                        /* variables: pool size NxN, stride size P*/
-                    /*}
-                ],*/
+                type: MODEL_BLOCKS + "flatten_layer",
+                message0: "flattening layer %1",
+                args0: [
+                    {/* TODO make a specific field for flatten layer, should display (size) */
+                        "type": ModelBlockField.KEY,
+                        "name": "FLATTENING_LAYER_PARAMS"
+                        /* variables: pool size NxN, stride size P */
+                    }
+                ],
                   inputsInline: false,
                   previousStatement: null,
                   nextStatement: null,
@@ -179,12 +203,12 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               {
                 kind: "block",
-                type: "fully_connected_layer_block",
+                type: MODEL_BLOCKS + "fully_connected_layer",
                 message0: "fully connected layer %1",
                 args0: [
-                    {/* TODO want this to be a shadow field */
+                    { /* TODO make a specific field for dense layers, should display number of nodes */
                         "type": ModelBlockField.KEY,
-                        "name": "FULLY_CONNECTE_LAYER_PARAMS"
+                        "name": "FULLY_CONNECTED_LAYER_PARAMS"
                         /* variables: number of nodes P*/
                     }
                 ],
@@ -197,12 +221,13 @@ export class ModelBlockDomainSpecificLanguage
               } as BlockDefinition,
               { /* TODO would like to make a hat block */
                 kind: "block",
-                type: "knn_block",
-                message0: "KNN classifier %1",
+                type: MODEL_BLOCKS + "knn",
+                message0: "K nearest neighbors classifier %1",
                 args0: [
                     {
                         "type": "field_input",
-                        "name": "KNN_CLASSIFIER_NAME"
+                        "name": "KNN_CLASSIFIER_NAME",
+                        "text": "classifier1"
                     }
                 ],
                 message1: "training data %1",
@@ -219,24 +244,14 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         "type": "field_number",
                         "name": "KNN_K_VALUE",
-                        "value": 3 /* can I dynamically set min/max based on # of examples? */
+                        "value": 3 /* TODO dynamically set max based on # of examples? */
                     }
                 ],
                   inputsInline: false,
                   colour: learning_color,
                   tooltip: "",
                   helpUrl: ""
-              } as BlockDefinition,            
-              { /* would like to make a hat block */
-                kind: "block",
-                type: "regression_block",
-                message0: "logistic regression",
-                args0: [],
-                  inputsInline: false,
-                  colour: learning_color,
-                  tooltip: "",
-                  helpUrl: ""
-              } as BlockDefinition, 
+              } as BlockDefinition 
         ]
         return blocks
     }
@@ -250,16 +265,21 @@ export class ModelBlockDomainSpecificLanguage
                 contents: [
                     {
                         kind: "button",
+                        text: "Create new dataset...",
+                        callbackKey: "createNewDatasetButton"
+                    },
+                    {
+                        kind: "block",
+                        type: MODEL_BLOCKS + "dataset",
+                    },
+                    {
+                        kind: "button",
                         text: "Create new class...",
                         callbackKey: "createNewClassButton"
                     },
                     {
                         kind: "block",
-                        type: "dataset_block",
-                    },
-                    {
-                        kind: "block",
-                        type: "class_block",
+                        type: MODEL_BLOCKS + "class",
                     },
                 ],
             },
@@ -270,7 +290,11 @@ export class ModelBlockDomainSpecificLanguage
                 contents: [
                     {
                         kind: "block",
-                        type: "standardize_block",
+                        type: MODEL_BLOCKS + "standardize",
+                    },
+                    {
+                        kind: "block",
+                        type: MODEL_BLOCKS + "smoothe"
                     }
                 ],
             },
@@ -281,35 +305,31 @@ export class ModelBlockDomainSpecificLanguage
                 contents: [
                     {
                         kind: "block",
-                        type: "nn_block",
+                        type: MODEL_BLOCKS + "nn",
                     },
                     {
                         kind: "block",
-                        type: "conv_layer_block"
+                        type: MODEL_BLOCKS + "conv_layer"
                     },
                     {
                         kind: "block",
-                        type: "max_pool_layer_block"
+                        type: MODEL_BLOCKS + "max_pool_layer"
                     },
                     {
                         kind: "block",
-                        type: "dropout_layer_block"
+                        type: MODEL_BLOCKS + "dropout_layer"
                     },
                     {
                         kind: "block",
-                        type: "flatten_layer_block"
+                        type: MODEL_BLOCKS + "flatten_layer"
                     },
                     {
                         kind: "block",
-                        type: "fully_connected_layer_block"
+                        type: MODEL_BLOCKS + "fully_connected_layer"
                     },
                     {
                         kind: "block",
-                        type: "knn_block",
-                    },
-                    {
-                        kind: "block",
-                        type: "regression_block",
+                        type: MODEL_BLOCKS + "knn",
                     }
                 ],
             },

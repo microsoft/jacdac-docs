@@ -19,6 +19,7 @@ import GaugeWidgetField from "./GaugeWidgetField"
 import BuiltinDataSetField from "./BuiltinDataSetField"
 import BarChartField from "./BarField"
 import PiePlotField from "./PieField"
+import ModelBlockField from "./ModelBlockField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -62,6 +63,8 @@ export function registerFields() {
         LinePlotField,
         BarChartField,
         PiePlotField,
+
+        ModelBlockField,
     ]
     fieldTypes.forEach(registerType)
 }
