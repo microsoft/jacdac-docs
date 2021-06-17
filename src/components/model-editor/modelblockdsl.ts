@@ -3,6 +3,12 @@ import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 //import { Block } from "@material-ui/icons"
 import ModelBlockField from "../blockly/fields/ModelBlockField"
 
+import postModelRequest from "../blockly/dsl/workers/tf.proxy"
+import {
+    TFModelTrainRequest,
+    TFModelPredictRequest,
+} from "../../../../workers/tf/dist/node_modules/tf.worker"
+
 const MODEL_BLOCKS = "model_block_"
 
 const dataset_color = "#123456"
@@ -33,7 +39,8 @@ export class ModelBlockDomainSpecificLanguage
                 args1: [
                   {
                     "type": "input_statement",
-                    "name": "DATASET_CONFIG"
+                    "name": "DATASET_CONFIG",
+                    "check": [MODEL_BLOCKS + "class"]
                   }
                 ],
                 inputsInline: false,
@@ -68,7 +75,7 @@ export class ModelBlockDomainSpecificLanguage
                 args0: [],
                   inputsInline: false,
                   previousStatement: null,
-                  nextStatement: null,
+                  nextStatement: [MODEL_BLOCKS + "class"],
                   colour: processing_color,
                   tooltip: "",
                   helpUrl: ""

@@ -3,9 +3,10 @@
 import { assert, SMap } from "../../../../../jacdac-ts/src/jdom/utils"
 import createCsvWorker from "../../../../workers/csv/workerloader"
 import createDataWorker from "../../../../workers/data/workerloader"
+import createTFWorker from "../../../../workers/tf/workerloader"
 import createVMWorker from "../../../../workers/vm/workerloader"
 
-export type VMType = "data" | "csv" | "vm"
+export type VMType = "data" | "csv" | "tf" | "vm"
 
 export interface WorkerMessage {
     worker: VMType
@@ -45,6 +46,7 @@ const _workers: SMap<WorkerProxy> = {}
 const loaders = {
     data: createDataWorker,
     csv: createCsvWorker,
+    tf: createTFWorker,
     vm: createVMWorker,
 }
 export default function workerProxy(workerid: VMType) {

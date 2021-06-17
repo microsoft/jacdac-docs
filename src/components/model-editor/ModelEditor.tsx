@@ -22,7 +22,12 @@ import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 
-import * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
+import postModelRequest from "./workers/tf.proxy"
+import {
+    TFModelTrainRequest,
+    TFModelPredictRequest,
+} from "../../../workers/tf/dist/node_modules/tf.worker"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -265,24 +270,24 @@ export default function ModelPlayground() {
     return (
         <Grid container direction={'column'}>
             <Grid item>
-                <h2>Collect Data</h2>
-                {/* Toggle button to get data from sensors vs upload from file */}
-                <div key="sensors">
-                    <h3>Choose sensors</h3>
-                    {!readingRegisters.length && (
-                        <span>Waiting for sensors...</span>
-                    )}
-                    {!!readingRegisters.length && (
-                        <ReadingFieldGrid
-                            readingRegisters={readingRegisters}
-                            registerIdsChecked={registerIdsChecked}
-                            recording={recording}
-                            liveDataSet={liveDataSet}
-                            handleRegisterCheck={handleRegisterCheck}
-                        />
-                    )}
-                </div>
-                <div key="record">
+            <h2>Collect Data</h2>
+            {/* Toggle button to get data from sensors vs upload from file */}
+            <div key="sensors">
+                <h3>Choose sensors</h3>
+                {!readingRegisters.length && (
+                    <span>Waiting for sensors...</span>
+                )}
+                {!!readingRegisters.length && (
+                    <ReadingFieldGrid
+                        readingRegisters={readingRegisters}
+                        registerIdsChecked={registerIdsChecked}
+                        recording={recording}
+                        liveDataSet={liveDataSet}
+                        handleRegisterCheck={handleRegisterCheck}
+                    />
+                )}
+            </div>
+            <div key="record">
                 <h3>Record data</h3>
                 <div className={classes.buttons}>
                     <Button
@@ -368,12 +373,24 @@ export default function ModelPlayground() {
             <Grid item>
                 <h2>Train Model</h2>
                 <span>Current Model Status: {tfModelStatus}</span><br/>
-                <span> {tfModelResult} </span><br/>
-                <button onClick={testTFJS}>Run</button>
+                <button onClick={testTFJS}>Train</button>
                  {/* <button onClick={() => setCount(count +1)}>+1</button> */ }
             </Grid>
             <Grid item>
                 <h2>Test Model</h2>
+                <span> {tfModelResult} </span><br/>
+                <div key="liveData">
+                    {liveDataSet && (
+                        <Trend
+                            key="trends"
+                            height={12}
+                            dataSet={liveDataSet}
+                            horizon={LIVE_HORIZON}
+                            dot={true}
+                            gradient={true}
+                        />
+                    )}
+                </div>
             </Grid>
         </Grid>
     )
