@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { BlockSvg, Events, FieldVariable } from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
@@ -16,9 +17,16 @@ import {
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 import postTransformData from "./workers/data.proxy"
-import { DataArrangeMessage } from "../../../workers/dist/node_modules/data.worker"
+import {
+    DataDropRequest,
+    DataArrangeRequest,
+    DataFilterColumnsRequest,
+} from "../../../workers/data/dist/node_modules/data.worker"
+import { BlockWithServices } from "../WorkspaceContext"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
+const DATA_DROP_BLOCK = "data_drop"
+const DATA_FILTER_COLUMNS_BLOCK = "data_filter_columns"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
@@ -76,10 +84,84 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column = b.getFieldValue("column")
                 const order = b.getFieldValue("order")
                 const descending = order === "descending"
-                return postTransformData(<DataArrangeMessage>{
+                return postTransformData(<DataArrangeRequest>{
                     type: "arrange",
                     column,
                     descending,
+                    data,
+                })
+            },
+            template: "meta",
+        },
+        {
+            kind: "block",
+            type: DATA_DROP_BLOCK,
+            message0: "drop %1 %2 %3",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column3",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const columns = [1, 2, 3].map(column => b.getFieldValue(`column${column}` ))
+                return postTransformData(<DataDropRequest>{
+                    type: "drop",
+                    columns,
+                    data,
+                })
+            },
+            template: "meta",
+        },
+        {
+            kind: "block",
+            type: DATA_FILTER_COLUMNS_BLOCK,
+            message0: "filter %1 %2 %3",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "logic",
+                    options: [
+                        [">", "gt"],
+                        ["<", "lt"],
+                        [">=", "ge"],
+                        ["<=", "le"],
+                        ["==", "eq"],
+                        ["!=", "ne"],
+                    ],
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const columns = [1, 2].map(column => { return b.getFieldValue(`column${column}`) })
+                const logic = b.getFieldValue("logic")
+                return postTransformData(<DataFilterColumnsRequest>{
+                    type: "filter_columns",
+                    columns,
+                    logic,
                     data,
                 })
             },
@@ -104,7 +186,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_DATAVARIABLE_READ_BLOCK,
-            message0: "data variable %1",
+            message0: "dataset variable %1",
             args0: [
                 <VariableInputDefinition>{
                     type: "field_variable",
@@ -118,12 +200,16 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             colour,
             template: "meta",
+            transformData: (block: BlockSvg) => {
+                const services = (block as BlockWithServices).jacdacServices
+                const data = services?.data
+                return Promise.resolve(data)
+            },
         },
-        // only 1 allowed to prevent cycles
         <BlockDefinition>{
             kind: "block",
             type: DATA_DATAVARIABLE_WRITE_BLOCK,
-            message0: "store in data variable %1",
+            message0: "store in dataset variable %1",
             args0: [
                 <VariableInputDefinition>{
                     type: "field_variable",
@@ -138,6 +224,22 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             colour,
             template: "meta",
+            transformData: (block: BlockSvg, data: object[]) => {
+                // grab the variable from the block
+                const variable = block.getFieldValue("data")
+                if (!variable) return Promise.resolve(undefined)
+                const readBlocks = block.workspace.getBlocksByType(
+                    DATA_DATAVARIABLE_READ_BLOCK,
+                    false
+                )
+                readBlocks
+                    .filter(b => b.isEnabled())
+                    .filter(b => b.getFieldValue("data") === variable)
+                    .map(b => (b as BlockWithServices).jacdacServices)
+                    .filter(services => !!services)
+                    .forEach(services => (services.data = data))
+                return Promise.resolve(data)
+            },
         },
     ],
     createCategory: () => [
@@ -162,6 +264,14 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_ARRANGE_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_DROP_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_FILTER_COLUMNS_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",

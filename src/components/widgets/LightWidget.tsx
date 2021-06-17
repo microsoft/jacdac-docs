@@ -4,7 +4,6 @@ import {
     LedPixelVariant,
     RENDER,
 } from "../../../jacdac-ts/src/jdom/constants"
-import useServiceServer from "../hooks/useServiceServer"
 import LedPixelServer from "../../../jacdac-ts/src/servers/ledpixelserver"
 import SvgWidget from "../widgets/SvgWidget"
 import useWidgetTheme from "../widgets/useWidgetTheme"
@@ -12,6 +11,7 @@ import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import LoadingProgress from "../ui/LoadingProgress"
 import useRegister from "../hooks/useRegister"
+import useFireKey from "../hooks/useFireKey"
 
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     const [r$, g$, b$] = [r / 255, g / 255, b / 255]
@@ -83,9 +83,16 @@ function LightStripWidget(props: {
     actualBrightness: number
     server: LedPixelServer
     widgetSize?: string
+    onLedClick?: (index: number) => void
 }) {
-    const { lightVariant, numPixels, actualBrightness, server, widgetSize } =
-        props
+    const {
+        lightVariant,
+        numPixels,
+        actualBrightness,
+        server,
+        widgetSize,
+        onLedClick,
+    } = props
     const { background, controlBackground } = useWidgetTheme()
     const pathRef = useRef<SVGPathElement>(undefined)
     const pixelsRef = useRef<SVGGElement>(undefined)
@@ -94,6 +101,8 @@ function LightStripWidget(props: {
     const sw = neoradius * 2.8
     const isJewel = lightVariant === LedPixelVariant.Jewel
     const isRing = lightVariant === LedPixelVariant.Ring
+    const handleLedClick = (index: number) =>
+        onLedClick ? () => onLedClick(index) : undefined
 
     // paint svg via dom
     const paint = () => {
@@ -166,7 +175,7 @@ function LightStripWidget(props: {
         const n = numPixels - (isJewel ? 1 : 0)
         const neoperimeter = n * (2.7 * neoradius)
         const margin = 2 * neoradius
-        const ringradius = neoperimeter / (2 * Math.PI)
+        const ringradius = (1.5 * neoperimeter) / (2 * Math.PI)
         width = 2 * (margin + ringradius)
         height = width
         const wm = width - 2 * margin
@@ -192,19 +201,27 @@ function LightStripWidget(props: {
                 <g ref={pixelsRef} opacity={opacity}>
                     {Array(numPixels)
                         .fill(0)
-                        .map((_, i) => (
-                            <circle
-                                key={"pixel" + i}
-                                r={neocircleradius}
-                                cx={width >> 1}
-                                cy={height >> 1}
-                                stroke={controlBackground}
-                                strokeWidth={1}
-                                aria-label={`pixel ${i}`}
-                            >
-                                <title>pixel {i}</title>
-                            </circle>
-                        ))}
+                        .map((_, i) => {
+                            const handleClick = handleLedClick(i)
+                            const fireClick = useFireKey(handleClick)
+                            return (
+                                <circle
+                                    className="clickeable"
+                                    key={"pixel" + i}
+                                    r={neocircleradius}
+                                    cx={width >> 1}
+                                    cy={height >> 1}
+                                    stroke={controlBackground}
+                                    strokeWidth={1}
+                                    aria-label={`pixel ${i}`}
+                                    onPointerDown={handleClick}
+                                    onPointerEnter={handleClick}
+                                    onKeyDown={fireClick}
+                                >
+                                    <title>pixel {i}</title>
+                                </circle>
+                            )
+                        })}
                 </g>
             </>
         </SvgWidget>
@@ -218,8 +235,9 @@ function LightMatrixWidget(props: {
     widgetSize?: string
     columns: number
     rows: number
+    onLedClick?: (index: number) => void
 }) {
-    const { columns, rows, server, widgetSize } = props
+    const { columns, rows, server, widgetSize, onLedClick } = props
     const { background, controlBackground } = useWidgetTheme()
 
     const widgetRef = useRef<SVGGElement>()
@@ -231,6 +249,8 @@ function LightMatrixWidget(props: {
     const m = 2
     const w = columns * pw + (columns + 1) * m
     const h = rows * ph + (rows + 1) * m
+    const handleLedClick = (index: number) =>
+        onLedClick ? () => onLedClick(index) : undefined
 
     // paint svg via dom
     const paint = () => setRgbLeds(widgetRef.current, server?.colors)
@@ -245,8 +265,12 @@ function LightMatrixWidget(props: {
             for (let col = 0; col < columns; col++) {
                 const index = row * columns + col
                 const label = `pixel ${index} at ${row},${col}`
+                const handleClick = handleLedClick(index)
+                const fireClick = useFireKey(handleClick)
+
                 ledEls.push(
                     <rect
+                        className="clickeable"
                         key={`l${row}-${col}`}
                         x={x}
                         y={y}
@@ -258,6 +282,9 @@ function LightMatrixWidget(props: {
                         stroke={"none"}
                         strokeWidth={ps}
                         aria-label={label}
+                        onPointerDown={handleClick}
+                        onPointerEnter={handleClick}
+                        onKeyDown={fireClick}
                     >
                         <title>{label}</title>
                     </rect>
@@ -297,8 +324,9 @@ export default function LightWidget(props: {
     service: JDService
     widgetCount?: number
     visible?: boolean
+    onLedClick?: (index: number) => void
 }) {
-    const { service, server } = props
+    const { service, server, onLedClick } = props
 
     const numPixelsRegister = useRegister(service, LedPixelReg.NumPixels)
     const variantRegister = useRegister(service, LedPixelReg.Variant)
@@ -340,6 +368,7 @@ export default function LightWidget(props: {
                 server={server}
                 columns={columns}
                 rows={rows}
+                onLedClick={onLedClick}
             />
         )
     } else
@@ -349,6 +378,7 @@ export default function LightWidget(props: {
                 lightVariant={lightVariant}
                 actualBrightness={actualBrightness}
                 server={server}
+                onLedClick={onLedClick}
             />
         )
 }
