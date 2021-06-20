@@ -7,6 +7,8 @@ import BlockContext from "./BlockContext"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
 const MINI_RADIUS = 8
+const MIN_FACTOR = 1.5
+
 function MiniBlock(props: {
     x: number
     y: number
@@ -73,7 +75,6 @@ export default function BlockMiniMap() {
         const view = metricsManager.getViewMetrics(true)
         const contents = metricsManager.getContentMetrics(true)
         const scroll = metricsManager.getScrollMetrics(true, view, contents)
-        console.log(workspace.getMetrics())
         const tops = workspace.getTopBlocks(false) as BlockSvg[]
         const blocks = tops.map(b => ({
             blockId: b.id,
@@ -107,6 +108,7 @@ export default function BlockMiniMap() {
     )
     useWorkspaceEvent(workspace, handleChange)
     const handleCenterView = (event: React.PointerEvent<Element>) => {
+        if (event.buttons < 1) return
         const pos = svgPointerPoint(svgRef.current, event)
 
         // see workspace.centerOnBlock
@@ -128,19 +130,13 @@ export default function BlockMiniMap() {
     const { scroll, contents, blocks } = metrics
     const { width, height } = contents
 
-    console.log({ scroll, view })
-    if (contents.width <= view.width && contents.height <= view.height)
+    if (contents.width <= view.width * MIN_FACTOR && contents.height <= view.height * MIN_FACTOR)
         return null
 
     const cwidth = Math.max(width, view.width)
     const cheight = Math.max(height, view.height)
     return (
-        <SvgWidget
-            size="4rem"
-            width={cwidth}
-            height={cheight}
-            svgRef={svgRef}
-        >
+        <SvgWidget size="20rem" width={cwidth} height={cheight} svgRef={svgRef}>
             <g transform={`translate(${-contents.left},${-contents.top})`}>
                 {blocks.map(({ blockId, rect, color }) => (
                     <MiniBlock
@@ -162,6 +158,7 @@ export default function BlockMiniMap() {
                 fill="transparent"
                 stroke={palette.text.hint}
                 onPointerDown={handleCenterView}
+                onPointerMove={handleCenterView}
             />
         </SvgWidget>
     )
