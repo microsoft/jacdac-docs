@@ -58,6 +58,7 @@ export default function BlockMiniMap() {
     const svgRef = useRef<SVGSVGElement>()
     const [metrics, setMetrics] = useState<{
         scroll: MetricsManager.ContainerRegion
+        contents: MetricsManager.ContainerRegion
         blocks: {
             blockId: string
             rect: utils.Rect
@@ -69,14 +70,15 @@ export default function BlockMiniMap() {
         const metricsManager = workspace.getMetricsManager()
         console.log({ metrics: metricsManager.getMetrics() })
         const view = metricsManager.getViewMetrics(true)
-        const scroll = metricsManager.getScrollMetrics(true, view)
+        const contents = metricsManager.getContentMetrics(true)
+        const scroll = metricsManager.getScrollMetrics(true, view, contents)
         const tops = workspace.getTopBlocks(false) as BlockSvg[]
         const blocks = tops.map(b => ({
             blockId: b.id,
             rect: b.getBoundingRectangle(),
             color: b.getColour(),
         }))
-        setMetrics({ scroll, blocks })
+        setMetrics({ scroll, contents, blocks })
         setView(view)
     }
     const handleView = () => {
@@ -108,10 +110,14 @@ export default function BlockMiniMap() {
         console.log({ pos })
         // TODO click
     }
-    if (!metrics?.blocks?.length) return null
+    if (!metrics?.blocks?.length || !view) return null
 
-    const { scroll, blocks } = metrics
+    const { scroll, contents, blocks } = metrics
     const { width, height } = scroll
+
+    console.log({ scroll, view })
+    if (contents.width <= view.width && contents.height <= view.height)
+        return null
 
     return (
         <SvgWidget size="4rem" width={width} height={height} svgRef={svgRef}>
