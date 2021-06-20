@@ -1,7 +1,7 @@
-import { useTheme } from "@material-ui/core"
 import { BlockSvg, Events, MetricsManager, utils } from "blockly"
-import React, { useCallback, useContext, useState } from "react"
+import React, { useCallback, useContext, useRef, useState } from "react"
 import { useDebounce } from "use-debounce"
+import { svgPointerPoint } from "../widgets/svgutils"
 import SvgWidget from "../widgets/SvgWidget"
 import BlockContext from "./BlockContext"
 import useWorkspaceEvent from "./useWorkspaceEvent"
@@ -55,6 +55,7 @@ function MiniViewport(props: {
 
 export default function BlockMiniMap() {
     const { workspace } = useContext(BlockContext)
+    const svgRef = useRef<SVGSVGElement>()
     const [metrics, setMetrics] = useState<{
         scroll: MetricsManager.ContainerRegion
         blocks: {
@@ -101,16 +102,29 @@ export default function BlockMiniMap() {
         [workspace]
     )
     useWorkspaceEvent(workspace, handleChange)
-    const [dmetrics] = useDebounce(metrics, 200)
-    if (!dmetrics?.blocks?.length) return null
+    const handleCenterView = (event: React.PointerEvent<Element>) => {
+        const pos = svgPointerPoint(svgRef.current, event)
+        workspace.scroll(pos.x, pos.y)
+        console.log({ pos })
+        // TODO click
+    }
+    if (!metrics?.blocks?.length) return null
 
-    const { scroll, blocks } = dmetrics
+    const { scroll, blocks } = metrics
     const { width, height } = scroll
 
     return (
-        <SvgWidget size="4rem" width={width} height={height}>
+        <SvgWidget size="4rem" width={width} height={height} svgRef={svgRef}>
+            <rect
+                x={0}
+                y={0}
+                width={width}
+                height={height}
+                fill="transparent"
+                onPointerDown={handleCenterView}
+            />
             {view && <MiniViewport scroll={scroll} view={view} />}
-            {blocks?.map(({ blockId, rect, color }) => (
+            {blocks.map(({ blockId, rect, color }) => (
                 <MiniBlock
                     key={blockId}
                     x={rect.left}

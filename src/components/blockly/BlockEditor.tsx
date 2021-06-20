@@ -59,7 +59,7 @@ export default function BlockEditor(props: { className?: string }) {
             oneBasedIndex: false,
             move: {
                 scrollbars: {
-                    vertical: false,
+                    vertical: true,
                     horizontal: true,
                 },
             },
