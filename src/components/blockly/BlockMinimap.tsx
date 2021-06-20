@@ -32,24 +32,22 @@ function MiniViewport(props: {
     scroll: MetricsManager.ContainerRegion
     view: MetricsManager.ContainerRegion
 }) {
-    const { view, scroll } = props
+    const { view } = props
     const { top, left, width, height } = view
-    const { width: sw, height: sh } = scroll
     const { palette } = useTheme()
-    const vx = Math.max(0, left)
-    const vy = Math.max(0, top)
-    const vw = Math.min(width, sw - vx)
-    const vh = Math.min(height, sh - vy)
+    const vx = left
+    const vy = top
 
     return (
         <rect
             x={vx}
             y={vy}
-            width={vw}
-            height={vh}
+            width={width}
+            height={height}
             strokeWidth={MINI_RADIUS >> 1}
-            stroke={palette.text.secondary}
-            fill="transparent"
+            stroke={palette.text.primary}
+            fill={palette.text.secondary}
+            opacity={0.2}
             rx={MINI_RADIUS}
             ry={MINI_RADIUS}
         />
@@ -75,6 +73,7 @@ export default function BlockMiniMap() {
         const view = metricsManager.getViewMetrics(true)
         const contents = metricsManager.getContentMetrics(true)
         const scroll = metricsManager.getScrollMetrics(true, view, contents)
+        console.log(workspace.getMetrics())
         const tops = workspace.getTopBlocks(false) as BlockSvg[]
         const blocks = tops.map(b => ({
             blockId: b.id,
@@ -127,39 +126,43 @@ export default function BlockMiniMap() {
     if (!metrics?.blocks?.length || !view) return null
 
     const { scroll, contents, blocks } = metrics
-    const { width, height } = scroll
+    const { width, height } = contents
 
     console.log({ scroll, view })
     if (contents.width <= view.width && contents.height <= view.height)
         return null
 
+    const cwidth = Math.max(width, view.width)
+    const cheight = Math.max(height, view.height)
     return (
         <SvgWidget
-            size="clamp(10rem, 5vh)"
-            width={width}
-            height={height}
+            size="4rem"
+            width={cwidth}
+            height={cheight}
             svgRef={svgRef}
         >
+            <g transform={`translate(${-contents.left},${-contents.top})`}>
+                {blocks.map(({ blockId, rect, color }) => (
+                    <MiniBlock
+                        key={blockId}
+                        x={rect.left}
+                        y={rect.top}
+                        width={rect.right - rect.left}
+                        height={-rect.top + rect.bottom}
+                        color={color}
+                    />
+                ))}
+                {view && <MiniViewport scroll={scroll} view={view} />}
+            </g>
             <rect
                 x={0}
                 y={0}
-                width={width}
-                height={height}
+                width={cwidth}
+                height={cheight}
                 fill="transparent"
                 stroke={palette.text.hint}
                 onPointerDown={handleCenterView}
             />
-            {blocks.map(({ blockId, rect, color }) => (
-                <MiniBlock
-                    key={blockId}
-                    x={rect.left}
-                    y={rect.top}
-                    width={rect.right - rect.left}
-                    height={-rect.top + rect.bottom}
-                    color={color}
-                />
-            ))}
-            {view && <MiniViewport scroll={scroll} view={view} />}
         </SvgWidget>
     )
 }
