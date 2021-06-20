@@ -1,12 +1,12 @@
+import { useTheme } from "@material-ui/core"
 import { BlockSvg, Events, MetricsManager, utils } from "blockly"
 import React, { useCallback, useContext, useRef, useState } from "react"
-import { useDebounce } from "use-debounce"
 import { svgPointerPoint } from "../widgets/svgutils"
 import SvgWidget from "../widgets/SvgWidget"
 import BlockContext from "./BlockContext"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
-const MINI_RADIUS = 4
+const MINI_RADIUS = 8
 function MiniBlock(props: {
     x: number
     y: number
@@ -18,11 +18,12 @@ function MiniBlock(props: {
     return (
         <rect
             x={x}
-            y={y}
+            y={y + height}
             width={width}
             height={height}
             fill={color}
-            r={MINI_RADIUS}
+            rx={MINI_RADIUS}
+            ry={MINI_RADIUS}
         />
     )
 }
@@ -34,6 +35,7 @@ function MiniViewport(props: {
     const { view, scroll } = props
     const { top, left, width, height } = view
     const { width: sw, height: sh } = scroll
+    const { palette } = useTheme()
     const vx = Math.max(0, left)
     const vy = Math.max(0, top)
     const vw = Math.min(width, sw - vx)
@@ -45,10 +47,11 @@ function MiniViewport(props: {
             y={vy}
             width={vw}
             height={vh}
-            strokeWidth={MINI_RADIUS}
-            stroke={"#999"}
+            strokeWidth={MINI_RADIUS >> 1}
+            stroke={palette.text.secondary}
             fill="transparent"
-            r={MINI_RADIUS}
+            rx={MINI_RADIUS}
+            ry={MINI_RADIUS}
         />
     )
 }
@@ -56,6 +59,7 @@ function MiniViewport(props: {
 export default function BlockMiniMap() {
     const { workspace } = useContext(BlockContext)
     const svgRef = useRef<SVGSVGElement>()
+    const { palette } = useTheme()
     const [metrics, setMetrics] = useState<{
         scroll: MetricsManager.ContainerRegion
         contents: MetricsManager.ContainerRegion
@@ -68,7 +72,6 @@ export default function BlockMiniMap() {
     const [view, setView] = useState<MetricsManager.ContainerRegion>()
     const handleMetrics = () => {
         const metricsManager = workspace.getMetricsManager()
-        console.log({ metrics: metricsManager.getMetrics() })
         const view = metricsManager.getViewMetrics(true)
         const contents = metricsManager.getContentMetrics(true)
         const scroll = metricsManager.getScrollMetrics(true, view, contents)
@@ -106,9 +109,20 @@ export default function BlockMiniMap() {
     useWorkspaceEvent(workspace, handleChange)
     const handleCenterView = (event: React.PointerEvent<Element>) => {
         const pos = svgPointerPoint(svgRef.current, event)
-        workspace.scroll(pos.x, pos.y)
-        console.log({ pos })
-        // TODO click
+
+        // see workspace.centerOnBlock
+        const metrics = workspace.getMetrics()
+        // viewHeight and viewWidth are in pixels.
+        const halfViewWidth = metrics.viewWidth / 2
+        const halfViewHeight = metrics.viewHeight / 2
+        // Put the block in the center of the visible workspace instead.
+        const scrollToCenterX = pos.x - halfViewWidth
+        const scrollToCenterY = pos.y - halfViewHeight
+        // Convert from workspace directions to canvas directions.
+        const x = -scrollToCenterX
+        const y = -scrollToCenterY
+
+        workspace.scroll(x, y)
     }
     if (!metrics?.blocks?.length || !view) return null
 
@@ -120,16 +134,21 @@ export default function BlockMiniMap() {
         return null
 
     return (
-        <SvgWidget size="4rem" width={width} height={height} svgRef={svgRef}>
+        <SvgWidget
+            size="clamp(10rem, 5vh)"
+            width={width}
+            height={height}
+            svgRef={svgRef}
+        >
             <rect
                 x={0}
                 y={0}
                 width={width}
                 height={height}
                 fill="transparent"
+                stroke={palette.text.hint}
                 onPointerDown={handleCenterView}
             />
-            {view && <MiniViewport scroll={scroll} view={view} />}
             {blocks.map(({ blockId, rect, color }) => (
                 <MiniBlock
                     key={blockId}
@@ -140,6 +159,7 @@ export default function BlockMiniMap() {
                     color={color}
                 />
             ))}
+            {view && <MiniViewport scroll={scroll} view={view} />}
         </SvgWidget>
     )
 }
