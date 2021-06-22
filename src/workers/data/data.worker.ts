@@ -18,6 +18,11 @@ export interface DataArrangeRequest extends DataRequest {
     descending: boolean
 }
 
+export interface DataSelectRequest extends DataRequest {
+    type: "select"
+    columns: string[]
+}
+
 export interface DataDropRequest extends DataRequest {
     type: "drop"
     columns: string[]
@@ -27,6 +32,13 @@ export interface DataFilterColumnsRequest extends DataRequest {
     type: "filter_columns"
     columns: string[]
     logic: string
+}
+
+export interface DataFilterStringRequest extends DataRequest {
+    type: "filter_string"
+    column: string
+    logic: string
+    rhs: string
 }
 
 export interface DataRecordWindowRequest extends DataRequest {
@@ -42,10 +54,61 @@ const handlers: { [index: string]: (props: any) => object[] } = {
         const { column, descending, data } = props
         return tidy(data, arrange(descending ? desc(column) : column))
     },
+    select: (props: DataSelectRequest) => {
+        const { columns, data } = props
+        if (!columns) return data
+        else return tidy(data, select(columns.map(column => `${column}`)))
+    },
     drop: (props: DataDropRequest) => {
         const { columns, data } = props
         if (!columns) return data
         else return tidy(data, select(columns.map(column => `-${column}`)))
+    },
+    filter_string: (props: DataFilterStringRequest) => {
+        const { column, logic, rhs, data } = props
+        if (!column || !rhs) return data
+
+        switch (logic) {
+            case "gt":
+                return tidy(
+                    data,
+                    filter(d => d[column] > rhs)
+                )
+                break
+            case "lt":
+                return tidy(
+                    data,
+                    filter(d => d[column] < rhs)
+                )
+                break
+            case "ge":
+                return tidy(
+                    data,
+                    filter(d => d[column] >= rhs)
+                )
+                break
+            case "le":
+                return tidy(
+                    data,
+                    filter(d => d[column] <= rhs)
+                )
+                break
+            case "eq":
+                return tidy(
+                    data,
+                    filter(d => d[column] == rhs)
+                )
+                break
+            case "ne":
+                return tidy(
+                    data,
+                    filter(d => d[column] != rhs)
+                )
+                break
+            default:
+                return data
+                break
+        }
     },
     filter_columns: (props: DataFilterColumnsRequest) => {
         const { columns, logic, data } = props
