@@ -1,6 +1,7 @@
 import { useTheme } from "@material-ui/core"
 import { BlockSvg, Events, MetricsManager, utils } from "blockly"
 import React, { useCallback, useContext, useRef, useState } from "react"
+import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { svgPointerPoint } from "../widgets/svgutils"
 import SvgWidget from "../widgets/SvgWidget"
 import BlockContext from "./BlockContext"
@@ -20,7 +21,7 @@ function MiniBlock(props: {
     return (
         <rect
             x={x}
-            y={y + height}
+            y={y}
             width={width}
             height={height}
             fill={color}
@@ -71,16 +72,23 @@ export default function BlockMiniMap() {
     }>()
     const [view, setView] = useState<MetricsManager.ContainerRegion>()
     const handleMetrics = () => {
+        console.log({ metrics: workspace.getMetrics() })
         const metricsManager = workspace.getMetricsManager()
         const view = metricsManager.getViewMetrics(true)
         const contents = metricsManager.getContentMetrics(true)
         const scroll = metricsManager.getScrollMetrics(true, view, contents)
-        const tops = workspace.getTopBlocks(false) as BlockSvg[]
+        const tops: BlockSvg[] = arrayConcatMany(
+            (workspace.getTopBlocks(false) as BlockSvg[]).map(top => [
+                top,
+                ...(top.childBlocks_ as BlockSvg[]),
+            ])
+        )
         const blocks = tops.map(b => ({
             blockId: b.id,
             rect: b.getBoundingRectangle(),
             color: b.getColour(),
         }))
+        console.log({ tops, blocks })
         setMetrics({ scroll, contents, blocks })
         setView(view)
     }
@@ -128,23 +136,29 @@ export default function BlockMiniMap() {
     if (!metrics?.blocks?.length || !view) return null
 
     const { scroll, contents, blocks } = metrics
-    const { width, height } = contents
 
-    if (contents.width <= view.width * MIN_FACTOR && contents.height <= view.height * MIN_FACTOR)
+    if (
+        contents.width <= view.width * MIN_FACTOR &&
+        contents.height <= view.height * MIN_FACTOR
+    )
         return null
 
-    const cwidth = Math.max(width, view.width)
-    const cheight = Math.max(height, view.height)
+    const cleft = Math.min(view.left, contents.left)
+    const cright = Math.max(view.left + view.width, contents.left + contents.width)
+    const ctop = Math.min(view.top, contents.top)
+    const cbottom = Math.max(view.top + view.height, contents.top + contents.height)
+    const cwidth = cright - cleft
+    const cheight = cbottom - ctop
     return (
-        <SvgWidget size="20rem" width={cwidth} height={cheight} svgRef={svgRef}>
-            <g transform={`translate(${-contents.left},${-contents.top})`}>
+        <SvgWidget size="30rem" width={cwidth} height={cheight} svgRef={svgRef}>
+            <g transform={`translate(${-cleft},${-ctop})`}>
                 {blocks.map(({ blockId, rect, color }) => (
                     <MiniBlock
                         key={blockId}
                         x={rect.left}
                         y={rect.top}
                         width={rect.right - rect.left}
-                        height={-rect.top + rect.bottom}
+                        height={rect.bottom - rect.top}
                         color={color}
                     />
                 ))}
