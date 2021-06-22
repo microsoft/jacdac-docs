@@ -67,6 +67,8 @@ export type EventTemplate = "event"
 export type EventFieldTemplate = "event_field"
 
 export type RegisterTemplate =
+    | "register_set_server"   // register name, expr hole for return value
+    | "register_get_server"   // register name, special expr block
     | "register_change_event"
     | "register_set"
     | "register_get"
