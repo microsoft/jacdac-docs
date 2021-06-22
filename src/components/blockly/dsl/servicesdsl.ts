@@ -72,6 +72,7 @@ import {
     TWIN_BLOCK,
     ValueInputDefinition,
     VariableInputDefinition,
+    LabelDefinition,
 } from "../toolbox"
 import { ExpressionWithErrors, makeVMBase } from "../../vm/VMgenerator"
 import BlockDomainSpecificLanguage, {
@@ -1018,6 +1019,10 @@ export class ServicesBlockDomainSpecificLanguage
                 name: service.name,
                 colour: serviceColor(service),
                 contents: [
+                    <LabelDefinition>{
+                        kind: "label",
+                        text: "Client",
+                    },
                     ...serviceBlocks.map<BlockReference>(block => ({
                         kind: "block",
                         type: block.type,
@@ -1034,6 +1039,10 @@ export class ServicesBlockDomainSpecificLanguage
                             type: block.type,
                             values: block.values,
                         })),
+                    <LabelDefinition>{
+                        kind: "label",
+                        text: "Server",
+                    },
                 ],
                 button: {
                     kind: "button",
