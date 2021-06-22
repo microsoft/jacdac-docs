@@ -1043,6 +1043,9 @@ export class ServicesBlockDomainSpecificLanguage
                         kind: "label",
                         text: "Server",
                     },
+                    // TODO: register read and write blocks
+                    // TODO: events 
+
                 ],
                 button: {
                     kind: "button",
