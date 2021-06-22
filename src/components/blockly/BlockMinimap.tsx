@@ -159,7 +159,7 @@ export default function BlockMiniMap(props: { height: number }) {
                 role={"group"}
             >
                 <g transform={`translate(${-cleft},${-ctop})`}>
-                    {blocks.map(({ blockId, rect, color }) => (
+                    {blocks?.map(({ blockId, rect, color }) => (
                         <MiniBlock
                             key={blockId}
                             x={rect.left}
