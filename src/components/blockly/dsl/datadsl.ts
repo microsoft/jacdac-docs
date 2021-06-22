@@ -25,6 +25,7 @@ import {
     DataArrangeRequest,
     DataFilterColumnsRequest,
     DataFilterStringRequest,
+    DataSummarizeByGroupRequest,
     DataRecordWindowRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
@@ -34,6 +35,7 @@ const DATA_SELECT_BLOCK = "data_select"
 const DATA_DROP_BLOCK = "data_drop"
 const DATA_FILTER_COLUMNS_BLOCK = "data_filter_columns"
 const DATA_FILTER_STRING_BLOCK = "data_filter_string"
+const DATA_SUMMARIZE_BY_GROUP_BLOCK = "data_summarize_by_group"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
@@ -257,6 +259,48 @@ const dataDsl: BlockDomainSpecificLanguage = {
             },
             template: "meta",
         },
+        {
+            kind: "block",
+            type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
+            message0: "group %1 by %2 calculate %3",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "by",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "calc",
+                    options: [
+                        ["Mean", "mean"],
+                        ["Median", "med"],
+                        ["Min", "min"],
+                        ["Max", "max"],
+                    ],
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const column = b.getFieldValue("column")
+                const by = b.getFieldValue("by")
+                const calc = b.getFieldValue("calc")
+                return postTransformData(<DataSummarizeByGroupRequest>{
+                    type: "summarize_by_group",
+                    column,
+                    by,
+                    calc,
+                    data,
+                })
+            },
+            template: "meta",
+        },
         <BlockDefinition>{
             kind: "block",
             type: DATA_DATASET_BUILTIN_BLOCK,
@@ -400,6 +444,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_FILTER_STRING_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",

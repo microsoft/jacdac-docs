@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { filter, select, arrange, desc, tidy } from "@tidyjs/tidy"
+import { groupBy, summarize, mean, median, min, max, filter, select, arrange, desc, tidy } from "@tidyjs/tidy"
 
 export interface DataMessage {
     worker: "data"
@@ -39,6 +39,13 @@ export interface DataFilterStringRequest extends DataRequest {
     column: string
     logic: string
     rhs: string
+}
+
+export interface DataSummarizeByGroupRequest extends DataRequest {
+    type: "summarize_by_group"
+    column: string
+    by: string
+    calc: string
 }
 
 export interface DataRecordWindowRequest extends DataRequest {
@@ -150,6 +157,44 @@ const handlers: { [index: string]: (props: any) => object[] } = {
                 return tidy(
                     data,
                     filter(d => d[columns[0]] !== d[columns[1]])
+                )
+                break
+            default:
+                return data
+                break
+        }
+    },
+    summarize_by_group: (props: DataSummarizeByGroupRequest) => { 
+        const { column , by, calc, data } = props
+        if (!column || !by || !calc) return data
+
+        switch (calc) {
+            case "mean":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    groupBy(by as any, [ summarize({ Mean: mean(column as any) }) ])
+                  )
+                break
+            case "med":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    groupBy(by as any, [ summarize({ Median: median(column as any) }) ])
+                )
+                break
+            case "min":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    groupBy(by as any, [ summarize({ Min: min(column as any) }) ])
+                )
+                break
+            case "max":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    groupBy(by as any, [ summarize({ Max: max(column as any) }) ])
                 )
                 break
             default:
