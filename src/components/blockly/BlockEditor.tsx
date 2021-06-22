@@ -90,10 +90,10 @@ export default function BlockEditor(props: { className?: string }) {
     }, [workspace, blocklyRef.current])
 
     return (
-        <>
-            <BlockMinimap />
+        <div>
+            <BlockMinimap height={4} />
             <div className={clsx(classes.editor, className)} ref={blocklyRef} />
             <BlocklyModalDialogs />
-        </>
+        </div>
     )
 }

@@ -56,7 +56,8 @@ function MiniViewport(props: {
     )
 }
 
-export default function BlockMiniMap() {
+export default function BlockMiniMap(props: { height: number }) {
+    const { height } = props
     const { workspace } = useContext(BlockContext)
     const svgRef = useRef<SVGSVGElement>()
     const { palette } = useTheme()
@@ -144,8 +145,6 @@ export default function BlockMiniMap() {
     const cwidth = scroll.width
     const cheight = scroll.height
 
-    const containerHeight = 5
-
     return (
         <div
             style={{
@@ -161,8 +160,8 @@ export default function BlockMiniMap() {
                 height={cheight}
                 aria-label={"Blocks minimap"}
                 style={{
-                    height: `${containerHeight}rem`,
-                    width: `${containerHeight / cheight  * cwidth}rem`
+                    height: `${height}rem`,
+                    width: `${(height / cheight) * cwidth}rem`,
                 }}
                 role={"group"}
             >
