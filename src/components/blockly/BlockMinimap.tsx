@@ -3,7 +3,6 @@ import { BlockSvg, Events, MetricsManager, utils } from "blockly"
 import React, { useCallback, useContext, useRef, useState } from "react"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { svgPointerPoint } from "../widgets/svgutils"
-import SvgWidget from "../widgets/SvgWidget"
 import BlockContext from "./BlockContext"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
@@ -144,31 +143,53 @@ export default function BlockMiniMap() {
     const cwidth = scroll.width
     const cheight = scroll.height
 
+    const containerHeight = 5
+
     return (
-        <SvgWidget size="20rem" width={cwidth} height={cheight} svgRef={svgRef}>
-            <g transform={`translate(${-cleft},${-ctop})`}>
-                {blocks.map(({ blockId, rect, color }) => (
-                    <MiniBlock
-                        key={blockId}
-                        x={rect.left}
-                        y={rect.top}
-                        width={rect.right - rect.left}
-                        height={rect.bottom - rect.top}
-                        color={color}
-                    />
-                ))}
-                {view && <MiniViewport scroll={scroll} view={view} />}
-            </g>
-            <rect
-                x={0}
-                y={0}
+        <div
+            style={{
+                position: "relative",
+                width: "100%",
+            }}
+        >
+            <svg
+                ref={svgRef}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox={`0 0 ${cwidth} ${cheight}`}
                 width={cwidth}
                 height={cheight}
-                fill="transparent"
-                stroke={palette.text.hint}
-                onPointerDown={handleCenterView}
-                onPointerMove={handleCenterView}
-            />
-        </SvgWidget>
+                aria-label={"Blocks minimap"}
+                style={{
+                    height: `${containerHeight}rem`,
+                    width: `${containerHeight / cheight  * cwidth}rem`
+                }}
+                role={"group"}
+            >
+                <g transform={`translate(${-cleft},${-ctop})`}>
+                    {blocks.map(({ blockId, rect, color }) => (
+                        <MiniBlock
+                            key={blockId}
+                            x={rect.left}
+                            y={rect.top}
+                            width={rect.right - rect.left}
+                            height={rect.bottom - rect.top}
+                            color={color}
+                        />
+                    ))}
+                    {view && <MiniViewport scroll={scroll} view={view} />}
+                </g>
+                <rect
+                    x={0}
+                    y={0}
+                    width={cwidth}
+                    height={cheight}
+                    fill="transparent"
+                    stroke={palette.text.hint}
+                    strokeWidth={12}
+                    onPointerDown={handleCenterView}
+                    onPointerMove={handleCenterView}
+                />
+            </svg>
+        </div>
     )
 }
