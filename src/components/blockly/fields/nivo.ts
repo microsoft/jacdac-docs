@@ -3,8 +3,10 @@ import { tidy, select, rename, mutate } from "@tidyjs/tidy"
 import { toMap, unique } from "../../../../jacdac-ts/src/jdom/utils"
 
 export function tidyHeaders(data: object[]) {
-    const headers = Object.keys(data?.[0] || {})
-    return headers
+    const row = data?.[0] || {}
+    const headers = Object.keys(row)
+    const types = headers.map(header => typeof row[header])
+    return { headers, types }
 }
 
 export function tidyFindLastValue(data: object[], column: string) {
@@ -24,7 +26,11 @@ export function tidyToNivo(
 } {
     // avoid duplicates in column
     columns = unique(columns)
-    const headers = tidyHeaders(data)
+
+    // missing data
+    if (columns.some(c => !c)) return { series: undefined, labels: undefined }
+
+    const { headers } = tidyHeaders(data)
     let k = 0
     const renaming = toMap(
         columns,
