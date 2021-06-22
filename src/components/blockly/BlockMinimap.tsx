@@ -101,6 +101,7 @@ export default function BlockMiniMap() {
                 case Events.BLOCK_CREATE:
                 case Events.BLOCK_DELETE:
                 case Events.BLOCK_MOVE:
+                case Events.BLOCK_CHANGE:
                 case Events.FINISHED_LOADING:
                     handleMetrics()
                     break
