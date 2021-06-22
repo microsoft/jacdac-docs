@@ -72,7 +72,6 @@ export default function BlockMiniMap() {
     }>()
     const [view, setView] = useState<MetricsManager.ContainerRegion>()
     const handleMetrics = () => {
-        console.log({ metrics: workspace.getMetrics() })
         const metricsManager = workspace.getMetricsManager()
         const view = metricsManager.getViewMetrics(true)
         const contents = metricsManager.getContentMetrics(true)
@@ -88,7 +87,6 @@ export default function BlockMiniMap() {
             rect: b.getBoundingRectangle(),
             color: b.getColour(),
         }))
-        console.log({ tops, blocks })
         setMetrics({ scroll, contents, blocks })
         setView(view)
     }
@@ -118,16 +116,14 @@ export default function BlockMiniMap() {
     const handleCenterView = (event: React.PointerEvent<Element>) => {
         if (event.buttons < 1) return
         const pos = svgPointerPoint(svgRef.current, event)
-
-        // see workspace.centerOnBlock
-        const metrics = workspace.getMetrics()
         // viewHeight and viewWidth are in pixels.
-        const halfViewWidth = metrics.viewWidth / 2
-        const halfViewHeight = metrics.viewHeight / 2
+        const halfViewWidth = view.width / 2
+        const halfViewHeight = view.height / 2
         // Put the block in the center of the visible workspace instead.
-        const scrollToCenterX = pos.x - halfViewWidth
-        const scrollToCenterY = pos.y - halfViewHeight
+        const scrollToCenterX = pos.x - halfViewWidth + scroll.left
+        const scrollToCenterY = pos.y - halfViewHeight + scroll.top
         // Convert from workspace directions to canvas directions.
+        // move to center of view
         const x = -scrollToCenterX
         const y = -scrollToCenterY
 
@@ -143,14 +139,13 @@ export default function BlockMiniMap() {
     )
         return null
 
-    const cleft = Math.min(view.left, contents.left)
-    const cright = Math.max(view.left + view.width, contents.left + contents.width)
-    const ctop = Math.min(view.top, contents.top)
-    const cbottom = Math.max(view.top + view.height, contents.top + contents.height)
-    const cwidth = cright - cleft
-    const cheight = cbottom - ctop
+    const cleft = scroll.left
+    const ctop = scroll.top
+    const cwidth = scroll.width
+    const cheight = scroll.height
+
     return (
-        <SvgWidget size="30rem" width={cwidth} height={cheight} svgRef={svgRef}>
+        <SvgWidget size="20rem" width={cwidth} height={cheight} svgRef={svgRef}>
             <g transform={`translate(${-cleft},${-ctop})`}>
                 {blocks.map(({ blockId, rect, color }) => (
                     <MiniBlock
