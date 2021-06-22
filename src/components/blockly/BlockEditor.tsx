@@ -13,10 +13,11 @@ import Flags from "../../../jacdac-ts/src/jdom/flags"
 import BlockContext from "./BlockContext"
 import BlockMinimap from "./BlockMinimap"
 
+const miniMapHeight = 4
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         editor: {
-            height: `calc(100vh - ${Flags.diagnostics ? 15 : 10}rem)`,
+            height: `calc(100vh - ${(Flags.diagnostics ? 15 : 10) + miniMapHeight}rem)`,
             "& .blocklyTreeLabel": {
                 fontFamily: theme.typography.fontFamily,
             },
@@ -91,7 +92,7 @@ export default function BlockEditor(props: { className?: string }) {
 
     return (
         <div>
-            <BlockMinimap height={4} />
+            <BlockMinimap height={miniMapHeight} />
             <div className={clsx(classes.editor, className)} ref={blocklyRef} />
             <BlocklyModalDialogs />
         </div>

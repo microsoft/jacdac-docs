@@ -130,16 +130,9 @@ export default function BlockMiniMap(props: { height: number }) {
 
         workspace.scroll(x, y)
     }
-    if (!metrics?.blocks?.length || !view) return null
+    if (!metrics || !view) return null
 
-    const { scroll, contents, blocks } = metrics
-
-    if (
-        contents.width <= view.width * MIN_FACTOR &&
-        contents.height <= view.height * MIN_FACTOR
-    )
-        return null
-
+    const { scroll, blocks } = metrics
     const cleft = scroll.left
     const ctop = scroll.top
     const cwidth = scroll.width
