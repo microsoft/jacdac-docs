@@ -23,11 +23,11 @@ import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 
 import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
-import postModelRequest from "./workers/tf.proxy"
+import postModelRequest from "../blockly/dsl/workers/tf.proxy"
 import {
     TFModelTrainRequest,
     TFModelPredictRequest,
-} from "../../../workers/tf/dist/node_modules/tf.worker"
+} from "../../workers/tf/dist/node_modules/tf.worker"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -77,11 +77,6 @@ function createDataSet(
 }
 
 export default function ModelPlayground() {
-    const [count, setCount] = useState(0)
-    useEffect(() => {
-        //document.title = `${count} click(s)`;
-    });
-
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const [tables, setTables] = useState<FieldDataSet[]>([])
     const chartPalette = useChartPalette()
@@ -98,33 +93,6 @@ export default function ModelPlayground() {
         )
     )
 
-    const [tfModelStatus, setModelStatus] = useState("idle")
-    const [tfModelResult, setModelResult] = useState("")
-
-    const testTFJS = async () => {
-        setModelStatus("running")
-        setModelResult("")
-        // Define a model for linear regression.
-        const model = tf.sequential()
-        model.add(tf.layers.dense({ units: 1, inputShape: [1] }))
-
-        // Prepare the model for training: Specify the loss and the optimizer.
-        model.compile({ loss: "meanSquaredError", optimizer: "sgd" })
-
-        // Generate some synthetic data for training.
-        const xs = tf.tensor2d([1, 2, 3, 4], [4, 1])
-        const ys = tf.tensor2d([1, 3, 5, 7], [4, 1])
-
-        // Train the model using the data.
-        await model.fit(xs, ys)
-        // Use the model to do inference on a data point the model hasn't seen before:
-        const z = model.predict(tf.tensor2d([5], [1, 1]))
-        
-        console.log({ xs, ys, model })
-        setModelStatus("idle")
-        setModelResult("Model Result: " + z.toString())
-    }
-
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [recording, setRecording] = useState(false)
@@ -139,7 +107,7 @@ export default function ModelPlayground() {
                   readingRegisters.filter(
                       reg => registerIds.indexOf(reg.id) > -1
                   ),
-                  `${currentClassLabel}${tables.length}`,
+                  `${currentClassLabel}$${tables.length}`,
                   live,
                   chartPalette
               )
@@ -147,11 +115,8 @@ export default function ModelPlayground() {
     const handleRegisterCheck = (reg: JDRegister) => {
         const i = registerIdsChecked.indexOf(reg.id)
         if (i > -1) registerIdsChecked.splice(i, 1)
-        else {
-            registerIdsChecked.push(reg.id)
-            //console.log(reg.service._specification.name);
-            // TODO store the type of data source (e.g. button, accelerometer, etc.)
-        }
+        else registerIdsChecked.push(reg.id)  // TODO store the type of data source (e.g. button, accelerometer, etc.)
+        
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
         setLiveDataSet(newDataSet(registerIdsChecked, true))
@@ -227,6 +192,9 @@ export default function ModelPlayground() {
         setLiveDataSet(liveDataSet)
         setRecordingLength(liveDataSet.rows.length)
         setLiveDataTimestamp(bus.timestamp)
+
+        // this function calls model.predict
+        updatePrediction()
     }
     const throttleUpdate = throttle(() => updateLiveData(), 30)
     // data collection
@@ -267,11 +235,133 @@ export default function ModelPlayground() {
         registerIdsChecked
     ])
 
+    // training model
+    const [tfModel, setModel] = useState( {
+        model: tf.sequential(),
+        status: "idle",
+        labels: [],
+        inputShape: [0,0],
+        trainingAcc: 0,
+        topClass: "",
+        prediction: {}
+    })
+    const trainEnabled = tables.length >= 2
+    
+    const trainTFModel = async () => {
+        tfModel.status = "running"
+        tfModel.topClass = ""
+        tfModel.prediction = {}
+        setModel(tfModel)
+
+        // Create a new TFJS model
+        const model = tf.sequential()
+        
+        // Assumptions: the sampling rate, sampling duration, and sensors used are constant
+        let sampleLength = -1
+        let sampleChannels = -1
+        const x_data = []
+        const labels = []
+        const y_data = []
+
+        tables.forEach( (table) => {
+            if (sampleLength == -1) {
+                sampleLength = table.length
+                sampleChannels = table.width
+            } else if ((table.length != sampleLength) || (table.width != sampleChannels)) {
+                // RANDI TODO Decide what to do about different shaped data
+                alert(
+                    "Data input does not have the same shape: "+ table.name + "\n" +
+                    sampleLength + " | " + table.length + "\n" +
+                    sampleChannels + " | " + table.width
+                )
+            }
+            // For x data, just add each sample as a new row into x_data
+            x_data.push(table.data())
+
+            // For y data, get the label, see if the label already exists in the list of labels add a
+            //  new label if it is not already in the list, add the *index* of that label into y data
+            const tableLabel = table.name.slice(0, table.name.indexOf("$"))
+            const idx = labels.indexOf(tableLabel)
+            if (idx < 0) labels.push(tableLabel)
+            y_data.push(labels.indexOf(tableLabel))
+        })
+    
+        // must start with a fully connected layer of size equal to input
+        model.add(tf.layers.dense({
+            units: 16,
+            inputShape: [sampleLength, sampleChannels],
+            activation: "softmax"
+        }))
+
+        // moving from 3-dimensional data to 2-dimensional requires a flattening layer
+        model.add(tf.layers.flatten())
+        
+        // must end with a fully connected layer with size equal to number of labels
+        model.add(tf.layers.dense({
+            units: labels.length,
+            activation: "softmax"
+        }))
+
+        model.compile({ loss: "categoricalCrossentropy", optimizer: "sgd", metrics: ['accuracy'],})
+        
+        // RANDI TODO normalize data
+        const xs = tf.tensor3d(x_data, [x_data.length, sampleLength, sampleChannels])
+        const ys = tf.oneHot(tf.tensor1d(y_data, 'int32'), labels.length)
+
+        // Train the model using the data
+        let acc = 0
+        await model.fit(xs, ys, {epochs: 250})
+        .then(info => {
+            console.log('Initial accuracy: ', info.history.acc[0])
+            console.log('Final accuracy: ', info.history.acc[info.history.acc.length-1])
+            acc = info.history.acc[info.history.acc.length-1]
+        })
+
+        tfModel.model = model
+        tfModel.status = "completed"
+        tfModel.labels = labels
+        tfModel.inputShape = [sampleLength, sampleChannels]
+        tfModel.trainingAcc = acc
+        setModel(tfModel)
+    }
+    // predicting with model
+    const updatePrediction = async () => {
+        if (tfModel["status"] == "completed") {
+            // Use the model to do inference on a data point the model hasn't seen before:
+            let data = undefined
+            const z_data = []
+            if (liveDataSet) {
+                data = liveDataSet.data()
+                data = data.slice(data.length-tfModel.inputShape[0])
+                z_data.push(data)
+            }
+
+            const z_result = {}
+            let z = ""
+
+            if (data && data.length >= tfModel.inputShape[0]) {
+                // Get probability values from model
+                const prediction = await tfModel.model.predict(tf.tensor3d(z_data)) as tf.Tensor<tf.Rank>
+                z = tfModel.labels[prediction.argMax(1).dataSync()] // TODO make sure this is stable. Seems strange that it just works
+
+                // Save probability for each class in model object
+                for (let i=0; i<tfModel.labels.length; i++) {
+                    z_result[tfModel.labels[i]] = prediction.dataSync()[i]
+                }
+                //console.log(z_result)
+            }
+
+            tfModel.prediction = z_result
+            tfModel.topClass = z
+            setModel(tfModel)
+        }
+    }
+
     return (
         <Grid container direction={'column'}>
             <Grid item>
             <h2>Collect Data</h2>
-            {/* Toggle button to get data from sensors vs upload from file */}
+            {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
             <div key="sensors">
                 <h3>Choose sensors</h3>
                 {!readingRegisters.length && (
@@ -336,7 +426,7 @@ export default function ModelPlayground() {
                         }}
                         onChange={handleSamplingDurationChange}
                     />
-                    <TextField /* Probably makes more sense as a dropdown */
+                    <TextField /* RANDI TODO Probably makes more sense as a dropdown */
                         className={classes.field}
                         disabled={recording}
                         label="Class label"
@@ -372,15 +462,29 @@ export default function ModelPlayground() {
             </Grid>
             <Grid item>
                 <h2>Train Model</h2>
-                <span>Current Model Status: {tfModelStatus}</span><br/>
-                <button onClick={testTFJS}>Train</button>
-                 {/* <button onClick={() => setCount(count +1)}>+1</button> */ }
+                <div className={classes.buttons}>
+                    <Button
+                        size="large"
+                        variant="contained"
+                        color={"primary"}
+                        aria-label="start training model"
+                        title="start training model"
+                        onClick={trainTFModel}
+                        startIcon={<PlayArrowIcon />}
+                        disabled={!trainEnabled}
+                    >
+                        {"Train"}
+                    </Button>
+                </div>
+                <span> Model Status: {tfModel.status}</span><br/>
+                <span> Training Accuracy: {tfModel.trainingAcc}</span><br/>
+                <span> Labels: {tfModel.labels.toString() }</span><br/>
             </Grid>
             <Grid item>
                 <h2>Test Model</h2>
-                <span> {tfModelResult} </span><br/>
+                <span> Top Class: {tfModel.topClass} </span><br/>
                 <div key="liveData">
-                    {liveDataSet && (
+                    {(tfModel.status == "completed") && (
                         <Trend
                             key="trends"
                             height={12}

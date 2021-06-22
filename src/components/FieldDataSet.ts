@@ -71,6 +71,10 @@ export default class FieldDataSet extends JDEventSource {
         return this.rows.length
     }
 
+    get width() {
+        return this.fields.length
+    }
+
     data(flatten?: boolean) {
         if (flatten && this.headers.length == 1)
             return this.rows.map(row => row.data[0])
