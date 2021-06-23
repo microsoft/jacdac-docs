@@ -194,7 +194,7 @@ function BlockMiniMap(props: {
  * @const
  * @private
  */
-const MARGIN_VERTICAL_ = 48
+const MARGIN_VERTICAL_ = 42
 
 /**
  * Distance between control and right or left edge of workspace.
