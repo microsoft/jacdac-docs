@@ -506,8 +506,8 @@ export class ServicesBlockDomainSpecificLanguage
                         kind: "block",
                         type: `jacdac_raise_event_${service.shortId}`,
                         message0: !ev.fields.length
-                            ? `${humanify(ev.name)} %1`
-                            : `${humanify(ev.name)} %1 with ${fieldsToMessage(
+                            ? `raise %1 ${humanify(ev.name)}`
+                            : `raise %1 ${humanify(ev.name)} with ${fieldsToMessage(
                                 ev
                             )}`,
                         args0: [
@@ -520,7 +520,7 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: ev.description,
                         helpUrl: serviceHelp(service),
                         service,
-                        events,
+                        events: [ev],
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
 
