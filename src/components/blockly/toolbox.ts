@@ -62,16 +62,20 @@ export interface BlockReference {
     max?: number
 }
 
-export type EventTemplate = "event"
+export type EventTemplate = "event" | "raise_event"
 
 export type EventFieldTemplate = "event_field"
 
+export type RegisterValueTemplate = "register_value"
+
 export type RegisterTemplate =
-    | "register_set_server"   // register name, expr hole for return value
-    | "register_get_server"   // register name, special expr block
+    // client blocks
     | "register_change_event"
     | "register_set"
     | "register_get"
+    // server blocks
+    | "register_set_server"   // register name, expr hole for return value
+    | "register_get_server"   // register name, special expr block
 
 export type CommandTemplate = "command"
 
@@ -79,6 +83,7 @@ export type BlockTemplate =
     | EventTemplate
     | EventFieldTemplate
     | RegisterTemplate
+    | RegisterValueTemplate
     | CommandTemplate
     | "shadow"
     | "meta"
