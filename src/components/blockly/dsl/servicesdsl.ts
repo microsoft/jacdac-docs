@@ -499,34 +499,65 @@ export class ServicesBlockDomainSpecificLanguage
         )
 
         const eventServerBlocks = events.flatMap<EventBlockDefinition>(
-            ({ service, events }) => events.map<EventBlockDefinition>(
-                (ev) => { 
-                    return { 
-                        kind: "block",
-                        type: `jacdac_raise_event_${service.shortId}_${ev.name}`,
-                        message0: !ev.fields.length
-                            ? `raise %1 ${humanify(ev.name)}`
-                            : `raise %1 ${humanify(ev.name)} with ${fieldsToMessage(
-                                ev
-                            )}`,
-                        args0: [
-                            fieldVariable(service),
-                            ...fieldsToFieldInputs(ev),
-                        ],
-                        values: fieldsToValues(service, ev),
-                        inputsInline: true,
-                        colour: serviceColor(service),
-                        tooltip: ev.description,
-                        helpUrl: serviceHelp(service),
-                        service,
-                        events: [ev],
-                        previousStatement: CODE_STATEMENT_TYPE,
-                        nextStatement: CODE_STATEMENT_TYPE,
+            ({ service, events }) => { 
+                const eventsNoArgs = events.filter(ev => ev.fields.length === 0)
+                const retNoArgs: EventBlockDefinition = { 
+                    kind: "block",
+                    type: `jacdac_raise_event_${service.shortId}`,
+                    message0: `raise %1 %2`,
+                    args0: [
+                        fieldVariable(service),
+                        <InputDefinition>{
+                            type: "field_dropdown",
+                            name: "event",
+                            options: eventsNoArgs.map(event => [
+                                humanify(event.name),
+                                event.name,
+                            ]),
+                        },
+                    ],
+                    inputsInline: true,
+                    colour: serviceColor(service),
+                    tooltip: `Events for the ${service.name} service`,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    events: eventsNoArgs,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
 
-                        template: "raise_event",
-                    } 
-                }
-            )
+                    template: "raise_event",
+                } 
+                const eventsArgs =  events.filter(ev => ev.fields.length)
+                const retArgs = eventsArgs.map<EventBlockDefinition>(
+                    (ev) => { 
+                        return { 
+                            kind: "block",
+                            type: `jacdac_raise_event_${service.shortId}_${ev.name}`,
+                            message0: !ev.fields.length
+                                ? `raise %1 ${humanify(ev.name)}`
+                                : `raise %1 ${humanify(ev.name)} with ${fieldsToMessage(
+                                    ev
+                                )}`,
+                            args0: [
+                                fieldVariable(service),
+                                ...fieldsToFieldInputs(ev),
+                            ],
+                            values: fieldsToValues(service, ev),
+                            inputsInline: true,
+                            colour: serviceColor(service),
+                            tooltip: ev.description,
+                            helpUrl: serviceHelp(service),
+                            service,
+                            events: [ev],
+                            previousStatement: CODE_STATEMENT_TYPE,
+                            nextStatement: CODE_STATEMENT_TYPE,
+
+                            template: "raise_event",
+                        } 
+                    }
+                )
+                return [ retNoArgs, ...retArgs]
+            }
         )
 
         const registerChangeByEventClientBlocks = registers
