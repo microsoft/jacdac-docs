@@ -1,13 +1,23 @@
 import { useTheme } from "@material-ui/core"
-import { BlockSvg, Events, MetricsManager, utils } from "blockly"
-import React, { useCallback, useContext, useRef, useState } from "react"
+import {
+    BlockSvg,
+    Events,
+    IPositionable,
+    MetricsManager,
+    PluginManager,
+    utils,
+    WorkspaceSvg,
+    TOOLBOX_AT_LEFT,
+    Scrollbar,
+    TOOLBOX_AT_BOTTOM,
+} from "blockly"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import ReactDOM from "react-dom"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { svgPointerPoint } from "../widgets/svgutils"
-import BlockContext from "./BlockContext"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
 const MINI_RADIUS = 8
-const MIN_FACTOR = 1.5
 
 function MiniBlock(props: {
     x: number
@@ -56,9 +66,11 @@ function MiniViewport(props: {
     )
 }
 
-export default function BlockMiniMap(props: { height: number }) {
-    const { height } = props
-    const { workspace } = useContext(BlockContext)
+function BlockMiniMap(props: {
+    workspace: WorkspaceSvg
+    onSizeUpdate: (width: number, height: number) => void
+}) {
+    const { workspace, onSizeUpdate } = props
     const svgRef = useRef<SVGSVGElement>()
     const { palette } = useTheme()
     const [metrics, setMetrics] = useState<{
@@ -89,6 +101,7 @@ export default function BlockMiniMap(props: { height: number }) {
         }))
         setMetrics({ scroll, contents, blocks })
         setView(view)
+        onSizeUpdate(scroll.width, scroll.height)
     }
     const handleView = () => {
         const metricsManager = workspace.getMetricsManager()
@@ -115,6 +128,8 @@ export default function BlockMiniMap(props: { height: number }) {
     )
     useWorkspaceEvent(workspace, handleChange)
     const handleCenterView = (event: React.PointerEvent<Element>) => {
+        event.preventDefault()
+        event.stopPropagation()
         if (event.buttons < 1) return
         const pos = svgPointerPoint(svgRef.current, event)
         // viewHeight and viewWidth are in pixels.
@@ -139,50 +154,169 @@ export default function BlockMiniMap(props: { height: number }) {
     const cheight = scroll.height
 
     return (
-        <div
-            style={{
-                position: "relative",
-                width: "100%",
-            }}
+        <svg
+            ref={svgRef}
+            viewBox={`0 0 ${cwidth} ${cheight}`}
+            width={cwidth}
+            height={cheight}
         >
-            <svg
-                ref={svgRef}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox={`0 0 ${cwidth} ${cheight}`}
+            <g transform={`translate(${-cleft},${-ctop})`}>
+                {blocks?.map(({ blockId, rect, color }) => (
+                    <MiniBlock
+                        key={blockId}
+                        x={rect.left}
+                        y={rect.top}
+                        width={rect.right - rect.left}
+                        height={rect.bottom - rect.top}
+                        color={color}
+                    />
+                ))}
+                {view && <MiniViewport scroll={scroll} view={view} />}
+            </g>
+            <rect
+                x={0}
+                y={0}
                 width={cwidth}
                 height={cheight}
-                aria-label={"Blocks minimap"}
-                style={{
-                    height: `${height}rem`,
-                    width: `${(height / cheight) * cwidth}rem`,
-                }}
-                role={"group"}
-            >
-                <g transform={`translate(${-cleft},${-ctop})`}>
-                    {blocks?.map(({ blockId, rect, color }) => (
-                        <MiniBlock
-                            key={blockId}
-                            x={rect.left}
-                            y={rect.top}
-                            width={rect.right - rect.left}
-                            height={rect.bottom - rect.top}
-                            color={color}
-                        />
-                    ))}
-                    {view && <MiniViewport scroll={scroll} view={view} />}
-                </g>
-                <rect
-                    x={0}
-                    y={0}
-                    width={cwidth}
-                    height={cheight}
-                    fill="transparent"
-                    stroke={palette.text.hint}
-                    strokeWidth={12}
-                    onPointerDown={handleCenterView}
-                    onPointerMove={handleCenterView}
-                />
-            </svg>
-        </div>
+                fill="transparent"
+                stroke={palette.text.hint}
+                strokeWidth={24}
+                onPointerDown={handleCenterView}
+                onPointerMove={handleCenterView}
+            />
+        </svg>
     )
+}
+
+/**
+ * Distance between control and bottom or top edge of workspace.
+ * @type {number}
+ * @const
+ * @private
+ */
+const MARGIN_VERTICAL_ = 48
+
+/**
+ * Distance between control and right or left edge of workspace.
+ * @type {number}
+ * @const
+ * @private
+ */
+const MARGIN_HORIZONTAL_ = 20
+
+class MinimapPlugin implements IPositionable {
+    private top_ = 0
+    private left_ = 0
+    private width_ = 96
+    private height_ = 96
+    private scale_ = 0.05
+    private svgGroup_: SVGGElement
+
+    constructor(readonly workspace_: WorkspaceSvg) {
+        this.init()
+    }
+
+    private init() {
+        console.log("init minimap")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginManager = (this.workspace_ as any).getPluginManager()
+        pluginManager.addPlugin({
+            id: "minimap",
+            plugin: this,
+            weight: 2,
+            types: [PluginManager.Type.POSITIONABLE],
+        })
+        this.createDom_()
+        this.workspace_.resize()
+    }
+
+    private createDom_() {
+        this.svgGroup_ = utils.dom.createSvgElement(utils.Svg.G, {
+            class: "minimap",
+        })
+        utils.dom.insertAfter(this.svgGroup_, this.workspace_.getBubbleCanvas())
+        ReactDOM.render(this.render(), this.svgGroup_)
+    }
+
+    private render() {
+        return (
+            <BlockMiniMap
+                workspace={this.workspace_}
+                onSizeUpdate={this.handleSizeUpdate.bind(this)}
+            />
+        )
+    }
+
+    position(metrics: MetricsManager.UiMetrics): void {
+        console.log("position")
+        const hasVerticalScrollbars =
+            this.workspace_.scrollbar &&
+            this.workspace_.scrollbar.canScrollHorizontally()
+        const hasHorizontalScrollbars =
+            this.workspace_.scrollbar &&
+            this.workspace_.scrollbar.canScrollVertically()
+
+        if (
+            metrics.toolboxMetrics.position === TOOLBOX_AT_LEFT ||
+            (this.workspace_.horizontalLayout && !this.workspace_.RTL)
+        ) {
+            // Right corner placement.
+            this.left_ =
+                metrics.absoluteMetrics.left +
+                metrics.viewMetrics.width -
+                this.width_ -
+                MARGIN_HORIZONTAL_
+            if (hasVerticalScrollbars && !this.workspace_.RTL) {
+                this.left_ -= Scrollbar.scrollbarThickness
+            }
+        } else {
+            // Left corner placement.
+            this.left_ = MARGIN_HORIZONTAL_
+            if (hasVerticalScrollbars && this.workspace_.RTL) {
+                this.left_ += Scrollbar.scrollbarThickness
+            }
+        }
+
+        // Upper corner placement
+        this.top_ = metrics.absoluteMetrics.top + MARGIN_VERTICAL_
+
+        this.positionSvgGroup()
+    }
+
+    private positionSvgGroup() {
+        this.svgGroup_.setAttribute(
+            "transform",
+            `translate(${this.left_},${this.top_}) scale(${this.scale_})`
+        )
+    }
+
+    getBoundingRectangle(): utils.Rect {
+        return new utils.Rect(
+            this.top_,
+            this.top_ + this.height_,
+            this.left_,
+            this.left_ + this.width_
+        )
+    }
+
+    private handleSizeUpdate(width: number, height: number) {
+        if (width !== this.width_ || height !== this.height_) {
+            console.log("size update")
+            const dw = width * this.scale_ - this.width_
+            const dh = height * this.scale_ - this.height_
+            this.width_ = width * this.scale_
+            this.height_ = height * this.scale_
+            this.left_ -= dw
+            this.top_ -= dh
+            this.positionSvgGroup()
+        }
+    }
+}
+
+export function useBlockMinimap(workspace: WorkspaceSvg) {
+    useEffect(() => {
+        if (workspace) {
+            new MinimapPlugin(workspace)
+        }
+    }, [workspace])
 }

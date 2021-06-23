@@ -11,13 +11,12 @@ import clsx from "clsx"
 import { withPrefix } from "gatsby"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import BlockContext from "./BlockContext"
-import BlockMinimap from "./BlockMinimap"
+import { useBlockMinimap } from "./BlockMinimap"
 
-const miniMapHeight = 4
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         editor: {
-            height: `calc(100vh - ${(Flags.diagnostics ? 15 : 10) + miniMapHeight}rem)`,
+            height: `calc(100vh - ${Flags.diagnostics ? 15 : 10}rem)`,
             "& .blocklyTreeLabel": {
                 fontFamily: theme.typography.fontFamily,
             },
@@ -90,9 +89,11 @@ export default function BlockEditor(props: { className?: string }) {
         return () => observer.disconnect()
     }, [workspace, blocklyRef.current])
 
+    // minimap 
+    useBlockMinimap(workspace)
+
     return (
         <div>
-            <BlockMinimap height={miniMapHeight} />
             <div className={clsx(classes.editor, className)} ref={blocklyRef} />
             <BlocklyModalDialogs />
         </div>
