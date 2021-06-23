@@ -504,7 +504,7 @@ export class ServicesBlockDomainSpecificLanguage
                 (ev) => { 
                     return { 
                         kind: "block",
-                        type: `jacdac_raise_event_${service.shortId}`,
+                        type: `jacdac_raise_event_${service.shortId}_${ev.name}`,
                         message0: !ev.fields.length
                             ? `raise %1 ${humanify(ev.name)}`
                             : `raise %1 ${humanify(ev.name)} with ${fieldsToMessage(
