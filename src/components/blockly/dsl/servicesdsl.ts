@@ -498,7 +498,6 @@ export class ServicesBlockDomainSpecificLanguage
             })
         )
 
-        // TODO: this should look like client Command block now
         const eventServerBlocks = events.flatMap<EventBlockDefinition>(
             ({ service, events }) => events.map<EventBlockDefinition>(
                 (ev) => { 
