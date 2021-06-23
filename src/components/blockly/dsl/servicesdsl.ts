@@ -992,6 +992,7 @@ export class ServicesBlockDomainSpecificLanguage
 
         return [
             ...this._serviceClientBlocks,
+            ...this._serviceServerBlocks,
             ...this._eventFieldClientBlocks,
             ...this._roleBlocks,
             ...toolsBlocks,
@@ -1086,9 +1087,17 @@ export class ServicesBlockDomainSpecificLanguage
                         kind: "label",
                         text: "Server",
                     },
+                    ...this._serviceServerBlocks
+                        .filter(
+                            ev =>
+                                ev.service === service
+                        )
+                        .map<BlockReference>(block => ({
+                            kind: "block",
+                            type: block.type,
+                            values: block.values,
+                        }))
                     // TODO: register read and write blocks
-                    // TODO: events 
-
                 ],
                 button: {
                     kind: "button",
