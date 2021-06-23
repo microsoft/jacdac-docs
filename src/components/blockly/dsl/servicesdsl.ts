@@ -143,9 +143,14 @@ export class ServicesBlockDomainSpecificLanguage
 {
     id = "jacdacServices"
     supportedServices: jdspec.ServiceSpec[] = []
-    private _serviceBlocks: ServiceBlockDefinition[]
-    private _eventFieldBlocks: EventFieldDefinition[]
-    private _runtimeBlocks: BlockDefinition[]
+    // client blocks
+    private _serviceClientBlocks: ServiceBlockDefinition[]
+    private _eventFieldClientBlocks: EventFieldDefinition[]
+    // server blocks
+    private _serviceServerBlocks: ServiceBlockDefinition[]
+    // generic role blocks
+    private _roleBlocks: BlockDefinition[]
+
 
     private createServiceColor(theme: Theme) {
         const sensorColor = theme.palette.success.main
@@ -330,7 +335,7 @@ export class ServicesBlockDomainSpecificLanguage
             )
         )
 
-        const customBlockDefinitions: CustomBlockDefinition[] = [
+        const customClientBlockDefinitions: CustomBlockDefinition[] = [
             ...resolveService(SRV_HID_KEYBOARD).map(
                 service =>
                     <CustomBlockDefinition>{
@@ -466,7 +471,7 @@ export class ServicesBlockDomainSpecificLanguage
             return def
         })
 
-        const eventBlocks = events.map<EventBlockDefinition>(
+        const eventClientBlocks = events.map<EventBlockDefinition>(
             ({ service, events }) => ({
                 kind: "block",
                 type: `jacdac_events_${service.shortId}`,
@@ -493,7 +498,39 @@ export class ServicesBlockDomainSpecificLanguage
             })
         )
 
-        const registerChangeByEventBlocks = registers
+        // TODO: this should look like client Command block now
+        const eventServerBlocks = events.flatMap<EventBlockDefinition>(
+            ({ service, events }) => events.map<EventBlockDefinition>(
+                (ev) => { 
+                    return { 
+                        kind: "block",
+                        type: `jacdac_raise_event_${service.shortId}`,
+                        message0: !ev.fields.length
+                            ? `${humanify(ev.name)} %1`
+                            : `${humanify(ev.name)} %1 with ${fieldsToMessage(
+                                ev
+                            )}`,
+                        args0: [
+                            fieldVariable(service),
+                            ...fieldsToFieldInputs(ev),
+                        ],
+                        values: fieldsToValues(service, ev),
+                        inputsInline: true,
+                        colour: serviceColor(service),
+                        tooltip: ev.description,
+                        helpUrl: serviceHelp(service),
+                        service,
+                        events,
+                        previousStatement: CODE_STATEMENT_TYPE,
+                        nextStatement: CODE_STATEMENT_TYPE,
+
+                        template: "raise_event",
+                    } 
+                }
+            )
+        )
+
+        const registerChangeByEventClientBlocks = registers
             .filter(
                 ({ service }) =>
                     !service.packets.some(
@@ -536,7 +573,7 @@ export class ServicesBlockDomainSpecificLanguage
             registerSimples,
             ({ register }) => !!toBlocklyType(register.fields[0])
         )
-        const registerSimplesGetBlocks =
+        const registerSimpleGetClientBlocks =
             registerSimpleTypes.map<RegisterBlockDefinition>(
                 ({ service, register }) => ({
                     kind: "block",
@@ -580,7 +617,7 @@ export class ServicesBlockDomainSpecificLanguage
                     .filter(({ einfo }) => !!einfo)
             )
         )
-        const registerEnumGetBlocks = [
+        const registerEnumGetClientBlocks = [
             ...registerSimpleEnumTypes,
             ...registerCompositeEnumTypes,
         ].map<RegisterBlockDefinition>(
@@ -616,7 +653,7 @@ export class ServicesBlockDomainSpecificLanguage
             })
         )
 
-        const registerNumericsGetBlocks = registerComposites
+        const registerNumericsGetClientBlocks = registerComposites
             .filter(re => re.register.fields.some(isNumericType))
             .map<RegisterBlockDefinition>(({ service, register }) => ({
                 kind: "block",
@@ -650,7 +687,7 @@ export class ServicesBlockDomainSpecificLanguage
                 template: "register_get",
             }))
 
-        const registerSetBlocks = registers
+        const registerSetClientBlocks = registers
             .filter(({ register }) => register.kind === "rw")
             .filter(({ register }) => fieldsSupported(register))
             .map<RegisterBlockDefinition>(({ service, register }) => ({
@@ -680,7 +717,7 @@ export class ServicesBlockDomainSpecificLanguage
                 template: "register_set",
             }))
 
-        const commandBlocks = commands.map<CommandBlockDefinition>(
+        const commandClientBlocks = commands.map<CommandBlockDefinition>(
             ({ service, command }) => ({
                 kind: "block",
                 type: `jacdac_command_${service.shortId}_${command.name}`,
@@ -707,15 +744,21 @@ export class ServicesBlockDomainSpecificLanguage
             })
         )
 
-        this._serviceBlocks = [
-            ...eventBlocks,
-            ...registerChangeByEventBlocks,
-            ...registerSimplesGetBlocks,
-            ...registerEnumGetBlocks,
-            ...registerNumericsGetBlocks,
-            ...registerSetBlocks,
-            ...customBlockDefinitions,
-            ...commandBlocks,
+        this._serviceClientBlocks = [
+            ...eventClientBlocks,
+            ...registerChangeByEventClientBlocks,
+            ...registerSimpleGetClientBlocks,
+            ...registerEnumGetClientBlocks,
+            ...registerNumericsGetClientBlocks,
+            ...registerSetClientBlocks,
+            ...customClientBlockDefinitions,
+            ...commandClientBlocks,
+        ]
+
+        this._serviceServerBlocks = [
+            ...eventServerBlocks,
+            // registerGetServerBlocks
+            // registerSetServerBlocks
         ]
 
         const eventFieldGroups = [
@@ -739,7 +782,7 @@ export class ServicesBlockDomainSpecificLanguage
             },
         ]
         // generate accessor blocks for event data with numbers
-        this._eventFieldBlocks = arrayConcatMany(
+        this._eventFieldClientBlocks = arrayConcatMany(
             arrayConcatMany(
                 eventFieldGroups.map(({ output, filter }) =>
                     events.map(({ service, events }) =>
@@ -783,7 +826,7 @@ export class ServicesBlockDomainSpecificLanguage
             )
         )
 
-        this._runtimeBlocks = [
+        this._roleBlocks = [
             {
                 kind: "block",
                 type: ROLE_BOUND_EVENT_BLOCK,
@@ -948,9 +991,9 @@ export class ServicesBlockDomainSpecificLanguage
         ]
 
         return [
-            ...this._serviceBlocks,
-            ...this._eventFieldBlocks,
-            ...this._runtimeBlocks,
+            ...this._serviceClientBlocks,
+            ...this._eventFieldClientBlocks,
+            ...this._roleBlocks,
             ...toolsBlocks,
         ]
     }
@@ -979,7 +1022,7 @@ export class ServicesBlockDomainSpecificLanguage
                 })
                 .filter(ev => !!ev)
         )
-        const jdBlocks = this._serviceBlocks.filter(block => !!block.service)
+        const jdBlocks = this._serviceClientBlocks.filter(block => !!block.service)
         const services = uniqueMap(
             jdBlocks,
             block => block.service.shortId,
@@ -1010,7 +1053,7 @@ export class ServicesBlockDomainSpecificLanguage
         const servicesCategories: CategoryDefinition[] = toolboxServices
             .map(service => ({
                 service,
-                serviceBlocks: this._serviceBlocks.filter(
+                serviceBlocks: this._serviceClientBlocks.filter(
                     block => block.service === service
                 ),
             }))
@@ -1028,7 +1071,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: block.type,
                         values: block.values,
                     })),
-                    ...this._eventFieldBlocks
+                    ...this._eventFieldClientBlocks
                         .filter(
                             ev =>
                                 ev.service === service &&
