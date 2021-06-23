@@ -26,6 +26,7 @@ import {
     DataFilterColumnsRequest,
     DataFilterStringRequest,
     DataSummarizeByGroupRequest,
+    DataMutateColumnsRequest,
     DataRecordWindowRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
@@ -35,6 +36,7 @@ const DATA_SELECT_BLOCK = "data_select"
 const DATA_DROP_BLOCK = "data_drop"
 const DATA_FILTER_COLUMNS_BLOCK = "data_filter_columns"
 const DATA_FILTER_STRING_BLOCK = "data_filter_string"
+const DATA_MUTATE_COLUMNS_BLOCK = "data_mutate_columns"
 const DATA_SUMMARIZE_BY_GROUP_BLOCK = "data_summarize_by_group"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
@@ -261,6 +263,60 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
         {
             kind: "block",
+            type: DATA_MUTATE_COLUMNS_BLOCK,
+            message0: "mutate %1 %2 %3 %4",
+            colour,
+            args0: [
+                <TextInputDefinition>{
+                    type: "field_input",
+                    name: "newcolumn",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "lhs",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "logic",
+                    options: [
+                        ["+", "plus"],
+                        ["-", "minus"],
+                        ["*", "mult"],
+                        ["/", "div"],
+                        [">", "gt"],
+                        ["<", "lt"],
+                        [">=", "ge"],
+                        ["<=", "le"],
+                        ["==", "eq"],
+                        ["!=", "ne"],
+                    ],
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "rhs",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const newcolumn = b.getFieldValue("newcolumn")
+                const lhs = b.getFieldValue("lhs")
+                const rhs = b.getFieldValue("rhs")
+                const logic = b.getFieldValue("logic")
+                return postTransformData(<DataMutateColumnsRequest>{
+                    type: "mutate_columns",
+                    newcolumn,
+                    lhs,
+                    rhs,
+                    logic,
+                    data,
+                })
+            },
+            template: "meta",
+        },
+        {
+            kind: "block",
             type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
             message0: "group %1 by %2 calculate %3",
             colour,
@@ -444,6 +500,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_FILTER_STRING_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_MUTATE_COLUMNS_BLOCK,
                 },
                 <BlockReference>{
                     kind: "block",
