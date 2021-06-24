@@ -53,7 +53,7 @@ export default function workspaceJSONToVMProgram(
 
     const roles: VMRole[] = workspace.variables
         .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
-        .map(v => ({ role: v.name, serviceShortId: v.type }))
+        .map(v => ({ role: v.name, serviceShortId: v.type.split(":")[0] }))
 
     class EmptyExpression extends Error {}
 

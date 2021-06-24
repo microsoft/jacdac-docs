@@ -522,10 +522,10 @@ export class ServicesBlockDomainSpecificLanguage
             })
         )
 
-        const eventServerBlocks = events.flatMap<EventBlockDefinition>(
+        const eventServerBlocks = events.flatMap<CommandBlockDefinition>(
             ({ service, events }) => {
                 const eventsNoArgs = events.filter(ev => ev.fields.length === 0)
-                const retNoArgs: EventBlockDefinition = {
+                const retNoArgs: CommandBlockDefinition = {
                     kind: "block",
                     type: `jacdac_raise_event_${service.shortId}`,
                     message0: `raise %1 %2`,
@@ -545,14 +545,14 @@ export class ServicesBlockDomainSpecificLanguage
                     tooltip: `Events for the ${service.name} service`,
                     helpUrl: serviceHelp(service),
                     service,
-                    events: eventsNoArgs,
+                    command: undefined,
                     previousStatement: CODE_STATEMENT_TYPE,
                     nextStatement: CODE_STATEMENT_TYPE,
 
-                    template: "raise_event",
+                    template: "raise",
                 }
                 const eventsArgs = events.filter(ev => ev.fields.length)
-                const retArgs = eventsArgs.map<EventBlockDefinition>(ev => {
+                const retArgs = eventsArgs.map<CommandBlockDefinition>(ev => {
                     return {
                         kind: "block",
                         type: `jacdac_raise_event_${service.shortId}_${ev.name}`,
@@ -571,11 +571,11 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: ev.description,
                         helpUrl: serviceHelp(service),
                         service,
-                        events: [ev],
+                        command: undefined,
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
 
-                        template: "raise_event",
+                        template: "raise",
                     }
                 })
                 return [retNoArgs, ...retArgs]
@@ -1405,21 +1405,39 @@ export class ServicesBlockDomainSpecificLanguage
                     errors,
                 }
             }
+            case "raise":
             case "command": {
                 const { command: serviceCommand } =
                     definition as CommandBlockDefinition
                 const { value: role } = inputs[0].fields.role
+                const eventName =
+                    template === "raise"
+                        ? inputs[0].fields["event"].value.toString()
+                        : ""
                 const exprsErrors = inputs.map(a =>
                     blockToExpression(event, a.child)
                 )
                 return {
                     cmd: makeVMBase(block, {
                         type: "CallExpression",
-                        arguments: exprsErrors.map(p => p.expr),
-                        callee: toMemberExpression(
-                            role as string,
-                            serviceCommand.name
-                        ),
+                        arguments: [
+                            ...(eventName
+                                ? [
+                                      toMemberExpression(
+                                          role as string,
+                                          eventName
+                                      ),
+                                  ]
+                                : []),
+                            ...exprsErrors.map(p => p.expr),
+                        ],
+                        callee:
+                            template === "command"
+                                ? toMemberExpression(
+                                      role as string,
+                                      serviceCommand.name
+                                  )
+                                : toIdentifier("raiseEvent"),
                     }),
                     errors: exprsErrors.flatMap(p => p.errors),
                 }
@@ -1432,7 +1450,7 @@ export class ServicesBlockDomainSpecificLanguage
                     cmd: makeVMBase(block, {
                         type: "CallExpression",
                         arguments: exprsErrors.map(p => p.expr),
-                        callee: toIdentifier("server")
+                        callee: toIdentifier("server"),
                     }),
                     errors: exprsErrors.flatMap(p => p.errors),
                 }
