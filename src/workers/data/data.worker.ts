@@ -49,6 +49,14 @@ export interface DataMutateColumnsRequest extends DataRequest {
     logic: string
 }
 
+export interface DataMutateStringRequest extends DataRequest {
+    type: "mutate_string"
+    newcolumn: string
+    lhs: string
+    rhs: number
+    logic: string
+}
+
 export interface DataSummarizeByGroupRequest extends DataRequest {
     type: "summarize_by_group"
     column: string
@@ -173,6 +181,58 @@ const handlers: { [index: string]: (props: any) => object[] } = {
         }
     },
     mutate_columns: (props: DataMutateColumnsRequest) => {
+        const { newcolumn, lhs, rhs, logic, data } = props
+        if (newcolumn === undefined || !lhs || !rhs || !logic) return data
+        
+        const calc = {}
+
+        switch (logic) {
+            case "plus":
+                calc[newcolumn] = (d) => d[lhs] + rhs
+                return tidy(data, mutate(calc))
+                break
+            case "minus":
+                calc[newcolumn] = (d) => d[lhs] - (rhs as any)
+                return tidy(data, mutate(calc))
+                break
+            case "mult":
+                calc[newcolumn] = (d) => d[lhs] * (rhs as any)
+                return tidy(data, mutate(calc))
+                break
+            case "div":
+                calc[newcolumn] = (d) => d[lhs] / (rhs as any)
+                return tidy(data, mutate(calc))
+                break
+            case "gt":
+                calc[newcolumn] = (d) => (d[lhs] > rhs).toString()
+                return tidy(data, mutate(calc))
+                break
+            case "lt":
+                calc[newcolumn] = (d) => (d[lhs] < rhs).toString()
+                return tidy(data, mutate(calc))
+                break
+            case "ge":
+                calc[newcolumn] = (d) => (d[lhs] >= rhs).toString()
+                return tidy(data, mutate(calc))
+                break
+            case "le":
+                calc[newcolumn] = (d) => (d[lhs] <= rhs).toString()
+                return tidy(data, mutate(calc))
+                break
+            case "eq":
+                calc[newcolumn] = (d) => (d[lhs] == rhs).toString()
+                return tidy(data, mutate(calc))
+                break
+            case "ne":
+                calc[newcolumn] = (d) => (d[lhs] != rhs).toString()
+                return tidy(data, mutate(calc))
+                break
+            default:
+                return data
+                break
+        }
+    },
+    mutate_string: (props: DataMutateStringRequest) => {
         const { newcolumn, lhs, rhs, logic, data } = props
         if (newcolumn === undefined || !lhs || !rhs || !logic) return data
         
