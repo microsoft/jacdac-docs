@@ -9,7 +9,6 @@ import {
     WorkspaceSvg,
     TOOLBOX_AT_LEFT,
     Scrollbar,
-    TOOLBOX_AT_BOTTOM,
 } from "blockly"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import ReactDOM from "react-dom"
@@ -18,6 +17,11 @@ import { svgPointerPoint } from "../widgets/svgutils"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
 const MINI_RADIUS = 8
+const MARGIN_VERTICAL_ = 20
+const MARGIN_HORIZONTAL_ = 20
+const MIN_SCALE = 0.05
+const MAX_WIDTH = 200
+const MAX_HEIGHT = 96
 
 function MiniBlock(props: {
     x: number
@@ -72,7 +76,6 @@ function BlockMiniMap(props: {
 }) {
     const { workspace, onSizeUpdate } = props
     const svgRef = useRef<SVGSVGElement>()
-    const { palette } = useTheme()
     const [metrics, setMetrics] = useState<{
         scroll: MetricsManager.ContainerRegion
         contents: MetricsManager.ContainerRegion
@@ -189,7 +192,7 @@ function BlockMiniMap(props: {
                 width={cwidth}
                 height={cheight}
                 fill="transparent"
-                stroke={palette.text.hint}
+                stroke={"#aaa"}
                 strokeWidth={24}
                 onPointerDown={handleCenterView}
                 onPointerMove={handleCenterView}
@@ -197,26 +200,6 @@ function BlockMiniMap(props: {
         </svg>
     )
 }
-
-/**
- * Distance between control and bottom or top edge of workspace.
- * @type {number}
- * @const
- * @private
- */
-const MARGIN_VERTICAL_ = 20
-
-/**
- * Distance between control and right or left edge of workspace.
- * @type {number}
- * @const
- * @private
- */
-const MARGIN_HORIZONTAL_ = 20
-
-const MIN_SCALE = 0.05
-const MAX_WIDTH = 200
-const MAX_HEIGHT = 96
 
 class MinimapPlugin implements IPositionable {
     private top_ = 0
