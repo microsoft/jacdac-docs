@@ -145,6 +145,7 @@ function BlockMiniMap(props: {
 
         workspace.scroll(x, y)
     }
+    // nothing to see
     if (!metrics || !view) return null
 
     const { scroll, blocks } = metrics
@@ -152,6 +153,10 @@ function BlockMiniMap(props: {
     const ctop = scroll.top
     const cwidth = scroll.width
     const cheight = scroll.height
+
+    // view too small
+    console.log({ cwidth, cheight, view })
+    if (cwidth <= view.width * 2.5 && cheight <= view.height * 2.5) return null
 
     return (
         <svg
@@ -255,9 +260,6 @@ class MinimapPlugin implements IPositionable {
         const hasVerticalScrollbars =
             this.workspace_.scrollbar &&
             this.workspace_.scrollbar.canScrollHorizontally()
-        const hasHorizontalScrollbars =
-            this.workspace_.scrollbar &&
-            this.workspace_.scrollbar.canScrollVertically()
 
         if (
             metrics.toolboxMetrics.position === TOOLBOX_AT_LEFT ||
