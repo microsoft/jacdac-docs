@@ -140,16 +140,16 @@ export function useToolboxButtons(
         // collect buttons
         const buttons: ButtonDefinition[] = toolboxConfiguration?.contents
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map(cat => (cat as CategoryDefinition).button)
+            .flatMap(cat => (cat as CategoryDefinition).buttons)
             .filter(btn => !!btn)
         buttons?.forEach(button =>
-            workspace.registerButtonCallback(button.callbackKey, () =>
+            workspace.registerButtonCallback(button.callbackKey, () => {
                 Blockly.Variables.createVariableButtonHandler(
                     workspace,
                     null,
-                    `${button.service.shortId}:${button.client}`
+                    button.service.shortId
                 )
-            )
+            })
         )
     }, [workspace, JSON.stringify(toolboxConfiguration)])
 }

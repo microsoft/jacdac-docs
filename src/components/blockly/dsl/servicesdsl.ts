@@ -159,6 +159,10 @@ export class ServicesBlockDomainSpecificLanguage
         return serviceColor
     }
 
+    private toRoleType(srv: jdspec.ServiceSpec, client = true) {
+        return `${srv.shortId}:${client}`
+    }
+
     createBlocks(options: CreateBlocksOptions) {
         const { theme } = options
         const serviceColor = this.createServiceColor(theme)
@@ -236,9 +240,7 @@ export class ServicesBlockDomainSpecificLanguage
                   })
         const variableName = (srv: jdspec.ServiceSpec) =>
             `${humanify(srv.camelName).toLowerCase()} 1`
-        const toRoleType = (srv: jdspec.ServiceSpec, client = true) => {
-            return `${srv.shortId}:${client}`
-        }
+
         const roleVariable = (
             service: jdspec.ServiceSpec,
             client = true
@@ -246,8 +248,8 @@ export class ServicesBlockDomainSpecificLanguage
             type: "field_variable",
             name: "role",
             variable: variableName(service),
-            variableTypes: [toRoleType(service,client)],
-            defaultType: service.shortId,
+            variableTypes: [this.toRoleType(service, client)],
+            defaultType: this.toRoleType(service, client),
         })
         const fieldsToFieldInputs = (info: jdspec.PacketInfo) =>
             info.fields.map(field => ({
@@ -337,6 +339,26 @@ export class ServicesBlockDomainSpecificLanguage
                     }))
             )
         )
+
+        const serverClientBlockDefinitions: CustomBlockDefinition[] = [
+            ...this.supportedServices.map(
+                service =>
+                    <CustomBlockDefinition>{
+                        kind: "block",
+                        type: `implement_${service.shortId}`,
+                        message0: `${service.shortId} server %1`,
+                        args0: [roleVariable(service, false)],
+                        colour: serviceColor(service),
+                        inputsInline: true,
+                        previousStatement: CODE_STATEMENT_TYPE,
+                        nextStatement: CODE_STATEMENT_TYPE,
+                        tooltip: `Implement a service`,
+                        helpUrl: serviceHelp(service),
+                        service,
+                        template: "custom",
+                    }
+            ),
+        ]
 
         const customClientBlockDefinitions: CustomBlockDefinition[] = [
             ...resolveService(SRV_HID_KEYBOARD).map(
@@ -509,7 +531,7 @@ export class ServicesBlockDomainSpecificLanguage
                     type: `jacdac_raise_event_${service.shortId}`,
                     message0: `raise %1 %2`,
                     args0: [
-                        roleVariable(service,false),
+                        roleVariable(service, false),
                         <InputDefinition>{
                             type: "field_dropdown",
                             name: "event",
@@ -541,7 +563,7 @@ export class ServicesBlockDomainSpecificLanguage
                                   ev.name
                               )} with ${fieldsToMessage(ev)}`,
                         args0: [
-                            roleVariable(service,false),
+                            roleVariable(service, false),
                             ...fieldsToFieldInputs(ev),
                         ],
                         values: fieldsToValues(service, ev),
@@ -757,10 +779,7 @@ export class ServicesBlockDomainSpecificLanguage
                     : `${humanify(command.name)} %1 with ${fieldsToMessage(
                           command
                       )}`,
-                args0: [
-                    roleVariable(service),
-                    ...fieldsToFieldInputs(command),
-                ],
+                args0: [roleVariable(service), ...fieldsToFieldInputs(command)],
                 values: fieldsToValues(service, command),
                 inputsInline: true,
                 colour: serviceColor(service),
@@ -784,6 +803,7 @@ export class ServicesBlockDomainSpecificLanguage
             ...registerSetClientBlocks,
             ...customClientBlockDefinitions,
             ...commandClientBlocks,
+            ...serverClientBlockDefinitions,
         ]
 
         this._serviceServerBlocks = [
@@ -870,7 +890,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...this.supportedServices.map(srv =>
-                                toRoleType(srv)
+                                this.toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -903,7 +923,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...this.supportedServices.map(srv =>
-                                toRoleType(srv)
+                                this.toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -928,7 +948,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...this.supportedServices.map(srv =>
-                                toRoleType(srv)
+                                this.toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -967,7 +987,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...servicesDSL.supportedServices.map(srv =>
-                                toRoleType(srv)
+                                this.toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -1000,7 +1020,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...servicesDSL.supportedServices.map(srv =>
-                                toRoleType(srv)
+                                this.toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -1075,36 +1095,42 @@ export class ServicesBlockDomainSpecificLanguage
             block => block.service
         )
 
-        const toolboxServices: { service: jdspec.ServiceSpec; client: boolean }[] =
-            uniqueMap(
-                Flags.diagnostics
-                    ? services.map(service => { 
-                        return {
-                            service, client: true
-                        }
-                    })
-                    : [
-                          ...blockServices
-                              .map(pair => {
-                                  const service = services.find(
-                                      service => service.shortId === pair.shortId
-                                  )
-                                  return service ? {
-                                    service,
-                                    client: pair.client
-                                  } : undefined
-                            })
-                              .filter(srv => !!srv),
-                          ...liveServices.map(srv => {
-                              return { service: srv.specification, client: true }
-                          }),
-                      ],
-                srv => srv.service.shortId,
-                srv => srv
-            )
+        const toolboxServices: {
+            service: jdspec.ServiceSpec
+            client: boolean
+        }[] = uniqueMap(
+            Flags.diagnostics
+                ? services.map(service => {
+                      return {
+                          service,
+                          client: true,
+                      }
+                  })
+                : [
+                      ...blockServices
+                          .map(pair => {
+                              const service = services.find(
+                                  service => service.shortId === pair.shortId
+                              )
+                              return service
+                                  ? {
+                                        service,
+                                        client: pair.client,
+                                    }
+                                  : undefined
+                          })
+                          .filter(srv => !!srv),
+                      ...liveServices.map(srv => {
+                          return { service: srv.specification, client: true }
+                      }),
+                  ],
+            srv => this.toRoleType(srv.service, srv.client),
+            srv => srv
+        )
             .filter(
                 srv =>
-                    srv && ignoredServices.indexOf(srv.service.classIdentifier) < 0
+                    srv &&
+                    ignoredServices.indexOf(srv.service.classIdentifier) < 0
             )
             .sort((l, r) => l.service.name.localeCompare(r.service.name))
 
@@ -1120,52 +1146,46 @@ export class ServicesBlockDomainSpecificLanguage
                 const isClient = serviceClient.client
                 return {
                     kind: "category",
-                    name: "service.name" + (isClient ? "" : "Srv"),
+                    name: service.name + (isClient ? "" : "Srv"),
                     colour: serviceColor(service),
-                    contents: isClient ? [
-                        ...serviceBlocks.map<BlockReference>(block => ({
-                            kind: "block",
-                            type: block.type,
-                            values: block.values,
-                        })),
-                        ...this._eventFieldClientBlocks
-                            .filter(
-                                ev =>
-                                    ev.service === service &&
-                                    usedEvents.has(ev.event)
-                            )
-                            .map<BlockReference>(block => ({
-                                kind: "block",
-                                type: block.type,
-                                values: block.values,
-                            }))
-                    ] : 
-                    [
-                        ...this._serviceServerBlocks
-                            .filter(ev => ev.service === service)
-                            .map<BlockReference>(block => ({
-                                kind: "block",
-                                type: block.type,
-                                values: block.values,
-                            })),
-                        // TODO: register read and write blocks
-                    ],
-                    buttons: isClient ? [
+                    contents: isClient
+                        ? [
+                              ...serviceBlocks.map<BlockReference>(block => ({
+                                  kind: "block",
+                                  type: block.type,
+                                  values: block.values,
+                              })),
+                              ...this._eventFieldClientBlocks
+                                  .filter(
+                                      ev =>
+                                          ev.service === service &&
+                                          usedEvents.has(ev.event)
+                                  )
+                                  .map<BlockReference>(block => ({
+                                      kind: "block",
+                                      type: block.type,
+                                      values: block.values,
+                                  })),
+                          ]
+                        : [
+                              ...this._serviceServerBlocks
+                                  .filter(ev => ev.service === service)
+                                  .map<BlockReference>(block => ({
+                                      kind: "block",
+                                      type: block.type,
+                                      values: block.values,
+                                  })),
+                              // TODO: register read and write blocks
+                          ],
+                    buttons: [
                         {
                             kind: "button",
-                            text: `Add ${service.name} client role`,
+                            text: `Add ${service.name} role`,
                             callbackKey: `jacdac_add_role_callback_${service.shortId}`,
                             service,
                             client: true,
                         },
-                        {
-                            kind: "button",
-                            text: `Add ${service.name} server role`,
-                            callbackKey: `jacdac_add_server_role_callback_${service.shortId}`,
-                            service,
-                            client: false,
-                        },
-                    ] : [],
+                    ],
                 }
             })
             .filter(cat => !!cat.contents?.length)
