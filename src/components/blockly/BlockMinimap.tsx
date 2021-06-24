@@ -155,7 +155,6 @@ function BlockMiniMap(props: {
     const cheight = scroll.height
 
     // view too small
-    console.log({ cwidth, cheight, view })
     if (cwidth <= view.width * 2.5 && cheight <= view.height * 2.5) return null
 
     return (
@@ -256,7 +255,6 @@ class MinimapPlugin implements IPositionable {
     }
 
     position(metrics: MetricsManager.UiMetrics): void {
-        console.log("position")
         const hasVerticalScrollbars =
             this.workspace_.scrollbar &&
             this.workspace_.scrollbar.canScrollHorizontally()
@@ -306,7 +304,6 @@ class MinimapPlugin implements IPositionable {
 
     private handleSizeUpdate(width: number, height: number) {
         if (width !== this.width_ || height !== this.height_) {
-            console.log("size update")
             this.scale_ = Math.min(
                 MIN_SCALE,
                 Math.min(MAX_HEIGHT / height, MAX_WIDTH / width)
