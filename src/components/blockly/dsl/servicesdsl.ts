@@ -238,8 +238,8 @@ export class ServicesBlockDomainSpecificLanguage
                       min: field.typicalMin || field.absoluteMin,
                       max: field.typicalMax || field.absoluteMax,
                   })
-        const variableName = (srv: jdspec.ServiceSpec) =>
-            `${humanify(srv.camelName).toLowerCase()} 1`
+        const variableName = (srv: jdspec.ServiceSpec, client: boolean) =>
+            `${humanify(srv.camelName).toLowerCase()}${client ? "" : "Srv"} 1`
 
         const roleVariable = (
             service: jdspec.ServiceSpec,
@@ -247,7 +247,7 @@ export class ServicesBlockDomainSpecificLanguage
         ): VariableInputDefinition => ({
             type: "field_variable",
             name: "role",
-            variable: variableName(service),
+            variable: variableName(service, client),
             variableTypes: [this.toRoleType(service, client)],
             defaultType: this.toRoleType(service, client),
         })
@@ -345,14 +345,14 @@ export class ServicesBlockDomainSpecificLanguage
                 service =>
                     <CustomBlockDefinition>{
                         kind: "block",
-                        type: `implement_${service.shortId}`,
-                        message0: `${service.shortId} server %1`,
+                        type: `server_${service.shortId}`,
+                        message0: `server %1`,
                         args0: [roleVariable(service, false)],
                         colour: serviceColor(service),
                         inputsInline: true,
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
-                        tooltip: `Implement a service`,
+                        tooltip: `Implement a server`,
                         helpUrl: serviceHelp(service),
                         service,
                         template: "custom",
