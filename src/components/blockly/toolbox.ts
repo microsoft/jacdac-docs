@@ -168,6 +168,7 @@ export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
 export const TWIN_BLOCK = "jacdac_tools_twin"
 
 export const toolsColour = "#888"
+export const testColour = "#6FbA6A"
 
 export const CHART_WIDTH = 388
 export const CHART_HEIGHT = 240
