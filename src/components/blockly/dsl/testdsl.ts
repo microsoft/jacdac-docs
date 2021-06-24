@@ -1,22 +1,19 @@
 import {
-    SRV_BOOTLOADER,
-    SRV_CONTROL,
-    SRV_LOGGER,
-} from "../../../../jacdac-ts/jacdac-spec/dist/specconstants"
-import { serviceSpecifications } from "../../../../jacdac-ts/src/jdom/spec"
-import {
     CODE_STATEMENT_TYPE,
-    OptionsInputDefinition,
     TextInputDefinition,
     testColour,
     ValueInputDefinition,
     BOOLEAN_TYPE,
+    OptionsInputDefinition,
+    NUMBER_TYPE,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 
 const TEST_BLOCK = "test_test"
 const TEST_ASK_BLOCK = "test_ask"
 const TEST_CHECK_BLOCK = "test_check"
+const TEST_CHANGES_BLOCK = "test_changes"
+const TEST_INCDEC_BY_BLOCK = "test_incdec_by"
 const colour = testColour
 
 const testDsl: BlockDomainSpecificLanguage = {
@@ -32,7 +29,6 @@ const testDsl: BlockDomainSpecificLanguage = {
                     name: "name",
                     text: "myTest",
                 },
-
             ],
             colour,
             inputsInline: true,
@@ -76,6 +72,54 @@ const testDsl: BlockDomainSpecificLanguage = {
             previousStatement: CODE_STATEMENT_TYPE,
             nextStatement: CODE_STATEMENT_TYPE,
         },
+        {
+            kind: "block",
+            type: TEST_CHANGES_BLOCK,
+            message0: `check %1 changes`,
+            args0: [
+                <ValueInputDefinition>{
+                    type: "input_value",
+                    name: "expression",
+                },
+            ],
+            colour,
+            inputsInline: true,
+            tooltip: `Checks that an expression changes of value.`,
+            helpUrl: "",
+            previousStatement: CODE_STATEMENT_TYPE,
+            nextStatement: CODE_STATEMENT_TYPE,
+        },
+        {
+            kind: "block",
+            type: TEST_INCDEC_BY_BLOCK,
+            message0: `check %1 %2 by %3`,
+            args0: [
+                <ValueInputDefinition>{
+                    type: "input_value",
+                    name: "expression",
+                    check: NUMBER_TYPE,
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "direction",
+                    options: [
+                        ["increments", "increments"],
+                        ["decrements", "decrements"],
+                    ],
+                },
+                <ValueInputDefinition>{
+                    type: "input_value",
+                    name: "threshold",
+                    check: NUMBER_TYPE,
+                },
+            ],
+            colour,
+            inputsInline: true,
+            tooltip: `Checks that an expression changes of value by a given threshold.`,
+            helpUrl: "",
+            previousStatement: CODE_STATEMENT_TYPE,
+            nextStatement: CODE_STATEMENT_TYPE,
+        },
     ],
     createCategory: () => [
         {
@@ -94,6 +138,14 @@ const testDsl: BlockDomainSpecificLanguage = {
                 {
                     kind: "block",
                     type: TEST_CHECK_BLOCK,
+                },
+                {
+                    kind: "block",
+                    type: TEST_CHANGES_BLOCK,
+                },
+                {
+                    kind: "block",
+                    type: TEST_INCDEC_BY_BLOCK,
                 },
             ],
         },
