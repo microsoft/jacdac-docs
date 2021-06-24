@@ -435,7 +435,7 @@ export class ServicesBlockDomainSpecificLanguage
             ),
             ...resolveService(SRV_SEVEN_SEGMENT_DISPLAY).map(
                 service =>
-                    <CustomBlockDefinition>{
+                    <CommandBlockDefinition>{
                         kind: "block",
                         type: `set_digits`,
                         message0: `set %1 digits to %2`,
@@ -460,8 +460,8 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: `Display a number of the screen`,
                         helpUrl: serviceHelp(service),
                         service,
-                        // encode digits
-                        template: "custom",
+                        command: undefined,
+                        template: "server",
                     }
             ),
             ...resolveService(SRV_LED_MATRIX).map(
@@ -1420,6 +1420,19 @@ export class ServicesBlockDomainSpecificLanguage
                             role as string,
                             serviceCommand.name
                         ),
+                    }),
+                    errors: exprsErrors.flatMap(p => p.errors),
+                }
+            }
+            case "server": {
+                const exprsErrors = inputs.map(a =>
+                    blockToExpression(event, a.child)
+                )
+                return {
+                    cmd: makeVMBase(block, {
+                        type: "CallExpression",
+                        arguments: exprsErrors.map(p => p.expr),
+                        callee: toIdentifier("server")
                     }),
                     errors: exprsErrors.flatMap(p => p.errors),
                 }

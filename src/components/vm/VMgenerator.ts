@@ -344,6 +344,7 @@ export default function workspaceJSONToVMProgram(
 
     return {
         roles,
+        implements: [],
         handlers,
     }
 }
