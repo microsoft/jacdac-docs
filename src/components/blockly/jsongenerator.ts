@@ -34,7 +34,6 @@ export interface BlockJSON {
     value?: string | number | boolean
     inputs?: InputJSON[]
     next?: BlockJSON
-    warning?: string
 }
 
 export interface WorkspaceJSON {
