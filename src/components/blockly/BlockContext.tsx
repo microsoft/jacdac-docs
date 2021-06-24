@@ -6,9 +6,11 @@ import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import bus from "../../jacdac/providerbus"
 import useRoleManager from "../hooks/useRoleManager"
 import useLocalStorage from "../useLocalStorage"
+import { BlockWarning, collectWarnings } from "./blockwarning"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
 import {
+    JSON_WARNINGS_CATEGORY,
     NEW_PROJET_XML,
     resolveBlockDefinition,
     ToolboxConfiguration,
@@ -23,11 +25,6 @@ import {
     FieldWithServices,
     WorkspaceServices,
 } from "./WorkspaceContext"
-
-export interface BlockWarning {
-    sourceId?: string
-    message: string
-}
 
 export interface BlockProps {
     dsls: BlockDomainSpecificLanguage[]
@@ -206,6 +203,8 @@ export function BlockProvider(props: {
             JSON.stringify(newWorkspaceJSON) !== JSON.stringify(workspaceJSON)
         ) {
             setWorkspaceJSON(newWorkspaceJSON)
+            const newWarnings = collectWarnings(newWorkspaceJSON)
+            setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
         }
     }, [dsls, workspace, dragging, workspaceXml])
     useEffect(() => {
