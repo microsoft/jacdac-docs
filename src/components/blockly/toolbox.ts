@@ -200,7 +200,7 @@ export interface CategoryDefinition extends ContentDefinition {
         | SeparatorDefinition
         | LabelDefinition
     )[]
-    button?: ButtonDefinition
+    buttons?: ButtonDefinition[]
 }
 
 export interface ButtonDefinition extends ContentDefinition {
@@ -208,6 +208,7 @@ export interface ButtonDefinition extends ContentDefinition {
     text: string
     callbackKey: string
     service: jdspec.ServiceSpec
+    client: boolean
 }
 
 export interface SeparatorDefinition extends ContentDefinition {

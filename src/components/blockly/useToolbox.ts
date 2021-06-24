@@ -14,7 +14,6 @@ import {
     ToolboxConfiguration,
 } from "./toolbox"
 import { WorkspaceJSON } from "./jsongenerator"
-import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 // overrides blockly emboss filter for svg elements
@@ -66,9 +65,9 @@ function loadBlocks(
 }
 
 function patchCategoryJSONtoXML(cat: CategoryDefinition): CategoryDefinition {
-    if (cat.button) {
+    if (cat.buttons) {
         if (!cat.contents) cat.contents = []
-        cat.contents.unshift(cat.button)
+        cat.contents.unshift(...cat.buttons)
     }
     cat.contents
         ?.filter(node => node.kind === "block")
@@ -148,7 +147,7 @@ export function useToolboxButtons(
                 Blockly.Variables.createVariableButtonHandler(
                     workspace,
                     null,
-                    button.service.shortId
+                    `${button.service.shortId}:${button.client}`
                 )
             )
         )

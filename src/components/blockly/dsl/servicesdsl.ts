@@ -151,7 +151,6 @@ export class ServicesBlockDomainSpecificLanguage
     // generic role blocks
     private _roleBlocks: BlockDefinition[]
 
-
     private createServiceColor(theme: Theme) {
         const sensorColor = theme.palette.success.main
         const otherColor = theme.palette.info.main
@@ -237,13 +236,17 @@ export class ServicesBlockDomainSpecificLanguage
                   })
         const variableName = (srv: jdspec.ServiceSpec) =>
             `${humanify(srv.camelName).toLowerCase()} 1`
-        const fieldVariable = (
-            service: jdspec.ServiceSpec
+        const toRoleType = (srv: jdspec.ServiceSpec, client = true) => {
+            return `${srv.shortId}:${client}`
+        }
+        const roleVariable = (
+            service: jdspec.ServiceSpec,
+            client = true
         ): VariableInputDefinition => ({
             type: "field_variable",
             name: "role",
             variable: variableName(service),
-            variableTypes: [service.shortId],
+            variableTypes: [toRoleType(service,client)],
             defaultType: service.shortId,
         })
         const fieldsToFieldInputs = (info: jdspec.PacketInfo) =>
@@ -343,7 +346,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `key`,
                         message0: `%1 %2 key %3`,
                         args0: [
-                            fieldVariable(service),
+                            roleVariable(service),
                             <OptionsInputDefinition>{
                                 type: "field_dropdown",
                                 name: "action",
@@ -376,7 +379,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `fade`,
                         message0: `fade %1 to %2 at speed %3`,
                         args0: [
-                            fieldVariable(service),
+                            roleVariable(service),
                             {
                                 type: "input_value",
                                 name: "color",
@@ -416,7 +419,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `set_digits`,
                         message0: `set %1 digits to %2`,
                         args0: [
-                            fieldVariable(service),
+                            roleVariable(service),
                             {
                                 type: "input_value",
                                 name: "digits",
@@ -447,7 +450,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `show_leds`,
                         message0: `show %1 leds %2`,
                         args0: [
-                            fieldVariable(service),
+                            roleVariable(service),
                             {
                                 type: LEDMatrixField.KEY,
                                 name: "leds",
@@ -477,7 +480,7 @@ export class ServicesBlockDomainSpecificLanguage
                 type: `jacdac_events_${service.shortId}`,
                 message0: `on %1 %2`,
                 args0: [
-                    fieldVariable(service),
+                    roleVariable(service),
                     <InputDefinition>{
                         type: "field_dropdown",
                         name: "event",
@@ -499,14 +502,14 @@ export class ServicesBlockDomainSpecificLanguage
         )
 
         const eventServerBlocks = events.flatMap<EventBlockDefinition>(
-            ({ service, events }) => { 
+            ({ service, events }) => {
                 const eventsNoArgs = events.filter(ev => ev.fields.length === 0)
-                const retNoArgs: EventBlockDefinition = { 
+                const retNoArgs: EventBlockDefinition = {
                     kind: "block",
                     type: `jacdac_raise_event_${service.shortId}`,
                     message0: `raise %1 %2`,
                     args0: [
-                        fieldVariable(service),
+                        roleVariable(service,false),
                         <InputDefinition>{
                             type: "field_dropdown",
                             name: "event",
@@ -526,37 +529,35 @@ export class ServicesBlockDomainSpecificLanguage
                     nextStatement: CODE_STATEMENT_TYPE,
 
                     template: "raise_event",
-                } 
-                const eventsArgs =  events.filter(ev => ev.fields.length)
-                const retArgs = eventsArgs.map<EventBlockDefinition>(
-                    (ev) => { 
-                        return { 
-                            kind: "block",
-                            type: `jacdac_raise_event_${service.shortId}_${ev.name}`,
-                            message0: !ev.fields.length
-                                ? `raise %1 ${humanify(ev.name)}`
-                                : `raise %1 ${humanify(ev.name)} with ${fieldsToMessage(
-                                    ev
-                                )}`,
-                            args0: [
-                                fieldVariable(service),
-                                ...fieldsToFieldInputs(ev),
-                            ],
-                            values: fieldsToValues(service, ev),
-                            inputsInline: true,
-                            colour: serviceColor(service),
-                            tooltip: ev.description,
-                            helpUrl: serviceHelp(service),
-                            service,
-                            events: [ev],
-                            previousStatement: CODE_STATEMENT_TYPE,
-                            nextStatement: CODE_STATEMENT_TYPE,
+                }
+                const eventsArgs = events.filter(ev => ev.fields.length)
+                const retArgs = eventsArgs.map<EventBlockDefinition>(ev => {
+                    return {
+                        kind: "block",
+                        type: `jacdac_raise_event_${service.shortId}_${ev.name}`,
+                        message0: !ev.fields.length
+                            ? `raise %1 ${humanify(ev.name)}`
+                            : `raise %1 ${humanify(
+                                  ev.name
+                              )} with ${fieldsToMessage(ev)}`,
+                        args0: [
+                            roleVariable(service,false),
+                            ...fieldsToFieldInputs(ev),
+                        ],
+                        values: fieldsToValues(service, ev),
+                        inputsInline: true,
+                        colour: serviceColor(service),
+                        tooltip: ev.description,
+                        helpUrl: serviceHelp(service),
+                        service,
+                        events: [ev],
+                        previousStatement: CODE_STATEMENT_TYPE,
+                        nextStatement: CODE_STATEMENT_TYPE,
 
-                            template: "raise_event",
-                        } 
+                        template: "raise_event",
                     }
-                )
-                return [ retNoArgs, ...retArgs]
+                })
+                return [retNoArgs, ...retArgs]
             }
         )
 
@@ -580,7 +581,7 @@ export class ServicesBlockDomainSpecificLanguage
                 type: `jacdac_change_by_events_${service.shortId}_${register.name}`,
                 message0: `on %1 ${humanify(register.name)} change by %2`,
                 args0: [
-                    fieldVariable(service),
+                    roleVariable(service),
                     ...fieldsToFieldInputs(register),
                 ].filter(v => !!v),
                 values: fieldsToValues(service, register),
@@ -611,7 +612,7 @@ export class ServicesBlockDomainSpecificLanguage
                     message0:
                         customMessage(service, register, register.fields[0])
                             ?.get || `%1 ${humanify(register.name)}`,
-                    args0: [fieldVariable(service)],
+                    args0: [roleVariable(service)],
                     inputsInline: true,
                     output: toBlocklyType(register.fields[0]),
                     colour: serviceColor(service),
@@ -660,7 +661,7 @@ export class ServicesBlockDomainSpecificLanguage
                         field.name === "_" ? "" : ` ${field.name}`
                     } %2`,
                 args0: [
-                    fieldVariable(service),
+                    roleVariable(service),
                     <OptionsInputDefinition>{
                         type: "field_dropdown",
                         name: field.name,
@@ -692,7 +693,7 @@ export class ServicesBlockDomainSpecificLanguage
                     register.fields.length > 1 ? ` %2` : ""
                 }`,
                 args0: [
-                    fieldVariable(service),
+                    roleVariable(service),
                     register.fields.length > 1
                         ? <OptionsInputDefinition>{
                               type: "field_dropdown",
@@ -731,7 +732,7 @@ export class ServicesBlockDomainSpecificLanguage
                               : fieldsToMessage(register)
                       }`,
                 args0: [
-                    fieldVariable(service),
+                    roleVariable(service),
                     ...fieldsToFieldInputs(register),
                 ],
                 values: fieldsToValues(service, register),
@@ -757,7 +758,7 @@ export class ServicesBlockDomainSpecificLanguage
                           command
                       )}`,
                 args0: [
-                    fieldVariable(service),
+                    roleVariable(service),
                     ...fieldsToFieldInputs(command),
                 ],
                 values: fieldsToValues(service, command),
@@ -868,8 +869,8 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "any",
                         variableTypes: [
                             "client",
-                            ...this.supportedServices.map(
-                                service => service.shortId
+                            ...this.supportedServices.map(srv =>
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -901,8 +902,8 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "any",
                         variableTypes: [
                             "client",
-                            ...this.supportedServices.map(
-                                service => service.shortId
+                            ...this.supportedServices.map(srv =>
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -926,8 +927,8 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "all",
                         variableTypes: [
                             "client",
-                            ...this.supportedServices.map(
-                                service => service.shortId
+                            ...this.supportedServices.map(srv =>
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -965,8 +966,8 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "none",
                         variableTypes: [
                             "client",
-                            ...servicesDSL.supportedServices.map(
-                                service => service.shortId
+                            ...servicesDSL.supportedServices.map(srv =>
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -998,8 +999,8 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "none",
                         variableTypes: [
                             "client",
-                            ...servicesDSL.supportedServices.map(
-                                service => service.shortId
+                            ...servicesDSL.supportedServices.map(srv =>
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -1033,10 +1034,22 @@ export class ServicesBlockDomainSpecificLanguage
         const { theme, source, liveServices } = options
         const serviceColor = this.createServiceColor(theme)
 
-        const blockServices =
+        const blockServices: { shortId: string; client: boolean }[] =
             source?.variables
-                .map(v => v.type)
-                .filter(type => !!serviceSpecificationFromName(type)) || []
+                .map(v => {
+                    const split = v.type.split(":")
+                    return {
+                        shortId: split[0],
+                        client:
+                            split.length === 2
+                                ? split[1] === "true"
+                                    ? true
+                                    : false
+                                : false,
+                    }
+                })
+                .filter(pair => !!serviceSpecificationFromName(pair.shortId)) ||
+            []
         const usedEvents: Set<jdspec.PacketInfo> = new Set(
             source?.blocks
                 ?.map(block => ({
@@ -1053,89 +1066,108 @@ export class ServicesBlockDomainSpecificLanguage
                 })
                 .filter(ev => !!ev)
         )
-        const jdBlocks = this._serviceClientBlocks.filter(block => !!block.service)
+        const jdBlocks = this._serviceClientBlocks.filter(
+            block => !!block.service
+        )
         const services = uniqueMap(
             jdBlocks,
             block => block.service.shortId,
             block => block.service
         )
 
-        const toolboxServices: jdspec.ServiceSpec[] = uniqueMap(
-            Flags.diagnostics
-                ? services
-                : [
-                      ...blockServices
-                          .map(srvid =>
-                              services.find(
-                                  service => service.shortId === srvid
-                              )
-                          )
-                          .filter(srv => !!srv),
-                      ...liveServices.map(srv => srv.specification),
-                  ],
-            srv => srv.shortId,
-            srv => srv
-        )
-            .filter(
-                srv => srv && ignoredServices.indexOf(srv.classIdentifier) < 0
+        const toolboxServices: { service: jdspec.ServiceSpec; client: boolean }[] =
+            uniqueMap(
+                Flags.diagnostics
+                    ? services.map(service => { 
+                        return {
+                            service, client: true
+                        }
+                    })
+                    : [
+                          ...blockServices
+                              .map(pair => {
+                                  const service = services.find(
+                                      service => service.shortId === pair.shortId
+                                  )
+                                  return service ? {
+                                    service,
+                                    client: pair.client
+                                  } : undefined
+                            })
+                              .filter(srv => !!srv),
+                          ...liveServices.map(srv => {
+                              return { service: srv.specification, client: true }
+                          }),
+                      ],
+                srv => srv.service.shortId,
+                srv => srv
             )
-            .sort((l, r) => l.name.localeCompare(r.name))
+            .filter(
+                srv =>
+                    srv && ignoredServices.indexOf(srv.service.classIdentifier) < 0
+            )
+            .sort((l, r) => l.service.name.localeCompare(r.service.name))
 
         const servicesCategories: CategoryDefinition[] = toolboxServices
-            .map(service => ({
-                service,
+            .map(serviceClient => ({
+                serviceClient,
                 serviceBlocks: this._serviceClientBlocks.filter(
-                    block => block.service === service
+                    block => block.service === serviceClient.service
                 ),
             }))
-            .map<CategoryDefinition>(({ service, serviceBlocks }) => ({
-                kind: "category",
-                name: service.name,
-                colour: serviceColor(service),
-                contents: [
-                    <LabelDefinition>{
-                        kind: "label",
-                        text: "Client",
-                    },
-                    ...serviceBlocks.map<BlockReference>(block => ({
-                        kind: "block",
-                        type: block.type,
-                        values: block.values,
-                    })),
-                    ...this._eventFieldClientBlocks
-                        .filter(
-                            ev =>
-                                ev.service === service &&
-                                usedEvents.has(ev.event)
-                        )
-                        .map<BlockReference>(block => ({
+            .map<CategoryDefinition>(({ serviceClient, serviceBlocks }) => {
+                const service = serviceClient.service
+                const isClient = serviceClient.client
+                return {
+                    kind: "category",
+                    name: "service.name" + (isClient ? "" : "Srv"),
+                    colour: serviceColor(service),
+                    contents: isClient ? [
+                        ...serviceBlocks.map<BlockReference>(block => ({
                             kind: "block",
                             type: block.type,
                             values: block.values,
                         })),
-                    <LabelDefinition>{
-                        kind: "label",
-                        text: "Server",
-                    },
-                    ...this._serviceServerBlocks
-                        .filter(
-                            ev =>
-                                ev.service === service
-                        )
-                        .map<BlockReference>(block => ({
-                            kind: "block",
-                            type: block.type,
-                            values: block.values,
-                        }))
-                    // TODO: register read and write blocks
-                ],
-                button: {
-                    kind: "button",
-                    text: `Add ${service.name} role`,
-                    callbackKey: `jacdac_add_role_callback_${service.shortId}`,
-                    service,
-                },
-            }))
+                        ...this._eventFieldClientBlocks
+                            .filter(
+                                ev =>
+                                    ev.service === service &&
+                                    usedEvents.has(ev.event)
+                            )
+                            .map<BlockReference>(block => ({
+                                kind: "block",
+                                type: block.type,
+                                values: block.values,
+                            }))
+                    ] : 
+                    [
+                        ...this._serviceServerBlocks
+                            .filter(ev => ev.service === service)
+                            .map<BlockReference>(block => ({
+                                kind: "block",
+                                type: block.type,
+                                values: block.values,
+                            })),
+                        // TODO: register read and write blocks
+                    ],
+                    buttons: isClient ? [
+                        {
+                            kind: "button",
+                            text: `Add ${service.name} client role`,
+                            callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+                            service,
+                            client: true,
+                        },
+                        {
+                            kind: "button",
+                            text: `Add ${service.name} server role`,
+                            callbackKey: `jacdac_add_server_role_callback_${service.shortId}`,
+                            service,
+                            client: false,
+                        },
+                    ] : [],
+                }
+            })
             .filter(cat => !!cat.contents?.length)
 
         const commonCategory: CategoryDefinition = {
