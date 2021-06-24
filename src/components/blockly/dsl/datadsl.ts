@@ -12,6 +12,7 @@ import {
     DummyInputDefinition,
     identityTransformData,
     LabelDefinition,
+    NumberInputDefinition,
     OptionsInputDefinition,
     VariableInputDefinition,
 } from "../toolbox"
@@ -20,17 +21,21 @@ import postTransformData from "./workers/data.proxy"
 import {
     DataDropRequest,
     DataArrangeRequest,
+    DataFilterColumnsRequest,
+    DataRecordWindowRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_DROP_BLOCK = "data_drop"
+const DATA_FILTER_COLUMNS_BLOCK = "data_filter_columns"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
 const DATA_TABLE_TYPE = "DataTable"
 const DATA_SHOW_TABLE_BLOCK = "data_show_table"
+const DATA_RECORD_WINDOW_BLOCK = "data_record_window_block"
 
 const colour = "#777"
 const dataDsl: BlockDomainSpecificLanguage = {
@@ -94,23 +99,76 @@ const dataDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: DATA_DROP_BLOCK,
-            message0: "drop %1",
+            message0: "drop %1 %2 %3",
             colour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
-                    name: "column",
+                    name: "column1",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column3",
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
-                const column = b.getFieldValue("column")
-                console.log("Drop: ", { column })
+                const columns = [1, 2, 3].map(column =>
+                    b.getFieldValue(`column${column}`)
+                )
                 return postTransformData(<DataDropRequest>{
                     type: "drop",
-                    column,
+                    columns,
+                    data,
+                })
+            },
+            template: "meta",
+        },
+        {
+            kind: "block",
+            type: DATA_FILTER_COLUMNS_BLOCK,
+            message0: "filter %1 %2 %3",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "logic",
+                    options: [
+                        [">", "gt"],
+                        ["<", "lt"],
+                        [">=", "ge"],
+                        ["<=", "le"],
+                        ["==", "eq"],
+                        ["!=", "ne"],
+                    ],
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const columns = [1, 2].map(column => {
+                    return b.getFieldValue(`column${column}`)
+                })
+                const logic = b.getFieldValue("logic")
+                return postTransformData(<DataFilterColumnsRequest>{
+                    type: "filter_columns",
+                    columns,
+                    logic,
                     data,
                 })
             },
@@ -190,6 +248,36 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 return Promise.resolve(data)
             },
         },
+        <BlockDefinition>{
+            kind: "block",
+            type: DATA_RECORD_WINDOW_BLOCK,
+            message0: "record last %1 s",
+            args0: [
+                <NumberInputDefinition>{
+                    type: "field_number",
+                    name: "horizon",
+                    value: 10,
+                },
+            ],
+            inputsInline: false,
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            transformData: async (
+                block: BlockSvg,
+                data: { time: number }[],
+                previousData: { time: number }[]
+            ) => {
+                const horizon = block.getFieldValue("horizon") || 10
+                return postTransformData(<DataRecordWindowRequest>{
+                    type: "recordwindow",
+                    data,
+                    previousData,
+                    horizon,
+                })
+            },
+        },
     ],
     createCategory: () => [
         <CategoryDefinition>{
@@ -217,6 +305,18 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_DROP_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_FILTER_COLUMNS_BLOCK,
+                },
+                <LabelDefinition>{
+                    kind: "label",
+                    text: "Live",
+                },
+                <BlockDefinition>{
+                    kind: "block",
+                    type: DATA_RECORD_WINDOW_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",

@@ -103,7 +103,7 @@ export interface BlockDefinition extends BlockReference {
 
     // data transformation
     // eslint-disable-next-line @typescript-eslint/ban-types
-    transformData?: (block: BlockSvg, data: object[]) => Promise<object[]>
+    transformData?: (block: BlockSvg, data: object[], previousData: object[]) => Promise<object[]>
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -168,6 +168,11 @@ export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
 export const TWIN_BLOCK = "jacdac_tools_twin"
 
 export const toolsColour = "#888"
+
+export const CHART_WIDTH = 388
+export const CHART_HEIGHT = 240
+export const TABLE_WIDTH = CHART_WIDTH
+export const TABLE_HEIGHT = 480
 
 export interface ContentDefinition {
     kind: "category" | "sep" | "button" | "label"
