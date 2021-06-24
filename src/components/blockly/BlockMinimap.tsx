@@ -194,7 +194,7 @@ function BlockMiniMap(props: {
  * @const
  * @private
  */
-const MARGIN_VERTICAL_ = 42
+const MARGIN_VERTICAL_ = 28
 
 /**
  * Distance between control and right or left edge of workspace.
@@ -204,12 +204,16 @@ const MARGIN_VERTICAL_ = 42
  */
 const MARGIN_HORIZONTAL_ = 20
 
+const MIN_SCALE = 0.05
+const MAX_WIDTH = 200
+const MAX_HEIGHT = 96
+
 class MinimapPlugin implements IPositionable {
     private top_ = 0
     private left_ = 0
-    private width_ = 96
-    private height_ = 96
-    private scale_ = 0.05
+    private width_ = MAX_WIDTH
+    private height_ = MAX_HEIGHT
+    private scale_ = MIN_SCALE
     private svgGroup_: SVGGElement
 
     constructor(readonly workspace_: WorkspaceSvg) {
@@ -217,7 +221,6 @@ class MinimapPlugin implements IPositionable {
     }
 
     private init() {
-        console.log("init minimap")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pluginManager = (this.workspace_ as any).getPluginManager()
         pluginManager.addPlugin({
@@ -279,6 +282,9 @@ class MinimapPlugin implements IPositionable {
 
         // Upper corner placement
         this.top_ = metrics.absoluteMetrics.top + MARGIN_VERTICAL_
+        if (hasHorizontalScrollbars) {
+            this.top_ += Scrollbar.scrollbarThickness
+        }
 
         this.positionSvgGroup()
     }
@@ -302,6 +308,10 @@ class MinimapPlugin implements IPositionable {
     private handleSizeUpdate(width: number, height: number) {
         if (width !== this.width_ || height !== this.height_) {
             console.log("size update")
+            this.scale_ = Math.min(
+                MIN_SCALE,
+                Math.min(MAX_HEIGHT / height, MAX_WIDTH / width)
+            )
             const dw = width * this.scale_ - this.width_
             const dh = height * this.scale_ - this.height_
             this.width_ = width * this.scale_
