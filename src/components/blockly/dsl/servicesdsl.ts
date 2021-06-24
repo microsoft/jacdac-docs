@@ -339,10 +339,10 @@ export class ServicesBlockDomainSpecificLanguage
             )
         )
 
-        const serverClientBlockDefinitions: CustomBlockDefinition[] = [
+        const serverClientBlockDefinitions: CommandBlockDefinition[] = [
             ...this.supportedServices.map(
                 service =>
-                    <CustomBlockDefinition>{
+                    <CommandBlockDefinition>{
                         kind: "block",
                         type: `server_${service.shortId}`,
                         message0: `server %1`,
@@ -354,7 +354,8 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: `Implement a server`,
                         helpUrl: serviceHelp(service),
                         service,
-                        template: "custom",
+                        command: undefined,
+                        template: "server",
                     }
             ),
         ]
@@ -435,7 +436,7 @@ export class ServicesBlockDomainSpecificLanguage
             ),
             ...resolveService(SRV_SEVEN_SEGMENT_DISPLAY).map(
                 service =>
-                    <CommandBlockDefinition>{
+                    <CustomBlockDefinition>{
                         kind: "block",
                         type: `set_digits`,
                         message0: `set %1 digits to %2`,
@@ -460,8 +461,7 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: `Display a number of the screen`,
                         helpUrl: serviceHelp(service),
                         service,
-                        command: undefined,
-                        template: "server",
+                        template: "custom",
                     }
             ),
             ...resolveService(SRV_LED_MATRIX).map(
