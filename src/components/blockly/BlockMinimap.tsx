@@ -194,7 +194,7 @@ function BlockMiniMap(props: {
  * @const
  * @private
  */
-const MARGIN_VERTICAL_ = 28
+const MARGIN_VERTICAL_ = 20
 
 /**
  * Distance between control and right or left edge of workspace.
@@ -282,9 +282,6 @@ class MinimapPlugin implements IPositionable {
 
         // Upper corner placement
         this.top_ = metrics.absoluteMetrics.top + MARGIN_VERTICAL_
-        if (hasHorizontalScrollbars) {
-            this.top_ += Scrollbar.scrollbarThickness
-        }
 
         this.positionSvgGroup()
     }
@@ -313,11 +310,9 @@ class MinimapPlugin implements IPositionable {
                 Math.min(MAX_HEIGHT / height, MAX_WIDTH / width)
             )
             const dw = width * this.scale_ - this.width_
-            const dh = height * this.scale_ - this.height_
             this.width_ = width * this.scale_
             this.height_ = height * this.scale_
             this.left_ -= dw
-            this.top_ -= dh
             this.positionSvgGroup()
         }
     }
