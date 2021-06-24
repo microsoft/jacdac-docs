@@ -147,7 +147,7 @@ export function useToolboxButtons(
                 Blockly.Variables.createVariableButtonHandler(
                     workspace,
                     null,
-                    button.service.shortId
+                    `${button.service.shortId}:${button.client}`
                 )
             })
         )

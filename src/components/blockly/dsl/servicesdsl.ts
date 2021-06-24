@@ -72,7 +72,6 @@ import {
     TWIN_BLOCK,
     ValueInputDefinition,
     VariableInputDefinition,
-    LabelDefinition,
 } from "../toolbox"
 import { ExpressionWithErrors, makeVMBase } from "../../vm/VMgenerator"
 import BlockDomainSpecificLanguage, {
@@ -1183,7 +1182,7 @@ export class ServicesBlockDomainSpecificLanguage
                             text: `Add ${service.name} role`,
                             callbackKey: `jacdac_add_role_callback_${service.shortId}`,
                             service,
-                            client: true,
+                            client: isClient,
                         },
                     ],
                 }
