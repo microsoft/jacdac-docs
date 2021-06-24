@@ -14,7 +14,6 @@ import {
     ToolboxConfiguration,
 } from "./toolbox"
 import { WorkspaceJSON } from "./jsongenerator"
-import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 
 // overrides blockly emboss filter for svg elements
