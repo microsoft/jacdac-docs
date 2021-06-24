@@ -25,28 +25,14 @@ const testDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: TEST_BLOCK,
-            message0: `test %1 for %2`,
+            message0: `test %1`,
             args0: [
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "name",
                     text: "myTest",
                 },
-                <OptionsInputDefinition>{
-                    type: "field_dropdown",
-                    name: "service",
-                    options: serviceSpecifications()
-                        .filter(spec => spec.shortId[0] !== "_")
-                        .filter(
-                            spec =>
-                                [
-                                    SRV_CONTROL,
-                                    SRV_BOOTLOADER,
-                                    SRV_LOGGER,
-                                ].indexOf(spec.classIdentifier) < 0
-                        )
-                        .map(spec => [spec.name, spec.shortId]),
-                },
+
             ],
             colour,
             inputsInline: true,
