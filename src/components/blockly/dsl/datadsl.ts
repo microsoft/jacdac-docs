@@ -361,7 +361,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const rhs = b.getFieldValue("rhs")
                 const logic = b.getFieldValue("logic")
                 return postTransformData(<DataMutateStringRequest>{
-                    type: "mutate_columns",
+                    type: "mutate_string",
                     newcolumn,
                     lhs,
                     rhs,
