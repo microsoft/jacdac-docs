@@ -20,7 +20,6 @@ function RoleChip(props: {
     role: string
     service: JDService
     serviceShortId: string
-    handleRoleClick: () => void
 }) {
     const { workspace } = useContext(BlockContext)
     const { role, service, serviceShortId } = props
@@ -54,7 +53,7 @@ function RoleChip(props: {
                 ) as BlockSvg
             if (!twinBlock) {
                 twinBlock = workspace.newBlock(TWIN_BLOCK) as BlockSvg
-                const variable = workspace.getVariable(role, serviceShortId)
+                const variable = workspace.getVariable(role, `${serviceShortId}:true`)
                 console.log(`new twin`, { twinBlock })
                 const field = twinBlock.inputList[0].fieldRow.find(
                     f => f.name === "role"
