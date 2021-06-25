@@ -15,7 +15,7 @@ import {
 } from "../blockly/toolbox"
 import Blockly from "blockly"
 import BlockDomainSpecificLanguage, { resolveDsl } from "../blockly/dsl/dsl"
-import { splitFilter } from "../../../../jacdac-ts/src/jdom/utils"
+import { splitFilter } from "../../../jacdac-ts/src/jdom/utils"
 
 export interface ExpressionWithErrors {
     expr: jsep.Expression
@@ -62,7 +62,7 @@ export default function workspaceJSONToVMProgram(
             })),
         r => r.client === "true"
     )
-    
+
     class EmptyExpression extends Error {}
 
     const blockToExpression: (

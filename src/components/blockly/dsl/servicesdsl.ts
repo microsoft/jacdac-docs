@@ -549,7 +549,7 @@ export class ServicesBlockDomainSpecificLanguage
                     previousStatement: CODE_STATEMENT_TYPE,
                     nextStatement: CODE_STATEMENT_TYPE,
 
-                    template: "raise",
+                    template: "raiseNo",
                 }
                 const eventsArgs = events.filter(ev => ev.fields.length)
                 const retArgs = eventsArgs.map<CommandBlockDefinition>(ev => {
@@ -571,11 +571,11 @@ export class ServicesBlockDomainSpecificLanguage
                         tooltip: ev.description,
                         helpUrl: serviceHelp(service),
                         service,
-                        command: undefined,
+                        command: ev,
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
 
-                        template: "raise",
+                        template: "raiseArgs",
                     }
                 })
                 return [retNoArgs, ...retArgs]
@@ -1383,7 +1383,7 @@ export class ServicesBlockDomainSpecificLanguage
 
     compileCommandToVM(options: CompileCommandToVMOptions) {
         const { event, block, definition, blockToExpression } = options
-        const { template, service } = definition
+        const { template } = definition
         const { inputs } = block
         switch (template) {
             case "register_set": {
@@ -1405,39 +1405,30 @@ export class ServicesBlockDomainSpecificLanguage
                     errors,
                 }
             }
-            case "raise":
+            case "raiseNo":
+            case "raiseArgs":
             case "command": {
                 const { command: serviceCommand } =
                     definition as CommandBlockDefinition
                 const { value: role } = inputs[0].fields.role
                 const eventName =
-                    template === "raise"
+                    template === "raiseNo"
                         ? inputs[0].fields["event"].value.toString()
                         : ""
-                const exprsErrors = inputs.map(a =>
-                    blockToExpression(event, a.child)
-                )
+                const exprsErrors =
+                    template === "raiseNo"
+                        ? []
+                        : inputs.map(a => {
+                              return blockToExpression(event, a.child)
+                          })
                 return {
                     cmd: makeVMBase(block, {
                         type: "CallExpression",
-                        arguments: [
-                            ...(eventName
-                                ? [
-                                      toMemberExpression(
-                                          role as string,
-                                          eventName
-                                      ),
-                                  ]
-                                : []),
-                            ...exprsErrors.map(p => p.expr),
-                        ],
-                        callee:
-                            template === "command"
-                                ? toMemberExpression(
-                                      role as string,
-                                      serviceCommand.name
-                                  )
-                                : toIdentifier("raiseEvent"),
+                        arguments: exprsErrors.map(p => p.expr),
+                        callee: toMemberExpression(
+                            role as string,
+                            eventName ? eventName : serviceCommand.name
+                        ),
                     }),
                     errors: exprsErrors.flatMap(p => p.errors),
                 }
