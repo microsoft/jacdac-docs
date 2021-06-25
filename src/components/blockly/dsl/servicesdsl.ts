@@ -1443,15 +1443,11 @@ export class ServicesBlockDomainSpecificLanguage
                 }
             }
             case "server": {
-                const { value: role } = inputs[0].fields.role
                 return {
                     cmd: makeVMBase(block, {
                         type: "CallExpression",
-                        arguments: [
-                            toIdentifier(role as string),
-                            toIdentifier(service.shortId),
-                        ],
-                        callee: toIdentifier("server"),
+                        arguments: [],
+                        callee: toIdentifier("nop"),
                     }),
                     errors: [],
                 }
