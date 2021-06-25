@@ -1383,7 +1383,7 @@ export class ServicesBlockDomainSpecificLanguage
 
     compileCommandToVM(options: CompileCommandToVMOptions) {
         const { event, block, definition, blockToExpression } = options
-        const { template } = definition
+        const { template, service } = definition
         const { inputs } = block
         switch (template) {
             case "register_set": {
@@ -1443,16 +1443,17 @@ export class ServicesBlockDomainSpecificLanguage
                 }
             }
             case "server": {
-                const exprsErrors = inputs.map(a =>
-                    blockToExpression(event, a.child)
-                )
+                const { value: role } = inputs[0].fields.role
                 return {
                     cmd: makeVMBase(block, {
                         type: "CallExpression",
-                        arguments: exprsErrors.map(p => p.expr),
+                        arguments: [
+                            toIdentifier(role as string),
+                            toIdentifier(service.shortId),
+                        ],
                         callee: toIdentifier("server"),
                     }),
-                    errors: exprsErrors.flatMap(p => p.errors),
+                    errors: [],
                 }
             }
             default: {
