@@ -62,10 +62,7 @@ export default function workspaceJSONToVMProgram(
             })),
         r => r.client === "true"
     )
-
-    console.log("R", roles)
-    console.log("SR",serverRoles)
-
+    
     class EmptyExpression extends Error {}
 
     const blockToExpression: (
