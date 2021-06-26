@@ -27,7 +27,7 @@ import {
     DataFilterStringRequest,
     DataSummarizeByGroupRequest,
     DataMutateColumnsRequest,
-    DataMutateStringRequest,
+    DataMutateNumberRequest,
     DataRecordWindowRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
@@ -38,7 +38,7 @@ const DATA_DROP_BLOCK = "data_drop"
 const DATA_FILTER_COLUMNS_BLOCK = "data_filter_columns"
 const DATA_FILTER_STRING_BLOCK = "data_filter_string"
 const DATA_MUTATE_COLUMNS_BLOCK = "data_mutate_columns"
-const DATA_MUTATE_STRING_BLOCK = "data_mutate_string"
+const DATA_MUTATE_NUMBER_BLOCK = "data_mutate_number"
 const DATA_SUMMARIZE_BY_GROUP_BLOCK = "data_summarize_by_group"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
@@ -319,7 +319,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
         {
             kind: "block",
-            type: DATA_MUTATE_STRING_BLOCK,
+            type: DATA_MUTATE_NUMBER_BLOCK,
             message0: "mutate %1 %2 %3 %4",
             colour,
             args0: [
@@ -360,7 +360,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const lhs = b.getFieldValue("lhs")
                 const rhs = b.getFieldValue("rhs")
                 const logic = b.getFieldValue("logic")
-                return postTransformData(<DataMutateStringRequest>{
+                return postTransformData(<DataMutateNumberRequest>{
                     type: "mutate_string",
                     newcolumn,
                     lhs,
@@ -563,7 +563,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 },
                 <BlockReference>{
                     kind: "block",
-                    type: DATA_MUTATE_STRING_BLOCK,
+                    type: DATA_MUTATE_NUMBER_BLOCK,
                 },
                 <BlockReference>{
                     kind: "block",

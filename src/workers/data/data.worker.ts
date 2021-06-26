@@ -49,8 +49,8 @@ export interface DataMutateColumnsRequest extends DataRequest {
     logic: string
 }
 
-export interface DataMutateStringRequest extends DataRequest {
-    type: "mutate_string"
+export interface DataMutateNumberRequest extends DataRequest {
+    type: "mutate_number"
     newcolumn: string
     lhs: string
     rhs: number
@@ -232,9 +232,9 @@ const handlers: { [index: string]: (props: any) => object[] } = {
                 break
         }
     },
-    mutate_string: (props: DataMutateStringRequest) => {
+    mutate_number: (props: DataMutateNumberRequest) => {
         const { newcolumn, lhs, rhs, logic, data } = props
-        if (newcolumn === undefined || !lhs || !rhs || !logic) return data
+        if (newcolumn === undefined || !lhs || rhs === undefined || !logic) return data
         
         const calc = {}
 
