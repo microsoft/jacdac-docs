@@ -23,8 +23,8 @@ import { TWIN_BLOCK } from "./toolbox"
 
 export default function RoleChip(props: {
     role: string
-    service: JDService
     serviceShortId: string
+    service: JDService
     server: JDServiceServer
 }) {
     const { workspace } = useContext(BlockContext)
