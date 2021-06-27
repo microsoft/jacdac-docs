@@ -20,14 +20,13 @@ import {
     SRV_ROLE_MANAGER,
     SRV_SERVO,
     SRV_SEVEN_SEGMENT_DISPLAY,
-    SystemEvent,
     SystemReg,
 } from "../../../../jacdac-ts/src/jdom/constants"
 import Flags from "../../../../jacdac-ts/src/jdom/flags"
 import {
+    isClientEvent,
+    isClientRegister,
     isCommand,
-    isEvent,
-    isRegister,
     isSensor,
     serviceSpecificationFromName,
     serviceSpecifications,
@@ -118,12 +117,6 @@ const ignoredServices = [
     SRV_ROLE_MANAGER,
     SRV_PROTO_TEST,
     SRV_BOOTLOADER,
-]
-const ignoredEvents = [SystemEvent.StatusCodeChanged]
-const includedRegisters = [
-    SystemReg.Reading,
-    SystemReg.Value,
-    SystemReg.Intensity,
 ]
 
 const customMessages = [
@@ -299,28 +292,17 @@ export class ServicesBlockDomainSpecificLanguage
             allServices.filter(srv => srv.classIdentifier === cls)
         const registers = arrayConcatMany(
             this.supportedServices.map(service =>
-                service.packets
-                    .filter(
-                        pkt =>
-                            isRegister(pkt) &&
-                            !pkt.lowLevel &&
-                            includedRegisters.indexOf(pkt.identifier) > -1
-                    )
-                    .map(register => ({
-                        service,
-                        register,
-                    }))
+                service.packets.filter(isClientRegister).map(register => ({
+                    service,
+                    register,
+                }))
             )
         )
+
         const events = this.supportedServices
             .map(service => ({
                 service,
-                events: service.packets.filter(
-                    pkt =>
-                        isEvent(pkt) &&
-                        !pkt.lowLevel &&
-                        ignoredEvents.indexOf(pkt.identifier) < 0
-                ),
+                events: service.packets.filter(isClientEvent),
             }))
             .filter(kv => !!kv.events.length)
         const commands = arrayConcatMany(
@@ -583,14 +565,7 @@ export class ServicesBlockDomainSpecificLanguage
         )
 
         const registerChangeByEventClientBlocks = registers
-            .filter(
-                ({ service }) =>
-                    !service.packets.some(
-                        pkt =>
-                            isEvent(pkt) &&
-                            ignoredEvents.indexOf(pkt.identifier) < 0
-                    )
-            )
+            .filter(({ service }) => !service.packets.some(isClientEvent))
             .filter(
                 ({ register }) =>
                     register.fields.length === 1 &&
