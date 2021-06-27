@@ -3,7 +3,10 @@ import BlockContext from "./BlockContext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import DeviceAvatar from "../devices/DeviceAvatar"
-import { serviceSpecificationFromName } from "../../../jacdac-ts/src/jdom/spec"
+import {
+    serviceSpecificationFromClassIdentifier,
+    serviceSpecificationFromName,
+} from "../../../jacdac-ts/src/jdom/spec"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import JDServiceServer from "../../../jacdac-ts/src/jdom/serviceserver"
 import {
@@ -25,20 +28,24 @@ export default function RoleChip(props: {
     server: JDServiceServer
 }) {
     const { workspace } = useContext(BlockContext)
-    const { role, service, serviceShortId } = props
+    const { role, service, serviceShortId, server } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const server = useServiceServer(service)
+    const serviceServer = server ? server : useServiceServer(service)
     const handleRoleClick = () => {
         // spin off simulator
         if (!service) {
-            const specification = serviceSpecificationFromName(serviceShortId)
-            if (specification)
+            const specification = !server
+                ? serviceSpecificationFromName(serviceShortId)
+                : serviceSpecificationFromClassIdentifier(server.serviceClass)
+            if (specification) {
                 addServiceProvider(
                     bus,
                     serviceProviderDefinitionFromServiceClass(
                         specification.classIdentifier
-                    )
+                    ),
+                    server
                 )
+            }
         }
         // add twin block
         if (workspace) {
@@ -56,7 +63,10 @@ export default function RoleChip(props: {
                 ) as BlockSvg
             if (!twinBlock) {
                 twinBlock = workspace.newBlock(TWIN_BLOCK) as BlockSvg
-                const variable = workspace.getVariable(role, `${serviceShortId}:true`)
+                const variable = workspace.getVariable(
+                    role,
+                    `${serviceShortId}:${server ? "false" : "true"}`
+                )
                 console.log(`new twin`, { twinBlock })
                 const field = twinBlock.inputList[0].fieldRow.find(
                     f => f.name === "role"
@@ -71,14 +81,15 @@ export default function RoleChip(props: {
         }
     }
 
-    const handleDelete = () => bus.removeServiceProvider(server.device)
+    // TODO: do we allow delete on the server role?
+    const handleDelete = () => bus.removeServiceProvider(serviceServer.device)
     return (
         <Chip
             label={role}
             variant={service ? "default" : "outlined"}
             avatar={service && <DeviceAvatar device={service.device} />}
             onClick={handleRoleClick}
-            onDelete={server ? handleDelete : undefined}
+            onDelete={serviceServer ? handleDelete : undefined}
             deleteIcon={
                 <Tooltip title="stop simulator">
                     <CancelIcon />
