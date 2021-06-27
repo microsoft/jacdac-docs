@@ -24,8 +24,8 @@ import {
 } from "../../../../jacdac-ts/src/jdom/constants"
 import Flags from "../../../../jacdac-ts/src/jdom/flags"
 import {
-    isClientEvent,
-    isClientRegister,
+    isHighLevelEvent,
+    isHighLevelRegister,
     isCommand,
     isSensor,
     serviceSpecificationFromName,
@@ -292,7 +292,7 @@ export class ServicesBlockDomainSpecificLanguage
             allServices.filter(srv => srv.classIdentifier === cls)
         const registers = arrayConcatMany(
             this.supportedServices.map(service =>
-                service.packets.filter(isClientRegister).map(register => ({
+                service.packets.filter(isHighLevelRegister).map(register => ({
                     service,
                     register,
                 }))
@@ -302,7 +302,7 @@ export class ServicesBlockDomainSpecificLanguage
         const events = this.supportedServices
             .map(service => ({
                 service,
-                events: service.packets.filter(isClientEvent),
+                events: service.packets.filter(isHighLevelEvent),
             }))
             .filter(kv => !!kv.events.length)
         const commands = arrayConcatMany(
@@ -565,7 +565,7 @@ export class ServicesBlockDomainSpecificLanguage
         )
 
         const registerChangeByEventClientBlocks = registers
-            .filter(({ service }) => !service.packets.some(isClientEvent))
+            .filter(({ service }) => !service.packets.some(isHighLevelEvent))
             .filter(
                 ({ register }) =>
                     register.fields.length === 1 &&
