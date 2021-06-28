@@ -207,8 +207,8 @@ export interface ButtonDefinition extends ContentDefinition {
     kind: "button"
     text: string
     callbackKey: string
-    service: jdspec.ServiceSpec
-    client: boolean
+    service?: jdspec.ServiceSpec
+    client?: boolean
 }
 
 export interface SeparatorDefinition extends ContentDefinition {

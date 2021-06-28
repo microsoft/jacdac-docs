@@ -83,6 +83,7 @@ import BlockDomainSpecificLanguage, {
 } from "./dsl"
 import JDomTreeField from "../fields/JDomTreeField"
 import TwinField from "../fields/TwinField"
+import { VariableJSON } from "../jsongenerator"
 
 const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
 const ROLE_BOUND_EVENT_BLOCK = "jacdac_role_bound_event"
@@ -130,6 +131,19 @@ const customMessages = [
 
 const commandColor = "#8c6a1d"
 
+export function toRoleType(service: jdspec.ServiceSpec, client = true) {
+    return `${service.shortId}:${client ? "client" : "server"}`
+}
+
+export function parseRoleType(v: VariableJSON) {
+    const split = v.type.split(":")
+    return {
+        role: v.name,
+        serviceShortId: split[0],
+        client: split.length === 2 ? (split[1] === "client") : true,
+    }
+}
+
 export class ServicesBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
 {
@@ -149,10 +163,6 @@ export class ServicesBlockDomainSpecificLanguage
         const serviceColor = (srv: jdspec.ServiceSpec) =>
             isSensor(srv) ? sensorColor : otherColor
         return serviceColor
-    }
-
-    private toRoleType(srv: jdspec.ServiceSpec, client = true) {
-        return `${srv.shortId}:${client}`
     }
 
     createBlocks(options: CreateBlocksOptions) {
@@ -240,8 +250,8 @@ export class ServicesBlockDomainSpecificLanguage
             type: "field_variable",
             name: "role",
             variable: variableName(service, client),
-            variableTypes: [this.toRoleType(service, client)],
-            defaultType: this.toRoleType(service, client),
+            variableTypes: [toRoleType(service, client)],
+            defaultType: toRoleType(service, client),
         })
         const fieldsToFieldInputs = (info: jdspec.PacketInfo) =>
             info.fields.map(field => ({
@@ -864,7 +874,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...this.supportedServices.map(srv =>
-                                this.toRoleType(srv)
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -897,7 +907,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...this.supportedServices.map(srv =>
-                                this.toRoleType(srv)
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -922,7 +932,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...this.supportedServices.map(srv =>
-                                this.toRoleType(srv)
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -961,10 +971,10 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...servicesDSL.supportedServices.map(srv =>
-                                this.toRoleType(srv)
+                                toRoleType(srv)
                             ),
                             ...servicesDSL.supportedServices.map(srv =>
-                                this.toRoleType(srv,false)
+                                toRoleType(srv, false)
                             ),
                         ],
                         defaultType: "client",
@@ -997,7 +1007,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variableTypes: [
                             "client",
                             ...servicesDSL.supportedServices.map(srv =>
-                                this.toRoleType(srv)
+                                toRoleType(srv)
                             ),
                         ],
                         defaultType: "client",
@@ -1031,22 +1041,12 @@ export class ServicesBlockDomainSpecificLanguage
         const { theme, source, liveServices } = options
         const serviceColor = this.createServiceColor(theme)
 
-        const blockServices: { shortId: string; client: boolean }[] =
+        const blockServices: { serviceShortId: string; client: boolean }[] =
             source?.variables
-                .map(v => {
-                    const split = v.type.split(":")
-                    return {
-                        shortId: split[0],
-                        client:
-                            split.length === 2
-                                ? split[1] === "true"
-                                    ? true
-                                    : false
-                                : false,
-                    }
-                })
-                .filter(pair => !!serviceSpecificationFromName(pair.shortId)) ||
-            []
+                .map(parseRoleType)
+                .filter(
+                    vt => !!serviceSpecificationFromName(vt.serviceShortId)
+                ) || []
         const usedEvents: Set<jdspec.PacketInfo> = new Set(
             source?.blocks
                 ?.map(block => ({
@@ -1077,17 +1077,13 @@ export class ServicesBlockDomainSpecificLanguage
             client: boolean
         }[] = uniqueMap(
             Flags.diagnostics
-                ? services.map(service => {
-                      return {
-                          service,
-                          client: true,
-                      }
-                  })
+                ? services.map(service => ({ service, client: true }))
                 : [
                       ...blockServices
                           .map(pair => {
                               const service = services.find(
-                                  service => service.shortId === pair.shortId
+                                  service =>
+                                      service.shortId === pair.serviceShortId
                               )
                               return service
                                   ? {
@@ -1097,11 +1093,12 @@ export class ServicesBlockDomainSpecificLanguage
                                   : undefined
                           })
                           .filter(srv => !!srv),
-                      ...liveServices.map(srv => {
-                          return { service: srv.specification, client: true }
-                      }),
+                      ...liveServices.map(srv => ({
+                          service: srv.specification,
+                          client: true,
+                      })),
                   ],
-            srv => this.toRoleType(srv.service, srv.client),
+            srv => toRoleType(srv.service, srv.client),
             srv => srv
         )
             .filter(

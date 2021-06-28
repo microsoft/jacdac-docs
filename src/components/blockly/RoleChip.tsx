@@ -63,7 +63,7 @@ export default function RoleChip(props: {
                 twinBlock = workspace.newBlock(TWIN_BLOCK) as BlockSvg
                 const variable = workspace.getVariable(
                     role,
-                    `${serviceShortId}:${server ? "false" : "true"}`
+                    `${serviceShortId}:${server ? "server" : "client"}`
                 )
                 console.log(`new twin`, { twinBlock, variable })
                 const field = twinBlock.inputList[0].fieldRow.find(

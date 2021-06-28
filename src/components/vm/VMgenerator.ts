@@ -15,6 +15,7 @@ import {
 } from "../blockly/toolbox"
 import Blockly from "blockly"
 import BlockDomainSpecificLanguage, { resolveDsl } from "../blockly/dsl/dsl"
+import { parseRoleType } from "../blockly/dsl/servicesdsl"
 import { splitFilter } from "../../../jacdac-ts/src/jdom/utils"
 
 export interface ExpressionWithErrors {
@@ -55,12 +56,8 @@ export default function workspaceJSONToVMProgram(
     const [roles, serverRoles]: [VMRole[], VMRole[]] = splitFilter(
         workspace.variables
             .filter(v => BUILTIN_TYPES.indexOf(v.type) < 0)
-            .map(v => ({
-                role: v.name,
-                serviceShortId: v.type.split(":")[0],
-                client: v.type.split(":")[1],
-            })),
-        r => r.client === "true"
+            .map(parseRoleType),
+        r => r.client
     )
 
     class EmptyExpression extends Error {}

@@ -15,6 +15,7 @@ import {
 } from "./toolbox"
 import { WorkspaceJSON } from "./jsongenerator"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
+import { toRoleType } from "./dsl/servicesdsl"
 
 // overrides blockly emboss filter for svg elements
 Blockly.BlockSvg.prototype.setHighlighted = function (highlighted) {
@@ -51,7 +52,7 @@ function loadBlocks(
     // re-register blocks with blocklys
     blocks.forEach(
         block =>
-            (Blockly.Blocks[block.type] = <ServiceBlockDefinitionFactory>{
+            (Blockly.Blocks[block.type] = <ServiceBlockDefinitionFactory<any>>{
                 jacdacDefinition: block,
                 init: function () {
                     this.jsonInit(block)
@@ -147,7 +148,7 @@ export function useToolboxButtons(
                 Blockly.Variables.createVariableButtonHandler(
                     workspace,
                     null,
-                    `${button.service.shortId}:${button.client}`
+                    toRoleType(button.service, button.client)
                 )
             })
         )
