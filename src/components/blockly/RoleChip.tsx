@@ -34,9 +34,7 @@ export default function RoleChip(props: {
     const handleRoleClick = () => {
         // spin off simulator
         if (!service) {
-            const specification = !server
-                ? serviceSpecificationFromName(serviceShortId)
-                : serviceSpecificationFromClassIdentifier(server.serviceClass)
+            const specification = serviceSpecificationFromName(serviceShortId)
             if (specification) {
                 addServiceProvider(
                     bus,
@@ -67,7 +65,7 @@ export default function RoleChip(props: {
                     role,
                     `${serviceShortId}:${server ? "false" : "true"}`
                 )
-                console.log(`new twin`, { twinBlock })
+                console.log(`new twin`, { twinBlock, variable })
                 const field = twinBlock.inputList[0].fieldRow.find(
                     f => f.name === "role"
                 ) as FieldVariable

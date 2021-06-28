@@ -963,6 +963,9 @@ export class ServicesBlockDomainSpecificLanguage
                             ...servicesDSL.supportedServices.map(srv =>
                                 this.toRoleType(srv)
                             ),
+                            ...servicesDSL.supportedServices.map(srv =>
+                                this.toRoleType(srv,false)
+                            ),
                         ],
                         defaultType: "client",
                     },
