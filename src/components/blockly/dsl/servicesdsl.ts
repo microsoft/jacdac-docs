@@ -392,27 +392,6 @@ export class ServicesBlockDomainSpecificLanguage
 
         this.supportedServices = supportedServices
 
-        const serverClientBlockDefinitions: CommandBlockDefinition[] = [
-            ...this.supportedServices.map(
-                service =>
-                    <CommandBlockDefinition>{
-                        kind: "block",
-                        type: `server_${service.shortId}`,
-                        message0: `server %1`,
-                        args0: [roleVariable(service, false)],
-                        colour: serviceColor(service),
-                        inputsInline: true,
-                        previousStatement: CODE_STATEMENT_TYPE,
-                        nextStatement: CODE_STATEMENT_TYPE,
-                        tooltip: `Implement a server`,
-                        helpUrl: serviceHelp(service),
-                        service,
-                        command: undefined,
-                        template: "server",
-                    }
-            ),
-        ]
-
         // TODO: customServerBlockDefinitions
         const customClientBlockDefinitions: CustomBlockDefinition[] = [
             ...resolveService(SRV_HID_KEYBOARD).map(
@@ -859,7 +838,6 @@ export class ServicesBlockDomainSpecificLanguage
             ...commandClientBlocks,
             ...customClientBlockDefinitions,
             ...registerChangeByEventClientBlocks,
-            ...serverClientBlockDefinitions,
         ]
 
         this._serviceServerBlocks = [
@@ -1184,65 +1162,82 @@ export class ServicesBlockDomainSpecificLanguage
             )
             .sort((l, r) => l.service.name.localeCompare(r.service.name))
 
-        const servicesCategories: CategoryDefinition[] = toolboxServices
+        const makeCategory = (
+            service: jdspec.ServiceSpec,
+            isClient: boolean,
+            serviceBlocks: ServiceBlockDefinition[]
+        ) => {
+            return {
+                kind: "category",
+                name: service.name + (isClient ? "" : "Srv"),
+                colour: serviceColor(service),
+                contents: [
+                    <ButtonDefinition>{
+                        kind: "button",
+                        text: `Add ${service.name} role`,
+                        callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+                        callback: workspace =>
+                            Variables.createVariableButtonHandler(
+                                workspace,
+                                null,
+                                toRoleType(service, isClient)
+                            ),
+                    },
+                    ...(isClient
+                        ? [
+                              ...serviceBlocks.map<BlockReference>(block => ({
+                                  kind: "block",
+                                  type: block.type,
+                                  values: block.values,
+                              })),
+                              ...this._eventFieldClientBlocks
+                                  .filter(
+                                      ev =>
+                                          ev.service === service &&
+                                          usedEvents.has(ev.event)
+                                  )
+                                  .map<BlockReference>(block => ({
+                                      kind: "block",
+                                      type: block.type,
+                                      values: block.values,
+                                  })),
+                          ]
+                        : [
+                              ...this._serviceServerBlocks
+                                  .filter(ev => ev.service === service)
+                                  .map<BlockReference>(block => ({
+                                      kind: "block",
+                                      type: block.type,
+                                      values: block.values,
+                                  })),
+                          ]),
+                ],
+            }
+        }
+
+       const filteredServices = toolboxServices
             .map(serviceClient => ({
                 serviceClient,
                 serviceBlocks: this._serviceClientBlocks.filter(
                     block => block.service === serviceClient.service
                 ),
             }))
-            .map<CategoryDefinition>(({ serviceClient, serviceBlocks }) => {
-                const service = serviceClient.service
-                const isClient = serviceClient.client
-                return {
-                    kind: "category",
-                    name: service.name + (isClient ? "" : "Srv"),
-                    colour: serviceColor(service),
-                    contents: [
-                        <ButtonDefinition>{
-                            kind: "button",
-                            text: `Add ${service.name} role`,
-                            callbackKey: `jacdac_add_role_callback_${service.shortId}`,
-                            callback: workspace =>
-                                Variables.createVariableButtonHandler(
-                                    workspace,
-                                    null,
-                                    toRoleType(service, isClient)
-                                ),
-                        },
-                        ...(isClient
-                            ? [
-                                  ...serviceBlocks.map<BlockReference>(
-                                      block => ({
-                                          kind: "block",
-                                          type: block.type,
-                                          values: block.values,
-                                      })
-                                  ),
-                                  ...this._eventFieldClientBlocks
-                                      .filter(
-                                          ev =>
-                                              ev.service === service &&
-                                              usedEvents.has(ev.event)
-                                      )
-                                      .map<BlockReference>(block => ({
-                                          kind: "block",
-                                          type: block.type,
-                                          values: block.values,
-                                      })),
-                              ]
-                            : [
-                                  ...this._serviceServerBlocks
-                                      .filter(ev => ev.service === service)
-                                      .map<BlockReference>(block => ({
-                                          kind: "block",
-                                          type: block.type,
-                                          values: block.values,
-                                      })),
-                              ]),
-                    ],
-                }
-            })
+        const servicesCategories: CategoryDefinition[] = [
+            ...(filteredServices.map<CategoryDefinition>(sc =>
+                makeCategory(
+                    sc.serviceClient.service,
+                    true,
+                    sc.serviceBlocks
+                ) as CategoryDefinition
+            )),
+            ...(filteredServices.map<CategoryDefinition>(sc =>
+                makeCategory(
+                    sc.serviceClient.service,
+                    false,
+                    sc.serviceBlocks
+                ) as CategoryDefinition
+            )),
+        ]
 
         const commonCategory: CategoryDefinition = {
             kind: "category",
