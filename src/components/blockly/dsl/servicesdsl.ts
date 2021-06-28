@@ -576,6 +576,26 @@ export class ServicesBlockDomainSpecificLanguage
             }
         )
 
+        const commandServerBlocks = commands.map<EventBlockDefinition>(
+            ({ service, command }) => ({
+                kind: "block",
+                type: `jacdac_command_server_${service.shortId}_${command.name}`,
+                message0: `on ${humanify(command.name)} %1`,
+                args0: [
+                    roleVariable(service),
+                ],
+                colour: serviceColor(service),
+                inputsInline: true,
+                nextStatement: CODE_STATEMENT_TYPE,
+                tooltip: command.description,
+                helpUrl: serviceHelp(service),
+                service,
+                events: undefined,
+                template: "event",
+            })
+        )
+        console.log(commandServerBlocks)
+
         const registerChangeByEventClientBlocks = registers
             .filter(({ service }) => !service.packets.some(isHighLevelEvent))
             .filter(
@@ -790,10 +810,12 @@ export class ServicesBlockDomainSpecificLanguage
             ...customClientBlockDefinitions,
             ...commandClientBlocks,
             ...serverClientBlockDefinitions,
+
         ]
 
         this._serviceServerBlocks = [
             ...eventServerBlocks,
+            ...commandServerBlocks,
             // registerGetServerBlocks
             // registerSetServerBlocks
         ]
@@ -1163,7 +1185,6 @@ export class ServicesBlockDomainSpecificLanguage
                                       type: block.type,
                                       values: block.values,
                                   })),
-                              // TODO: register read and write blocks
                           ]),
                     ]
                 }
