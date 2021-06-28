@@ -413,6 +413,7 @@ export class ServicesBlockDomainSpecificLanguage
             ),
         ]
 
+        // TODO: customServerBlockDefinitions
         const customClientBlockDefinitions: CustomBlockDefinition[] = [
             ...resolveService(SRV_HID_KEYBOARD).map(
                 service =>
@@ -698,7 +699,9 @@ export class ServicesBlockDomainSpecificLanguage
             ].map<RegisterBlockDefinition>(
                 ({ service, register, field, einfo }) => ({
                     kind: "block",
-                    type: `jacdac_get_enum_${service.shortId}_${register.name}_${field.name}`,
+                    type: `jacdac_get_enum_${service.shortId}_${
+                        register.name
+                    }_${field.name}${client ? "" : "_server"}`,
                     message0:
                         customMessage(service, register, field)?.get ||
                         `%1 ${humanify(register.name)}${
@@ -735,7 +738,9 @@ export class ServicesBlockDomainSpecificLanguage
                 .filter(re => re.register.fields.some(isNumericType))
                 .map<RegisterBlockDefinition>(({ service, register }) => ({
                     kind: "block",
-                    type: `jacdac_get_numerics_${service.shortId}_${register.name}`,
+                    type: `jacdac_get_numerics_${service.shortId}_${
+                        register.name
+                    }${client ? "" : "_server"}`,
                     message0: `%1 ${humanify(register.name)}${
                         register.fields.length > 1 ? ` %2` : ""
                     }`,
@@ -768,36 +773,38 @@ export class ServicesBlockDomainSpecificLanguage
         const registerNumericsGetServerBlocks =
             makeRegisterNumericsGetBlocks(false)
 
-        const makeRegisterSetBlocks = (client = true) => 
-        (registers
-            .filter(({ register }) => register.kind === "rw")
-            .filter(({ register }) => fieldsSupported(register))
-            .map<RegisterBlockDefinition>(({ service, register }) => ({
-                kind: "block",
-                type: `jacdac_set_${service.shortId}_${register.name}`,
-                message0: isEnabledRegister(register)
-                    ? `set %1 %2`
-                    : `set %1 ${register.name} to ${
-                          register.fields.length === 1
-                              ? "%2"
-                              : fieldsToMessage(register)
-                      }`,
-                args0: [
-                    roleVariable(service, client),
-                    ...fieldsToFieldInputs(register),
-                ],
-                values: fieldsToValues(service, register),
-                inputsInline: true,
-                colour: serviceColor(service),
-                tooltip: register.description,
-                helpUrl: serviceHelp(service),
-                service,
-                register,
-                previousStatement: CODE_STATEMENT_TYPE,
-                nextStatement: CODE_STATEMENT_TYPE,
+        const makeRegisterSetBlocks = (client = true) =>
+            registers
+                .filter(({ register }) => register.kind === "rw")
+                .filter(({ register }) => fieldsSupported(register))
+                .map<RegisterBlockDefinition>(({ service, register }) => ({
+                    kind: "block",
+                    type: `jacdac_set_${service.shortId}_${register.name}${
+                        client ? "" : "_server"
+                    }`,
+                    message0: isEnabledRegister(register)
+                        ? `set %1 %2`
+                        : `set %1 ${register.name} to ${
+                              register.fields.length === 1
+                                  ? "%2"
+                                  : fieldsToMessage(register)
+                          }`,
+                    args0: [
+                        roleVariable(service, client),
+                        ...fieldsToFieldInputs(register),
+                    ],
+                    values: fieldsToValues(service, register),
+                    inputsInline: true,
+                    colour: serviceColor(service),
+                    tooltip: register.description,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    register,
+                    previousStatement: CODE_STATEMENT_TYPE,
+                    nextStatement: CODE_STATEMENT_TYPE,
 
-                template: "register_set",
-            })))
+                    template: "register_set",
+                }))
 
         const registerSetClientBlocks = makeRegisterSetBlocks()
         const registerSetServerBlocks = makeRegisterSetBlocks(false)
@@ -845,23 +852,23 @@ export class ServicesBlockDomainSpecificLanguage
 
         this._serviceClientBlocks = [
             ...eventClientBlocks,
-            ...registerChangeByEventClientBlocks,
             ...registerSimpleGetClientBlocks,
             ...registerEnumGetClientBlocks,
             ...registerNumericsGetClientBlocks,
             ...registerSetClientBlocks,
-            ...customClientBlockDefinitions,
             ...commandClientBlocks,
+            ...customClientBlockDefinitions,
+            ...registerChangeByEventClientBlocks,
             ...serverClientBlockDefinitions,
         ]
 
         this._serviceServerBlocks = [
             ...eventServerBlocks,
-            ...commandServerBlocks,
             ...registerSimpleGetServerBlocks,
             ...registerEnumGetServerBlocks,
             ...registerNumericsGetServerBlocks,
-            ...registerSetServerBlocks
+            ...registerSetServerBlocks,
+            ...commandServerBlocks,
         ]
 
         const eventFieldGroups = [
@@ -929,6 +936,7 @@ export class ServicesBlockDomainSpecificLanguage
             )
         )
 
+        // client only
         this._roleBlocks = [
             {
                 kind: "block",
