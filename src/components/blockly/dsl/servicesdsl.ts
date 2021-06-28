@@ -142,7 +142,177 @@ export function parseRoleType(v: VariableJSON) {
     return {
         role: v.name,
         serviceShortId: split[0],
-        client: split.length === 2 ? (split[1] === "client") : true,
+        client: split.length === 2 ? split[1] === "client" : true,
+    }
+}
+
+// internal helper functions
+const customShadows = [
+    {
+        serviceClass: SRV_SERVO,
+        kind: "rw",
+        identifier: ServoReg.Angle,
+        field: "_",
+        shadow: <BlockDefinition>{
+            kind: "block",
+            type: ServoAngleField.SHADOW.type,
+        },
+    },
+    {
+        serviceClass: SRV_BUZZER,
+        kind: "command",
+        identifier: BuzzerCmd.PlayNote,
+        field: "frequency",
+        shadow: <BlockDefinition>{
+            kind: "block",
+            type: NoteField.SHADOW.type,
+        },
+    },
+]
+const lookupCustomShadow = (
+    service: jdspec.ServiceSpec,
+    info: jdspec.PacketInfo,
+    field: jdspec.PacketMember
+) =>
+    customShadows.find(
+        cs =>
+            cs.serviceClass === service.classIdentifier &&
+            cs.kind == info.kind &&
+            cs.identifier === info.identifier &&
+            cs.field == field.name
+    )?.shadow
+
+const serviceHelp = (service: jdspec.ServiceSpec) =>
+    withPrefix(`/services/${service.shortId}`)
+const fieldsSupported = (pkt: jdspec.PacketInfo) =>
+    pkt.fields.every(toBlocklyType)
+const fieldName = (reg: jdspec.PacketInfo, field: jdspec.PacketMember) =>
+    field.name === "_" ? reg.name : field.name
+const fieldToShadow = (
+    service: jdspec.ServiceSpec,
+    info: jdspec.PacketInfo,
+    field: jdspec.PacketMember
+): BlockReference =>
+    lookupCustomShadow(service, info, field) ||
+    (isBooleanField(field)
+        ? { kind: "block", type: "jacdac_on_off" }
+        : isStringField(field)
+        ? { kind: "block", type: "text" }
+        : field.unit === "°"
+        ? {
+              kind: "block",
+              type: "jacdac_angle",
+          }
+        : field.unit === "/"
+        ? { kind: "block", type: "jacdac_ratio" }
+        : /^%/.test(field.unit)
+        ? { kind: "block", type: "jacdac_percent" }
+        : field.type === "u8"
+        ? { kind: "block", type: "jacdac_byte" }
+        : {
+              kind: "block",
+              type: "math_number",
+              value: field.defaultValue || 0,
+              min: field.typicalMin || field.absoluteMin,
+              max: field.typicalMax || field.absoluteMax,
+          })
+const variableName = (srv: jdspec.ServiceSpec, client: boolean) =>
+    `${humanify(srv.camelName).toLowerCase()}${client ? "" : "Srv"} 1`
+
+const roleVariable = (
+    service: jdspec.ServiceSpec,
+    client = true
+): VariableInputDefinition => ({
+    type: "field_variable",
+    name: "role",
+    variable: variableName(service, client),
+    variableTypes: [toRoleType(service, client)],
+    defaultType: toRoleType(service, client),
+})
+const fieldsToFieldInputs = (info: jdspec.PacketInfo) =>
+    info.fields.map(field => ({
+        type: "input_value",
+        name: fieldName(info, field),
+        check: toBlocklyType(field),
+    }))
+const fieldsToValues = (service: jdspec.ServiceSpec, info: jdspec.PacketInfo) =>
+    toMap<jdspec.PacketMember, BlockReference | BlockDefinition>(
+        info.fields,
+        field => fieldName(info, field),
+        field => fieldToShadow(service, info, field)
+    )
+const fieldsToMessage = (info: jdspec.PacketInfo) =>
+    info.fields.map((field, i) => `${humanify(field.name)} %${2 + i}`).join(" ")
+const isEnabledRegister = (info: jdspec.PacketInfo) =>
+    info.fields.length === 1 &&
+    info.fields[0].type === "bool" &&
+    info.name === "enabled"
+const customMessage = (
+    srv: jdspec.ServiceSpec,
+    reg: jdspec.PacketInfo,
+    field: jdspec.PacketMember
+) =>
+    customMessages.find(
+        m =>
+            m.service === srv.classIdentifier &&
+            m.register === reg.identifier &&
+            m.field === field.name
+    )
+
+const createServiceColor = (theme: Theme) => {
+    const sensorColor = theme.palette.success.main
+    const otherColor = theme.palette.info.main
+    const serviceColor = (srv: jdspec.ServiceSpec) =>
+        isSensor(srv) ? sensorColor : otherColor
+    return serviceColor
+}
+
+const getServiceInfo = () => { 
+    const allServices = serviceSpecifications()
+    const supportedServices = allServices
+    .filter(
+        service =>
+            !/^_/.test(service.shortId) &&
+            service.status !== "deprecated"
+    )
+    .filter(
+        service => ignoredServices.indexOf(service.classIdentifier) < 0
+    )
+    return {
+        allServices,
+        supportedServices,
+
+        registers: arrayConcatMany(
+            supportedServices.map(service =>
+            service.packets.filter(isHighLevelRegister).map(register => ({
+                service,
+                register,
+            }))
+            )
+        ),
+
+        events: supportedServices
+            .map(service => ({
+                service,
+                events: service.packets.filter(isHighLevelEvent),
+            }))
+            .filter(kv => !!kv.events.length),
+    
+        commands: arrayConcatMany(
+            supportedServices.map(service =>
+            service.packets
+                .filter(
+                    pkt =>
+                        isCommand(pkt) &&
+                        !pkt.lowLevel &&
+                        fieldsSupported(pkt)
+                )
+                .map(pkt => ({
+                    service,
+                    command: pkt,
+                }))
+            )
+        )
     }
 }
 
@@ -159,180 +329,14 @@ export class ServicesBlockDomainSpecificLanguage
     // generic role blocks
     private _roleBlocks: BlockDefinition[]
 
-    private createServiceColor(theme: Theme) {
-        const sensorColor = theme.palette.success.main
-        const otherColor = theme.palette.info.main
-        const serviceColor = (srv: jdspec.ServiceSpec) =>
-            isSensor(srv) ? sensorColor : otherColor
-        return serviceColor
-    }
-
     createBlocks(options: CreateBlocksOptions) {
         const { theme } = options
-        const serviceColor = this.createServiceColor(theme)
-        // blocks
-        const customShadows = [
-            {
-                serviceClass: SRV_SERVO,
-                kind: "rw",
-                identifier: ServoReg.Angle,
-                field: "_",
-                shadow: <BlockDefinition>{
-                    kind: "block",
-                    type: ServoAngleField.SHADOW.type,
-                },
-            },
-            {
-                serviceClass: SRV_BUZZER,
-                kind: "command",
-                identifier: BuzzerCmd.PlayNote,
-                field: "frequency",
-                shadow: <BlockDefinition>{
-                    kind: "block",
-                    type: NoteField.SHADOW.type,
-                },
-            },
-        ]
-        const lookupCustomShadow = (
-            service: jdspec.ServiceSpec,
-            info: jdspec.PacketInfo,
-            field: jdspec.PacketMember
-        ) =>
-            customShadows.find(
-                cs =>
-                    cs.serviceClass === service.classIdentifier &&
-                    cs.kind == info.kind &&
-                    cs.identifier === info.identifier &&
-                    cs.field == field.name
-            )?.shadow
+        const { allServices, supportedServices, registers, events, commands } = getServiceInfo()
+        this.supportedServices = supportedServices;
 
-        const serviceHelp = (service: jdspec.ServiceSpec) =>
-            withPrefix(`/services/${service.shortId}`)
-        const fieldsSupported = (pkt: jdspec.PacketInfo) =>
-            pkt.fields.every(toBlocklyType)
-        const fieldName = (
-            reg: jdspec.PacketInfo,
-            field: jdspec.PacketMember
-        ) => (field.name === "_" ? reg.name : field.name)
-        const fieldToShadow = (
-            service: jdspec.ServiceSpec,
-            info: jdspec.PacketInfo,
-            field: jdspec.PacketMember
-        ): BlockReference =>
-            lookupCustomShadow(service, info, field) ||
-            (isBooleanField(field)
-                ? { kind: "block", type: "jacdac_on_off" }
-                : isStringField(field)
-                ? { kind: "block", type: "text" }
-                : field.unit === "°"
-                ? {
-                      kind: "block",
-                      type: "jacdac_angle",
-                  }
-                : field.unit === "/"
-                ? { kind: "block", type: "jacdac_ratio" }
-                : /^%/.test(field.unit)
-                ? { kind: "block", type: "jacdac_percent" }
-                : field.type === "u8"
-                ? { kind: "block", type: "jacdac_byte" }
-                : {
-                      kind: "block",
-                      type: "math_number",
-                      value: field.defaultValue || 0,
-                      min: field.typicalMin || field.absoluteMin,
-                      max: field.typicalMax || field.absoluteMax,
-                  })
-        const variableName = (srv: jdspec.ServiceSpec, client: boolean) =>
-            `${humanify(srv.camelName).toLowerCase()}${client ? "" : "Srv"} 1`
-
-        const roleVariable = (
-            service: jdspec.ServiceSpec,
-            client = true
-        ): VariableInputDefinition => ({
-            type: "field_variable",
-            name: "role",
-            variable: variableName(service, client),
-            variableTypes: [toRoleType(service, client)],
-            defaultType: toRoleType(service, client),
-        })
-        const fieldsToFieldInputs = (info: jdspec.PacketInfo) =>
-            info.fields.map(field => ({
-                type: "input_value",
-                name: fieldName(info, field),
-                check: toBlocklyType(field),
-            }))
-        const fieldsToValues = (
-            service: jdspec.ServiceSpec,
-            info: jdspec.PacketInfo
-        ) =>
-            toMap<jdspec.PacketMember, BlockReference | BlockDefinition>(
-                info.fields,
-                field => fieldName(info, field),
-                field => fieldToShadow(service, info, field)
-            )
-        const fieldsToMessage = (info: jdspec.PacketInfo) =>
-            info.fields
-                .map((field, i) => `${humanify(field.name)} %${2 + i}`)
-                .join(" ")
-        const isEnabledRegister = (info: jdspec.PacketInfo) =>
-            info.fields.length === 1 &&
-            info.fields[0].type === "bool" &&
-            info.name === "enabled"
-        const customMessage = (
-            srv: jdspec.ServiceSpec,
-            reg: jdspec.PacketInfo,
-            field: jdspec.PacketMember
-        ) =>
-            customMessages.find(
-                m =>
-                    m.service === srv.classIdentifier &&
-                    m.register === reg.identifier &&
-                    m.field === field.name
-            )
-
-        const allServices = serviceSpecifications()
-        this.supportedServices = allServices
-            .filter(
-                service =>
-                    !/^_/.test(service.shortId) &&
-                    service.status !== "deprecated"
-            )
-            .filter(
-                service => ignoredServices.indexOf(service.classIdentifier) < 0
-            )
+        const serviceColor = createServiceColor(theme)
         const resolveService = (cls: number): jdspec.ServiceSpec[] =>
             allServices.filter(srv => srv.classIdentifier === cls)
-        const registers = arrayConcatMany(
-            this.supportedServices.map(service =>
-                service.packets.filter(isHighLevelRegister).map(register => ({
-                    service,
-                    register,
-                }))
-            )
-        )
-
-        const events = this.supportedServices
-            .map(service => ({
-                service,
-                events: service.packets.filter(isHighLevelEvent),
-            }))
-            .filter(kv => !!kv.events.length)
-        const commands = arrayConcatMany(
-            this.supportedServices.map(service =>
-                service.packets
-                    .filter(
-                        pkt =>
-                            isCommand(pkt) &&
-                            !pkt.lowLevel &&
-                            fieldsSupported(pkt)
-                    )
-                    .map(pkt => ({
-                        service,
-                        command: pkt,
-                    }))
-            )
-        )
-
         const serverClientBlockDefinitions: CommandBlockDefinition[] = [
             ...this.supportedServices.map(
                 service =>
@@ -581,9 +585,7 @@ export class ServicesBlockDomainSpecificLanguage
                 kind: "block",
                 type: `jacdac_command_server_${service.shortId}_${command.name}`,
                 message0: `on ${humanify(command.name)} %1`,
-                args0: [
-                    roleVariable(service),
-                ],
+                args0: [roleVariable(service)],
                 colour: serviceColor(service),
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
@@ -594,7 +596,6 @@ export class ServicesBlockDomainSpecificLanguage
                 template: "event",
             })
         )
-        console.log(commandServerBlocks)
 
         const registerChangeByEventClientBlocks = registers
             .filter(({ service }) => !service.packets.some(isHighLevelEvent))
@@ -810,7 +811,6 @@ export class ServicesBlockDomainSpecificLanguage
             ...customClientBlockDefinitions,
             ...commandClientBlocks,
             ...serverClientBlockDefinitions,
-
         ]
 
         this._serviceServerBlocks = [
@@ -1063,7 +1063,7 @@ export class ServicesBlockDomainSpecificLanguage
 
     createCategory(options: CreateCategoryOptions) {
         const { theme, source, liveServices } = options
-        const serviceColor = this.createServiceColor(theme)
+        const serviceColor = createServiceColor(theme)
 
         const blockServices: { serviceShortId: string; client: boolean }[] =
             source?.variables
@@ -1155,41 +1155,42 @@ export class ServicesBlockDomainSpecificLanguage
                                 Variables.createVariableButtonHandler(
                                     workspace,
                                     null,
-                                    toRoleType(service,isClient)
+                                    toRoleType(service, isClient)
                                 ),
                         },
                         ...(isClient
-                        ? [
-                              ...serviceBlocks.map<BlockReference>(block => ({
-                                  kind: "block",
-                                  type: block.type,
-                                  values: block.values,
-                              })),
-                              ...this._eventFieldClientBlocks
-                                  .filter(
-                                      ev =>
-                                          ev.service === service &&
-                                          usedEvents.has(ev.event)
-                                  )
-                                  .map<BlockReference>(block => ({
-                                      kind: "block",
-                                      type: block.type,
-                                      values: block.values,
-                                  })),
-                          ]
-                        : [
-                              ...this._serviceServerBlocks
-                                  .filter(ev => ev.service === service)
-                                  .map<BlockReference>(block => ({
-                                      kind: "block",
-                                      type: block.type,
-                                      values: block.values,
-                                  })),
-                          ]),
-                    ]
+                            ? [
+                                  ...serviceBlocks.map<BlockReference>(
+                                      block => ({
+                                          kind: "block",
+                                          type: block.type,
+                                          values: block.values,
+                                      })
+                                  ),
+                                  ...this._eventFieldClientBlocks
+                                      .filter(
+                                          ev =>
+                                              ev.service === service &&
+                                              usedEvents.has(ev.event)
+                                      )
+                                      .map<BlockReference>(block => ({
+                                          kind: "block",
+                                          type: block.type,
+                                          values: block.values,
+                                      })),
+                              ]
+                            : [
+                                  ...this._serviceServerBlocks
+                                      .filter(ev => ev.service === service)
+                                      .map<BlockReference>(block => ({
+                                          kind: "block",
+                                          type: block.type,
+                                          values: block.values,
+                                      })),
+                              ]),
+                    ],
                 }
             })
-
 
         const commonCategory: CategoryDefinition = {
             kind: "category",
