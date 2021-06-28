@@ -169,6 +169,7 @@ const customShadows = [
         },
     },
 ]
+
 const lookupCustomShadow = (
     service: jdspec.ServiceSpec,
     info: jdspec.PacketInfo,
@@ -184,10 +185,13 @@ const lookupCustomShadow = (
 
 const serviceHelp = (service: jdspec.ServiceSpec) =>
     withPrefix(`/services/${service.shortId}`)
+
 const fieldsSupported = (pkt: jdspec.PacketInfo) =>
     pkt.fields.every(toBlocklyType)
+
 const fieldName = (reg: jdspec.PacketInfo, field: jdspec.PacketMember) =>
     field.name === "_" ? reg.name : field.name
+
 const fieldToShadow = (
     service: jdspec.ServiceSpec,
     info: jdspec.PacketInfo,
@@ -216,6 +220,7 @@ const fieldToShadow = (
               min: field.typicalMin || field.absoluteMin,
               max: field.typicalMax || field.absoluteMax,
           })
+
 const variableName = (srv: jdspec.ServiceSpec, client: boolean) =>
     `${humanify(srv.camelName).toLowerCase()}${client ? "" : "Srv"} 1`
 
@@ -229,24 +234,29 @@ const roleVariable = (
     variableTypes: [toRoleType(service, client)],
     defaultType: toRoleType(service, client),
 })
+
 const fieldsToFieldInputs = (info: jdspec.PacketInfo) =>
     info.fields.map(field => ({
         type: "input_value",
         name: fieldName(info, field),
         check: toBlocklyType(field),
     }))
+
 const fieldsToValues = (service: jdspec.ServiceSpec, info: jdspec.PacketInfo) =>
     toMap<jdspec.PacketMember, BlockReference | BlockDefinition>(
         info.fields,
         field => fieldName(info, field),
         field => fieldToShadow(service, info, field)
     )
+
 const fieldsToMessage = (info: jdspec.PacketInfo) =>
     info.fields.map((field, i) => `${humanify(field.name)} %${2 + i}`).join(" ")
+
 const isEnabledRegister = (info: jdspec.PacketInfo) =>
     info.fields.length === 1 &&
     info.fields[0].type === "bool" &&
     info.name === "enabled"
+
 const customMessage = (
     srv: jdspec.ServiceSpec,
     reg: jdspec.PacketInfo,
@@ -267,52 +277,83 @@ const createServiceColor = (theme: Theme) => {
     return serviceColor
 }
 
-const getServiceInfo = () => { 
+const getServiceInfo = () => {
     const allServices = serviceSpecifications()
     const supportedServices = allServices
-    .filter(
-        service =>
-            !/^_/.test(service.shortId) &&
-            service.status !== "deprecated"
-    )
-    .filter(
-        service => ignoredServices.indexOf(service.classIdentifier) < 0
-    )
-    return {
-        allServices,
-        supportedServices,
-
-        registers: arrayConcatMany(
-            supportedServices.map(service =>
+        .filter(
+            service =>
+                !/^_/.test(service.shortId) && service.status !== "deprecated"
+        )
+        .filter(service => ignoredServices.indexOf(service.classIdentifier) < 0)
+    const registers = arrayConcatMany(
+        supportedServices.map(service =>
             service.packets.filter(isHighLevelRegister).map(register => ({
                 service,
                 register,
             }))
-            )
-        ),
+        )
+    )
+    const [registerSimples, registerComposites] = splitFilter(
+        registers,
+        reg => reg.register.fields.length == 1
+    )
+    const [registerSimpleTypes, registerSimpleOthers] = splitFilter(
+        registerSimples,
+        ({ register }) => !!toBlocklyType(register.fields[0])
+    )
+    const registerSimpleEnumTypes = registerSimpleOthers
+        .filter(
+            ({ service, register }) => !!enumInfo(service, register.fields[0])
+        )
+        .map(({ service, register }) => ({
+            service,
+            register,
+            field: register.fields[0],
+            einfo: enumInfo(service, register.fields[0]),
+        }))
+    const registerCompositeEnumTypes = arrayConcatMany(
+        registerComposites.map(({ service, register }) =>
+            register.fields
+                .map(field => ({
+                    service,
+                    register,
+                    field,
+                    einfo: enumInfo(service, field),
+                }))
+                .filter(({ einfo }) => !!einfo)
+        )
+    )
 
+    return {
+        allServices,
+        supportedServices,
+        registers,
+        registerSimpleTypes,
+        registerComposites,
+        registerSimpleEnumTypes,
+        registerCompositeEnumTypes,
         events: supportedServices
             .map(service => ({
                 service,
                 events: service.packets.filter(isHighLevelEvent),
             }))
             .filter(kv => !!kv.events.length),
-    
+
         commands: arrayConcatMany(
             supportedServices.map(service =>
-            service.packets
-                .filter(
-                    pkt =>
-                        isCommand(pkt) &&
-                        !pkt.lowLevel &&
-                        fieldsSupported(pkt)
-                )
-                .map(pkt => ({
-                    service,
-                    command: pkt,
-                }))
+                service.packets
+                    .filter(
+                        pkt =>
+                            isCommand(pkt) &&
+                            !pkt.lowLevel &&
+                            fieldsSupported(pkt)
+                    )
+                    .map(pkt => ({
+                        service,
+                        command: pkt,
+                    }))
             )
-        )
+        ),
     }
 }
 
@@ -331,12 +372,26 @@ export class ServicesBlockDomainSpecificLanguage
 
     createBlocks(options: CreateBlocksOptions) {
         const { theme } = options
-        const { allServices, supportedServices, registers, events, commands } = getServiceInfo()
-        this.supportedServices = supportedServices;
-
         const serviceColor = createServiceColor(theme)
+
+        // pure service information here
+        const {
+            allServices,
+            supportedServices,
+            registers,
+            events,
+            commands,
+            registerSimpleTypes,
+            registerComposites,
+            registerSimpleEnumTypes,
+            registerCompositeEnumTypes,
+        } = getServiceInfo()
+
         const resolveService = (cls: number): jdspec.ServiceSpec[] =>
             allServices.filter(srv => srv.classIdentifier === cls)
+
+        this.supportedServices = supportedServices
+
         const serverClientBlockDefinitions: CommandBlockDefinition[] = [
             ...this.supportedServices.map(
                 service =>
@@ -580,23 +635,7 @@ export class ServicesBlockDomainSpecificLanguage
             }
         )
 
-        const commandServerBlocks = commands.map<EventBlockDefinition>(
-            ({ service, command }) => ({
-                kind: "block",
-                type: `jacdac_command_server_${service.shortId}_${command.name}`,
-                message0: `on ${humanify(command.name)} %1`,
-                args0: [roleVariable(service)],
-                colour: serviceColor(service),
-                inputsInline: true,
-                nextStatement: CODE_STATEMENT_TYPE,
-                tooltip: command.description,
-                helpUrl: serviceHelp(service),
-                service,
-                events: undefined,
-                template: "event",
-            })
-        )
-
+        // there are no corresponding server blocks for this specialized event
         const registerChangeByEventClientBlocks = registers
             .filter(({ service }) => !service.packets.some(isHighLevelEvent))
             .filter(
@@ -625,23 +664,17 @@ export class ServicesBlockDomainSpecificLanguage
                 template: "register_change_event",
             }))
 
-        const [registerSimples, registerComposites] = splitFilter(
-            registers,
-            reg => reg.register.fields.length == 1
-        )
-        const [registerSimpleTypes, registerSimpleOthers] = splitFilter(
-            registerSimples,
-            ({ register }) => !!toBlocklyType(register.fields[0])
-        )
-        const registerSimpleGetClientBlocks =
+        const makeRegisterSimpleGetBlocks = (client = true) =>
             registerSimpleTypes.map<RegisterBlockDefinition>(
                 ({ service, register }) => ({
                     kind: "block",
-                    type: `jacdac_get_simple_${service.shortId}_${register.name}`,
+                    type: `jacdac_get_simple_${service.shortId}_${
+                        register.name
+                    }${client ? "" : "_server"}`,
                     message0:
                         customMessage(service, register, register.fields[0])
                             ?.get || `%1 ${humanify(register.name)}`,
-                    args0: [roleVariable(service)],
+                    args0: [roleVariable(service, client)],
                     inputsInline: true,
                     output: toBlocklyType(register.fields[0]),
                     colour: serviceColor(service),
@@ -654,100 +687,89 @@ export class ServicesBlockDomainSpecificLanguage
                     template: "register_get",
                 })
             )
-        const registerSimpleEnumTypes = registerSimpleOthers
-            .filter(
-                ({ service, register }) =>
-                    !!enumInfo(service, register.fields[0])
+
+        const registerSimpleGetClientBlocks = makeRegisterSimpleGetBlocks()
+        const registerSimpleGetServerBlocks = makeRegisterSimpleGetBlocks(false)
+
+        const makeRegisterEnumGetBlocks = (client = true) =>
+            [
+                ...registerSimpleEnumTypes,
+                ...registerCompositeEnumTypes,
+            ].map<RegisterBlockDefinition>(
+                ({ service, register, field, einfo }) => ({
+                    kind: "block",
+                    type: `jacdac_get_enum_${service.shortId}_${register.name}_${field.name}`,
+                    message0:
+                        customMessage(service, register, field)?.get ||
+                        `%1 ${humanify(register.name)}${
+                            field.name === "_" ? "" : ` ${field.name}`
+                        } %2`,
+                    args0: [
+                        roleVariable(service, client),
+                        <OptionsInputDefinition>{
+                            type: "field_dropdown",
+                            name: field.name,
+                            options: Object.keys(einfo.members).map(member => [
+                                humanify(member),
+                                member,
+                            ]),
+                        },
+                    ],
+                    inputsInline: true,
+                    output: "Boolean",
+                    colour: serviceColor(service),
+                    tooltip: register.description,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    register,
+                    field,
+
+                    template: "register_get",
+                })
             )
-            .map(({ service, register }) => ({
-                service,
-                register,
-                field: register.fields[0],
-                einfo: enumInfo(service, register.fields[0]),
-            }))
-        const registerCompositeEnumTypes = arrayConcatMany(
-            registerComposites.map(({ service, register }) =>
-                register.fields
-                    .map(field => ({
-                        service,
-                        register,
-                        field,
-                        einfo: enumInfo(service, field),
-                    }))
-                    .filter(({ einfo }) => !!einfo)
-            )
-        )
-        const registerEnumGetClientBlocks = [
-            ...registerSimpleEnumTypes,
-            ...registerCompositeEnumTypes,
-        ].map<RegisterBlockDefinition>(
-            ({ service, register, field, einfo }) => ({
-                kind: "block",
-                type: `jacdac_get_enum_${service.shortId}_${register.name}_${field.name}`,
-                message0:
-                    customMessage(service, register, field)?.get ||
-                    `%1 ${humanify(register.name)}${
-                        field.name === "_" ? "" : ` ${field.name}`
-                    } %2`,
-                args0: [
-                    roleVariable(service),
-                    <OptionsInputDefinition>{
-                        type: "field_dropdown",
-                        name: field.name,
-                        options: Object.keys(einfo.members).map(member => [
-                            humanify(member),
-                            member,
-                        ]),
-                    },
-                ],
-                inputsInline: true,
-                output: "Boolean",
-                colour: serviceColor(service),
-                tooltip: register.description,
-                helpUrl: serviceHelp(service),
-                service,
-                register,
-                field,
+        const registerEnumGetClientBlocks = makeRegisterEnumGetBlocks()
+        const registerEnumGetServerBlocks = makeRegisterEnumGetBlocks(false)
 
-                template: "register_get",
-            })
-        )
+        const makeRegisterNumericsGetBlocks = (client = true) =>
+            registerComposites
+                .filter(re => re.register.fields.some(isNumericType))
+                .map<RegisterBlockDefinition>(({ service, register }) => ({
+                    kind: "block",
+                    type: `jacdac_get_numerics_${service.shortId}_${register.name}`,
+                    message0: `%1 ${humanify(register.name)}${
+                        register.fields.length > 1 ? ` %2` : ""
+                    }`,
+                    args0: [
+                        roleVariable(service, client),
+                        register.fields.length > 1
+                            ? <OptionsInputDefinition>{
+                                  type: "field_dropdown",
+                                  name: "field",
+                                  options: register.fields
+                                      .filter(f => isNumericType(f))
+                                      .map(field => [
+                                          humanify(field.name),
+                                          fieldName(register, field),
+                                      ]),
+                              }
+                            : undefined,
+                    ].filter(v => !!v),
+                    inputsInline: true,
+                    output: "Number",
+                    colour: serviceColor(service),
+                    tooltip: register.description,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    register,
 
-        const registerNumericsGetClientBlocks = registerComposites
-            .filter(re => re.register.fields.some(isNumericType))
-            .map<RegisterBlockDefinition>(({ service, register }) => ({
-                kind: "block",
-                type: `jacdac_get_numerics_${service.shortId}_${register.name}`,
-                message0: `%1 ${humanify(register.name)}${
-                    register.fields.length > 1 ? ` %2` : ""
-                }`,
-                args0: [
-                    roleVariable(service),
-                    register.fields.length > 1
-                        ? <OptionsInputDefinition>{
-                              type: "field_dropdown",
-                              name: "field",
-                              options: register.fields
-                                  .filter(f => isNumericType(f))
-                                  .map(field => [
-                                      humanify(field.name),
-                                      fieldName(register, field),
-                                  ]),
-                          }
-                        : undefined,
-                ].filter(v => !!v),
-                inputsInline: true,
-                output: "Number",
-                colour: serviceColor(service),
-                tooltip: register.description,
-                helpUrl: serviceHelp(service),
-                service,
-                register,
+                    template: "register_get",
+                }))
+        const registerNumericsGetClientBlocks = makeRegisterNumericsGetBlocks()
+        const registerNumericsGetServerBlocks =
+            makeRegisterNumericsGetBlocks(false)
 
-                template: "register_get",
-            }))
-
-        const registerSetClientBlocks = registers
+        const makeRegisterSetBlocks = (client = true) => 
+        (registers
             .filter(({ register }) => register.kind === "rw")
             .filter(({ register }) => fieldsSupported(register))
             .map<RegisterBlockDefinition>(({ service, register }) => ({
@@ -761,7 +783,7 @@ export class ServicesBlockDomainSpecificLanguage
                               : fieldsToMessage(register)
                       }`,
                 args0: [
-                    roleVariable(service),
+                    roleVariable(service, client),
                     ...fieldsToFieldInputs(register),
                 ],
                 values: fieldsToValues(service, register),
@@ -775,7 +797,10 @@ export class ServicesBlockDomainSpecificLanguage
                 nextStatement: CODE_STATEMENT_TYPE,
 
                 template: "register_set",
-            }))
+            })))
+
+        const registerSetClientBlocks = makeRegisterSetBlocks()
+        const registerSetServerBlocks = makeRegisterSetBlocks(false)
 
         const commandClientBlocks = commands.map<CommandBlockDefinition>(
             ({ service, command }) => ({
@@ -801,6 +826,23 @@ export class ServicesBlockDomainSpecificLanguage
             })
         )
 
+        const commandServerBlocks = commands.map<EventBlockDefinition>(
+            ({ service, command }) => ({
+                kind: "block",
+                type: `jacdac_command_server_${service.shortId}_${command.name}`,
+                message0: `on ${humanify(command.name)} %1`,
+                args0: [roleVariable(service)],
+                colour: serviceColor(service),
+                inputsInline: true,
+                nextStatement: CODE_STATEMENT_TYPE,
+                tooltip: command.description,
+                helpUrl: serviceHelp(service),
+                service,
+                events: undefined,
+                template: "event",
+            })
+        )
+
         this._serviceClientBlocks = [
             ...eventClientBlocks,
             ...registerChangeByEventClientBlocks,
@@ -816,8 +858,10 @@ export class ServicesBlockDomainSpecificLanguage
         this._serviceServerBlocks = [
             ...eventServerBlocks,
             ...commandServerBlocks,
-            // registerGetServerBlocks
-            // registerSetServerBlocks
+            ...registerSimpleGetServerBlocks,
+            ...registerEnumGetServerBlocks,
+            ...registerNumericsGetServerBlocks,
+            ...registerSetServerBlocks
         ]
 
         const eventFieldGroups = [
