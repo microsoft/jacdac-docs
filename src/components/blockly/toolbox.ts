@@ -165,6 +165,10 @@ export const BUILTIN_TYPES = ["", ...PRIMITIVE_TYPES]
 export const CODE_STATEMENT_TYPE = "Code"
 export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
 
+export const MODEL_BLOCK_CLASS_STATEMENT_TYPE = "ModelBlockClassStatement"
+export const MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE = "ModelBlockPreprocessStatement"
+export const MODEL_BLOCK_LAYER_STATEMENT_TYPE = "ModelBlockLayerStatement"
+
 export const TWIN_BLOCK = "jacdac_tools_twin"
 
 export const toolsColour = "#888"
