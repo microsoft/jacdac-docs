@@ -127,7 +127,7 @@ function MouseInput (props: {onChange: (state: MouseIfaceState)=>void }) {
     const {onChange} = props;
     const label = ""
     const widgetSize = `clamp(6rem, 25vw, 30vw)`
-    const { background, controlBackground, active, textProps } =
+    const { background, active, textProps } =
         useWidgetTheme("secondary")
 
     const defaultIfaceMap: MouseIfaceState = {
@@ -135,7 +135,7 @@ function MouseInput (props: {onChange: (state: MouseIfaceState)=>void }) {
         rightClick:false
     }
         
-    const [ifaceMap, setIfaceMap] = useState<MouseIfaceState>()
+    const [ifaceMap, setIfaceMap] = useState<MouseIfaceState>({leftClick:false,rightClick:false})
 
     const w = 100
     const h = 100
@@ -144,14 +144,12 @@ function MouseInput (props: {onChange: (state: MouseIfaceState)=>void }) {
     const handleLclickFocus = () => {
         const map = defaultIfaceMap;
         map.leftClick = !ifaceMap.leftClick;
-        console.log("lclick ", map);
         setIfaceMap(map);
         onChange(map);
     }
     const handleRclickFocus = () => {
         const map = defaultIfaceMap;
         map.rightClick = !ifaceMap.rightClick;
-        console.log("rclick ", map);
         setIfaceMap(map);
         onChange(map);
     }
