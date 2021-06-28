@@ -1,16 +1,18 @@
 import { Events, WorkspaceSvg } from "blockly"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
-import { toMap } from "../../../jacdac-ts/src/jdom/utils"
+import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import bus from "../../jacdac/providerbus"
 import useRoleManager from "../hooks/useRoleManager"
 import useLocalStorage from "../useLocalStorage"
+import { BlockWarning, collectWarnings } from "./blockwarning"
+import { registerDataSolver } from "./dsl/datasolver"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
 import {
+    JSON_WARNINGS_CATEGORY,
     NEW_PROJET_XML,
-    resolveBlockDefinition,
     ToolboxConfiguration,
 } from "./toolbox"
 import useBlocklyEvents from "./useBlocklyEvents"
@@ -24,11 +26,6 @@ import {
     WorkspaceServices,
 } from "./WorkspaceContext"
 
-export interface BlockWarning {
-    sourceId?: string
-    message: string
-}
-
 export interface BlockProps {
     dsls: BlockDomainSpecificLanguage[]
     workspace: WorkspaceSvg
@@ -39,7 +36,7 @@ export interface BlockProps {
     dragging: boolean
     setWorkspace: (ws: WorkspaceSvg) => void
     setWorkspaceXml: (value: string) => void
-    setWarnings: (warnings: BlockWarning[]) => void
+    setWarnings: (category: string, warnings: BlockWarning[]) => void
 }
 
 const BlockContext = createContext<BlockProps>({
@@ -73,12 +70,29 @@ export function BlockProvider(props: {
     const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
     const [workspaceJSON, setWorkspaceJSON] = useState<WorkspaceJSON>(undefined)
-    const [warnings, setWarnings] = useState<BlockWarning[]>([])
+    const [warnings, _setWarnings] = useState<
+        {
+            category: string
+            entries: BlockWarning[]
+        }[]
+    >([])
     const [dragging, setDragging] = useState(false)
 
     const setWorkspaceXml = (xml: string) => {
         setStoredXml(xml)
         _setWorkspaceXml(xml)
+    }
+
+    const setWarnings = (category: string, entries: BlockWarning[]) => {
+        const i = warnings.findIndex(w => w.category === category)
+        _setWarnings([
+            ...warnings.slice(0, i),
+            {
+                category,
+                entries,
+            },
+            ...warnings.slice(i + 1),
+        ])
     }
 
     const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
@@ -97,29 +111,7 @@ export function BlockProvider(props: {
             )
         }
         services.initialized = true
-        // register data transforms
-        const { transformData } = resolveBlockDefinition(block.type) || {}
-        if (transformData) {
-            services.on(CHANGE, async () => {
-                if (!block.isEnabled()) return
-
-                const next = (block.nextConnection?.targetBlock() ||
-                    block.childBlocks_?.[0]) as BlockWithServices
-                const nextServices = next?.jacdacServices
-                if (nextServices) {
-                    try {
-                        const newData = await transformData(
-                            block,
-                            services.data,
-                            nextServices.data
-                        )
-                        nextServices.data = newData
-                    } catch (e) {
-                        console.debug(e)
-                    }
-                }
-            })
-        }
+        registerDataSolver(block)
     }
 
     const handleBlockChange = (blockId: string) => {
@@ -136,7 +128,7 @@ export function BlockProvider(props: {
     }) => {
         const { type, workspaceId } = event
         if (workspaceId !== workspace.id) return
-        console.log(`blockly: ${type}`, event)
+        //console.log(`blockly: ${type}`, event)
         if (type === Events.BLOCK_DRAG) {
             const dragEvent = event as Events.BlockDrag
             setDragging(!!dragEvent.isStart)
@@ -189,6 +181,8 @@ export function BlockProvider(props: {
             JSON.stringify(newWorkspaceJSON) !== JSON.stringify(workspaceJSON)
         ) {
             setWorkspaceJSON(newWorkspaceJSON)
+            const newWarnings = collectWarnings(newWorkspaceJSON)
+            setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
         }
     }, [dsls, workspace, dragging, workspaceXml])
     useEffect(() => {
@@ -202,7 +196,11 @@ export function BlockProvider(props: {
     useEffect(() => {
         if (!workspace) return
         const allErrors = toMap(
-            warnings || [],
+            arrayConcatMany(
+                warnings
+                    .map(w => w.entries)
+                    .filter(entries => !!entries?.length)
+            ),
             e => e.sourceId || "",
             e => e.message
         )

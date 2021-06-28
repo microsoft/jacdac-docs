@@ -51,6 +51,7 @@ import {
     BlockDefinition,
     BlockReference,
     BOOLEAN_TYPE,
+    ButtonDefinition,
     CategoryDefinition,
     CODE_STATEMENT_TYPE,
     CommandBlockDefinition,
@@ -84,6 +85,7 @@ import BlockDomainSpecificLanguage, {
 import JDomTreeField from "../fields/JDomTreeField"
 import TwinField from "../fields/TwinField"
 import { VariableJSON } from "../jsongenerator"
+import { Variables } from "blockly"
 
 const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
 const ROLE_BOUND_EVENT_BLOCK = "jacdac_role_bound_event"
@@ -1122,7 +1124,19 @@ export class ServicesBlockDomainSpecificLanguage
                     kind: "category",
                     name: service.name + (isClient ? "" : "Srv"),
                     colour: serviceColor(service),
-                    contents: isClient
+                    contents: [
+                        <ButtonDefinition>{
+                            kind: "button",
+                            text: `Add ${service.name} role`,
+                            callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+                            callback: workspace =>
+                                Variables.createVariableButtonHandler(
+                                    workspace,
+                                    null,
+                                    toRoleType(service,isClient)
+                                ),
+                        },
+                        ...(isClient
                         ? [
                               ...serviceBlocks.map<BlockReference>(block => ({
                                   kind: "block",
@@ -1150,19 +1164,11 @@ export class ServicesBlockDomainSpecificLanguage
                                       values: block.values,
                                   })),
                               // TODO: register read and write blocks
-                          ],
-                    buttons: [
-                        {
-                            kind: "button",
-                            text: `Add ${service.name} role`,
-                            callbackKey: `jacdac_add_role_callback_${service.shortId}`,
-                            service,
-                            client: isClient,
-                        },
-                    ],
+                          ]),
+                    ]
                 }
             })
-            .filter(cat => !!cat.contents?.length)
+
 
         const commonCategory: CategoryDefinition = {
             kind: "category",
