@@ -756,7 +756,7 @@ export class ServicesBlockDomainSpecificLanguage
 
         const makeRegisterSetBlocks = (client = true) =>
             registers
-                .filter(({ register }) => register.kind === "rw")
+                .filter(({ register }) => !client || register.kind === "rw")
                 .filter(({ register }) => fieldsSupported(register))
                 .map<RegisterBlockDefinition>(({ service, register }) => ({
                     kind: "block",
