@@ -62,10 +62,12 @@ import {
     identityTransformData,
     InputDefinition,
     JSON_TYPE,
+    LabelDefinition,
     NUMBER_TYPE,
     OptionsInputDefinition,
     RegisterBlockDefinition,
     resolveBlockDefinition,
+    SeparatorDefinition,
     ServiceBlockDefinition,
     STRING_TYPE,
     toolsColour,
@@ -1169,7 +1171,7 @@ export class ServicesBlockDomainSpecificLanguage
         ) => {
             return {
                 kind: "category",
-                name: service.name + (isClient ? "" : "Srv"),
+                name: service.name,
                 colour: serviceColor(service),
                 contents: [
                     <ButtonDefinition>{
@@ -1215,29 +1217,30 @@ export class ServicesBlockDomainSpecificLanguage
             }
         }
 
-       const filteredServices = toolboxServices
-            .map(serviceClient => ({
-                serviceClient,
-                serviceBlocks: this._serviceClientBlocks.filter(
-                    block => block.service === serviceClient.service
-                ),
-            }))
-        const servicesCategories: CategoryDefinition[] = [
-            ...(filteredServices.map<CategoryDefinition>(sc =>
-                makeCategory(
-                    sc.serviceClient.service,
-                    true,
-                    sc.serviceBlocks
-                ) as CategoryDefinition
-            )),
-            ...(filteredServices.map<CategoryDefinition>(sc =>
-                makeCategory(
-                    sc.serviceClient.service,
-                    false,
-                    sc.serviceBlocks
-                ) as CategoryDefinition
-            )),
-        ]
+        const filteredServices = toolboxServices.map(serviceClient => ({
+            serviceClient,
+            serviceBlocks: this._serviceClientBlocks.filter(
+                block => block.service === serviceClient.service
+            ),
+        }))
+        const clientServicesCategories: CategoryDefinition[] =
+            filteredServices.map<CategoryDefinition>(
+                sc =>
+                    makeCategory(
+                        sc.serviceClient.service,
+                        true,
+                        sc.serviceBlocks
+                    ) as CategoryDefinition
+            )
+        const serverServicesCategories: CategoryDefinition[] =
+            filteredServices.map<CategoryDefinition>(
+                sc =>
+                    makeCategory(
+                        sc.serviceClient.service,
+                        false,
+                        sc.serviceBlocks
+                    ) as CategoryDefinition
+            )
 
         const commonCategory: CategoryDefinition = {
             kind: "category",
@@ -1281,8 +1284,22 @@ export class ServicesBlockDomainSpecificLanguage
             ],
         }
 
-        return [...servicesCategories, commonCategory, toolsCategory]
+        return [
+            ...clientServicesCategories,
+            commonCategory,
+            toolsCategory,
+            <SeparatorDefinition>{
+                kind: "sep",
+            },
+            <LabelDefinition>{
+                kind: "label",
+                text: "Servers"
+            },
+            ...serverServicesCategories,
+        ]
     }
+
+    
 
     compileEventToVM(options: CompileEventToVMOptions): CompileEventToVMResult {
         const makeAwaitEvent = (
