@@ -369,6 +369,7 @@ export class ServicesBlockDomainSpecificLanguage
     private _eventFieldClientBlocks: EventFieldDefinition[]
     // server blocks
     private _serviceServerBlocks: ServiceBlockDefinition[]
+    private _commandFieldServerBlocks: EventFieldDefinition[]
     // generic role blocks
     private _roleBlocks: BlockDefinition[]
 
@@ -881,49 +882,68 @@ export class ServicesBlockDomainSpecificLanguage
                     isStringField(f) && f.encoding === "JSON",
             },
         ]
-        // generate accessor blocks for event data with numbers
-        this._eventFieldClientBlocks = arrayConcatMany(
-            arrayConcatMany(
-                eventFieldGroups.map(({ output, filter }) =>
-                    events.map(({ service, events }) =>
-                        events
-                            .filter(
-                                event => event.fields.filter(filter).length > 0
-                            )
-                            .map(event => ({ service, event }))
-                            .map(
-                                ({ service, event }) =>
-                                    <EventFieldDefinition>{
-                                        kind: "block",
-                                        type: `jacdac_event_field_${output.toLowerCase()}_${
-                                            service.shortId
-                                        }_${event.name}`,
-                                        message0: `${event.name} %1`,
-                                        args0: [
-                                            <InputDefinition>{
-                                                type: "field_dropdown",
-                                                name: "field",
-                                                options: event.fields.map(
-                                                    field => [
-                                                        humanify(field.name),
-                                                        field.name,
-                                                    ]
-                                                ),
-                                            },
-                                        ],
-                                        colour: serviceColor(service),
-                                        inputsInline: true,
-                                        tooltip: `Data fields of the ${event.name} event`,
-                                        helpUrl: serviceHelp(service),
-                                        service,
-                                        event,
-                                        output,
-                                        template: "event_field",
-                                    }
-                            )
+
+        type servicePackets = {
+            service: jdspec.ServiceSpec
+            packets: jdspec.PacketInfo[]
+        }
+        // generate accessor blocks for event/command data with numbers
+        const makeFieldBlocks = (sps: servicePackets[], client = true) => {
+            const worker = (
+                sp: servicePackets,
+                output: string,
+                filter: (field: jdspec.PacketMember) => boolean
+            ) => {
+                const { service, packets } = sp
+                return packets
+                    .filter(pkt => pkt.fields.filter(filter).length > 0)
+                    .map(pkt => ({ service, pkt }))
+                    .map(
+                        ({ service, pkt }) =>
+                            <EventFieldDefinition>{
+                                kind: "block",
+                                type: `jacdac_event_field_${output.toLowerCase()}_${
+                                    service.shortId
+                                }_${pkt.name}${client ? "" : "_server"}`,
+                                message0: `${pkt.name} %1`,
+                                args0: [
+                                    <InputDefinition>{
+                                        type: "field_dropdown",
+                                        name: "field",
+                                        options: pkt.fields.map(field => [
+                                            humanify(field.name),
+                                            field.name,
+                                        ]),
+                                    },
+                                ],
+                                colour: serviceColor(service),
+                                inputsInline: true,
+                                tooltip: `Data fields of the ${pkt.name} ${
+                                    client ? "event" : "command"
+                                }`,
+                                helpUrl: serviceHelp(service),
+                                service,
+                                event: pkt,
+                                output,
+                                template: "event_field",
+                            }
+                    )
+            }
+
+            return arrayConcatMany(
+                arrayConcatMany(
+                    eventFieldGroups.map(({ output, filter }) =>
+                        sps.map(sp => worker(sp, output, filter))
                     )
                 )
             )
+        }
+
+        this._eventFieldClientBlocks = makeFieldBlocks(
+            events.map(p => ({ service: p.service, packets: p.events }))
+        )
+        this._commandFieldServerBlocks = makeFieldBlocks(
+            commands.map(p => ({ service: p.service, packets: [p.command] }))
         )
 
         // client only
@@ -1098,6 +1118,7 @@ export class ServicesBlockDomainSpecificLanguage
             ...this._serviceClientBlocks,
             ...this._serviceServerBlocks,
             ...this._eventFieldClientBlocks,
+            ...this._commandFieldServerBlocks,
             ...this._roleBlocks,
             ...toolsBlocks,
         ]
@@ -1162,8 +1183,8 @@ export class ServicesBlockDomainSpecificLanguage
             )
             .sort((l, r) => l.name.localeCompare(r.name))
 
-        const getFieldBlocks = (service: jdspec.ServiceSpec) =>
-            this._eventFieldClientBlocks
+        const getFieldBlocks = (service: jdspec.ServiceSpec, fieldBlocks: EventFieldDefinition[]) =>
+            fieldBlocks
                 .filter(
                     ev => ev.service === service && usedEvents.has(ev.event)
                 )
@@ -1202,7 +1223,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: block.type,
                         values: block.values,
                     })),
-                    ...getFieldBlocks(service),
+                    ...getFieldBlocks(service, isClient ? this._eventFieldClientBlocks : this._commandFieldServerBlocks),
                 ],
             }
         }
