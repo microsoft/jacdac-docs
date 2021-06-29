@@ -1,4 +1,7 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState, useContext } from "react"
+import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
+import { createToneContext, ToneContext } from "../../components/hooks/toneContext"
+import { startServiceProviderFromServiceClass } from "../../../jacdac-ts/src/servers/servers"
 import {
     BuzzerCmd,
     REPORT_UPDATE,
@@ -8,9 +11,23 @@ import {
 import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 import Packet from "../../../jacdac-ts/src/jdom/packet"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
-import Dashboard from "../../components/dashboard/Dashboard"
 import useServiceProviderFromServiceClass from "../../components/hooks/useServiceProviderFromServiceClass"
 import useServices from "../../components/hooks/useServices"
+import GridHeader from "../../components/ui/GridHeader"
+import { Button } from "gatsby-theme-material-ui"
+import {
+    Card,
+    CardActions,
+    CardContent,
+    Grid,
+    Typography,
+} from "@material-ui/core"
+import ConnectAlert from "../../components/alert/ConnectAlert"
+import DeviceCardHeader from "../../components/DeviceCardHeader"
+import { JDService } from "../../../jacdac-ts/dist/jacdac"
+import usePlayTone from "../../components/hooks/usePlayTone"
+import useServiceServer from "../../components/hooks/useServiceServer"
+import BuzzerServer from "../../../jacdac-ts/src/servers/buzzerserver"
 
 function tonePayload(frequency: number, ms: number, volume: number) {
     const period = Math.round(1000000 / frequency)
@@ -23,29 +40,59 @@ const TONE_THROTTLE = 100
 
 export default function AccelerometerTheremin() {
     // collect accelerometers and buzzers on the bus
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const accelerometers = useServices({ serviceClass: SRV_ACCELEROMETER })
     const buzzers = useServices({ serviceClass: SRV_BUZZER })
+    const [accelService, setAccelService] = useState<JDService>()
+    const [buzzerServer, setBuzzerServer] = useState<BuzzerServer>()
 
-    // spin up a buzzer simulator
-    useServiceProviderFromServiceClass(SRV_ACCELEROMETER)
-    useServiceProviderFromServiceClass(SRV_BUZZER)
+    const { playTone, setVolume, onClickActivateAudioContext, activated } =
+        usePlayTone()
 
-    console.log({ accelerometers, buzzers })
+    // listen for playTone commands from the buzzer
+    useEffect(
+        () =>
+            buzzerServer?.subscribe<[number, number]>(
+                BuzzerServer.PLAY_TONE,
+                args => {
+                    playTone?.(args[0], args[1])
+                }
+            ),
+        [buzzerServer]
+    )
+
+    const handleSelectAccelerometerService = (accel) => () => {
+        accelService == accel ? setAccelService(null) : setAccelService(accel)
+    }
+
+    const handleBrowserAudioEnable = () => () => { 
+        onClickActivateAudioContext();
+        const dev = startServiceProviderFromServiceClass(
+            bus,
+            SRV_BUZZER
+        )
+        const srv = dev
+            .services()
+            .find(s => s.serviceClass === SRV_BUZZER) as BuzzerServer
+
+        setBuzzerServer(srv);
+    }
 
     // register for accelerometer data events
     useEffect(() => {
-        const unsubs = accelerometers.map(accelerometer =>
-            accelerometer.readingRegister.subscribe(
+        let unsubs = () => {}
+        if (accelService) 
+            unsubs = accelService.readingRegister.subscribe(
                 REPORT_UPDATE,
                 // don't trigger more than every 100ms
                 throttle(async () => {
-                    const [x] = accelerometer.readingRegister.unpackedValue
+                    const [x] = accelService.readingRegister.unpackedValue
                     await Promise.all(
                         buzzers.map(async buzzer => {
                             const pkt = Packet.from(
                                 BuzzerCmd.PlayTone,
                                 tonePayload(
-                                    1000 + Math.abs(x) * 1000,
+                                    1000 + (x * 1000),
                                     TONE_DURATION,
                                     1
                                 )
@@ -55,11 +102,65 @@ export default function AccelerometerTheremin() {
                     )
                 }, TONE_THROTTLE)
             )
-        )
+
         // cleanup callback
-        return () => unsubs.forEach(u => u())
-    }, [accelerometers, buzzers]) // re-register if accelerometers, buzzers change
+        return () => unsubs()
+    }, [accelService, buzzers]) // re-register if accelerometers, buzzers change
 
     // TODO any specific rendering needed here?
-    return <Dashboard />
+    return (
+        <Grid container spacing={2}>
+            <Grid item xs={12}>
+                <GridHeader title="Audio controls" />
+                <Button
+                    variant={"outlined"}
+                    onClick={handleBrowserAudioEnable()}
+                >
+                    {activated 
+                        ? "Browser audio enabled"
+                        : "Start browser audio"}
+                </Button>
+            </Grid>
+            {!accelerometers.length && (
+                <>
+                    <GridHeader title="Connect a device" />
+                    <Grid item xs>
+                        <ConnectAlert serviceClass={SRV_ACCELEROMETER} />
+                    </Grid>
+                </>
+            )}
+            {accelerometers.length && (
+                <>
+                    <GridHeader title="Available accelerometers" />
+                    {accelerometers.map(accelerometer => (
+                        <Grid item xs={12} sm={6} lg={4} xl={3} key={accelerometer.id}>
+                        <Card>
+                            <DeviceCardHeader
+                                device={accelerometer.device}
+                                showAvatar={true}
+                                showMedia={true}
+                            />
+                            <CardContent>
+                                <Typography variant="h5">
+                                    {(accelerometer === accelService
+                                        ? "Streaming from "
+                                        : "") + (accelerometer.device.physical ? "Physical " : "Virtual ") + `Accelerometer ${accelerometer.friendlyName}`}
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
+                                <Button
+                                    variant={"outlined"}
+                                    onClick={handleSelectAccelerometerService(accelerometer)}
+                                >
+                                    {accelerometer === accelService
+                                        ? "Stop streaming"
+                                        : "Start streaming"}
+                                </Button>
+                            </CardActions>
+                        </Card>
+                        </Grid>
+                    ))}
+                </>
+                )}
+        </Grid>)
 }
