@@ -1162,6 +1162,17 @@ export class ServicesBlockDomainSpecificLanguage
             )
             .sort((l, r) => l.name.localeCompare(r.name))
 
+        const getFieldBlocks = (service: jdspec.ServiceSpec) =>
+            this._eventFieldClientBlocks
+                .filter(
+                    ev => ev.service === service && usedEvents.has(ev.event)
+                )
+                .map<BlockReference>(block => ({
+                    kind: "block",
+                    type: block.type,
+                    values: block.values,
+                }))
+
         const makeCategory = (
             service: jdspec.ServiceSpec,
             isClient: boolean,
@@ -1186,34 +1197,12 @@ export class ServicesBlockDomainSpecificLanguage
                                 toRoleType(service, isClient)
                             ),
                     },
-                    ...(isClient
-                        ? [
-                              ...serviceBlocks.map<BlockReference>(block => ({
-                                  kind: "block",
-                                  type: block.type,
-                                  values: block.values,
-                              })),
-                              ...this._eventFieldClientBlocks
-                                  .filter(
-                                      ev =>
-                                          ev.service === service &&
-                                          usedEvents.has(ev.event)
-                                  )
-                                  .map<BlockReference>(block => ({
-                                      kind: "block",
-                                      type: block.type,
-                                      values: block.values,
-                                  })),
-                          ]
-                        : [
-                              ...this._serviceServerBlocks
-                                  .filter(ev => ev.service === service)
-                                  .map<BlockReference>(block => ({
-                                      kind: "block",
-                                      type: block.type,
-                                      values: block.values,
-                                  })),
-                          ]),
+                    ...serviceBlocks.map<BlockReference>(block => ({
+                        kind: "block",
+                        type: block.type,
+                        values: block.values,
+                    })),
+                    ...getFieldBlocks(service),
                 ],
             }
         }
@@ -1222,9 +1211,10 @@ export class ServicesBlockDomainSpecificLanguage
             toolboxServices
                 .map(serviceClient => ({
                     serviceClient,
-                    serviceBlocks: this._serviceClientBlocks.filter(
-                        block => block.service === serviceClient
-                    ),
+                    serviceBlocks: (client
+                        ? this._serviceClientBlocks
+                        : this._serviceServerBlocks
+                    ).filter(block => block.service === serviceClient),
                 }))
                 .map<CategoryDefinition>(
                     sc =>
