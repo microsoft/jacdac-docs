@@ -617,34 +617,43 @@ export class ServicesBlockDomainSpecificLanguage
             }
         )
 
-        // there are no corresponding server blocks for this specialized event
-        const registerChangeByEventClientBlocks = registers
-            .filter(({ service }) => !service.packets.some(isHighLevelEvent))
-            .filter(
-                ({ register }) =>
-                    register.fields.length === 1 &&
-                    isNumericType(register.fields[0]) &&
-                    register.identifier !== SystemReg.Intensity
-            )
-            .map<RegisterBlockDefinition>(({ service, register }) => ({
-                kind: "block",
-                type: `jacdac_change_by_events_${service.shortId}_${register.name}`,
-                message0: `on %1 ${humanify(register.name)} change by %2`,
-                args0: [
-                    roleVariable(service),
-                    ...fieldsToFieldInputs(register),
-                ].filter(v => !!v),
-                values: fieldsToValues(service, register),
-                inputsInline: true,
-                nextStatement: CODE_STATEMENT_TYPE,
-                colour: serviceColor(service),
-                tooltip: `Event raised when ${register.name} changes`,
-                helpUrl: serviceHelp(service),
-                service,
-                register,
+        const makeRegisterChangeByEventBlocks = (client = true) =>
+            registers
+                .filter(
+                    ({ service }) => !service.packets.some(isHighLevelEvent)
+                )
+                .filter(
+                    ({ register }) =>
+                        register.fields.length === 1 &&
+                        isNumericType(register.fields[0]) &&
+                        register.identifier !== SystemReg.Intensity
+                )
+                .map<RegisterBlockDefinition>(({ service, register }) => ({
+                    kind: "block",
+                    type: `jacdac_change_by_events_${service.shortId}_${
+                        register.name
+                    }${client ? "" : "_server"}`,
+                    message0: `on %1 ${humanify(register.name)} change by %2`,
+                    args0: [
+                        roleVariable(service, client),
+                        ...fieldsToFieldInputs(register),
+                    ].filter(v => !!v),
+                    values: fieldsToValues(service, register),
+                    inputsInline: true,
+                    nextStatement: CODE_STATEMENT_TYPE,
+                    colour: serviceColor(service),
+                    tooltip: `Event raised when ${register.name} changes`,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    register,
 
-                template: "register_change_event",
-            }))
+                    template: "register_change_event",
+                }))
+
+        const registerChangeByEventClientBlocks =
+            makeRegisterChangeByEventBlocks()
+        const registerChangeByEventServerBlocks =
+            makeRegisterChangeByEventBlocks(false)
 
         const makeRegisterSimpleGetBlocks = (client = true) =>
             registerSimpleTypes.map<RegisterBlockDefinition>(
@@ -849,6 +858,7 @@ export class ServicesBlockDomainSpecificLanguage
             ...registerNumericsGetServerBlocks,
             ...registerSetServerBlocks,
             ...commandServerBlocks,
+            ...registerChangeByEventServerBlocks,
         ]
 
         const eventFieldGroups = [
@@ -1293,13 +1303,11 @@ export class ServicesBlockDomainSpecificLanguage
             },
             <LabelDefinition>{
                 kind: "label",
-                text: "Servers"
+                text: "Servers",
             },
             ...serverServicesCategories,
         ]
     }
-
-    
 
     compileEventToVM(options: CompileEventToVMOptions): CompileEventToVMResult {
         const makeAwaitEvent = (
