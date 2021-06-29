@@ -107,11 +107,6 @@ export default function AccelerometerTheremin() {
         return () => unsubs()
     }, [accelService, buzzers]) // re-register if accelerometers, buzzers change
 
-    useEffect(() => {
-        accelerometers.length == 1 ? setAccelService(accelerometers[0]) : null
-        return () => {}
-    }, [accelerometers]) // re-register if accelerometers, buzzers change
-
     // TODO any specific rendering needed here?
     return (
         <Grid container spacing={2}>
