@@ -828,7 +828,7 @@ export class ServicesBlockDomainSpecificLanguage
                 kind: "block",
                 type: `jacdac_command_server_${service.shortId}_${command.name}`,
                 message0: `on ${humanify(command.name)} %1`,
-                args0: [roleVariable(service,false)],
+                args0: [roleVariable(service, false)],
                 colour: serviceColor(service),
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
@@ -1107,7 +1107,7 @@ export class ServicesBlockDomainSpecificLanguage
         const { theme, source, liveServices } = options
         const serviceColor = createServiceColor(theme)
 
-        const blockServices: { serviceShortId: string; client: boolean }[] =
+        const blockServices: { serviceShortId: string }[] =
             source?.variables
                 .map(parseRoleType)
                 .filter(
@@ -1121,15 +1121,12 @@ export class ServicesBlockDomainSpecificLanguage
                 }))
                 .filter(({ definition }) => definition?.template === "event")
                 .map(({ block, definition }) => {
-                    const { events } = (definition as EventBlockDefinition)
-                    if (events.length === 1)
-                        return events[0]
+                    const { events } = definition as EventBlockDefinition
+                    if (events.length === 1) return events[0]
                     else {
                         const eventName = block.inputs[0].fields["event"]
-                        .value as string
-                        return events.find(
-                            ev => ev.name === eventName
-                        )
+                            .value as string
+                        return events.find(ev => ev.name === eventName)
                     }
                 })
                 .filter(ev => !!ev)
@@ -1143,41 +1140,27 @@ export class ServicesBlockDomainSpecificLanguage
             block => block.service
         )
 
-        const toolboxServices: {
-            service: jdspec.ServiceSpec
-            client: boolean
-        }[] = uniqueMap(
+        const toolboxServices: jdspec.ServiceSpec[] = uniqueMap(
             Flags.diagnostics
-                ? services.map(service => ({ service, client: true }))
+                ? services
                 : [
                       ...blockServices
-                          .map(pair => {
-                              const service = services.find(
+                          .map(pair =>
+                              services.find(
                                   service =>
                                       service.shortId === pair.serviceShortId
                               )
-                              return service
-                                  ? {
-                                        service,
-                                        client: pair.client,
-                                    }
-                                  : undefined
-                          })
+                          )
                           .filter(srv => !!srv),
-                      ...liveServices.map(srv => ({
-                          service: srv.specification,
-                          client: true,
-                      })),
+                      ...liveServices.map(s => s.specification),
                   ],
-            srv => toRoleType(srv.service, srv.client),
+            srv => srv.shortId,
             srv => srv
         )
             .filter(
-                srv =>
-                    srv &&
-                    ignoredServices.indexOf(srv.service.classIdentifier) < 0
+                srv => srv && ignoredServices.indexOf(srv.classIdentifier) < 0
             )
-            .sort((l, r) => l.service.name.localeCompare(r.service.name))
+            .sort((l, r) => l.name.localeCompare(r.name))
 
         const makeCategory = (
             service: jdspec.ServiceSpec,
@@ -1186,13 +1169,16 @@ export class ServicesBlockDomainSpecificLanguage
         ) => {
             return {
                 kind: "category",
-                name: service.name,
+                name: service.name + (isClient ? "" : ":S"),
                 colour: serviceColor(service),
                 contents: [
                     <ButtonDefinition>{
                         kind: "button",
                         text: `Add ${service.name} role`,
-                        callbackKey: `jacdac_add_role_callback_${service.shortId}`,
+                        callbackKey: `jacdac_add_role_callback_${toRoleType(
+                            service,
+                            isClient
+                        )}`,
                         callback: workspace =>
                             Variables.createVariableButtonHandler(
                                 workspace,
@@ -1237,13 +1223,13 @@ export class ServicesBlockDomainSpecificLanguage
                 .map(serviceClient => ({
                     serviceClient,
                     serviceBlocks: this._serviceClientBlocks.filter(
-                        block => block.service === serviceClient.service
+                        block => block.service === serviceClient
                     ),
                 }))
                 .map<CategoryDefinition>(
                     sc =>
                         makeCategory(
-                            sc.serviceClient.service,
+                            sc.serviceClient,
                             client,
                             sc.serviceBlocks
                         ) as CategoryDefinition
@@ -1476,7 +1462,7 @@ export class ServicesBlockDomainSpecificLanguage
                         ],
                         callee: toIdentifier("writeRegister"),
                     }),
-                    errors: exprsErrors.flatMap(p => p.errors)
+                    errors: exprsErrors.flatMap(p => p.errors),
                 }
             }
             case "raiseNo":
