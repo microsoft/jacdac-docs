@@ -35,7 +35,7 @@ function tonePayload(frequency: number, ms: number, volume: number) {
     return jdpack("u16 u16 u16", [period, duty, ms])
 }
 
-const TONE_DURATION = 100
+const TONE_DURATION = 50
 const TONE_THROTTLE = 100
 
 export default function AccelerometerTheremin() {
