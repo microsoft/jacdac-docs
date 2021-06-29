@@ -24,7 +24,7 @@ import {
 } from "@material-ui/core"
 import ConnectAlert from "../../components/alert/ConnectAlert"
 import DeviceCardHeader from "../../components/DeviceCardHeader"
-import { JDService } from "../../../jacdac-ts/dist/jacdac"
+import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import usePlayTone from "../../components/hooks/usePlayTone"
 import useServiceServer from "../../components/hooks/useServiceServer"
 import BuzzerServer from "../../../jacdac-ts/src/servers/buzzerserver"
@@ -106,6 +106,11 @@ export default function AccelerometerTheremin() {
         // cleanup callback
         return () => unsubs()
     }, [accelService, buzzers]) // re-register if accelerometers, buzzers change
+
+    useEffect(() => {
+        accelerometers.length == 1 ? setAccelService(accelerometers[0]) : null
+        return () => {}
+    }, [accelerometers]) // re-register if accelerometers, buzzers change
 
     // TODO any specific rendering needed here?
     return (
