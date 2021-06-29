@@ -652,8 +652,8 @@ export class ServicesBlockDomainSpecificLanguage
 
         const registerChangeByEventClientBlocks =
             makeRegisterChangeByEventBlocks()
-        const registerChangeByEventServerBlocks =
-            makeRegisterChangeByEventBlocks(false)
+        //const registerChangeByEventServerBlocks =
+        //    makeRegisterChangeByEventBlocks(false)
 
         const makeRegisterSimpleGetBlocks = (client = true) =>
             registerSimpleTypes.map<RegisterBlockDefinition>(
@@ -828,14 +828,14 @@ export class ServicesBlockDomainSpecificLanguage
                 kind: "block",
                 type: `jacdac_command_server_${service.shortId}_${command.name}`,
                 message0: `on ${humanify(command.name)} %1`,
-                args0: [roleVariable(service)],
+                args0: [roleVariable(service,false)],
                 colour: serviceColor(service),
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
                 tooltip: command.description,
                 helpUrl: serviceHelp(service),
                 service,
-                events: undefined,
+                events: [command],
                 template: "event",
             })
         )
@@ -858,7 +858,7 @@ export class ServicesBlockDomainSpecificLanguage
             ...registerNumericsGetServerBlocks,
             ...registerSetServerBlocks,
             ...commandServerBlocks,
-            ...registerChangeByEventServerBlocks,
+            // ...registerChangeByEventServerBlocks,
         ]
 
         const eventFieldGroups = [
@@ -1121,11 +1121,16 @@ export class ServicesBlockDomainSpecificLanguage
                 }))
                 .filter(({ definition }) => definition?.template === "event")
                 .map(({ block, definition }) => {
-                    const eventName = block.inputs[0].fields["event"]
+                    const { events } = (definition as EventBlockDefinition)
+                    if (events.length === 1)
+                        return events[0]
+                    else {
+                        const eventName = block.inputs[0].fields["event"]
                         .value as string
-                    return (definition as EventBlockDefinition).events.find(
-                        ev => ev.name === eventName
-                    )
+                        return events.find(
+                            ev => ev.name === eventName
+                        )
+                    }
                 })
                 .filter(ev => !!ev)
         )
@@ -1227,30 +1232,24 @@ export class ServicesBlockDomainSpecificLanguage
             }
         }
 
-        const filteredServices = toolboxServices.map(serviceClient => ({
-            serviceClient,
-            serviceBlocks: this._serviceClientBlocks.filter(
-                block => block.service === serviceClient.service
-            ),
-        }))
-        const clientServicesCategories: CategoryDefinition[] =
-            filteredServices.map<CategoryDefinition>(
-                sc =>
-                    makeCategory(
-                        sc.serviceClient.service,
-                        true,
-                        sc.serviceBlocks
-                    ) as CategoryDefinition
-            )
-        const serverServicesCategories: CategoryDefinition[] =
-            filteredServices.map<CategoryDefinition>(
-                sc =>
-                    makeCategory(
-                        sc.serviceClient.service,
-                        false,
-                        sc.serviceBlocks
-                    ) as CategoryDefinition
-            )
+        const makeServicesCategories = (client = true) =>
+            toolboxServices
+                .map(serviceClient => ({
+                    serviceClient,
+                    serviceBlocks: this._serviceClientBlocks.filter(
+                        block => block.service === serviceClient.service
+                    ),
+                }))
+                .map<CategoryDefinition>(
+                    sc =>
+                        makeCategory(
+                            sc.serviceClient.service,
+                            client,
+                            sc.serviceBlocks
+                        ) as CategoryDefinition
+                )
+        const clientServicesCategories = makeServicesCategories()
+        const serverServicesCategories = makeServicesCategories(false)
 
         const commonCategory: CategoryDefinition = {
             kind: "category",
@@ -1462,22 +1461,22 @@ export class ServicesBlockDomainSpecificLanguage
         const { inputs } = block
         switch (template) {
             case "register_set": {
+                // TODO: need to handle the case of writing a register with fields
                 const { register } = definition as RegisterBlockDefinition
-                const { expr, errors } = blockToExpression(
-                    event,
-                    inputs[0].child
-                )
+                const exprsErrors = inputs.map(a => {
+                    return blockToExpression(event, a.child)
+                })
                 const { value: role } = inputs[0].fields.role
                 return {
                     cmd: makeVMBase(block, {
                         type: "CallExpression",
                         arguments: [
                             toMemberExpression(role as string, register.name),
-                            expr,
+                            ...exprsErrors.map(p => p.expr),
                         ],
                         callee: toIdentifier("writeRegister"),
                     }),
-                    errors,
+                    errors: exprsErrors.flatMap(p => p.errors)
                 }
             }
             case "raiseNo":
