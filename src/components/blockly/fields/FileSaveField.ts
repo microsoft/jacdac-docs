@@ -7,18 +7,13 @@ export default class FileSaveField extends Field {
     private fileType: string
 
     constructor(options?: any) {
-        super(null, null, options)
-
+        super("", null, options)
         this.fileType = options?.fileType || "csv"
     }
     fileHandle: FileSystemFileHandle
 
     static fromJson(options: any) {
         return new FileSaveField(options)
-    }
-
-    getText_() {
-        return this.fileHandle?.name || "???"
     }
 
     showEditor_() {
@@ -52,8 +47,7 @@ export default class FileSaveField extends Field {
             ].filter(({ id }) => this.fileType === id),
             excludeAcceptAllOption: true,
         }
-        this.fileHandle = await window.showSaveFilePicker(options)
-        this.setValue(this.fileHandle?.name)
-        this.markDirty()
+        this.fileHandle = await window.showSaveFilePicker?.(options)
+        this.setValue(this.fileHandle?.name || "")
     }
 }
