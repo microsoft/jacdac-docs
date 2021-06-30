@@ -19,7 +19,8 @@ import GaugeWidgetField from "./GaugeWidgetField"
 import BuiltinDataSetField from "./BuiltinDataSetField"
 import BarChartField from "./BarField"
 import PiePlotField from "./PieField"
-import ModelBlockField from "./ModelBlockField"
+
+import ModelBlockField from "./ModelBlockFields/ModelBlockField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
