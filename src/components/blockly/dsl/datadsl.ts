@@ -29,8 +29,12 @@ import {
     DataMutateColumnsRequest,
     DataMutateNumberRequest,
     DataRecordWindowRequest,
+    DataBinRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
+import FileSaveField from "../fields/FileSaveField"
+import { saveCSV, openCSV } from "./workers/csv.proxy"
+import FileOpenField from "../fields/FileOpenField"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -46,7 +50,10 @@ const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
 const DATA_TABLE_TYPE = "DataTable"
 const DATA_SHOW_TABLE_BLOCK = "data_show_table"
-const DATA_RECORD_WINDOW_BLOCK = "data_record_window_block"
+const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
+const DATA_BIN_BLOCK = "data_bin"
+const DATA_LOAD_FILE_BLOCK = "data_load_file"
+const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
 const colour = "#777"
 const dataDsl: BlockDomainSpecificLanguage = {
@@ -420,7 +427,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             args0: [
                 {
                     type: BuiltinDataSetField.KEY,
-                    name: "dateset",
+                    name: "dataset",
                 },
             ],
             inputsInline: false,
@@ -470,6 +477,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             colour,
             template: "meta",
+            alwaysTransformData: true,
             transformData: (block: BlockSvg, data: object[]) => {
                 // grab the variable from the block
                 const variable = block.getFieldValue("data")
@@ -478,12 +486,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     DATA_DATAVARIABLE_READ_BLOCK,
                     false
                 )
-                readBlocks
+                const readServices = readBlocks
                     .filter(b => b.isEnabled())
                     .filter(b => b.getFieldValue("data") === variable)
                     .map(b => (b as BlockWithServices).jacdacServices)
                     .filter(services => !!services)
-                    .forEach(services => (services.data = data))
+                readServices.forEach(services => (services.data = data))
                 return Promise.resolve(data)
             },
         },
@@ -517,6 +525,69 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 })
             },
         },
+        <BlockDefinition>{
+            kind: "block",
+            type: DATA_BIN_BLOCK,
+            message0: "bin %1",
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column",
+                },
+            ],
+            inputsInline: false,
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            transformData: async (block: BlockSvg, data: object[]) => {
+                const column = block.getFieldValue("column")
+                return postTransformData(<DataBinRequest>{
+                    type: "bin",
+                    column,
+                    data,
+                })
+            },
+        },
+        {
+            kind: "block",
+            type: DATA_LOAD_FILE_BLOCK,
+            message0: "dataset from file %1",
+            args0: [
+                {
+                    type: FileOpenField.KEY,
+                    name: "file",
+                },
+            ],
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            inputsInline: false,
+            transformData: identityTransformData,
+        },
+        {
+            kind: "block",
+            type: DATA_SAVE_FILE_BLOCK,
+            message0: "save dataset to file %1",
+            args0: [
+                {
+                    type: FileSaveField.KEY,
+                    name: "file",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            inputsInline: false,
+            alwaysTransformData: true,
+            transformData: async (block, data) => {
+                const file = block.getField("file") as FileSaveField
+                if (file?.fileHandle && data)
+                    await saveCSV(file.fileHandle, data)
+                return data
+            },
+        },
     ],
     createCategory: () => [
         <CategoryDefinition>{
@@ -531,6 +602,14 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_DATASET_BUILTIN_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_LOAD_FILE_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_SAVE_FILE_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",
@@ -568,6 +647,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_BIN_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",

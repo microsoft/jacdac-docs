@@ -19,6 +19,8 @@ import GaugeWidgetField from "./GaugeWidgetField"
 import BuiltinDataSetField from "./BuiltinDataSetField"
 import BarChartField from "./BarField"
 import PiePlotField from "./PieField"
+import FileSaveField from "./FileSaveField"
+import FileOpenField from "./FileOpenField"
 
 import ModelBlockField from "./ModelBlockFields/ModelBlockField"
 
@@ -66,6 +68,9 @@ export function registerFields() {
         PiePlotField,
 
         ModelBlockField,
+        
+        FileSaveField,
+        FileOpenField,
     ]
     fieldTypes.forEach(registerType)
 }
