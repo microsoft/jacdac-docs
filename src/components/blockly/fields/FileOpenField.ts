@@ -2,7 +2,37 @@
 import { Block, Field } from "blockly"
 import { parseCSV } from "../dsl/workers/csv.proxy"
 import { BlockWithServices, FieldWithServices } from "../WorkspaceContext"
-import { fileOpen } from "browser-fs-access"
+
+// inline browser-fs-access until issue of ssr is fixed
+const getFileWithHandle = async handle => {
+    const file = await handle.getFile()
+    file.handle = handle
+    return file
+}
+const fileOpen = async (options: any = {}) => {
+    const accept = {}
+    if (options.mimeTypes) {
+        options.mimeTypes.map(mimeType => {
+            accept[mimeType] = options.extensions || []
+        })
+    } else {
+        accept["*/*"] = options.extensions || []
+    }
+    const handleOrHandles = await window.showOpenFilePicker({
+        types: [
+            {
+                description: options.description || "",
+                accept: accept,
+            },
+        ],
+        multiple: options.multiple || false,
+    })
+    const files = await Promise.all(handleOrHandles.map(getFileWithHandle))
+    if (options.multiple) {
+        return files
+    }
+    return files[0]
+}
 
 interface FileOpenFieldValue {
     name: string
@@ -13,7 +43,7 @@ export default class FileOpenField extends Field implements FieldWithServices {
     static KEY = "jacdac_field_file_open"
     SERIALIZABLE = true
     // eslint-disable-next-line @typescript-eslint/ban-types
-    private data: object[]
+    private _data: object[]
 
     constructor(options?: any) {
         super("...", null, options)
@@ -21,6 +51,22 @@ export default class FileOpenField extends Field implements FieldWithServices {
 
     static fromJson(options: any) {
         return new FileOpenField(options)
+    }
+
+    toXml(fieldElement: Element) {
+        fieldElement.textContent = JSON.stringify(this.value_)
+        return fieldElement
+    }
+
+    fromXml(fieldElement: Element) {
+        try {
+            const v = JSON.parse(fieldElement.textContent)
+            this.value_ = v
+            this.parseSource()
+        } catch (e) {
+            console.log(e, { text: fieldElement.textContent })
+            this.value_ = undefined
+        }
     }
 
     getText_() {
@@ -34,7 +80,16 @@ export default class FileOpenField extends Field implements FieldWithServices {
 
     doValueUpdate_(newValue) {
         super.doValueUpdate_(newValue)
-        this.updateData()
+        this.parseSource()
+    }
+
+    private async parseSource() {
+        const source = (this.value_ as FileOpenFieldValue)?.source
+        if (source) {
+            const csv = await parseCSV(source)
+            this._data = csv?.data
+            this.updateData()
+        }
     }
 
     notifyServicesChanged() {
@@ -45,7 +100,7 @@ export default class FileOpenField extends Field implements FieldWithServices {
         const block = this.getSourceBlock() as BlockWithServices
         const services = block?.jacdacServices
         if (!services) return
-        services.data = this.data
+        services.data = this._data
     }
 
     showEditor_() {
@@ -60,10 +115,7 @@ export default class FileOpenField extends Field implements FieldWithServices {
             multiple: false,
         })
         if (!file) return
-
         const source = await file.text()
-        const csv = await parseCSV(source)
-        this.data = csv?.data
         this.setValue(<FileOpenFieldValue>{
             name: file.name,
             source,
