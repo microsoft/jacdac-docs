@@ -20,6 +20,7 @@ import BuiltinDataSetField from "./BuiltinDataSetField"
 import BarChartField from "./BarField"
 import PiePlotField from "./PieField"
 import FileSaveField from "./FileSaveField"
+import FileOpenField from "./FileOpenField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -65,6 +66,7 @@ export function registerFields() {
         PiePlotField,
 
         FileSaveField,
+        FileOpenField,
     ]
     fieldTypes.forEach(registerType)
 }

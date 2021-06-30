@@ -16,11 +16,18 @@ export interface CsvDownloadRequest extends CsvRequest {
     type: "download"
 }
 
-export interface CsvSaveRequest extends CsvRequest {
-    type: "save"
+export interface CsvFileRequest extends CsvRequest {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fileHandle: any /* FileSystemFileHandle */
+}
+
+export interface CsvSaveRequest extends CsvFileRequest {
+    type: "save"
     data: object[]
+}
+
+export interface CsvOpenRequest extends CsvFileRequest {
+    type: "open"
 }
 
 export interface CsvFile {
@@ -49,6 +56,8 @@ function downloadCSV(url: string): Promise<CsvFile> {
             download: true,
             header: true,
             dynamicTyping: true,
+            skipEmptyLines: true,
+            comments: "#",
             transformHeader: (h: string) => h.trim().toLocaleLowerCase(),
             complete: (r: CsvFile) => resolve(r),
         })
@@ -77,6 +86,22 @@ const handlers: { [index: string]: (msg: CsvRequest) => Promise<object> } = {
         await writable.close()
 
         return {}
+    },
+    open: async (msg: CsvOpenRequest) => {
+        const { fileHandle } = msg
+        const file = await fileHandle.getFile()
+        const contents = await file.text()
+
+        return new Promise<{ file: CsvFile }>(resolve => {
+            Papa.parse(contents, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                comments: "#",
+                transformHeader: (h: string) => h.trim().toLocaleLowerCase(),
+                complete: (r: CsvFile) => resolve({ file: r }),
+            })
+        })
     },
 }
 

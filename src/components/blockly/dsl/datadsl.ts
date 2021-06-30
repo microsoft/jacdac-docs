@@ -33,7 +33,8 @@ import {
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
-import { saveCSV } from "./workers/csv.proxy"
+import { saveCSV, openCSV } from "./workers/csv.proxy"
+import FileOpenField from "../fields/FileOpenField"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -51,6 +52,7 @@ const DATA_TABLE_TYPE = "DataTable"
 const DATA_SHOW_TABLE_BLOCK = "data_show_table"
 const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
 const DATA_BIN_BLOCK = "data_bin"
+const DATA_LOAD_FILE_BLOCK = "data_load_file"
 const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
 const colour = "#777"
@@ -549,8 +551,24 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
         {
             kind: "block",
+            type: DATA_LOAD_FILE_BLOCK,
+            message0: "load file %1",
+            args0: [
+                {
+                    type: FileOpenField.KEY,
+                    name: "file",
+                },
+            ],
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            inputsInline: false,
+            transformData: identityTransformData,
+        },
+        {
+            kind: "block",
             type: DATA_SAVE_FILE_BLOCK,
-            message0: "save to file %1",
+            message0: "save file %1",
             args0: [
                 {
                     type: FileSaveField.KEY,
@@ -584,6 +602,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_DATASET_BUILTIN_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_LOAD_FILE_BLOCK,
                 },
                 <BlockReference>{
                     kind: "block",

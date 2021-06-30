@@ -25,22 +25,19 @@ export default class BuiltinDataSetField
         super(() => Object.keys(builtins).map(k => [k, k]), undefined, options)
     }
 
-    private updateData() {
+    private async updateData() {
         const url = builtins[this.getValue()]
         if (!url) return
 
         // load dataset as needed
         const sourceBlock = this.getSourceBlock() as BlockWithServices
         const services = sourceBlock?.jacdacServices
-        if (!services) return
+        if (!services || services.cache[BuiltinDataSetField.KEY] === url) return // already downloaded
 
-        if (services.cache[BuiltinDataSetField.KEY] === url) return // already downloaded
-
-        downloadCSV(url).then(({ data, errors }) => {
-            console.debug(`csv parse`, { data, errors })
-            services.data = data
-            services.cache[BuiltinDataSetField.KEY] = url
-        })
+        const { data, errors } = await downloadCSV(url)
+        console.debug(`csv parse`, { data, errors })
+        services.cache[BuiltinDataSetField.KEY] = url
+        services.data = data
     }
 
     setSourceBlock(block: Block) {

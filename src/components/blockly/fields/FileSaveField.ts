@@ -7,7 +7,7 @@ export default class FileSaveField extends Field {
     private fileType: string
 
     constructor(options?: any) {
-        super("", null, options)
+        super("...", null, options)
         this.fileType = options?.fileType || "csv"
     }
     fileHandle: FileSystemFileHandle
