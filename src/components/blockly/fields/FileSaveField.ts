@@ -3,7 +3,7 @@ import { Field } from "blockly"
 
 export default class FileSaveField extends Field {
     static KEY = "jacdac_field_file_save"
-    static SERIALIZABLE = true
+    SERIALIZABLE = true
     private fileType: string
 
     constructor(options?: any) {
