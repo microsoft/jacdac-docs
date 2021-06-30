@@ -32,6 +32,8 @@ import {
     DataBinRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
+import FileSaveField from "../fields/FileSaveField"
+import { saveCSV } from "./workers/csv.proxy"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -47,8 +49,9 @@ const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
 const DATA_TABLE_TYPE = "DataTable"
 const DATA_SHOW_TABLE_BLOCK = "data_show_table"
-const DATA_RECORD_WINDOW_BLOCK = "data_record_window_block"
-const DATA_BIN_BLOCK = "data_bin_block"
+const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
+const DATA_BIN_BLOCK = "data_bin"
+const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
 const colour = "#777"
 const dataDsl: BlockDomainSpecificLanguage = {
@@ -542,6 +545,29 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     column,
                     data,
                 })
+            },
+        },
+        {
+            kind: "block",
+            type: DATA_SAVE_FILE_BLOCK,
+            message0: "save to file %1",
+            args0: [
+                {
+                    type: FileSaveField.KEY,
+                    name: "file",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            inputsInline: false,
+            alwaysTransformData: true,
+            transformData: async (block, data) => {
+                const file = block.getField("file") as FileSaveField
+                if (file?.fileHandle && data)
+                    await saveCSV(file.fileHandle, data)
+                return data
             },
         },
     ],

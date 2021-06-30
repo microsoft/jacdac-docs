@@ -1,13 +1,12 @@
 import { BlockWithServices, FieldWithServices } from "../WorkspaceContext"
 import { Block, FieldDropdown } from "blockly"
 import { withPrefix } from "gatsby"
-import postLoadCSV from "../dsl/workers/csv.proxy"
+import { downloadCSV } from "../dsl/workers/csv.proxy"
 
 const builtins = {
     cereal: withPrefix("/datasets/cereal.csv"),
     penguins: withPrefix("/datasets/penguins.csv"),
     mt: withPrefix("/datasets/mt.csv"),
-    
 }
 
 export default class BuiltinDataSetField
@@ -37,7 +36,7 @@ export default class BuiltinDataSetField
 
         if (services.cache[BuiltinDataSetField.KEY] === url) return // already downloaded
 
-        postLoadCSV(url).then(({ data, errors }) => {
+        downloadCSV(url).then(({ data, errors }) => {
             console.debug(`csv parse`, { data, errors })
             services.data = data
             services.cache[BuiltinDataSetField.KEY] = url
