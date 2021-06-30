@@ -27,7 +27,6 @@ export default function VMToolbar(props: {
                 <VMStartSimulatorButton />
             </Grid>
             <BlockClientRoles />
-            <BlockServerRoles runner={runner} />
         </Grid>
     )
 }

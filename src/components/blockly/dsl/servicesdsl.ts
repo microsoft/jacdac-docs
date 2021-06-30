@@ -800,6 +800,36 @@ export class ServicesBlockDomainSpecificLanguage
         const registerSetClientBlocks = makeRegisterSetBlocks()
         const registerSetServerBlocks = makeRegisterSetBlocks(false)
 
+        const makeRegisterSetRequestBlocks = (isGet: boolean) =>
+            registers
+                .filter(
+                    r =>
+                        (isGet &&
+                            (r.register.kind === "ro" ||
+                                r.register.kind === "rw")) ||
+                        (!isGet && r.register.kind == "rw")
+                )
+                .map<EventBlockDefinition>(({ service, register }) => ({
+                    kind: "block",
+                    type: `jacdac_register_${isGet ? "get" : "set"}_request_${
+                        service.shortId
+                    }_${register.name}`,
+                    message0: `on register ${
+                        isGet ? "get" : "set"
+                    } %1 ${humanify(register.name)}`,
+                    args0: [roleVariable(service, false)],
+                    colour: serviceColor(service),
+                    inputsInline: true,
+                    nextStatement: CODE_STATEMENT_TYPE,
+                    tooltip: register.description,
+                    helpUrl: serviceHelp(service),
+                    service,
+                    events: [register],
+                    template: "event",
+                }))
+        const registerSetRequestBlocks = makeRegisterSetRequestBlocks(false)
+        const registerGetRequestBlocks = makeRegisterSetRequestBlocks(true)
+
         const commandClientBlocks = commands.map<CommandBlockDefinition>(
             ({ service, command }) => ({
                 kind: "block",
@@ -859,6 +889,8 @@ export class ServicesBlockDomainSpecificLanguage
             ...registerNumericsGetServerBlocks,
             ...registerSetServerBlocks,
             ...commandServerBlocks,
+            ...registerSetRequestBlocks,
+            ...registerGetRequestBlocks
             // ...registerChangeByEventServerBlocks,
         ]
 
@@ -1183,7 +1215,10 @@ export class ServicesBlockDomainSpecificLanguage
             )
             .sort((l, r) => l.name.localeCompare(r.name))
 
-        const getFieldBlocks = (service: jdspec.ServiceSpec, fieldBlocks: EventFieldDefinition[]) =>
+        const getFieldBlocks = (
+            service: jdspec.ServiceSpec,
+            fieldBlocks: EventFieldDefinition[]
+        ) =>
             fieldBlocks
                 .filter(
                     ev => ev.service === service && usedEvents.has(ev.event)
@@ -1223,7 +1258,12 @@ export class ServicesBlockDomainSpecificLanguage
                         type: block.type,
                         values: block.values,
                     })),
-                    ...getFieldBlocks(service, isClient ? this._eventFieldClientBlocks : this._commandFieldServerBlocks),
+                    ...getFieldBlocks(
+                        service,
+                        isClient
+                            ? this._eventFieldClientBlocks
+                            : this._commandFieldServerBlocks
+                    ),
                 ],
             }
         }
