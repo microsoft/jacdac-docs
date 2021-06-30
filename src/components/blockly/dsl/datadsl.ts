@@ -585,6 +585,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     kind: "block",
                     type: DATA_DATASET_BUILTIN_BLOCK,
                 },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_SAVE_FILE_BLOCK,
+                },
                 <LabelDefinition>{
                     kind: "label",
                     text: "Operators",
@@ -656,10 +660,6 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_DATAVARIABLE_WRITE_BLOCK,
-                },
-                <BlockReference>{
-                    kind: "block",
-                    type: DATA_SAVE_FILE_BLOCK,
                 },
             ],
         },
