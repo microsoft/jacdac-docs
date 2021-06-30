@@ -32,7 +32,6 @@
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
     "blockly": "^5.20210325.1",
-    "browser-fs-access": "^0.17.3",
     "compare-versions": "^3.6.0",
     "concurrently": "^6.2.0",
     "d3-array": "^3.0.1",
