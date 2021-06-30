@@ -52,8 +52,8 @@ export default class FileSaveField extends Field {
             ].filter(({ id }) => this.fileType === id),
             excludeAcceptAllOption: true,
         }
-        console.log("save options", options)
         this.fileHandle = await window.showSaveFilePicker(options)
         this.setValue(this.fileHandle?.name)
+        this.markDirty()
     }
 }
