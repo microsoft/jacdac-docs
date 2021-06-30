@@ -24,12 +24,11 @@ export default function RoleChip(props: {
     role: string
     serviceShortId: string
     service: JDService
-    server: JDServiceServer
 }) {
     const { workspace } = useContext(BlockContext)
-    const { role, service, serviceShortId, server } = props
+    const { role, service, serviceShortId } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const serviceServer = server ? server : useServiceServer(service)
+    const serviceServer = useServiceServer(service)
     const handleRoleClick = () => {
         // spin off simulator
         if (!service) {
@@ -39,8 +38,7 @@ export default function RoleChip(props: {
                     bus,
                     serviceProviderDefinitionFromServiceClass(
                         specification.classIdentifier
-                    ),
-                    server
+                    )
                 )
             }
         }
@@ -62,7 +60,7 @@ export default function RoleChip(props: {
                 twinBlock = workspace.newBlock(TWIN_BLOCK) as BlockSvg
                 const variable = workspace.getVariable(
                     role,
-                    `${serviceShortId}:${server ? "server" : "client"}`
+                    `${serviceShortId}:client`
                 )
                 console.log(`new twin`, { twinBlock, variable })
                 const field = twinBlock.inputList[0].fieldRow.find(
@@ -78,7 +76,6 @@ export default function RoleChip(props: {
         }
     }
 
-    // TODO: do we allow delete on the server role?
     const handleDelete = () => bus.removeServiceProvider(serviceServer.device)
     return (
         <Chip
