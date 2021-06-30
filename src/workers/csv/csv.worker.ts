@@ -26,8 +26,9 @@ export interface CsvSaveRequest extends CsvFileRequest {
     data: object[]
 }
 
-export interface CsvOpenRequest extends CsvFileRequest {
-    type: "open"
+export interface CsvParseRequest extends CsvRequest {
+    type: "parse"
+    source: string
 }
 
 export interface CsvFile {
@@ -87,13 +88,11 @@ const handlers: { [index: string]: (msg: CsvRequest) => Promise<object> } = {
 
         return {}
     },
-    open: async (msg: CsvOpenRequest) => {
-        const { fileHandle } = msg
-        const file = await fileHandle.getFile()
-        const contents = await file.text()
+    parse: async (msg: CsvParseRequest) => {
+        const { source } = msg
 
         return new Promise<{ file: CsvFile }>(resolve => {
-            Papa.parse(contents, {
+            Papa.parse(source, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,

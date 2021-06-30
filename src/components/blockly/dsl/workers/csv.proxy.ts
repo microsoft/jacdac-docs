@@ -3,7 +3,7 @@ import workerProxy from "./proxy"
 import {
     CsvDownloadRequest,
     CsvSaveRequest,
-    CsvOpenRequest,
+    CsvParseRequest,
     CsvFile,
     CsvResponse,
 } from "../../../../workers/csv/dist/node_modules/csv.worker"
@@ -31,15 +31,12 @@ export async function saveCSV(
     })
 }
 
-export async function openCSV(
-    fileHandle: FileSystemFileHandle
-): Promise<CsvFile> {
+export async function parseCSV(source: string): Promise<CsvFile> {
     const worker = workerProxy("csv")
-    const resp = await worker.postMessage<CsvOpenRequest, CsvResponse>({
+    const resp = await worker.postMessage<CsvParseRequest, CsvResponse>({
         worker: "csv",
-        type: "open",
-        fileHandle,
+        type: "parse",
+        source,
     })
-    console.log(`open resp`, resp)
     return resp?.file
 }
