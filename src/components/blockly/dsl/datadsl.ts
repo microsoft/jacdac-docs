@@ -657,6 +657,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     kind: "block",
                     type: DATA_DATAVARIABLE_WRITE_BLOCK,
                 },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_SAVE_FILE_BLOCK,
+                },
             ],
         },
     ],

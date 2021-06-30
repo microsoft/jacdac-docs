@@ -3,14 +3,19 @@ import { Field } from "blockly"
 
 export default class FileSaveField extends Field {
     static KEY = "jacdac_field_file_save"
+    static SERIALIZABLE = true
     private fileType: string
 
-    constructor(value: string, validator?: any, options?: any) {
-        super(value, validator, options)
+    constructor(options?: any) {
+        super(null, null, options)
 
         this.fileType = options?.fileType || "csv"
     }
     fileHandle: FileSystemFileHandle
+
+    static fromJson(options: any) {
+        return new FileSaveField(options)
+    }
 
     getText_() {
         return this.fileHandle?.name || "???"
