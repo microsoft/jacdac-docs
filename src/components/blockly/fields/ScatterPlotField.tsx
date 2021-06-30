@@ -8,10 +8,11 @@ import { PointerBoundary } from "./PointerBoundary"
 import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
 import { tidyToNivo } from "./nivo"
+import { CHART_HEIGHT, CHART_WIDTH } from "../toolbox"
 const ScatterPlot = lazy(() => import("./ScatterPlot"))
 
 function ScatterChartWidget() {
-    const { sourceBlock } = useContext(WorkspaceContext)
+    const { sourceBlock, dragging } = useContext(WorkspaceContext)
     const { data } = useBlockData(sourceBlock)
 
     // need to map data to nivo
@@ -27,6 +28,7 @@ function ScatterChartWidget() {
         yScale: { type: "linear", min: "auto", max: "auto" },
         axisTop: null,
         axisRight: null,
+        isInteractive: false,
         axisBottom: {
             tickSize: 5,
             tickPadding: 5,
@@ -44,7 +46,10 @@ function ScatterChartWidget() {
             legendOffset: -32,
         },
     })
-    if (chartProps) chartProps.data = series
+    if (chartProps) {
+        chartProps.animate = !dragging
+        chartProps.data = series
+    }
 
     const hasData =
         labels?.length === 2 &&
@@ -55,12 +60,17 @@ function ScatterChartWidget() {
     chartProps.axisBottom.legend = labels[0]
     chartProps.axisLeft.legend = labels[1]
 
+    console.log("scatter", { x, y, series, chartProps })
     return (
         <NoSsr>
             <div style={{ background: "#fff", borderRadius: "0.25rem" }}>
                 <PointerBoundary>
                     <Suspense>
-                        <ScatterPlot width={388} height={240} {...chartProps} />
+                        <ScatterPlot
+                            width={CHART_WIDTH}
+                            height={CHART_HEIGHT}
+                            {...chartProps}
+                        />
                     </Suspense>
                 </PointerBoundary>
             </div>
