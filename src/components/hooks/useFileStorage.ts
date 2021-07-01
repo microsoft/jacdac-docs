@@ -8,9 +8,14 @@ export default function useFileStorage(
 
     // initial load
     useEffectAsync(async () => {
-        const file = await fileHandle?.getFile()
-        const value = await file?.text()
-        setStoredValue(value)
+        try {
+            const file = await fileHandle?.getFile()
+            const value = await file?.text()
+            setStoredValue(value)
+        } catch (e) {
+            console.debug(e)
+            setStoredValue(undefined)
+        }
     }, [fileHandle])
 
     // Return a wrapped version of useState's setter function that ...
@@ -20,11 +25,11 @@ export default function useFileStorage(
             setStoredValue(value)
             if (fileHandle) {
                 const writable = await fileHandle.createWritable()
-                await writable.write(value)
+                await writable.write(value || "")
                 await writable.close()
             }
-        } catch (error) {
-            console.log(error)
+        } catch (e) {
+            console.debug(e)
         }
     }
 
