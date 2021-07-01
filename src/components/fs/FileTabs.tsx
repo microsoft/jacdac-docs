@@ -14,21 +14,22 @@ function FileChip(props: { file: FileSystemHandle }) {
 
 export default function FileTabs(props: { storageKey: string }) {
     const { storageKey } = props
-    const { files, directory, supported, showDirectoryPicker } =
+    const { files, directory, supported, showDirectoryPicker, clearDirectory } =
         useDirectoryFileHandles(storageKey)
 
     const handleOpenDirectory = () => showDirectoryPicker()
+    const handleCloseDirectory = () => clearDirectory()
 
     if (!supported) return null
     return (
         <Grid container spacing={1}>
             <Grid item>
-                <IconButtonWithTooltip
+                <Chip
+                    avatar={<OpenInBrowserIcon />}
+                    label={directory?.name || "open directory"}
                     onClick={handleOpenDirectory}
-                    title="open directory"
-                >
-                    <OpenInBrowserIcon />
-                </IconButtonWithTooltip>
+                    onDelete={directory ? handleCloseDirectory : undefined}
+                />
             </Grid>
             {files?.map(file => (
                 <Grid item key={file.name}>

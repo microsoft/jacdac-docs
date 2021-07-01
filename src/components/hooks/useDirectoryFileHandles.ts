@@ -3,8 +3,7 @@ import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
 
 export default function useDirectoryFileHandles(storkageKey: string) {
-    const { supported, directory, showDirectoryPicker } =
-        useDirectoryHandle(storkageKey)
+    const { directory, ...rest } = useDirectoryHandle(storkageKey)
     const [files, setFiles] = useState<FileSystemFileHandle[]>([])
 
     useEffectAsync(async () => {
@@ -19,9 +18,8 @@ export default function useDirectoryFileHandles(storkageKey: string) {
     }, [directory])
 
     return {
-        supported,
-        showDirectoryPicker,
         directory,
         files,
+        ...rest,
     }
 }

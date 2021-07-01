@@ -37,6 +37,7 @@ export default function useDirectoryHandle(storageKey: string) {
               directories.set(storageKey, dir)
           }
         : undefined
+    const clearDirectory = () => directories?.set(storageKey, undefined)
     useChange(
         directories,
         async () => {
@@ -60,5 +61,6 @@ export default function useDirectoryHandle(storageKey: string) {
         supported,
         showDirectoryPicker,
         directory,
+        clearDirectory,
     }
 }
