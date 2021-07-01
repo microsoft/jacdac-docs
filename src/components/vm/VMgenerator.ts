@@ -15,7 +15,7 @@ import {
 } from "../blockly/toolbox"
 import Blockly from "blockly"
 import BlockDomainSpecificLanguage, { resolveDsl } from "../blockly/dsl/dsl"
-import { parseRoleType } from "../blockly/dsl/servicesdsl"
+import { parseRoleType } from "../blockly/dsl/servicesbase"
 import { splitFilter } from "../../../jacdac-ts/src/jdom/utils"
 
 export interface ExpressionWithErrors {
