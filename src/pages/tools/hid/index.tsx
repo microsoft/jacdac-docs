@@ -2,6 +2,7 @@ import React, { lazy, useContext, useEffect, useRef, useState } from "react"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import {
     Card,
+    CardHeader,
     CardActions,
     CardContent,
     Dialog,
@@ -41,7 +42,10 @@ import useServices from "../../../components/hooks/useServices"
 import { Button } from "gatsby-theme-material-ui"
 import Alert from "../../../components/ui/Alert"
 import GridHeader from "../../../components/ui/GridHeader"
-import { humanify } from "../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
+import {
+    humanify,
+    capitalize,
+} from "../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import ConnectAlert from "../../../components/alert/ConnectAlert"
 import DeviceCardHeader from "../../../components/DeviceCardHeader"
 import useGridBreakpoints from "../../../components/useGridBreakpoints"
@@ -51,8 +55,11 @@ import AppContext from "../../../components/AppContext"
 import { AlertTitle } from "@material-ui/lab"
 import { renderKeyboardKey } from "../../../../jacdac-ts/src/servers/hidkeyboardserver"
 import SelectWithLabel from "../../../components/ui/SelectWithLabel"
-import KeyboardOutlined from "@material-ui/icons/KeyboardOutlined"
-import { MouseOutlined } from "@material-ui/icons"
+import {
+    MouseOutlined,
+    GamepadOutlined,
+    KeyboardOutlined,
+} from "@material-ui/icons"
 import { MouseInput } from "./mouse"
 import {
     ThresholdConfigurator,
@@ -76,6 +83,7 @@ interface HIDEvent {
     selector: number
     modifiers: HidKeyboardModifiers
     deviceId: string
+    serviceIndex: number
 }
 
 function HIDEventToBuffer(event: JDEvent, ev: HIDEvent) {
@@ -115,14 +123,17 @@ function bufferToHIDEvent(key: string, data: Uint8Array, bus: JDBus): HIDEvent {
         selector,
         modifiers,
         deviceId,
+        serviceIndex,
     }
 }
 
-function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
-    const { onAdd } = props
-    const [selectedService, setService] = useState<JDService>()
+function SelectHIDEvent(props: {
+    onAdd: (hidEvent: HIDEvent) => void
+    service: JDService
+}) {
+    const { onAdd, service } = props
     const [selected, setSelected] = useState("")
-    const [selectedDataSource, setSelectedData] = useState("")
+    const [selectedDataSource, setSelectedData] = useState("event")
     const [selector, setSelector] = useState(0)
     const [modifiers, setModifiers] = useState(HidKeyboardModifiers.None)
     const [inputType, setInputType] = useState("")
@@ -149,23 +160,27 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
     ]
     const eventFilter = (ev: JDEvent) =>
         ev.code !== SystemEvent.StatusCodeChanged
-    const services = useServices({ ignoreSelf: true, specification: true })
-        .filter(srv => excludedServices.indexOf(srv.serviceClass) < 0)
-        .filter(srv => srv.events.some(eventFilter))
 
     const handleClickEventKeyboard = (service: JDService) => () => {
-        setService(service)
         setInputType("keyboard")
     }
     const handleClickEventMouse = (service: JDService) => () => {
-        setService(service)
         setInputType("mouse")
     }
     const disabled = !event || !selector
-    const handleAdd = event => onAdd({ eventId: event.id, selector, modifiers })
+    const serviceIndex = service.serviceIndex
+    const deviceId = service.device.deviceId
+    const handleAdd = event =>
+        onAdd({
+            eventId: event.id,
+            selector,
+            modifiers,
+            serviceIndex,
+            deviceId,
+        })
     const handleChange = (ev: React.ChangeEvent<{ value: unknown }>) => {
         const domEvt = ev.target.value as string
-        const evt = selectedService.events.find(el => {
+        const evt = service.events.find(el => {
             return domEvt === humanify(el.name)
         })
 
@@ -184,7 +199,7 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
 
         if (tvalue === "threshold")
             setThresholdRegister(
-                selectedService.specification.packets.find(item => {
+                service.specification.packets.find(item => {
                     return item.identifierName === "reading"
                 })
             )
@@ -193,58 +208,50 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
         setSelectedData(tvalue)
     }
 
-    const handleChangeThresholdLogic = (
-        ev: React.ChangeEvent<{ value: unknown }>
-    ) => {}
-
-    const handleChangeEventLogic = (
-        ev: React.ChangeEvent<{ value: unknown }>
-    ) => {
-        // setValueDefined({
-        //     type: LogicDescriptorType.Event,
-        //     trigger: ev.target.value,
-        // })
-    }
-
     return (
         <Grid container spacing={2}>
-            {!services?.length && (
+            {!service && (
                 <Grid item xs={12}>
                     <Alert severity="info">
                         Connect your devices to bind keyboard commands.
                     </Alert>
                 </Grid>
             )}
-            {services.map(service => (
-                <Grid item xs={12} sm={6} lg={4} xl={3} key={service.id}>
-                    <Card>
-                        <DeviceCardHeader
-                            device={service.device}
-                            showAvatar={true}
-                        />
-                        <CardContent>
-                            <Typography variant="h4">{service.name}</Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button
-                                onClick={handleClickEventKeyboard(service)}
-                                variant={"outlined"}
-                                startIcon={<KeyboardOutlined />}
-                            >
-                                {"Map to keyboard"}
-                            </Button>
-                            <Button
-                                onClick={handleClickEventMouse(service)}
-                                variant={"outlined"}
-                                startIcon={<MouseOutlined />}
-                            >
-                                {"Map to mouse"}
-                            </Button>
-                        </CardActions>
-                    </Card>
-                </Grid>
-            ))}
-            {selectedService && inputType && (
+            {service && !inputType && (
+                <>
+                    <Grid item xs={2}>
+                        <Button
+                            onClick={handleClickEventKeyboard(service)}
+                            variant={"outlined"}
+                            startIcon={<KeyboardOutlined />}
+                            fullWidth={true}
+                        >
+                            {"Bind to keyboard"}
+                        </Button>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <Button
+                            onClick={handleClickEventMouse(service)}
+                            variant={"outlined"}
+                            startIcon={<MouseOutlined />}
+                            fullWidth={true}
+                        >
+                            {"Bind to mouse"}
+                        </Button>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <Button
+                            onClick={handleClickEventMouse(service)}
+                            variant={"outlined"}
+                            startIcon={<GamepadOutlined />}
+                            fullWidth={true}
+                        >
+                            {"Bind to gamepad"}
+                        </Button>
+                    </Grid>
+                </>
+            )}
+            {service && inputType && (
                 <>
                     <GridHeader title="Pick your data source" />
                     <Grid item xs={12}>
@@ -268,13 +275,11 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
                                 value={selected}
                                 onChange={handleChange}
                             >
-                                {selectedService.events
-                                    .filter(eventFilter)
-                                    .map(ev => (
-                                        <MenuItem key={ev.name} value={ev.name}>
-                                            {humanify(ev.name)}
-                                        </MenuItem>
-                                    ))}
+                                {service.events.filter(eventFilter).map(ev => (
+                                    <MenuItem key={ev.name} value={ev.name}>
+                                        {humanify(ev.name)}
+                                    </MenuItem>
+                                ))}
                             </SelectWithLabel>
                         </Grid>
                     )}
@@ -282,7 +287,7 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
                         <ThresholdConfigurator
                             onSave={logic => setValueDefined(logic)}
                             thresholdRegister={thresholdRegister}
-                            selectedService={selectedService}
+                            selectedService={service}
                         ></ThresholdConfigurator>
                     )}
 
@@ -332,8 +337,79 @@ function SelectHIDEvent(props: { onAdd: (hidEvent: HIDEvent) => void }) {
     )
 }
 
-function HIDBinding() {
-    return <></>
+function HIDBinding(props: {
+    hidEvents: HIDEvent[]
+    settings: SettingsClient
+}) {
+    const { hidEvents, settings } = props
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const gridBreakpoints = useGridBreakpoints()
+
+    const handleRemoveBinding = (index: number) => () => {
+        const { key } = hidEvents[index]
+        if (key) settings.deleteValue(key)
+    }
+
+    return (
+        <>
+            {!hidEvents?.length && (
+                <Grid item xs>
+                    <Alert severity="info">
+                        No bindings yet! Click <strong>Add binding</strong> to
+                        start building your adapter.
+                    </Alert>
+                </Grid>
+            )}
+            {hidEvents
+                ?.map(({ eventId, selector, modifiers }) => ({
+                    eventId,
+                    event: bus.node(eventId) as JDEvent,
+                    selector,
+                    modifiers,
+                }))
+                .map(({ eventId, event, selector, modifiers }, index) => (
+                    <Grid item {...gridBreakpoints} key={eventId}>
+                        <Card>
+                            <DeviceCardHeader
+                                device={event?.service.device}
+                                showAvatar={true}
+                            />
+                            <CardContent>
+                                {event ? (
+                                    <Typography variant="h6">
+                                        {`${event.service.name} ${humanify(
+                                            event.name
+                                        )}`}
+                                    </Typography>
+                                ) : (
+                                    <Alert severity="warning">
+                                        <AlertTitle>
+                                            Device not found
+                                        </AlertTitle>
+                                    </Alert>
+                                )}
+
+                                <Typography variant="h5">
+                                    {renderKeyboardKey(
+                                        selector,
+                                        modifiers,
+                                        true
+                                    )}
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
+                                <IconButtonWithTooltip
+                                    title={"Remove binding"}
+                                    onClick={handleRemoveBinding(index)}
+                                >
+                                    <DeleteIcon />
+                                </IconButtonWithTooltip>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
+        </>
+    )
 }
 
 export default function HIDConfigurator() {
@@ -341,12 +417,16 @@ export default function HIDConfigurator() {
     const { setError } = useContext(AppContext)
     const settingsServices = useServices({ serviceClass: SRV_SETTINGS })
     const [settingsService, setSettingsService] = useState<JDService>()
+    const [selectedService, setSelectedService] = useState<JDService>()
     const [hidEvents, setHIDEvents] = useState<HIDEvent[]>([])
     const [open, setOpen] = useState(false)
     const gridBreakpoints = useGridBreakpoints()
     const exportRef = useRef()
 
-    const handleOpenAdd = () => setOpen(true)
+    const handleOpenAdd = service => () => {
+        setSelectedService(service)
+        setOpen(true)
+    }
     const handleCloseAdd = () => setOpen(false)
 
     const settings = useServiceClient(
@@ -390,11 +470,9 @@ export default function HIDConfigurator() {
 
         const payload = HIDEventToBuffer(event, hidEvent)
         settings.setValue(PREFIX + randomDeviceId(), payload)
+        console.log(settings)
     }
-    const handleRemoveBinding = (index: number) => () => {
-        const { key } = hidEvents[index]
-        if (key) settings.deleteValue(key)
-    }
+
     const handleSelectSettingsService = (service: JDService) => () =>
         setSettingsService(settingsService === service ? undefined : service)
 
@@ -487,121 +565,43 @@ export default function HIDConfigurator() {
                                     <DeviceCardHeader
                                         device={service.device}
                                         showAvatar={true}
-                                        titleText={service.name}
+                                    />
+                                    <CardHeader
+                                        title={capitalize(service.name)}
                                     />
                                     <CardContent>
-                                        <Typography variant="h5">
-                                            {service.name}
-                                        </Typography>
-                                        {!hidEvents?.length && (
-                                            <Grid item xs>
-                                                <Alert severity="info">
-                                                    No bindings yet! Click{" "}
-                                                    <strong>Add binding</strong>{" "}
-                                                    to start building your
-                                                    adapter.
-                                                </Alert>
-                                            </Grid>
-                                        )}
-                                        {hidEvents
-                                            ?.map(
-                                                ({
-                                                    eventId,
-                                                    selector,
-                                                    modifiers,
-                                                }) => ({
-                                                    eventId,
-                                                    event: bus.node(
-                                                        eventId
-                                                    ) as JDEvent,
-                                                    selector,
-                                                    modifiers,
-                                                })
-                                            )
-                                            .map(
-                                                (
-                                                    {
-                                                        eventId,
-                                                        event,
-                                                        selector,
-                                                        modifiers,
-                                                    },
-                                                    index
-                                                ) => (
-                                                    <Grid
-                                                        item
-                                                        {...gridBreakpoints}
-                                                        key={eventId}
-                                                    >
-                                                        <Card>
-                                                            <DeviceCardHeader
-                                                                device={
-                                                                    event
-                                                                        ?.service
-                                                                        .device
-                                                                }
-                                                                showAvatar={
-                                                                    true
-                                                                }
-                                                            />
-                                                            <CardContent>
-                                                                {event ? (
-                                                                    <Typography variant="h6">
-                                                                        {`${
-                                                                            event
-                                                                                .service
-                                                                                .name
-                                                                        } ${humanify(
-                                                                            event.name
-                                                                        )}`}
-                                                                    </Typography>
-                                                                ) : (
-                                                                    <Alert severity="warning">
-                                                                        <AlertTitle>
-                                                                            Device
-                                                                            not
-                                                                            found
-                                                                        </AlertTitle>
-                                                                    </Alert>
-                                                                )}
-
-                                                                <Typography variant="h5">
-                                                                    {renderKeyboardKey(
-                                                                        selector,
-                                                                        modifiers,
-                                                                        true
-                                                                    )}
-                                                                </Typography>
-                                                            </CardContent>
-                                                            <CardActions>
-                                                                <IconButtonWithTooltip
-                                                                    title={
-                                                                        "Remove binding"
-                                                                    }
-                                                                    onClick={handleRemoveBinding(
-                                                                        index
-                                                                    )}
-                                                                >
-                                                                    <DeleteIcon />
-                                                                </IconButtonWithTooltip>
-                                                            </CardActions>
-                                                        </Card>
-                                                    </Grid>
-                                                )
+                                        <HIDBinding
+                                            hidEvents={hidEvents.filter(
+                                                event =>
+                                                    event.deviceId ==
+                                                        service.device.id &&
+                                                    event.serviceIndex ==
+                                                        service.serviceIndex
                                             )}
+                                            settings={settings}
+                                        />
                                     </CardContent>
                                     <CardActions>
                                         <Button
-                                            variant={"outlined"}
-                                            startIcon={<KeyboardOutlined />}
+                                            onClick={handleOpenAdd(service)}
+                                            variant={"contained"}
+                                            color={"primary"}
                                         >
-                                            {"Map to keyboard"}
+                                            {"Add new binding"}
                                         </Button>
                                         <Button
-                                            variant={"outlined"}
-                                            startIcon={<MouseOutlined />}
+                                            variant={"contained"}
+                                            disabled={
+                                                hidEvents.filter(
+                                                    event =>
+                                                        event.deviceId ==
+                                                            service.device.id &&
+                                                        event.serviceIndex ==
+                                                            service.serviceIndex
+                                                ).length == 0
+                                            }
                                         >
-                                            {"Map to mouse"}
+                                            {"Clear all bindings"}
                                         </Button>
                                     </CardActions>
                                 </Card>
@@ -609,6 +609,20 @@ export default function HIDConfigurator() {
                         ))}
                     </>
                 )}
+                <Dialog
+                    open={open}
+                    onClose={handleCloseAdd}
+                    maxWidth={"lg"}
+                    fullWidth={true}
+                >
+                    <DialogTitle>Add binding</DialogTitle>
+                    <DialogContent>
+                        <SelectHIDEvent
+                            onAdd={handleAdd}
+                            service={selectedService}
+                        />
+                    </DialogContent>
+                </Dialog>
             </Grid>
         </>
     )
