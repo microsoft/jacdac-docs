@@ -294,120 +294,120 @@ interface ServiceRegisterField extends ServiceRegister {
     einfo: jdspec.EnumInfo
 }
 
+export const serviceHelp = (service: jdspec.ServiceSpec) => {
+    return withPrefix(`/services/${service.shortId}`)
+}
+
+export const createServiceColor = (theme: Theme) => {
+    const sensorColor = theme.palette.success.main
+    const otherColor = theme.palette.info.main
+    const serviceColor = (srv: jdspec.ServiceSpec) =>
+        isSensor(srv) ? sensorColor : otherColor
+    return serviceColor
+}
+
+export const roleVariable = (
+    service: jdspec.ServiceSpec,
+    client = true
+): VariableInputDefinition => {
+    return {
+        type: "field_variable",
+        name: "role",
+        variable: variableName(service, client),
+        variableTypes: [toRoleType(service, client)],
+        defaultType: toRoleType(service, client),
+    }
+}
+
+export const getServiceInfo = () => {
+    const allServices = serviceSpecifications()
+    const supportedServices = allServices
+        .filter(
+            service =>
+                !/^_/.test(service.shortId) &&
+                service.status !== "deprecated"
+        )
+        .filter(
+            service => ignoredServices.indexOf(service.classIdentifier) < 0
+        )
+    const registers = arrayConcatMany(
+        supportedServices.map(service =>
+            service.packets.filter(isHighLevelRegister).map(register => ({
+                service,
+                register,
+            }))
+        )
+    )
+    const [registerSimples, registerComposites] = splitFilter(
+        registers,
+        reg => reg.register.fields.length == 1
+    )
+    const [registerSimpleTypes, registerSimpleOthers] = splitFilter(
+        registerSimples,
+        ({ register }) => !!toBlocklyType(register.fields[0])
+    )
+    const registerSimpleEnumTypes = registerSimpleOthers
+        .filter(
+            ({ service, register }) =>
+                !!enumInfo(service, register.fields[0])
+        )
+        .map(({ service, register }) => ({
+            service,
+            register,
+            field: register.fields[0],
+            einfo: enumInfo(service, register.fields[0]),
+        }))
+    const registerCompositeEnumTypes = arrayConcatMany(
+        registerComposites.map(({ service, register }) =>
+            register.fields
+                .map(field => ({
+                    service,
+                    register,
+                    field,
+                    einfo: enumInfo(service, field),
+                }))
+                .filter(({ einfo }) => !!einfo)
+        )
+    )
+
+    return {
+        allServices,
+        supportedServices,
+        registers,
+        registerSimpleTypes,
+        registerComposites,
+        registerSimpleEnumTypes,
+        registerCompositeEnumTypes,
+        events: supportedServices
+            .map(service => ({
+                service,
+                events: service.packets.filter(isHighLevelEvent),
+            }))
+            .filter(kv => !!kv.events.length),
+
+        commands: arrayConcatMany(
+            supportedServices.map(service =>
+                service.packets
+                    .filter(
+                        pkt =>
+                            isCommand(pkt) &&
+                            !pkt.lowLevel &&
+                            fieldsSupported(pkt)
+                    )
+                    .map(pkt => ({
+                        service,
+                        command: pkt,
+                    }))
+            )
+        ),
+    }
+}
+
 export class ServicesBaseDSL {
-    supportedServices: jdspec.ServiceSpec[] = []
+    // only state required across methods of class
     protected _serviceBlocks: ServiceBlockDefinition[]
     protected _eventFieldBlocks: EventFieldDefinition[]
     protected serviceColor: (srv: jdspec.ServiceSpec) => string
-
-    protected serviceHelp(service: jdspec.ServiceSpec) {
-        return withPrefix(`/services/${service.shortId}`)
-    }
-
-    protected createServiceColor(theme: Theme) {
-        const sensorColor = theme.palette.success.main
-        const otherColor = theme.palette.info.main
-        const serviceColor = (srv: jdspec.ServiceSpec) =>
-            isSensor(srv) ? sensorColor : otherColor
-        return serviceColor
-    }
-
-    protected roleVariable(
-        service: jdspec.ServiceSpec,
-        client = true
-    ): VariableInputDefinition {
-        return {
-            type: "field_variable",
-            name: "role",
-            variable: variableName(service, client),
-            variableTypes: [toRoleType(service, client)],
-            defaultType: toRoleType(service, client),
-        }
-    }
-
-    protected getServiceInfo() {
-        const allServices = serviceSpecifications()
-        const supportedServices = allServices
-            .filter(
-                service =>
-                    !/^_/.test(service.shortId) &&
-                    service.status !== "deprecated"
-            )
-            .filter(
-                service => ignoredServices.indexOf(service.classIdentifier) < 0
-            )
-        const registers = arrayConcatMany(
-            supportedServices.map(service =>
-                service.packets.filter(isHighLevelRegister).map(register => ({
-                    service,
-                    register,
-                }))
-            )
-        )
-        const [registerSimples, registerComposites] = splitFilter(
-            registers,
-            reg => reg.register.fields.length == 1
-        )
-        const [registerSimpleTypes, registerSimpleOthers] = splitFilter(
-            registerSimples,
-            ({ register }) => !!toBlocklyType(register.fields[0])
-        )
-        const registerSimpleEnumTypes = registerSimpleOthers
-            .filter(
-                ({ service, register }) =>
-                    !!enumInfo(service, register.fields[0])
-            )
-            .map(({ service, register }) => ({
-                service,
-                register,
-                field: register.fields[0],
-                einfo: enumInfo(service, register.fields[0]),
-            }))
-        const registerCompositeEnumTypes = arrayConcatMany(
-            registerComposites.map(({ service, register }) =>
-                register.fields
-                    .map(field => ({
-                        service,
-                        register,
-                        field,
-                        einfo: enumInfo(service, field),
-                    }))
-                    .filter(({ einfo }) => !!einfo)
-            )
-        )
-
-        return {
-            allServices,
-            supportedServices,
-            registers,
-            registerSimpleTypes,
-            registerComposites,
-            registerSimpleEnumTypes,
-            registerCompositeEnumTypes,
-            events: supportedServices
-                .map(service => ({
-                    service,
-                    events: service.packets.filter(isHighLevelEvent),
-                }))
-                .filter(kv => !!kv.events.length),
-
-            commands: arrayConcatMany(
-                supportedServices.map(service =>
-                    service.packets
-                        .filter(
-                            pkt =>
-                                isCommand(pkt) &&
-                                !pkt.lowLevel &&
-                                fieldsSupported(pkt)
-                        )
-                        .map(pkt => ({
-                            service,
-                            command: pkt,
-                        }))
-                )
-            ),
-        }
-    }
 
     protected makeRegisterSimpleGetBlocks(registers: ServiceRegister[], client = true) {
         return registers.map<RegisterBlockDefinition>(
@@ -419,12 +419,12 @@ export class ServicesBaseDSL {
                 message0:
                     customMessage(service, register, register.fields[0])?.get ||
                     `%1 ${humanify(register.name)}`,
-                args0: [this.roleVariable(service, client)],
+                args0: [roleVariable(service, client)],
                 inputsInline: true,
                 output: toBlocklyType(register.fields[0]),
                 colour: this.serviceColor(service),
                 tooltip: register.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 register,
                 field: register.fields[0],
@@ -451,14 +451,14 @@ export class ServicesBaseDSL {
                               : fieldsToMessage(register)
                       }`,
                 args0: [
-                    this.roleVariable(service, client),
+                    roleVariable(service, client),
                     ...fieldsToFieldInputs(register),
                 ],
                 values: fieldsToValues(service, register),
                 inputsInline: true,
                 colour: this.serviceColor(service),
                 tooltip: register.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 register,
                 previousStatement: CODE_STATEMENT_TYPE,
@@ -487,7 +487,7 @@ export class ServicesBaseDSL {
                 }${client ? "" : "_server"}`,
                 message0: `on %1 ${humanify(register.name)} change by %2`,
                 args0: [
-                    this.roleVariable(service, client),
+                    roleVariable(service, client),
                     ...fieldsToFieldInputs(register),
                 ].filter(v => !!v),
                 values: fieldsToValues(service, register),
@@ -495,7 +495,7 @@ export class ServicesBaseDSL {
                 nextStatement: CODE_STATEMENT_TYPE,
                 colour: this.serviceColor(service),
                 tooltip: `Event raised when ${register.name} changes`,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 register,
 
@@ -515,7 +515,7 @@ export class ServicesBaseDSL {
                     register.fields.length > 1 ? ` %2` : ""
                 }`,
                 args0: [
-                    this.roleVariable(service, client),
+                    roleVariable(service, client),
                     register.fields.length > 1
                         ? <OptionsInputDefinition>{
                               type: "field_dropdown",
@@ -533,7 +533,7 @@ export class ServicesBaseDSL {
                 output: "Number",
                 colour: this.serviceColor(service),
                 tooltip: register.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 register,
 
@@ -557,7 +557,7 @@ export class ServicesBaseDSL {
                         field.name === "_" ? "" : ` ${field.name}`
                     } %2`,
                 args0: [
-                    this.roleVariable(service, client),
+                    roleVariable(service, client),
                     <OptionsInputDefinition>{
                         type: "field_dropdown",
                         name: field.name,
@@ -571,7 +571,7 @@ export class ServicesBaseDSL {
                 output: "Boolean",
                 colour: this.serviceColor(service),
                 tooltip: register.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 register,
                 field,
@@ -615,7 +615,7 @@ export class ServicesBaseDSL {
                             tooltip: `Data fields of the ${pkt.name} ${
                                 client ? "event" : "command"
                             }`,
-                            helpUrl: this.serviceHelp(service),
+                            helpUrl: serviceHelp(service),
                             service,
                             event: pkt,
                             output,
@@ -635,7 +635,7 @@ export class ServicesBaseDSL {
 
     protected createCategoryHelper(options: CreateCategoryOptions) {
         const { theme, source, liveServices } = options
-        this.serviceColor = this.createServiceColor(theme)
+        this.serviceColor = createServiceColor(theme)
 
         const blockServices: { serviceShortId: string }[] =
             source?.variables
@@ -995,7 +995,7 @@ export class ServicesBlockDomainSpecificLanguage
 
     createBlocks(options: CreateBlocksOptions) {
         const { theme } = options
-        this.serviceColor = this.createServiceColor(theme)
+        this.serviceColor = createServiceColor(theme)
 
         // pure service information here
         const {
@@ -1008,9 +1008,7 @@ export class ServicesBlockDomainSpecificLanguage
             registerComposites,
             registerSimpleEnumTypes,
             registerCompositeEnumTypes,
-        } = this.getServiceInfo()
-
-        this.supportedServices = supportedServices
+        } = getServiceInfo()
 
         const resolveService = (cls: number): jdspec.ServiceSpec[] =>
             allServices.filter(srv => srv.classIdentifier === cls)
@@ -1023,7 +1021,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `key`,
                         message0: `%1 %2 key %3`,
                         args0: [
-                            this.roleVariable(service),
+                            roleVariable(service),
                             <OptionsInputDefinition>{
                                 type: "field_dropdown",
                                 name: "action",
@@ -1043,7 +1041,7 @@ export class ServicesBlockDomainSpecificLanguage
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
                         tooltip: `Send a keyboard key combo`,
-                        helpUrl: this.serviceHelp(service),
+                        helpUrl: serviceHelp(service),
                         service,
                         expression: `role.key(combo.selectors, combo.modifiers, action)`,
                         template: "custom",
@@ -1056,7 +1054,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `fade`,
                         message0: `fade %1 to %2 at speed %3`,
                         args0: [
-                            this.roleVariable(service),
+                            roleVariable(service),
                             {
                                 type: "input_value",
                                 name: "color",
@@ -1083,7 +1081,7 @@ export class ServicesBlockDomainSpecificLanguage
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
                         tooltip: `Fade LED color`,
-                        helpUrl: this.serviceHelp(service),
+                        helpUrl: serviceHelp(service),
                         service,
                         expression: `role.animate((color >> 16) & 0xff, (color >> 8) & 0xff, (color >> 0) & 0xff, speed * 0xff)`,
                         template: "custom",
@@ -1096,7 +1094,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `set_digits`,
                         message0: `set %1 digits to %2`,
                         args0: [
-                            this.roleVariable(service),
+                            roleVariable(service),
                             {
                                 type: "input_value",
                                 name: "digits",
@@ -1114,7 +1112,7 @@ export class ServicesBlockDomainSpecificLanguage
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
                         tooltip: `Display a number of the screen`,
-                        helpUrl: this.serviceHelp(service),
+                        helpUrl: serviceHelp(service),
                         service,
                         template: "custom",
                     }
@@ -1126,7 +1124,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: `show_leds`,
                         message0: `show %1 leds %2`,
                         args0: [
-                            this.roleVariable(service),
+                            roleVariable(service),
                             {
                                 type: LEDMatrixField.KEY,
                                 name: "leds",
@@ -1137,7 +1135,7 @@ export class ServicesBlockDomainSpecificLanguage
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
                         tooltip: `Display LEDs on the LED matrix`,
-                        helpUrl: this.serviceHelp(service),
+                        helpUrl: serviceHelp(service),
                         service,
                         // encode digits
                         template: "custom",
@@ -1156,7 +1154,7 @@ export class ServicesBlockDomainSpecificLanguage
                 type: `jacdac_events_${service.shortId}`,
                 message0: `on %1 %2`,
                 args0: [
-                    this.roleVariable(service),
+                    roleVariable(service),
                     <InputDefinition>{
                         type: "field_dropdown",
                         name: "event",
@@ -1170,7 +1168,7 @@ export class ServicesBlockDomainSpecificLanguage
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
                 tooltip: `Events for the ${service.name} service`,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 events,
                 template: "event",
@@ -1199,14 +1197,14 @@ export class ServicesBlockDomainSpecificLanguage
                           command
                       )}`,
                 args0: [
-                    this.roleVariable(service),
+                    roleVariable(service),
                     ...fieldsToFieldInputs(command),
                 ],
                 values: fieldsToValues(service, command),
                 inputsInline: true,
                 colour: this.serviceColor(service),
                 tooltip: command.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 command,
                 previousStatement: CODE_STATEMENT_TYPE,
@@ -1244,7 +1242,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "any",
                         variableTypes: [
                             "client",
-                            ...this.supportedServices.map(srv =>
+                            ...supportedServices.map(srv =>
                                 toRoleType(srv)
                             ),
                         ],
@@ -1277,7 +1275,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "any",
                         variableTypes: [
                             "client",
-                            ...this.supportedServices.map(srv =>
+                            ...supportedServices.map(srv =>
                                 toRoleType(srv)
                             ),
                         ],
@@ -1302,7 +1300,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "all",
                         variableTypes: [
                             "client",
-                            ...this.supportedServices.map(srv =>
+                            ...supportedServices.map(srv =>
                                 toRoleType(srv)
                             ),
                         ],
@@ -1341,10 +1339,10 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "none",
                         variableTypes: [
                             "client",
-                            ...servicesDSL.supportedServices.map(srv =>
+                            ...supportedServices.map(srv =>
                                 toRoleType(srv)
                             ),
-                            ...servicesDSL.supportedServices.map(srv =>
+                            ...supportedServices.map(srv =>
                                 toRoleType(srv, false)
                             ),
                         ],
@@ -1377,7 +1375,7 @@ export class ServicesBlockDomainSpecificLanguage
                         variable: "none",
                         variableTypes: [
                             "client",
-                            ...servicesDSL.supportedServices.map(srv =>
+                            ...supportedServices.map(srv =>
                                 toRoleType(srv)
                             ),
                         ],

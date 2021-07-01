@@ -12,9 +12,13 @@ import BlockDomainSpecificLanguage, {
     CreateCategoryOptions,
 } from "./dsl"
 import {
+    createServiceColor,
     fieldsToFieldInputs,
     fieldsToMessage,
     fieldsToValues,
+    getServiceInfo,
+    roleVariable,
+    serviceHelp,
     ServiceRegister,
     ServicesBaseDSL,
 } from "./servicesdsl"
@@ -46,12 +50,12 @@ export class ServerServicesBlockDomainSpecificLanguage
                 message0: `on register ${isGet ? "get" : "set"} %1 ${humanify(
                     register.name
                 )}`,
-                args0: [this.roleVariable(service, false)],
+                args0: [roleVariable(service, false)],
                 colour: this.serviceColor(service),
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
                 tooltip: register.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 events: [register],
                 template: "event",
@@ -60,7 +64,7 @@ export class ServerServicesBlockDomainSpecificLanguage
 
     createBlocks(options: CreateBlocksOptions) {
         const { theme } = options
-        this.serviceColor = this.createServiceColor(theme)
+        this.serviceColor = createServiceColor(theme)
 
         // pure service information here
         const {
@@ -71,7 +75,7 @@ export class ServerServicesBlockDomainSpecificLanguage
             registerComposites,
             registerSimpleEnumTypes,
             registerCompositeEnumTypes,
-        } = this.getServiceInfo()
+        } = getServiceInfo()
 
         const eventServerBlocks = events.flatMap<CommandBlockDefinition>(
             ({ service, events }) => {
@@ -81,7 +85,7 @@ export class ServerServicesBlockDomainSpecificLanguage
                     type: `jacdac_raise_event_${service.shortId}`,
                     message0: `raise %1 %2`,
                     args0: [
-                        this.roleVariable(service, false),
+                        roleVariable(service, false),
                         <InputDefinition>{
                             type: "field_dropdown",
                             name: "event",
@@ -94,7 +98,7 @@ export class ServerServicesBlockDomainSpecificLanguage
                     inputsInline: true,
                     colour: this.serviceColor(service),
                     tooltip: `Events for the ${service.name} service`,
-                    helpUrl: this.serviceHelp(service),
+                    helpUrl: serviceHelp(service),
                     service,
                     command: undefined,
                     previousStatement: CODE_STATEMENT_TYPE,
@@ -113,14 +117,14 @@ export class ServerServicesBlockDomainSpecificLanguage
                                   ev.name
                               )} with ${fieldsToMessage(ev)}`,
                         args0: [
-                            this.roleVariable(service, false),
+                            roleVariable(service, false),
                             ...fieldsToFieldInputs(ev),
                         ],
                         values: fieldsToValues(service, ev),
                         inputsInline: true,
                         colour: this.serviceColor(service),
                         tooltip: ev.description,
-                        helpUrl: this.serviceHelp(service),
+                        helpUrl: serviceHelp(service),
                         service,
                         command: ev,
                         previousStatement: CODE_STATEMENT_TYPE,
@@ -161,12 +165,12 @@ export class ServerServicesBlockDomainSpecificLanguage
                 kind: "block",
                 type: `jacdac_command_server_${service.shortId}_${command.name}`,
                 message0: `on ${humanify(command.name)} %1`,
-                args0: [this.roleVariable(service, false)],
+                args0: [roleVariable(service, false)],
                 colour: this.serviceColor(service),
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
                 tooltip: command.description,
-                helpUrl: this.serviceHelp(service),
+                helpUrl: serviceHelp(service),
                 service,
                 events: [command],
                 template: "event",
