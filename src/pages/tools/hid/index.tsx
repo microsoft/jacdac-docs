@@ -127,6 +127,19 @@ function bufferToHIDEvent(key: string, data: Uint8Array, bus: JDBus): HIDEvent {
     }
 }
 
+async function readSettings(settings: SettingsClient, bus: JDBus) {
+    const hes: HIDEvent[] = []
+    if (settings) {
+        const all = await settings.list()
+        for (const kv of all.filter(entry => entry.key?.startsWith(PREFIX))) {
+            const { key, value } = kv
+            const he = bufferToHIDEvent(key, value, bus)
+            if (he) hes.push(he)
+        }
+    }
+    return hes
+}
+
 function SelectHIDEvent(props: {
     onAdd: (hidEvent: HIDEvent) => void
     service: JDService
@@ -140,6 +153,7 @@ function SelectHIDEvent(props: {
     const [valueDefined, setValueDefined] = useState<LogicDescriptor>()
     const [thresholdRegister, setThresholdRegister] =
         useState<jdspec.PacketInfo>()
+    const [event, setEvent] = useState<JDEvent>()
 
     const selectOpts = ["event", "threshold"]
 
@@ -150,40 +164,31 @@ function SelectHIDEvent(props: {
         setSelector(newSelector)
         setModifiers(newModifiers)
     }
-
-    const excludedServices = [
-        SRV_CONTROL,
-        SRV_PROTO_TEST,
-        SRV_ROLE_MANAGER,
-        SRV_SETTINGS,
-        SRV_LOGGER,
-    ]
     const eventFilter = (ev: JDEvent) =>
         ev.code !== SystemEvent.StatusCodeChanged
 
-    const handleClickEventKeyboard = (service: JDService) => () => {
+    const handleClickEventKeyboard = (service: JDService) => () =>
         setInputType("keyboard")
-    }
-    const handleClickEventMouse = (service: JDService) => () => {
+    const handleClickEventMouse = (service: JDService) => () =>
         setInputType("mouse")
-    }
     const disabled = !event || !selector
-    const serviceIndex = service.serviceIndex
-    const deviceId = service.device.deviceId
-    const handleAdd = event =>
+    const handleAdd = () => {
+        console.log("onAdd called")
         onAdd({
             eventId: event.id,
             selector,
             modifiers,
-            serviceIndex,
-            deviceId,
+            serviceIndex: service.serviceIndex,
+            deviceId: service.device.deviceId,
         })
+    }
+
     const handleChange = (ev: React.ChangeEvent<{ value: unknown }>) => {
         const domEvt = ev.target.value as string
         const evt = service.events.find(el => {
             return domEvt === humanify(el.name)
         })
-
+        setEvent(evt)
         setValueDefined({
             trigger: evt?.id,
             type: LogicDescriptorType.Event,
@@ -340,9 +345,9 @@ function SelectHIDEvent(props: {
 function HIDBinding(props: {
     hidEvents: HIDEvent[]
     settings: SettingsClient
+    bus: JDBus
 }) {
-    const { hidEvents, settings } = props
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { hidEvents, settings, bus } = props
     const gridBreakpoints = useGridBreakpoints()
 
     const handleRemoveBinding = (index: number) => () => {
@@ -448,29 +453,18 @@ export default function HIDConfigurator() {
         .filter(srv => srv.events.some(eventFilter))
 
     useServiceProviderFromServiceClass(SRV_SETTINGS)
-    useChange(settings, async () => {
-        const hes: HIDEvent[] = []
-        if (settings) {
-            const all = await settings.list()
-            for (const kv of all.filter(entry =>
-                entry.key?.startsWith(PREFIX)
-            )) {
-                const { key, value } = kv
-                const he = bufferToHIDEvent(key, value, bus)
-                if (he) hes.push(he)
-            }
-        }
-        if (JSON.stringify(hes) !== JSON.stringify(hidEvents)) setHIDEvents(hes)
-    })
+    useChange(settings, async () => {})
     const handleAdd = async (hidEvent: HIDEvent) => {
+        console.log("handle Add act")
         setOpen(false)
 
         const event = bus.node(hidEvent.eventId) as JDEvent
         if (!event) return
 
         const payload = HIDEventToBuffer(event, hidEvent)
-        settings.setValue(PREFIX + randomDeviceId(), payload)
-        console.log(settings)
+        await settings.setValue(PREFIX + randomDeviceId(), payload)
+        const newCfg = await readSettings(settings, bus)
+        setHIDEvents(newCfg)
     }
 
     const handleSelectSettingsService = (service: JDService) => () =>
@@ -579,6 +573,7 @@ export default function HIDConfigurator() {
                                                         service.serviceIndex
                                             )}
                                             settings={settings}
+                                            bus={bus}
                                         />
                                     </CardContent>
                                     <CardActions>
