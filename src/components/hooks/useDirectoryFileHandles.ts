@@ -2,8 +2,8 @@ import { useState } from "react"
 import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
 
-export default function useDirectoryFileHandles(storkageKey: string) {
-    const { directory, ...rest } = useDirectoryHandle(storkageKey)
+export default function useDirectoryFileHandles(storageKey: string) {
+    const { directory, ...rest } = useDirectoryHandle(storageKey)
     const [files, setFiles] = useState<FileSystemFileHandle[]>([])
 
     useEffectAsync(async () => {
