@@ -14,6 +14,7 @@ import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import vmDsls from "./vmdsls"
 import { VMStatus } from "../../../jacdac-ts/src/vm/runner"
 import { VM_WARNINGS_CATEGORY } from "../blockly/toolbox"
+import FileTabs from "../fs/FileTabs"
 
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
 function VMEditorWithContext() {
@@ -67,6 +68,9 @@ function VMEditorWithContext() {
 
     return (
         <Grid container direction="column" spacing={1}>
+            <Grid item xs={12}>
+                <FileTabs storageKey={VM_SOURCE_STORAGE_KEY} />
+            </Grid>
             <Grid item xs={12}>
                 <VMToolbar runner={runner} run={run} cancel={cancel} />
             </Grid>

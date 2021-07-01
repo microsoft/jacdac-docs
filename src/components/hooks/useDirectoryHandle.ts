@@ -20,13 +20,16 @@ async function verifyPermission(fileHandle: FileSystemHandle) {
     return false
 }
 
+export function fileSystemHandleSupported() {
+    return typeof window !== "undefined" && !!window.showDirectoryPicker
+}
+
 export default function useDirectoryHandle(storageKey: string) {
     const { db } = useContext(DbContext)
     const directories = useChange(db, _ => _?.directories)
     const [directory, setDirectory] = useState<FileSystemDirectoryHandle>()
 
-    const supported =
-        typeof window !== "undefined" && !!window.showDirectoryPicker
+    const supported = fileSystemHandleSupported()
     const showDirectoryPicker = supported
         ? async (options?: DirectoryPickerOptions) => {
               const dir = await window.showDirectoryPicker(options)

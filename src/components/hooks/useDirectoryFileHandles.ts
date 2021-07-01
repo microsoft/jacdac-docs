@@ -10,8 +10,10 @@ export default function useDirectoryFileHandles(storkageKey: string) {
     useEffectAsync(async () => {
         const values = directory?.values()
         const newFiles: FileSystemFileHandle[] = []
-        for await (const entry of values) {
-            if (entry.kind === "file") newFiles.push(entry)
+        if (values) {
+            for await (const entry of values) {
+                if (entry.kind === "file") newFiles.push(entry)
+            }
         }
         setFiles(newFiles)
     }, [directory])
@@ -19,6 +21,7 @@ export default function useDirectoryFileHandles(storkageKey: string) {
     return {
         supported,
         showDirectoryPicker,
+        directory,
         files,
     }
 }
