@@ -30,6 +30,7 @@ export default function useDirectoryHandle(storageKey: string) {
     const showDirectoryPicker = supported
         ? async (options?: DirectoryPickerOptions) => {
               const dir = await window.showDirectoryPicker(options)
+              console.log(`store directory to idb`, dir)
               directories.set(storageKey, dir)
           }
         : undefined
