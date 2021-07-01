@@ -709,7 +709,7 @@ class ServicesBaseDSL {
             return {
                 kind: "category",
                 name: service.name + (isClient ? "" : ":S"),
-                colour: serviceColor(service),
+                colour: this.serviceColor(service),
                 contents: [
                     <ButtonDefinition>{
                         kind: "button",
@@ -1074,7 +1074,7 @@ export class ServicesBlockDomainSpecificLanguage extends ServicesBaseDSL
                                 type: "jacdac_ratio",
                             },
                         },
-                        colour: serviceColor(service),
+                        colour: this.serviceColor(service),
                         inputsInline: true,
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
@@ -1105,7 +1105,7 @@ export class ServicesBlockDomainSpecificLanguage extends ServicesBaseDSL
                                 type: "math_number",
                             },
                         },
-                        colour: serviceColor(service),
+                        colour: this.serviceColor(service),
                         inputsInline: true,
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
@@ -1128,7 +1128,7 @@ export class ServicesBlockDomainSpecificLanguage extends ServicesBaseDSL
                                 name: "leds",
                             },
                         ],
-                        colour: serviceColor(service),
+                        colour: this.serviceColor(service),
                         inputsInline: true,
                         previousStatement: CODE_STATEMENT_TYPE,
                         nextStatement: CODE_STATEMENT_TYPE,
