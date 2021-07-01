@@ -60,7 +60,7 @@ export class ServerServicesBlockDomainSpecificLanguage
 
     createBlocks(options: CreateBlocksOptions) {
         const { theme } = options
-        const serviceColor = this.createServiceColor(theme)
+        this.serviceColor = this.createServiceColor(theme)
 
         // pure service information here
         const {
@@ -92,7 +92,7 @@ export class ServerServicesBlockDomainSpecificLanguage
                         },
                     ],
                     inputsInline: true,
-                    colour: serviceColor(service),
+                    colour: this.serviceColor(service),
                     tooltip: `Events for the ${service.name} service`,
                     helpUrl: this.serviceHelp(service),
                     service,
@@ -118,7 +118,7 @@ export class ServerServicesBlockDomainSpecificLanguage
                         ],
                         values: fieldsToValues(service, ev),
                         inputsInline: true,
-                        colour: serviceColor(service),
+                        colour: this.serviceColor(service),
                         tooltip: ev.description,
                         helpUrl: this.serviceHelp(service),
                         service,
@@ -162,7 +162,7 @@ export class ServerServicesBlockDomainSpecificLanguage
                 type: `jacdac_command_server_${service.shortId}_${command.name}`,
                 message0: `on ${humanify(command.name)} %1`,
                 args0: [this.roleVariable(service, false)],
-                colour: serviceColor(service),
+                colour: this.serviceColor(service),
                 inputsInline: true,
                 nextStatement: CODE_STATEMENT_TYPE,
                 tooltip: command.description,
