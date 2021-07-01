@@ -1,5 +1,5 @@
 import servicesDSL from "../blockly/dsl/servicesdsl"
-import serverServicesDSL from "../blockly/dsl/serverblocksdsl"
+import serverServicesDSL from "../blockly/dsl/serverblockdsl"
 import toolsDsl from "../blockly/dsl/toolsdsl"
 import loopsDsl from "../blockly/dsl/loopsdsl"
 import logicDsl from "../blockly/dsl/logicdsl"
