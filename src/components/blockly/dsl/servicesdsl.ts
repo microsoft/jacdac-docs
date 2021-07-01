@@ -299,13 +299,12 @@ export class ServicesBaseDSL {
     protected _serviceBlocks: ServiceBlockDefinition[]
     protected _eventFieldBlocks: EventFieldDefinition[]
     protected serviceColor: (srv: jdspec.ServiceSpec) => string
-    constructor() {}
 
-    serviceHelp(service: jdspec.ServiceSpec) {
+    protected serviceHelp(service: jdspec.ServiceSpec) {
         return withPrefix(`/services/${service.shortId}`)
     }
 
-    createServiceColor(theme: Theme) {
+    protected createServiceColor(theme: Theme) {
         const sensorColor = theme.palette.success.main
         const otherColor = theme.palette.info.main
         const serviceColor = (srv: jdspec.ServiceSpec) =>
@@ -313,7 +312,7 @@ export class ServicesBaseDSL {
         return serviceColor
     }
 
-    roleVariable(
+    protected roleVariable(
         service: jdspec.ServiceSpec,
         client = true
     ): VariableInputDefinition {
@@ -326,7 +325,7 @@ export class ServicesBaseDSL {
         }
     }
 
-    getServiceInfo() {
+    protected getServiceInfo() {
         const allServices = serviceSpecifications()
         const supportedServices = allServices
             .filter(
@@ -410,7 +409,7 @@ export class ServicesBaseDSL {
         }
     }
 
-    makeRegisterSimpleGetBlocks(registers: ServiceRegister[], client = true) {
+    protected makeRegisterSimpleGetBlocks(registers: ServiceRegister[], client = true) {
         return registers.map<RegisterBlockDefinition>(
             ({ service, register }) => ({
                 kind: "block",
@@ -435,7 +434,7 @@ export class ServicesBaseDSL {
         )
     }
 
-    makeRegisterSetBlocks(registers: ServiceRegister[], client = true) {
+    protected makeRegisterSetBlocks(registers: ServiceRegister[], client = true) {
         return registers
             .filter(({ register }) => !client || register.kind === "rw")
             .filter(({ register }) => fieldsSupported(register))
@@ -469,7 +468,7 @@ export class ServicesBaseDSL {
             }))
     }
 
-    makeRegisterChangeByEventBlocks(
+    protected makeRegisterChangeByEventBlocks(
         registers: ServiceRegister[],
         client = true
     ) {
@@ -504,7 +503,7 @@ export class ServicesBaseDSL {
             }))
     }
 
-    makeRegisterNumericsGetBlocks(registers: ServiceRegister[], client = true) {
+    protected makeRegisterNumericsGetBlocks(registers: ServiceRegister[], client = true) {
         return registers
             .filter(re => re.register.fields.some(isNumericType))
             .map<RegisterBlockDefinition>(({ service, register }) => ({
@@ -542,7 +541,7 @@ export class ServicesBaseDSL {
             }))
     }
 
-    makeRegisterEnumGetBlocks(
+    protected makeRegisterEnumGetBlocks(
         registers: ServiceRegisterField[],
         client = true
     ) {
@@ -583,7 +582,7 @@ export class ServicesBaseDSL {
     }
 
     // generate accessor blocks for event/command data with numbers
-    makeFieldBlocks(sps: ServicePackets[], client = true) {
+    protected makeFieldBlocks(sps: ServicePackets[], client = true) {
         const worker = (
             sp: ServicePackets,
             output: string,
@@ -634,7 +633,7 @@ export class ServicesBaseDSL {
         )
     }
 
-    createCategoryHelper(options: CreateCategoryOptions) {
+    protected createCategoryHelper(options: CreateCategoryOptions) {
         const { theme, source, liveServices } = options
         this.serviceColor = this.createServiceColor(theme)
 
