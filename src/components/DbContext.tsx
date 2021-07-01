@@ -64,7 +64,10 @@ class IDBDb extends JDEventSource implements IDbStorage, IDb {
         this.blobs = new DbStore<Blob>(this, IDBDb.STORE_BLOBS)
         this.values = new DbStore<string>(this, IDBDb.STORE_STORAGE)
         this.firmwares = new DbStore<Blob>(this, IDBDb.STORE_FIRMWARE_BLOBS)
-        this.directories = new DbStore<FileSystemDirectoryHandle>(this, IDBDb.STORE_DIRECTORIES)
+        this.directories = new DbStore<FileSystemDirectoryHandle>(
+            this,
+            IDBDb.STORE_DIRECTORIES
+        )
     }
 
     private get db() {
@@ -242,6 +245,7 @@ class MemoryDb extends JDEventSource implements IDb, IDbStorage {
         [IDBDb.STORE_BLOBS]: {},
         [IDBDb.STORE_STORAGE]: {},
         [IDBDb.STORE_FIRMWARE_BLOBS]: {},
+        [IDBDb.STORE_DIRECTORIES]: {},
     }
     readonly blobs: DbStore<Blob>
     readonly values: DbStore<string>
@@ -253,7 +257,10 @@ class MemoryDb extends JDEventSource implements IDb, IDbStorage {
         this.blobs = new DbStore<Blob>(this, IDBDb.STORE_BLOBS)
         this.values = new DbStore<string>(this, IDBDb.STORE_STORAGE)
         this.firmwares = new DbStore<Blob>(this, IDBDb.STORE_FIRMWARE_BLOBS)
-        this.directories = new DbStore<FileSystemDirectoryHandle>(this, IDBDb.STORE_DIRECTORIES)
+        this.directories = new DbStore<FileSystemDirectoryHandle>(
+            this,
+            IDBDb.STORE_DIRECTORIES
+        )
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

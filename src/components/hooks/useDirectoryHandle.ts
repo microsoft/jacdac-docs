@@ -29,20 +29,23 @@ export default function useDirectoryHandle(storageKey: string) {
     const directories = useChange(db, _ => _?.directories)
     const [directory, setDirectory] = useState<FileSystemDirectoryHandle>()
 
+    console.log({ directory })
     const supported = fileSystemHandleSupported()
     const showDirectoryPicker = supported
         ? async (options?: DirectoryPickerOptions) => {
               const dir = await window.showDirectoryPicker(options)
-              console.log(`store directory to idb`, dir)
+              console.log(`store directory`, { storageKey, directories, dir })
               directories.set(storageKey, dir)
           }
         : undefined
     const clearDirectory = () => directories?.set(storageKey, undefined)
+
+    // reload directory from DB
     useChange(
         directories,
         async () => {
             let dir = await directories?.get(storageKey)
-            console.log(`load directory ${storageKey}`, { dir })
+            console.log(`load directory`, { storageKey, directories, dir })
             if (dir) {
                 // check permissions
                 const perm = await verifyPermission(dir)
