@@ -21,13 +21,13 @@ import {
     serviceHelp,
     ServiceRegister,
     ServicesBaseDSL,
-} from "./servicesdsl"
+} from "./servicesbase"
 
 export class ServerServicesBlockDomainSpecificLanguage
     extends ServicesBaseDSL
     implements BlockDomainSpecificLanguage
 {
-    id = "jacdacServices"
+    id = "jacdacServerServices"
     supportedServices: jdspec.ServiceSpec[] = []
 
     makeRegisterGetSetRequestBlocks(
