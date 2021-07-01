@@ -34,8 +34,7 @@ export default function useDirectoryHandle(storageKey: string) {
     const showDirectoryPicker = supported
         ? async (options?: DirectoryPickerOptions) => {
               const dir = await window.showDirectoryPicker(options)
-              console.log(`store directory`, { storageKey, directories, dir })
-              directories.set(storageKey, dir)
+              if (dir !== directory) directories.set(storageKey, dir)
           }
         : undefined
     const clearDirectory = () => directories?.set(storageKey, undefined)
@@ -56,7 +55,7 @@ export default function useDirectoryHandle(storageKey: string) {
                     dir = undefined
                 }
             }
-            setDirectory(dir)
+            if (dir !== directory) setDirectory(dir)
         },
         [storageKey]
     )
