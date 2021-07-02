@@ -25,14 +25,9 @@
     "@nivo/pie": "^0.72.0",
     "@nivo/scatterplot": "^0.72.0",
     "@octokit/core": "^3.5.1",
-<<<<<<< HEAD
     "@react-three/drei": "^7.0.2",
     "@react-three/fiber": "^7.0.1",
     "@tensorflow/tfjs": "^3.7.0",
-=======
-    "@react-three/drei": "^7.0.6",
-    "@react-three/fiber": "^7.0.2",
->>>>>>> 21469813e50398f105259c83169463c6e36fe43e
     "@tidyjs/tidy": "^2.4.2",
     "@types/wicg-file-system-access": "^2020.9.1",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
