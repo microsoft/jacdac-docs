@@ -125,7 +125,10 @@ export default function ModelPlayground() {
     const handleRegisterCheck = (reg: JDRegister) => {
         const i = registerIdsChecked.indexOf(reg.id)
         if (i > -1) registerIdsChecked.splice(i, 1)
-        else registerIdsChecked.push(reg.id) // TODO store the type of data source (e.g. button, accelerometer, etc.)
+        else registerIdsChecked.push(reg.id)
+        
+        // Randi TODO add some way to update predictEnabled based on whether tfModel["inputType"] == registerIdsChecked
+        // Alert user before allowing changes
 
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
@@ -223,7 +226,7 @@ export default function ModelPlayground() {
         setLiveDataTimestamp(bus.timestamp)
 
         // this function calls model.predict
-        updatePrediction()
+        if (tfModel.status == "completed") updatePrediction()
     }
     const throttleUpdate = throttle(() => updateLiveData(), 30)
     // data collection
@@ -253,6 +256,9 @@ export default function ModelPlayground() {
         if (error) return undefined
         const interval = setInterval(() => addRow(), samplingIntervalDelayi)
         const stopStreaming = startStreamingRegisters()
+        
+        setTrainEnabled(dataset.labels.length >= 2)
+
         return () => {
             clearInterval(interval)
             stopStreaming()
@@ -269,13 +275,14 @@ export default function ModelPlayground() {
         topClass: "",
         prediction: {},
     })
-    const trainEnabled = dataset.labels.length >= 2
-
+    const [trainEnabled, setTrainEnabled] = useState(false)    
+    
     const trainTFModel = async () => {
         tfModel.status = "running"
         tfModel.topClass = ""
         tfModel.prediction = {}
         setModel(tfModel)
+        setTrainEnabled(false)
 
         // Assumptions: the sampling rate, sampling duration, and sensors used are constant
         let sampleLength = -1
@@ -285,27 +292,23 @@ export default function ModelPlayground() {
         
         for (const label of dataset.labels) {
             dataset.examples[label].forEach(table => {
-                if (sampleLength == -1) {
+                if (sampleLength < table.length) {
                     sampleLength = table.length
                     sampleChannels = table.width
-                } else if (
-                    table.length != sampleLength ||
-                    table.width != sampleChannels
-                ) {
+                } else if (table.width != sampleChannels) {
+                    setTrainEnabled(false)
                     // RANDI TODO Decide what to do about different shaped data
                     alert(
-                        "Data input does not have the same shape: " +
+                        "All input data must have the same shape: " +
                             table.name +
-                            "\n" +
-                            sampleLength +
-                            " | " +
-                            table.length +
-                            "\n" +
-                            sampleChannels +
-                            " | " +
-                            table.width
+                            "\n Has " +
+                            table.width +
+                            " inputs instead of " +
+                            sampleChannels
                     )
-                }
+                } /* else if (table.length != sampleLength) {
+
+                } */
                 // For x data, just add each sample as a new row into x_data
                 x_data.push(table.data())
 
@@ -412,37 +415,35 @@ export default function ModelPlayground() {
     }
     // predicting with model
     const updatePrediction = async () => {
-        if (tfModel["status"] == "completed") { // Randi TODO add some way to check that tfModel["inputType"] == registerIdsChecked
-            // Use the model to do inference on a data point the model hasn't seen before:
-            let data = undefined
-            const z_data = []
-            if (liveDataSet) {
-                data = liveDataSet.data()
-                data = data.slice(data.length - tfModel.inputShape[0])
-                z_data.push(data)
-            }
-
-            const z_result = {}
-            let z = ""
-
-            if (data && data.length >= tfModel.inputShape[0]) {
-                // Get probability values from model
-                const prediction = (await tfModel.model.predict(
-                    tf.tensor3d(z_data)
-                )) as tf.Tensor<tf.Rank>
-                z = tfModel.labels[prediction.argMax(1).dataSync()]
-
-                // Save probability for each class in model object
-                for (let i = 0; i < tfModel.labels.length; i++) {
-                    z_result[tfModel.labels[i]] = prediction.dataSync()[i]
-                }
-                //console.log(z_result)
-            }
-
-            tfModel.prediction = z_result
-            tfModel.topClass = z
-            setModel(tfModel)
+        // Use the model to do inference on a data point the model hasn't seen before:
+        let data = undefined
+        const z_data = []
+        if (liveDataSet) {
+            data = liveDataSet.data()
+            data = data.slice(data.length - tfModel.inputShape[0])
+            z_data.push(data)
         }
+
+        const z_result = {}
+        let z = ""
+
+        if (data && data.length >= tfModel.inputShape[0]) {
+            // Get probability values from model
+            const prediction = (await tfModel.model.predict(
+                tf.tensor3d(z_data)
+            )) as tf.Tensor<tf.Rank>
+            z = tfModel.labels[prediction.argMax(1).dataSync()]
+
+            // Save probability for each class in model object
+            for (let i = 0; i < tfModel.labels.length; i++) {
+                z_result[tfModel.labels[i]] = prediction.dataSync()[i]
+            }
+            //console.log(z_result)
+        }
+
+        tfModel.prediction = z_result
+        tfModel.topClass = z
+        setModel(tfModel)
     }
 
     return (
@@ -578,19 +579,30 @@ export default function ModelPlayground() {
             </Grid>
             <Grid item>
                 <h2>Test Model</h2>
-                <span> Top Class: {tfModel.topClass} </span>
-                <br />
-                <div key="liveData">
-                    {tfModel.status == "completed" && (
-                        <Trend
-                            key="trends"
-                            height={12}
-                            dataSet={liveDataSet}
-                            horizon={LIVE_HORIZON}
-                            dot={true}
-                            gradient={true}
-                        />
-                    )}
+                <div key="predict">
+                    <span> Top Class: {tfModel.topClass} </span>
+                    <br />
+                    <div key="liveData">
+                        {tfModel.status == "completed" && (
+                            <Trend
+                                key="trends"
+                                height={12}
+                                dataSet={liveDataSet}
+                                horizon={LIVE_HORIZON}
+                                dot={true}
+                                gradient={true}
+                            />
+                        )}
+                    </div>
+                </div>
+            </Grid>
+            <Grid item>
+                <h2>Deploy Model</h2>
+                <div key="program">
+                    <h3>Set output</h3>
+                </div>
+                <div key="saveModel">
+                    <h3>Save model</h3>
                 </div>
             </Grid>
         </Grid>
