@@ -10,14 +10,12 @@ import EditIcon from "@material-ui/icons/Edit"
 import { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
 import ReactImageField from "../ReactImageField"
 
-export interface RecordingBlockFieldValue {
-    totalSamples: number
-    timestamp: number
-    inputTypes: string[]
+export interface DenseLayerBlockFieldValue {
+    parameter: number
 }
 
-export default class RecordingBlockField extends ReactImageField<RecordingBlockFieldValue> {
-    static KEY = "recording_block_field_key"
+export default class DenseLayerBlockField extends ReactImageField<DenseLayerBlockFieldValue> {
+    static KEY = "dense_layer_block_field_key"
     
     constructor(value: string) {
         super(value)
@@ -28,30 +26,19 @@ export default class RecordingBlockField extends ReactImageField<RecordingBlockF
     }
 
     static fromJson(options: ReactFieldJSON) {
-        return new RecordingBlockField(options?.value)
+        return new DenseLayerBlockField(options?.value)
     }
 
     get defaultValue() {
         return {
-            totalSamples: 0,
-            timestamp: Date.now(),
-            inputTypes: []
+            parameter: 0
         }
     }
 
     getText_() {
-        const {totalSamples, timestamp, inputTypes} = this.value
+        const { parameter} = this.value
 
-        let inputs = "none"
-        if (inputTypes.length) inputs = inputTypes.join(", ")
-
-        return `Recorded ${totalSamples} sample(s)\n`
-                + `\tat ${timestamp}\n`
-                + `\tfrom ${inputs}`
-    }
-
-    editRecording(workspace) {
-        console.log("Edit this recording")
+        return `Parameter: ${parameter}`
     }
 
     renderValue(): string {
@@ -60,6 +47,12 @@ export default class RecordingBlockField extends ReactImageField<RecordingBlockF
     }
 
     renderField(): ReactNode {        
-        return null
+        return (
+            <Grid container>
+                <Grid item>
+                    <div style={{color:'#ffffff'}}> {this.getText_()} </div>
+                </Grid>
+            </Grid>
+        )
     }
 }

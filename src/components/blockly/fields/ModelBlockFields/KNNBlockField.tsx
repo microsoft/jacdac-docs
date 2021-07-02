@@ -1,15 +1,22 @@
 import React, { lazy, ReactNode, useContext } from "react"
-import { Grid, Button } from "@material-ui/core"
+import {
+    Grid,
+    Button,
+    TextField
+} from "@material-ui/core"
+import EditIcon from "@material-ui/icons/Edit"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+
 import { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
 import ReactImageField from "../ReactImageField"
 
-export interface ModelBlockFieldValue {
+export interface KNNBlockFieldValue {
     parameter: number
 }
 
-export default class ModelBlockField extends ReactImageField<ModelBlockFieldValue> {
-    static KEY = "model_field_key"
-
+export default class KNNBlockField extends ReactImageField<KNNBlockFieldValue> {
+    static KEY = "knn_block_field_key"
+    
     constructor(value: string) {
         super(value)
 
@@ -19,18 +26,19 @@ export default class ModelBlockField extends ReactImageField<ModelBlockFieldValu
     }
 
     static fromJson(options: ReactFieldJSON) {
-        return new ModelBlockField(options?.value)
+        return new KNNBlockField(options?.value)
     }
 
     get defaultValue() {
         return {
-            parameter: 0,
+            parameter: 0
         }
     }
 
     getText_() {
-        const parameter = this.value
-        return `${parameter}`
+        const { parameter} = this.value
+
+        return `Parameter: ${parameter}`
     }
 
     renderValue(): string {
@@ -38,12 +46,12 @@ export default class ModelBlockField extends ReactImageField<ModelBlockFieldValu
         return "https://royalposthumus.com/images/white_menu_icon.png"
     }
 
-    renderField(): ReactNode {
-        //const { trainingDataset, testingDataset, parameter } = this.value
-
+    renderField(): ReactNode {        
         return (
             <Grid container>
-                <Grid item>Hello</Grid>
+                <Grid item>
+                    <div style={{color:'#ffffff'}}> {this.getText_()} </div>
+                </Grid>
             </Grid>
         )
     }

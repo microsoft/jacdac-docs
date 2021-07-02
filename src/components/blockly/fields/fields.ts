@@ -23,6 +23,16 @@ import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
 
 import ModelBlockField from "./ModelBlockFields/ModelBlockField"
+import DatasetBlockField from "./ModelBlockFields/DatasetBlockField"
+import RecordingBlockField from "./ModelBlockFields/RecordingBlockField"
+import SmoothingBlockField from "./ModelBlockFields/SmoothingBlockField"
+import KNNBlockField from "./ModelBlockFields/KNNBlockField"
+import NeuralNetworkBlockField from "./ModelBlockFields/NeuralNetworkBlockField"
+import ConvLayerBlockField from "./ModelBlockFields/ConvLayerBlockField"
+import PoolingLayerBlockField from "./ModelBlockFields/PoolingLayerBlockField"
+import DropoutLayerBlockField from "./ModelBlockFields/DropoutLayerBlockField"
+import FlattenLayerBlockField from "./ModelBlockFields/FlattenLayerBlockField"
+import DenseLayerBlockField from "./ModelBlockFields/DenseLayerBlockField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -68,7 +78,17 @@ export function registerFields() {
         PiePlotField,
 
         ModelBlockField,
-        
+        DatasetBlockField,
+        RecordingBlockField,
+        SmoothingBlockField,
+        KNNBlockField,
+        NeuralNetworkBlockField,
+        ConvLayerBlockField,
+        PoolingLayerBlockField,
+        DropoutLayerBlockField,
+        FlattenLayerBlockField,
+        DenseLayerBlockField,
+
         FileSaveField,
         FileOpenField,
     ]
