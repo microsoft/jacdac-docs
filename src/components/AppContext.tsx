@@ -12,12 +12,14 @@ import errorPath from "../../jacdac-ts/src/jdom/error"
 import { JDService } from "../../jacdac-ts/src/jdom/service"
 import { isCancelError } from "../../jacdac-ts/src/jdom/utils"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
+import { Workspace } from "blockly"
 
 import Suspense from "./ui/Suspense"
 const StartSimulatorDialog = lazy(
     () => import("./dialogs/StartSimulatorDialog")
 )
 const SelectRoleDialog = lazy(() => import("./dialogs/SelectRoleDialog"))
+const RecordDataDialog = lazy(() => import("./dialogs/RecordDataDialog"))
 
 export enum DrawerType {
     None,
@@ -37,6 +39,7 @@ export interface AppProps {
     setError: (error: any) => void
     toggleShowDeviceHostsDialog: () => void
     showSelectRoleDialog: (srv: JDService) => void
+    showRecordDataDialog: (workspace: Workspace) => void
 }
 
 const AppContext = createContext<AppProps>({
@@ -49,6 +52,7 @@ const AppContext = createContext<AppProps>({
     setError: () => {},
     toggleShowDeviceHostsDialog: () => {},
     showSelectRoleDialog: () => {},
+    showRecordDataDialog: () => {},
 })
 AppContext.displayName = "app"
 
@@ -63,6 +67,9 @@ export const AppProvider = ({ children }) => {
     const [showDeviceHostsDialog, setShowDeviceHostsDialog] = useState(false)
     const [showSelectRoleDialogService, setShowSelectRoleDialogService] =
         useState<JDService>(undefined)
+    const[recordDataDialogVisible, setRecordDataDialogVisible] = useState<boolean>(false)
+    const [recordDataDialogWorkspace, setRecordDataDialogWorkspace] =
+        useState<Workspace>(undefined)
 
     const { enqueueSnackbar } = useSnackbar()
 
@@ -119,6 +126,14 @@ export const AppProvider = ({ children }) => {
     const showSelectRoleDialog = (srv: JDService) =>
         setShowSelectRoleDialogService(srv)
 
+    const handleCloseRecordDataDialog = () => {
+        setRecordDataDialogVisible(false)
+    }
+    const showRecordDataDialog = (workspace: Workspace) => {
+        setRecordDataDialogWorkspace(workspace)
+        setRecordDataDialogVisible(true)
+    }
+
     return (
         <AppContext.Provider
             value={{
@@ -131,6 +146,7 @@ export const AppProvider = ({ children }) => {
                 setError,
                 toggleShowDeviceHostsDialog,
                 showSelectRoleDialog,
+                showRecordDataDialog,
             }}
         >
             {children}
@@ -147,6 +163,15 @@ export const AppProvider = ({ children }) => {
                     <SelectRoleDialog
                         service={showSelectRoleDialogService}
                         onClose={handleCloseRoleDialog}
+                    />
+                </Suspense>
+            )}
+            {showRecordDataDialog && (
+                <Suspense>
+                    <RecordDataDialog
+                        open={recordDataDialogVisible}
+                        workspace={recordDataDialogWorkspace}
+                        onClose={handleCloseRecordDataDialog}
                     />
                 </Suspense>
             )}
