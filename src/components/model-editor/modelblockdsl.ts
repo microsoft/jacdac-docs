@@ -375,9 +375,10 @@ export class ModelBlockDomainSpecificLanguage
 
     addNewDataset(workspace) {
         // Prompt user for dataset name
-        console.log("Randi I am the true workspace", {workspace})
+        console.log("Randi I am the true workspace: ", {db: workspace.connectionDBList?.length,  workspace})
         Blockly.prompt("Enter new dataset name:", "", newDatasetName => {
             // Check if name is already used
+            console.log("Randi I am the true workspace2: ", {db: workspace.connectionDBList?.length,  workspace})
             if (newDatasetName != null && newDatasetName != undefined) {
                 if (
                     newDatasetName != "" &&
