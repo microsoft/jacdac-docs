@@ -10,12 +10,12 @@ export default function BlockClientRoles() {
 
     return (
         <>
-            {roles?.map(({ role, service, serviceShortId }) => (
+            {roles?.map(({ role, service, serviceClass }) => (
                 <Grid item key={role}>
                     <RoleChip
                         role={role}
                         service={service}
-                        serviceShortId={serviceShortId}
+                        serviceClass={serviceClass}
                     />
                 </Grid>
             ))}
