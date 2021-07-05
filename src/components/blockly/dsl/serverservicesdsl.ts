@@ -220,10 +220,11 @@ export class ServerServicesBlockDomainSpecificLanguage
             <SeparatorDefinition>{
                 kind: "sep",
             },
-            <CategoryDefinition>{
+            {
+                kind: "category",
                 name: "Servers",
                 contents: inlineCategory,
-            }
+            } as CategoryDefinition
         ]
     }
 }
