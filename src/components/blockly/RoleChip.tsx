@@ -14,7 +14,6 @@ import { BlockSvg, FieldVariable } from "blockly"
 import useServiceServer from "../hooks/useServiceServer"
 import CancelIcon from "@material-ui/icons/Cancel"
 import { Chip, Tooltip } from "@material-ui/core"
-
 import { TWIN_BLOCK } from "./toolbox"
 
 export default function RoleChip(props: {
@@ -56,9 +55,14 @@ export default function RoleChip(props: {
                 ) as BlockSvg
             if (!twinBlock) {
                 twinBlock = workspace.newBlock(TWIN_BLOCK) as BlockSvg
-                const variable = workspace.getVariable(
+                let variable = workspace.getVariable(
                     role,
                     `${serviceClass}:client`
+                )
+                if (!variable)
+                    variable = workspace.getVariable(
+                        role,
+                        `${serviceClass}:server`
                 )
                 console.log(`new twin`, { twinBlock, variable })
                 const field = twinBlock.inputList[0].fieldRow.find(
