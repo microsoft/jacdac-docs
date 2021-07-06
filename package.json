@@ -111,7 +111,7 @@
   "license": "MIT",
   "scripts": {
     "setup": "git submodule update --init --recursive && git pull && yarn install --frozen-lockfile",
-    "postinstall": "yarn buildworkers && cd jacdac-ts && yarn install --frozen-lockfile && yarn dist",
+    "postinstall": "yarn buildworkers && yarn buildml4f && cd jacdac-ts && yarn install --frozen-lockfile && yarn dist",
     "pullsubmodules": "git submodule update --init --recursive",
     "lint": "node node_modules/eslint/bin/eslint.js src/**/*.ts src/**/*.tsx",
     "clean": "node node_modules/gatsby/cli.js clean",
@@ -127,6 +127,7 @@
     "builddtdl": "cd jacdac-ts && yarn builddtdl",
     "buildspecs": "cd jacdac-ts && yarn buildspecs",
     "watchts": "cd jacdac-ts && yarn watch",
+    "buildml4f": "cd ml4f && yarn",
     "buildpxt": "cd jacdac-ts/pxt-jacdac && sh mk.sh",
     "buildworkercsv": "cd src/workers/csv && node ../../../node_modules/microbundle/dist/cli.js build -f modern --no-compress --types --ts-config tsconfig.json",
     "buildworkerdata": "cd src/workers/data && node ../../../node_modules/microbundle/dist/cli.js build -f modern --no-compress --types --ts-config tsconfig.json",
