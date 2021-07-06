@@ -18,6 +18,7 @@ import { visitWorkspace } from "../blockly/jsonvisitor"
 // Randi copiedfrom AppContext
 import Suspense from "../ui/Suspense"
 import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
+import { visitToolbox } from "../blockly/toolbox"
 
 const RecordDataDialog = lazy(() => import("../dialogs/RecordDataDialog"))
 
