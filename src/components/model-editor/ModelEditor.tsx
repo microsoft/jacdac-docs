@@ -35,6 +35,8 @@ import {
     TFModelPredictRequest,
 } from "../../workers/tf/dist/node_modules/tf.worker"
 
+import * as ml4f from "../../../ml4f/src/main"
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
@@ -403,7 +405,7 @@ export default function ModelPlayground() {
                 "Final accuracy: ",
                 info.history.acc[info.history.acc.length - 1]
             )
-            acc = info.history.acc[info.history.acc.length - 1]
+            acc = info.history.acc[info.history.acc.length - 1] as number
         })
 
         tfModel.model = model
@@ -411,6 +413,15 @@ export default function ModelPlayground() {
         tfModel.labels = dataset.labels
         tfModel.inputShape = [sampleLength, sampleChannels]
         tfModel.trainingAcc = acc
+
+        const armcompiled = await ml4f.compileAndTest(model, {
+            verbose: true,
+            includeTest: true,
+            float16weights: false,
+            optimize: true
+        })
+        console.log(armcompiled)
+        // use armcompiled.machineCode
         setModel(tfModel)
     }
     // predicting with model
