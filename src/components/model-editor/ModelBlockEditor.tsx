@@ -36,12 +36,16 @@ function ModelBlockEditorWithContext() {
         console.log(workspaceXML)
     }, [workspaceXML])*/
 
-    /* Randi's super hacky way to reference dialogs */
+    // Randi's super hacky way to reference dialogs
     useEffect(() => {
         visitToolbox(toolboxConfiguration, {
             visitButton: btn => {
                 if (btn.callbackKey == "createNewRecordingButton") {
-                    btn.callback = () => showRecordDataDialog(workspace)
+                    const oldCallback = btn.callback
+                    btn.callback = () => {
+                        showRecordDataDialog(workspace)
+                        oldCallback(workspace)
+                    }
                 }
             }
         })

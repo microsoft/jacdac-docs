@@ -20,6 +20,8 @@ import DropoutLayerBlockField from "../blockly/fields/ModelBlockFields/DropoutLa
 import FlattenLayerBlockField from "../blockly/fields/ModelBlockFields/FlattenLayerBlockField"
 import DenseLayerBlockField from "../blockly/fields/ModelBlockFields/DenseLayerBlockField"
 
+import RecordDataDialog from "../dialogs/RecordDataDialog"
+
 
 import postModelRequest from "../blockly/dsl/workers/tf.proxy"
 import {
@@ -415,7 +417,6 @@ export class ModelBlockDomainSpecificLanguage
     }
 
     addNewRecording(workspace) {
-        /* it should never actually get here */
         console.log("Add new recording")
     }
 

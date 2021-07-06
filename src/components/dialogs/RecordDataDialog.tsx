@@ -17,7 +17,7 @@ import FieldDataSet from "../FieldDataSet"
 import useChange from "../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 
-import { BlockSvg, FieldVariable, Workspace, Variables } from "blockly"
+import { BlockSvg, FieldVariable, Variables, Workspace } from "blockly"
 
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
@@ -134,7 +134,7 @@ export default function BlocklyDataRecordingDialog(props: {
             )
             
             // Create new recording block on the workspace
-            const newRecordingBlock = workspace.newBlock(
+            /*const newRecordingBlock = workspace.newBlock(
                 MODEL_BLOCKS + "recording"
             ) as BlockSvg
 
@@ -152,9 +152,11 @@ export default function BlocklyDataRecordingDialog(props: {
                 ) as FieldVariable
             classNameField.setValue(classVar.getId())*/
 
-            //newRecordingBlock.initSvg()
-            //newRecordingBlock.render(false)
+            /*
+            newRecordingBlock.initSvg()
+            newRecordingBlock.render(false)
             workspace.centerOnBlock(newRecordingBlock.id) // TODO Randi figure out why this doesn't exist
+            */
         }
 
         onClose()
