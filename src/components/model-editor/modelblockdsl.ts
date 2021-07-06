@@ -20,17 +20,16 @@ import DropoutLayerBlockField from "../blockly/fields/ModelBlockFields/DropoutLa
 import FlattenLayerBlockField from "../blockly/fields/ModelBlockFields/FlattenLayerBlockField"
 import DenseLayerBlockField from "../blockly/fields/ModelBlockFields/DenseLayerBlockField"
 
-
 import postModelRequest from "../blockly/dsl/workers/tf.proxy"
 import {
     TFModelTrainRequest,
     TFModelPredictRequest,
 } from "../../workers/tf/dist/node_modules/tf.worker"
 
-const MODEL_BLOCKS = "model_block_"
-const MB_DATASET_TYPE = "ModelBlockDataset"
-const MB_CLASS_TYPE = "ModelBlockClass"
-const MB_CLASSIFIER_TYPE = "ModelBlockClassifier"
+export const MODEL_BLOCKS = "model_block_"
+export const MB_DATASET_TYPE = "ModelBlockDataset"
+export const MB_CLASS_TYPE = "ModelBlockClass"
+export const MB_CLASSIFIER_TYPE = "ModelBlockClassifier"
 
 const dataset_color = "#123456"
 const class_color = "#2466A8"
@@ -38,9 +37,9 @@ const processing_color = "#ac2469"
 const learning_color = "#561234"
 const layer_color = "#97207a"
 
-const datasetNames = [] // TODO Randi figure out some way to update this if a variable gets deleted?
+// TODO Randi figure out some way to update this if a variable gets deleted?
+const datasetNames = []
 const classNames = []
-let recordingCount = 0
 
 export class ModelBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
@@ -91,9 +90,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: "field_input",
                         name: "RECORDING_NAME",
-                        text:
-                            "class1.r" +
-                            recordingCount /* TODO Randi this should update based on the number of samples so far */,
+                        text: "recording0",
                     },
                     {
                         type: "field_variable",
@@ -167,7 +164,7 @@ export class ModelBlockDomainSpecificLanguage
                 args0: [
                     {
                         type: "field_variable",
-                        name: "NN_CLASSIFIER_NAME",
+                        name: "CLASSIFIER_NAME",
                         variable:
                             "classifier1" /*  TODO Randi this should display classifier variable types or NN classifier1 */,
                         variableTypes: [MB_CLASSIFIER_TYPE],
@@ -333,7 +330,7 @@ export class ModelBlockDomainSpecificLanguage
                 args0: [
                     {
                         type: "field_variable",
-                        name: "KNN_CLASSIFIER_NAME",
+                        name: "CLASSIFIER_NAME",
                         variable:
                             "classifier2" /* TODO Randi this should display class variable types or KNN classifier1 */,
                         variableTypes: [MB_CLASSIFIER_TYPE],
@@ -373,53 +370,6 @@ export class ModelBlockDomainSpecificLanguage
         return blocks
     }
 
-    addNewDataset(workspace) {
-        // Prompt user for dataset name
-        console.log("Randi I am the true workspace: ", {db: workspace.connectionDBList?.length,  workspace})
-        Blockly.prompt("Enter new dataset name:", "", newDatasetName => {
-            // Check if name is already used
-            console.log("Randi I am the true workspace2: ", {db: workspace.connectionDBList?.length,  workspace})
-            if (newDatasetName != null && newDatasetName != undefined) {
-                if (
-                    newDatasetName != "" &&
-                    !Variables.nameUsedWithAnyType(newDatasetName, workspace)
-                ) {
-                    // Get or create new dataset typed variable
-                    const newDatasetVar = workspace.createVariable(
-                        newDatasetName,
-                        MB_DATASET_TYPE
-                    )
-
-                    // Create new dataset block on the workspace
-                    const newDatasetBlock = workspace.newBlock(
-                        MODEL_BLOCKS + "dataset"
-                    ) as BlockSvg
-
-                    // Automatically insert the variable name into the new block
-                    console.log(newDatasetBlock.inputList[0])
-                    const field = newDatasetBlock.inputList[0].fieldRow.find(
-                        f => f.name === "DATASET_NAME"
-                    ) as FieldVariable
-                    field.setValue(newDatasetVar.getId())
-
-                    // Add new block to the screen
-                    newDatasetBlock.initSvg()
-                    newDatasetBlock.render(false)
-                    workspace.centerOnBlock(newDatasetBlock.id)
-                } else {
-                    setTimeout(() => Blockly.alert(
-                        "That variable name is invalid or already exists"
-                    ), 10)
-                }
-            }
-        })
-    }
-
-    addNewRecording(workspace) {
-        /* it should never actually get here */
-        console.log("Add new recording")
-    }
-
     createCategory() {
         return [
             <CategoryDefinition>{
@@ -435,7 +385,7 @@ export class ModelBlockDomainSpecificLanguage
                         kind: "button",
                         text: "Create new dataset...",
                         callbackKey: "createNewDatasetButton",
-                        callback: workspace => this.addNewDataset(workspace),
+                        //callback: workspace => this.addNewDataset(workspace),
                     },
                     {
                         kind: "block",
@@ -449,7 +399,6 @@ export class ModelBlockDomainSpecificLanguage
                         kind: "button",
                         text: "Create new recording...",
                         callbackKey: "createNewRecordingButton",
-                        callback: workspace => this.addNewRecording(workspace),
                     },
                     {
                         kind: "block",
@@ -481,12 +430,6 @@ export class ModelBlockDomainSpecificLanguage
                         kind: "button",
                         text: "Create new ML classifier...",
                         callbackKey: "createNewClassifierButton",
-                        callback: workspace =>
-                            Variables.createVariableButtonHandler(
-                                workspace,
-                                null,
-                                MB_CLASSIFIER_TYPE
-                            ),
                     },
                     {
                         kind: "label",
