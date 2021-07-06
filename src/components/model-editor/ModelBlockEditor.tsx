@@ -18,6 +18,9 @@ function ModelBlockEditorWithContext() {
     // block context handles hosting blockly
     const { workspace, workspaceJSON, toolboxConfiguration } = useContext(BlockContext)
     console.log(BlockContext)
+    console.log(`Randi ws: ${workspace?.connectionDBList}`)
+    // Michal's ugly hack
+    ;(AppContext as any).blocklyWorkspace = workspace
 
     // app context hosts other dialogs
     const { showRecordDataDialog } = useContext(AppContext)

@@ -22,6 +22,7 @@ import { BlockSvg, FieldVariable, Variables, Workspace } from "blockly"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
+import AppContext from "../AppContext"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -64,6 +65,7 @@ export default function BlocklyDataRecordingDialog(props: {
     const MODEL_BLOCKS = "model_block_"
 
     const { open, workspace, onClose } = props
+    console.log("Randi Record Dialog Entry: ", {db: workspace?.connectionDBList?.length,  workspace})
     const [dialogType, setDialogType] =
         useState<"chooseSensors" | "recordData">()
     //const { callback } = props
@@ -125,8 +127,11 @@ export default function BlocklyDataRecordingDialog(props: {
     const handleNext = () => {
         //recordingName, className, registerIdsChecked
 
+        // Michal's ugly hack
+        const workspace = (AppContext as any).blocklyWorkspace
+
         if (className != null && className != undefined) {
-            console.log("Randi Record Dialog: ", {workspace})
+            console.log("Randi Record Dialog: ", {db: workspace?.connectionDBList?.length,  workspace})
             // Get or create new class typed variable
             const classVar = workspace.createVariable(
                 className,
