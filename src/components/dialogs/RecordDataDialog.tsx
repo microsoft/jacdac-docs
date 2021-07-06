@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core"
 import { Button } from "gatsby-theme-material-ui"
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
-import React, { ChangeEvent, useEffect, useContext, useRef, useState } from "react"
+import React, { useState } from "react"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import ReadingFieldGrid from "../ReadingFieldGrid"
@@ -17,13 +17,9 @@ import FieldDataSet from "../FieldDataSet"
 import useChange from "../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 
-import { BlockSvg, FieldVariable, Variables, Workspace } from "blockly"
-
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
-import AppContext from "../AppContext"
-
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
@@ -56,22 +52,22 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
+/* // Randi TODO set stipulations for the callback
+interface CallbackOneParam<T1, T2 = void> {
+    (param1: T1): T2;
+  } */
+
 export default function BlocklyDataRecordingDialog(props: {
     open: boolean
-    workspace: Workspace
+    onNext: (values) => void // Randi TODO replace with on Done
     onClose: () => void
-}) {    
-    const MB_CLASS_TYPE = "ModelBlockClass"
-    const MODEL_BLOCKS = "model_block_"
-
-    const { open, workspace, onClose } = props
-    console.log("Randi Record Dialog Entry: ", {db: workspace?.connectionDBList?.length,  workspace})
-    const [dialogType, setDialogType] =
-        useState<"chooseSensors" | "recordData">()
-    //const { callback } = props
+}) {
+    const { open, onNext, onClose } = props
+    const [dialogType, setDialogType] = useState<
+        "chooseSensors" | "recordData"
+    >()
 
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    //const { workspace } = useContext(BlockContext)
 
     const classes = useStyles()
     const readingRegisters = useChange(bus, bus =>
@@ -87,8 +83,15 @@ export default function BlocklyDataRecordingDialog(props: {
 
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
-    const [recordingName, setRecordingName] = useState("recording1")
+    const [totalRecordings, setTotalRecordings] = useState(0)
+    const [recordingName, setRecordingName] = useState(
+        "recording" + totalRecordings
+    )
     const [className, setClassName] = useState("class1")
+    const recordingRegisters = readingRegisters.filter(
+        reg => registerIdsChecked.indexOf(reg.id) > -1
+    )
+
     const [recording, setRecording] = useState(false)
     const [liveDataSet, setLiveDataSet] = useState<FieldDataSet>(undefined)
 
@@ -96,81 +99,59 @@ export default function BlocklyDataRecordingDialog(props: {
         const i = registerIdsChecked.indexOf(reg.id)
         if (i > -1) registerIdsChecked.splice(i, 1)
         else registerIdsChecked.push(reg.id)
-        
+
         // Randi TODO save registerIdsChecked
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
     }
 
-    const recordingRegisters = readingRegisters.filter(
-        reg => registerIdsChecked.indexOf(reg.id) > -1
-    )
-    
-    const handleRecordingNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleRecordingNameChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         setRecordingName(event.target.value.trim())
     }
 
-    const handleClassNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleClassNameChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         setClassName(event.target.value.trim())
 
         // TODO Randi Check if class name already exists
         //if (newClassName != "" && !Variables.nameUsedWithAnyType(newClassName, workspace)) {
         //Blockly.alert("That variable name is invalid or already exists")
+    }
 
+    const resetInputs = () => {
+        setClassName("class1") // Randi TODO make this one of the items in the dropdown
+        setRecordingName("recording" + totalRecordings)
     }
 
     const handleCancel = () => {
-        console.log("Record Data Dialog: ", {workspace})
+        // reset the user inputs
+        resetInputs()
+        // close the modal
         onClose()
     }
 
     const handleNext = () => {
-        //recordingName, className, registerIdsChecked
+        // update the total number of recordings
+        setTotalRecordings(totalRecordings + 1)
 
-        // Michal's ugly hack
-        const workspace = (AppContext as any).blocklyWorkspace
+        // call the next function
+        onNext({
+            recordingName: recordingName,
+            className: className,
+            recordingRegisters: recordingRegisters,
+        })
 
-        if (className != null && className != undefined) {
-            console.log("Randi Record Dialog: ", {db: workspace?.connectionDBList?.length,  workspace})
-            // Get or create new class typed variable
-            const classVar = workspace.createVariable(
-                className,
-                MB_CLASS_TYPE
-            )
-            
-            // Create new recording block on the workspace
-            /*const newRecordingBlock = workspace.newBlock(
-                MODEL_BLOCKS + "recording"
-            ) as BlockSvg
-
-            // Automatically insert the recording name into the new block
-            /*const recordingNameField =
-                newRecordingBlock.inputList[0].fieldRow.find(
-                    f => f.name === "RECORDING_NAME"
-                ) as FieldVariable
-            recordingNameField.setValue(recordingName)*/
-
-            // Automatically insert the class name into the new block
-            /*const classNameField =
-                newRecordingBlock.inputList[0].fieldRow.find(
-                    f => f.name === "CLASS_NAME"
-                ) as FieldVariable
-            classNameField.setValue(classVar.getId())*/
-
-            /*
-            newRecordingBlock.initSvg()
-            newRecordingBlock.render(false)
-            workspace.centerOnBlock(newRecordingBlock.id) // TODO Randi figure out why this doesn't exist
-            */
-        }
-
+        // reset the user inputs
+        resetInputs()
+        // close the modal
         onClose()
     }
 
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}>
+        <Dialog open={open} onClose={onClose}>
             <DialogContent>
                 <Grid container direction={"column"}>
                     <Grid item>
@@ -185,7 +166,7 @@ export default function BlocklyDataRecordingDialog(props: {
                                     variant="outlined"
                                     onChange={handleRecordingNameChange}
                                 />
-                                <TextField /* RANDI TODO Probably makes more sense as a dropdown */
+                                <TextField /* RANDI TODO change to an autofill dropdown */
                                     className={classes.field}
                                     label="Class label"
                                     value={className}
@@ -208,22 +189,20 @@ export default function BlocklyDataRecordingDialog(props: {
                                 />
                             )}
                         </div>
-                            
                     </Grid>
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button
-                    variant="contained"
-                    onClick={handleCancel}>
-                        Cancel
+                <Button variant="contained" onClick={handleCancel}>
+                    Cancel
                 </Button>
                 <Button
                     variant="contained"
                     color="primary"
                     endIcon={<NavigateNextIcon />}
                     disabled={!registerIdsChecked.length}
-                    onClick={handleNext}>
+                    onClick={handleNext}
+                >
                     Next
                 </Button>
             </DialogActions>
