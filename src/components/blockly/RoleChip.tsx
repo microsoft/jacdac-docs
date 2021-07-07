@@ -20,14 +20,15 @@ export default function RoleChip(props: {
     role: string
     serviceClass: number
     service: JDService
+    preferredDeviceId: string
 }) {
     const { workspace } = useContext(BlockContext)
-    const { role, service, serviceClass } = props
+    const { role, service, serviceClass, preferredDeviceId } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const serviceServer = useServiceServer(service)
     const handleRoleClick = () => {
         // spin off simulator
-        if (!service) {
+        if (!service && !preferredDeviceId ) {
             const specification =
                 serviceSpecificationFromClassIdentifier(serviceClass)
             if (specification) {
