@@ -44,7 +44,7 @@ function VMEditorWithContext() {
         }
     }, [dsls, workspaceJSON])
     useEffect(
-        () => program && roleManager?.setRoles(program.roles),
+        () => program && roleManager?.setRoles([...program.roles, ...program.serverRoles]),
         [roleManager, program]
     )
     useEffect(
