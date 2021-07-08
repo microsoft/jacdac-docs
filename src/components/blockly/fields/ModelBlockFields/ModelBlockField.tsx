@@ -1,4 +1,5 @@
 import React, { useContext,
+                useEffect,
                 useState } from "react"
 
 import { Grid,} from "@material-ui/core"
@@ -13,8 +14,17 @@ import WorkspaceContext from "../../WorkspaceContext"
 
 function ExpandIconWidget() {
 
-    const { sourceBlock } = useContext(WorkspaceContext)
-    const [parametersVisible, setParametersVisible] = useState(true)
+    const { sourceBlock, workspaceJSON } = useContext(WorkspaceContext)
+    const [parametersVisible, setParametersVisible] = useState(false)
+
+    useEffect(() => {
+        const parameterField =
+                    // the block parameters field should always be in the same place (e.g. in args0)
+                    sourceBlock.inputList[0].fieldRow.find(
+                        f => f.name === "BLOCK_PARAMS"
+                    ) as ReactParameterField<any>
+        setParametersVisible(parameterField.areParametersVisible())
+    }, [workspaceJSON])
 
     const handleExpandBlock = () => {
         const parameterField =
@@ -25,11 +35,11 @@ function ExpandIconWidget() {
         
         if (parameterField) {
             // This works correctly, but the parameter field is always visible in the toolbox/on reload
-            parameterField.setVisible(!parametersVisible)
-            setParametersVisible(parameterField.visible_)
+            /*parameterField.setVisible(!parametersVisible)
+            setParametersVisible(parameterField.visible_)*/
             
-            /*parameterField.setParametersVisible(!parametersVisible)
-            setParametersVisible(parameterField.areParametersVisible())*/
+            parameterField.setParametersVisible(!parametersVisible)
+            setParametersVisible(parameterField.areParametersVisible())
         }
     }
 

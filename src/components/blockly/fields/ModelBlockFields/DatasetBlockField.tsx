@@ -9,11 +9,17 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import Blockly, { FieldVariable } from "blockly"
 
-function DatasetParameterWidget() {
+function DatasetParameterWidget(props: {
+        visible: boolean
+    }) {
+    const { visible } = props
     const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
     const [classes, setClasses] = useState<string[]>([])
     const [inputs, setInputs] = useState<string[]>([])
     const [numSamples, setNumSamples] = useState(0)
+
+    const [parametersVisible, setParametersVisisble] = useState(visible)
+    useEffect(() => setParametersVisisble(visible), [visible])
 
     const handleSplitDataset = () => {
         console.log("Split dataset")
@@ -33,7 +39,6 @@ function DatasetParameterWidget() {
             const allRecordingBlocks = getAllChildBlocks(childBlock)
             //console.log("Randi all children", childBlocks)
             for (const block of allRecordingBlocks) {
-                console.log("Randi, recording blocks: ", block)
                 // get the block parameters
                 const parameterField =
                     // the block parameters field should always be in the same place (e.g. in args0)
@@ -70,7 +75,7 @@ function DatasetParameterWidget() {
     }
 
     return (
-        <Grid container spacing={1}>
+        <> {visible && <Grid container spacing={1}>
             <Grid item>
                 <Box color="text.secondary">
                     Classes: {classes.length ? classes.join(", ") : "none"},
@@ -100,6 +105,7 @@ function DatasetParameterWidget() {
                 </Tooltip>
             </Grid>
         </Grid>
+        } </>
     )
 }
 
@@ -143,7 +149,6 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
         this.value = {
             parametersVisible: visible,
         }
-        this.updateView() // This doesn't seem to do anything
         this.rerender()
     }
 
@@ -154,9 +159,8 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
     }
 
     renderInlineField(): ReactNode {
-        return <DatasetParameterWidget />
-        /*return (
-            <> { this.value.parametersVisible && <DatasetParameterWidget /> } </>
-        )*/
+        return <DatasetParameterWidget
+            visible={this.value.parametersVisible}
+        />
     }
 }
