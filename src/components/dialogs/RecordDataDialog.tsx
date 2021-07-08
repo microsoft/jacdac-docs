@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core"
 import { Button } from "gatsby-theme-material-ui"
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import ReadingFieldGrid from "../ReadingFieldGrid"
@@ -20,6 +20,7 @@ import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
@@ -59,7 +60,7 @@ interface CallbackOneParam<T1, T2 = void> {
 
 export default function BlocklyDataRecordingDialog(props: {
     open: boolean
-    onNext: (values) => void // Randi TODO replace with on Done
+    onNext: (values) => void // Randi TODO add onDone
     onClose: () => void
 }) {
     const { open, onNext, onClose } = props
