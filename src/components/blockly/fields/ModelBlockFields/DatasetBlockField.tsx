@@ -144,6 +144,7 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
             parametersVisible: visible,
         }
         this.updateView() // This doesn't seem to do anything
+        this.rerender()
     }
 
     getText_() {
