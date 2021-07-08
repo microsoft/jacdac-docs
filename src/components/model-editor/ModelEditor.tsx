@@ -1,4 +1,6 @@
-import React, { useEffect, useContext, useState } from "react"
+import React, { useEffect,
+                useContext,
+                useState } from "react"
 import {
     Grid,
     Button,
@@ -11,6 +13,9 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import StopIcon from "@material-ui/icons/Stop"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
+import Autocomplete, {
+    createFilterOptions,
+} from "@material-ui/lab/Autocomplete"
 
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
@@ -28,6 +33,8 @@ import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 
+import * as ml4f from "../../../ml4f/src/main"
+
 import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
 import postModelRequest from "../blockly/dsl/workers/tf.proxy"
 import {
@@ -35,7 +42,9 @@ import {
     TFModelPredictRequest,
 } from "../../workers/tf/dist/node_modules/tf.worker"
 
-import * as ml4f from "../../../ml4f/src/main"
+//Dashboard.tsx
+
+const filter = createFilterOptions()
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -48,6 +57,7 @@ const useStyles = makeStyles((theme: Theme) =>
         field: {
             marginRight: theme.spacing(1),
             marginBottom: theme.spacing(1.5),
+            display: "inline-flex",
         },
         segment: {
             marginTop: theme.spacing(2),
@@ -85,15 +95,16 @@ function createDataSet(
 }
 
 export default function ModelPlayground() {
+    const classes = useStyles()
+    const chartPalette = useChartPalette()
+    
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const [dataset, setDataset] = useState({
         labels: [],
         totalExamples: 0,
-        examples: {}
+        examples: {},
     })
-    const chartPalette = useChartPalette()
 
-    const classes = useStyles()
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
             bus.devices().map(device =>
@@ -128,7 +139,7 @@ export default function ModelPlayground() {
         const i = registerIdsChecked.indexOf(reg.id)
         if (i > -1) registerIdsChecked.splice(i, 1)
         else registerIdsChecked.push(reg.id)
-        
+
         // Randi TODO add some way to update predictEnabled based on whether tfModel["inputType"] == registerIdsChecked
         // Alert user before allowing changes
 
@@ -165,8 +176,9 @@ export default function ModelPlayground() {
     ) => {
         setSamplingDuration(event.target.value.trim())
     }
-    const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setLabel(event.target.value.trim())
+    const handleLabelChange = (newLabel) => {
+        console.log("label change")
+        setLabel(newLabel)
     }
     const stopRecording = () => {
         if (recording) {
@@ -258,7 +270,7 @@ export default function ModelPlayground() {
         if (error) return undefined
         const interval = setInterval(() => addRow(), samplingIntervalDelayi)
         const stopStreaming = startStreamingRegisters()
-        
+
         setTrainEnabled(dataset.labels.length >= 2)
 
         return () => {
@@ -277,8 +289,8 @@ export default function ModelPlayground() {
         topClass: "",
         prediction: {},
     })
-    const [trainEnabled, setTrainEnabled] = useState(false)    
-    
+    const [trainEnabled, setTrainEnabled] = useState(false)
+
     const trainTFModel = async () => {
         tfModel.status = "running"
         tfModel.topClass = ""
@@ -291,7 +303,7 @@ export default function ModelPlayground() {
         let sampleChannels = -1
         const x_data = []
         const y_data = []
-        
+
         for (const label of dataset.labels) {
             dataset.examples[label].forEach(table => {
                 if (sampleLength < table.length) {
@@ -321,24 +333,24 @@ export default function ModelPlayground() {
         // Create a new TFJS model
         const model = tf.sequential()
 
-        // TODO Randi do you have to start with a fully connected layer of size equal to input        
+        // TODO Randi do you have to start with a fully connected layer of size equal to input
         model.add(
             tf.layers.conv1d({
                 inputShape: [sampleLength, sampleChannels],
                 kernelSize: [4],
                 strides: 1,
                 filters: 16,
-                activation: 'relu'
+                activation: "relu",
             })
         )
         model.add(
             tf.layers.maxPooling1d({
-                poolSize: [2]
+                poolSize: [2],
             })
         )
         model.add(
             tf.layers.dropout({
-                rate: 0.1
+                rate: 0.1,
             })
         )
         model.add(
@@ -346,17 +358,17 @@ export default function ModelPlayground() {
                 kernelSize: [2],
                 strides: 1,
                 filters: 16,
-                activation: 'relu'
+                activation: "relu",
             })
         )
         model.add(
             tf.layers.maxPooling1d({
-                poolSize: [2]
+                poolSize: [2],
             })
         )
         model.add(
             tf.layers.dropout({
-                rate: 0.1
+                rate: 0.1,
             })
         )
         model.add(
@@ -364,12 +376,12 @@ export default function ModelPlayground() {
                 kernelSize: [2],
                 strides: 1,
                 filters: 16,
-                activation: 'relu'
+                activation: "relu",
             })
         )
         model.add(
             tf.layers.dropout({
-                rate: 0.1
+                rate: 0.1,
             })
         )
 
@@ -393,9 +405,12 @@ export default function ModelPlayground() {
         const xs = tf.tensor3d(x_data, [
             x_data.length,
             sampleLength,
-            sampleChannels
+            sampleChannels,
         ])
-        const ys = tf.oneHot(tf.tensor1d(y_data, "int32"), dataset.labels.length)
+        const ys = tf.oneHot(
+            tf.tensor1d(y_data, "int32"),
+            dataset.labels.length
+        )
 
         // Train the model using the data
         let acc = 0
@@ -418,7 +433,7 @@ export default function ModelPlayground() {
             verbose: true,
             includeTest: true,
             float16weights: false,
-            optimize: true
+            optimize: true,
         })
         console.log(armcompiled)
         // use armcompiled.machineCode
@@ -460,7 +475,7 @@ export default function ModelPlayground() {
     return (
         <Grid container direction={"column"}>
             <Grid item>
-                <h2>Collect Data</h2>
+                <h2>1 - Collect Data</h2>
                 {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
                 <div key="sensors">
                     <h3>Choose sensors</h3>
@@ -479,38 +494,22 @@ export default function ModelPlayground() {
                 </div>
                 <div key="record">
                     <h3>Record data</h3>
-                    <div className={classes.buttons}>
-                        <Button
-                            size="large"
-                            variant="contained"
-                            color={recording ? "secondary" : "primary"}
-                            aria-label="start/stop recording"
-                            title="start/stop recording"
-                            onClick={toggleRecording}
-                            startIcon={
-                                recording ? <StopIcon /> : <PlayArrowIcon />
-                            }
-                            disabled={!startEnabled}
-                        >
-                            {recording ? "Stop" : "Start"}
-                        </Button>
-                    </div>
                     <div className={classes.row}>
-                        <TextField
+                        <Autocomplete
                             className={classes.field}
-                            error={errorSamplingIntervalDelay}
                             disabled={recording}
-                            label="Sampling interval"
-                            value={samplingIntervalDelay}
-                            variant="outlined"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        ms
-                                    </InputAdornment>
-                                ),
-                            }}
-                            onChange={handleSamplingIntervalChange}
+                            options={dataset.labels}
+                            style={{ width: 300 }}
+                            renderInput={params => (
+                                <TextField
+                                    {...params}
+                                    label="Class label"
+                                    variant="outlined"
+                                />
+                            )}
+                            value={currentClassLabel}
+                            freeSolo
+                            onInputChange={(event, newValue) => handleLabelChange(newValue)}
                         />
                         <TextField
                             className={classes.field}
@@ -528,14 +527,38 @@ export default function ModelPlayground() {
                             }}
                             onChange={handleSamplingDurationChange}
                         />
-                        <TextField /* RANDI TODO Probably makes more sense as a dropdown */
+                        <TextField
                             className={classes.field}
+                            error={errorSamplingIntervalDelay}
                             disabled={recording}
-                            label="Class label"
-                            value={currentClassLabel}
+                            label="Sampling interval"
+                            value={samplingIntervalDelay}
                             variant="outlined"
-                            onChange={handleLabelChange}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        ms
+                                    </InputAdornment>
+                                ),
+                            }}
+                            onChange={handleSamplingIntervalChange}
                         />
+                    </div>
+                    <div className={classes.buttons}>
+                        <Button
+                            size="large"
+                            variant="contained"
+                            color={recording ? "secondary" : "primary"}
+                            aria-label="start/stop recording"
+                            title="start/stop recording"
+                            onClick={toggleRecording}
+                            startIcon={
+                                recording ? <StopIcon /> : <PlayArrowIcon />
+                            }
+                            disabled={!startEnabled}
+                        >
+                            {recording ? "Stop" : "Start"}
+                        </Button>
                     </div>
                 </div>
                 <div key="liveData">
@@ -554,19 +577,22 @@ export default function ModelPlayground() {
                     {!!dataset.totalExamples && (
                         <div key="recordings">
                             <h3>Recordings</h3>
-                            {dataset.labels.map((classLabel) =>
-                                <ClassDataSetGrid key={'dataset-' + classLabel} /* RANDI TODO Maybe take in labels as well as tables? */
+                            {dataset.labels.map(classLabel => (
+                                <ClassDataSetGrid
+                                    key={
+                                        "dataset-" + classLabel
+                                    } /* RANDI TODO Maybe take in labels as well as tables? */
                                     label={classLabel}
                                     tables={dataset.examples[classLabel]}
                                     handleDeleteTable={handleDeleteRecording}
                                 />
-                            )}
+                            ))}
                         </div>
                     )}
                 </div>
             </Grid>
             <Grid item>
-                <h2>Train Model</h2>
+                <h2>2 - Train Model</h2>
                 <div className={classes.buttons}>
                     <Button
                         size="large"
@@ -583,15 +609,15 @@ export default function ModelPlayground() {
                 </div>
                 <span> Model Status: {tfModel.status}</span>
                 <br />
-                <span> Training Accuracy: {tfModel.trainingAcc}</span>
+                <span> Training Accuracy: { (tfModel.status=="completed") ? tfModel.trainingAcc : "--" }</span>
                 <br />
-                <span> Labels: {tfModel.labels.join(", ")}</span>
+                <span> Labels: {tfModel.labels.length ? tfModel.labels.join(", ") : "--" }</span>
                 <br />
             </Grid>
             <Grid item>
-                <h2>Test Model</h2>
+                <h2>3 - Test Model</h2>
                 <div key="predict">
-                    <span> Top Class: {tfModel.topClass} </span>
+                    <span> Top Class: {(tfModel.status == "completed") ? tfModel.topClass : "--" } </span>
                     <br />
                     <div key="liveData">
                         {tfModel.status == "completed" && (
@@ -608,9 +634,12 @@ export default function ModelPlayground() {
                 </div>
             </Grid>
             <Grid item>
-                <h2>Deploy Model</h2>
-                <div key="program">
+                <h2>4 - Deploy Model</h2>
+                <div key="programOutput">
                     <h3>Set output</h3>
+                    {tfModel.labels.map((label) => (
+                        <div key={label + "Output"}>When model detects {label}: </div>
+                    ))}
                 </div>
                 <div key="saveModel">
                     <h3>Save model</h3>
