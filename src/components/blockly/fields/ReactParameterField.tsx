@@ -69,6 +69,10 @@ export default class ReactParameterField<T> extends ReactField<T> {
         return fo
     }
 
+    rerender() {
+        ReactDOM.render(this.renderBlock(), this.container)
+    }
+
     dispose() {
         if (this.container) {
             ReactDOM.unmountComponentAtNode(this.container)
@@ -119,6 +123,7 @@ export default class ReactParameterField<T> extends ReactField<T> {
     }
 
     setParametersVisible(visible) {
+        this.rerender()
         // override to implement
     }
 }
