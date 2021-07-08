@@ -14,7 +14,7 @@ import WorkspaceContext from "../../WorkspaceContext"
 function ExpandIconWidget() {
 
     const { sourceBlock } = useContext(WorkspaceContext)
-    const [parametersVisible, setParametersVisible] = useState(false)
+    const [parametersVisible, setParametersVisible] = useState(true)
 
     const handleExpandBlock = () => {
         const parameterField =
@@ -24,12 +24,12 @@ function ExpandIconWidget() {
                 ) as ReactParameterField<any>
         
         if (parameterField) {
-            /* // This works correctly, but the parameter field is always visible in the toolbox/on reload
+            // This works correctly, but the parameter field is always visible in the toolbox/on reload
             parameterField.setVisible(!parametersVisible)
             setParametersVisible(parameterField.visible_)
-            */
-            parameterField.setParametersVisible(!parametersVisible)
-            setParametersVisible(parameterField.areParametersVisible())
+            
+            /*parameterField.setParametersVisible(!parametersVisible)
+            setParametersVisible(parameterField.areParametersVisible())*/
         }
     }
 

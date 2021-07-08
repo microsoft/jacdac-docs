@@ -1,15 +1,5 @@
-import React, { lazy,
-                ReactNode,
-                useContext,
-                useEffect,
-                useState } from "react"
-import {
-    Grid,
-    Box,
-    Button,
-    TextField,
-    Tooltip
-} from "@material-ui/core"
+import React, { lazy, ReactNode, useContext, useEffect, useState } from "react"
+import { Grid, Box, Button, TextField, Tooltip } from "@material-ui/core"
 import CallSplitIcon from "@material-ui/icons/CallSplit"
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -17,23 +7,70 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 import ReactField, { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
+import Blockly, { FieldVariable } from "blockly"
 
 function DatasetParameterWidget() {
-    const { flyout, sourceId, sourceBlock } = useContext(WorkspaceContext)
+    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
     const [classes, setClasses] = useState<string[]>([])
     const [inputs, setInputs] = useState<string[]>([])
+    const [numSamples, setNumSamples] = useState(0)
 
-    const handleSplitDataset = () => { console.log("Split dataset") }
-    const handleDownloadDataset = () => { console.log("Download dataset") }
+    const handleSplitDataset = () => {
+        console.log("Split dataset")
+    }
+    const handleDownloadDataset = () => {
+        console.log("Download dataset")
+    }
 
-    /*useEffect(() => {
-    }, [sourceBlock])*/
+    useEffect(() => {
+        // update the recordings
+        const childrenBlocks = sourceBlock.getChildren(false) // seems to only return the top block, not all of them. so I implement my own get all children
+        const updatedClasses = []
+        const updatedInputs = []
+
+        if (childrenBlocks.length > 0) {
+            const childBlock = childrenBlocks[0]
+            const allRecordingBlocks = getAllChildBlocks(childBlock)
+            //console.log("Randi all children", childBlocks)
+            for (const block of allRecordingBlocks) {
+                console.log("Randi, recording blocks: ", block)
+                // get the block parameters
+                const parameterField =
+                    // the block parameters field should always be in the same place (e.g. in args0)
+                    block.inputList[0].fieldRow.find(
+                        f => f.name === "BLOCK_PARAMS"
+                    ) as ReactParameterField<any>
+                // {"totalSamples":number,"timestamp":number,"inputTypes":string[]}
+                
+                // get the class name parameter and add it to the list of classes
+                const classNameField =
+                    // the block parameters field should always be in the same place (e.g. in args0)
+                    block.inputList[0].fieldRow.find(
+                        f => f.name === "CLASS_NAME"
+                    ) as FieldVariable
+                const className = classNameField.getVariable().name
+                if (!updatedClasses.includes(className)) updatedClasses.push(className)
+            }
+        }
+
+        setClasses(updatedClasses)
+        setInputs(updatedInputs)
+    }, [workspaceJSON])
+
+    const getAllChildBlocks = (startingChildBlock: Blockly.Block) => {
+        const recordingBlockType = "model_block_recording"
+        const childBlocks = [startingChildBlock]
+
+        for (const child of childBlocks) {
+            const nextChild = child.getNextBlock()
+            if (nextChild && nextChild.type == recordingBlockType)
+                childBlocks.push(nextChild)
+        }
+        return childBlocks
+    }
 
     return (
-        <Grid
-            container
-            spacing={1}
-        >
+        <Grid container spacing={1}>
             <Grid item>
                 <Box color="text.secondary">
                     Classes: {classes.length ? classes.join(", ") : "none"},
@@ -42,14 +79,14 @@ function DatasetParameterWidget() {
             </Grid>
             <Grid item>
                 <Tooltip title="Automatically split dataset e.g. to create a test dataset">
-                <Button
-                    onClick={handleSplitDataset}
-                    startIcon={<CallSplitIcon />}
-                    variant="outlined"
-                    size="small"
-                >
-                Split
-                </Button>
+                    <Button
+                        onClick={handleSplitDataset}
+                        startIcon={<CallSplitIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Split
+                    </Button>
                 </Tooltip>
                 <Tooltip title="Download dataset as csv file">
                     <Button
@@ -58,7 +95,7 @@ function DatasetParameterWidget() {
                         variant="outlined"
                         size="small"
                     >
-                    Download
+                        Download
                     </Button>
                 </Tooltip>
             </Grid>
@@ -92,11 +129,10 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
 
     get defaultValue() {
         return {
-            parametersVisible: false
+            parametersVisible: false,
         }
     }
 
-    
     areParametersVisible() {
         const { parametersVisible } = this.value
         return parametersVisible
@@ -105,7 +141,7 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
     setParametersVisible(visible) {
         console.log("Randi setParametersVisible: " + visible)
         this.value = {
-            parametersVisible: visible
+            parametersVisible: visible,
         }
         this.updateView() // This doesn't seem to do anything
     }
@@ -116,10 +152,10 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
         return `${totalRecordings} recordings`
     }
 
-    renderInlineField(): ReactNode {        
-        //return <DatasetParameterWidget />
-        return (
+    renderInlineField(): ReactNode {
+        return <DatasetParameterWidget />
+        /*return (
             <> { this.value.parametersVisible && <DatasetParameterWidget /> } </>
-        )
+        )*/
     }
 }

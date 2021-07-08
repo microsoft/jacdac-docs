@@ -68,11 +68,7 @@ function ModelBlockEditorWithContext() {
         }
     }
 
-    const buttonsWithDialogs = {
-        createNewDatasetButton: addNewDataset,
-        createNewRecordingButton: toggleRecordDataDialog,
-        createNewClassifierButton: addNewClassifier,
-    }
+   
 
     // run this when workspaceJSON changes
     useEffect(() => {
@@ -84,19 +80,16 @@ function ModelBlockEditorWithContext() {
         })
     }, [workspaceJSON])
 
-    // Randi TODO use this to plug in NN classifier into toolbox
-    /*useEffect(() => {
-        console.log(workspaceXML)
-    }, [workspaceXML])*/
-
+    const buttonsWithDialogs = {
+        createNewDatasetButton: addNewDataset,
+        createNewRecordingButton: toggleRecordDataDialog,
+        createNewClassifierButton: addNewClassifier,
+    }
     // set button callbacks
     useEffect(() => {
         // register callbacks buttons with custom dialogs
         visitToolbox(toolboxConfiguration, {
             visitButton: btn => {
-                /*if (btn.callbackKey == "createNewRecordingButton") {
-                    btn.callback = () => toggleRecordDataDialog()
-                }*/
                 if (btn.callbackKey in buttonsWithDialogs) {
                     btn.callback = workspace => {
                         buttonsWithDialogs[btn.callbackKey](workspace)
