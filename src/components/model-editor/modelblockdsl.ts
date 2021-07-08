@@ -1,6 +1,7 @@
 import {
     BlockDefinition,
     CategoryDefinition,
+    DummyInputDefinition,
     MODEL_BLOCK_CLASS_STATEMENT_TYPE,
     MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
     MODEL_BLOCK_LAYER_STATEMENT_TYPE,
@@ -9,6 +10,8 @@ import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
 import ModelBlockField from "../blockly/fields/ModelBlockFields/ModelBlockField"
+import WatchValueField from "../blockly/fields/WatchValueField"
+import TwinField from "../blockly/fields/TwinField"
 import DatasetBlockField from "../blockly/fields/ModelBlockFields/DatasetBlockField"
 import RecordingBlockField from "../blockly/fields/ModelBlockFields/RecordingBlockField"
 import SmoothingBlockField from "../blockly/fields/ModelBlockFields/SmoothingBlockField"
@@ -51,7 +54,7 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dataset",
-                message0: "dataset %1 %2",
+                message0: "dataset %1 %2 %3",
                 args0: [
                     {
                         type: "field_variable",
@@ -61,17 +64,20 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_DATASET_TYPE,
                     },
                     {
-                        /* TODO make a specific field for dataset definition, should display a + icon */
+                        type: ModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
+                        /* TODO make a specific field for dataset definition, should display when expand is pressed */
                         type: DatasetBlockField.KEY,
-                        name: "DATASET_PARAMS",
-                        /* dropdown ability to automatically generate a test dataset */
+                        name: "BLOCK_PARAMS"
                     },
                 ],
                 message1: "%1",
                 args1: [
                     {
                         type: "input_statement",
-                        name: "DATASET_CONFIG",
+                        name: "DATASET_RECORDINGS",
                         check: [MODEL_BLOCK_CLASS_STATEMENT_TYPE],
                     },
                 ],
@@ -103,7 +109,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         /* TODO make a specific field for class info, should display a + icon */
                         type: RecordingBlockField.KEY,
-                        name: "RECORDING_BLOCK_DETAILS",
+                        name: "BLOCK_PARAMS",
                         /* dropdown have button to edit recording */
                     },
                 ],
@@ -140,7 +146,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         /* TODO make a specific field for dataset smoothing, should display window size */
                         type: SmoothingBlockField.KEY,
-                        name: "SMOOTH_PREPROCESS_SIZE",
+                        name: "BLOCK_PARAMS",
                         /* variables: window size, stride */
                     },
                 ],
@@ -160,7 +166,7 @@ export class ModelBlockDomainSpecificLanguage
                 // would like to make this a hat block
                 kind: "block",
                 type: MODEL_BLOCKS + "nn",
-                message0: "neural network classifier %1 %2",
+                message0: "neural network classifier %1 %2 %3",
                 args0: [
                     {
                         type: "field_variable",
@@ -171,9 +177,13 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_CLASSIFIER_TYPE,
                     },
                     {
+                        type: ModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         /* TODO make a specific field for NN classifiers, should display a + icon */
                         type: NeuralNetworkBlockField.KEY,
-                        name: "NN_CLASSIFIER_PARAMS",
+                        name: "BLOCK_PARAMS",
                         /* variables: learning rate, optimizer, epochs P*/
                     },
                 ],

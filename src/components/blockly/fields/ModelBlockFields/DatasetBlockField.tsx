@@ -1,58 +1,125 @@
-import React, { lazy, ReactNode, useContext } from "react"
+import React, { lazy,
+                ReactNode,
+                useContext,
+                useEffect,
+                useState } from "react"
 import {
     Grid,
+    Box,
     Button,
-    TextField
+    TextField,
+    Tooltip
 } from "@material-ui/core"
-import EditIcon from "@material-ui/icons/Edit"
+import CallSplitIcon from "@material-ui/icons/CallSplit"
+import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
-import { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
-import ReactImageField from "../ReactImageField"
+import ReactField, { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
+import ReactParameterField from "../ReactParameterField"
+import WorkspaceContext from "../../WorkspaceContext"
 
-export interface DatasetBlockFieldValue {
-    parameter: number
+function DatasetParameterWidget() {
+    const { flyout, sourceId, sourceBlock } = useContext(WorkspaceContext)
+    const [classes, setClasses] = useState<string[]>([])
+    const [inputs, setInputs] = useState<string[]>([])
+
+    const handleSplitDataset = () => { console.log("Split dataset") }
+    const handleDownloadDataset = () => { console.log("Download dataset") }
+
+    /*useEffect(() => {
+    }, [sourceBlock])*/
+
+    return (
+        <Grid
+            container
+            spacing={1}
+        >
+            <Grid item>
+                <Box color="text.secondary">
+                    Classes: {classes.length ? classes.join(", ") : "none"},
+                    Inputs: {inputs.length ? inputs.join(", ") : "none"}
+                </Box>
+            </Grid>
+            <Grid item>
+                <Tooltip title="Automatically split dataset e.g. to create a test dataset">
+                <Button
+                    onClick={handleSplitDataset}
+                    startIcon={<CallSplitIcon />}
+                    variant="outlined"
+                    size="small"
+                >
+                Split
+                </Button>
+                </Tooltip>
+                <Tooltip title="Download dataset as csv file">
+                    <Button
+                        onClick={handleDownloadDataset}
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                    Download
+                    </Button>
+                </Tooltip>
+            </Grid>
+        </Grid>
+    )
 }
 
-export default class DatasetBlockField extends ReactImageField<DatasetBlockFieldValue> {
+export interface DatasetBlockFieldValue {
+    parametersVisible: boolean
+}
+
+export default class DatasetBlockField extends ReactParameterField<DatasetBlockFieldValue> {
     static KEY = "dataset_block_field_key"
-    
+    static EDITABLE = false
+
     constructor(value: string) {
         super(value)
-
-        this.events.on(VALUE_CHANGE, () => {
-            this.setSize(32, 32)
-        })
     }
 
     static fromJson(options: ReactFieldJSON) {
         return new DatasetBlockField(options?.value)
     }
 
+    protected createContainer(): HTMLDivElement {
+        const c = document.createElement("div")
+        c.style.display = "inline-block"
+        c.style.minWidth = "14rem"
+        //c.style.marginLeft = "1rem"
+        return c
+    }
+
     get defaultValue() {
         return {
-            parameter: 0
+            parametersVisible: false
         }
     }
 
+    
+    areParametersVisible() {
+        const { parametersVisible } = this.value
+        return parametersVisible
+    }
+
+    setParametersVisible(visible) {
+        console.log("Randi setParametersVisible: " + visible)
+        this.value = {
+            parametersVisible: visible
+        }
+        this.updateView() // This doesn't seem to do anything
+    }
+
     getText_() {
-        const { parameter} = this.value
+        const totalRecordings = 2 // RANDI Todo
 
-        return `Parameter: ${parameter}`
+        return `${totalRecordings} recordings`
     }
 
-    renderValue(): string {
-        // Doesn't work for local images
-        return "https://royalposthumus.com/images/white_menu_icon.png"
-    }
-
-    renderField(): ReactNode {        
+    renderInlineField(): ReactNode {        
+        //return <DatasetParameterWidget />
         return (
-            <Grid container>
-                <Grid item>
-                    <div style={{color:'#ffffff'}}> {this.getText_()} </div>
-                </Grid>
-            </Grid>
+            <> { this.value.parametersVisible && <DatasetParameterWidget /> } </>
         )
     }
 }
