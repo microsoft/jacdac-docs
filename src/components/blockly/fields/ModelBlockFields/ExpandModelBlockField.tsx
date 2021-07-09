@@ -16,22 +16,13 @@ function ExpandIconWidget() {
     const { sourceBlock, workspaceJSON } = useContext(WorkspaceContext)
     const [parametersVisible, setParametersVisible] = useState(false)
 
-    useEffect(() => {
-        const parameterField =
-                    // the block parameters field should always be in the same place (e.g. in args0)
-                    sourceBlock.inputList[0].fieldRow.find(
-                        f => f.name === "BLOCK_PARAMS"
-                    ) as ReactParameterField<any>
+    /*useEffect(() => {
+        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<any>
         setParametersVisible(parameterField.areParametersVisible())
-    }, [workspaceJSON])
+    }, [workspaceJSON])*/
 
     const handleExpandBlock = () => {
-        const parameterField =
-                // the block parameters field should always be in the same place (e.g. in args1)
-                sourceBlock.inputList[0].fieldRow.find( 
-                    f => f.name === "BLOCK_PARAMS"
-                ) as ReactParameterField<any>
-        
+        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<any>
         if (parameterField) {            
             parameterField.setParametersVisible(!parametersVisible)
             setParametersVisible(parameterField.areParametersVisible())

@@ -39,7 +39,6 @@ function DatasetParameterWidget(props: {
     }
 
     useEffect(() => {
-        console.log("Randi workspace update")
         // update based on source block's parameter visibility field
         updateVisibility()
 
@@ -58,11 +57,7 @@ function DatasetParameterWidget(props: {
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const datasetParameterField =
-                    // the block parameters field should always be in the same place (e.g. in args0)
-                    sourceBlock.inputList[0].fieldRow.find(
-                        f => f.name === "BLOCK_PARAMS"
-                    ) as ReactParameterField<any>
+        const datasetParameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<any>
         setParametersVisible(datasetParameterField.areParametersVisible())
     }
 
@@ -72,6 +67,7 @@ function DatasetParameterWidget(props: {
         let allRecordingBlocks = []
         const updatedClasses = []
         const updatedInputs = []
+        let totalSamples = 0
 
         if (childrenBlocks.length > 0) {
             const childBlock = childrenBlocks[0]
@@ -79,25 +75,19 @@ function DatasetParameterWidget(props: {
             //console.log("Randi all children", childBlocks)
             for (const block of allRecordingBlocks) {
                 // get the block parameters for the recording
-                const recordingParameterField =
-                    // the block parameters field should always be in the same place (e.g. in args0)
-                    block.inputList[0].fieldRow.find(
-                        f => f.name === "BLOCK_PARAMS"
-                    ) as ReactParameterField<any>
+                const recordingParameterField = block.getField("BLOCK_PARAMS") as ReactParameterField<any>
+                totalSamples += recordingParameterField.getValue().totalSamples
                 // {"totalSamples":number,"timestamp":number,"inputTypes":string[]}
                 
                 // get the class name parameter and add it to the list of classes
-                const classNameField =
-                    // the block parameters field should always be in the same place (e.g. in args0)
-                    block.inputList[0].fieldRow.find(
-                        f => f.name === "CLASS_NAME"
-                    ) as FieldVariable
+                const classNameField = block.getField("CLASS_NAME") as FieldVariable
                 const className = classNameField.getVariable().name
                 if (!updatedClasses.includes(className)) updatedClasses.push(className)
             }
         }
 
         setNumRecordings(allRecordingBlocks.length)
+        setNumSamples(totalSamples)
         setClasses(updatedClasses)
         setInputs(updatedInputs)
     }
