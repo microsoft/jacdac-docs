@@ -50,7 +50,7 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dataset",
-                message0: "dataset %1 %2 %3",
+                message0: "dataset %1 %2",
                 args0: [
                     {
                         type: "field_variable",
@@ -63,13 +63,16 @@ export class ModelBlockDomainSpecificLanguage
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: DatasetBlockField.KEY,
                         name: "BLOCK_PARAMS"
                     },
                 ],
-                message1: "%1",
-                args1: [
+                message2: "%1",
+                args2: [
                     {
                         type: "input_statement",
                         name: "DATASET_RECORDINGS",
@@ -86,7 +89,7 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "recording",
-                message0: "recording %1 %2 %3 %4",
+                message0: "recording %1 %2 %3",
                 args0: [
                     {
                         type: "field_input",
@@ -105,6 +108,9 @@ export class ModelBlockDomainSpecificLanguage
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: RecordingBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -138,12 +144,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "smooth",
-                message0: "smooth data %1 %2", // calculates moving average over a particular window
+                message0: "smooth data %1", // calculates moving average over a particular window
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: SmoothingBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -165,7 +174,7 @@ export class ModelBlockDomainSpecificLanguage
                 // would like to make this a hat block
                 kind: "block",
                 type: MODEL_BLOCKS + "nn",
-                message0: "neural network classifier %1 %2 %3",
+                message0: "neural network classifier %1 training data %2 %3",
                 args0: [
                     {
                         type: "field_variable",
@@ -175,22 +184,22 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_CLASSIFIER_TYPE,
                     },
                     {
-                        type: ExpandModelBlockField.KEY,
-                        name: "EXPAND_BUTTON",
-                    },
-                    {
-                        type: NeuralNetworkBlockField.KEY,
-                        name: "BLOCK_PARAMS",
-                    },
-                ],
-                message1: "training data %1",
-                args1: [
-                    {
                         type: "field_variable",
                         name: "NN_TRAINING",
                         variable: "dataset1",
                         variableTypes: [MB_DATASET_TYPE],
                         defaultType: MB_DATASET_TYPE,
+                    },
+                    {
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                ],
+                message1: "%1",
+                args1: [
+                    {
+                        type: NeuralNetworkBlockField.KEY,
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 message2: "%1",
@@ -213,12 +222,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "conv_layer",
-                message0: "convolutional layer %1 %2",
+                message0: "convolutional layer %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: ConvLayerBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -238,12 +250,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "max_pool_layer",
-                message0: "max pooling layer %1 %2",
+                message0: "max pooling layer %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: PoolingLayerBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -262,12 +277,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dropout_layer",
-                message0: "dropout layer %1 %2",
+                message0: "dropout layer %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: DropoutLayerBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -286,12 +304,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "flatten_layer",
-                message0: "flatten %1 %2",
+                message0: "flatten %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: FlattenLayerBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -310,12 +331,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dense_layer",
-                message0: "dense layer %1 %2",
+                message0: "dense layer %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
+                ],
+                message1: "%1",
+                args1: [
                     {
                         type: DenseLayerBlockField.KEY,
                         name: "BLOCK_PARAMS",
@@ -349,7 +373,7 @@ export class ModelBlockDomainSpecificLanguage
                         name: "EXPAND_BUTTON",
                     },
                 ],
-                message1: "training data %1 %2",
+                message1: "training data %1 k %2",
                 args1: [
                     {
                         type: "field_variable",
@@ -359,16 +383,16 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_DATASET_TYPE,
                     },
                     {
-                        type: KNNBlockField.KEY,
-                        name: "BLOCK_PARAMS",
-                    },
-                ],
-                message2: "k %1",
-                args2: [
-                    {
                         type: "field_number",
                         name: "KNN_K_VALUE",
                         value: 3, /* Randi TODO dynamically set max based on number of examples? */
+                    },
+                ],
+                message2: "%1",
+                args2: [
+                    {
+                        type: KNNBlockField.KEY,
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
