@@ -1,10 +1,5 @@
-import React, { lazy, ReactNode, useContext } from "react"
-import {
-    Grid,
-    Button,
-    TextField
-} from "@material-ui/core"
-import EditIcon from "@material-ui/icons/Edit"
+import { ReactNode, useContext } from "react"
+
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
 import { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"

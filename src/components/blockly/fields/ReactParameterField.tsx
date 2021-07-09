@@ -123,7 +123,7 @@ export default class ReactParameterField<T> extends ReactField<T> {
     }
 
     setParametersVisible(visible) {
-        this.rerender()
         // override to implement
+        this.rerender()
     }
 }

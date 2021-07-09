@@ -1,25 +1,35 @@
-import React, { lazy, ReactNode, useContext, useEffect, useState } from "react"
-import { Grid, Box, Button, TextField, Tooltip } from "@material-ui/core"
+import React, { ReactNode, useContext, useEffect, useState } from "react"
+import { Grid, Box, Button, Tooltip } from "@material-ui/core"
 import CallSplitIcon from "@material-ui/icons/CallSplit"
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
-import ReactField, { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
+import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import Blockly, { FieldVariable } from "blockly"
 
-function DatasetParameterWidget(props: {
-        visible: boolean
-    }) {
-    const { visible } = props
-    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
-    const [classes, setClasses] = useState<string[]>([])
-    const [inputs, setInputs] = useState<string[]>([])
-    const [numSamples, setNumSamples] = useState(0)
+export interface DatasetBlockFieldValue {
+    parametersVisible: boolean
+    numRecordings: number
+    numSamples: number
+    classes: string[]
+    inputs: string[]
+}
 
-    const [parametersVisible, setParametersVisisble] = useState(visible)
-    useEffect(() => setParametersVisisble(visible), [visible])
+function DatasetParameterWidget(props: {
+        initFieldValue: DatasetBlockFieldValue
+        setFieldValue: (DatasetBlockFieldValue) => void
+    }) {
+    const { initFieldValue, setFieldValue } = props
+
+    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
+
+    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
+    const [numRecordings, setNumRecordings] = useState(initFieldValue.numRecordings)
+    const [numSamples, setNumSamples] = useState(initFieldValue.numSamples)
+    const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
+    const [inputs, setInputs] = useState<string[]>(initFieldValue.inputs)
 
     const handleSplitDataset = () => {
         console.log("Split dataset")
@@ -29,18 +39,47 @@ function DatasetParameterWidget(props: {
     }
 
     useEffect(() => {
+        console.log("Randi workspace update")
+        // update based on source block's parameter visibility field
+        updateVisibility()
+
+        // update based on source block's associated recording blocks
+        updateRecordings()
+
+        // push changes to field values to the parent
+        const updatedValue = {
+            parametersVisible: parametersVisible, // don't actually change this
+            numRecordings: numRecordings,
+            numSamples: numSamples,
+            classes: classes,
+            inputs: inputs,
+        }
+        setFieldValue(updatedValue)
+    }, [workspaceJSON])
+
+    const updateVisibility = () => {
+        const datasetParameterField =
+                    // the block parameters field should always be in the same place (e.g. in args0)
+                    sourceBlock.inputList[0].fieldRow.find(
+                        f => f.name === "BLOCK_PARAMS"
+                    ) as ReactParameterField<any>
+        setParametersVisible(datasetParameterField.areParametersVisible())
+    }
+
+    const updateRecordings = () => {
         // update the recordings
         const childrenBlocks = sourceBlock.getChildren(false) // seems to only return the top block, not all of them. so I implement my own get all children
+        let allRecordingBlocks = []
         const updatedClasses = []
         const updatedInputs = []
 
         if (childrenBlocks.length > 0) {
             const childBlock = childrenBlocks[0]
-            const allRecordingBlocks = getAllChildBlocks(childBlock)
+            allRecordingBlocks = getAllChildBlocks(childBlock)
             //console.log("Randi all children", childBlocks)
             for (const block of allRecordingBlocks) {
-                // get the block parameters
-                const parameterField =
+                // get the block parameters for the recording
+                const recordingParameterField =
                     // the block parameters field should always be in the same place (e.g. in args0)
                     block.inputList[0].fieldRow.find(
                         f => f.name === "BLOCK_PARAMS"
@@ -58,9 +97,10 @@ function DatasetParameterWidget(props: {
             }
         }
 
+        setNumRecordings(allRecordingBlocks.length)
         setClasses(updatedClasses)
         setInputs(updatedInputs)
-    }, [workspaceJSON])
+    }
 
     const getAllChildBlocks = (startingChildBlock: Blockly.Block) => {
         const recordingBlockType = "model_block_recording"
@@ -75,11 +115,13 @@ function DatasetParameterWidget(props: {
     }
 
     return (
-        <> {visible && <Grid container spacing={1}>
+        <> {parametersVisible && <Grid container spacing={1}>
             <Grid item>
                 <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"},
-                    Inputs: {inputs.length ? inputs.join(", ") : "none"}
+                    Classes: {classes.length ? classes.join(", ") : "none"}
+                </Box>
+                <Box color="text.secondary">
+                    Input type: {inputs.length ? inputs.join(", ") : "none"}
                 </Box>
             </Grid>
             <Grid item>
@@ -109,16 +151,13 @@ function DatasetParameterWidget(props: {
     )
 }
 
-export interface DatasetBlockFieldValue {
-    parametersVisible: boolean
-}
-
 export default class DatasetBlockField extends ReactParameterField<DatasetBlockFieldValue> {
     static KEY = "dataset_block_field_key"
     static EDITABLE = false
 
     constructor(value: string) {
         super(value)
+        this.updateFieldValue = this.updateFieldValue.bind(this);
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -136,6 +175,10 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
     get defaultValue() {
         return {
             parametersVisible: false,
+            numRecordings: 0,
+            numSamples: 0,
+            classes: [],
+            inputs: [],
         }
     }
 
@@ -145,22 +188,34 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
     }
 
     setParametersVisible(visible) {
-        console.log("Randi setParametersVisible: " + visible)
-        this.value = {
+        const updatedValue = {
+            ...this.value,
             parametersVisible: visible,
         }
-        this.rerender()
+        this.value = updatedValue
     }
 
     getText_() {
-        const totalRecordings = 2 // RANDI Todo
+        const totalRecordings = this.value.numRecordings
 
         return `${totalRecordings} recordings`
     }
 
+    updateFieldValue(msg: DatasetBlockFieldValue) {
+        this.value = {
+            ...this.value, // don't copy over visibility (will cause loop)
+            numRecordings: msg.numRecordings,
+            numSamples:msg.numSamples,
+            classes:msg.classes,
+            inputs:msg.inputs,
+        }
+    }
+
+    //     // this.value.parametersVisible}
     renderInlineField(): ReactNode {
-        return <DatasetParameterWidget
-            visible={this.value.parametersVisible}
-        />
+        return ( <> {  <DatasetParameterWidget 
+            initFieldValue={this.value}
+            setFieldValue={this.updateFieldValue} />} </>)
+        
     }
 }

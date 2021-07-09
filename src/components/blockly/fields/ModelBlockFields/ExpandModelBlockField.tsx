@@ -13,7 +13,6 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 
 function ExpandIconWidget() {
-
     const { sourceBlock, workspaceJSON } = useContext(WorkspaceContext)
     const [parametersVisible, setParametersVisible] = useState(false)
 
@@ -33,11 +32,7 @@ function ExpandIconWidget() {
                     f => f.name === "BLOCK_PARAMS"
                 ) as ReactParameterField<any>
         
-        if (parameterField) {
-            // This works correctly, but the parameter field is always visible in the toolbox/on reload
-            /*parameterField.setVisible(!parametersVisible)
-            setParametersVisible(parameterField.visible_)*/
-            
+        if (parameterField) {            
             parameterField.setParametersVisible(!parametersVisible)
             setParametersVisible(parameterField.areParametersVisible())
         }
@@ -60,7 +55,7 @@ function ExpandIconWidget() {
     )
 }
 
-export default class ModelBlockField extends ReactInlineField {
+export default class ExpandModelBlockField extends ReactInlineField {
     static KEY = "model_field_key"
 
     constructor(value: string) {
@@ -75,7 +70,7 @@ export default class ModelBlockField extends ReactInlineField {
     }
 
     static fromJson(options: ReactFieldJSON) {
-        return new ModelBlockField(options?.value)
+        return new ExpandModelBlockField(options?.value)
     }
 
     getText_() {

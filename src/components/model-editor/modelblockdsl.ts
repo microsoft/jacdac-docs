@@ -9,7 +9,7 @@ import {
 import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
-import ModelBlockField from "../blockly/fields/ModelBlockFields/ModelBlockField"
+import ExpandModelBlockField from "../blockly/fields/ModelBlockFields/ExpandModelBlockField"
 import WatchValueField from "../blockly/fields/WatchValueField"
 import TwinField from "../blockly/fields/TwinField"
 import DatasetBlockField from "../blockly/fields/ModelBlockFields/DatasetBlockField"
@@ -64,7 +64,7 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_DATASET_TYPE,
                     },
                     {
-                        type: ModelBlockField.KEY,
+                        type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
                     {
@@ -177,7 +177,7 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_CLASSIFIER_TYPE,
                     },
                     {
-                        type: ModelBlockField.KEY,
+                        type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
                     },
                     {

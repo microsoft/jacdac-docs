@@ -22,7 +22,7 @@ import PiePlotField from "./PieField"
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
 
-import ModelBlockField from "./ModelBlockFields/ModelBlockField"
+import ExpandModelBlockField from "./ModelBlockFields/ExpandModelBlockField"
 import DatasetBlockField from "./ModelBlockFields/DatasetBlockField"
 import RecordingBlockField from "./ModelBlockFields/RecordingBlockField"
 import SmoothingBlockField from "./ModelBlockFields/SmoothingBlockField"
@@ -77,7 +77,7 @@ export function registerFields() {
         BarChartField,
         PiePlotField,
 
-        ModelBlockField,
+        ExpandModelBlockField,
         DatasetBlockField,
         RecordingBlockField,
         SmoothingBlockField,
