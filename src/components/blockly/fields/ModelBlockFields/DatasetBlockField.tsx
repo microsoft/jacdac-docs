@@ -8,6 +8,7 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import Blockly, { FieldVariable } from "blockly"
+import { RecordingBlockFieldValue } from "./RecordingBlockField"
 
 export interface DatasetBlockFieldValue {
     parametersVisible: boolean
@@ -39,12 +40,11 @@ function DatasetParameterWidget(props: {
     }
 
     useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
+        // push changes to source block after state values update
+        sendUpdate()
+    }, [numRecordings, numSamples, classes, inputs])
 
-        // update based on source block's associated recording blocks
-        updateRecordings()
-
+    const sendUpdate = () => {
         // push changes to field values to the parent
         const updatedValue = {
             parametersVisible: parametersVisible, // don't actually change this
@@ -54,10 +54,18 @@ function DatasetParameterWidget(props: {
             inputs: inputs,
         }
         setFieldValue(updatedValue)
+    }
+
+    useEffect(() => {
+        // update based on source block's parameter visibility field
+        updateVisibility()
+
+        // update based on source block's associated recording blocks
+        updateRecordings()
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const datasetParameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<any>
+        const datasetParameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<DatasetBlockFieldValue>
         setParametersVisible(datasetParameterField.areParametersVisible())
     }
 
@@ -75,8 +83,8 @@ function DatasetParameterWidget(props: {
             //console.log("Randi all children", childBlocks)
             for (const block of allRecordingBlocks) {
                 // get the block parameters for the recording
-                const recordingParameterField = block.getField("BLOCK_PARAMS") as ReactParameterField<any>
-                totalSamples += recordingParameterField.getValue().totalSamples
+                const recordingParameterField = block.getField("BLOCK_PARAMS") as ReactParameterField<RecordingBlockFieldValue>
+                totalSamples += recordingParameterField.getValue().numSamples
                 // {"totalSamples":number,"timestamp":number,"inputTypes":string[]}
                 
                 // get the class name parameter and add it to the list of classes
@@ -105,7 +113,7 @@ function DatasetParameterWidget(props: {
     }
 
     return (
-        <> {parametersVisible && <Grid container spacing={1}>
+        <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
             <Grid item>
                 <Box color="text.secondary">
                     Classes: {classes.length ? classes.join(", ") : "none"}
@@ -154,14 +162,6 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
         return new DatasetBlockField(options?.value)
     }
 
-    protected createContainer(): HTMLDivElement {
-        const c = document.createElement("div")
-        c.style.display = "inline-block"
-        c.style.minWidth = "14rem"
-        //c.style.marginLeft = "1rem"
-        return c
-    }
-
     get defaultValue() {
         return {
             parametersVisible: false,
@@ -188,7 +188,7 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
     getText_() {
         const totalRecordings = this.value.numRecordings
 
-        return `${totalRecordings} recordings`
+        return `${totalRecordings} recording(s)`
     }
 
     updateFieldValue(msg: DatasetBlockFieldValue) {
@@ -201,7 +201,6 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
         }
     }
 
-    //     // this.value.parametersVisible}
     renderInlineField(): ReactNode {
         return ( <> {  <DatasetParameterWidget 
             initFieldValue={this.value}

@@ -1,17 +1,13 @@
 import {
     BlockDefinition,
     CategoryDefinition,
-    DummyInputDefinition,
     MODEL_BLOCK_CLASS_STATEMENT_TYPE,
     MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
     MODEL_BLOCK_LAYER_STATEMENT_TYPE,
 } from "../blockly/toolbox"
-import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
 import ExpandModelBlockField from "../blockly/fields/ModelBlockFields/ExpandModelBlockField"
-import WatchValueField from "../blockly/fields/WatchValueField"
-import TwinField from "../blockly/fields/TwinField"
 import DatasetBlockField from "../blockly/fields/ModelBlockFields/DatasetBlockField"
 import RecordingBlockField from "../blockly/fields/ModelBlockFields/RecordingBlockField"
 import SmoothingBlockField from "../blockly/fields/ModelBlockFields/SmoothingBlockField"
@@ -68,7 +64,6 @@ export class ModelBlockDomainSpecificLanguage
                         name: "EXPAND_BUTTON",
                     },
                     {
-                        /* TODO make a specific field for dataset definition, should display when expand is pressed */
                         type: DatasetBlockField.KEY,
                         name: "BLOCK_PARAMS"
                     },
@@ -91,7 +86,7 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "recording",
-                message0: "recording %1 %2 %3",
+                message0: "recording %1 %2 %3 %4",
                 args0: [
                     {
                         type: "field_input",
@@ -107,10 +102,12 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_CLASS_TYPE,
                     },
                     {
-                        /* TODO make a specific field for class info, should display a + icon */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: RecordingBlockField.KEY,
                         name: "BLOCK_PARAMS",
-                        /* dropdown have button to edit recording */
                     },
                 ],
                 inputsInline: false,
@@ -141,13 +138,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "smooth",
-                message0: "smooth data %1", // calculates moving average over a particular window
+                message0: "smooth data %1 %2", // calculates moving average over a particular window
                 args0: [
                     {
-                        /* TODO make a specific field for dataset smoothing, should display window size */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: SmoothingBlockField.KEY,
                         name: "BLOCK_PARAMS",
-                        /* variables: window size, stride */
                     },
                 ],
                 inputsInline: false,
@@ -171,8 +170,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: "field_variable",
                         name: "CLASSIFIER_NAME",
-                        variable:
-                            "classifier1" /*  TODO Randi this should display classifier variable types or NN classifier1 */,
+                        variable: "classifier1",
                         variableTypes: [MB_CLASSIFIER_TYPE],
                         defaultType: MB_CLASSIFIER_TYPE,
                     },
@@ -181,10 +179,8 @@ export class ModelBlockDomainSpecificLanguage
                         name: "EXPAND_BUTTON",
                     },
                     {
-                        /* TODO make a specific field for NN classifiers, should display a + icon */
                         type: NeuralNetworkBlockField.KEY,
                         name: "BLOCK_PARAMS",
-                        /* variables: learning rate, optimizer, epochs P*/
                     },
                 ],
                 message1: "training data %1",
@@ -197,15 +193,6 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_DATASET_TYPE,
                     },
                 ],
-                /*message2: "validation data %1",
-                args2: [
-                    {
-                        type: "field_variable",
-                        name: "NN_TESTING",                        
-                        variableTypes: [MB_DATASET_TYPE],
-                        defaultType: MB_DATASET_TYPE,
-                    }
-                ],*/
                 message2: "%1",
                 args2: [
                     {
@@ -226,13 +213,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "conv_layer",
-                message0: "convolutional layer %1",
+                message0: "convolutional layer %1 %2",
                 args0: [
                     {
-                        /* TODO make a specific field for conv layers, should display filter size */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: ConvLayerBlockField.KEY,
-                        name: "CONV_LAYER_PARAMS",
-                        /* variables: filter size NxN, number of filters M, stride size P*/
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -249,13 +238,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "max_pool_layer",
-                message0: "max pooling layer %1",
+                message0: "max pooling layer %1 %2",
                 args0: [
                     {
-                        /* TODO make a specific field for pooling layers, should display pool size */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: PoolingLayerBlockField.KEY,
-                        name: "MAX_POOL_LAYER_PARAMS",
-                        /* variables: pool size NxN, stride size P*/
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -271,13 +262,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dropout_layer",
-                message0: "dropout layer %1",
+                message0: "dropout layer %1 %2",
                 args0: [
                     {
-                        /* TODO make a specific field for dropout layers, should display dropout rate */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: DropoutLayerBlockField.KEY,
-                        name: "DROPOUT_LAYER_PARAMS",
-                        /* variables: rate N*/
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -293,12 +286,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "flatten_layer",
-                message0: "flatten %1",
+                message0: "flatten %1 %2",
                 args0: [
                     {
-                        /* TODO make a specific field for flatten layer, should display (size) */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: FlattenLayerBlockField.KEY,
-                        name: "FLATTEN_LAYER_PARAMS",
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -314,13 +310,15 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dense_layer",
-                message0: "dense layer %1",
+                message0: "dense layer %1 %2",
                 args0: [
                     {
-                        /* TODO make a specific field for dense layers, should display number of nodes */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                    {
                         type: DenseLayerBlockField.KEY,
-                        name: "DENSE_LAYER_PARAMS",
-                        /* variables: number of nodes P*/
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -334,7 +332,7 @@ export class ModelBlockDomainSpecificLanguage
                 helpUrl: "",
             } as BlockDefinition,
             {
-                /* TODO would like to make a hat block */ kind: "block",
+                kind: "block",
                 type: MODEL_BLOCKS + "knn",
                 message0: "K nearest neighbors classifier %1 %2",
                 args0: [
@@ -347,13 +345,11 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_CLASSIFIER_TYPE,
                     },
                     {
-                        /* TODO make a specific field for KNN classifiers should display ... */
-                        type: KNNBlockField.KEY,
-                        name: "KNN_PARAMS",
-                        /* variables: ... */
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
                     },
                 ],
-                message1: "training data %1",
+                message1: "training data %1 %2",
                 args1: [
                     {
                         type: "field_variable",
@@ -362,13 +358,17 @@ export class ModelBlockDomainSpecificLanguage
                         variableTypes: [MB_DATASET_TYPE],
                         defaultType: MB_DATASET_TYPE,
                     },
+                    {
+                        type: KNNBlockField.KEY,
+                        name: "BLOCK_PARAMS",
+                    },
                 ],
                 message2: "k %1",
                 args2: [
                     {
                         type: "field_number",
                         name: "KNN_K_VALUE",
-                        value: 3 /* TODO dynamically set max based on # of examples? */,
+                        value: 3, /* Randi TODO dynamically set max based on number of examples? */
                     },
                 ],
                 inputsInline: false,
@@ -395,7 +395,6 @@ export class ModelBlockDomainSpecificLanguage
                         kind: "button",
                         text: "Create new dataset...",
                         callbackKey: "createNewDatasetButton",
-                        //callback: workspace => this.addNewDataset(workspace),
                     },
                     {
                         kind: "block",

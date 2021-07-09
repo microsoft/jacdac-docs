@@ -24,13 +24,13 @@ export default class ReactParameterField<T> extends ReactField<T> {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(options?: any) {
-        super(options?.value, undefined, options, { width: 1, height: 1 })
+        super(options?.value, undefined, options, { width: 0, height: 0 })
     }
 
     protected createContainer(): HTMLDivElement {
         const c = document.createElement("div")
         c.style.display = "inline-block"
-        c.style.minWidth = "14rem"
+        //c.style.minWidth = "0rem"
         return c
     }
 
@@ -124,6 +124,5 @@ export default class ReactParameterField<T> extends ReactField<T> {
 
     setParametersVisible(visible) {
         // override to implement
-        this.rerender()
     }
 }

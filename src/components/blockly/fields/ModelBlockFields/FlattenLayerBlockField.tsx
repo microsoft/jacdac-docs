@@ -1,28 +1,74 @@
-import React, { lazy, ReactNode, useContext } from "react"
-import {
-    Grid,
-    Button,
-    TextField
-} from "@material-ui/core"
-import EditIcon from "@material-ui/icons/Edit"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import React, { ReactNode, useContext, useEffect, useState } from "react"
+import { Grid, Box } from "@material-ui/core"
 
-import { ReactFieldJSON, VALUE_CHANGE } from "../ReactField"
-import ReactImageField from "../ReactImageField"
+import { ReactFieldJSON } from "../ReactField"
+import ReactParameterField from "../ReactParameterField"
+import WorkspaceContext from "../../WorkspaceContext"
 
-export interface FlattenLayerBlockFieldValue {
-    parameter: number
+export interface FlattenLayerFieldValue {
+    parametersVisible: boolean
+    numTrainableParams: number
+    runTimeInCycles: number
+    outputShape: number[]
 }
 
-export default class FlattenLayerBlockField extends ReactImageField<FlattenLayerBlockFieldValue> {
+function LayerParameterWidget(props: {
+    initFieldValue: FlattenLayerFieldValue
+}) {
+    const { initFieldValue } = props
+
+    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
+
+    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
+    const [numTrainableParams, setNumTrainableParams] = useState(initFieldValue.numTrainableParams)
+    const [runTimeInCycles, setRunTimeInCycles] = useState(initFieldValue.runTimeInCycles)
+    const [outputShape, setOutputShape] = useState<number[]>(initFieldValue.outputShape)
+
+    useEffect(() => {
+        // update based on source block's parameter visibility field
+        updateVisibility()
+
+        // update should happen after model is compiled
+        updateModelParameters()
+    }, [workspaceJSON])
+
+    const updateVisibility = () => {
+        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<FlattenLayerFieldValue>
+        setParametersVisible(parameterField.areParametersVisible())
+    }
+
+    const updateModelParameters = () => {
+        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<FlattenLayerFieldValue>
+        console.log("Randi update block parameters: ", parameterField)
+
+        // calculate the size of this layer (based on size of previous layer as well as parameters here)
+        // update the number of trainable parameters (based on the size of this layer)
+        // update the number of cycles it will take to run (based on the size of this layer)
+    }
+
+    return (
+        <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
+            <Grid item>
+                <Box color="text.secondary">
+                    No. of Parameters: {numTrainableParams}
+                </Box>
+                <Box color="text.secondary">
+                    Cycles: {runTimeInCycles}
+                </Box>
+                <Box color="text.secondary">
+                    Shape: [{outputShape.join(", ")}]
+                </Box>
+            </Grid>
+        </Grid>
+        } </>
+    )
+}
+
+export default class FlattenLayerBlockField extends ReactParameterField<FlattenLayerFieldValue> {
     static KEY = "flatten_layer_block_field_key"
     
     constructor(value: string) {
         super(value)
-
-        this.events.on(VALUE_CHANGE, () => {
-            this.setSize(32, 32)
-        })
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -31,28 +77,34 @@ export default class FlattenLayerBlockField extends ReactImageField<FlattenLayer
 
     get defaultValue() {
         return {
-            parameter: 0
+            parametersVisible: false,
+            numTrainableParams: 0,
+            runTimeInCycles: 0, 
+            outputShape: [0,0],
+            rate: 0.1
         }
     }
 
     getText_() {
-        const { parameter} = this.value
-
-        return `Parameter: ${parameter}`
+        return ``
     }
 
-    renderValue(): string {
-        // Doesn't work for local images
-        return "https://royalposthumus.com/images/white_menu_icon.png"
+    areParametersVisible() {
+        const { parametersVisible } = this.value
+        return parametersVisible
     }
 
-    renderField(): ReactNode {        
-        return (
-            <Grid container>
-                <Grid item>
-                    <div style={{color:'#ffffff'}}> {this.getText_()} </div>
-                </Grid>
-            </Grid>
-        )
+    setParametersVisible(visible) {
+        const updatedValue = {
+            ...this.value,
+            parametersVisible: visible,
+        }
+        this.value = updatedValue
+    }
+
+    renderInlineField(): ReactNode {
+        return ( <> {  <LayerParameterWidget 
+            initFieldValue={this.value} />} </>)
+        
     }
 }
