@@ -193,6 +193,7 @@ function BlockMiniMap(props: {
 }
 
 class MinimapPlugin implements IPositionable {
+    readonly id = 'minimap';    
     private top_ = 0
     private left_ = 0
     private width_ = MAX_WIDTH
@@ -205,7 +206,6 @@ class MinimapPlugin implements IPositionable {
     }
 
     private init() {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const componentManager = this.workspace_.getComponentManager()
         componentManager.addComponent({
             component: this,
