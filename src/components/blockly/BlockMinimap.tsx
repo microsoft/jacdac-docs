@@ -4,11 +4,11 @@ import {
     Events,
     IPositionable,
     MetricsManager,
-    PluginManager,
     utils,
     WorkspaceSvg,
     TOOLBOX_AT_LEFT,
     Scrollbar,
+    ComponentManager,
 } from "blockly"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import ReactDOM from "react-dom"
@@ -206,12 +206,11 @@ class MinimapPlugin implements IPositionable {
 
     private init() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pluginManager = (this.workspace_ as any).getPluginManager()
-        pluginManager.addPlugin({
-            id: "minimap",
-            plugin: this,
+        const componentManager = this.workspace_.getComponentManager()
+        componentManager.addComponent({
+            component: this,
             weight: 2,
-            types: [PluginManager.Type.POSITIONABLE],
+            capabilities: [ComponentManager.Capability.POSITIONABLE],
         })
         this.createDom_()
         this.workspace_.resize()
