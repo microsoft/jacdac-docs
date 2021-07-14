@@ -25,6 +25,8 @@ function VMEditorWithContext() {
         roleManager,
         setWarnings,
         dragging,
+        workspaceFileHandle,
+        setWorkspaceFileHandle,
     } = useContext(BlockContext)
     const [program, setProgram] = useState<VMProgram>()
     const autoStart = true
@@ -49,7 +51,11 @@ function VMEditorWithContext() {
             program &&
             roleManager?.setRoles([
                 ...program.roles,
-                ...(program.serverRoles.map(r => ({role: r.role, serviceClass: r.serviceClass, preferredDeviceId: "TBD"}))),
+                ...program.serverRoles.map(r => ({
+                    role: r.role,
+                    serviceClass: r.serviceClass,
+                    preferredDeviceId: "TBD",
+                })),
             ]),
         [roleManager, program]
     )
@@ -73,9 +79,15 @@ function VMEditorWithContext() {
 
     return (
         <Grid container direction="column" spacing={1}>
-            <Grid item xs={12}>
-                <FileTabs storageKey={VM_SOURCE_STORAGE_KEY} />
-            </Grid>
+            {!!setWorkspaceFileHandle && (
+                <Grid item xs={12}>
+                    <FileTabs
+                        storageKey={VM_SOURCE_STORAGE_KEY}
+                        selectedFileHandle={workspaceFileHandle}
+                        onFileHandleSelected={setWorkspaceFileHandle}
+                    />
+                </Grid>
+            )}
             <Grid item xs={12}>
                 <VMToolbar runner={runner} run={run} cancel={cancel} />
             </Grid>

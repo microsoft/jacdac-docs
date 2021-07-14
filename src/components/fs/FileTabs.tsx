@@ -1,5 +1,5 @@
 import { Grid, Chip } from "@material-ui/core"
-import React, { useState } from "react"
+import React from "react"
 import useDirectoryFileHandles from "../hooks/useDirectoryFileHandles"
 import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
 
@@ -21,19 +21,16 @@ function FileChip(props: {
 
 export default function FileTabs(props: {
     storageKey: string
-    onFileSelected: (file: FileSystemHandle) => void
+    selectedFileHandle: FileSystemFileHandle
+    onFileHandleSelected: (file: FileSystemFileHandle) => void
 }) {
-    const { storageKey, onFileSelected } = props
+    const { storageKey, selectedFileHandle, onFileHandleSelected } = props
     const { files, directory, supported, showDirectoryPicker, clearDirectory } =
         useDirectoryFileHandles(storageKey)
-    const [selected, setSelected] = useState<FileSystemHandle>()
 
     const handleOpenDirectory = () => showDirectoryPicker()
     const handleCloseDirectory = () => clearDirectory()
-    const handleFileSelected = file => () => {
-        setSelected(file)
-        onFileSelected(file)
-    }
+    const handleFileHandleSelected = file => () => onFileHandleSelected(file)
 
     if (!supported) return null
     return (
@@ -51,8 +48,8 @@ export default function FileTabs(props: {
                 <Grid item key={file.name}>
                     <FileChip
                         file={file}
-                        selected={file === selected}
-                        onClick={handleFileSelected(file)}
+                        selected={file === selectedFileHandle}
+                        onClick={handleFileHandleSelected(file)}
                     />
                 </Grid>
             ))}

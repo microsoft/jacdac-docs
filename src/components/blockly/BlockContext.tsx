@@ -1,5 +1,11 @@
 import { Events, WorkspaceSvg } from "blockly"
-import React, { createContext, ReactNode, useEffect, useState } from "react"
+import React, {
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
+} from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
@@ -25,6 +31,10 @@ import {
     FieldWithServices,
     WorkspaceServices,
 } from "./WorkspaceContext"
+import useEffectAsync from "../useEffectAsync"
+import AppContext from "../AppContext"
+import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
+import useFileStorage from "../hooks/useFileStorage"
 
 export interface BlockProps {
     dsls: BlockDomainSpecificLanguage[]
@@ -37,6 +47,9 @@ export interface BlockProps {
     setWorkspace: (ws: WorkspaceSvg) => void
     setWorkspaceXml: (value: string) => void
     setWarnings: (category: string, warnings: BlockWarning[]) => void
+
+    workspaceFileHandle: FileSystemFileHandle
+    setWorkspaceFileHandle: (file: FileSystemFileHandle) => void
 }
 
 const BlockContext = createContext<BlockProps>({
@@ -50,6 +63,9 @@ const BlockContext = createContext<BlockProps>({
     setWarnings: () => {},
     setWorkspace: () => {},
     setWorkspaceXml: () => {},
+
+    workspaceFileHandle: undefined,
+    setWorkspaceFileHandle: undefined,
 })
 BlockContext.displayName = "Block"
 
@@ -62,10 +78,14 @@ export function BlockProvider(props: {
     children: ReactNode
 }) {
     const { storageKey, dsls, children } = props
+    const { setError } = useContext(AppContext)
+    const [workspaceFileHandle, setFileHandle] =
+        useState<FileSystemFileHandle>()
     const [storedXml, setStoredXml] = useLocalStorage(
         storageKey,
         NEW_PROJET_XML
     )
+    const [, setWorkspaceFileContent] = useFileStorage(workspaceFileHandle)
     const roleManager = useRoleManager()
     const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
@@ -81,7 +101,22 @@ export function BlockProvider(props: {
     const setWorkspaceXml = (xml: string) => {
         setStoredXml(xml)
         _setWorkspaceXml(xml)
+        setWorkspaceFileContent?.(xml)
     }
+
+    useEffectAsync(async () => {
+        if (!workspaceFileHandle) return
+
+        try {
+            console.debug(`reading ${workspaceFileHandle.name}`)
+            const file = await workspaceFileHandle.getFile()
+            const text = await file.text()
+            setWorkspaceXml(text)
+        } catch (e) {
+            setError(e)
+            setFileHandle(undefined)
+        }
+    }, [workspaceFileHandle])
 
     const setWarnings = (category: string, entries: BlockWarning[]) => {
         const i = warnings.findIndex(w => w.category === category)
@@ -152,6 +187,11 @@ export function BlockProvider(props: {
             handleBlockChange(cev.blockId)
         }
     }
+
+    const setWorkspaceFileHandle: (fileHandle: FileSystemFileHandle) => void =
+        fileSystemHandleSupported()
+            ? fileHandle => setFileHandle(fileHandle)
+            : undefined
 
     // plugins
     useBlocklyPlugins(workspace)
@@ -244,6 +284,8 @@ export function BlockProvider(props: {
                 setWarnings,
                 setWorkspace,
                 setWorkspaceXml,
+                workspaceFileHandle,
+                setWorkspaceFileHandle,
             }}
         >
             {children}
