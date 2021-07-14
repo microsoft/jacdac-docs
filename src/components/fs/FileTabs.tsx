@@ -9,10 +9,11 @@ function FileChip(props: {
     onClick: () => void
 }) {
     const { file, selected, onClick } = props
+    const { name } = file
     return (
         <Chip
             clickable
-            label={file.name}
+            label={name.replace(/\.json$/i, '')}
             color={selected ? "primary" : undefined}
             onClick={onClick}
         />
