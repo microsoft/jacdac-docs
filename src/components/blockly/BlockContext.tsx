@@ -1,4 +1,4 @@
-import { Events, WorkspaceSvg } from "blockly"
+import { Events, WorkspaceSvg, Xml } from "blockly"
 import React, {
     createContext,
     ReactNode,
@@ -101,7 +101,7 @@ export function BlockProvider(props: {
     const setWorkspaceXml = (xml: string) => {
         setStoredXml(xml)
         _setWorkspaceXml(xml)
-        setWorkspaceFileContent?.(xml)
+        setWorkspaceFileContent?.(JSON.stringify({ xml }))
     }
 
     useEffectAsync(async () => {
@@ -111,10 +111,15 @@ export function BlockProvider(props: {
             console.debug(`reading ${workspaceFileHandle.name}`)
             const file = await workspaceFileHandle.getFile()
             const text = await file.text()
-            setWorkspaceXml(text)
+            const xml = JSON.parse(text).xml
+            // try loading xml into a dummy blockly workspace
+            const dom = Xml.textToDom(xml)
+            // all good, load in workspace
+            workspace.clear()
+            Xml.domToWorkspace(dom, workspace)
         } catch (e) {
             setError(e)
-            setFileHandle(undefined)
+            //setFileHandle(undefined)
         }
     }, [workspaceFileHandle])
 
@@ -189,9 +194,7 @@ export function BlockProvider(props: {
     }
 
     const setWorkspaceFileHandle: (f: FileSystemFileHandle) => void =
-        fileSystemHandleSupported()
-            ? f => setFileHandle(f)
-            : undefined
+        fileSystemHandleSupported() ? f => setFileHandle(f) : undefined
 
     // plugins
     useBlocklyPlugins(workspace)
