@@ -63,12 +63,14 @@ PacketsContext.displayName = "packets"
 
 export default PacketsContext
 
+const DEFAULT_PACKET_FILTER = "announce:false reset-in:false min-priority:false"
+
 // eslint-disable-next-line react/prop-types
 export const PacketsProvider = ({ children }) => {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const [filter, _setFilter] = useLocalStorage(
         "packetfilter",
-        "announce:false reset-in:false min-priority:false"
+        DEFAULT_PACKET_FILTER
     )
 
     const recorder = useRef<TraceRecorder>(undefined)
@@ -99,7 +101,7 @@ export const PacketsProvider = ({ children }) => {
         clearPackets()
         bus.clear()
     }
-    const setReplayTrace = (trace: Trace) => {
+    const setReplayTrace = async (trace: Trace) => {
         clearPackets()
         player.current.trace = trace
     }
@@ -107,8 +109,8 @@ export const PacketsProvider = ({ children }) => {
         if (recorder.current.recording) {
             player.current.trace = recorder.current.stop()
         } else {
-            player.current.trace = undefined
             recorder.current.start()
+            player.current.trace = undefined
             setProgress(undefined)
         }
     }
@@ -118,7 +120,7 @@ export const PacketsProvider = ({ children }) => {
             player.current.stop()
         } else {
             clearPackets()
-            await bus.disconnect()
+            bus.clear() // clear all devices
             player.current.start()
         }
     }
@@ -159,15 +161,21 @@ export const PacketsProvider = ({ children }) => {
             })
         )
         player.current.mount(
-            player.current.subscribe(CHANGE, () => {
+            player.current.subscribe(CHANGE, async () => {
                 setTracing(player.current.running)
                 _setReplayTrace(player.current.trace)
+                if (player.current.trace) await bus.stop()
+                else {
+                    if (!recorder.current.trace)
+                        bus.clear()
+                    await bus.start()
+                }
             })
         )
         player.current.mount(
-            player.current.subscribe(PROGRESS, () => {
+            player.current.subscribe(PROGRESS, () =>
                 setProgress(player.current.progress)
-            })
+            )
         )
 
         return () => {

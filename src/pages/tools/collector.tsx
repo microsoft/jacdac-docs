@@ -31,7 +31,11 @@ import {
     REPORT_UPDATE,
     SRV_SENSOR_AGGREGATOR,
 } from "../../../jacdac-ts/src/jdom/constants"
-import { arrayConcatMany, throttle } from "../../../jacdac-ts/src/jdom/utils"
+import {
+    arrayConcatMany,
+    throttle,
+    uniqueMap,
+} from "../../../jacdac-ts/src/jdom/utils"
 import DataSetGrid from "../../components/DataSetGrid"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import ReadingFieldGrid from "../../components/ReadingFieldGrid"
@@ -43,6 +47,13 @@ import ServiceManagerContext from "../../components/ServiceManagerContext"
 import useChartPalette from "../../components/useChartPalette"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import useEvents from "../../components/hooks/useEvents"
+import useDevices from "../../components/hooks/useDevices"
+import { useId } from "react-use-id-hook"
+import DashboardDeviceItem from "../../components/dashboard/DashboardDeviceItem"
+import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
+import AppContext from "../../components/AppContext"
+import AddIcon from "@material-ui/icons/Add"
+import { useSnackbar } from "notistack"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -94,6 +105,8 @@ function createDataSet(
 
 export default function Collector() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { enqueueSnackbar } = useSnackbar()
+    const { toggleShowDeviceHostsDialog } = useContext(AppContext)
     const classes = useStyles()
     const { fileStorage } = useContext(ServiceManagerContext)
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
@@ -108,18 +121,22 @@ export default function Collector() {
     const [, setLiveDataTimestamp] = useState(0)
     const [triggerEventId, setTriggerEventId] = useState<string>("")
     const chartPalette = useChartPalette()
-    const readingRegisters = useChange(bus, bus =>
-        arrayConcatMany(
-            bus.devices().map(device =>
-                device
-                    .services()
-                    .filter(srv => isSensor(srv.specification))
-                    .map(srv => srv.readingRegister)
-            )
+    const devices = useDevices({ ignoreSelf: true, announced: true })
+    const readingRegisters = arrayConcatMany(
+        devices.map(device =>
+            device
+                .services()
+                .filter(srv => isSensor(srv.specification))
+                .map(srv => srv.readingRegister)
         )
     )
     const recordingRegisters = readingRegisters.filter(
         reg => registerIdsChecked.indexOf(reg.id) > -1
+    )
+    const recordingDevices = uniqueMap(
+        recordingRegisters,
+        reg => reg.service.device.deviceId,
+        reg => reg.service.device
     )
     const aggregators: JDService[] = useChange(bus, bus =>
         bus.services({ serviceClass: SRV_SENSOR_AGGREGATOR })
@@ -137,7 +154,15 @@ export default function Collector() {
     const error = errorSamplingDuration || errorSamplingIntervalDelay
     const triggerEvent = bus.node(triggerEventId) as JDEvent
     const startEnabled = !!recordingRegisters?.length
-    const events = useEvents()
+    const events = useEvents({ ignoreChange: true })
+    const aggregatorsId = useId()
+    const sensorsId = useId()
+    const recordId = useId()
+    const recordingsId = useId()
+    const dashboardId = useId()
+    const samplingIntervalId = useId()
+    const samplingDurationId = useId()
+    const prefixId = useId()
 
     useEffect(() => {
         //console.log(`trigger event`, triggerEventId, triggerEvent)
@@ -188,10 +213,11 @@ export default function Collector() {
     }
     const stopRecording = () => {
         if (recording) {
-            //console.log(`stop recording`, liveDataSet)
             setTables([liveDataSet, ...tables])
             setLiveDataSet(newDataSet(registerIdsChecked, true))
             setRecording(false)
+
+            enqueueSnackbar(`recording stopped`)
         }
     }
     const startRecording = async () => {
@@ -203,6 +229,7 @@ export default function Collector() {
                 await client.setInputs(createSensorConfig())
                 client.collect(samplingCount)
             }
+            enqueueSnackbar(`recording started`)
         }
     }
     const startStreamingRegisters = () => {
@@ -304,7 +331,7 @@ export default function Collector() {
                 various output formats.
             </p>
             {!!aggregators.length && (
-                <div key="aggregators">
+                <section id={aggregatorsId}>
                     <h3>(Optional) Choose a data aggregator</h3>
                     <p>
                         A <Link to="/services/aggregator">data aggregator</Link>{" "}
@@ -334,10 +361,18 @@ export default function Collector() {
                             </Grid>
                         ))}
                     </Grid>
-                </div>
+                </section>
             )}
-            <div key="sensors">
-                <h3>Choose sensors</h3>
+            <section id={sensorsId}>
+                <h3>
+                    Choose sensors &nbsp;
+                    <IconButtonWithTooltip
+                        title="start simulator"
+                        onClick={toggleShowDeviceHostsDialog}
+                    >
+                        <AddIcon />
+                    </IconButtonWithTooltip>
+                </h3>
                 {!readingRegisters.length && (
                     <Alert className={classes.grow} severity="info">
                         Waiting for sensor...
@@ -352,8 +387,8 @@ export default function Collector() {
                         handleRegisterCheck={handleRegisterCheck}
                     />
                 )}
-            </div>
-            <div key="record">
+            </section>
+            <section id={recordId}>
                 <h3>Record data</h3>
                 {aggregator && (
                     <p>
@@ -366,8 +401,7 @@ export default function Collector() {
                         size="large"
                         variant="contained"
                         color={recording ? "secondary" : "primary"}
-                        aria-label="start/stop recording"
-                        title="start/stop recording"
+                        title={recording ? "stop recording" : "start recording"}
                         onClick={toggleRecording}
                         startIcon={recording ? <StopIcon /> : <PlayArrowIcon />}
                         disabled={!startEnabled}
@@ -388,6 +422,7 @@ export default function Collector() {
                 </div>
                 <div className={classes.row}>
                     <TextField
+                        id={samplingIntervalId}
                         className={classes.field}
                         error={errorSamplingIntervalDelay}
                         disabled={recording}
@@ -404,6 +439,7 @@ export default function Collector() {
                         onChange={handleSamplingIntervalChange}
                     />
                     <TextField
+                        id={samplingDurationId}
                         className={classes.field}
                         error={errorSamplingDuration}
                         disabled={recording}
@@ -420,6 +456,7 @@ export default function Collector() {
                         onChange={handleSamplingDurationChange}
                     />
                     <TextField
+                        id={prefixId}
                         className={classes.field}
                         disabled={recording}
                         label="File name prefix"
@@ -432,9 +469,24 @@ export default function Collector() {
                         eventId={triggerEventId}
                         onChange={handleTriggerChange}
                         label={"Start Event"}
+                        friendlyName={true}
                     />
                 </div>
-            </div>
+            </section>
+            {!!recordingDevices?.length && (
+                <section id={dashboardId}>
+                    <Grid container spacing={1}>
+                        {recordingDevices?.map(device => (
+                            <DashboardDeviceItem
+                                key={device.id}
+                                device={device}
+                                showAvatar={true}
+                                showHeader={true}
+                            />
+                        ))}
+                    </Grid>
+                </section>
+            )}
             {liveDataSet && (
                 <Trend
                     key="trends"
@@ -446,13 +498,13 @@ export default function Collector() {
                 />
             )}
             {!!tables.length && (
-                <div key="recordings">
+                <section id={recordingsId}>
                     <h3>Recordings</h3>
                     <DataSetGrid
                         tables={tables}
                         handleDeleteTable={handleDeleteTable}
                     />
-                </div>
+                </section>
             )}
         </div>
     )
