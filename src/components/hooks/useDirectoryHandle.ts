@@ -1,5 +1,5 @@
-import { useContext, useState } from "react"
-import useChange from "../../jacdac/useChange"
+import { useContext, useMemo, useState } from "react"
+import useChange, { useChangeAsync } from "../../jacdac/useChange"
 import DbContext from "../DbContext"
 
 async function verifyPermission(fileHandle: FileSystemHandle) {
@@ -26,32 +26,35 @@ export function fileSystemHandleSupported() {
 
 export default function useDirectoryHandle(storageKey: string) {
     const { db } = useContext(DbContext)
-    const directories = useChange(db, _ => _?.directories)
+    const directories = useMemo(() => db?.directories, [db])
     const [directory, setDirectory] = useState<FileSystemDirectoryHandle>()
 
-    console.log({ directory })
     const supported = fileSystemHandleSupported()
     const showDirectoryPicker = supported
         ? async (options?: DirectoryPickerOptions) => {
-              const dir = await window.showDirectoryPicker(options)
-              if (dir !== directory) directories.set(storageKey, dir)
+              try {
+                  const dir = await window.showDirectoryPicker(options)
+                  if (dir !== directory) directories.set(storageKey, dir)
+              } catch (e) {
+                  console.debug(e)
+              }
           }
         : undefined
     const clearDirectory = () => directories?.set(storageKey, undefined)
 
     // reload directory from DB
-    useChange(
+    useChangeAsync(
         directories,
-        async () => {
-            let dir = await directories?.get(storageKey)
-            console.log(`load directory`, { storageKey, directories, dir })
+        async _ => {
+            let dir = await _?.get(storageKey)
+            console.debug(`load directory`, { storageKey, _, dir })
             if (dir) {
                 // check permissions
                 const perm = await verifyPermission(dir)
                 if (!perm) {
-                    console.log(`permission verification failed`)
+                    console.debug(`permission verification failed`)
                     // clear from db
-                    directories.set(storageKey, undefined)
+                    _.set(storageKey, undefined)
                     dir = undefined
                 }
             }
