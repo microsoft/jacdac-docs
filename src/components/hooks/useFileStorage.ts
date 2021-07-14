@@ -22,12 +22,11 @@ export default function useFileStorage(
 
     // debounced save
     useEffectAsync(async () => {
+        if (!fileHandle || debouncedStoredValue === undefined) return
         try {
-            if (fileHandle) {
-                const writable = await fileHandle.createWritable()
-                await writable.write(debouncedStoredValue || "")
-                await writable.close()
-            }
+            const writable = await fileHandle.createWritable()
+            await writable.write(debouncedStoredValue || "")
+            await writable.close()
         } catch (e) {
             console.debug(e)
         }

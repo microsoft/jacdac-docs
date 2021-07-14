@@ -188,9 +188,9 @@ export function BlockProvider(props: {
         }
     }
 
-    const setWorkspaceFileHandle: (fileHandle: FileSystemFileHandle) => void =
+    const setWorkspaceFileHandle: (f: FileSystemFileHandle) => void =
         fileSystemHandleSupported()
-            ? fileHandle => setFileHandle(fileHandle)
+            ? f => setFileHandle(f)
             : undefined
 
     // plugins
