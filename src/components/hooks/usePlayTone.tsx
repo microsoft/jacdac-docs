@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext, useCallback } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import { startServiceProviderFromServiceClass } from "../../../jacdac-ts/src/servers/servers"
 import { BuzzerCmd, SRV_BUZZER } from "../../../jacdac-ts/src/jdom/constants"
@@ -69,7 +69,7 @@ export function usePlayTone() {
         }
     }
 
-    const buzzerPlayTone = async (
+    const buzzerPlayTone = useCallback(async (
         frequency: number,
         duration: number,
         volume: number
@@ -84,7 +84,7 @@ export function usePlayTone() {
                 await buzzer.sendPacketAsync(pkt)
             })
         )
-    }
+    }, [buzzers])
 
     const browserAudio = activated && !!buzzerServer
     return {
