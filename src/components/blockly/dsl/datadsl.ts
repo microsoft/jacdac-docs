@@ -55,7 +55,7 @@ const DATA_SHOW_TABLE_BLOCK = "data_show_table"
 const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
 const DATA_BIN_BLOCK = "data_bin"
 const DATA_CORRELATION_BLOCK = "data_correlation"
-const DATA_LINREG_BLOCK = "data_linreg"
+const DATA_LINEAR_REGRESSION_BLOCK = "data_linear_regression"
 const DATA_LOAD_FILE_BLOCK = "data_load_file"
 const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
@@ -585,7 +585,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
         <BlockDefinition>{
             kind: "block",
-            type: DATA_LINREG_BLOCK,
+            type: DATA_LINEAR_REGRESSION_BLOCK,
             message0: "Linear Regression %1 %2",
             args0: [
                 {
@@ -606,7 +606,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column1 = block.getFieldValue("column1")
                 const column2 = block.getFieldValue("column2")
                 return postTransformData(<DataLinearRegressionRequest>{
-                    type: "linreg",
+                    type: "linear_regression",
                     column1,
                     column2,
                     data,
@@ -726,7 +726,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 },
                 <BlockReference>{
                     kind: "block",
-                    type: DATA_LINREG_BLOCK,
+                    type: DATA_LINEAR_REGRESSION_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",
