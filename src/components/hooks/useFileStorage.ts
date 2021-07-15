@@ -1,12 +1,10 @@
 import { useState } from "react"
 import useEffectAsync from "../useEffectAsync"
-import { useDebounce } from "use-debounce"
 
 export default function useFileStorage(
     fileHandle: FileSystemFileHandle
 ): [string, (value: string) => void] {
     const [storedValue, setStoredValue] = useState<string>()
-    const [debouncedStoredValue] = useDebounce(storedValue, 1000)
 
     // initial load
     useEffectAsync(async () => {
@@ -22,15 +20,15 @@ export default function useFileStorage(
 
     // debounced save
     useEffectAsync(async () => {
-        if (!fileHandle || debouncedStoredValue === undefined) return
+        if (!fileHandle || storedValue === undefined) return
         try {
             const writable = await fileHandle.createWritable()
-            await writable.write(debouncedStoredValue || "")
+            await writable.write(storedValue || "")
             await writable.close()
         } catch (e) {
             console.debug(e)
         }
-    }, [debouncedStoredValue, fileHandle])
+    }, [storedValue, fileHandle])
 
     // if no file, return nothing
     if (!fileHandle) return [undefined, undefined]
