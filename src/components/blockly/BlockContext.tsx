@@ -88,7 +88,7 @@ export function BlockProvider(props: {
         storageKey,
         NEW_PROJET_XML
     )
-    const [, setWorkspaceFileContent] = useFileStorage(workspaceFileHandle)
+    const setWorkspaceFileContent = useFileStorage(workspaceFileHandle)
     const roleManager = useRoleManager()
     const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
@@ -101,10 +101,11 @@ export function BlockProvider(props: {
     >([])
     const [dragging, setDragging] = useState(false)
 
-    const setWorkspaceXml = (xml: string) => {
+    const setWorkspaceXml = async (xml: string) => {
+        console.log(`save xml`)
         setStoredXml(xml)
         _setWorkspaceXml(xml)
-        setWorkspaceFileContent?.(JSON.stringify({ xml }))
+        await setWorkspaceFileContent?.(JSON.stringify({ xml }))
     }
 
     useEffectAsync(async () => {
@@ -121,6 +122,7 @@ export function BlockProvider(props: {
             // all good, load in workspace
             workspace.clear()
             Xml.domToWorkspace(dom, workspace)
+            console.debug(`loaded ${workspaceFileHandle.name}`)
         } catch (e) {
             setError(e)
             setWorkspaceFileHandle(undefined)
