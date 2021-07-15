@@ -12,6 +12,7 @@ import {
     desc,
     tidy,
     mutate,
+    count
 } from "@tidyjs/tidy"
 import { bin } from "d3-array"
 import { 
@@ -73,6 +74,12 @@ export interface DataMutateNumberRequest extends DataRequest {
     lhs: string
     rhs: number
     logic: string
+}
+
+export interface DataSummarizeRequest extends DataRequest {
+    type: "summarize"
+    column: string
+    calc: string
 }
 
 export interface DataSummarizeByGroupRequest extends DataRequest {
@@ -280,6 +287,39 @@ const handlers: { [index: string]: (props: any) => object[] } = {
             case "ne":
                 calc[newcolumn] = d => d[lhs] != rhs
                 return tidy(data, mutate(calc))
+            default:
+                return data
+        }
+    },
+    summarize: (props: DataSummarizeRequest) => {
+        const { column, calc, data } = props
+        if (!column || !calc) return data
+
+        switch (calc) {
+            case "mean":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ mean: mean(column as any) }),
+                )
+            case "med":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ median: median(column as any) }),
+                )
+            case "min":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ min: min(column as any) })
+                )
+            case "max":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ max: max(column as any) })
+                )
             default:
                 return data
         }
