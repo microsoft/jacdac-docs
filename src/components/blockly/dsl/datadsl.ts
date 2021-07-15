@@ -29,6 +29,7 @@ import {
     DataSummarizeByGroupRequest,
     DataMutateColumnsRequest,
     DataMutateNumberRequest,
+    DataCountRequest,
     DataRecordWindowRequest,
     DataBinRequest,
     DataCorrelationRequest,
@@ -48,6 +49,7 @@ const DATA_MUTATE_COLUMNS_BLOCK = "data_mutate_columns"
 const DATA_MUTATE_NUMBER_BLOCK = "data_mutate_number"
 const DATA_SUMMARIZE_BLOCK = "data_summarize"
 const DATA_SUMMARIZE_BY_GROUP_BLOCK = "data_summarize_by_group"
+const DATA_COUNT_BLOCK = "data_count"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
@@ -462,6 +464,30 @@ const dataDsl: BlockDomainSpecificLanguage = {
             },
             template: "meta",
         },
+        {
+            kind: "block",
+            type: DATA_COUNT_BLOCK,
+            message0: "count %1",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const column = b.getFieldValue("column")
+                return postTransformData(<DataCountRequest>{
+                    type: "count",
+                    column,
+                    data,
+                })
+            },
+            template: "meta",
+        },
         <BlockDefinition>{
             kind: "block",
             type: DATA_DATASET_BUILTIN_BLOCK,
@@ -753,6 +779,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_COUNT_BLOCK,
                 },
                 <BlockReference>{
                     kind: "block",

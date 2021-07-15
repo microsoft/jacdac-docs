@@ -89,6 +89,11 @@ export interface DataSummarizeByGroupRequest extends DataRequest {
     calc: string
 }
 
+export interface DataCountRequest extends DataRequest {
+    type: "count"
+    column: string
+}
+
 export interface DataRecordWindowRequest extends DataRequest {
     type: "record_window"
     horizon: number
@@ -362,6 +367,13 @@ const handlers: { [index: string]: (props: any) => object[] } = {
             default:
                 return data
         }
+    },
+    count: (props: DataCountRequest) => {
+        const { column,  data } = props
+        if (!column) return data
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return tidy(data, count(column as any))
     },
     record_window: (props: DataRecordWindowRequest) => {
         const { data, previousData, horizon } = props
