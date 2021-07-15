@@ -114,11 +114,10 @@ export function BlockProvider(props: {
             console.debug(`reading ${workspaceFileHandle.name}`)
             const file = await workspaceFileHandle.getFile()
             const text = await file.text()
-            const { editor, xml = DEFAULT_XML } =
-                (JSON.parse(text) as BlockFile) || {}
-            if (!editor) throw new Error("unknown file format")
+            const json: BlockFile = JSON.parse(text) as BlockFile
+            const { xml } = json || {}
             // try loading xml into a dummy blockly workspace
-            const dom = Xml.textToDom(xml)
+            const dom = Xml.textToDom(xml || DEFAULT_XML)
             // all good, load in workspace
             workspace.clear()
             Xml.domToWorkspace(dom, workspace)
