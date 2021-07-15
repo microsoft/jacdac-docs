@@ -8,12 +8,11 @@ import {
     DialogActions,
     Button,
 } from "@material-ui/core"
-import React, { ChangeEvent, useContext, useState } from "react"
+import React, { ChangeEvent, useState } from "react"
 import useDirectoryFileHandles from "../hooks/useDirectoryFileHandles"
 import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
 import AddIcon from "@material-ui/icons/Add"
 import { useId } from "react-use-id-hook"
-import AppContext from "../AppContext"
 
 function FileChip(props: {
     file: FileSystemHandle
@@ -33,11 +32,13 @@ function FileChip(props: {
 }
 
 function NewFileDialogButton(props: {
-    directory: FileSystemDirectoryHandle
+    createFile: (
+        filename: string,
+        content: string
+    ) => Promise<FileSystemFileHandle>
     onFileHandleCreated: (file: FileSystemFileHandle) => void
 }) {
-    const { directory, onFileHandleCreated } = props
-    const { setError } = useContext(AppContext)
+    const { createFile, onFileHandleCreated } = props
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState("")
     const valueId = useId()
@@ -45,20 +46,9 @@ function NewFileDialogButton(props: {
     const handleOpen = () => setOpen(true)
     const handleOk = async () => {
         setOpen(false)
-        // create the new file
         const filename = value.toLocaleLowerCase().replace(/\s+/g, "") + ".json"
-        try {
-            const fileHandle = await directory.getFileHandle(filename, {
-                create: true,
-            })
-            const file = await fileHandle.createWritable({
-                keepExistingData: false,
-            })
-            await file.write("{}")
-            onFileHandleCreated(fileHandle)
-        } catch (e) {
-            setError(e)
-        }
+        const fileHandle = await createFile(filename, "{}")
+        if (fileHandle) onFileHandleCreated(fileHandle)
     }
     const handleCancel = () => setOpen(false)
     const handleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -114,8 +104,14 @@ export default function FileTabs(props: {
         onFileHandleSelected,
         onFileHandleCreated,
     } = props
-    const { files, directory, supported, showDirectoryPicker, clearDirectory } =
-        useDirectoryFileHandles(storageKey)
+    const {
+        files,
+        directory,
+        supported,
+        showDirectoryPicker,
+        clearDirectory,
+        createFile,
+    } = useDirectoryFileHandles(storageKey)
 
     const handleOpenDirectory = () => showDirectoryPicker()
     const handleCloseDirectory = () => clearDirectory()
@@ -145,7 +141,7 @@ export default function FileTabs(props: {
             {directory && (
                 <Grid item>
                     <NewFileDialogButton
-                        directory={directory}
+                        createFile={createFile}
                         onFileHandleCreated={onFileHandleCreated}
                     />
                 </Grid>
