@@ -5,8 +5,8 @@ import { IconButton, Link } from "gatsby-theme-material-ui"
 import ImportButton from "../ImportButton"
 import AppContext from "../AppContext"
 import { Xml } from "blockly"
-import VMFile from "../../../jacdac-ts/src/vm/file"
 import BlockContext from "./BlockContext"
+import BlockFile from "./blockfile"
 
 function LoadButton() {
     const { workspace } = useContext(BlockContext)
@@ -19,7 +19,7 @@ function LoadButton() {
 
         try {
             const text = await file.text()
-            const jsfile = JSON.parse(text) as VMFile
+            const jsfile = JSON.parse(text) as BlockFile
             console.debug(`imported file`, jsfile)
             const xml = jsfile?.xml
             if (typeof xml !== "string") throw new Error("Invalid file format")

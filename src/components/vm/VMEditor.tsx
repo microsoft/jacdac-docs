@@ -15,8 +15,14 @@ import vmDsls from "./vmdsls"
 import { VMStatus } from "../../../jacdac-ts/src/vm/runner"
 import { VM_WARNINGS_CATEGORY } from "../blockly/toolbox"
 import FileTabs from "../fs/FileTabs"
+import BlockFile from "../blockly/blockfile"
 
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
+const VM_NEW_FILE_CONTENT = JSON.stringify({
+    editor: "vm",
+    xml: "",
+} as BlockFile)
+
 function VMEditorWithContext() {
     const {
         dsls,
@@ -86,6 +92,7 @@ function VMEditorWithContext() {
                         selectedFileHandle={workspaceFileHandle}
                         onFileHandleSelected={setWorkspaceFileHandle}
                         onFileHandleCreated={setWorkspaceFileHandle}
+                        newFileContent={VM_NEW_FILE_CONTENT}
                     />
                 </Grid>
             )}

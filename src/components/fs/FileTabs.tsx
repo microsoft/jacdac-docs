@@ -36,9 +36,10 @@ function NewFileDialogButton(props: {
         filename: string,
         content: string
     ) => Promise<FileSystemFileHandle>
+    newFileContent: string
     onFileHandleCreated: (file: FileSystemFileHandle) => void
 }) {
-    const { createFile, onFileHandleCreated } = props
+    const { createFile, newFileContent, onFileHandleCreated } = props
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState("")
     const valueId = useId()
@@ -47,7 +48,7 @@ function NewFileDialogButton(props: {
     const handleOk = async () => {
         setOpen(false)
         const filename = value.toLocaleLowerCase().replace(/\s+/g, "") + ".json"
-        const fileHandle = await createFile(filename, "{}")
+        const fileHandle = await createFile(filename, newFileContent)
         if (fileHandle) onFileHandleCreated(fileHandle)
     }
     const handleCancel = () => setOpen(false)
@@ -96,12 +97,14 @@ export default function FileTabs(props: {
     storageKey: string
     selectedFileHandle: FileSystemFileHandle
     onFileHandleSelected: (file: FileSystemFileHandle) => void
+    newFileContent: string
     onFileHandleCreated: (file: FileSystemFileHandle) => void
 }) {
     const {
         storageKey,
         selectedFileHandle,
         onFileHandleSelected,
+        newFileContent,
         onFileHandleCreated,
     } = props
     const {
@@ -142,6 +145,7 @@ export default function FileTabs(props: {
                 <Grid item>
                     <NewFileDialogButton
                         createFile={createFile}
+                        newFileContent={newFileContent}
                         onFileHandleCreated={onFileHandleCreated}
                     />
                 </Grid>
