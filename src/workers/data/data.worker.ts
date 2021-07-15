@@ -14,7 +14,10 @@ import {
     mutate,
 } from "@tidyjs/tidy"
 import { bin } from "d3-array"
-import { sampleCorrelation } from "simple-statistics"
+import { 
+    sampleCorrelation, 
+    linearRegression,
+} from "simple-statistics"
 
 export interface DataMessage {
     worker: "data"
@@ -93,6 +96,12 @@ export interface DataBinRequest extends DataRequest {
 
 export interface DataCorrelationRequest extends DataRequest {
     type: "correlation"
+    column1: string
+    column2: string
+}
+
+export interface DataLinearRegressionRequest extends DataRequest {
+    type: "linreg"
     column1: string
     column2: string
 }
@@ -335,9 +344,20 @@ const handlers: { [index: string]: (props: any) => object[] } = {
     },
     correlation: (props: DataCorrelationRequest) => {
         const { data, column1, column2 } = props
+        if (!column1 || !column2) return data
+
         const x = data.map((obj) => obj[column1])
         const y = data.map((obj) => obj[column2])
-        return [{Correlation: sampleCorrelation(x, y)}]
+        return [{Correlation: sampleCorrelation(x, y).toFixed(3)}]
+    },
+    linreg: (props: DataCorrelationRequest) => {
+        const { data, column1, column2 } = props
+        if (!column1 || !column2) return data
+
+        const x = data.map((obj) => obj[column1])
+        const y = data.map((obj) => obj[column2])
+        const linregmb = linearRegression([x, y])
+        return [{Slope: linregmb.m.toFixed(3), Intercept: linregmb.b.toFixed(3)}]
     },
 }
 

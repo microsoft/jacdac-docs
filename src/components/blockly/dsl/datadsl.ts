@@ -31,6 +31,7 @@ import {
     DataRecordWindowRequest,
     DataBinRequest,
     DataCorrelationRequest,
+    DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
@@ -54,6 +55,7 @@ const DATA_SHOW_TABLE_BLOCK = "data_show_table"
 const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
 const DATA_BIN_BLOCK = "data_bin"
 const DATA_CORRELATION_BLOCK = "data_correlation"
+const DATA_LINREG_BLOCK = "data_linreg"
 const DATA_LOAD_FILE_BLOCK = "data_load_file"
 const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
@@ -581,6 +583,36 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 })
             },
         },
+        <BlockDefinition>{
+            kind: "block",
+            type: DATA_LINREG_BLOCK,
+            message0: "Linear Regression %1 %2",
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+            ],
+            inputsInline: false,
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            transformData: async (block: BlockSvg, data: object[]) => {
+                const column1 = block.getFieldValue("column1")
+                const column2 = block.getFieldValue("column2")
+                return postTransformData(<DataLinearRegressionRequest>{
+                    type: "linreg",
+                    column1,
+                    column2,
+                    data,
+                })
+            },
+        },
         {
             kind: "block",
             type: DATA_LOAD_FILE_BLOCK,
@@ -691,6 +723,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_CORRELATION_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_LINREG_BLOCK,
                 },
                 <LabelDefinition>{
                     kind: "label",
