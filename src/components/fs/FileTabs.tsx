@@ -2,6 +2,8 @@ import { Grid, Chip } from "@material-ui/core"
 import React from "react"
 import useDirectoryFileHandles from "../hooks/useDirectoryFileHandles"
 import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import AddIcon from "@material-ui/icons/Add"
 
 function FileChip(props: {
     file: FileSystemHandle
@@ -13,7 +15,7 @@ function FileChip(props: {
     return (
         <Chip
             clickable
-            label={name.replace(/\.json$/i, '')}
+            label={name.replace(/\.json$/i, "")}
             color={selected ? "primary" : undefined}
             onClick={onClick}
         />
@@ -32,6 +34,9 @@ export default function FileTabs(props: {
     const handleOpenDirectory = () => showDirectoryPicker()
     const handleCloseDirectory = () => clearDirectory()
     const handleFileHandleSelected = file => () => onFileHandleSelected(file)
+    const handleNewFile = () => {
+        
+    }
 
     if (!supported) return null
     return (
@@ -54,6 +59,14 @@ export default function FileTabs(props: {
                     />
                 </Grid>
             ))}
+            <Grid item>
+                <IconButtonWithTooltip
+                    title="Create new file"
+                    onClick={handleNewFile}
+                >
+                    <AddIcon />
+                </IconButtonWithTooltip>
+            </Grid>
         </Grid>
     )
 }
