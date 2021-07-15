@@ -8,11 +8,12 @@ import {
     DialogActions,
     Button,
 } from "@material-ui/core"
-import React, { ChangeEvent, useState } from "react"
+import React, { ChangeEvent, useRef, useState } from "react"
 import useDirectoryFileHandles from "../hooks/useDirectoryFileHandles"
 import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
 import AddIcon from "@material-ui/icons/Add"
 import { useId } from "react-use-id-hook"
+import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps"
 
 function FileChip(props: {
     file: FileSystemHandle
@@ -116,13 +117,15 @@ export default function FileTabs(props: {
         createFile,
     } = useDirectoryFileHandles(storageKey)
 
+    const gridRef = useRef()
+    const keyboardProps = useKeyboardNavigationProps(gridRef.current)
     const handleOpenDirectory = () => showDirectoryPicker()
     const handleCloseDirectory = () => clearDirectory()
     const handleFileHandleSelected = file => () => onFileHandleSelected(file)
 
     if (!supported) return null
     return (
-        <Grid container spacing={1}>
+        <Grid ref={gridRef} container spacing={1} {...keyboardProps}>
             <Grid item>
                 <Chip
                     clickable
