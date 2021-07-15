@@ -70,6 +70,8 @@ const BlockContext = createContext<BlockProps>({
 })
 BlockContext.displayName = "Block"
 
+const DEFAULT_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
+
 export default BlockContext
 
 // eslint-disable-next-line react/prop-types
@@ -112,9 +114,11 @@ export function BlockProvider(props: {
             console.debug(`reading ${workspaceFileHandle.name}`)
             const file = await workspaceFileHandle.getFile()
             const text = await file.text()
-            const jsonFile = JSON.parse(text) as BlockFile
+            const { editor, xml = DEFAULT_XML } =
+                (JSON.parse(text) as BlockFile) || {}
+            if (!editor) throw new Error("unknown file format")
             // try loading xml into a dummy blockly workspace
-            const dom = Xml.textToDom(jsonFile.xml)
+            const dom = Xml.textToDom(xml)
             // all good, load in workspace
             workspace.clear()
             Xml.domToWorkspace(dom, workspace)
