@@ -102,32 +102,16 @@ export function BlockProvider(props: {
     const [dragging, setDragging] = useState(false)
 
     const setWorkspaceXml = async (xml: string) => {
-        console.log(`save xml`)
+        console.debug(`save workspace xml`)
         setStoredXml(xml)
         _setWorkspaceXml(xml)
-        await setWorkspaceFileContent?.(JSON.stringify({ xml }))
-    }
-
-    useEffectAsync(async () => {
-        if (!workspaceFileHandle) return
-
-        try {
-            console.debug(`reading ${workspaceFileHandle.name}`)
-            const file = await workspaceFileHandle.getFile()
-            const text = await file.text()
-            const json: BlockFile = JSON.parse(text) as BlockFile
-            const { xml } = json || {}
-            // try loading xml into a dummy blockly workspace
-            const dom = Xml.textToDom(xml || DEFAULT_XML)
-            // all good, load in workspace
-            workspace.clear()
-            Xml.domToWorkspace(dom, workspace)
-            console.debug(`loaded ${workspaceFileHandle.name}`)
-        } catch (e) {
-            setError(e)
-            setWorkspaceFileHandle(undefined)
+        const file = {
+            editor: "vm",
+            xml,
         }
-    }, [workspaceFileHandle])
+        const fileContent = JSON.stringify(file)
+        await setWorkspaceFileContent?.(fileContent)
+    }
 
     const setWarnings = (category: string, entries: BlockWarning[]) => {
         const i = warnings.findIndex(w => w.category === category)
@@ -199,8 +183,33 @@ export function BlockProvider(props: {
         }
     }
 
-    const setWorkspaceFileHandle: (f: FileSystemFileHandle) => void =
-        fileSystemHandleSupported() ? f => setFileHandle(f) : undefined
+    const setWorkspaceFileHandle: (f: FileSystemFileHandle) => Promise<void> =
+        fileSystemHandleSupported()
+            ? async f => {
+                  if (!f) {
+                      setFileHandle(f)
+                      return
+                  }
+
+                  try {
+                      console.debug(`reading ${f.name}`)
+                      const file = await f.getFile()
+                      const text = await file.text()
+                      const json: BlockFile = JSON.parse(text) as BlockFile
+                      const { xml } = json || {}
+                      // try loading xml into a dummy blockly workspace
+                      const dom = Xml.textToDom(xml || DEFAULT_XML)
+                      // all good, load in workspace
+                      workspace.clear()
+                      Xml.domToWorkspace(dom, workspace)
+                      console.debug(`loaded ${f.name}`)
+                      setFileHandle(f)
+                  } catch (e) {
+                      setError(e)
+                      setFileHandle(undefined)
+                  }
+              }
+            : undefined
 
     // plugins
     useBlocklyPlugins(workspace)
