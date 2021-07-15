@@ -1,5 +1,5 @@
 import { useContext, useMemo, useState } from "react"
-import useChange, { useChangeAsync } from "../../jacdac/useChange"
+import { useChangeAsync } from "../../jacdac/useChange"
 import DbContext from "../DbContext"
 
 async function verifyPermission(fileHandle: FileSystemHandle) {

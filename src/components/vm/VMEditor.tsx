@@ -85,6 +85,7 @@ function VMEditorWithContext() {
                         storageKey={VM_SOURCE_STORAGE_KEY}
                         selectedFileHandle={workspaceFileHandle}
                         onFileHandleSelected={setWorkspaceFileHandle}
+                        onFileHandleCreated={setWorkspaceFileHandle}
                     />
                 </Grid>
             )}
