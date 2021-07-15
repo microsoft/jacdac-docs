@@ -35,6 +35,7 @@ import useEffectAsync from "../useEffectAsync"
 import AppContext from "../AppContext"
 import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
 import useFileStorage from "../hooks/useFileStorage"
+import BlockFile from "./blockfile"
 
 export interface BlockProps {
     dsls: BlockDomainSpecificLanguage[]
@@ -111,15 +112,15 @@ export function BlockProvider(props: {
             console.debug(`reading ${workspaceFileHandle.name}`)
             const file = await workspaceFileHandle.getFile()
             const text = await file.text()
-            const xml = JSON.parse(text).xml
+            const jsonFile = JSON.parse(text) as BlockFile
             // try loading xml into a dummy blockly workspace
-            const dom = Xml.textToDom(xml)
+            const dom = Xml.textToDom(jsonFile.xml)
             // all good, load in workspace
             workspace.clear()
             Xml.domToWorkspace(dom, workspace)
         } catch (e) {
             setError(e)
-            //setFileHandle(undefined)
+            setWorkspaceFileHandle(undefined)
         }
     }, [workspaceFileHandle])
 
