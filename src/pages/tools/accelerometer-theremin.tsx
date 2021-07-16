@@ -1,14 +1,8 @@
-import React, { useEffect, useState, useContext } from "react"
-import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import { startServiceProviderFromServiceClass } from "../../../jacdac-ts/src/servers/servers"
+import React, { useEffect, useState } from "react"
 import {
-    BuzzerCmd,
     REPORT_UPDATE,
     SRV_ACCELEROMETER,
-    SRV_BUZZER,
 } from "../../../jacdac-ts/src/jdom/constants"
-import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
-import Packet from "../../../jacdac-ts/src/jdom/packet"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 import useServices from "../../components/hooks/useServices"
 import GridHeader from "../../components/ui/GridHeader"
@@ -75,8 +69,8 @@ export default function AccelerometerTheremin() {
 
     return (
         <Grid container spacing={2}>
+            <GridHeader title="Audio controls" />
             <Grid item xs={12}>
-                <GridHeader title="Audio controls" />
                 <Button variant={"outlined"} onClick={toggleBrowserAudio}>
                     {browserAudio
                         ? "Stop browser audio"
@@ -91,7 +85,7 @@ export default function AccelerometerTheremin() {
                     </Grid>
                 </>
             )}
-            {accelerometers.length && (
+            {!!accelerometers.length && (
                 <>
                     <GridHeader title="Available accelerometers" />
                     {accelerometers.map(accelerometer => (
