@@ -31,13 +31,15 @@ import {
     FieldWithServices,
     WorkspaceServices,
 } from "./WorkspaceContext"
-import useEffectAsync from "../useEffectAsync"
 import AppContext from "../AppContext"
 import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
 import useFileStorage from "../hooks/useFileStorage"
 import BlockFile from "./blockfile"
 
 export interface BlockProps {
+    editorId: string
+    setEditorId: (id: string) => void
+
     dsls: BlockDomainSpecificLanguage[]
     workspace: WorkspaceSvg
     workspaceXml: string
@@ -54,6 +56,8 @@ export interface BlockProps {
 }
 
 const BlockContext = createContext<BlockProps>({
+    editorId: "",
+    setEditorId: () => {},
     dsls: [],
     workspace: undefined,
     workspaceXml: undefined,
@@ -100,17 +104,20 @@ export function BlockProvider(props: {
         }[]
     >([])
     const [dragging, setDragging] = useState(false)
+    const [editorId, setEditorId] = useState("")
 
     const setWorkspaceXml = async (xml: string) => {
         console.debug(`save workspace xml`)
         setStoredXml(xml)
         _setWorkspaceXml(xml)
-        const file = {
-            editor: "vm",
-            xml,
+        if (setWorkspaceFileContent) {
+            const file = {
+                editor: editorId,
+                xml,
+            }
+            const fileContent = JSON.stringify(file)
+            await setWorkspaceFileContent(fileContent)
         }
-        const fileContent = JSON.stringify(file)
-        await setWorkspaceFileContent?.(fileContent)
     }
 
     const setWarnings = (category: string, entries: BlockWarning[]) => {
@@ -196,7 +203,9 @@ export function BlockProvider(props: {
                       const file = await f.getFile()
                       const text = await file.text()
                       const json: BlockFile = JSON.parse(text) as BlockFile
-                      const { xml } = json || {}
+                      const { editor, xml } = json || {}
+                      if (editor !== editorId)
+                          throw new Error("Wrong block editor")
                       // try loading xml into a dummy blockly workspace
                       const dom = Xml.textToDom(xml || DEFAULT_XML)
                       // all good, load in workspace
@@ -292,6 +301,8 @@ export function BlockProvider(props: {
     return (
         <BlockContext.Provider
             value={{
+                editorId,
+                setEditorId,
                 dsls,
                 workspace,
                 workspaceXml,

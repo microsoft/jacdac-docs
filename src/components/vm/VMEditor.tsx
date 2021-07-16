@@ -17,9 +17,10 @@ import { VM_WARNINGS_CATEGORY } from "../blockly/toolbox"
 import FileTabs from "../fs/FileTabs"
 import BlockFile from "../blockly/blockfile"
 
+const VM_EDITOR_ID = "vm"
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
 const VM_NEW_FILE_CONTENT = JSON.stringify({
-    editor: "vm",
+    editor: VM_EDITOR_ID,
     xml: "",
 } as BlockFile)
 
@@ -100,7 +101,7 @@ function VMEditorWithContext() {
                 <VMToolbar runner={runner} run={run} cancel={cancel} />
             </Grid>
             <Grid item xs={12}>
-                <BlockEditor />
+                <BlockEditor editorId={VM_EDITOR_ID} />
             </Grid>
             {Flags.diagnostics && (
                 <>
