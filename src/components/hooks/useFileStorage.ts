@@ -9,7 +9,6 @@ export default function useFileStorage(fileHandle: FileSystemFileHandle) {
             const writable = await fileHandle.createWritable()
             await writable.write(value || "")
             await writable.close()
-            console.debug(`saved ${fileHandle.name}`)
         } catch (e) {
             console.debug(e)
         }

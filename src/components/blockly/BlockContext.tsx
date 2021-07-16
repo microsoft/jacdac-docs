@@ -107,7 +107,6 @@ export function BlockProvider(props: {
     const [editorId, setEditorId] = useState("")
 
     const setWorkspaceXml = async (xml: string) => {
-        console.debug(`save workspace xml`)
         setStoredXml(xml)
         _setWorkspaceXml(xml)
         if (setWorkspaceFileContent) {
@@ -211,7 +210,6 @@ export function BlockProvider(props: {
                       // all good, load in workspace
                       workspace.clear()
                       Xml.domToWorkspace(dom, workspace)
-                      console.debug(`loaded ${f.name}`, { f })
                       setFileHandle(f)
                   } catch (e) {
                       setError(e)

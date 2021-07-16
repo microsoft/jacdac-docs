@@ -49,7 +49,6 @@ export default function BlocklyModalDialogs() {
 
         // cleanup
         return () => {
-            console.log("cleanup")
             Blockly.alert = previous.alert
             Blockly.confirm = previous.confirm
             Blockly.prompt = previous.prompt
