@@ -18,8 +18,7 @@ function TwinWidget() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { roleService, flyout, sourceId, sourceBlock } =
         useContext(WorkspaceContext)
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    const { data, setData } = useBlockData<object>(sourceBlock, [])
+    const { data, setData } = useBlockData(sourceBlock, [])
 
     // data collection
     const register = useBestRegister(roleService)
@@ -54,7 +53,7 @@ function TwinWidget() {
             container
             alignItems="center"
             alignContent="center"
-            justify="center"
+            justifyContent="center"
             spacing={1}
         >
             <Grid item>

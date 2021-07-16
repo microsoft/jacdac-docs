@@ -1,5 +1,6 @@
 import { SMap } from "../../../jacdac-ts/src/jdom/utils"
-import Blockly, { Block, BlockSvg } from "blockly"
+import Blockly, { Block, Workspace } from "blockly"
+import { BlockWithServices } from "./WorkspaceContext"
 
 export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -50,33 +51,28 @@ export interface ColorInputDefnition extends InputDefinition {
     color?: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface BlockReference {
-    kind: "block"
-    type: string
-    values?: SMap<BlockReference>
-    blockxml?: string
-
-    value?: number
-    min?: number
-    max?: number
-}
-
 export type EventTemplate = "event"
 
 export type EventFieldTemplate = "event_field"
 
+export type RegisterValueTemplate = "register_value"
+
 export type RegisterTemplate =
+    // client blocks
     | "register_change_event"
     | "register_set"
     | "register_get"
+    // server blocks
+    | "register_set_server"   // register name, expr hole for return value
+    | "register_get_server"   // register name, special expr block
 
-export type CommandTemplate = "command"
+export type CommandTemplate = "command" | "server" | "raiseNo" | "raiseArgs"
 
 export type BlockTemplate =
     | EventTemplate
     | EventFieldTemplate
     | RegisterTemplate
+    | RegisterValueTemplate
     | CommandTemplate
     | "shadow"
     | "meta"
@@ -102,8 +98,17 @@ export interface BlockDefinition extends BlockReference {
     vm?: (...args: any[]) => any
 
     // data transformation
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    transformData?: (block: BlockSvg, data: object[], previousData: object[]) => Promise<object[]>
+    transformData?: (
+        block: BlockWithServices,
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        data: object[],
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        previousData: object[]
+        // eslint-disable-next-line @typescript-eslint/ban-types
+    ) => Promise<object[]>
+
+    // run data transformation even when no follower
+    alwaysTransformData?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -178,9 +183,21 @@ export const VM_WARNINGS_CATEGORY = "vm"
 export const JSON_WARNINGS_CATEGORY = "json"
 
 export interface ContentDefinition {
-    kind: "category" | "sep" | "button" | "label"
+    kind: "category" | "sep" | "button" | "label" | "block"
     order?: number
     hidden?: boolean
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface BlockReference extends ContentDefinition {
+    kind: "block"
+    type: string
+    values?: SMap<BlockReference>
+    blockxml?: string
+
+    value?: number
+    min?: number
+    max?: number
 }
 
 export interface CategoryDefinition extends ContentDefinition {
@@ -190,20 +207,14 @@ export interface CategoryDefinition extends ContentDefinition {
     expanded?: boolean
     colour?: string
     categorystyle?: string
-    contents?: (
-        | BlockReference
-        | ButtonDefinition
-        | SeparatorDefinition
-        | LabelDefinition
-    )[]
-    button?: ButtonDefinition
+    contents?: ContentDefinition[]
 }
 
 export interface ButtonDefinition extends ContentDefinition {
     kind: "button"
     text: string
-    callbackKey: string
-    service: jdspec.ServiceSpec
+    callbackKey: string,
+    callback: (workspace: Workspace) => void
 }
 
 export interface SeparatorDefinition extends ContentDefinition {
@@ -219,4 +230,28 @@ export interface LabelDefinition extends ContentDefinition {
 export interface ToolboxConfiguration {
     kind: "categoryToolbox"
     contents: ContentDefinition[]
+}
+
+export function visitToolbox(
+    node: ToolboxConfiguration,
+    visitor: {
+        visitButton?: (button: ButtonDefinition) => void
+    }
+) {
+    const visitContents = (contents: ContentDefinition[]) => {
+        contents?.forEach(content => {
+            const { kind } = content
+            switch (kind) {
+                case "button":
+                    visitor.visitButton?.(content as ButtonDefinition)
+                    break
+                case "category": {
+                    const cat = content as CategoryDefinition
+                    visitContents(cat.contents)
+                    break
+                }
+            }
+        })
+    }
+    visitContents(node.contents)
 }

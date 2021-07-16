@@ -33,6 +33,7 @@ import useIntersectionObserver from "../hooks/useIntersectionObserver"
 import { dependencyId } from "../../../jacdac-ts/src/jdom/node"
 import useMediaQueries from "../hooks/useMediaQueries"
 import { useSnackbar } from "notistack"
+import { DeviceLostAlert } from "../alert/DeviceLostAlert"
 
 const ignoredServices = [SRV_CONTROL, SRV_LOGGER, SRV_SETTINGS, SRV_PROTO_TEST]
 
@@ -84,7 +85,7 @@ export default function DashboardDevice(
                 component="div"
                 container
                 spacing={2}
-                justify="center"
+                justifyContent="center"
                 alignItems="flex-end"
                 alignContent="space-between"
             >
@@ -152,6 +153,7 @@ export default function DashboardDevice(
                 }
             />
             <CardContent style={{ paddingTop: 0 }}>
+                <DeviceLostAlert device={device} />
                 <ServiceWidgets />
                 {expanded && (
                     <Grid

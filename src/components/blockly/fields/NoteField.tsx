@@ -1,10 +1,9 @@
 import React, { lazy, ReactNode } from "react"
-import { createToneContext, ToneContext } from "../../hooks/toneContext"
+import { createToneContext, ToneContext } from "../../ui/WebAudioContext"
 import Suspense from "../../ui/Suspense"
 import ReactField, {
     ReactFieldJSON,
     toShadowDefinition,
-    UNMOUNT,
 } from "./ReactField"
 const PianoWidget = lazy(() => import("../../widgets/PianoWidget"))
 
@@ -20,10 +19,6 @@ export default class NoteField extends ReactField<number> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(options?: any) {
         super(options?.value, undefined, options)
-        this.events.on(UNMOUNT, () => {
-            this.toneContext?.close()
-            this.toneContext = undefined
-        })
     }
 
     get defaultValue() {
@@ -38,7 +33,7 @@ export default class NoteField extends ReactField<number> {
         const handlePlayTone = async (newFrequency: number) => {
             this.value = newFrequency
             if (!this.toneContext) this.toneContext = createToneContext()
-            this.toneContext?.playTone(newFrequency, 400)
+            this.toneContext?.playTone(newFrequency, 400, 0.5)
         }
         return (
             <Suspense>

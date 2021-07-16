@@ -1,18 +1,24 @@
-import { Events, WorkspaceSvg } from "blockly"
-import React, { createContext, ReactNode, useEffect, useState } from "react"
+import { Events, WorkspaceSvg, Xml } from "blockly"
+import React, {
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
+} from "react"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import bus from "../../jacdac/providerbus"
 import useRoleManager from "../hooks/useRoleManager"
-import useLocalStorage from "../useLocalStorage"
+import useLocalStorage from "../hooks/useLocalStorage"
 import { BlockWarning, collectWarnings } from "./blockwarning"
+import { registerDataSolver } from "./dsl/datasolver"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
 import { domToJSON, WorkspaceJSON } from "./jsongenerator"
 import {
     JSON_WARNINGS_CATEGORY,
     NEW_PROJET_XML,
-    resolveBlockDefinition,
     ToolboxConfiguration,
 } from "./toolbox"
 import useBlocklyEvents from "./useBlocklyEvents"
@@ -25,8 +31,15 @@ import {
     FieldWithServices,
     WorkspaceServices,
 } from "./WorkspaceContext"
+import AppContext from "../AppContext"
+import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
+import useFileStorage from "../hooks/useFileStorage"
+import BlockFile from "./blockfile"
 
 export interface BlockProps {
+    editorId: string
+    setEditorId: (id: string) => void
+
     dsls: BlockDomainSpecificLanguage[]
     workspace: WorkspaceSvg
     workspaceXml: string
@@ -37,9 +50,14 @@ export interface BlockProps {
     setWorkspace: (ws: WorkspaceSvg) => void
     setWorkspaceXml: (value: string) => void
     setWarnings: (category: string, warnings: BlockWarning[]) => void
+
+    workspaceFileHandle: FileSystemFileHandle
+    setWorkspaceFileHandle: (file: FileSystemFileHandle) => void
 }
 
 const BlockContext = createContext<BlockProps>({
+    editorId: "",
+    setEditorId: () => {},
     dsls: [],
     workspace: undefined,
     workspaceXml: undefined,
@@ -50,8 +68,13 @@ const BlockContext = createContext<BlockProps>({
     setWarnings: () => {},
     setWorkspace: () => {},
     setWorkspaceXml: () => {},
+
+    workspaceFileHandle: undefined,
+    setWorkspaceFileHandle: undefined,
 })
 BlockContext.displayName = "Block"
+
+const DEFAULT_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
 export default BlockContext
 
@@ -62,10 +85,14 @@ export function BlockProvider(props: {
     children: ReactNode
 }) {
     const { storageKey, dsls, children } = props
+    const { setError } = useContext(AppContext)
+    const [workspaceFileHandle, setFileHandle] =
+        useState<FileSystemFileHandle>()
     const [storedXml, setStoredXml] = useLocalStorage(
         storageKey,
         NEW_PROJET_XML
     )
+    const setWorkspaceFileContent = useFileStorage(workspaceFileHandle)
     const roleManager = useRoleManager()
     const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
@@ -77,10 +104,19 @@ export function BlockProvider(props: {
         }[]
     >([])
     const [dragging, setDragging] = useState(false)
+    const [editorId, setEditorId] = useState("")
 
-    const setWorkspaceXml = (xml: string) => {
+    const setWorkspaceXml = async (xml: string) => {
         setStoredXml(xml)
         _setWorkspaceXml(xml)
+        if (setWorkspaceFileContent) {
+            const file = {
+                editor: editorId,
+                xml,
+            }
+            const fileContent = JSON.stringify(file)
+            await setWorkspaceFileContent(fileContent)
+        }
     }
 
     const setWarnings = (category: string, entries: BlockWarning[]) => {
@@ -111,29 +147,7 @@ export function BlockProvider(props: {
             )
         }
         services.initialized = true
-        // register data transforms
-        const { transformData } = resolveBlockDefinition(block.type) || {}
-        if (transformData) {
-            services.on(CHANGE, async () => {
-                if (!block.isEnabled()) return
-
-                const next = (block.nextConnection?.targetBlock() ||
-                    block.childBlocks_?.[0]) as BlockWithServices
-                const nextServices = next?.jacdacServices
-                if (nextServices) {
-                    try {
-                        const newData = await transformData(
-                            block,
-                            services.data,
-                            nextServices.data
-                        )
-                        nextServices.data = newData
-                    } catch (e) {
-                        console.debug(e)
-                    }
-                }
-            })
-        }
+        registerDataSolver(block)
     }
 
     const handleBlockChange = (blockId: string) => {
@@ -150,7 +164,7 @@ export function BlockProvider(props: {
     }) => {
         const { type, workspaceId } = event
         if (workspaceId !== workspace.id) return
-        console.log(`blockly: ${type}`, event)
+        //console.log(`blockly: ${type}`, event)
         if (type === Events.BLOCK_DRAG) {
             const dragEvent = event as Events.BlockDrag
             setDragging(!!dragEvent.isStart)
@@ -174,6 +188,35 @@ export function BlockProvider(props: {
             handleBlockChange(cev.blockId)
         }
     }
+
+    const setWorkspaceFileHandle: (f: FileSystemFileHandle) => Promise<void> =
+        fileSystemHandleSupported()
+            ? async f => {
+                  if (!f) {
+                      setFileHandle(f)
+                      return
+                  }
+
+                  try {
+                      console.debug(`reading ${f.name}`)
+                      const file = await f.getFile()
+                      const text = await file.text()
+                      const json: BlockFile = JSON.parse(text) as BlockFile
+                      const { editor, xml } = json || {}
+                      if (editor !== editorId)
+                          throw new Error("Wrong block editor")
+                      // try loading xml into a dummy blockly workspace
+                      const dom = Xml.textToDom(xml || DEFAULT_XML)
+                      // all good, load in workspace
+                      workspace.clear()
+                      Xml.domToWorkspace(dom, workspace)
+                      setFileHandle(f)
+                  } catch (e) {
+                      setError(e)
+                      setFileHandle(undefined)
+                  }
+              }
+            : undefined
 
     // plugins
     useBlocklyPlugins(workspace)
@@ -256,6 +299,8 @@ export function BlockProvider(props: {
     return (
         <BlockContext.Provider
             value={{
+                editorId,
+                setEditorId,
                 dsls,
                 workspace,
                 workspaceXml,
@@ -266,6 +311,8 @@ export function BlockProvider(props: {
                 setWarnings,
                 setWorkspace,
                 setWorkspaceXml,
+                workspaceFileHandle,
+                setWorkspaceFileHandle,
             }}
         >
             {children}

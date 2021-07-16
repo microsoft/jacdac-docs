@@ -4,11 +4,11 @@ import {
     Events,
     IPositionable,
     MetricsManager,
-    PluginManager,
     utils,
     WorkspaceSvg,
     TOOLBOX_AT_LEFT,
     Scrollbar,
+    ComponentManager,
 } from "blockly"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import ReactDOM from "react-dom"
@@ -16,7 +16,7 @@ import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { svgPointerPoint } from "../widgets/svgutils"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
-const MINI_RADIUS = 8
+const MINI_RADIUS = 16
 const MARGIN_VERTICAL_ = 20
 const MARGIN_HORIZONTAL_ = 20
 const MIN_SCALE = 0.05
@@ -62,7 +62,7 @@ function MiniViewport(props: {
             height={height}
             strokeWidth={MINI_RADIUS >> 1}
             stroke={palette.text.primary}
-            fill={palette.text.secondary}
+            fill={palette.grey[400]}
             opacity={0.2}
             rx={MINI_RADIUS}
             ry={MINI_RADIUS}
@@ -151,20 +151,11 @@ function BlockMiniMap(props: {
     // nothing to see
     if (!metrics || !view) return null
 
-    const { scroll, contents, blocks } = metrics
+    const { scroll, blocks } = metrics
     const cleft = scroll.left
     const ctop = scroll.top
     const cwidth = scroll.width
     const cheight = scroll.height
-
-    // all blocks visible
-    if (
-        contents.left >= view.left &&
-        contents.top >= view.top &&
-        contents.left + contents.width <= view.left + view.width &&
-        contents.top + contents.height <= view.top + view.height
-    )
-        return null
 
     return (
         <svg
@@ -202,6 +193,7 @@ function BlockMiniMap(props: {
 }
 
 class MinimapPlugin implements IPositionable {
+    readonly id = 'minimap';    
     private top_ = 0
     private left_ = 0
     private width_ = MAX_WIDTH
@@ -214,13 +206,11 @@ class MinimapPlugin implements IPositionable {
     }
 
     private init() {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pluginManager = (this.workspace_ as any).getPluginManager()
-        pluginManager.addPlugin({
-            id: "minimap",
-            plugin: this,
+        const componentManager = this.workspace_.getComponentManager()
+        componentManager.addComponent({
+            component: this,
             weight: 2,
-            types: [PluginManager.Type.POSITIONABLE],
+            capabilities: [ComponentManager.Capability.POSITIONABLE],
         })
         this.createDom_()
         this.workspace_.resize()

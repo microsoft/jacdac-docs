@@ -1,8 +1,7 @@
 import { Grid, MenuItem, TextField, Typography } from "@material-ui/core"
-import React, { ChangeEvent, useMemo, useState } from "react"
+import React, { ChangeEvent, lazy, useMemo, useState } from "react"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import { lightEncode } from "../../../jacdac-ts/src/jdom/light"
-import ColorInput from "../ui/ColorInput"
 import SelectWithLabel from "../ui/SelectWithLabel"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -17,6 +16,9 @@ import LedPixelServer from "../../../jacdac-ts/src/servers/ledpixelserver"
 import LightWidget from "../widgets/LightWidget"
 import { LedPixelCmd } from "../../../jacdac-ts/src/jdom/constants"
 import ColorButtons from "../widgets/ColorButtons"
+import Suspense from "../ui/Suspense"
+const ColorInput = lazy(() => import("../ui/ColorInput"))
+
 /*
 0xD6: range P=0 N=length W=1 S=0- range from pixel P, Npixels long (currently unsupported: every Wpixels skip Spixels)
 */
@@ -149,7 +151,7 @@ function LightCommand(props: { service: JDService; expanded: boolean }) {
                     spacing={1}
                     direction="row"
                     alignItems="center"
-                    justify="flex-start"
+                    justifyContent="flex-start"
                 >
                     <Grid item key="descr" xs={12}>
                         <Typography variant="caption">{description}</Typography>
@@ -200,7 +202,7 @@ function LightCommand(props: { service: JDService; expanded: boolean }) {
                     direction="row"
                     alignItems="center"
                     alignContent="flex-start"
-                    justify="flex-start"
+                    justifyContent="flex-start"
                 >
                     {(args === "K" || args === "PC") && (
                         <Grid item key="K">
@@ -216,10 +218,12 @@ function LightCommand(props: { service: JDService; expanded: boolean }) {
                     {(args === "C+" || args === "PC") &&
                         dcolors.map((c, i) => (
                             <Grid item xs key={i}>
-                                <ColorInput
-                                    value={c}
-                                    onChange={handleColorChange(i)}
-                                />
+                                <Suspense>
+                                    <ColorInput
+                                        value={c}
+                                        onChange={handleColorChange(i)}
+                                    />
+                                </Suspense>
                             </Grid>
                         ))}
                     {args === "C+" && (
@@ -265,7 +269,7 @@ export default function DashboardLEDPixel(props: DashboardServiceProps) {
     const handleColorChange = (newColor: number) => setPenColor(newColor)
     const handleLedClick: (index: number) => void = async (index: number) => {
         const encoded = lightEncode(
-`setone % #
+            `setone % #
 show 20`,
             [index, penColor]
         )

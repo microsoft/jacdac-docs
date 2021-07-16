@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { ReactFieldJSON } from "./ReactField"
-import { Box, Grid, Switch, Typography, useTheme } from "@material-ui/core"
+import { Box, Grid, Typography, useTheme } from "@material-ui/core"
 import WorkspaceContext from "../WorkspaceContext"
 import ReactInlineField from "./ReactInlineField"
 import { PointerBoundary } from "./PointerBoundary"
@@ -9,6 +9,7 @@ import { VM_WATCH_CHANGE } from "../../../../jacdac-ts/src/vm/events"
 import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
 import useBlockData from "../useBlockData"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
+import SwitchWithLabel from "../../ui/SwitchWithLabel"
 
 const HORIZON = 10
 function WatchValueWidget() {
@@ -60,7 +61,7 @@ function WatchValueWidget() {
                 container
                 alignItems="flex-end"
                 alignContent="center"
-                justify="center"
+                justifyContent="center"
                 spacing={1}
             >
                 <Grid item>
@@ -70,7 +71,13 @@ function WatchValueWidget() {
                                 {valueNumber}
                             </Typography>
                         ) : typeof value === "boolean" ? (
-                            <Switch value={!!value} />
+                            <Box pl={1}>
+                                <SwitchWithLabel
+                                    readOnly={true}
+                                    checked={!!value}
+                                    label={value ? "true" : "false"}
+                                />
+                            </Box>
                         ) : (
                             <Typography variant="body1">
                                 {value === undefined ? "..." : value + ""}
