@@ -19,6 +19,7 @@ import GaugeWidgetField from "./GaugeWidgetField"
 import BuiltinDataSetField from "./BuiltinDataSetField"
 import BarChartField from "./BarField"
 import PiePlotField from "./PieField"
+import HistogramField from "./HistogramField"
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
 
@@ -64,6 +65,7 @@ export function registerFields() {
         LinePlotField,
         BarChartField,
         PiePlotField,
+        HistogramField,
 
         FileSaveField,
         FileOpenField,
