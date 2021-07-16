@@ -18,6 +18,9 @@ import ConnectAlert from "../../components/alert/ConnectAlert"
 import DeviceCardHeader from "../../components/DeviceCardHeader"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { usePlayTone } from "../../components/hooks/usePlayTone"
+import Dashboard from "../../components/dashboard/Dashboard"
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import { useId } from "react-use-id-hook"
 
 const TONE_DURATION = 50
 const TONE_THROTTLE = 100
@@ -29,6 +32,9 @@ const TONE_THROTTLE = 100
 // an accelerometer
 export default function AccelerometerTheremin() {
     const { playTone, toggleBrowserAudio, browserAudio } = usePlayTone()
+
+    // identifiers for accessibility
+    const sectionId = useId()
 
     // useServices accepts a number of filters and returns any services that match
     // get all accelerometer + buzzer services
@@ -47,6 +53,10 @@ export default function AccelerometerTheremin() {
             ? setAccelService(undefined)
             : setAccelService(accel)
     }
+
+    // filter to only show accelerometers in dashboard
+    const dashboardDeviceFilter = (d: JDDevice) =>
+        d.hasService(SRV_ACCELEROMETER)
 
     // register for accelerometer data events
     useEffect(() => {
@@ -68,69 +78,80 @@ export default function AccelerometerTheremin() {
     }, [accelService, playTone]) // re-register if accelerometers, buzzers change
 
     return (
-        <Grid container spacing={2}>
-            <GridHeader title="Audio controls" />
-            <Grid item xs={12}>
-                <Button variant={"outlined"} onClick={toggleBrowserAudio}>
-                    {browserAudio
-                        ? "Stop browser audio"
-                        : "Start browser audio"}
-                </Button>
-            </Grid>
-            {!accelerometers.length && (
-                <>
-                    <GridHeader title="Connect a device" />
-                    <Grid item xs>
-                        <ConnectAlert serviceClass={SRV_ACCELEROMETER} />
-                    </Grid>
-                </>
-            )}
-            {!!accelerometers.length && (
-                <>
-                    <GridHeader title="Available accelerometers" />
-                    {accelerometers.map(accelerometer => (
-                        <Grid
-                            item
-                            xs={12}
-                            sm={6}
-                            lg={4}
-                            xl={3}
-                            key={accelerometer.id}
+        <>
+            <section id={sectionId}>
+                <Grid container spacing={2}>
+                    <GridHeader title="Audio controls" />
+                    <Grid item xs={12}>
+                        <Button
+                            variant={"outlined"}
+                            onClick={toggleBrowserAudio}
                         >
-                            <Card>
-                                <DeviceCardHeader
-                                    device={accelerometer.device}
-                                    showAvatar={true}
-                                    showMedia={true}
+                            {browserAudio
+                                ? "Stop browser audio"
+                                : "Start browser audio"}
+                        </Button>
+                    </Grid>
+                    {!accelerometers.length && (
+                        <>
+                            <GridHeader title="Connect a device" />
+                            <Grid item xs>
+                                <ConnectAlert
+                                    serviceClass={SRV_ACCELEROMETER}
                                 />
-                                <CardContent>
-                                    <Typography variant="h5">
-                                        {(accelerometer === accelService
-                                            ? "Streaming from "
-                                            : "") +
-                                            (accelerometer.device.physical
-                                                ? "Physical "
-                                                : "Virtual ") +
-                                            `Accelerometer ${accelerometer.friendlyName}`}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Button
-                                        variant={"outlined"}
-                                        onClick={handleSelectAccelerometerService(
-                                            accelerometer
-                                        )}
-                                    >
-                                        {accelerometer === accelService
-                                            ? "Stop streaming"
-                                            : "Start streaming"}
-                                    </Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    ))}
-                </>
-            )}
-        </Grid>
+                            </Grid>
+                        </>
+                    )}
+                    {!!accelerometers.length && (
+                        <>
+                            <GridHeader title="Available accelerometers" />
+                            {accelerometers.map(accelerometer => (
+                                <Grid
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    lg={4}
+                                    xl={3}
+                                    key={accelerometer.id}
+                                >
+                                    <Card>
+                                        <DeviceCardHeader
+                                            device={accelerometer.device}
+                                            showAvatar={true}
+                                            showMedia={true}
+                                        />
+                                        <CardContent>
+                                            <Typography variant="h5">
+                                                {(accelerometer === accelService
+                                                    ? "Streaming from "
+                                                    : "") +
+                                                    (accelerometer.device
+                                                        .physical
+                                                        ? "Physical "
+                                                        : "Virtual ") +
+                                                    `Accelerometer ${accelerometer.friendlyName}`}
+                                            </Typography>
+                                        </CardContent>
+                                        <CardActions>
+                                            <Button
+                                                variant={"outlined"}
+                                                onClick={handleSelectAccelerometerService(
+                                                    accelerometer
+                                                )}
+                                            >
+                                                {accelerometer === accelService
+                                                    ? "Stop streaming"
+                                                    : "Start streaming"}
+                                            </Button>
+                                        </CardActions>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </>
+                    )}
+                </Grid>
+            </section>
+            <Dashboard deviceFilter={dashboardDeviceFilter} />
+        </>
     )
 }
