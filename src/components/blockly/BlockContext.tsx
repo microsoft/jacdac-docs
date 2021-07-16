@@ -211,7 +211,7 @@ export function BlockProvider(props: {
                       // all good, load in workspace
                       workspace.clear()
                       Xml.domToWorkspace(dom, workspace)
-                      console.debug(`loaded ${f.name}`)
+                      console.debug(`loaded ${f.name}`, { f })
                       setFileHandle(f)
                   } catch (e) {
                       setError(e)

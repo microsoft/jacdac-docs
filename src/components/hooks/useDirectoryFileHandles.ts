@@ -17,6 +17,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
             }
         }
         setFiles(newFiles)
+        return newFiles
     }
 
     const createFile = async (
@@ -32,15 +33,17 @@ export default function useDirectoryFileHandles(storageKey: string) {
             })
             await file.write(content)
             await file.close()
-            await refresh()
-            return fileHandle
+            const newFiles = await refresh()
+            return newFiles.find(f => f.name === filename)
         } catch (e) {
             setError(e)
             return undefined
         }
     }
 
-    useEffectAsync(refresh, [directory])
+    useEffectAsync(async () => {
+        await refresh()
+    }, [directory])
 
     return {
         directory,
