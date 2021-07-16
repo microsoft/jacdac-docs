@@ -2,19 +2,13 @@ import { useEffect, useState, useContext, useCallback } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import { startServiceProviderFromServiceClass } from "../../../jacdac-ts/src/servers/servers"
 import { BuzzerCmd, SRV_BUZZER } from "../../../jacdac-ts/src/jdom/constants"
-import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 import Packet from "../../../jacdac-ts/src/jdom/packet"
 import useServices from "./useServices"
 import BuzzerServer, {
     BuzzerTone,
+    tonePayload,
 } from "../../../jacdac-ts/src/servers/buzzerserver"
 import WebAudioContext from "../ui/WebAudioContext"
-
-function tonePayload(frequency: number, ms: number, volume: number) {
-    const period = Math.round(1000000 / frequency)
-    const duty = (period * volume) >> 11
-    return jdpack("u16 u16 u16", [period, duty, ms])
-}
 
 export function usePlayTone() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -69,22 +63,21 @@ export function usePlayTone() {
         }
     }
 
-    const buzzerPlayTone = useCallback(async (
-        frequency: number,
-        duration: number,
-        volume: number
-    ) => {
-        await Promise.all(
-            // for each buzzer, map x acceleration to buzzer output
-            buzzers?.map(async buzzer => {
-                const pkt = Packet.from(
-                    BuzzerCmd.PlayTone,
-                    tonePayload(frequency, duration, volume)
-                )
-                await buzzer.sendPacketAsync(pkt)
-            })
-        )
-    }, [buzzers])
+    const buzzerPlayTone = useCallback(
+        async (frequency: number, duration: number, volume: number) => {
+            await Promise.all(
+                // for each buzzer, map x acceleration to buzzer output
+                buzzers?.map(async buzzer => {
+                    const pkt = Packet.from(
+                        BuzzerCmd.PlayTone,
+                        tonePayload(frequency, duration, volume)
+                    )
+                    await buzzer.sendPacketAsync(pkt)
+                })
+            )
+        },
+        [buzzers]
+    )
 
     const browserAudio = activated && !!buzzerServer
     return {
