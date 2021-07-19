@@ -2,10 +2,8 @@ import { Grid } from "@material-ui/core"
 import React from "react"
 import { VMProgramRunner } from "../../../jacdac-ts/src/vm/runner"
 import BlockClientRoles from "../blockly/BlockRoles"
-import BlockServerRoles from "../blockly/BlockServerRoles"
 import VMRunnerButtons from "./VMRunnerButtons"
 import VMStartSimulatorButton from "./VMStartSimulatorButton"
-import BlockFileButtons from "../blockly/BlockFileButtons"
 
 export default function VMToolbar(props: {
     runner: VMProgramRunner
@@ -21,7 +19,6 @@ export default function VMToolbar(props: {
             alignItems="center"
             alignContent="center"
         >
-            <BlockFileButtons />
             <VMRunnerButtons runner={runner} run={run} cancel={cancel} />
             <Grid item>
                 <VMStartSimulatorButton />
