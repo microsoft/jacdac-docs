@@ -24,22 +24,35 @@ const useStyles = makeStyles((theme: Theme) =>
                 fontWeight: `normal !important`,
                 fontFamily: `${theme.typography.fontFamily} !important`,
             },
+            "& .blocklyTreeIconOpen, & .blocklyTreeIconClosed": {
+                opacity: 0.5,
+            },
         },
     })
 )
 
-export default function BlockEditor(props: { className?: string }) {
-    const { className } = props
+export default function BlockEditor(props: {
+    editorId: string
+    className?: string
+}) {
+    const { editorId, className } = props
     const {
         toolboxConfiguration,
         workspaceXml,
         setWorkspace,
         setWorkspaceXml,
+        setEditorId,
     } = useContext(BlockContext)
     const classes = useStyles()
     const { darkMode } = useContext(DarkModeContext)
     const { setError } = useContext(AppContext)
     const theme = darkMode === "dark" ? DarkTheme : Theme
+
+    // setup editor id in context
+    useEffect(() => {
+        setEditorId(editorId)
+        return () => setEditorId("")
+    }, [editorId])
 
     // ReactBlockly
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,7 +102,6 @@ export default function BlockEditor(props: { className?: string }) {
         return () => observer.disconnect()
     }, [workspace, blocklyRef.current])
 
-    // minimap 
     useBlockMinimap(workspace)
 
     return (

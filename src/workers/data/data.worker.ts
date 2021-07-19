@@ -12,8 +12,13 @@ import {
     desc,
     tidy,
     mutate,
+    count
 } from "@tidyjs/tidy"
 import { bin } from "d3-array"
+import { 
+    sampleCorrelation, 
+    linearRegression,
+} from "simple-statistics"
 
 export interface DataMessage {
     worker: "data"
@@ -71,11 +76,22 @@ export interface DataMutateNumberRequest extends DataRequest {
     logic: string
 }
 
+export interface DataSummarizeRequest extends DataRequest {
+    type: "summarize"
+    column: string
+    calc: string
+}
+
 export interface DataSummarizeByGroupRequest extends DataRequest {
     type: "summarize_by_group"
     column: string
     by: string
     calc: string
+}
+
+export interface DataCountRequest extends DataRequest {
+    type: "count"
+    column: string
 }
 
 export interface DataRecordWindowRequest extends DataRequest {
@@ -88,6 +104,18 @@ export interface DataRecordWindowRequest extends DataRequest {
 export interface DataBinRequest extends DataRequest {
     type: "bin"
     column: string
+}
+
+export interface DataCorrelationRequest extends DataRequest {
+    type: "correlation"
+    column1: string
+    column2: string
+}
+
+export interface DataLinearRegressionRequest extends DataRequest {
+    type: "linear_regression"
+    column1: string
+    column2: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -268,6 +296,39 @@ const handlers: { [index: string]: (props: any) => object[] } = {
                 return data
         }
     },
+    summarize: (props: DataSummarizeRequest) => {
+        const { column, calc, data } = props
+        if (!column || !calc) return data
+
+        switch (calc) {
+            case "mean":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ mean: mean(column as any) }),
+                )
+            case "med":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ median: median(column as any) }),
+                )
+            case "min":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ min: min(column as any) })
+                )
+            case "max":
+                return tidy(
+                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    summarize({ max: max(column as any) })
+                )
+            default:
+                return data
+        }
+    },
     summarize_by_group: (props: DataSummarizeByGroupRequest) => {
         const { column, by, calc, data } = props
         if (!column || !by || !calc) return data
@@ -307,6 +368,13 @@ const handlers: { [index: string]: (props: any) => object[] } = {
                 return data
         }
     },
+    count: (props: DataCountRequest) => {
+        const { column,  data } = props
+        if (!column) return data
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return tidy(data, count(column as any))
+    },
     record_window: (props: DataRecordWindowRequest) => {
         const { data, previousData, horizon } = props
         if (!data?.length) return data
@@ -325,6 +393,23 @@ const handlers: { [index: string]: (props: any) => object[] } = {
         const binned: (object[] & { x0: number; x1: number })[] = binner(data)
         // convert back to objects
         return binned.map(b => ({ count: b.length, x0: b.x0, x1: b.x1 }))
+    },
+    correlation: (props: DataCorrelationRequest) => {
+        const { data, column1, column2 } = props
+        if (!column1 || !column2) return data
+
+        const x = data.map((obj) => obj[column1])
+        const y = data.map((obj) => obj[column2])
+        return [{correlation: sampleCorrelation(x, y).toFixed(3)}]
+    },
+    linear_regression: (props: DataCorrelationRequest) => {
+        const { data, column1, column2 } = props
+        if (!column1 || !column2) return data
+
+        const x = data.map((obj) => obj[column1])
+        const y = data.map((obj) => obj[column2])
+        const linregmb = linearRegression([x, y])
+        return [{slope: linregmb.m.toFixed(3), intercept: linregmb.b.toFixed(3)}]
     },
 }
 

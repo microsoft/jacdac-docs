@@ -11,11 +11,11 @@ import {
     DATA_SCIENCE_STATEMENT_TYPE,
     DummyInputDefinition,
     identityTransformData,
-    LabelDefinition,
     NumberInputDefinition,
     OptionsInputDefinition,
     VariableInputDefinition,
     TextInputDefinition,
+    SeparatorDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 import postTransformData from "./workers/data.proxy"
@@ -25,11 +25,15 @@ import {
     DataArrangeRequest,
     DataFilterColumnsRequest,
     DataFilterStringRequest,
+    DataSummarizeRequest,
     DataSummarizeByGroupRequest,
     DataMutateColumnsRequest,
     DataMutateNumberRequest,
+    DataCountRequest,
     DataRecordWindowRequest,
     DataBinRequest,
+    DataCorrelationRequest,
+    DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
@@ -43,7 +47,9 @@ const DATA_FILTER_COLUMNS_BLOCK = "data_filter_columns"
 const DATA_FILTER_STRING_BLOCK = "data_filter_string"
 const DATA_MUTATE_COLUMNS_BLOCK = "data_mutate_columns"
 const DATA_MUTATE_NUMBER_BLOCK = "data_mutate_number"
+const DATA_SUMMARIZE_BLOCK = "data_summarize"
 const DATA_SUMMARIZE_BY_GROUP_BLOCK = "data_summarize_by_group"
+const DATA_COUNT_BLOCK = "data_count"
 const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
@@ -52,6 +58,8 @@ const DATA_TABLE_TYPE = "DataTable"
 const DATA_SHOW_TABLE_BLOCK = "data_show_table"
 const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
 const DATA_BIN_BLOCK = "data_bin"
+const DATA_CORRELATION_BLOCK = "data_correlation"
+const DATA_LINEAR_REGRESSION_BLOCK = "data_linear_regression"
 const DATA_LOAD_FILE_BLOCK = "data_load_file"
 const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
@@ -380,6 +388,42 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
         {
             kind: "block",
+            type: DATA_SUMMARIZE_BLOCK,
+            message0: "summarize %1 calculate %2",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column",
+                },
+                <OptionsInputDefinition>{
+                    type: "field_dropdown",
+                    name: "calc",
+                    options: [
+                        ["mean", "mean"],
+                        ["median", "med"],
+                        ["min", "min"],
+                        ["max", "max"],
+                    ],
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const column = b.getFieldValue("column")
+                const calc = b.getFieldValue("calc")
+                return postTransformData(<DataSummarizeRequest>{
+                    type: "summarize",
+                    column,
+                    calc,
+                    data,
+                })
+            },
+            template: "meta",
+        },
+        {
+            kind: "block",
             type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
             message0: "group %1 by %2 calculate %3",
             colour,
@@ -415,6 +459,30 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     column,
                     by,
                     calc,
+                    data,
+                })
+            },
+            template: "meta",
+        },
+        {
+            kind: "block",
+            type: DATA_COUNT_BLOCK,
+            message0: "count %1",
+            colour,
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column",
+                },
+            ],
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            transformData: (b: BlockSvg, data: any[]) => {
+                const column = b.getFieldValue("column")
+                return postTransformData(<DataCountRequest>{
+                    type: "count",
+                    column,
                     data,
                 })
             },
@@ -549,6 +617,66 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 })
             },
         },
+        <BlockDefinition>{
+            kind: "block",
+            type: DATA_CORRELATION_BLOCK,
+            message0: "correlation %1 %2",
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+            ],
+            inputsInline: false,
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            transformData: async (block: BlockSvg, data: object[]) => {
+                const column1 = block.getFieldValue("column1")
+                const column2 = block.getFieldValue("column2")
+                return postTransformData(<DataCorrelationRequest>{
+                    type: "correlation",
+                    column1,
+                    column2,
+                    data,
+                })
+            },
+        },
+        <BlockDefinition>{
+            kind: "block",
+            type: DATA_LINEAR_REGRESSION_BLOCK,
+            message0: "linear regression %1 %2",
+            args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+            ],
+            inputsInline: false,
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour,
+            template: "meta",
+            transformData: async (block: BlockSvg, data: object[]) => {
+                const column1 = block.getFieldValue("column1")
+                const column2 = block.getFieldValue("column2")
+                return postTransformData(<DataLinearRegressionRequest>{
+                    type: "linear_regression",
+                    column1,
+                    column2,
+                    data,
+                })
+            },
+        },
         {
             kind: "block",
             type: DATA_LOAD_FILE_BLOCK,
@@ -590,15 +718,14 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
     ],
     createCategory: () => [
+        <SeparatorDefinition>{
+            kind: "sep",
+        },
         <CategoryDefinition>{
             kind: "category",
-            name: "Data",
+            name: "Data sets",
             colour,
             contents: [
-                <LabelDefinition>{
-                    kind: "label",
-                    text: "Data sets",
-                },
                 <BlockReference>{
                     kind: "block",
                     type: DATA_DATASET_BUILTIN_BLOCK,
@@ -611,10 +738,13 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     kind: "block",
                     type: DATA_SAVE_FILE_BLOCK,
                 },
-                <LabelDefinition>{
-                    kind: "label",
-                    text: "Operators",
-                },
+            ],
+        },
+        <CategoryDefinition>{
+            kind: "category",
+            name: "Operators",
+            colour,
+            contents: [
                 <BlockReference>{ kind: "block", type: DATA_SHOW_TABLE_BLOCK },
                 <BlockReference>{
                     kind: "block",
@@ -646,24 +776,46 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 },
                 <BlockReference>{
                     kind: "block",
+                    type: DATA_SUMMARIZE_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
                     type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_COUNT_BLOCK,
                 },
                 <BlockReference>{
                     kind: "block",
                     type: DATA_BIN_BLOCK,
                 },
-                <LabelDefinition>{
-                    kind: "label",
-                    text: "Live",
-                },
                 <BlockDefinition>{
                     kind: "block",
                     type: DATA_RECORD_WINDOW_BLOCK,
                 },
-                <LabelDefinition>{
-                    kind: "label",
-                    text: "Data variables",
+            ],
+        },
+        <CategoryDefinition>{
+            kind: "category",
+            name: "Statistics",
+            colour,
+            contents: [
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_CORRELATION_BLOCK,
                 },
+                <BlockReference>{
+                    kind: "block",
+                    type: DATA_LINEAR_REGRESSION_BLOCK,
+                },
+            ],
+        },
+        <CategoryDefinition>{
+            kind: "category",
+            name: "Data variables",
+            colour,
+            contents: [
                 <ButtonDefinition>{
                     kind: "button",
                     text: `Add dataset variable`,
