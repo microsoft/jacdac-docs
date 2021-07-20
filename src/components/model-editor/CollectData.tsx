@@ -1,6 +1,4 @@
-import React, { useEffect,
-    useContext,
-    useState } from "react"
+import React, { useEffect, useContext, useState } from "react"
 
 import {
     Grid,
@@ -21,9 +19,9 @@ import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
+import ModelDataset from "./ModelDataset"
 import Trend from "../Trend"
 import ClassDataSetGrid from "../ClassDataSetGrid"
-import ModelDataSet from "./ModelDataset"
 
 import useChartPalette from "../useChartPalette"
 
@@ -36,7 +34,6 @@ import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
-import ModelDataset from "./ModelDataset"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 
 const LIVE_HORIZON = 24
@@ -52,6 +49,7 @@ function createDataSet(
     const set = new FieldDataSet(bus, name, fields, colors)
     if (live) set.maxRows = LIVE_HORIZON + 4
 
+    console.log("Randi created new dataset", set)
     return set
 }
 const useStyles = makeStyles((theme: Theme) =>
@@ -93,8 +91,8 @@ export default function CollectData(props: {
 }) {
     const classes = useStyles()
     const chartPalette = useChartPalette()
-    
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)    
+
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
             bus.devices().map(device =>
@@ -115,14 +113,13 @@ export default function CollectData(props: {
     const [recordingName, setRecordingName] = useState(
         "recording" + totalRecordings
     )
-    const [className, setClassName] = useState("class1")
 
-    const [recording, setRecording] = useState(false)
+    const [isRecording, setIsRecording] = useState(false)
     const [, setRecordingLength] = useState(0)
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
 
-    const newDataSet = (registerIds: string[], live: boolean) =>
+    const newRecording = (registerIds: string[], live: boolean) =>
         registerIds.length
             ? createDataSet(
                   bus,
@@ -142,6 +139,7 @@ export default function CollectData(props: {
         // Randi TODO save registerIdsChecked
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
+        setLiveRecording(newRecording(registerIdsChecked, true))
     }
 
     const handleRecordingNameChange = (
@@ -150,135 +148,140 @@ export default function CollectData(props: {
         setRecordingName(event.target.value.trim())
     }
 
-    const handleClassNameChange = (
+    /*const handleClassNameChange = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
-        setClassName(event.target.value.trim())
-
         // TODO Randi Check if class name already exists
         //if (newClassName != "" && !Variables.nameUsedWithAnyType(newClassName, workspace)) {
         //Blockly.alert("That variable name is invalid or already exists")
+    }*/
+
+    /* For recording data*/
+    const [currentClassLabel, setCurrentClassLabel] = useState("Class1")
+    const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
+    const [samplingDuration, setSamplingDuration] = useState("2")
+    const recordingRegisters = readingRegisters.filter(
+        reg => registerIdsChecked.indexOf(reg.id) > -1
+    )
+
+    const samplingIntervalDelayi = parseInt(samplingIntervalDelay)
+    const samplingCount = Math.ceil(
+        (parseFloat(samplingDuration) * 1000) / samplingIntervalDelayi
+    )
+    const errorSamplingIntervalDelay =
+        isNaN(samplingIntervalDelayi) || !/\d+/.test(samplingIntervalDelay)
+    const errorSamplingDuration = isNaN(samplingCount)
+    const error = errorSamplingDuration || errorSamplingIntervalDelay
+    const startEnabled = !!recordingRegisters?.length
+
+    const handleSamplingIntervalChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setSamplingIntervalDelay(event.target.value.trim())
     }
-
-        /* For recording data*/
-        const [currentClassLabel, setLabel] = useState("Class1")
-        const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
-        const [samplingDuration, setSamplingDuration] = useState("2")
-        const recordingRegisters = readingRegisters.filter(
-            reg => registerIdsChecked.indexOf(reg.id) > -1
-        )
-    
-        const samplingIntervalDelayi = parseInt(samplingIntervalDelay)
-        const samplingCount = Math.ceil(
-            (parseFloat(samplingDuration) * 1000) / samplingIntervalDelayi
-        )
-        const errorSamplingIntervalDelay =
-            isNaN(samplingIntervalDelayi) || !/\d+/.test(samplingIntervalDelay)
-        const errorSamplingDuration = isNaN(samplingCount)
-        const error = errorSamplingDuration || errorSamplingIntervalDelay
-        const startEnabled = !!recordingRegisters?.length
-    
-        const handleSamplingIntervalChange = (
-            event: React.ChangeEvent<HTMLInputElement>
-        ) => {
-            setSamplingIntervalDelay(event.target.value.trim())
-        }
-        const handleSamplingDurationChange = (
-            event: React.ChangeEvent<HTMLInputElement>
-        ) => {
-            setSamplingDuration(event.target.value.trim())
-        }
-        const handleLabelChange = (newLabel) => {
-            console.log("label change")
-            setLabel(newLabel)
-        }
-        const handleDownloadDataset = () => {
-            dataset.toCSV()
-        }
-        const stopRecording = () => {
-            if (recording) {    
-                setLiveRecording(newDataSet(registerIdsChecked, true))
-                setRecording(false)
-
-                dataset.addRecording(liveRecording, currentClassLabel)
-                setDataset(dataset)
-                onChange(dataset)
-            }
-        }
-        const startRecording = async () => {
-            if (!recording && recordingRegisters.length) {
-                setLiveRecording(newDataSet(registerIdsChecked, false))
-                setRecording(true)
-            }
-        }
-        const startStreamingRegisters = () => {
-            console.log(`start streaming`)
-            const streamers = recordingRegisters?.map(reg =>
-                reg.subscribe(REPORT_UPDATE, () => {})
+    const handleSamplingDurationChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setSamplingDuration(event.target.value.trim())
+    }
+    const handleLabelChange = newLabel => {
+        console.log("label change")
+        setCurrentClassLabel(newLabel)
+    }
+    const handleDownloadDataset = () => {
+        console.log("Download button pressed")
+        dataset.toCSV()
+    }
+    const stopRecording = () => {
+        if (isRecording) {
+            // add new data to the dataset
+            dataset.addRecording(
+                liveRecording,
+                currentClassLabel,
+                registerIdsChecked
             )
-            return () => {
-                console.log(`stop streaming`)
-                streamers.map(streamer => streamer())
-            }
-        }
-        const toggleRecording = () => {
-            if (recording) stopRecording()
-            else startRecording()
-        }
-        const handleDeleteRecording = (recording: FieldDataSet) => {
-            dataset.removeRecording(recording)
+            setTotalRecordings(totalRecordings + 1)
             setDataset(dataset)
-            onChange(dataset)
-        }
-        const updateLiveData = () => {
-            setLiveRecording(liveRecording)
-            setRecordingLength(liveRecording.rows.length)
-            setLiveDataTimestamp(bus.timestamp)
-        }
-        const throttleUpdate = throttle(() => updateLiveData(), 30)
-        // data collection
-        // interval add data entry
-        const addRow = (values?: number[]) => {
-            if (!liveRecording) return
-            //console.log(values)
-            liveRecording.addRow(values)
-            if (recording && liveRecording.length >= samplingCount) {
-                // stop recording
-                updateLiveData()
-                stopRecording()
-            } else {
-                throttleUpdate()
-            }
-        }
-        // setting interval
-        useEffect(() => {
-            if (error) return
-            console.log(`set interval to ${samplingIntervalDelayi}`)
-            recordingRegisters.forEach(reg =>
-                reg.sendSetIntAsync(samplingIntervalDelayi)
-            )
-        }, [samplingIntervalDelayi, registerIdsChecked, errorSamplingIntervalDelay])
-        // collecting
-        useEffect(() => {
-            if (error) return undefined
-            const interval = setInterval(() => addRow(), samplingIntervalDelayi)
-            const stopStreaming = startStreamingRegisters()
-    
-            return () => {
-                clearInterval(interval)
-                stopStreaming()
-            }
-        }, [recording, samplingIntervalDelayi, samplingCount, registerIdsChecked])
 
-    const resetInputs = () => {
-        setClassName("class1") // Randi TODO make this one of the items in the dropdown
-        setRecordingName("recording" + totalRecordings)
+            // create new live recording
+            setLiveRecording(newRecording(registerIdsChecked, true))
+            onChange(dataset)
+
+            // stop recording
+            setIsRecording(false)
+        }
     }
+    const startRecording = async () => {
+        if (!isRecording && recordingRegisters.length) {
+            setLiveRecording(newRecording(registerIdsChecked, false))
+            setIsRecording(true)
+        }
+    }
+    const startStreamingRegisters = () => {
+        console.log(`start streaming`)
+        const streamers = recordingRegisters?.map(reg =>
+            reg.subscribe(REPORT_UPDATE, () => {})
+        )
+        return () => {
+            console.log(`stop streaming`)
+            streamers.map(streamer => streamer())
+        }
+    }
+    const toggleRecording = () => {
+        if (isRecording) stopRecording()
+        else startRecording()
+    }
+    const handleDeleteRecording = (recording: FieldDataSet) => {
+        dataset.removeRecording(recording)
+        setDataset(dataset)
+        onChange(dataset)
+    }
+    const updateLiveData = () => {
+        setLiveRecording(liveRecording)
+        setRecordingLength(liveRecording.rows.length)
+        setLiveDataTimestamp(bus.timestamp)
+    }
+    const throttleUpdate = throttle(() => updateLiveData(), 30)
+    // data collection
+    // interval add data entry
+    const addRow = (values?: number[]) => {
+        if (!liveRecording) return
+        //console.log(values)
+        liveRecording.addRow(values)
+        if (isRecording && liveRecording.length >= samplingCount) {
+            console.log("Randi reached max length, stop recording")
+            // stop recording
+            updateLiveData()
+            stopRecording()
+        } else {
+            throttleUpdate()
+        }
+    }
+    // setting interval
+    useEffect(() => {
+        if (error) return
+        console.log(`set interval to ${samplingIntervalDelayi}`)
+        recordingRegisters.forEach(reg =>
+            reg.sendSetIntAsync(samplingIntervalDelayi)
+        )
+    }, [samplingIntervalDelayi, registerIdsChecked, errorSamplingIntervalDelay])
+    // collecting
+    useEffect(() => {
+        if (error) return undefined
+        const interval = setInterval(() => addRow(), samplingIntervalDelayi)
+        const stopStreaming = startStreamingRegisters()
+
+        return () => {
+            clearInterval(interval)
+            stopStreaming()
+        }
+    }, [isRecording, samplingIntervalDelayi, samplingCount, registerIdsChecked])
+    // saving new datasets
+    useEffect(() => {
+        setRecordingName("recording" + totalRecordings)
+    }, [totalRecordings])
 
     const handleNext = () => {
-        // update the total number of recordings
-        setTotalRecordings(totalRecordings + 1)
-
         onNext(dataset)
     }
 
@@ -296,7 +299,7 @@ export default function CollectData(props: {
                         <ReadingFieldGrid
                             readingRegisters={readingRegisters}
                             registerIdsChecked={registerIdsChecked}
-                            recording={recording}
+                            recording={isRecording}
                             liveDataSet={liveRecording}
                             handleRegisterCheck={handleRegisterCheck}
                         />
@@ -316,7 +319,7 @@ export default function CollectData(props: {
                         />
                         <Autocomplete
                             className={classes.field}
-                            disabled={recording}
+                            disabled={isRecording}
                             options={dataset.labelList}
                             style={{ width: 250, display: "inline-flex" }}
                             renderInput={params => (
@@ -327,12 +330,14 @@ export default function CollectData(props: {
                                 />
                             )}
                             value={currentClassLabel}
-                            onInputChange={(event, newValue) => handleLabelChange(newValue)}
+                            onInputChange={(event, newValue) =>
+                                handleLabelChange(newValue)
+                            }
                         />
                         <TextField
                             className={classes.field}
                             error={errorSamplingDuration}
-                            disabled={recording}
+                            disabled={isRecording}
                             label="Sampling duration"
                             value={samplingDuration}
                             variant="outlined"
@@ -348,7 +353,7 @@ export default function CollectData(props: {
                         <TextField
                             className={classes.field}
                             error={errorSamplingIntervalDelay}
-                            disabled={recording}
+                            disabled={isRecording}
                             label="Sampling interval"
                             value={samplingIntervalDelay}
                             variant="outlined"
@@ -366,16 +371,16 @@ export default function CollectData(props: {
                         <Button
                             size="large"
                             variant="contained"
-                            color={recording ? "secondary" : "primary"}
+                            color={isRecording ? "secondary" : "primary"}
                             aria-label="start/stop recording"
                             title="start/stop recording"
                             onClick={toggleRecording}
                             startIcon={
-                                recording ? <StopIcon /> : <PlayArrowIcon />
+                                isRecording ? <StopIcon /> : <PlayArrowIcon />
                             }
                             disabled={!startEnabled}
                         >
-                            {recording ? "Stop" : "Start"}
+                            {isRecording ? "Stop" : "Start"}
                         </Button>
                     </div>
                 </div>
@@ -396,19 +401,24 @@ export default function CollectData(props: {
                 <div key="recordedData">
                     {!!dataset.numRecordings && (
                         <div key="recordings">
-                            <h3>Recordings
-                            <IconButtonWithTooltip
-                                onClick={handleDownloadDataset}
-                                title="Download all recording data">
-                            <DownloadIcon />
-                            </IconButtonWithTooltip></h3>
+                            <h3>
+                                Dataset
+                                <IconButtonWithTooltip
+                                    onClick={handleDownloadDataset}
+                                    title="Download all recording data"
+                                >
+                                    <DownloadIcon />
+                                </IconButtonWithTooltip>
+                            </h3>
                             {dataset.labels.map(classLabel => (
                                 <ClassDataSetGrid
                                     key={
                                         "dataset-" + classLabel
                                     } /* RANDI TODO Maybe take in labels as well as tables? */
                                     label={classLabel}
-                                    tables={dataset.getRecordingsWithLabel(classLabel)}
+                                    tables={dataset.getRecordingsWithLabel(
+                                        classLabel
+                                    )}
                                     handleDeleteTable={handleDeleteRecording}
                                 />
                             ))}
@@ -416,9 +426,7 @@ export default function CollectData(props: {
                     )}
                 </div>
             </Grid>
-            <Grid item
-                style={{display: 'flex', justifyContent: 'flex-end'}}
-            >
+            <Grid item style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button
                     variant="contained"
                     color="secondary"
