@@ -29,10 +29,7 @@ export function addNewDataset(workspace) {
                 ) as BlockSvg
 
                 // automatically insert the variable name into the new block
-                console.log(newDatasetBlock.inputList[0])
-                const field = newDatasetBlock.inputList[0].fieldRow.find(
-                    f => f.name === "DATASET_NAME"
-                ) as FieldVariable
+                const field = newDatasetBlock.getField("DATASET_NAME") as FieldVariable
                 field.setValue(newDatasetVar.getId())
 
                 // add new block to the screen
@@ -75,10 +72,7 @@ export function addNewClassifier(workspace) {
                 ) as BlockSvg
 
                 // automatically insert the variable name into the new block
-                console.log(newBlock.inputList[0])
-                const field = newBlock.inputList[0].fieldRow.find(
-                    f => f.name === `CLASSIFIER_NAME`
-                ) as FieldVariable
+                const field = newBlock.getField("CLASSIFIER_NAME") as FieldVariable
                 field.setValue(newVariable.getId())
 
                 // add new block to the screen
