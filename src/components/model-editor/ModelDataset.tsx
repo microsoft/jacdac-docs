@@ -1,32 +1,26 @@
-import { JDBus } from "../../../jacdac-ts/src/jdom/bus";
-import { CHANGE } from "../../../jacdac-ts/src/jdom/constants";
-import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource";
-import { JDField } from "../../../jacdac-ts/src/jdom/field";
-import { JDRegister } from "../../../jacdac-ts/src/jdom/register";
-import { arrayConcatMany, roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils";
+import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
+import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 
 import FieldDataSet from "../FieldDataSet"
 
 export default class ModelDataset extends JDEventSource {
     readonly id = Math.random().toString()
-    
+
     // maintain computed number of examples and input data types to avoid recomputation
     inputTypes: string[]
+    registerIds: string[]
 
     constructor(
-        public readonly labels?: string[], 
-        public readonly recordings?: FieldDataSet[],
+        public readonly labels?: string[],
+        public readonly recordings?: FieldDataSet[]
     ) {
-        super();
-        
-        this.labels = [];
+        super()
+
+        this.labels = []
         this.recordings = []
 
-        if (labels !== undefined)
-            this.labels = labels
-        if (recordings !== undefined)
-            this.recordings = recordings
-
+        if (labels !== undefined) this.labels = labels
+        if (recordings !== undefined) this.recordings = recordings
     }
 
     get labelList() {
@@ -42,30 +36,31 @@ export default class ModelDataset extends JDEventSource {
     }
 
     arraysEqual(a, b) {
-        if (a === b) return true;
-        if (a == null || b == null) return false;
-        if (a.length !== b.length) return false;
-      
+        if (a === b) return true
+        if (a == null || b == null) return false
+        if (a.length !== b.length) return false
+
         // If you don't care about the order of the elements inside
         // the array, you should sort both arrays here.
         // Please note that calling sort on an array will modify that array.
         // you might want to clone your array first.
-      
-        for (var i = 0; i < a.length; ++i) {
-            if (a[i] !== b[i]) return false;
+
+        for (let i = 0; i < a.length; ++i) {
+            if (a[i] !== b[i]) return false
         }
-        return true;
+        return true
     }
 
     getRecordingsWithLabel(label: string) {
         return this.recordings[label]
     }
 
-    addRecording(recording: FieldDataSet, label: string) {
+    addRecording(recording: FieldDataSet, label: string, registerIds: string[]) {
         if (this.labels.length == 0) {
             this.labels.push(label)
             this.recordings[label] = [recording]
             this.inputTypes = recording.headerList
+            this.registerIds = registerIds
 
             this.emit(CHANGE)
         } else if (this.arraysEqual(recording.headerList, this.inputTypes)) {
@@ -88,7 +83,7 @@ export default class ModelDataset extends JDEventSource {
 
         if (i > -1) {
             this.recordings[tableLabel].splice(i, 1)
-            
+
             // If this emptied out a label, then remove that label
             if (this.recordings[tableLabel].length == 0) {
                 const j = this.labels.indexOf(tableLabel)
@@ -97,11 +92,15 @@ export default class ModelDataset extends JDEventSource {
         }
     }
 
+    get summary() {
+
+        return "Labels: " + this.labelList.join(", ")
+    }
+
     toCSV() {
         const allheaders = ["time", ...this.inputTypes].join(",")
         const csv: string[] = [allheaders]
-        this.recordings.forEach(recording =>
-            csv.push(recording.toCSV()))
-        return csv.join('\n');
+        this.recordings.forEach(recording => csv.push(recording.toCSV()))
+        return csv.join("\n")
     }
 }
