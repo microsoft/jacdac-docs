@@ -2,26 +2,22 @@ import React, { useEffect,
                 useContext,
                 useState } from "react"
 import {
-    Grid,
-    Button,
-    TextField,
-    InputAdornment,
     createStyles,
+    Box,
+    Tabs,
+    Tab,
 } from "@material-ui/core"
+import TabPanel from "../ui/TabPanel"
 import { makeStyles, Theme } from "@material-ui/core/styles"
-import PlayArrowIcon from "@material-ui/icons/PlayArrow"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
-import StopIcon from "@material-ui/icons/Stop"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
-import Autocomplete, {
-    createFilterOptions,
-} from "@material-ui/lab/Autocomplete"
 
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import useChartPalette from "../useChartPalette"
 import Trend from "../Trend"
-import ClassDataSetGrid from "../ClassDataSetGrid"
+
+import CollectData from "./CollectData"
+//import TrainModel from "./TrainModel"
+//import ModelOutput from "./ModelOutput"
 
 import useChange from "../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
@@ -41,10 +37,9 @@ import {
     TFModelTrainRequest,
     TFModelPredictRequest,
 } from "../../workers/tf/dist/node_modules/tf.worker"
+import ModelDataset from "./ModelDataset"
 
 //Dashboard.tsx
-
-const filter = createFilterOptions()
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -99,11 +94,7 @@ export default function ModelPlayground() {
     const chartPalette = useChartPalette()
     
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const [dataset, setDataset] = useState({
-        labels: [],
-        totalExamples: 0,
-        examples: {},
-    })
+    const [dataset, setDataset] = useState<ModelDataset>(new ModelDataset())
 
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
@@ -116,21 +107,30 @@ export default function ModelPlayground() {
         )
     )
 
+    const [tab, setTab] = useState(0)
+    const handleTabChange = (
+        event: React.ChangeEvent<unknown>,
+        newValue: number
+    ) => {
+        console.log("Changing to tab: ", newValue)
+        setTab(newValue)
+    }
+
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [recording, setRecording] = useState(false)
     const [, setRecordingLength] = useState(0)
-    const [liveDataSet, setLiveDataSet] = useState<FieldDataSet>(undefined)
+    const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
 
-    const newDataSet = (registerIds: string[], live: boolean) =>
+    const newRecording = (registerIds: string[], live: boolean) =>
         registerIds.length
             ? createDataSet(
                   bus,
                   readingRegisters.filter(
                       reg => registerIds.indexOf(reg.id) > -1
                   ),
-                  `${currentClassLabel}$${dataset.totalExamples}`,
+                  `${currentClassLabel}$${dataset.numRecordings}`,
                   live,
                   chartPalette
               )
@@ -145,7 +145,7 @@ export default function ModelPlayground() {
 
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
-        setLiveDataSet(newDataSet(registerIdsChecked, true))
+        setLiveRecording(newRecording(registerIdsChecked, true))
     }
 
     /* For recording data*/
@@ -166,42 +166,19 @@ export default function ModelPlayground() {
     const error = errorSamplingDuration || errorSamplingIntervalDelay
     const startEnabled = !!recordingRegisters?.length
 
-    const handleSamplingIntervalChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setSamplingIntervalDelay(event.target.value.trim())
-    }
-    const handleSamplingDurationChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setSamplingDuration(event.target.value.trim())
-    }
-    const handleLabelChange = (newLabel) => {
-        console.log("label change")
-        setLabel(newLabel)
-    }
     const stopRecording = () => {
         if (recording) {
-            dataset.totalExamples += 1
-            dataset.examples[currentClassLabel].push(liveDataSet)
+            dataset.addRecording(liveRecording, currentClassLabel)
             setDataset(dataset)
 
-            setLiveDataSet(newDataSet(registerIdsChecked, true))
+            setLiveRecording(newRecording(registerIdsChecked, true))
             setRecording(false)
         }
     }
     const startRecording = async () => {
         if (!recording && recordingRegisters.length) {
-            setLiveDataSet(newDataSet(registerIdsChecked, false))
+            setLiveRecording(newRecording(registerIdsChecked, false))
             setRecording(true)
-
-            // Check if label is already in dataset
-            if (dataset.labels.indexOf(currentClassLabel) < 0) {
-                // If not, add the new label to the dataset
-                dataset.labels.push(currentClassLabel)
-                dataset.examples[currentClassLabel] = []
-                setDataset(dataset)
-            }
         }
     }
     const startStreamingRegisters = () => {
@@ -214,29 +191,9 @@ export default function ModelPlayground() {
             streamers.map(streamer => streamer())
         }
     }
-    const toggleRecording = () => {
-        if (recording) stopRecording()
-        else startRecording()
-    }
-    const handleDeleteRecording = (table: FieldDataSet) => {
-        const tableLabel = table.name.slice(0, table.name.indexOf("$"))
-        const i = dataset.examples[tableLabel].indexOf(table)
-
-        if (i > -1) {
-            dataset.examples[tableLabel].splice(i, 1)
-            dataset.totalExamples -= 1
-
-            // If this emptied out a label, then remove that label
-            if (dataset.examples[tableLabel].length == 0) {
-                const j = dataset.labels.indexOf(tableLabel)
-                dataset.labels.splice(j, 1)
-            }
-            setDataset(dataset)
-        }
-    }
     const updateLiveData = () => {
-        setLiveDataSet(liveDataSet)
-        setRecordingLength(liveDataSet.rows.length)
+        setLiveRecording(liveRecording)
+        setRecordingLength(liveRecording.rows.length)
         setLiveDataTimestamp(bus.timestamp)
 
         // this function calls model.predict
@@ -246,10 +203,10 @@ export default function ModelPlayground() {
     // data collection
     // interval add data entry
     const addRow = (values?: number[]) => {
-        if (!liveDataSet) return
+        if (!liveRecording) return
         //console.log(values)
-        liveDataSet.addRow(values)
-        if (recording && liveDataSet.length >= samplingCount) {
+        liveRecording.addRow(values)
+        if (recording && liveRecording.length >= samplingCount) {
             // stop recording
             updateLiveData()
             stopRecording()
@@ -279,7 +236,7 @@ export default function ModelPlayground() {
         }
     }, [recording, samplingIntervalDelayi, samplingCount, registerIdsChecked])
 
-    // training model
+    /*  For training model */
     const [tfModel, setModel] = useState({
         model: tf.sequential(),
         status: "idle",
@@ -305,14 +262,13 @@ export default function ModelPlayground() {
         const y_data = []
 
         for (const label of dataset.labels) {
-            dataset.examples[label].forEach(table => {
+            dataset.getRecordingsWithLabel(label).forEach(table => {
                 if (sampleLength < table.length) {
                     sampleLength = table.length
                     sampleChannels = table.width
                 } else if (table.width != sampleChannels) {
                     setTrainEnabled(false)
-                    // RANDI TODO Decide what to do about different shaped data
-                    alert(
+                   alert(
                         "All input data must have the same shape: " +
                             table.name +
                             "\n Has " +
@@ -444,8 +400,8 @@ export default function ModelPlayground() {
         // Use the model to do inference on a data point the model hasn't seen before:
         let data = undefined
         const z_data = []
-        if (liveDataSet) {
-            data = liveDataSet.data()
+        if (liveRecording) {
+            data = liveRecording.data()
             data = data.slice(data.length - tfModel.inputShape[0])
             z_data.push(data)
         }
@@ -472,11 +428,49 @@ export default function ModelPlayground() {
         setModel(tfModel)
     }
 
+    const handleDataChange = (dataset) => {
+        setDataset(dataset)
+        console.log("Randi updated dataset from tab 0: ", dataset)
+    }
+
+    const nextTab = () => {
+        console.log("Randi on to the next tab")
+        if (tab == 0 && dataset.labels.length >= 2) {4
+            setTab(1)
+        }
+    }
+
     return (
+        <Box mb={2}>
+            <h1>ML Model Creator</h1>
+            <p>
+            This page allows you to collect data from Jacdac sensors and use them to train a neural network model that does classification.
+            </p>
+            
+            <Tabs
+                value={tab}
+                onChange={handleTabChange}
+                aria-label="View specification formats"
+            >
+                <Tab label={`1 - Collect Data`} />
+                <Tab label={`2 - Train Model`} />
+                <Tab label={`3 - Deploy Model`} />
+            </Tabs>
+            <TabPanel value={tab} index={0}>
+                <CollectData
+                    dataset={dataset} /* RANDI TODO would this let me change tabs before setDataset is called? */
+                    onChange={handleDataChange}
+                    onNext={nextTab}
+                />
+            </TabPanel>
+        </Box>
+    )
+
+    /*return (
         <Grid container direction={"column"}>
             <Grid item>
                 <h2>1 - Collect Data</h2>
-                {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
+                {/* RANDI TODO Toggle button to get data from sensors vs upload from file }
                 <div key="sensors">
                     <h3>Choose sensors</h3>
                     {!readingRegisters.length && (
@@ -581,7 +575,7 @@ export default function ModelPlayground() {
                                 <ClassDataSetGrid
                                     key={
                                         "dataset-" + classLabel
-                                    } /* RANDI TODO Maybe take in labels as well as tables? */
+                                    } /* RANDI TODO Maybe take in labels as well as tables? 
                                     label={classLabel}
                                     tables={dataset.examples[classLabel]}
                                     handleDeleteTable={handleDeleteRecording}
@@ -592,7 +586,7 @@ export default function ModelPlayground() {
                 </div>
             </Grid>
             <Grid item>
-                <h2>2 - Train Model</h2>
+                <h2>2 - Train and Test Model</h2>
                 <div className={classes.buttons}>
                     <Button
                         size="large"
@@ -613,9 +607,6 @@ export default function ModelPlayground() {
                 <br />
                 <span> Labels: {tfModel.labels.length ? tfModel.labels.join(", ") : "--" }</span>
                 <br />
-            </Grid>
-            <Grid item>
-                <h2>3 - Test Model</h2>
                 <div key="predict">
                     <span> Top Class: {(tfModel.status == "completed") ? tfModel.topClass : "--" } </span>
                     <br />
@@ -634,7 +625,7 @@ export default function ModelPlayground() {
                 </div>
             </Grid>
             <Grid item>
-                <h2>4 - Deploy Model</h2>
+                <h2>3 - Assign Outputs and Deploy Model</h2>
                 <div key="programOutput">
                     <h3>Set output</h3>
                     {tfModel.labels.map((label) => (
@@ -646,5 +637,5 @@ export default function ModelPlayground() {
                 </div>
             </Grid>
         </Grid>
-    )
+    )*/
 }
