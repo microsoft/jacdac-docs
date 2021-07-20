@@ -77,7 +77,7 @@ function RecordingParameterWidget( props: {
                 </Box>
                 <Box color="text.secondary">
                     {/* Randi TODO make this look nice, date, time */}
-                    Last timestamp: {(latestTimestamp==0) ? latestTimestamp : "--"}
+                    Timestamp: {(latestTimestamp==0) ? latestTimestamp : "--"}
                 </Box>
             </Grid>
             <Grid item>
