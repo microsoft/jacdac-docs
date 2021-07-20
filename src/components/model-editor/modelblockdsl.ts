@@ -26,9 +26,9 @@ import {
 } from "../../workers/tf/dist/node_modules/tf.worker"
 
 export const MODEL_BLOCKS = "model_block_"
-export const MB_DATASET_TYPE = "ModelBlockDataset"
-export const MB_CLASS_TYPE = "ModelBlockClass"
-export const MB_CLASSIFIER_TYPE = "ModelBlockClassifier"
+export const MB_DATASET_VAR_TYPE = "ModelBlockDataset"
+export const MB_CLASS_VAR_TYPE = "ModelBlockClass"
+export const MB_CLASSIFIER_VAR_TYPE = "ModelBlockClassifier"
 
 const dataset_color = "#123456"
 const class_color = "#2466A8"
@@ -56,8 +56,8 @@ export class ModelBlockDomainSpecificLanguage
                         type: "field_variable",
                         name: "DATASET_NAME",
                         variable: "dataset1",
-                        variableTypes: [MB_DATASET_TYPE],
-                        defaultType: MB_DATASET_TYPE,
+                        variableTypes: [MB_DATASET_VAR_TYPE],
+                        defaultType: MB_DATASET_VAR_TYPE,
                     },
                     {
                         type: ExpandModelBlockField.KEY,
@@ -101,8 +101,8 @@ export class ModelBlockDomainSpecificLanguage
                         name: "CLASS_NAME",
                         variable:
                             "class1" /* TODO Randi this should display class variable types or class1 */,
-                        variableTypes: [MB_CLASS_TYPE],
-                        defaultType: MB_CLASS_TYPE,
+                        variableTypes: [MB_CLASS_VAR_TYPE],
+                        defaultType: MB_CLASS_VAR_TYPE,
                     },
                     {
                         type: ExpandModelBlockField.KEY,
@@ -180,15 +180,15 @@ export class ModelBlockDomainSpecificLanguage
                         type: "field_variable",
                         name: "CLASSIFIER_NAME",
                         variable: "classifier1",
-                        variableTypes: [MB_CLASSIFIER_TYPE],
-                        defaultType: MB_CLASSIFIER_TYPE,
+                        variableTypes: [MB_CLASSIFIER_VAR_TYPE],
+                        defaultType: MB_CLASSIFIER_VAR_TYPE,
                     },
                     {
                         type: "field_variable",
                         name: "NN_TRAINING",
                         variable: "dataset1",
-                        variableTypes: [MB_DATASET_TYPE],
-                        defaultType: MB_DATASET_TYPE,
+                        variableTypes: [MB_DATASET_VAR_TYPE],
+                        defaultType: MB_DATASET_VAR_TYPE,
                     },
                     {
                         type: ExpandModelBlockField.KEY,
@@ -365,8 +365,8 @@ export class ModelBlockDomainSpecificLanguage
                         name: "CLASSIFIER_NAME",
                         variable:
                             "classifier2" /* TODO Randi this should display class variable types or KNN classifier1 */,
-                        variableTypes: [MB_CLASSIFIER_TYPE],
-                        defaultType: MB_CLASSIFIER_TYPE,
+                        variableTypes: [MB_CLASSIFIER_VAR_TYPE],
+                        defaultType: MB_CLASSIFIER_VAR_TYPE,
                     },
                     {
                         type: ExpandModelBlockField.KEY,
@@ -379,8 +379,8 @@ export class ModelBlockDomainSpecificLanguage
                         type: "field_variable",
                         name: "KNN_TRAINING",
                         variable: "dataset1",
-                        variableTypes: [MB_DATASET_TYPE],
-                        defaultType: MB_DATASET_TYPE,
+                        variableTypes: [MB_DATASET_VAR_TYPE],
+                        defaultType: MB_DATASET_VAR_TYPE,
                     },
                     {
                         type: "field_number",
@@ -406,11 +406,20 @@ export class ModelBlockDomainSpecificLanguage
 
     createCategory() {
         return [
-            <CategoryDefinition>{
+            <CategoryDefinition><unknown>{
                 kind: "category",
                 name: "Dataset",
                 colour: dataset_color,
                 contents: [
+                    {
+                        kind: "label",
+                        text: "Recordings",
+                    },
+                    {
+                        kind: "button",
+                        text: "Create new recording...",
+                        callbackKey: "createNewRecordingButton",
+                    },
                     {
                         kind: "label",
                         text: "Datasets",
@@ -424,22 +433,9 @@ export class ModelBlockDomainSpecificLanguage
                         kind: "block",
                         type: MODEL_BLOCKS + "dataset",
                     },
-                    {
-                        kind: "label",
-                        text: "Classes",
-                    },
-                    {
-                        kind: "button",
-                        text: "Create new recording...",
-                        callbackKey: "createNewRecordingButton",
-                    },
-                    {
-                        kind: "block",
-                        type: MODEL_BLOCKS + "recording",
-                    },
                 ],
             },
-            <CategoryDefinition>{
+            <CategoryDefinition><unknown>{
                 kind: "category",
                 name: "Preprocessing",
                 colour: processing_color,
@@ -454,7 +450,7 @@ export class ModelBlockDomainSpecificLanguage
                     },
                 ],
             },
-            <CategoryDefinition>{
+            <CategoryDefinition><unknown>{
                 kind: "category",
                 name: "Learning",
                 colour: learning_color,
