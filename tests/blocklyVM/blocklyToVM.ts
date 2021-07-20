@@ -1,10 +1,10 @@
 import { suite, test } from "mocha"
 import { readdirSync, readFileSync, access, constants } from "fs"
 import { join } from "path"
-import { WorkspaceJSON } from "../../components/blockly/jsongenerator"
-import workspaceJSONToVMProgram from "../../components/vm/VMgenerator"
-import vmDsls from "../../components/vm/vmdsls"
-import { VMError, VMProgram } from "../../../jacdac-ts/src/vm/ir"
+import { WorkspaceJSON } from "../../src/components/blockly/jsongenerator"
+import workspaceJSONToVMProgram from "../../src/components/vm/VMgenerator"
+import vmDsls from "../../src/components/vm/vmdsls"
+import { VMError, VMProgram } from "../../jacdac-ts/src/vm/ir"
 
 // TODO: how to expose to mocha and build system?
 // TODO: JSON equality

@@ -106,6 +106,10 @@
     "ws": "^7.5.3",
     "xmlhttprequest-ssl": "^2.0.0"
   },
+  "devDependencies": {
+    "@types/mocha": "^8.2.2",
+    "mocha": "^9.0.0"
+  },
   "keywords": [
     "jacdac"
   ],
@@ -119,7 +123,7 @@
     "blocklymedia": "mkdir -p static/blockly && cp -r -f node_modules/blockly/media static/blockly",
     "predistdocs": "yarn clean && yarn blocklymedia && cd jacdac-ts/tools && node ./prepare.js",
     "distdocs": "node ./node_modules/gatsby/cli.js build --prefix-paths --no-uglify",
-    "vmtests": "cd tests/blockToVMProgram && node ../node_modules/mocha/bin/mocha --require ts-node/register --watch-extensions ts,tsx -p ./tsconfig.json blocklyToVM.ts",
+    "tests": "cd tests/blocklyVM && node ../../node_modules/mocha/bin/mocha --require ts-node/register --watch-extensions ts,tsx -p ../tsconfig.json blocklyToVM.ts",
     "tools": "npx http-server . -c-1",
     "watchdocs": "node node_modules/gatsby/cli.js develop",
     "prettier": "prettier --write src/**/*.ts src/**/*.tsx",

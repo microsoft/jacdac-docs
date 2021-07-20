@@ -1,0 +1,6 @@
+{
+    "extends": "../jacdac-ts/tsconfig.json",
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
