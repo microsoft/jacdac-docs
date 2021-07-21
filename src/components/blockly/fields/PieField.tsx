@@ -8,6 +8,7 @@ import { PointerBoundary } from "./PointerBoundary"
 import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
 import { tidyToNivo } from "./nivo"
+import { PiePlotFieldKEY } from "./keys"
 const Pie = lazy(() => import("./Pie"))
 
 function PieChartWidget() {
@@ -61,7 +62,7 @@ function PieChartWidget() {
 }
 
 export default class PiePlotField extends ReactInlineField {
-    static KEY = "jacdac_field_pie_plot"
+    static KEY = PiePlotFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

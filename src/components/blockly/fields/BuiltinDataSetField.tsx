@@ -1,7 +1,8 @@
-import { BlockWithServices, FieldWithServices } from "../WorkspaceContext"
+import { BlockWithServices, FieldWithServices } from "../workspacecontextutils"
 import { Block, FieldDropdown } from "blockly"
 import { withPrefix } from "gatsby"
 import { downloadCSV } from "../dsl/workers/csv.proxy"
+import { BuiltinDataSetFieldKEY } from "./keys"
 
 const builtins = {
     cereal: withPrefix("/datasets/cereal.csv"),
@@ -13,7 +14,7 @@ export default class BuiltinDataSetField
     extends FieldDropdown
     implements FieldWithServices
 {
-    static KEY = "jacdac_field_data_builtin_dataset"
+    static KEY = BuiltinDataSetFieldKEY
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     static fromJson(options: object) {

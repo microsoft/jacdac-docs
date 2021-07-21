@@ -5,10 +5,11 @@ import ReactField, {
     ReactFieldJSON,
     toShadowDefinition,
 } from "./ReactField"
+import { NoteFieldKEY } from "./keys"
 const PianoWidget = lazy(() => import("../../widgets/PianoWidget"))
 
 export default class NoteField extends ReactField<number> {
-    static KEY = "jacdac_field_note"
+    static KEY = NoteFieldKEY
     static SHADOW = toShadowDefinition(NoteField)
     toneContext: ToneContext
 

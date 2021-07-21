@@ -1,6 +1,7 @@
 import React, { lazy, ReactNode } from "react"
 import { fromHex, toHex } from "../../../../jacdac-ts/src/jdom/utils"
 import Suspense from "../../ui/Suspense"
+import { LEDMatrixFieldKEY } from "./keys"
 import { ReactFieldJSON, VALUE_CHANGE } from "./ReactField"
 import ReactImageField from "./ReactImageField"
 const LEDMatrixWidget = lazy(() => import("../../widgets/LEDMatrixWidget"))
@@ -13,7 +14,7 @@ export interface LEDMatrixFieldValue {
 }
 
 export default class LEDMatrixField extends ReactImageField<LEDMatrixFieldValue> {
-    static KEY = "jacdac_field_led_matrix"
+    static KEY = LEDMatrixFieldKEY
 
     constructor(value: string) {
         super(value)

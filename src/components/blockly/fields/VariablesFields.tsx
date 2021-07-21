@@ -1,8 +1,9 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core"
 import React, { useContext, useEffect, useState } from "react"
 import { VM_GLOBAL_CHANGE } from "../../../../jacdac-ts/src/vm/events"
-import { atomic } from "../../../../jacdac-ts/src/vm/runner"
+import { atomic } from "../../../../jacdac-ts/src/vm/utils"
 import WorkspaceContext from "../WorkspaceContext"
+import { VariablesFieldKEY } from "./keys"
 import { ReactFieldJSON } from "./ReactField"
 import ReactInlineField from "./ReactInlineField"
 
@@ -55,7 +56,7 @@ function VariablesWidget() {
 }
 
 export default class VariablesField extends ReactInlineField {
-    static KEY = "jacdac_field_variables_view"
+    static KEY = VariablesFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

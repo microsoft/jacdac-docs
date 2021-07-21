@@ -1,8 +1,5 @@
 import { toIdentifier } from "../../../../jacdac-ts/src/vm/compile"
 import { CmdWithErrors, makeVMBase } from "../../vm/VMgenerator"
-import LogViewField from "../fields/LogViewField"
-import VariablesField from "../fields/VariablesFields"
-import WatchValueField from "../fields/WatchValueField"
 import {
     BlockReference,
     CODE_STATEMENT_TYPE,
@@ -32,7 +29,7 @@ const toolsDSL: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: VariablesField.KEY,
+                    type: "jacdac_field_variables_view", // VariablesField.KEY,
                     name: "variables",
                 },
             ],
@@ -52,7 +49,7 @@ const toolsDSL: BlockDomainSpecificLanguage = {
                     name: "value",
                 },
                 <InputDefinition>{
-                    type: WatchValueField.KEY,
+                    type: "jacdac_field_watch_value", // WatchValueField.KEY,
                     name: "watch",
                 },
             ],
@@ -89,7 +86,7 @@ const toolsDSL: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 <InputDefinition>{
-                    type: LogViewField.KEY,
+                    type: "jacdac_field_log_view", // LogViewField.KEY,
                     name: "watch",
                 },
             ],

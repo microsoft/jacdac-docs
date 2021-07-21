@@ -3,8 +3,8 @@ import { readdirSync, readFileSync, access, constants } from "fs"
 import { join } from "path"
 import { WorkspaceJSON } from "../../src/components/blockly/jsongenerator"
 import workspaceJSONToVMProgram from "../../src/components/vm/VMgenerator"
-import vmDsls from "../../src/components/vm/vmdsls"
 import { VMError, VMProgram } from "../../jacdac-ts/src/vm/ir"
+import { vmOnlyDsls } from "../../src/components/vm/vmdsls"
 
 // TODO: how to expose to mocha and build system?
 // TODO: JSON equality
@@ -21,7 +21,7 @@ suite("blockly2vm", () => {
                 console.log(`test ${match}`)
 
                 const workspaceJSON: WorkspaceJSON = JSON.parse(readFileSync(blocklyPath, "utf8"))
-                const newProgram = workspaceJSONToVMProgram(workspaceJSON, vmDsls)
+                const newProgram = workspaceJSONToVMProgram(workspaceJSON, vmOnlyDsls)
                 let errors: VMError[] = undefined
                 newProgram.handlers.forEach(h => {
                     if (!errors && h?.errors.length) {

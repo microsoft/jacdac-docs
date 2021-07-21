@@ -12,6 +12,7 @@ import { REPORT_UPDATE } from "../../../../jacdac-ts/src/jdom/constants"
 import useBlockData from "../useBlockData"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import { toMap } from "../../../../jacdac-ts/src/jdom/utils"
+import { TwinFieldKEY } from "./keys"
 
 const HORIZON = 10
 function TwinWidget() {
@@ -70,7 +71,7 @@ function TwinWidget() {
 }
 
 export default class TwinField extends ReactInlineField {
-    static KEY = "jacdac_field_twin"
+    static KEY = TwinFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

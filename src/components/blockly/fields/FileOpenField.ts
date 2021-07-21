@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Block, Field } from "blockly"
 import { parseCSV } from "../dsl/workers/csv.proxy"
-import { BlockWithServices, FieldWithServices } from "../WorkspaceContext"
+import { BlockWithServices, FieldWithServices } from "../workspacecontextutils"
+import { FileOpenFieldKEY } from "./keys"
 
 // inline browser-fs-access until issue of ssr is fixed
 const getFileWithHandle = async handle => {
@@ -40,7 +41,7 @@ interface FileOpenFieldValue {
 }
 
 export default class FileOpenField extends Field implements FieldWithServices {
-    static KEY = "jacdac_field_file_open"
+    static KEY = FileOpenFieldKEY
     SERIALIZABLE = true
     // eslint-disable-next-line @typescript-eslint/ban-types
     private _data: object[]

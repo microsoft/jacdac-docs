@@ -1,6 +1,6 @@
 import { SMap } from "../../../jacdac-ts/src/jdom/utils"
 import Blockly, { Block, Workspace } from "blockly"
-import { BlockWithServices } from "./WorkspaceContext"
+import { BlockWithServices } from "./workspacecontextutils"
 
 export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 

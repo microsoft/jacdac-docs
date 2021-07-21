@@ -3,7 +3,7 @@ import {
     toIdentifier,
     toMemberExpression,
 } from "../../../../jacdac-ts/src/vm/compile"
-import { makeVMBase } from "../../vm/VMgenerator"
+import { ExpressionWithErrors, makeVMBase } from "../../vm/VMgenerator"
 
 const variablesDsl: BlockDomainSpecificLanguage = {
     id: "variables",
@@ -20,7 +20,7 @@ const variablesDsl: BlockDomainSpecificLanguage = {
         const { type, inputs } = block
         if (type === "variables_get") {
             const { value: variable } = inputs[0].fields.var
-            const ret = {
+            const ret: ExpressionWithErrors = {
                 expr: toMemberExpression("$var", variable.toString()),
                 errors: [],
             }

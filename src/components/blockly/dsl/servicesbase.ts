@@ -38,8 +38,9 @@ import {
     toMemberExpression,
 } from "../../../../jacdac-ts/src/vm/compile"
 import { VMError } from "../../../../jacdac-ts/src/vm/ir"
-import NoteField from "../fields/NoteField"
-import ServoAngleField from "../fields/ServoAngleField"
+// eliminate ts dependence on tsx
+//import NoteField from "../fields/NoteField"
+//import ServoAngleField from "../fields/ServoAngleField"
 import {
     BlockDefinition,
     BlockReference,
@@ -125,7 +126,7 @@ const customShadows = [
         field: "_",
         shadow: <BlockDefinition>{
             kind: "block",
-            type: ServoAngleField.SHADOW.type,
+            type: "jacdac_field_servo_angle_shadow" // ServoAngleField.SHADOW.type,
         },
     },
     {
@@ -135,7 +136,7 @@ const customShadows = [
         field: "frequency",
         shadow: <BlockDefinition>{
             kind: "block",
-            type: NoteField.SHADOW.type,
+            type: "jacdac_field_note_shadow" // NoteField.SHADOW.type,
         },
     },
 ]

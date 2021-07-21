@@ -8,6 +8,7 @@ import { tidyFindLastValue } from "./nivo"
 import { tidy, min as tidyMin, max as tidyMax, summarize } from "@tidyjs/tidy"
 import { Grid } from "@material-ui/core"
 import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
+import { GaugeWidgetFieldKEY } from "./keys"
 const GaugeWidget = lazy(() => import("../../widgets/GaugeWidget"))
 
 function GaugeWidgetView() {
@@ -55,7 +56,7 @@ function GaugeWidgetView() {
 }
 
 export default class GaugeWidgetField extends ReactInlineField {
-    static KEY = "jacdac_field_gauge_widget"
+    static KEY = GaugeWidgetFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

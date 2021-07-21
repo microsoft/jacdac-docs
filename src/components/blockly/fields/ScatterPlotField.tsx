@@ -9,6 +9,7 @@ import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
 import { tidyToNivo } from "./nivo"
 import { CHART_HEIGHT, CHART_WIDTH } from "../toolbox"
+import { ScatterPlotFieldKEY } from "./keys"
 const ScatterPlot = lazy(() => import("./ScatterPlot"))
 
 function ScatterChartWidget() {
@@ -79,7 +80,7 @@ function ScatterChartWidget() {
 }
 
 export default class ScatterPlotField extends ReactInlineField {
-    static KEY = "jacdac_field_scatter_plot"
+    static KEY = ScatterPlotFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

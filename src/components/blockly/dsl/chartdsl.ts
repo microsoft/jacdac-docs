@@ -1,4 +1,3 @@
-import ScatterPlotField from "../fields/ScatterPlotField"
 import {
     BlockReference,
     CategoryDefinition,
@@ -7,10 +6,14 @@ import {
     identityTransformData,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
-import DataColumnChooserField from "../fields/DataColumnChooserField"
-import LinePlotField from "../fields/LinePlotField"
-import BarChartField from "../fields/BarField"
-import PiePlotField from "../fields/PieField"
+
+import {
+    LinePlotFieldKEY,
+    DataColumnChooserFieldKEY,
+    BarChartFieldKEY,
+    PiePlotFieldKEY,
+    ScatterPlotFieldKEY
+} from "../fields/keys"
 
 const SCATTERPLOT_BLOCK = "chart_scatterplot"
 const LINEPLOT_BLOCK = "chart_lineplot"
@@ -27,12 +30,12 @@ const chartDSL: BlockDomainSpecificLanguage = {
             message0: "scatterplot x %1 y %2 %3 %4",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "x",
                     dataType: "number",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "y",
                     dataType: "number",
                 },
@@ -40,7 +43,7 @@ const chartDSL: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: ScatterPlotField.KEY,
+                    type: ScatterPlotFieldKEY,
                     name: "plot",
                 },
             ],
@@ -57,12 +60,12 @@ const chartDSL: BlockDomainSpecificLanguage = {
             message0: "bar index %1 value %2 %3 %4",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "index",
                     dataType: "number",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "value",
                     dataType: "number",
                 },
@@ -70,7 +73,7 @@ const chartDSL: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: BarChartField.KEY,
+                    type: BarChartFieldKEY,
                     name: "plot",
                 },
             ],
@@ -87,12 +90,12 @@ const chartDSL: BlockDomainSpecificLanguage = {
             message0: "line x %1 y %2 %3 %4",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "x",
                     dataType: "number",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "y",
                     dataType: "number",
                 },
@@ -100,7 +103,7 @@ const chartDSL: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: LinePlotField.KEY,
+                    type: LinePlotFieldKEY,
                     name: "plot",
                 },
             ],
@@ -117,12 +120,12 @@ const chartDSL: BlockDomainSpecificLanguage = {
             message0: "pie name %1 value %2 %3 %4",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "id",
                     dataType: "string",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "value",
                     dataType: "number",
                 },
@@ -130,7 +133,7 @@ const chartDSL: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: PiePlotField.KEY,
+                    type: PiePlotFieldKEY,
                     name: "plot",
                 },
             ],

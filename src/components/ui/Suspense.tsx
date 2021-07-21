@@ -5,7 +5,7 @@ import { start, done } from "nprogress"
 function Fallback() {
     useEffect(() => {
         start();
-        return () => done();
+        return () => { done() };
     }, []);
     return <span></span>
 }

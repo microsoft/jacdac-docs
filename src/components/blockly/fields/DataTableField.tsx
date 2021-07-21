@@ -6,6 +6,7 @@ import useBlockData from "../useBlockData"
 import { createStyles, makeStyles } from "@material-ui/core"
 import { TABLE_HEIGHT, TABLE_WIDTH } from "../toolbox"
 import { PointerBoundary } from "./PointerBoundary"
+import { DataTableFieldKEY } from "./keys"
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -79,7 +80,7 @@ function DataTableWidget() {
 }
 
 export default class DataTableField extends ReactInlineField {
-    static KEY = "jacdac_field_data_table"
+    static KEY = DataTableFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

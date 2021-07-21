@@ -2,6 +2,7 @@ import { useTheme } from "@material-ui/core"
 import React, { useContext, useEffect, useState } from "react"
 import { VM_LOG_ENTRY } from "../../../../jacdac-ts/src/vm/events"
 import WorkspaceContext from "../WorkspaceContext"
+import { LogViewFieldKEY } from "./keys"
 import { ReactFieldJSON } from "./ReactField"
 import ReactInlineField from "./ReactInlineField"
 
@@ -37,7 +38,7 @@ function LogViewWidget() {
 }
 
 export default class LogViewField extends ReactInlineField {
-    static KEY = "jacdac_field_log_view"
+    static KEY = LogViewFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

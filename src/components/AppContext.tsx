@@ -55,7 +55,7 @@ AppContext.displayName = "app"
 export default AppContext
 
 // eslint-disable-next-line react/prop-types
-export const AppProvider = ({ children }) => {
+export const AppProvider = (prop: any) => {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const [type, setType] = useState(DrawerType.None)
     const [searchQuery, setSearchQuery] = useState("")
@@ -133,7 +133,7 @@ export const AppProvider = ({ children }) => {
                 showSelectRoleDialog,
             }}
         >
-            {children}
+            {prop.children}
             {showDeviceHostsDialog && (
                 <Suspense>
                     <StartSimulatorDialog

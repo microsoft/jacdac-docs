@@ -16,9 +16,9 @@ import { CHANGE } from "../../../../jacdac-ts/src/jdom/constants"
 import {
     BlockServices,
     BlockWithServices,
-    FieldWithServices,
-    WorkspaceProvider,
-} from "../WorkspaceContext"
+    FieldWithServices
+} from "../workspacecontextutils"
+import { WorkspaceProvider } from "../WorkspaceContext"
 import { WebAudioProvider } from "../../ui/WebAudioContext"
 import { ReactFieldBase } from "./ReactFieldBase"
 
