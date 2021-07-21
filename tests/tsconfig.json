@@ -1,6 +1,13 @@
 {
     "extends": "../jacdac-ts/tsconfig.json",
     "compilerOptions": {
-      "module": "commonjs"
+      "module": "commonjs",
+      "lib": [
+        "es2015",
+        "es2016",
+        "es2017",
+        "es2019",
+        "dom"
+      ]
     }
   }
