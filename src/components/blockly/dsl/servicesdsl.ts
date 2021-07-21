@@ -39,6 +39,7 @@ import {
     toRoleType,
 } from "./servicesbase"
 import { humanify } from "../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
+import { LEDColorFieldKEY } from "../fields/keys"
 
 const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
 const ROLE_BOUND_EVENT_BLOCK = "jacdac_role_bound_event"
@@ -130,7 +131,7 @@ export class ServicesBlockDomainSpecificLanguage
                         values: {
                             color: {
                                 kind: "block",
-                                type:  "jacdac_field_led_color_shadow" // LEDColorField.SHADOW.type,
+                                type:  LEDColorFieldKEY+"_shadow"
                             },
                             speed: {
                                 kind: "block",
@@ -367,7 +368,7 @@ export class ServicesBlockDomainSpecificLanguage
                 values: {
                     color: {
                         kind: "block",
-                        type: "jacdac_field_led_color_shadow" 
+                        type: LEDColorFieldKEY+"_shadow"
                     },
                 },
                 inputsInline: true,
@@ -480,7 +481,7 @@ export class ServicesBlockDomainSpecificLanguage
                     values: {
                         color: {
                             kind: "block",
-                            type: "jacdac_field_led_color_shadow" 
+                            type: LEDColorFieldKEY+"_shadow"
                         },
                     },
                 },

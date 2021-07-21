@@ -1,10 +1,12 @@
 import { suite, test } from "mocha"
 import { readdirSync, readFileSync, access, constants } from "fs"
 import { join } from "path"
-import { WorkspaceJSON } from "../../src/components/blockly/jsongenerator"
+import { domToJSON } from "../../src/components/blockly/jsongenerator"
 import workspaceJSONToVMProgram from "../../src/components/vm/VMgenerator"
 import { VMError, VMProgram } from "../../jacdac-ts/src/vm/ir"
 import vmOnlyDsls from "../../src/components/vm/vmonlydsls"
+import BlockFile from "../../src/components/blockly/blockfile"
+import { Workspace, Xml } from "blockly"
 
 // TODO: how to expose to mocha and build system?
 // TODO: JSON equality
@@ -20,8 +22,16 @@ suite("blockly2vm", () => {
 
                 console.log(`test ${match}`)
 
-                const workspaceJSON: WorkspaceJSON = JSON.parse(readFileSync(blocklyPath, "utf8"))
+                const blockFile: BlockFile = JSON.parse(readFileSync(blocklyPath, "utf8"))
+                // try loading xml into a dummy blockly workspace
+                const dom = Xml.textToDom(blockFile.xml)
+                const workspace = new Workspace()
+                // all good, load in workspace
+                workspace.clear()
+                Xml.domToWorkspace(dom, workspace)
+                const workspaceJSON = domToJSON(workspace, vmOnlyDsls)
                 const newProgram = workspaceJSONToVMProgram(workspaceJSON, vmOnlyDsls)
+                
                 let errors: VMError[] = undefined
                 newProgram.handlers.forEach(h => {
                     if (!errors && h?.errors.length) {
