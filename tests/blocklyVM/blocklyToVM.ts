@@ -4,7 +4,7 @@ import { join } from "path"
 import { WorkspaceJSON } from "../../src/components/blockly/jsongenerator"
 import workspaceJSONToVMProgram from "../../src/components/vm/VMgenerator"
 import { VMError, VMProgram } from "../../jacdac-ts/src/vm/ir"
-import { vmOnlyDsls } from "../../src/components/vm/vmdsls"
+import vmOnlyDsls from "../../src/components/vm/vmonlydsls"
 
 // TODO: how to expose to mocha and build system?
 // TODO: JSON equality
