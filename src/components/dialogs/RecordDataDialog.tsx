@@ -1,6 +1,7 @@
 import React, { useEffect, useContext, useState } from "react"
 
 import {
+    Button,
     Grid,
     Dialog,
     DialogActions,
@@ -9,10 +10,12 @@ import {
     createStyles,
     InputAdornment,
 } from "@material-ui/core"
-import { Button } from "gatsby-theme-material-ui"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import StopIcon from "@material-ui/icons/Stop"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import { Autocomplete } from "@material-ui/lab"
@@ -24,8 +27,9 @@ import ClassDataSetGrid from "../ClassDataSetGrid"
 import Trend from "../Trend"
 
 import useChange from "../../jacdac/useChange"
-import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import useChartPalette from "../useChartPalette"
+import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
+import ServiceManagerContext from "../ServiceManagerContext"
 
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
@@ -97,6 +101,7 @@ export default function BlocklyDataRecordingDialog(props: {
 
     const classes = useStyles()
     const chartPalette = useChartPalette()
+    const { fileStorage } = useContext(ServiceManagerContext)
 
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
@@ -113,10 +118,10 @@ export default function BlocklyDataRecordingDialog(props: {
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [totalSamples, setTotalSamples] = useState(0)
     const [recordingName, setRecordingName] = useState(
-        "recording." + recordingCount
+        "recording" + recordingCount
     )
     const [className, setClassName] = useState("class1")
-        
+
     const [, setRecordingLength] = useState(0)
 
     const handleRegisterCheck = (reg: JDRegister) => {
@@ -124,7 +129,6 @@ export default function BlocklyDataRecordingDialog(props: {
         if (i > -1) registerIdsChecked.splice(i, 1)
         else registerIdsChecked.push(reg.id)
 
-        // Randi TODO save registerIdsChecked
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
     }
@@ -146,12 +150,11 @@ export default function BlocklyDataRecordingDialog(props: {
     const [isRecording, setIsRecording] = useState(false)
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
-    const [currentRecording, setCurrentRecording] =
-        useState<FieldDataSet[]>([])
+    const [currentRecording, setCurrentRecording] = useState<FieldDataSet[]>([])
 
     const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
     const [samplingDuration, setSamplingDuration] = useState("2")
-    
+
     const samplingIntervalDelayi = parseInt(samplingIntervalDelay)
     const samplingCount = Math.ceil(
         (parseFloat(samplingDuration) * 1000) / samplingIntervalDelayi
@@ -179,7 +182,7 @@ export default function BlocklyDataRecordingDialog(props: {
                   readingRegisters.filter(
                       reg => registerIds.indexOf(reg.id) > -1
                   ),
-                  `${className}${recordingName}`,
+                  `${recordingName}`,
                   live,
                   chartPalette
               )
@@ -194,7 +197,7 @@ export default function BlocklyDataRecordingDialog(props: {
 
             // refresh live recording
             setLiveRecording(newRecording(registerIdsChecked, true))
-            
+
             // stop recording
             setIsRecording(false)
         }
@@ -264,21 +267,39 @@ export default function BlocklyDataRecordingDialog(props: {
     }, [isRecording, dialogType, samplingIntervalDelayi, samplingCount])
 
     /* For interface controls */
-    
+
     const resetInputs = () => {
-        setClassName("class1") // Randi TODO make this one of the items in the dropdown
+        setClassName("class1")
         setRecordingName("recording" + totalSamples)
         setSamplingIntervalDelay("100")
         setSamplingDuration("2")
     }
+    const handleDownloadDataset = () => {
+        const recordingCountHeader = `Number of recordings,${currentRecording.length}`
 
+        const recordingData: string[] = []
+        currentRecording.forEach(recording => {
+            recordingData.push(
+                "Recording metadata," +
+                    recording.name +
+                    "," +
+                    recording.rows.length +
+                    "," +
+                    className
+            )
+            recordingData.push(recording.toCSV())
+        })
+        const recordData = recordingData.join("\n")
+
+        const csv: string[] = [recordingCountHeader, recordData]
+        fileStorage.saveText(`${recordingName}dataset.csv`, csv.join("\n"))
+    }
     const handleCancel = () => {
         // reset the user inputs
         resetInputs()
         // close the modal
         onClose()
     }
-
     const handleNext = () => {
         // begin recording live data
         setLiveRecording(newRecording(registerIdsChecked, true))
@@ -377,14 +398,48 @@ export default function BlocklyDataRecordingDialog(props: {
                     </DialogActions>
                 </>
             ) : (
+                // recordData
                 <>
                     <DialogContent>
                         <Grid container direction={"column"}>
                             <Grid item>
+                                <h3>Edit recording: {recordingName}</h3>
+                                <div key="recordedData">
+                                    <div key="recordings">
+                                        <h4>
+                                            Recorded samples
+                                            <IconButtonWithTooltip
+                                                onClick={handleDownloadDataset}
+                                                title="Download all recording data"
+                                                disabled={
+                                                    currentRecording.length == 0
+                                                }
+                                            >
+                                                <DownloadIcon />
+                                            </IconButtonWithTooltip>
+                                        </h4>
+                                        {currentRecording.length > 0 ? (
+                                            <ClassDataSetGrid
+                                                key={"samples-" + recordingName}
+                                                label={className}
+                                                tables={currentRecording}
+                                                handleDeleteTable={
+                                                    handleDeleteSample
+                                                }
+                                            />
+                                        ) : (
+                                            <span>None</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </Grid>
+                            <Grid item>
+                                <br />
+                            </Grid>
+                            <Grid item>
                                 <div key="record">
-                                    <h3>Edit recording: {recordingName}</h3>
                                     <div className={classes.row}>
-                                        <h4>Record samples</h4>
+                                        <h4>Add more samples</h4>
                                         <TextField
                                             className={classes.field}
                                             error={errorSamplingDuration}
@@ -460,24 +515,6 @@ export default function BlocklyDataRecordingDialog(props: {
                                     )}
                                 </div>
                             </Grid>
-                            <Grid item>
-                                <div key="recordedData">
-                                    <div key="recordings">
-                                        <h3>Recorded samples</h3>
-                                        {currentRecording.length>0 ? (<ClassDataSetGrid
-                                            key={
-                                                "samples-" + recordingName
-                                            }
-                                            label={className}
-                                            tables={currentRecording}
-                                            handleDeleteTable={
-                                                handleDeleteSample
-                                            }
-                                        />) : (<span>None</span>)}
-                                    </div>
-                                </div>
-                            </Grid>
-                            <Grid item><br/></Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions>
@@ -488,7 +525,7 @@ export default function BlocklyDataRecordingDialog(props: {
                             variant="contained"
                             color="primary"
                             endIcon={<NavigateNextIcon />}
-                            disabled={!currentRecording}
+                            disabled={currentRecording.length < 1}
                             onClick={handleDone}
                         >
                             Done
