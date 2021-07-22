@@ -3,6 +3,7 @@ import SliderField from "./SliderField"
 import Suspense from "../../ui/Suspense"
 import { ReactFieldJSON, toShadowDefinition } from "./ReactField"
 import ValueContext, { ValueContextProps } from "./ValueContext"
+import { ServoAngleFieldKEY } from "./keys"
 
 const ServoWidget = lazy(() => import("../../widgets/ServoWidget"))
 
@@ -22,7 +23,7 @@ function ServiceFieldWidget() {
 }
 
 export default class ServoAngleField extends SliderField {
-    static KEY = "jacdac_field_servo_angle"
+    static KEY = ServoAngleFieldKEY
     static SHADOW = toShadowDefinition(ServoAngleField)
 
     static fromJson(options: ReactFieldJSON) {

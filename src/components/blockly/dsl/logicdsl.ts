@@ -1,7 +1,8 @@
+import { SMap } from "../../../../jacdac-ts/src/jdom/utils"
 import { ExpressionWithErrors } from "../../vm/VMgenerator"
 import BlockDomainSpecificLanguage from "./dsl"
 
-const ops = {
+const ops: SMap<string> = {
     AND: "&&",
     OR: "||",
     EQ: "===",
@@ -74,12 +75,12 @@ const logicDsl: BlockDomainSpecificLanguage = {
                 const right = blockToExpressionInner(event, inputs[1].child)
                 const op = inputs[1].fields["op"].value as string
                 return {
-                    expr: <jsep.LogicalExpression>{
+                    expr: {
                         type: "LogicalExpression",
                         operator: ops[op] || op,
                         left,
                         right,
-                    },
+                    } as jsep.LogicalExpression,
                     errors: [],
                 }
             }

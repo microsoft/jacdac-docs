@@ -79,7 +79,7 @@ const shadowDsl: BlockDomainSpecificLanguage = {
             message0: `%1`,
             args0: [
                 <NumberInputDefinition>{
-                    type: "field_angle",
+                    type: "field_angle" as "field_number",
                     name: "value",
                     min: 0,
                     max: 360,
@@ -95,7 +95,7 @@ const shadowDsl: BlockDomainSpecificLanguage = {
             message0: `%1`,
             args0: [
                 <NumberInputDefinition>{
-                    type: "field_slider",
+                    type: "field_slider" as "field_number",
                     name: "value",
                     min: 0,
                     max: 100,
@@ -111,7 +111,7 @@ const shadowDsl: BlockDomainSpecificLanguage = {
             message0: `%1`,
             args0: [
                 <NumberInputDefinition>{
-                    type: "field_slider",
+                    type: "field_slider" as "field_number",
                     name: "value",
                     min: 0,
                     max: 255,
@@ -127,7 +127,7 @@ const shadowDsl: BlockDomainSpecificLanguage = {
             message0: `%1`,
             args0: [
                 <NumberInputDefinition>{
-                    type: "field_slider",
+                    type: "field_slider" as "field_number",
                     name: "value",
                     min: 0,
                     max: 1,

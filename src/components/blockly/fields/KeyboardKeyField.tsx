@@ -3,6 +3,7 @@ import { HidKeyboardModifiers } from "../../../../jacdac-ts/src/jdom/constants"
 import ReactField, { ReactFieldJSON } from "./ReactField"
 import Suspense from "../../ui/Suspense"
 import { renderKeyboardKey } from "../../../../jacdac-ts/src/servers/hidkeyboardserver"
+import { KeyboardKeyFieldKEY } from "./keys"
 const KeyboardKeyInput = lazy(() => import("../../ui/KeyboardKeyInput"))
 
 export interface KeyboardFieldValue {
@@ -11,7 +12,7 @@ export interface KeyboardFieldValue {
 }
 
 export default class KeyboardKeyField extends ReactField<KeyboardFieldValue> {
-    static KEY = "jacdac_field_keyboard_key"
+    static KEY = KeyboardKeyFieldKEY
 
     static fromJson(options: ReactFieldJSON) {
         return new KeyboardKeyField(options?.value, undefined, options)

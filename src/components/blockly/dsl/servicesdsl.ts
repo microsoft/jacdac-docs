@@ -5,9 +5,7 @@ import {
     SRV_SEVEN_SEGMENT_DISPLAY,
 } from "../../../../jacdac-ts/src/jdom/constants"
 
-import KeyboardKeyField from "../fields/KeyboardKeyField"
-import LEDColorField from "../fields/LEDColorField"
-import LEDMatrixField from "../fields/LEDMatrixField"
+
 import {
     BlockDefinition,
     BlockReference,
@@ -29,8 +27,6 @@ import BlockDomainSpecificLanguage, {
     CreateBlocksOptions,
     CreateCategoryOptions,
 } from "./dsl"
-import JDomTreeField from "../fields/JDomTreeField"
-import TwinField from "../fields/TwinField"
 import {
     createServiceColor,
     fieldsToFieldInputs,
@@ -43,6 +39,7 @@ import {
     toRoleType,
 } from "./servicesbase"
 import { humanify } from "../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
+import { LEDColorFieldKEY } from "../fields/keys"
 
 const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
 const ROLE_BOUND_EVENT_BLOCK = "jacdac_role_bound_event"
@@ -97,7 +94,7 @@ export class ServicesBlockDomainSpecificLanguage
                                 ],
                             },
                             {
-                                type: KeyboardKeyField.KEY,
+                                type: "jacdac_field_keyboard_key", // KeyboardKeyField.KEY,
                                 name: "combo",
                             },
                         ],
@@ -134,7 +131,7 @@ export class ServicesBlockDomainSpecificLanguage
                         values: {
                             color: {
                                 kind: "block",
-                                type: LEDColorField.SHADOW.type,
+                                type:  LEDColorFieldKEY+"_shadow"
                             },
                             speed: {
                                 kind: "block",
@@ -191,7 +188,7 @@ export class ServicesBlockDomainSpecificLanguage
                         args0: [
                             roleVariable(service),
                             {
-                                type: LEDMatrixField.KEY,
+                                type: "jacdac_field_led_matrix", // LEDMatrixField.KEY,
                                 name: "leds",
                             },
                         ],
@@ -371,7 +368,7 @@ export class ServicesBlockDomainSpecificLanguage
                 values: {
                     color: {
                         kind: "block",
-                        type: LEDColorField.SHADOW.type,
+                        type: LEDColorFieldKEY+"_shadow"
                     },
                 },
                 inputsInline: true,
@@ -406,7 +403,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: "input_dummy",
                     },
                     <InputDefinition>{
-                        type: TwinField.KEY,
+                        type: "jacdac_field_twin", // TwinField.KEY,
                         name: "twin",
                     },
                 ],
@@ -437,7 +434,7 @@ export class ServicesBlockDomainSpecificLanguage
                         type: "input_dummy",
                     },
                     <InputDefinition>{
-                        type: JDomTreeField.KEY,
+                        type: "jacdac_field_jdom_service_tree", // JDomTreeField.KEY,
                         name: "twin",
                     },
                 ],
@@ -484,7 +481,7 @@ export class ServicesBlockDomainSpecificLanguage
                     values: {
                         color: {
                             kind: "block",
-                            type: LEDColorField.SHADOW.type,
+                            type: LEDColorFieldKEY+"_shadow"
                         },
                     },
                 },

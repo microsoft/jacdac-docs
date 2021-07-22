@@ -38,8 +38,6 @@ import {
     toMemberExpression,
 } from "../../../../jacdac-ts/src/vm/compile"
 import { VMError } from "../../../../jacdac-ts/src/vm/ir"
-import NoteField from "../fields/NoteField"
-import ServoAngleField from "../fields/ServoAngleField"
 import {
     BlockDefinition,
     BlockReference,
@@ -70,6 +68,7 @@ import {
 } from "./dsl"
 import { VariableJSON } from "../jsongenerator"
 import { Variables } from "blockly"
+import { NoteFieldKEY, ServoAngleFieldKEY } from "../fields/keys"
 
 const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
 const ROLE_BOUND_EVENT_BLOCK = "jacdac_role_bound_event"
@@ -125,7 +124,7 @@ const customShadows = [
         field: "_",
         shadow: <BlockDefinition>{
             kind: "block",
-            type: ServoAngleField.SHADOW.type,
+            type: ServoAngleFieldKEY + "_shadow",
         },
     },
     {
@@ -135,7 +134,7 @@ const customShadows = [
         field: "frequency",
         shadow: <BlockDefinition>{
             kind: "block",
-            type: NoteField.SHADOW.type,
+            type: NoteFieldKEY + "_shadow",
         },
     },
 ]
@@ -625,7 +624,7 @@ export class ServicesBaseDSL {
 
     protected createCategoryHelper(options: CreateCategoryOptions) {
         const { theme, source, liveServices } = options
-        this.serviceColor = createServiceColor(theme)
+        this.serviceColor = theme ? createServiceColor(theme) : () => ""
 
         const blockServices: { serviceClass: number }[] =
             source?.variables

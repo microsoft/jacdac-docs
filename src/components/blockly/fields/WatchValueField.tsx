@@ -10,6 +10,7 @@ import { roundWithPrecision } from "../../../../jacdac-ts/src/jdom/utils"
 import useBlockData from "../useBlockData"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import SwitchWithLabel from "../../ui/SwitchWithLabel"
+import { WatchValueFieldKEY } from "./keys"
 
 const HORIZON = 10
 function WatchValueWidget() {
@@ -91,7 +92,7 @@ function WatchValueWidget() {
 }
 
 export default class WatchValueField extends ReactInlineField {
-    static KEY = "jacdac_field_watch_value"
+    static KEY = WatchValueFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

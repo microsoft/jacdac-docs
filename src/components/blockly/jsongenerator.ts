@@ -74,21 +74,22 @@ export function domToJSON(
               )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const xmlToJSON = (xml: Element): any => {
-        const j = {}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const j: SMap<any> = {}
         if (Flags.diagnostics) j["xml"] = xml.outerHTML
         // dump attributes
         for (const name of xml.getAttributeNames()) {
             const v = xml.getAttribute(name)
             j[name.toLowerCase()] = v
         }
-        for (const child of xml.childNodes) {
+        xml.childNodes.forEach(child => {
             if (child.nodeType === Node.TEXT_NODE) j["value"] = xml.textContent
             else if (child.nodeType === Node.ELEMENT_NODE) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const children: any[] = j["children"] || (j["children"] = [])
                 children.push(xmlToJSON(child as Element))
             }
-        }
+        })
         return j
     }
     const fieldToJSON = (field: Blockly.Field) => {

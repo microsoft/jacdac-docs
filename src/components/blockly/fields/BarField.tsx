@@ -8,6 +8,7 @@ import { PointerBoundary } from "./PointerBoundary"
 import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
 import { tidyToNivo } from "./nivo"
+import { BarChartFieldKEY } from "./keys"
 const Bar = lazy(() => import("./Bar"))
 
 function BarChartWidget() {
@@ -68,7 +69,7 @@ function BarChartWidget() {
 }
 
 export default class BarChartField extends ReactInlineField {
-    static KEY = "jacdac_field_bar_chart"
+    static KEY = BarChartFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

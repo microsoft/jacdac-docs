@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
-import BuiltinDataSetField from "../fields/BuiltinDataSetField"
-import DataColumnChooserField from "../fields/DataColumnChooserField"
-import DataTableField from "../fields/DataTableField"
 import {
     BlockDefinition,
     BlockReference,
@@ -35,10 +32,12 @@ import {
     DataCorrelationRequest,
     DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
-import { BlockWithServices } from "../WorkspaceContext"
+import { BlockWithServices } from "../workspacecontextutils"
 import FileSaveField from "../fields/FileSaveField"
-import { saveCSV, openCSV } from "./workers/csv.proxy"
+import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
+import { BuiltinDataSetFieldKEY, DataColumnChooserFieldKEY, DataTableFieldKEY } from "../fields/keys"
+import { SMap } from "../../../../jacdac-ts/src/jdom/utils"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -76,7 +75,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: DataTableField.KEY,
+                    type: DataTableFieldKEY,
                     name: "table",
                 },
             ],
@@ -94,7 +93,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column",
                 },
                 <OptionsInputDefinition>{
@@ -129,15 +128,15 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column1",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column2",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column3",
                 },
             ],
@@ -163,15 +162,15 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column1",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column2",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column3",
                 },
             ],
@@ -197,7 +196,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column1",
                 },
                 <OptionsInputDefinition>{
@@ -213,7 +212,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     ],
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column2",
                 },
             ],
@@ -241,7 +240,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column",
                 },
                 <OptionsInputDefinition>{
@@ -289,7 +288,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     name: "newcolumn",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "lhs",
                 },
                 <OptionsInputDefinition>{
@@ -309,7 +308,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     ],
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "rhs",
                 },
             ],
@@ -343,7 +342,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     name: "newcolumn",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "lhs",
                 },
                 <OptionsInputDefinition>{
@@ -393,7 +392,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column",
                 },
                 <OptionsInputDefinition>{
@@ -429,11 +428,11 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "by",
                 },
                 <OptionsInputDefinition>{
@@ -471,7 +470,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column",
                 },
             ],
@@ -494,7 +493,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             message0: "dataset %1",
             args0: [
                 {
-                    type: BuiltinDataSetField.KEY,
+                    type: BuiltinDataSetFieldKEY,
                     name: "dataset",
                 },
             ],
@@ -599,7 +598,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             message0: "bin %1",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column",
                 },
             ],
@@ -623,11 +622,11 @@ const dataDsl: BlockDomainSpecificLanguage = {
             message0: "correlation %1 %2",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column1",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column2",
                 },
             ],
@@ -653,11 +652,11 @@ const dataDsl: BlockDomainSpecificLanguage = {
             message0: "linear regression %1 %2",
             args0: [
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column1",
                 },
                 {
-                    type: DataColumnChooserField.KEY,
+                    type: DataColumnChooserFieldKEY,
                     name: "column2",
                 },
             ],
@@ -858,7 +857,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 .filter(b => b.isEnabled())
 
             // mark and sweep variables, leaving one 1 enabled per kind
-            const marked = {}
+            const marked: SMap<boolean> = {}
             while (setvars.length) {
                 const block = setvars.shift()
                 const variable = (

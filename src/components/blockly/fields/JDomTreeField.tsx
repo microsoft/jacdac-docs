@@ -4,6 +4,7 @@ import WorkspaceContext from "../WorkspaceContext"
 import ReactInlineField from "./ReactInlineField"
 import Suspense from "../../ui/Suspense"
 import NoServiceAlert from "./NoServiceAlert"
+import { JDomTreeFieldKEY } from "./keys"
 
 const JDomServiceTreeView = lazy(
     () => import("../../tools/JDomServiceTreeView")
@@ -39,7 +40,7 @@ function JDomTreeWidget() {
 }
 
 export default class JDomTreeField extends ReactInlineField {
-    static KEY = "jacdac_field_jdom_service_tree"
+    static KEY = JDomTreeFieldKEY
     static EDITABLE = false
 
     static fromJson(options: ReactFieldJSON) {

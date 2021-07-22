@@ -4,6 +4,7 @@ import ReactField, { ReactFieldJSON, toShadowDefinition } from "./ReactField"
 import { rgbToHtmlColor } from "../../../../jacdac-ts/src/jdom/utils"
 import { child } from "../../widgets/svg"
 import ValueContext, { ValueContextProps } from "./ValueContext"
+import { LEDColorFieldKEY } from "./keys"
 
 const LEDWidget = lazy(() => import("../../widgets/LEDWidget"))
 
@@ -23,7 +24,7 @@ function LEDColorFieldWidget() {
 }
 
 export default class LEDColorField extends ReactField<number> {
-    static KEY = "jacdac_field_led_color"
+    static KEY = LEDColorFieldKEY
     static SHADOW = toShadowDefinition(LEDColorField)
 
     static fromJson(options: ReactFieldJSON) {

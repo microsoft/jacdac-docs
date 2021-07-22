@@ -30,7 +30,7 @@ import {
     BlockWithServices,
     FieldWithServices,
     WorkspaceServices,
-} from "./WorkspaceContext"
+} from "./workspacecontextutils"
 import AppContext from "../AppContext"
 import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
 import useFileStorage from "../hooks/useFileStorage"

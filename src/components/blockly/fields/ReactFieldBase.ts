@@ -1,6 +1,6 @@
-import Blockly from "blockly"
+import Blockly, { Field } from "blockly"
 
-export class ReactFieldBase<T> extends Blockly.Field {
+export class ReactFieldBase<T> extends Field {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(
         value: string,

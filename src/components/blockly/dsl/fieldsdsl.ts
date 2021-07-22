@@ -1,8 +1,8 @@
-import { fieldShadows } from "../fields/fields"
+// import { fieldShadows } from "../fields/fields"
 import BlockDomainSpecificLanguage from "./dsl"
 
 const fieldsDsl: BlockDomainSpecificLanguage = {
     id: "fields",
-    createBlocks: () => fieldShadows(),
+    createBlocks: () => [] // fieldShadows(),
 }
 export default fieldsDsl

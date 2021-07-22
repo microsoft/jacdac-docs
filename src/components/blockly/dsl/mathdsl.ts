@@ -1,13 +1,15 @@
+import { SMap } from "../../../../jacdac-ts/src/jdom/utils"
 import { ExpressionWithErrors } from "../../vm/VMgenerator"
 import {
     BlockDefinition,
+    BlockReference,
     CategoryDefinition,
     OptionsInputDefinition,
     ValueInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 
-const ops = {
+const ops: SMap<string> = {
     NEG: "-",
     ADD: "+",
     MULTIPLY: "*",
@@ -179,7 +181,7 @@ const mathDsl: BlockDomainSpecificLanguage = {
                         },
                     },
                 },
-                { kind: "block", type: "jacdac_math_random" },
+                { kind: "block", type: "jacdac_math_random" } as BlockReference,
                 { kind: "block", type: "jacdac_math_map" },
                 { kind: "block", type: "math_number" },
             ],

@@ -1,14 +1,16 @@
-import { BlockWithServices } from "../WorkspaceContext"
+import { BlockWithServices } from "../workspacecontextutils"
 import { ReactFieldJSON } from "./ReactField"
 import { tidyHeaders } from "./nivo"
 import { FieldDropdown } from "blockly"
+import { DataColumnChooserFieldKEY } from "./keys"
 
 export interface DataColumnChooseOptions extends ReactFieldJSON {
     dataType?: "number" | "string"
 }
 
+
 export default class DataColumnChooserField extends FieldDropdown {
-    static KEY = "jacdac_field_data_column_chooser"
+    static KEY = DataColumnChooserFieldKEY
 
     static fromJson(options: ReactFieldJSON) {
         return new DataColumnChooserField(options)
