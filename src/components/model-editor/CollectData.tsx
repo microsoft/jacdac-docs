@@ -17,7 +17,7 @@ import ClassDataSetGrid from "../ClassDataSetGrid"
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
-import { MODEL_EDITOR_DATASET } from "./ModelEditor"
+import { MODEL_EDITOR_STORAGE_KEY } from "./ModelEditor"
 
 import ServiceManagerContext from "../ServiceManagerContext"
 
@@ -138,7 +138,6 @@ export default function CollectData(props: {
         setSamplingDuration(event.target.value.trim())
     }
     const handleLabelChange = newLabel => {
-        console.log("label change")
         setCurrentClassLabel(newLabel)
     }
     const handleDownloadDataset = () => {
@@ -199,7 +198,6 @@ export default function CollectData(props: {
     // interval add data entry
     const addRow = (values?: number[]) => {
         if (!liveRecording) return
-        //console.log(values)
         liveRecording.addRow(values)
         if (isRecording && liveRecording.length >= samplingCount) {
             // stop recording
@@ -234,13 +232,6 @@ export default function CollectData(props: {
     }, [totalRecordings])
 
     const handleDatasetUpdate = dataset => {
-        // convert dataset object to JSON string
-        const datasetJSONObj = JSON.stringify(dataset)
-        // save JSON string in local storage
-        localStorage.setItem(MODEL_EDITOR_DATASET, datasetJSONObj)
-
-        console.log("Randi saved dataset into local storage")
-
         onChange(dataset)
     }
     const handleNext = () => {
@@ -283,7 +274,7 @@ export default function CollectData(props: {
                 </div>
             </Grid>
             <Grid item>
-                <h2>Collect Data</h2>
+                <h2>Collect More Data</h2>
                 {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
                 <div key="sensors">
                     <h3>Select input sensors</h3>

@@ -70,13 +70,11 @@ function RecordingParameterWidget( props: {
         <Grid container spacing={1}>
             <Grid item>
                 <Box color="text.secondary">
-                    No. of Samples: {numSamples}
-                </Box>
-                <Box color="text.secondary">
+                    No. of Samples: {numSamples} <br/>
                     Input type(s): {inputTypes.length ? inputTypes.join(", ") : "none"}
                 </Box>
             </Grid>
-            <Grid item>
+            <Grid item style={{ display: "inline-flex" }}>
             <Tooltip title="Add or remove samples from this recording">
                     <Button
                         onClick={handleEditRecording}

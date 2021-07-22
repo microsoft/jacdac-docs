@@ -16,18 +16,53 @@ import Suspense from "../ui/Suspense"
 import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
 import { visitToolbox } from "../blockly/toolbox"
 import RecordingBlockField from "../blockly/fields/ModelBlockFields/RecordingBlockField"
+import FieldDataSet from "../FieldDataSet"
 
 const RecordDataDialog = lazy(() => import("../dialogs/RecordDataDialog"))
 
 const MB_EDITOR_ID = "mb"
 const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
+const MB_DATA_STORAGE_KEY = "model-block-data-json"
+
+function getRecordingsFromLocalStorage() {
+    const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
+    if (dataObj == null || dataObj == undefined) return {}
+    const modelEditorData = JSON.parse(dataObj)
+
+    // construct new recordings object
+    const allRecordings = {}
+    for (const id in modelEditorData["recordings"]) {
+        const recordings = modelEditorData["recordings"][id]
+        allRecordings[id] = recordings.map(recording => {
+            return FieldDataSet.createFromFile(recording)
+        })
+    }
+    return allRecordings
+}
+
+function getDatasetsFromLocalStorage() {
+    return {}
+    /*const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
+    if (dataObj == null || dataObj == undefined) return {}
+    const modelEditorData = JSON.parse(dataObj)
+    return MBModel.createFromFile(modelEditorData["datasets"])*/
+}
+
+function getModelsFromLocalStorage() {
+    return {}
+    /*const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
+    if (dataObj == null || dataObj == undefined) return {}
+    const modelEditorData = JSON.parse(dataObj)
+    return MBModel.createFromFile(modelEditorData["model"])*/
+}
 
 function ModelBlockEditorWithContext() {
     // store recordings, datasets, and models
-    const [allRecordings, setAllRecordings] = useState({}) // dictionary of recording block ids and FieldDataSet objs
-    const [allClasses, setAllClasses] = useState<string[]>(undefined)
-    const [allDatasets, setAllDatasets] = useState({}) // dictionary of dataset block ids and ModelDataset objs
-    const [allModels, setAllModels] = useState({}) // dictionary of model block ids and MBModel objs
+    const [allRecordings, setAllRecordings] = useState(
+        getRecordingsFromLocalStorage
+    ) // dictionary of recording block ids and FieldDataSet arrays
+    const [allDatasets, setAllDatasets] = useState(getDatasetsFromLocalStorage) // dictionary of dataset vars and ModelDataset objs
+    const [allModels, setAllModels] = useState(getModelsFromLocalStorage) // dictionary of model vars and MBModel objs
 
     // block context handles hosting blockly
     const { workspace, workspaceJSON, toolboxConfiguration } =
@@ -35,7 +70,8 @@ function ModelBlockEditorWithContext() {
 
     const [recordDataDialogVisible, setRecordDataDialogVisible] =
         useState<boolean>(false)
-    const toggleRecordDataDialog = () => {
+
+    const getWorkspaceClasses = (): string[] => {
         // get updated list of class variables
         const classes = workspace
             .getVariablesOfType(MB_CLASS_VAR_TYPE)
@@ -43,8 +79,9 @@ function ModelBlockEditorWithContext() {
                 return classVar.name
             })
         if (classes.length == 0) classes.push("class1")
-        setAllClasses(classes)
-
+        return classes
+    }
+    const toggleRecordDataDialog = () => {
         // update visibility of recording dialog
         const b = !recordDataDialogVisible
         setRecordDataDialogVisible(b)
@@ -97,7 +134,28 @@ function ModelBlockEditorWithContext() {
             // Add recording data to list of recordings
             allRecordings[newRecordingBlock.id] = recording
             setAllRecordings(allRecordings)
+            updateLocalStorage(allRecordings, null, null)
         }
+    }
+
+    const updateLocalStorage = (newRecordings, newDatasets, newModels) => {
+        const recordings = newRecordings ? newRecordings : allRecordings
+        const datasets = newDatasets ? newDatasets : allDatasets
+        const models = newModels ? newModels : allModels
+
+        // convert dataset object to JSON string
+        const modelBlocksDataJSON = JSON.stringify({
+            recordings: recordings,
+            datasets: datasets,
+            models: models,
+        })
+        // save JSON string in local storage
+        localStorage.setItem(MB_DATA_STORAGE_KEY, modelBlocksDataJSON)
+        console.log("Randi updating saved data for blocks: ", {
+            recordings,
+            datasets,
+            models,
+        })
     }
 
     // run this when workspaceJSON changes
@@ -144,7 +202,7 @@ function ModelBlockEditorWithContext() {
                         open={recordDataDialogVisible}
                         onDone={addNewRecording}
                         onClose={toggleRecordDataDialog}
-                        allClassVars={allClasses}
+                        allClassVars={getWorkspaceClasses()}
                         recordingCount={Object.keys(allRecordings).length}
                     />
                 </Suspense>

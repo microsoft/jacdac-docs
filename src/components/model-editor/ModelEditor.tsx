@@ -17,8 +17,7 @@ import MBModel from "./MBModel"
 //Dashboard.tsx
 
 const MODEL_EDITOR = "model_editor" // create prefix for model editor page
-export const MODEL_EDITOR_DATASET = MODEL_EDITOR + "_dataset"
-export const MODEL_EDITOR_MODEL = MODEL_EDITOR + "_model"
+export const MODEL_EDITOR_STORAGE_KEY = "model-editor-data-json"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -54,24 +53,26 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 function getDatasetFromLocalStorage() {
-    const datasetObj = JSON.parse(localStorage.getItem(MODEL_EDITOR_DATASET))
-    console.log("Randi parsing dataset Obj: ", datasetObj)
-    const createdDataset = ModelDataset.createFromFile(datasetObj)
-    console.log("Randi created dataset: ", createdDataset)
-    return createdDataset
+    const dataObj = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+    if (dataObj == null || dataObj == undefined) return new ModelDataset()
+    const modelEditorData = JSON.parse(dataObj)
+    return ModelDataset.createFromFile(modelEditorData["dataset"])
+}
+
+function getModelFromLocalStorage() {
+    return new MBModel()
+    /*const dataObj = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+    if (dataObj == null || dataObj == undefined) return new MBModel()
+    const modelEditorData = JSON.parse(dataObj)
+    return MBModel.createFromFile(modelEditorData["model"])*/
 }
 
 export default function ModelPlayground() {
     const classes = useStyles()
     const chartPalette = useChartPalette()
 
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const [dataset, setDataset] = useState<ModelDataset>(
-        localStorage.getItem(MODEL_EDITOR_DATASET) !== null
-            ? getDatasetFromLocalStorage()
-            : new ModelDataset()
-    )
-    const [tfModel, setTFModel] = useState<MBModel>(new MBModel())
+    const [dataset, setDataset] = useState<ModelDataset>(getDatasetFromLocalStorage())
+    const [tfModel, setTFModel] = useState<MBModel>(getModelFromLocalStorage())
 
     /* For choosing sensors */
 
@@ -85,13 +86,19 @@ export default function ModelPlayground() {
         event: React.ChangeEvent<unknown>,
         newValue: number
     ) => {
-        console.log("Changing to tab: ", newValue)
         setTab(newValue)
     }
 
-    const handleDataChange = newDataset => {
+    const handleDataChange = newDataset => {       
+        console.log("Randi updated data from tab 0: ", newDataset)
+
+        // save JSON string in local storage
+        localStorage.setItem(MODEL_EDITOR_STORAGE_KEY, JSON.stringify({
+            "dataset": newDataset,
+            "model": tfModel,
+        }))
+
         setDataset(newDataset)
-        console.log("Randi update to dataset: ", newDataset)
     }
 
     const handleModelChange = newModel => {
@@ -100,7 +107,6 @@ export default function ModelPlayground() {
     }
 
     const nextTab = () => {
-        console.log("Randi on to the next tab")
         if (tab == 0 && dataset.labels.length >= 2) {
             setTab(1)
         } else if (tab == 1 && tfModel.status == "completed") {

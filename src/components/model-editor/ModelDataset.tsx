@@ -105,13 +105,7 @@ export default class ModelDataset extends JDEventSource {
         //totalRecordings
         Object.keys(recordings).forEach(label => {
             recordings[label].forEach(recording => {
-                const set = FieldDataSet.createFromFile(
-                    recording.name,
-                    recording.rows,
-                    recording.headers,
-                    recording.units,
-                    recording.colors
-                )
+                const set = FieldDataSet.createFromFile(recording)
                 this.addRecording(set, label, registerIds)
             })
         })

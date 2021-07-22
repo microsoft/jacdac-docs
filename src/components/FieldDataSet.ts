@@ -57,22 +57,22 @@ export default class FieldDataSet extends JDEventSource {
         return set
     }
 
-    static createFromFile(
-        name: string,
-        rows: Example[],
-        headers: string[],
-        units: string[],
+    static createFromFile(dataset: {
+        name: string
+        rows: Example[]
+        headers: string[]
+        units: string[]
         colors?: string[]
-    ): FieldDataSet {
-        const set = new FieldDataSet(null, name, null, colors)
+    }): FieldDataSet {
+        const set = new FieldDataSet(null, dataset.name, null, dataset.colors)
 
-        rows.forEach(row => {
+        dataset.rows.forEach(row => {
             const { timestamp, data } = row
             set.addExample(timestamp, data)
         })
-        set.units = units
-        set.headers = headers
-        set.colors = colors
+        set.units = dataset.units
+        set.headers = dataset.headers
+        set.colors = dataset.colors
 
         return set
     }

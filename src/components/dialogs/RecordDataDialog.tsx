@@ -182,7 +182,7 @@ export default function BlocklyDataRecordingDialog(props: {
                   readingRegisters.filter(
                       reg => registerIds.indexOf(reg.id) > -1
                   ),
-                  `${recordingName}`,
+                  `${recordingName}.${totalSamples}`,
                   live,
                   chartPalette
               )
@@ -270,7 +270,7 @@ export default function BlocklyDataRecordingDialog(props: {
 
     const resetInputs = () => {
         setClassName("class1")
-        setRecordingName("recording" + totalSamples)
+        setRecordingName("recording" + recordingCount)
         setSamplingIntervalDelay("100")
         setSamplingDuration("2")
     }

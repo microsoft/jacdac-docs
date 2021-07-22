@@ -100,10 +100,10 @@ function DatasetParameterWidget(props: {
             for (const block of allRecordingBlocks) {
                 // get the block parameters for the recording
                 const recordingParameterField = block.getField("BLOCK_PARAMS") as ReactParameterField<RecordingBlockFieldValue>
-                totalSamples += recordingParameterField.getValue().numSamples
+                totalSamples += recordingParameterField.value.numSamples
 
                 // make sure that all recording blocks have the same input types
-                const recordingBlockInputs = recordingParameterField.getValue().inputTypes
+                const recordingBlockInputs = recordingParameterField.value.inputTypes
                 if (updatedInputs.length == 0) updatedInputs = recordingBlockInputs
                 if (!arraysEqual(updatedInputs, recordingBlockInputs)) {
                     // Randi TODO attach warning to this block
@@ -136,16 +136,15 @@ function DatasetParameterWidget(props: {
     }
 
     return (
-        <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
-            <Grid item>
+        <> {parametersVisible &&
+        <Grid container spacing={1} direction={"row"}>
+            <Grid item style={{ display: "inline-flex" }}>
                 <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"}
-                </Box>
-                <Box color="text.secondary">
+                    Classes: {classes.length ? classes.join(", ") : "none"} <br />
                     Input type(s): {inputs.length ? inputs.join(", ") : "none"}
                 </Box>
             </Grid>
-            <Grid item>
+            <Grid item style={{ display: "inline-flex" }}>
                 <Tooltip title="Automatically split dataset e.g. to create a test dataset">
                     <Button
                         onClick={handleSplitDataset}
