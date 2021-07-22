@@ -1,38 +1,50 @@
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 
-import FieldDataSet from "../FieldDataSet"
+import FieldDataSet, { Example, Recording } from "../FieldDataSet"
+
+export class Dataset {
+    constructor(
+        public readonly inputTypes: string[],
+        public readonly recordings: { [label: string]: Recording[] },
+        public readonly registerIds: string[],
+        public readonly totalRecordings: number
+    ) {}
+}
 
 export default class ModelDataset extends JDEventSource {
+    static createFromFile(datasetJSONObj: Dataset): ModelDataset {
+        const set = new ModelDataset()
+        const { recordings, registerIds } = datasetJSONObj
+        set.addRecordingsFromFile(recordings, registerIds) // add recordings and update total recordings
+        return set
+    }
+
     readonly id = Math.random().toString()
 
-    // maintain computed number of examples and input data types to avoid recomputation
-    inputTypes: string[]
-    registerIds: string[]
+    // maintain computed number of recordings and input data types to avoid recomputation
+    totalRecordings: number
 
     constructor(
         public readonly labels?: string[],
-        public readonly recordings?: FieldDataSet[]
+        public readonly recordings?: { [label: string]: FieldDataSet[] },
+        public inputTypes?: string[],
+        public registerIds?: string[]
     ) {
         super()
 
         this.labels = []
-        this.recordings = []
-
-        if (labels !== undefined) this.labels = labels
-        if (recordings !== undefined) this.recordings = recordings
+        this.recordings = {}
+        this.totalRecordings = 0
     }
 
-    get labelList() {
-        return Object.keys(this.recordings)
-    }
-
-    get recordingList() {
-        return this.recordings
+    get labelOptions() {
+        if (this.labels.length == 0) return ["class1"]
+        return this.labels
     }
 
     get numRecordings() {
-        return this.labels.length
+        return this.totalRecordings
     }
 
     arraysEqual(a, b) {
@@ -55,13 +67,18 @@ export default class ModelDataset extends JDEventSource {
         return this.recordings[label]
     }
 
-    addRecording(recording: FieldDataSet, label: string, registerIds: string[]) {
-        if (this.labels.length == 0) {
+    addRecording(
+        recording: FieldDataSet,
+        label: string,
+        registerIds: string[]
+    ) {
+        if (this.totalRecordings == 0) {
             this.labels.push(label)
             this.recordings[label] = [recording]
             this.inputTypes = recording.headerList
             this.registerIds = registerIds
 
+            this.totalRecordings += 1
             this.emit(CHANGE)
         } else if (this.arraysEqual(recording.headerList, this.inputTypes)) {
             // Check if label is already in dataset
@@ -73,34 +90,98 @@ export default class ModelDataset extends JDEventSource {
                 this.recordings[label].push(recording)
             }
 
+            this.totalRecordings += 1
             this.emit(CHANGE)
-        } // TODO Randi decide what error to raise when inputting incorrect data (shouldn't be possible, though)
-    }
-
-    removeRecording(recording: FieldDataSet) {
-        const tableLabel = recording.name.slice(0, recording.name.indexOf("$"))
-        const i = this.recordings[tableLabel].indexOf(recording)
-
-        if (i > -1) {
-            this.recordings[tableLabel].splice(i, 1)
-
-            // If this emptied out a label, then remove that label
-            if (this.recordings[tableLabel].length == 0) {
-                const j = this.labels.indexOf(tableLabel)
-                this.labels.splice(j, 1)
-            }
+        } else {
+            // Randi TODO decide what error to raise when inputting incorrect data (shouldn't be possible, though)
+            console.log("Randi, did not add data to dataset")
         }
     }
 
-    get summary() {
+    addRecordingsFromFile(
+        recordings: { [label: string]: Recording[] },
+        registerIds: string[]
+    ) {
+        //totalRecordings
+        Object.keys(recordings).forEach(label => {
+            recordings[label].forEach(recording => {
+                const set = FieldDataSet.createFromFile(
+                    recording.name,
+                    recording.rows,
+                    recording.headers,
+                    recording.units,
+                    recording.colors
+                )
+                this.addRecording(set, label, registerIds)
+            })
+        })
+    }
 
-        return "Labels: " + this.labelList.join(", ")
+    removeRecording(recording: FieldDataSet) {
+        const recordingLabel = recording.name.slice(
+            0,
+            recording.name.indexOf("$")
+        )
+        const i = this.recordings[recordingLabel].indexOf(recording)
+
+        if (i > -1) {
+            this.recordings[recordingLabel].splice(i, 1)
+
+            // If this emptied out a label, then remove that label
+            if (this.recordings[recordingLabel].length == 0) {
+                const j = this.labels.indexOf(recordingLabel)
+                this.labels.splice(j, 1)
+            }
+
+            this.totalRecordings -= 1
+        }
+    }
+
+    countTotalRecordings() {
+        let total = 0
+
+        this.labels.forEach(label => {
+            this.recordings[label].forEach(() => {
+                total += 1
+            })
+        })
+
+        return total
+    }
+
+    get summary() {
+        if (this.labels.length <= 0) return "--"
+
+        let modelInfo = "Classes: "
+        this.labels.forEach(label => {
+            modelInfo +=
+                label + " [" + this.recordings[label].length + " sample(s)], "
+        })
+        modelInfo += "\nInputs: " + this.registerIds.join(", ")
+
+        return modelInfo
     }
 
     toCSV() {
-        const allheaders = ["time", ...this.inputTypes].join(",")
-        const csv: string[] = [allheaders]
-        this.recordings.forEach(recording => csv.push(recording.toCSV()))
+        const recordingCountHeader = `Number of recordings,${this.totalRecordings}`
+
+        const recordingData: string[] = []
+        this.labels.forEach(label => {
+            this.recordings[label].forEach(recording => {
+                recordingData.push(
+                    "Recording metadata," +
+                        recording.name +
+                        "," +
+                        recording.rows.length +
+                        "," +
+                        label
+                )
+                recordingData.push(recording.toCSV())
+            })
+        })
+        const recordData = recordingData.join("\n")
+
+        const csv: string[] = [recordingCountHeader, recordData]
         return csv.join("\n")
     }
 }

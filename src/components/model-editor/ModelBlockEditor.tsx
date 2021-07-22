@@ -36,7 +36,7 @@ function ModelBlockEditorWithContext() {
     const [recordDataDialogVisible, setRecordDataDialogVisible] =
         useState<boolean>(false)
     const toggleRecordDataDialog = () => {
-        // update class vars
+        // get updated list of class variables
         const classes = workspace
             .getVariablesOfType(MB_CLASS_VAR_TYPE)
             .map(function (classVar) {
@@ -56,7 +56,10 @@ function ModelBlockEditorWithContext() {
         if (className != null && className != undefined) {
             // Get or create new class typed variable
             // (createVariable will return an existing variable if one with a particular name already exists)
-            const classVar = workspace.createVariable(className, MB_CLASS_VAR_TYPE)
+            const classVar = workspace.createVariable(
+                className,
+                MB_CLASS_VAR_TYPE
+            )
 
             // Create new recording block on the workspace
             const newRecordingBlock = workspace.newBlock(
@@ -75,20 +78,21 @@ function ModelBlockEditorWithContext() {
             ) as FieldVariable
             classNameField.setValue(classVar.getId())
 
-            newRecordingBlock.initSvg()
-            newRecordingBlock.render(false)
-            workspace.centerOnBlock(newRecordingBlock.id)
-
             // Save recording data to block
             const blockParamsField = newRecordingBlock.getField(
                 "BLOCK_PARAMS"
             ) as RecordingBlockField
-            blockParamsField.updateFieldValue(
-                {   parametersVisible: null,
-                    numSamples: recording.length, 
-                    latestTimestamp: recording[0].timestamp,
-                    inputs: recording[0].headers,
-                })
+            const recordingBlockParams = {
+                parametersVisible: null,
+                numSamples: recording.length,
+                timestamp: recording[0].startTimestamp,
+                inputTypes: recording[0].headers,
+            }
+            blockParamsField.updateFieldValue(recordingBlockParams)
+
+            newRecordingBlock.initSvg()
+            newRecordingBlock.render(false)
+            workspace.centerOnBlock(newRecordingBlock.id)
 
             // Add recording data to list of recordings
             allRecordings[newRecordingBlock.id] = recording
@@ -101,7 +105,8 @@ function ModelBlockEditorWithContext() {
         visitWorkspace(workspaceJSON, {
             visitBlock: block => {
                 console.log(`block ${block.type}`, { block })
-                if (block.type == (MODEL_BLOCKS + "recording")) console.log(`recording data: `, allRecordings[block.id] )
+                if (block.type == MODEL_BLOCKS + "recording")
+                    console.log(`recording data: `, allRecordings[block.id])
                 // Randi TODO if dataset block, collect data?
             },
             visitInput: input => console.log(`input ${input.name}`, { input }),

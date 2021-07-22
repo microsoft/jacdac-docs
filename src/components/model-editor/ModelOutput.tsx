@@ -1,0 +1,1 @@
+import { isSensor, isActuator } from "../../../jacdac-ts/src/jdom/spec"

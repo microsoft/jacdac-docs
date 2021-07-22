@@ -1,10 +1,8 @@
-import { Grid, createStyles } from "@material-ui/core"
-import { Button } from "gatsby-theme-material-ui"
+import { Grid, Button } from "@material-ui/core"
 import Trend from "../Trend"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import React, { useContext, useState } from "react"
-import useChartPalette from "../useChartPalette"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import * as ml4f from "../../../ml4f/src/main"
@@ -22,38 +20,8 @@ import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
 import MBModel from "./MBModel"
+import { MODEL_EDITOR_MODEL } from "./ModelEditor"
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            marginBottom: theme.spacing(1),
-        },
-        grow: {
-            flexGrow: 1,
-        },
-        field: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(1.5),
-        },
-        segment: {
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-        },
-        row: {
-            marginBottom: theme.spacing(0.5),
-        },
-        buttons: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(2),
-        },
-        trend: {
-            width: theme.spacing(10),
-        },
-        vmiddle: {
-            verticalAlign: "middle",
-        },
-    })
-)
 const LIVE_HORIZON = 24
 function createDataSet(
     bus: JDBus,
@@ -70,15 +38,16 @@ function createDataSet(
 }
 
 export default function TrainModel(props: {
+    reactStyle: any
+    chartPalette: string[]
     dataset: ModelDataset
     model: MBModel
     onChange: (model) => void
     onNext: (model) => void
 }) {
-    const { dataset, model, onChange, onNext } = props
+    const classes = props.reactStyle
+    const { chartPalette, dataset, model, onChange, onNext } = props
     const [, setModel] = useState<MBModel>(undefined)
-    const classes = useStyles()
-    const chartPalette = useChartPalette()
 
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
@@ -170,7 +139,6 @@ export default function TrainModel(props: {
         // Create a new TFJS model
         const modelLayers = model.model
 
-        // TODO Randi do you have to start with a fully connected layer of size equal to input
         modelLayers.add(
             tf.layers.conv1d({
                 inputShape: [sampleLength, sampleChannels],
@@ -238,7 +206,6 @@ export default function TrainModel(props: {
             metrics: ["accuracy"],
         })
 
-        // RANDI TODO normalize data
         const xs = tf.tensor3d(x_data, [
             x_data.length,
             sampleLength,

@@ -31,10 +31,6 @@ export default class MBModel extends JDEventSource {
 
     }
 
-    get labelList() {
-        return this.labels
-    }
-
     set labelList(labels: string[]) {
         this.labels = labels
     }

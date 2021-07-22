@@ -1,11 +1,6 @@
 import React, { useEffect, useContext, useState } from "react"
 
-import {
-    Grid,
-    TextField,
-    createStyles,
-    InputAdornment,
-} from "@material-ui/core"
+import { Grid, TextField, InputAdornment } from "@material-ui/core"
 import { Button } from "gatsby-theme-material-ui"
 import { Autocomplete } from "@material-ui/lab"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
@@ -15,26 +10,25 @@ import StopIcon from "@material-ui/icons/Stop"
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
-import { makeStyles, Theme } from "@material-ui/core/styles"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 
+import Trend from "../Trend"
+import ClassDataSetGrid from "../ClassDataSetGrid"
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
-import Trend from "../Trend"
-import ClassDataSetGrid from "../ClassDataSetGrid"
+import { MODEL_EDITOR_DATASET } from "./ModelEditor"
 
-import useChartPalette from "../useChartPalette"
+import ServiceManagerContext from "../ServiceManagerContext"
 
 import useChange from "../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
-import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -49,49 +43,21 @@ function createDataSet(
     const set = new FieldDataSet(bus, name, fields, colors)
     if (live) set.maxRows = LIVE_HORIZON + 4
 
-    console.log("Randi created new dataset", set)
     return set
 }
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            marginBottom: theme.spacing(1),
-        },
-        grow: {
-            flexGrow: 1,
-        },
-        field: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(1.5),
-        },
-        segment: {
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-        },
-        row: {
-            marginBottom: theme.spacing(0.5),
-        },
-        buttons: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(2),
-        },
-        trend: {
-            width: theme.spacing(10),
-        },
-        vmiddle: {
-            verticalAlign: "middle",
-        },
-    })
-)
 
 export default function CollectData(props: {
+    reactStyle: any
+    chartPalette: string[]
     dataset: ModelDataset
     onChange: (dataset) => void
     onNext: (dataset) => void
 }) {
-    const classes = useStyles()
-    const chartPalette = useChartPalette()
+    const { chartPalette, dataset, onChange, onNext } = props
+    const [, setDataset] = useState<ModelDataset>(undefined)
+    const classes = props.reactStyle
 
+    const { fileStorage } = useContext(ServiceManagerContext)
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
@@ -103,10 +69,6 @@ export default function CollectData(props: {
             )
         )
     )
-
-    const { dataset, onChange, onNext } = props
-    const [, setDataset] = useState<ModelDataset>(undefined)
-
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [totalRecordings, setTotalRecordings] = useState(0)
@@ -136,7 +98,6 @@ export default function CollectData(props: {
         if (i > -1) registerIdsChecked.splice(i, 1)
         else registerIdsChecked.push(reg.id)
 
-        // Randi TODO save registerIdsChecked
         registerIdsChecked.sort()
         setRegisterIdsChecked([...registerIdsChecked])
         setLiveRecording(newRecording(registerIdsChecked, true))
@@ -148,16 +109,8 @@ export default function CollectData(props: {
         setRecordingName(event.target.value.trim())
     }
 
-    /*const handleClassNameChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        // TODO Randi Check if class name already exists
-        //if (newClassName != "" && !Variables.nameUsedWithAnyType(newClassName, workspace)) {
-        //Blockly.alert("That variable name is invalid or already exists")
-    }*/
-
     /* For recording data*/
-    const [currentClassLabel, setCurrentClassLabel] = useState("Class1")
+    const [currentClassLabel, setCurrentClassLabel] = useState("class1")
     const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
     const [samplingDuration, setSamplingDuration] = useState("2")
     const recordingRegisters = readingRegisters.filter(
@@ -189,8 +142,8 @@ export default function CollectData(props: {
         setCurrentClassLabel(newLabel)
     }
     const handleDownloadDataset = () => {
-        console.log("Download button pressed")
-        dataset.toCSV()
+        const csv = dataset.toCSV()
+        fileStorage.saveText(`${dataset.labelOptions.join("")}dataset.csv`, csv)
     }
     const stopRecording = () => {
         if (isRecording) {
@@ -205,7 +158,7 @@ export default function CollectData(props: {
 
             // create new live recording
             setLiveRecording(newRecording(registerIdsChecked, true))
-            onChange(dataset)
+            handleDatasetUpdate(dataset)
 
             // stop recording
             setIsRecording(false)
@@ -234,7 +187,7 @@ export default function CollectData(props: {
     const handleDeleteRecording = (recording: FieldDataSet) => {
         dataset.removeRecording(recording)
         setDataset(dataset)
-        onChange(dataset)
+        handleDatasetUpdate(dataset)
     }
     const updateLiveData = () => {
         setLiveRecording(liveRecording)
@@ -249,7 +202,6 @@ export default function CollectData(props: {
         //console.log(values)
         liveRecording.addRow(values)
         if (isRecording && liveRecording.length >= samplingCount) {
-            console.log("Randi reached max length, stop recording")
             // stop recording
             updateLiveData()
             stopRecording()
@@ -281,6 +233,16 @@ export default function CollectData(props: {
         setRecordingName("recording" + totalRecordings)
     }, [totalRecordings])
 
+    const handleDatasetUpdate = dataset => {
+        // convert dataset object to JSON string
+        const datasetJSONObj = JSON.stringify(dataset)
+        // save JSON string in local storage
+        localStorage.setItem(MODEL_EDITOR_DATASET, datasetJSONObj)
+
+        console.log("Randi saved dataset into local storage")
+
+        onChange(dataset)
+    }
     const handleNext = () => {
         onNext(dataset)
     }
@@ -288,10 +250,43 @@ export default function CollectData(props: {
     return (
         <Grid container direction={"column"}>
             <Grid item>
+                <h2>
+                    Current Dataset
+                    <IconButtonWithTooltip
+                        onClick={handleDownloadDataset}
+                        title="Download all recording data"
+                        disabled={dataset.numRecordings == 0}
+                    >
+                        <DownloadIcon />
+                    </IconButtonWithTooltip>
+                </h2>
+                <div key="recordedData">
+                    {dataset.numRecordings > 0 ? (
+                        <div key="recordings">
+                            <p>
+                                Input type(s): {dataset.inputTypes.join(",")}{" "}
+                            </p>
+                            {dataset.labels.map(classLabel => (
+                                <ClassDataSetGrid
+                                    key={"dataset-" + classLabel}
+                                    label={classLabel}
+                                    tables={dataset.getRecordingsWithLabel(
+                                        classLabel
+                                    )}
+                                    handleDeleteTable={handleDeleteRecording}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <p>Empty</p>
+                    )}
+                </div>
+            </Grid>
+            <Grid item>
                 <h2>Collect Data</h2>
                 {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
                 <div key="sensors">
-                    <h3>Collect data from</h3>
+                    <h3>Select input sensors</h3>
                     {!readingRegisters.length && (
                         <span>Waiting for sensors...</span>
                     )}
@@ -320,7 +315,7 @@ export default function CollectData(props: {
                         <Autocomplete
                             className={classes.field}
                             disabled={isRecording}
-                            options={dataset.labelList}
+                            options={dataset.labelOptions}
                             style={{ width: 250, display: "inline-flex" }}
                             renderInput={params => (
                                 <TextField
@@ -394,35 +389,6 @@ export default function CollectData(props: {
                             dot={true}
                             gradient={true}
                         />
-                    )}
-                </div>
-            </Grid>
-            <Grid item>
-                <div key="recordedData">
-                    {!!dataset.numRecordings && (
-                        <div key="recordings">
-                            <h3>
-                                Dataset
-                                <IconButtonWithTooltip
-                                    onClick={handleDownloadDataset}
-                                    title="Download all recording data"
-                                >
-                                    <DownloadIcon />
-                                </IconButtonWithTooltip>
-                            </h3>
-                            {dataset.labels.map(classLabel => (
-                                <ClassDataSetGrid
-                                    key={
-                                        "dataset-" + classLabel
-                                    } /* RANDI TODO Maybe take in labels as well as tables? */
-                                    label={classLabel}
-                                    tables={dataset.getRecordingsWithLabel(
-                                        classLabel
-                                    )}
-                                    handleDeleteTable={handleDeleteRecording}
-                                />
-                            ))}
-                        </div>
                     )}
                 </div>
             </Grid>
