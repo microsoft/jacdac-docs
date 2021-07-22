@@ -107,7 +107,7 @@ export default class FieldDataSet extends JDEventSource {
     }
 
     get width() {
-        return this.fields.length
+        return this.headers.length
     }
 
     get headerList() {

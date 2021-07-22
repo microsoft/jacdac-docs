@@ -9,6 +9,8 @@ import StopIcon from "@material-ui/icons/Stop"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
+import DeleteAllIcon from "@material-ui/icons/DeleteSweep"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 
@@ -53,8 +55,8 @@ export default function CollectData(props: {
     onChange: (dataset) => void
     onNext: (dataset) => void
 }) {
-    const { chartPalette, dataset, onChange, onNext } = props
-    const [, setDataset] = useState<ModelDataset>(undefined)
+    const { chartPalette, onChange, onNext } = props // Randi originally dataset was in here and 
+    const [dataset, setDataset] = useState<ModelDataset>(props.dataset) // Randi this said undefined
     const classes = props.reactStyle
 
     const { fileStorage } = useContext(ServiceManagerContext)
@@ -144,6 +146,21 @@ export default function CollectData(props: {
         const csv = dataset.toCSV()
         fileStorage.saveText(`${dataset.labelOptions.join("")}dataset.csv`, csv)
     }
+    const handleDeleteDataset = () => {
+        if(confirm("Are you sure you want to delete all recorded samples?")) {
+            const newDataset = new ModelDataset()
+            handleDatasetUpdate(newDataset)
+            setDataset(newDataset)
+
+            resetDataCollection()
+        }
+    }
+    const resetDataCollection = () => {
+        setCurrentClassLabel("class1")
+        setTotalRecordings(0)
+        setSamplingIntervalDelay("100")
+        setSamplingDuration("2")
+    }
     const stopRecording = () => {
         if (isRecording) {
             // add new data to the dataset
@@ -154,10 +171,10 @@ export default function CollectData(props: {
             )
             setTotalRecordings(totalRecordings + 1)
             setDataset(dataset)
+            handleDatasetUpdate(dataset)
 
             // create new live recording
             setLiveRecording(newRecording(registerIdsChecked, true))
-            handleDatasetUpdate(dataset)
 
             // stop recording
             setIsRecording(false)
@@ -250,6 +267,13 @@ export default function CollectData(props: {
                     >
                         <DownloadIcon />
                     </IconButtonWithTooltip>
+                    <IconButtonWithTooltip
+                        onClick={handleDeleteDataset}
+                        title="Delete all recording data"
+                        disabled={dataset.numRecordings == 0}
+                    >
+                        <DeleteAllIcon />
+                    </IconButtonWithTooltip>
                 </h2>
                 <div key="recordedData">
                     {dataset.numRecordings > 0 ? (
@@ -319,6 +343,7 @@ export default function CollectData(props: {
                             onInputChange={(event, newValue) =>
                                 handleLabelChange(newValue)
                             }
+                            getOptionSelected={(option, value) => true}
                         />
                         <TextField
                             className={classes.field}

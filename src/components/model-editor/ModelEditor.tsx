@@ -133,7 +133,7 @@ export default function ModelPlayground() {
                     disabled={dataset.labels.length < 2}
                 />
                 <Tab
-                    label={`3 - Deploy Model`}
+                    label={`3 - Test and Deploy`}
                     disabled={tfModel.status !== "completed"}
                 />
             </Tabs>

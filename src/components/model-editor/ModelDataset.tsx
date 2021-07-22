@@ -144,14 +144,17 @@ export default class ModelDataset extends JDEventSource {
     }
 
     get summary() {
-        if (this.labels.length <= 0) return "--"
+        if (this.labels.length <= 0) return ["Classes: none", "Input Types: none"]
 
-        let modelInfo = "Classes: "
+        const modelInfo = []
+        const classes = []
         this.labels.forEach(label => {
-            modelInfo +=
-                label + " [" + this.recordings[label].length + " sample(s)], "
+            classes.push(
+                label + " [" + this.recordings[label].length + " sample(s)]")
         })
-        modelInfo += "\nInputs: " + this.registerIds.join(", ")
+        modelInfo.push("Classes: " + classes.join(", "))
+        
+        modelInfo.push("\nInput Type(s): " + this.inputTypes.join(", "))
 
         return modelInfo
     }

@@ -139,9 +139,9 @@ function ModelBlockEditorWithContext() {
     }
 
     const updateLocalStorage = (newRecordings, newDatasets, newModels) => {
-        const recordings = newRecordings ? newRecordings : allRecordings
-        const datasets = newDatasets ? newDatasets : allDatasets
-        const models = newModels ? newModels : allModels
+        const recordings = newRecordings || allRecordings
+        const datasets = newDatasets || allDatasets
+        const models = newModels || allModels
 
         // convert dataset object to JSON string
         const modelBlocksDataJSON = JSON.stringify({

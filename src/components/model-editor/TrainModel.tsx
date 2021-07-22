@@ -2,7 +2,7 @@ import { Grid, Button } from "@material-ui/core"
 import Trend from "../Trend"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import * as ml4f from "../../../ml4f/src/main"
@@ -20,7 +20,7 @@ import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
 import MBModel from "./MBModel"
-import { MODEL_EDITOR_MODEL } from "./ModelEditor"
+import { MODEL_EDITOR_STORAGE_KEY } from "./ModelEditor"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -46,65 +46,20 @@ export default function TrainModel(props: {
     onNext: (model) => void
 }) {
     const classes = props.reactStyle
-    const { chartPalette, dataset, model, onChange, onNext } = props
-    const [, setModel] = useState<MBModel>(undefined)
+    const { chartPalette, dataset, onChange, onNext } = props
+    const [model, setModel] = useState<MBModel>(props.model)
+    const [pageReady, setPageReady] = useState(false)
 
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const readingRegisters = useChange(bus, bus =>
-        arrayConcatMany(
-            bus.devices().map(device =>
-                device
-                    .services()
-                    .filter(srv => isSensor(srv.specification))
-                    .map(srv => srv.readingRegister)
-            )
-        )
-    )
-
-    const handleNext = () => {
-        onNext(model)
-    }
-
-    const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
-    const [, setLiveDataTimestamp] = useState(0)
-    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
-
-    const newRecording = (registerIds: string[]) =>
-        registerIds.length
-            ? createDataSet(
-                  bus,
-                  readingRegisters.filter(
-                      reg => registerIds.indexOf(reg.id) > -1
-                  ),
-                  `liveData`,
-                  chartPalette
-              )
-            : undefined
-
-    const updateLiveData = () => {
-        setLiveRecording(liveRecording)
-        setLiveDataTimestamp(bus.timestamp)
-        if (model.status == "completed") updatePrediction()
-    }
-    const throttleUpdate = throttle(() => updateLiveData(), 30)
-    // interval add data entry
-    const addRow = (values?: number[]) => {
-        if (!liveRecording) {
-            setLiveRecording(newRecording(dataset.registerIds))
-        } else {
-            //console.log(values)
-            liveRecording.addRow(values)
-            throttleUpdate()
+    let { xs, ys } = { xs: tf.tensor([]), ys: tf.tensor([]) }
+    useEffect(() => {
+        if (!pageReady) {
+            prepareDataset()
+            prepareModel()
+            setPageReady(true)
         }
-    }
+    }, [dataset])
 
-    const trainTFModel = async () => {
-        model.status = "running"
-        model.topClass = ""
-        model.prediction = {}
-        setModel(model)
-        setTrainEnabled(false)
-
+    const prepareDataset = () => {
         // Assumptions: the sampling rate, sampling duration, and sensors used are constant
         let sampleLength = -1
         let sampleChannels = -1
@@ -136,12 +91,27 @@ export default function TrainModel(props: {
             })
         }
 
-        // Create a new TFJS model
+        xs = tf.tensor3d(x_data, [x_data.length, sampleLength, sampleChannels])
+        ys = tf.oneHot(tf.tensor1d(y_data, "int32"), dataset.labels.length)
+        console.log("Randi prepared dataset:", { xs, ys })
+
+        // Update model
+        model.labels = dataset.labels
+        model.inputShape = [sampleLength, sampleChannels]
+        model.outputShape = dataset.labels.length
+        model.xs = xs
+        model.ys = ys
+        setModel(model)
+        handleModelUpdate(model)
+    }
+
+    const prepareModel = () => {
+        // Use a standard architecture for models made on this page
         const modelLayers = model.model
 
         modelLayers.add(
             tf.layers.conv1d({
-                inputShape: [sampleLength, sampleChannels],
+                inputShape: model.inputShape,
                 kernelSize: [4],
                 strides: 1,
                 filters: 16,
@@ -195,7 +165,7 @@ export default function TrainModel(props: {
         // must end with a fully connected layer with size equal to number of labels
         modelLayers.add(
             tf.layers.dense({
-                units: dataset.labels.length,
+                units: model.outputShape,
                 activation: "softmax",
             })
         )
@@ -206,41 +176,99 @@ export default function TrainModel(props: {
             metrics: ["accuracy"],
         })
 
-        const xs = tf.tensor3d(x_data, [
-            x_data.length,
-            sampleLength,
-            sampleChannels,
-        ])
-        const ys = tf.oneHot(
-            tf.tensor1d(y_data, "int32"),
-            dataset.labels.length
+        setModel(model)
+        handleModelUpdate(model)
+    }
+
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const readingRegisters = useChange(bus, bus =>
+        arrayConcatMany(
+            bus.devices().map(device =>
+                device
+                    .services()
+                    .filter(srv => isSensor(srv.specification))
+                    .map(srv => srv.readingRegister)
+            )
         )
+    )
+
+    const handleNext = () => {
+        onNext(model)
+    }
+    const handleModelUpdate = model => {
+        onChange(model)
+    }
+
+    const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
+    const [, setLiveDataTimestamp] = useState(0)
+    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
+
+    const newRecording = (registerIds: string[]) =>
+        registerIds.length
+            ? createDataSet(
+                  bus,
+                  readingRegisters.filter(
+                      reg => registerIds.indexOf(reg.id) > -1
+                  ),
+                  `liveData`,
+                  chartPalette
+              )
+            : undefined
+
+    const updateLiveData = () => {
+        setLiveRecording(liveRecording)
+        setLiveDataTimestamp(bus.timestamp)
+        if (model.status == "completed") updatePrediction()
+    }
+    const throttleUpdate = throttle(() => updateLiveData(), 30)
+    // interval add data entry
+    const addRow = (values?: number[]) => {
+        if (!liveRecording) {
+            setLiveRecording(newRecording(dataset.registerIds))
+        } else {
+            //console.log(values)
+            liveRecording.addRow(values)
+            throttleUpdate()
+        }
+    }
+
+    const trainTFModel = async () => {
+        model.status = "running"
+        model.topClass = ""
+        model.prediction = {}
+        setModel(model)
+        handleModelUpdate(model)
+        setTrainEnabled(false)
 
         // Train the model using the data
         let acc = 0
-        await modelLayers.fit(xs, ys, { epochs: 250 }).then(info => {
-            console.log("Initial accuracy: ", info.history.acc[0])
-            console.log(
-                "Final accuracy: ",
-                info.history.acc[info.history.acc.length - 1]
-            )
-            acc = info.history.acc[info.history.acc.length - 1] as number
-        })
+        const modelLayers = model.model
+        await modelLayers
+            .fit(model.xs, model.ys, { epochs: 250 })
+            .then(info => {
+                console.log("Initial accuracy: ", info.history.acc[0])
+                console.log(
+                    "Final accuracy: ",
+                    info.history.acc[info.history.acc.length - 1]
+                )
+                acc = info.history.acc[info.history.acc.length - 1] as number
+            })
 
         model.status = "completed"
-        model.labels = dataset.labels
-        model.inputShape = [sampleLength, sampleChannels]
         model.trainingAcc = acc
+        setModel(model)
+        handleModelUpdate(model)
 
-        const armcompiled = await ml4f.compileAndTest(model.model, {
+        setTrainEnabled(true)
+
+        /*const armcompiled = await ml4f.compileAndTest(model.model, {
             verbose: true,
             includeTest: true,
             float16weights: false,
             optimize: true,
         })
-        console.log(armcompiled)
+        console.log(armcompiled)*/
         // use armcompiled.machineCode
-        setModel(model)
     }
     // predicting with model
     const updatePrediction = async () => {
@@ -273,92 +301,107 @@ export default function TrainModel(props: {
         model.prediction = z_result
         model.topClass = z
         setModel(model)
+        handleModelUpdate(model)
     }
 
     return (
-        <Grid container direction={"column"}>
-            <Grid item>
-                <h3>Dataset Summary</h3>
-                <span>{dataset.summary}</span>
-                <h3>Model Summary</h3>
-                <span>{model.summary}</span>
-                <div className={classes.buttons}>
-                    <Button
-                        size="large"
-                        variant="contained"
-                        color={"primary"}
-                        aria-label="start training model"
-                        title={
-                            trainEnabled
-                                ? "Press to start training machine learning model"
-                                : "You must have at least two classes to train a model. Go back to first tab."
-                        }
-                        onClick={trainTFModel}
-                        startIcon={<PlayArrowIcon />}
-                        disabled={!trainEnabled}
-                    >
-                        Train Model
-                    </Button>
-                </div>
-                <br />
-            </Grid>
-            {model.status == "completed" && (
-                <>
+        <>
+            {" "}
+            {pageReady && (
+                <Grid container direction={"column"}>
+                    <Grid item>
+                        <h3>Dataset Summary</h3>
+                        <div>
+                            {dataset.summary.map(line => {
+                                return (
+                                    <span key="dataset-summary">
+                                        {" "}
+                                        {line} <br />
+                                    </span>
+                                )
+                            })}
+                        </div>
+                        <h3>Model Summary</h3>
+                        <div>
+                            {model.summary.map(line => {
+                                return (
+                                    <span key="model-summary">
+                                        {" "}
+                                        {line} <br />
+                                    </span>
+                                )
+                            })}
+                        </div>
+                        <div className={classes.buttons}>
+                            <Button
+                                size="large"
+                                variant="contained"
+                                color={"primary"}
+                                aria-label="start training model"
+                                title={
+                                    trainEnabled
+                                        ? "Press to start training machine learning model"
+                                        : "You must have at least two classes to train a model. Go back to first tab."
+                                }
+                                onClick={trainTFModel}
+                                startIcon={<PlayArrowIcon />}
+                                disabled={!trainEnabled}
+                            >
+                                Train Model
+                            </Button>
+                        </div>
+                        <br />
+                    </Grid>
                     <Grid item>
                         <h3>Training Results</h3>
                         <span>
                             {" "}
-                            Training Accuracy:{" "}
+                            Final Training Accuracy:{" "}
                             {model.status == "completed"
                                 ? model.trainingAcc
                                 : "--"}
                         </span>
-                        <br />
-                        <span>
-                            {" "}
-                            Labels:{" "}
-                            {model.labels.length
-                                ? model.labels.join(", ")
-                                : "--"}
-                        </span>
-                        <br />
                     </Grid>
+                    {false && (
+                        <>
+                            <Grid item>
+                                <h3>Live Testing</h3>
+                                <div key="predict">
+                                    <span>
+                                        {" "}
+                                        Top Class:{" "}
+                                        {model.status == "completed"
+                                            ? model.topClass
+                                            : "--"}{" "}
+                                    </span>
+                                    <br />
+                                    <div key="liveData">
+                                        <Trend
+                                            key="trends"
+                                            height={12}
+                                            dataSet={liveRecording}
+                                            horizon={LIVE_HORIZON}
+                                            dot={true}
+                                            gradient={true}
+                                        />
+                                    </div>
+                                </div>
+                            </Grid>{" "}
+                        </>
+                    )}
                     <Grid item>
-                        <h3>Live Testing</h3>
-                        <div key="predict">
-                            <span>
-                                {" "}
-                                Top Class:{" "}
-                                {model.status == "completed"
-                                    ? model.topClass
-                                    : "--"}{" "}
-                            </span>
-                            <br />
-                            <div key="liveData">
-                                <Trend
-                                    key="trends"
-                                    height={12}
-                                    dataSet={liveRecording}
-                                    horizon={LIVE_HORIZON}
-                                    dot={true}
-                                    gradient={true}
-                                />
-                            </div>
-                        </div>
-                    </Grid>{" "}
-                </>
-            )}
-            <Grid item>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<NavigateNextIcon />}
-                    disabled={true}
-                    onClick={handleNext}
-                >
-                    Next
-                </Button>
-            </Grid>
-        </Grid>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<NavigateNextIcon />}
+                            disabled={true}
+                            onClick={handleNext}
+                        >
+                            Next
+                        </Button>
+                    </Grid>
+                </Grid>
+            )}{" "}
+        </>
     )
 }

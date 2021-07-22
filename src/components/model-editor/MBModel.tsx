@@ -1,34 +1,33 @@
-import { CHANGE } from "../../../jacdac-ts/src/jdom/constants";
-import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource";
+import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
+import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
-
 
 export default class MBModel extends JDEventSource {
     readonly id = Math.random().toString()
-    
+
     // maintain computed number of examples and input data types to avoid recomputation
     status: string
     inputShape: number[]
-    trainingAcc: number
+    outputShape: number
+    xs: tf.Tensor
+    ys: tf.Tensor
 
+    trainingAcc: number
     topClass: string
     prediction: any
 
     constructor(
-        public labels?: string[], 
-        public readonly model?: tf.Sequential,
+        public labels?: string[],
+        public readonly model?: tf.Sequential
     ) {
-        super();
-        
+        super()
+
         this.labels = []
         this.model = tf.sequential()
         this.status = "idle"
 
-        if (labels !== undefined)
-            this.labels = labels
-        if (model !== undefined)
-            this.model = model
-
+        if (labels !== undefined) this.labels = labels
+        if (model !== undefined) this.model = model
     }
 
     set labelList(labels: string[]) {
@@ -40,13 +39,24 @@ export default class MBModel extends JDEventSource {
     }
 
     get summary() {
-        if (this.status == "idle") {
-            return "Model Status: " + this.status +  
-                    "\r\nModel Topology: --"
+        // Randi replace with an assert
+        if (this.model.layers.length == 0) {
+            console.error(
+                "This model does not have an layers. Please add some."
+            )
+            return []
         }
-        const summ = "" // this.model.summary(printFn)
-        return "Model Status: " + this.status + 
-                "\r\n" + summ
+
+        const modelSummary = [
+            "Model Status: " + this.status,
+            "Model Topology: ",
+        ]
+
+        this.model.summary(undefined, undefined, newLine => {
+            modelSummary.push(newLine)
+        })
+
+        return modelSummary
     }
 
     toJSON() {
