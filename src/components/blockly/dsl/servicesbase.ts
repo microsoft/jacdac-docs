@@ -624,7 +624,7 @@ export class ServicesBaseDSL {
 
     protected createCategoryHelper(options: CreateCategoryOptions) {
         const { theme, source, liveServices } = options
-        this.serviceColor = createServiceColor(theme)
+        this.serviceColor = theme ? createServiceColor(theme) : () => ""
 
         const blockServices: { serviceClass: number }[] =
             source?.variables
