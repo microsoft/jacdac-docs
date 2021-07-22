@@ -69,12 +69,28 @@ function DatasetParameterWidget(props: {
         setParametersVisible(datasetParameterField.areParametersVisible())
     }
 
+    const arraysEqual = (a, b) => {
+        if (a === b) return true
+        if (a == null || b == null) return false
+        if (a.length !== b.length) return false
+
+        // If you don't care about the order of the elements inside
+        // the array, you should sort both arrays here.
+        // Please note that calling sort on an array will modify that array.
+        // you might want to clone your array first.
+
+        for (let i = 0; i < a.length; ++i) {
+            if (a[i] !== b[i]) return false
+        }
+        return true
+    }
+
     const updateRecordings = () => {
         // update the recordings
         const childrenBlocks = sourceBlock.getChildren(false) // seems to only return the top block, not all of them. so I implement my own get all children
         let allRecordingBlocks = []
         const updatedClasses = []
-        const updatedInputs = []
+        let updatedInputs = []
         let totalSamples = 0
 
         if (childrenBlocks.length > 0) {
@@ -85,7 +101,14 @@ function DatasetParameterWidget(props: {
                 // get the block parameters for the recording
                 const recordingParameterField = block.getField("BLOCK_PARAMS") as ReactParameterField<RecordingBlockFieldValue>
                 totalSamples += recordingParameterField.getValue().numSamples
-                // {"totalSamples":number,"timestamp":number,"inputTypes":string[]}
+
+                // make sure that all recording blocks have the same input types
+                const recordingBlockInputs = recordingParameterField.getValue().inputTypes
+                if (updatedInputs.length == 0) updatedInputs = recordingBlockInputs
+                if (!arraysEqual(updatedInputs, recordingBlockInputs)) {
+                    // Randi TODO attach warning to this block
+                    console.log("Randi error with input types in block")
+                }
                 
                 // get the class name parameter and add it to the list of classes
                 const classNameField = block.getField("CLASS_NAME") as FieldVariable
@@ -119,7 +142,7 @@ function DatasetParameterWidget(props: {
                     Classes: {classes.length ? classes.join(", ") : "none"}
                 </Box>
                 <Box color="text.secondary">
-                    Input type: {inputs.length ? inputs.join(", ") : "none"}
+                    Input type(s): {inputs.length ? inputs.join(", ") : "none"}
                 </Box>
             </Grid>
             <Grid item>

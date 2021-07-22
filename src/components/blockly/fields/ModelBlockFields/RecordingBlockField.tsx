@@ -11,8 +11,8 @@ import WorkspaceContext from "../../WorkspaceContext"
 export interface RecordingBlockFieldValue {
     parametersVisible: boolean
     numSamples: number
-    latestTimestamp: number
-    inputs: string[]
+    timestamp: number
+    inputTypes: string[]
 }
 
 function RecordingParameterWidget( props: {
@@ -25,8 +25,8 @@ function RecordingParameterWidget( props: {
 
     const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
     const [numSamples, setNumSamples] = useState(initFieldValue.numSamples)
-    const [latestTimestamp, setLatestTimestamp] = useState(initFieldValue.latestTimestamp)
-    const [inputs, setInputs] = useState<string[]>(initFieldValue.inputs)
+    const [timestamp, setTimestamp] = useState(initFieldValue.timestamp)
+    const [inputTypes, setInputTypes] = useState<string[]>(initFieldValue.inputTypes)
 
     const handleEditRecording = () => {
         // update parameters based on changes to this recording
@@ -34,7 +34,7 @@ function RecordingParameterWidget( props: {
 
         //setNumSamples()
         //setLatestTimestamp()
-        //setInputs()
+        //setInputTypes()
     }
     const handleDownloadDataset = () => {
         console.log("Download dataset")
@@ -43,14 +43,14 @@ function RecordingParameterWidget( props: {
     useEffect(() => {
         // push changes to source block after state values update
         sendUpdate()
-    }, [numSamples, latestTimestamp, inputs])
+    }, [numSamples, timestamp, inputTypes])
 
     const sendUpdate = () => {
         const updatedFieldValue = {
             parametersVisible: parametersVisible,
             numSamples: numSamples, 
-            latestTimestamp: latestTimestamp,
-            inputs: inputs,
+            timestamp: timestamp,
+            inputTypes: inputTypes,
         }
         setFieldValue(updatedFieldValue)
     }
@@ -73,11 +73,7 @@ function RecordingParameterWidget( props: {
                     No. of Samples: {numSamples}
                 </Box>
                 <Box color="text.secondary">
-                    Input type: {inputs.length ? inputs.join(", ") : "none"}
-                </Box>
-                <Box color="text.secondary">
-                    {/* Randi TODO make this look nice, date, time */}
-                    Timestamp: {(latestTimestamp==0) ? latestTimestamp : "--"}
+                    Input type(s): {inputTypes.length ? inputTypes.join(", ") : "none"}
                 </Box>
             </Grid>
             <Grid item>
@@ -123,8 +119,8 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
         return {
             parametersVisible: false,
             numSamples: 0,
-            latestTimestamp: Date.now(),
-            inputs: [],
+            timestamp: 0,
+            inputTypes: [],
         }
     }
     
@@ -151,8 +147,8 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
         this.value = {
             ...this.value, // don't copy over visibility (will cause loop)
             numSamples:msg.numSamples,
-            latestTimestamp:msg.latestTimestamp,
-            inputs:msg.inputs,
+            timestamp:msg.timestamp,
+            inputTypes:msg.inputTypes,
         }
     }
 

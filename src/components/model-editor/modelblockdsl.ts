@@ -19,12 +19,6 @@ import DropoutLayerBlockField from "../blockly/fields/ModelBlockFields/DropoutLa
 import FlattenLayerBlockField from "../blockly/fields/ModelBlockFields/FlattenLayerBlockField"
 import DenseLayerBlockField from "../blockly/fields/ModelBlockFields/DenseLayerBlockField"
 
-import postModelRequest from "../blockly/dsl/workers/tf.proxy"
-import {
-    TFModelTrainRequest,
-    TFModelPredictRequest,
-} from "../../workers/tf/dist/node_modules/tf.worker"
-
 export const MODEL_BLOCKS = "model_block_"
 export const MB_DATASET_VAR_TYPE = "ModelBlockDataset"
 export const MB_CLASS_VAR_TYPE = "ModelBlockClass"
@@ -35,10 +29,6 @@ const class_color = "#2466A8"
 const processing_color = "#ac2469"
 const learning_color = "#561234"
 const layer_color = "#97207a"
-
-// TODO Randi figure out some way to update this if a variable gets deleted?
-const datasetNames = []
-const classNames = []
 
 export class ModelBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
@@ -68,7 +58,7 @@ export class ModelBlockDomainSpecificLanguage
                 args1: [
                     {
                         type: DatasetBlockField.KEY,
-                        name: "BLOCK_PARAMS"
+                        name: "BLOCK_PARAMS",
                     },
                 ],
                 message2: "%1",
@@ -99,8 +89,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: "field_variable",
                         name: "CLASS_NAME",
-                        variable:
-                            "class1" /* TODO Randi this should display class variable types or class1 */,
+                        variable: "class1",
                         variableTypes: [MB_CLASS_VAR_TYPE],
                         defaultType: MB_CLASS_VAR_TYPE,
                     },
@@ -144,7 +133,7 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "smooth",
-                message0: "smooth data %1", // calculates moving average over a particular window
+                message0: "smooth data %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
@@ -171,7 +160,6 @@ export class ModelBlockDomainSpecificLanguage
             } as BlockDefinition,
             /* Learning Blocks */
             {
-                // would like to make this a hat block
                 kind: "block",
                 type: MODEL_BLOCKS + "nn",
                 message0: "neural network classifier %1 training data %2 %3",
@@ -363,8 +351,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: "field_variable",
                         name: "CLASSIFIER_NAME",
-                        variable:
-                            "classifier2" /* TODO Randi this should display class variable types or KNN classifier1 */,
+                        variable: "classifier2",
                         variableTypes: [MB_CLASSIFIER_VAR_TYPE],
                         defaultType: MB_CLASSIFIER_VAR_TYPE,
                     },
@@ -385,7 +372,7 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: "field_number",
                         name: "KNN_K_VALUE",
-                        value: 3, /* Randi TODO dynamically set max based on number of examples? */
+                        value: 3,
                     },
                 ],
                 message2: "%1",
@@ -405,8 +392,7 @@ export class ModelBlockDomainSpecificLanguage
     }
 
     createCategory() {
-        return [
-            <CategoryDefinition><unknown>{
+        return [<CategoryDefinition>(<unknown>{
                 kind: "category",
                 name: "Dataset",
                 colour: dataset_color,
@@ -434,8 +420,7 @@ export class ModelBlockDomainSpecificLanguage
                         type: MODEL_BLOCKS + "dataset",
                     },
                 ],
-            },
-            <CategoryDefinition><unknown>{
+            }), <CategoryDefinition>(<unknown>{
                 kind: "category",
                 name: "Preprocessing",
                 colour: processing_color,
@@ -449,8 +434,7 @@ export class ModelBlockDomainSpecificLanguage
                         type: MODEL_BLOCKS + "smooth",
                     },
                 ],
-            },
-            <CategoryDefinition><unknown>{
+            }), <CategoryDefinition>(<unknown>{
                 kind: "category",
                 name: "Learning",
                 colour: learning_color,
@@ -497,8 +481,7 @@ export class ModelBlockDomainSpecificLanguage
                         type: MODEL_BLOCKS + "dense_layer",
                     },
                 ],
-            },
-        ]
+            })]
     }
 }
 
