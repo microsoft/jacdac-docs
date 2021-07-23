@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import * as tf from "@tensorflow/tfjs"
 
+
 export interface TFModelMessage {
     worker: "tf";
     id?: string;
-    trainingData: object[][]; /* RANDI TODO figure out what format this will be */
-    tfModel: object; /* JSON (?) object representing model */
 }
 
 export interface TFModelRequest extends TFModelMessage {
@@ -14,22 +13,23 @@ export interface TFModelRequest extends TFModelMessage {
 
 export interface TFModelTrainRequest extends TFModelRequest {
     type: "train";
-    trainData: ModelDataset; // Randi TODO send as JSON as well? Does that help anything?
+    trainDataJSON: string;
     modelJSON: string;
 }
 
 export interface TFModelPredictRequest extends TFModelRequest {
     type: "predict";
-    testData: object[]; /* RANDI TODO figure out what format this will be */
+    testData: number[][];
+    modelJSON: string; // Randi TODO send trained model JSON as well? 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handlers: { [index: string]: (props: any) => object[][] } = {
     train: (props: TFModelTrainRequest) => {
-        return undefined /* RANDI TODO figure out what these should return */
+        return [{ trainedTFModel: null, armModel:null }, ]
     },
     predict: (props: TFModelPredictRequest) => {
-        return undefined /* RANDI TODO figure out what these should return */
+        return [{ prediction: null }, ]
     }
 }
 
