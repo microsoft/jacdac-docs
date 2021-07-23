@@ -14,6 +14,8 @@ export interface TFModelRequest extends TFModelMessage {
 
 export interface TFModelTrainRequest extends TFModelRequest {
     type: "train";
+    trainData: ModelDataset; // Randi TODO send as JSON as well? Does that help anything?
+    modelJSON: string;
 }
 
 export interface TFModelPredictRequest extends TFModelRequest {
