@@ -19,7 +19,6 @@ import ClassDataSetGrid from "../ClassDataSetGrid"
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
-import { MODEL_EDITOR_STORAGE_KEY } from "./ModelEditor"
 
 import ServiceManagerContext from "../ServiceManagerContext"
 
@@ -47,6 +46,21 @@ function createDataSet(
 
     return set
 }
+function arraysEqual(a, b) {
+    if (a === b) return true
+    if (a == null || b == null) return false
+    if (a.length !== b.length) return false
+
+    // If you don't care about the order of the elements inside
+    // the array, you should sort both arrays here.
+    // Please note that calling sort on an array will modify that array.
+    // you might want to clone your array first.
+
+    for (let i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false
+    }
+    return true
+}
 
 export default function CollectData(props: {
     reactStyle: any
@@ -55,7 +69,7 @@ export default function CollectData(props: {
     onChange: (dataset) => void
     onNext: (dataset) => void
 }) {
-    const { chartPalette, onChange, onNext } = props // Randi originally dataset was in here and 
+    const { chartPalette, onChange, onNext } = props // Randi originally dataset was in here and
     const [dataset, setDataset] = useState<ModelDataset>(props.dataset) // Randi this said undefined
     const classes = props.reactStyle
 
@@ -115,6 +129,7 @@ export default function CollectData(props: {
     const [currentClassLabel, setCurrentClassLabel] = useState("class1")
     const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
     const [samplingDuration, setSamplingDuration] = useState("2")
+    const [datasetMatch, setDatasetMatch] = useState(false)
     const recordingRegisters = readingRegisters.filter(
         reg => registerIdsChecked.indexOf(reg.id) > -1
     )
@@ -127,7 +142,7 @@ export default function CollectData(props: {
         isNaN(samplingIntervalDelayi) || !/\d+/.test(samplingIntervalDelay)
     const errorSamplingDuration = isNaN(samplingCount)
     const error = errorSamplingDuration || errorSamplingIntervalDelay
-    const startEnabled = !!recordingRegisters?.length
+    const startEnabled = !!recordingRegisters?.length && datasetMatch
 
     const handleSamplingIntervalChange = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -147,7 +162,7 @@ export default function CollectData(props: {
         fileStorage.saveText(`${dataset.labelOptions.join("")}dataset.csv`, csv)
     }
     const handleDeleteDataset = () => {
-        if(confirm("Are you sure you want to delete all recorded samples?")) {
+        if (confirm("Are you sure you want to delete all recorded samples?")) {
             const newDataset = new ModelDataset()
             handleDatasetUpdate(newDataset)
             setDataset(newDataset)
@@ -243,10 +258,17 @@ export default function CollectData(props: {
             stopStreaming()
         }
     }, [isRecording, samplingIntervalDelayi, samplingCount, registerIdsChecked])
-    // saving new datasets
     useEffect(() => {
         setRecordingName("recording" + totalRecordings)
     }, [totalRecordings])
+    useEffect(() => {
+        if (dataset && liveRecording) {
+            if (dataset.inputTypes) {
+                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) setDatasetMatch(false)
+                else setDatasetMatch(true)
+            }
+        }
+    }, [liveRecording])
 
     const handleDatasetUpdate = dataset => {
         onChange(dataset)
@@ -328,10 +350,9 @@ export default function CollectData(props: {
                             onChange={handleRecordingNameChange}
                         />
                         <Autocomplete
-                            className={classes.field}
                             disabled={isRecording}
+                            className={classes.field}
                             options={dataset.labelOptions}
-                            style={{ width: 250, display: "inline-flex" }}
                             renderInput={params => (
                                 <TextField
                                     {...params}
@@ -409,15 +430,17 @@ export default function CollectData(props: {
                 </div>
             </Grid>
             <Grid item style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    endIcon={<NavigateNextIcon />}
-                    disabled={dataset.labels.length < 2}
-                    onClick={handleNext}
-                >
-                    Next
-                </Button>
+                <div className={classes.buttons}>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        endIcon={<NavigateNextIcon />}
+                        disabled={dataset.labels.length < 2}
+                        onClick={handleNext}
+                    >
+                        Next
+                    </Button>
+                </div>
             </Grid>
         </Grid>
     )

@@ -1,12 +1,28 @@
-import { Grid, Button } from "@material-ui/core"
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Button,
+    Grid,
+} from "@material-ui/core"
 import Trend from "../Trend"
+// tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
+// tslint:disable-next-line: match-default-export-name no-submodule-imports
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
+// tslint:disable-next-line: match-default-export-name no-submodule-imports
+import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
+// tslint:disable-next-line: match-default-export-name no-submodule-imports
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import React, { useContext, useEffect, useState } from "react"
-import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import * as ml4f from "../../../ml4f/src/main"
 import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
+import postModelRequest from "../blockly/dsl/workers/tf.proxy"
+import {
+    TFModelTrainRequest,
+    TFModelPredictRequest,
+} from "../../workers/tf/dist/node_modules/tf.worker"
 
 import useChange from "../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
@@ -15,14 +31,19 @@ import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
+import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 
+import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
 import MBModel from "./MBModel"
-import { MODEL_EDITOR_STORAGE_KEY } from "./ModelEditor"
 
-const LIVE_HORIZON = 24
+const LIVE_HORIZON = 100
+const NUM_EPOCHS = 250
+const LOSS_COLOR = "#8b0000"
+const ACC_COLOR = "#77dd77"
+
 function createDataSet(
     bus: JDBus,
     registers: JDRegister[],
@@ -36,6 +57,21 @@ function createDataSet(
 
     return set
 }
+function arraysEqual(a, b) {
+    if (a === b) return true
+    if (a == null || b == null) return false
+    if (a.length !== b.length) return false
+
+    // If you don't care about the order of the elements inside
+    // the array, you should sort both arrays here.
+    // Please note that calling sort on an array will modify that array.
+    // you might want to clone your array first.
+
+    for (let i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false
+    }
+    return true
+}
 
 export default function TrainModel(props: {
     reactStyle: any
@@ -48,9 +84,20 @@ export default function TrainModel(props: {
     const classes = props.reactStyle
     const { chartPalette, dataset, onChange, onNext } = props
     const [model, setModel] = useState<MBModel>(props.model)
-    const [pageReady, setPageReady] = useState(false)
 
-    let { xs, ys } = { xs: tf.tensor([]), ys: tf.tensor([]) }
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const readingRegisters = useChange(bus, bus =>
+        arrayConcatMany(
+            bus.devices().map(device =>
+                device
+                    .services()
+                    .filter(srv => isSensor(srv.specification))
+                    .map(srv => srv.readingRegister)
+            )
+        )
+    )
+
+    const [pageReady, setPageReady] = useState(false)
     useEffect(() => {
         if (!pageReady) {
             prepareDataset()
@@ -59,6 +106,7 @@ export default function TrainModel(props: {
         }
     }, [dataset])
 
+    /* For loading page */
     const prepareDataset = () => {
         // Assumptions: the sampling rate, sampling duration, and sensors used are constant
         let sampleLength = -1
@@ -91,9 +139,15 @@ export default function TrainModel(props: {
             })
         }
 
-        xs = tf.tensor3d(x_data, [x_data.length, sampleLength, sampleChannels])
-        ys = tf.oneHot(tf.tensor1d(y_data, "int32"), dataset.labels.length)
-        console.log("Randi prepared dataset:", { xs, ys })
+        const xs = tf.tensor3d(x_data, [
+            x_data.length,
+            sampleLength,
+            sampleChannels,
+        ])
+        const ys = tf.oneHot(
+            tf.tensor1d(y_data, "int32"),
+            dataset.labels.length
+        )
 
         // Update model
         model.labels = dataset.labels
@@ -108,7 +162,7 @@ export default function TrainModel(props: {
     const prepareModel = () => {
         // Use a standard architecture for models made on this page
         const modelLayers = model.model
-
+        console.log("Randi model input shape at prepareModel: ", model) // Randi TODO debug error: expected ndim 3, got 2
         modelLayers.add(
             tf.layers.conv1d({
                 inputShape: model.inputShape,
@@ -159,7 +213,6 @@ export default function TrainModel(props: {
                 rate: 0.1,
             })
         )
-
         // moving from 3-dimensional data to 2-dimensional requires a flattening layer
         modelLayers.add(tf.layers.flatten())
         // must end with a fully connected layer with size equal to number of labels
@@ -178,30 +231,146 @@ export default function TrainModel(props: {
 
         setModel(model)
         handleModelUpdate(model)
+
+        // Create space to hold training log data
+        const trainingLogDataset = {
+            name: "training-logs",
+            rows: [],
+            headers: ["loss", "acc"],
+            units: ["/", "/"],
+            colors: [LOSS_COLOR, ACC_COLOR],
+        }
+        setTrainingLogs(FieldDataSet.createFromFile(trainingLogDataset))
+
+        // Create space to hold prediction data
+        const livePredictionDataset = {
+            name: "live-predictions",
+            rows: [],
+            headers: dataset.labels,
+            units: dataset.labels.map(() => {
+                return "/"
+            }),
+            colors: dataset.labels.map(
+                (label, idx) => chartPalette[idx % chartPalette.length]
+            ),
+        }
+        setLivePredictions(FieldDataSet.createFromFile(livePredictionDataset))
     }
 
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const readingRegisters = useChange(bus, bus =>
-        arrayConcatMany(
-            bus.devices().map(device =>
-                device
-                    .services()
-                    .filter(srv => isSensor(srv.specification))
-                    .map(srv => srv.readingRegister)
-            )
-        )
-    )
+    /* For training model */
+    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
+    const [trainingLogs, setTrainingLogs] = useState<FieldDataSet>(undefined)
 
-    const handleNext = () => {
-        onNext(model)
-    }
-    const handleModelUpdate = model => {
-        onChange(model)
+    const onEpochEnd = (epoch, logs) => {
+        // logs.loss, logs.acc
+        const newData = [logs.loss, logs.acc]
+        if (trainingLogs) trainingLogs.addData(newData)
     }
 
+    const trainTFModel = async () => {
+        model.status = "running"
+        setModel(model)
+        handleModelUpdate(model)
+        setTrainEnabled(false)
+
+        // Train the model using the data
+        let acc = 0
+        const modelLayers = model.model
+        await modelLayers
+            .fit(model.xs, model.ys, {
+                epochs: NUM_EPOCHS, // Randi TODO save with model?
+                callbacks: {
+                    onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
+                },
+            })
+            .then(info => {
+                console.log("Initial accuracy: ", info.history.acc[0])
+                console.log(
+                    "Final accuracy: ",
+                    info.history.acc[info.history.acc.length - 1]
+                )
+                acc = info.history.acc[info.history.acc.length - 1] as number
+            })
+
+        // Compile code for MCU
+        const armcompiled = await ml4f.compileAndTest(model.model, {
+            verbose: true,
+            includeTest: true,
+            float16weights: false,
+            optimize: true,
+        })
+        console.log(armcompiled)
+        // use armcompiled.machineCode
+
+        // Update model status
+        model.status = "completed"
+        model.trainingAcc = acc
+        setModel(model)
+        handleModelUpdate(model)
+
+        // Update checked registers and live recording
+        setLiveRecording(newRecording(dataset.registerIds))
+        setRegisterIdsChecked(dataset.registerIds)
+
+        setTrainEnabled(true)
+    }
+
+    /* For predicting with model */
+    const [topClass, setTopClass] = useState<string>("")
+    const [livePredictions, setLivePredictions] =
+        useState<FieldDataSet>(undefined)
+
+    const updatePrediction = async () => {
+        // Use the model to do inference on a data point the model hasn't seen before:
+        if (!datasetMatch || !liveRecording) return
+
+        let data = liveRecording.data()
+        data = data.slice(data.length - model.inputShape[0])
+        const liveInput = [data]
+
+        let top = model.labels[0]
+
+        if (data && data.length >= model.inputShape[0]) {
+            const liveOutput = []
+
+            // Get probability values from model
+            const prediction = (await model.model.predict(
+                tf.tensor3d(liveInput)
+            )) as tf.Tensor<tf.Rank>
+
+            // Save probability for each class in model object
+            model.labels.forEach((label, idx) => {
+                liveOutput.push(prediction.dataSync()[idx])
+
+                // update which class has highest confidence
+                if (liveOutput[label] > liveOutput[top]) top = label
+            })
+
+            livePredictions.addData(liveOutput)
+            setTopClass(top)
+        }
+    }
+
+    /* For displaying live data */
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
-    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
+    const [datasetMatch, setDatasetMatch] = useState(false)
+
+    const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
+
+    const recordingRegisters = readingRegisters.filter(
+        reg => registerIdsChecked.indexOf(reg.id) > -1
+    )
+
+    const handleRegisterCheck = (reg: JDRegister) => {
+        const i = registerIdsChecked.indexOf(reg.id)
+        if (i > -1) registerIdsChecked.splice(i, 1)
+        else registerIdsChecked.push(reg.id)
+
+        registerIdsChecked.sort()
+        setRegisterIdsChecked([...registerIdsChecked])
+        setLiveRecording(newRecording(registerIdsChecked))
+    }
 
     const newRecording = (registerIds: string[]) =>
         registerIds.length
@@ -223,86 +392,58 @@ export default function TrainModel(props: {
     const throttleUpdate = throttle(() => updateLiveData(), 30)
     // interval add data entry
     const addRow = (values?: number[]) => {
-        if (!liveRecording) {
-            setLiveRecording(newRecording(dataset.registerIds))
-        } else {
-            //console.log(values)
+        if (liveRecording) {
             liveRecording.addRow(values)
             throttleUpdate()
         }
     }
-
-    const trainTFModel = async () => {
-        model.status = "running"
-        model.topClass = ""
-        model.prediction = {}
-        setModel(model)
-        handleModelUpdate(model)
-        setTrainEnabled(false)
-
-        // Train the model using the data
-        let acc = 0
-        const modelLayers = model.model
-        await modelLayers
-            .fit(model.xs, model.ys, { epochs: 250 })
-            .then(info => {
-                console.log("Initial accuracy: ", info.history.acc[0])
-                console.log(
-                    "Final accuracy: ",
-                    info.history.acc[info.history.acc.length - 1]
-                )
-                acc = info.history.acc[info.history.acc.length - 1] as number
-            })
-
-        model.status = "completed"
-        model.trainingAcc = acc
-        setModel(model)
-        handleModelUpdate(model)
-
-        setTrainEnabled(true)
-
-        /*const armcompiled = await ml4f.compileAndTest(model.model, {
-            verbose: true,
-            includeTest: true,
-            float16weights: false,
-            optimize: true,
-        })
-        console.log(armcompiled)*/
-        // use armcompiled.machineCode
-    }
-    // predicting with model
-    const updatePrediction = async () => {
-        // Use the model to do inference on a data point the model hasn't seen before:
-        let data = undefined
-        const z_data = []
-        if (liveRecording) {
-            data = liveRecording.data()
-            data = data.slice(data.length - model.inputShape[0])
-            z_data.push(data)
+    const startStreamingRegisters = () => {
+        console.log(`start streaming`)
+        const streamers = recordingRegisters?.map(reg =>
+            reg.subscribe(REPORT_UPDATE, () => {})
+        )
+        return () => {
+            console.log(`stop streaming`)
+            streamers.map(streamer => streamer())
         }
+    }
+    useEffect(() => {
+        const interval = setInterval(() => addRow(), 100) // Randi TODO grab interval from dataset? dataset.samplingInterval)
+        const stopStreaming = startStreamingRegisters()
 
-        const z_result = {}
-        let z = ""
-
-        if (data && data.length >= model.inputShape[0]) {
-            // Get probability values from model
-            const prediction = (await model.model.predict(
-                tf.tensor3d(z_data)
-            )) as tf.Tensor<tf.Rank>
-            z = model.labels[prediction.argMax(1).dataSync()]
-
-            // Save probability for each class in model object
-            for (let i = 0; i < model.labels.length; i++) {
-                z_result[model.labels[i]] = prediction.dataSync()[i]
+        return () => {
+            clearInterval(interval)
+            stopStreaming()
+        }
+    }, [registerIdsChecked])
+    useEffect(() => {
+        if (model.status == "completed" && dataset && liveRecording) {
+            if (dataset.inputTypes) {
+                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) {
+                    setDatasetMatch(false)
+                    console.error(
+                        "Mismatch between live data and current dataset: ",
+                        { d: dataset.inputTypes, lr: liveRecording }
+                    )
+                } else setDatasetMatch(true)
             }
-            //console.log(z_result)
         }
+    }, [liveRecording, registerIdsChecked])
 
-        model.prediction = z_result
-        model.topClass = z
-        setModel(model)
-        handleModelUpdate(model)
+    /* For page management */
+    const handleNext = () => {
+        onNext(model)
     }
+    const handleModelUpdate = model => {
+        onChange(model)
+    }
+
+    const [expanded, setExpanded] = React.useState<string | false>(false)
+    const handleExpandedSummaryChange =
+        (panel: string) =>
+        (event: React.ChangeEvent<unknown>, isExpanded: boolean) => {
+            setExpanded(isExpanded ? panel : false)
+        }
 
     return (
         <>
@@ -310,28 +451,76 @@ export default function TrainModel(props: {
             {pageReady && (
                 <Grid container direction={"column"}>
                     <Grid item>
-                        <h3>Dataset Summary</h3>
-                        <div>
-                            {dataset.summary.map(line => {
-                                return (
-                                    <span key="dataset-summary">
-                                        {" "}
-                                        {line} <br />
-                                    </span>
-                                )
-                            })}
-                        </div>
-                        <h3>Model Summary</h3>
-                        <div>
-                            {model.summary.map(line => {
-                                return (
-                                    <span key="model-summary">
-                                        {" "}
-                                        {line} <br />
-                                    </span>
-                                )
-                            })}
-                        </div>
+                        <h3>Information Summary</h3>
+                        <Accordion
+                            expanded={expanded === "dataSummary"}
+                            onChange={handleExpandedSummaryChange(
+                                "dataSummary"
+                            )}
+                        >
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <div>
+                                    <h4>Dataset</h4>
+                                    <p>
+                                        {expanded !== "dataSummary" && (
+                                            <span>
+                                                Classes:{" "}
+                                                {dataset.labels.join(", ")}
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <div>
+                                    {dataset.summary.map((line, lineIdx) => {
+                                        return (
+                                            <span
+                                                key={
+                                                    "dataset-summary-" + lineIdx
+                                                }
+                                            >
+                                                {" "}
+                                                {line} <br />
+                                            </span>
+                                        )
+                                    })}
+                                </div>
+                            </AccordionDetails>
+                        </Accordion>
+                        <Accordion
+                            expanded={expanded === "modelSummary"}
+                            onChange={handleExpandedSummaryChange(
+                                "modelSummary"
+                            )}
+                        >
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <div>
+                                    <h4>Model</h4>
+                                    <p>
+                                        {expanded !== "modelSummary" && (
+                                            <span>
+                                                Training Status: {model.status}
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <div>
+                                    {model.summary.map((line, lineIdx) => {
+                                        return (
+                                            <span
+                                                key={"model-summary-" + lineIdx}
+                                            >
+                                                {" "}
+                                                {line} <br />
+                                            </span>
+                                        )
+                                    })}
+                                </div>
+                            </AccordionDetails>
+                        </Accordion>
                         <div className={classes.buttons}>
                             <Button
                                 size="large"
@@ -346,6 +535,7 @@ export default function TrainModel(props: {
                                 onClick={trainTFModel}
                                 startIcon={<PlayArrowIcon />}
                                 disabled={!trainEnabled}
+                                style={{ marginTop: 16 }}
                             >
                                 Train Model
                             </Button>
@@ -354,30 +544,89 @@ export default function TrainModel(props: {
                     </Grid>
                     <Grid item>
                         <h3>Training Results</h3>
-                        <span>
-                            {" "}
-                            Final Training Accuracy:{" "}
-                            {model.status == "completed"
-                                ? model.trainingAcc
-                                : "--"}
-                        </span>
+                        <div key="liveData">
+                            {trainingLogs && (
+                                <div>
+                                    <FiberManualRecordIcon
+                                        className={classes.vmiddle}
+                                        fontSize="small"
+                                        style={{
+                                            color: ACC_COLOR,
+                                        }}
+                                    />
+                                    Accuracy
+                                    <FiberManualRecordIcon
+                                        className={classes.vmiddle}
+                                        fontSize="small"
+                                        style={{
+                                            color: LOSS_COLOR,
+                                        }}
+                                    />
+                                    Loss
+                                    <Trend
+                                        key="training-trends"
+                                        height={12}
+                                        dataSet={trainingLogs}
+                                        horizon={NUM_EPOCHS}
+                                        dot={false}
+                                        gradient={false}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <p>Final Training Accuracy: {model.trainingAcc}</p>
+                        <br />
                     </Grid>
-                    {false && (
-                        <>
-                            <Grid item>
-                                <h3>Live Testing</h3>
-                                <div key="predict">
-                                    <span>
-                                        {" "}
-                                        Top Class:{" "}
-                                        {model.status == "completed"
-                                            ? model.topClass
-                                            : "--"}{" "}
-                                    </span>
-                                    <br />
-                                    <div key="liveData">
+                    {model.status === "completed" && (
+                        <Grid item>
+                            <h3>Live Testing</h3>
+                            <div key="predict">
+                                <span>
+                                    {" "}
+                                    Top Class:{" "}
+                                    {model.status == "completed"
+                                        ? topClass
+                                        : "--"}{" "}
+                                </span>
+                                <br />
+                            </div>
+                            <div key="liveData">
+                                {liveRecording && (
+                                    <div>
+                                        {model.labels.map(label => {
+                                            return (
+                                                <span
+                                                    key={
+                                                        "prediction-key-" +
+                                                        label
+                                                    }
+                                                >
+                                                    <FiberManualRecordIcon
+                                                        className={
+                                                            classes.vmiddle
+                                                        }
+                                                        fontSize="small"
+                                                        style={{
+                                                            color: livePredictions.colorOf(
+                                                                undefined,
+                                                                label
+                                                            ),
+                                                        }}
+                                                    />
+                                                    {label}
+                                                </span>
+                                            )
+                                        })}
                                         <Trend
-                                            key="trends"
+                                            key="live-data-predictions"
+                                            height={12}
+                                            dataSet={livePredictions}
+                                            horizon={LIVE_HORIZON}
+                                            dot={true}
+                                            gradient={true}
+                                        />
+                                        <Trend
+                                            key="live-data-trends"
                                             height={12}
                                             dataSet={liveRecording}
                                             horizon={LIVE_HORIZON}
@@ -385,20 +634,59 @@ export default function TrainModel(props: {
                                             gradient={true}
                                         />
                                     </div>
-                                </div>
-                            </Grid>{" "}
-                        </>
+                                )}
+                            </div>
+                            <Accordion
+                                expanded={expanded === "chooseSensors"}
+                                onChange={handleExpandedSummaryChange(
+                                    "chooseSensors"
+                                )}
+                            >
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                >
+                                    <h4>Select input sensors</h4>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <div key="sensors">
+                                        {!readingRegisters.length && (
+                                            <span>Waiting for sensors...</span>
+                                        )}
+                                        {!!readingRegisters.length && (
+                                            <ReadingFieldGrid
+                                                readingRegisters={
+                                                    readingRegisters
+                                                }
+                                                registerIdsChecked={
+                                                    registerIdsChecked
+                                                }
+                                                recording={false}
+                                                liveDataSet={liveRecording}
+                                                handleRegisterCheck={
+                                                    handleRegisterCheck
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                </AccordionDetails>
+                            </Accordion>
+                        </Grid>
                     )}
-                    <Grid item>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<NavigateNextIcon />}
-                            disabled={true}
-                            onClick={handleNext}
-                        >
-                            Next
-                        </Button>
+                    <Grid
+                        item
+                        style={{ display: "flex", justifyContent: "flex-end" }}
+                    >
+                        <div className={classes.buttons}>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                endIcon={<NavigateNextIcon />}
+                                disabled={true}
+                                onClick={handleNext}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </Grid>
                 </Grid>
             )}{" "}

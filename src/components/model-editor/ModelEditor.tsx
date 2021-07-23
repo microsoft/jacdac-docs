@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useState, useEffect } from "react"
 import { createStyles, Box, Tabs, Tab } from "@material-ui/core"
 import TabPanel from "../ui/TabPanel"
 
@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme: Theme) =>
             marginRight: theme.spacing(1),
             marginBottom: theme.spacing(1.5),
             display: "inline-flex",
+            width: theme.spacing(35),
         },
         segment: {
             marginTop: theme.spacing(2),
@@ -52,13 +53,6 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
-function getDatasetFromLocalStorage() {
-    const dataObj = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
-    if (dataObj == null || dataObj == undefined) return new ModelDataset()
-    const modelEditorData = JSON.parse(dataObj)
-    return ModelDataset.createFromFile(modelEditorData["dataset"])
-}
-
 function getModelFromLocalStorage() {
     return new MBModel()
     /*const dataObj = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
@@ -71,22 +65,38 @@ export default function ModelPlayground() {
     const classes = useStyles()
     const chartPalette = useChartPalette()
 
-    const [dataset, setDataset] = useState<ModelDataset>(getDatasetFromLocalStorage())
-    const [tfModel, setTFModel] = useState<MBModel>(getModelFromLocalStorage())
+    const [dataset, setDataset] = useState<ModelDataset>(new ModelDataset())
+    const [tfModel, setTFModel] = useState<MBModel>(new MBModel())
+    const [tab, setTab] = useState<number>(0)
 
-    /* For choosing sensors */
+    const [pageReady, setPageReady] = useState(false)
+    useEffect(() => {
+        if (!pageReady) {            
+            const dataObj = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+            if (dataObj !== null && dataObj !== undefined) {
+                const modelEditorData = JSON.parse(dataObj)
 
-    /* For recording data*/
+                if (modelEditorData["dataset"]) setDataset(ModelDataset.createFromFile(modelEditorData["dataset"]))
+                // if (modelEditorData["model"]) setMBModel()
+                if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
+            }
+            setPageReady(true)
+        }
+    }, [dataset, tfModel, tab])
 
-    /*  For training model */
 
     /* Data and interface management */
-    const [tab, setTab] = useState(0)
     const handleTabChange = (
         event: React.ChangeEvent<unknown>,
-        newValue: number
+        newTab: number
     ) => {
-        setTab(newValue)
+        // save JSON string in local storage
+        localStorage.setItem(MODEL_EDITOR_STORAGE_KEY, JSON.stringify({
+            "dataset": dataset,
+            "model": tfModel,
+            "tab": newTab,
+        }))
+        setTab(newTab)
     }
 
     const handleDataChange = newDataset => {       
@@ -96,14 +106,23 @@ export default function ModelPlayground() {
         localStorage.setItem(MODEL_EDITOR_STORAGE_KEY, JSON.stringify({
             "dataset": newDataset,
             "model": tfModel,
+            "tab": tab,
         }))
 
         setDataset(newDataset)
     }
 
     const handleModelChange = newModel => {
-        setTFModel(newModel)
         console.log("Randi updated model from tab 1: ", newModel)
+
+        // save JSON string in local storage
+        localStorage.setItem(MODEL_EDITOR_STORAGE_KEY, JSON.stringify({
+            "dataset": dataset,
+            "model": newModel,
+            "tab": tab,
+        }))
+
+        setTFModel(newModel)
     }
 
     const nextTab = () => {
@@ -115,7 +134,7 @@ export default function ModelPlayground() {
     }
 
     return (
-        <Box mb={2}>
+        <> {pageReady && <Box mb={2}>
             <h1>ML Model Creator</h1>
             <p>
                 This page allows you to collect data from Jacdac sensors and use
@@ -156,6 +175,6 @@ export default function ModelPlayground() {
                     onNext={nextTab}
                 />
             </TabPanel>
-        </Box>
+        </Box>} </>
     )
 }

@@ -124,14 +124,20 @@ export default class FieldDataSet extends JDEventSource {
         return this.fields.indexOf(field)
     }
 
-    colorOf(field: JDField) {
-        return this.colors[this.indexOf(field)]
+    colorOf(field?: JDField, header?: string) {
+        if (field) return this.colors[this.indexOf(field)]
+        if (header) return this.colors[this.headers.indexOf(header)]
+        return ["#000"]
     }
 
     addRow(data?: number[]) {
         const timestamp = this.bus.timestamp
         if (!data) data = this.fields.map(f => f.value)
         this.addExample(timestamp, data)
+    }
+
+    addData(data: number[]) {
+        this.addExample(Date.now(), data)
     }
 
     private addExample(timestamp: number, data: number[]) {

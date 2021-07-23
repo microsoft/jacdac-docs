@@ -9,12 +9,10 @@ export default class MBModel extends JDEventSource {
     status: string
     inputShape: number[]
     outputShape: number
+    
     xs: tf.Tensor
     ys: tf.Tensor
-
     trainingAcc: number
-    topClass: string
-    prediction: any
 
     constructor(
         public labels?: string[],
@@ -48,8 +46,8 @@ export default class MBModel extends JDEventSource {
         }
 
         const modelSummary = [
-            "Model Status: " + this.status,
-            "Model Topology: ",
+            "Training Status: " + this.status,
+            "Topology: ",
         ]
 
         this.model.summary(undefined, undefined, newLine => {
