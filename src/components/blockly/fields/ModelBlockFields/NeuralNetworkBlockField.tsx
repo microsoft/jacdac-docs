@@ -9,6 +9,8 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import Blockly, { FieldVariable } from "blockly"
 
+import { openBlankDialog } from "../../../model-editor/ModelBlockModals"
+
 export interface NeuralNetworkBlockFieldValue {
     parametersVisible: boolean
     numLayers: number
@@ -142,13 +144,26 @@ function NNParameterWidget(props: {
 
     const handleViewModel = () => {
         console.log("Open NN classifier modal")
+        openBlankDialog()
     }
 
     return (
         <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
+            <Grid item style={{ display: "inline-flex", width:300 }}>
+                <Tooltip title="Open modal to view and run classifier">
+                    <Button
+                        onClick={handleViewModel}
+                        startIcon={<AutorenewIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Train Model
+                    </Button>
+                </Tooltip>
+            </Grid>
             <Grid item>
                 <Box color="text.secondary">
-                Learning rate
+                Learning rate 
                 <Tooltip title="Update the learning rate">
                     <TextField
                         id={"windowId"}
@@ -161,7 +176,7 @@ function NNParameterWidget(props: {
                 </Tooltip>
                 </Box>
                 <Box color="text.secondary">
-                    Optimizer
+                    Optimizer 
                     <Tooltip title="Update the optimizer">                     
                     <Select
                         id="optimizerId"
@@ -205,29 +220,11 @@ function NNParameterWidget(props: {
             </Grid>
             <Grid item>
                 <Box color="text.secondary">
-                    No. of Layers: {numLayers}
+                    No. of Layers: {numLayers}  <br />
+                    Classes: {classes.length ? classes.join(", ") : "none"}  <br />
+                    Model size: {modelSize}  <br />
+                    Cycles: {modelCycles}  <br />
                 </Box>
-                <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"}
-                </Box>
-                <Box color="text.secondary">
-                    Model size: {modelSize}
-                </Box>
-                <Box color="text.secondary">
-                    Cycles: {modelCycles}
-                </Box>
-            </Grid>
-            <Grid item>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleViewModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Compile
-                    </Button>
-                </Tooltip>
             </Grid>
         </Grid>
         } </>

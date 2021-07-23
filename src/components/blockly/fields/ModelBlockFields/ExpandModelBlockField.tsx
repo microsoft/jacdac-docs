@@ -14,18 +14,21 @@ import WorkspaceContext from "../../WorkspaceContext"
 
 function ExpandIconWidget() {
     const { sourceBlock, workspaceJSON } = useContext(WorkspaceContext)
-    const [parametersVisible, setParametersVisible] = useState(false)
 
-    /*useEffect(() => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<any>
-        setParametersVisible(parameterField.areParametersVisible())
-    }, [workspaceJSON])*/
+    const initializeParametersVisible = () => {
+        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<unknown>
+        if (parameterField) return parameterField.areParametersVisible()
+
+        return false
+    }
+    const [parametersVisible, setParametersVisible] = useState(initializeParametersVisible())
 
     const handleExpandBlock = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<any>
+        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<unknown>
         if (parameterField) {            
             parameterField.setParametersVisible(!parametersVisible)
-            setParametersVisible(parameterField.areParametersVisible())
+            // make sure parameters visible is aligned with the block
+            setParametersVisible(parameterField.areParametersVisible()) 
         }
     }
 

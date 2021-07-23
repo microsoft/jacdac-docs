@@ -106,7 +106,7 @@ function DatasetParameterWidget(props: {
                 const recordingBlockInputs = recordingParameterField.value.inputTypes
                 if (updatedInputs.length == 0) updatedInputs = recordingBlockInputs
                 if (!arraysEqual(updatedInputs, recordingBlockInputs)) {
-                    // Randi TODO attach warning to this block
+                    // Randi TODO attach warning to this block; gotta do this in ModelBlockEditor
                     console.log("Randi error with input types in block")
                 }
                 

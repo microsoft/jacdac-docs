@@ -162,7 +162,7 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "nn",
-                message0: "neural network classifier %1 training data %2 %3",
+                message0: "neural network classifier %1",
                 args0: [
                     {
                         type: "field_variable",
@@ -171,6 +171,9 @@ export class ModelBlockDomainSpecificLanguage
                         variableTypes: [MB_CLASSIFIER_VAR_TYPE],
                         defaultType: MB_CLASSIFIER_VAR_TYPE,
                     },
+                ],
+                message1: " training data %1 %2",
+                args1: [
                     {
                         type: "field_variable",
                         name: "NN_TRAINING",
@@ -183,15 +186,15 @@ export class ModelBlockDomainSpecificLanguage
                         name: "EXPAND_BUTTON",
                     },
                 ],
-                message1: "%1",
-                args1: [
+                message2: "%1",
+                args2: [
                     {
                         type: NeuralNetworkBlockField.KEY,
                         name: "BLOCK_PARAMS",
                     },
                 ],
-                message2: "%1",
-                args2: [
+                message3: "%1",
+                args3: [
                     {
                         type: "input_statement",
                         name: "NN_LAYERS",

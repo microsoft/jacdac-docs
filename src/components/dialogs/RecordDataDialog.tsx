@@ -329,7 +329,7 @@ export default function BlocklyDataRecordingDialog(props: {
                     <DialogContent>
                         <Grid container direction={"column"}>
                             <Grid item>
-                                <h2>Collect Data</h2>
+                                <h2>Collect new recording</h2>
                                 {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
                                 <div key="sensors">
                                     <div className={classes.row}>

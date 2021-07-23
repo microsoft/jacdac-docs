@@ -2,10 +2,14 @@
 import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
 import modelBlockDsl, {
     MODEL_BLOCKS,
-    MB_CLASS_TYPE,
-    MB_CLASSIFIER_TYPE,
-    MB_DATASET_TYPE,
+    MB_CLASS_VAR_TYPE,
+    MB_DATASET_VAR_TYPE,
+    MB_CLASSIFIER_VAR_TYPE,
 } from "./modelblockdsl"
+
+export function openBlankDialog() {
+    console.log("A dialog!")
+}
 
 // handling dialogs within Blockly
 export function addNewDataset(workspace) {
@@ -20,7 +24,7 @@ export function addNewDataset(workspace) {
                 // get or create new dataset typed variable
                 const newDatasetVar = workspace.createVariable(
                     newDatasetName,
-                    MB_DATASET_TYPE
+                    MB_DATASET_VAR_TYPE
                 )
 
                 // create new dataset block on the workspace
@@ -63,7 +67,7 @@ export function addNewClassifier(workspace) {
                 // get or creat new dataset typed variable
                 const newVariable = workspace.createVariable(
                     newVariableName,
-                    MB_CLASSIFIER_TYPE
+                    MB_CLASSIFIER_VAR_TYPE
                 )
 
                 // create new dataset block on the workspace
