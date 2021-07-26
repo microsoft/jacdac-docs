@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import {
     REPORT_UPDATE,
     SRV_BUTTON,
+    SRV_LIGHT_LEVEL,
     SRV_MICROPHONE,
     SRV_REFLECTED_LIGHT,
 } from "../../../jacdac-ts/src/jdom/constants"
@@ -46,9 +47,9 @@ export default function LightsensorAccessible() {
     // useServices accepts a number of filters and returns any services that match
     // get all led light sensor services
     // under the hood, it uses the bus and events.
-    const lightSensors = useServices({ serviceClass: SRV_REFLECTED_LIGHT})
+    const lightSensors = useServices({ serviceClass: SRV_LIGHT_LEVEL})
     console.log("light sensors: "  + lightSensors)
-    console.log(this.devices)
+    // console.log(this.devices)
 
     // create a state variable to hold the service selected as our light sensor
     // when using setLightService, React will render again this component
