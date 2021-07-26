@@ -87,10 +87,11 @@ export class BlockServices extends JDEventSource {
     set transformedData(value: object[]) {
         if (this._transformedData !== value) {
             this._transformedData = value
-            this.emit(CHANGE)
+            // don't update immediately transformed data or it
+            // generates an update loop
         }
     }
-    
+
     clearData() {
         this._data = undefined
         this._transformedData = undefined

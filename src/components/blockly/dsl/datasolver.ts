@@ -11,6 +11,7 @@ export function registerDataSolver(block: BlockWithServices) {
     services.on(CHANGE, async () => {
         if (!block.isEnabled() || block.isInFlyout) return
 
+        console.debug(`data transform [${block.id}]#${services.changeId}`)
         // transfer data
         const next = (block.nextConnection?.targetBlock() ||
             block.childBlocks_?.[0]) as BlockWithServices
