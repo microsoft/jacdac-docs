@@ -109,6 +109,9 @@ export interface BlockDefinition extends BlockReference {
 
     // run data transformation even when no follower
     alwaysTransformData?: boolean
+
+    // show data preview field
+    dataPreviewField?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
