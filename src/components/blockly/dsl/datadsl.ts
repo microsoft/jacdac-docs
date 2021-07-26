@@ -39,7 +39,7 @@ import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
 import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
-import DataTablePreviewField from "../fields/DataTablePreviewField"
+import DataPreviewField from "../fields/DataPreviewField"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -499,7 +499,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     name: "dataset",
                 },
                 {
-                    type: DataTablePreviewField.KEY,
+                    type: DataPreviewField.KEY,
                     name: "preview",
                 },
             ],

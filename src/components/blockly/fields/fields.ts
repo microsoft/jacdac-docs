@@ -21,7 +21,7 @@ import BarChartField from "./BarField"
 import PiePlotField from "./PieField"
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
-import DataTablePreviewField from "./DataTablePreviewField"
+import DataPreviewField from "./DataPreviewField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -57,7 +57,7 @@ export function registerFields() {
 
         VariablesField,
         DataTableField,
-        DataTablePreviewField,
+        DataPreviewField,
         DataColumnChooserField,
 
         BuiltinDataSetField,

@@ -1,48 +1,51 @@
 import React, { useContext } from "react"
 import WorkspaceContext from "../WorkspaceContext"
 import useBlockData from "../useBlockData"
-import { createStyles, makeStyles } from "@material-ui/core"
+import { makeStyles } from "@material-ui/core"
 import { TABLE_HEIGHT, TABLE_WIDTH } from "../toolbox"
 import { PointerBoundary } from "./PointerBoundary"
 
-const useStyles = makeStyles(() =>
-    createStyles({
-        root: {
-            paddingLeft: "0.5rem",
-            paddingRight: "0.5rem",
-            background: "#fff",
-            color: "#000",
-            borderRadius: "0.25rem",
-            width: `calc(${TABLE_WIDTH}px - 0.25rem)`,
-            height: `calc(${TABLE_HEIGHT}px - 0.25rem)`,
-            overflow: "auto",
-        },
-        table: {
-            margin: 0,
-            fontSize: "0.8rem",
-            lineHeight: "1rem",
+interface StylesProps {
+    tableHeight: number
+}
 
-            "& th, td": {
-                backgroundClip: "padding-box",
-                "scroll-snap-align": "start",
-            },
-            "& th": {
-                position: "sticky",
-                top: 0,
-                background: "white",
-            },
-            "& td": {
-                borderColor: "#ccc",
-                borderRightStyle: "solid 1px",
-            },
-        },
-    })
-)
+const useStyles = makeStyles(() => ({
+    root: (props: StylesProps) => ({
+        paddingLeft: "0.5rem",
+        paddingRight: "0.5rem",
+        background: "#fff",
+        color: "#000",
+        borderRadius: "0.25rem",
+        width: `calc(${TABLE_WIDTH}px - 0.25rem)`,
+        height: `calc(${props.tableHeight}px - 0.25rem)`,
+        overflow: "auto",
+    }),
+    table: {
+        margin: 0,
+        fontSize: "0.8rem",
+        lineHeight: "1rem",
 
-export function DataTableWidget() {
+        "& th, td": {
+            backgroundClip: "padding-box",
+            "scroll-snap-align": "start",
+        },
+        "& th": {
+            position: "sticky",
+            top: 0,
+            background: "white",
+        },
+        "& td": {
+            borderColor: "#ccc",
+            borderRightStyle: "solid 1px",
+        },
+    },
+}))
+
+export function DataTableWidget(props: { tableHeight?: number }) {
+    const { tableHeight = TABLE_HEIGHT } = props
     const { sourceBlock } = useContext(WorkspaceContext)
     const { data } = useBlockData<{ id?: string } & unknown>(sourceBlock)
-    const classes = useStyles()
+    const classes = useStyles({ tableHeight })
 
     if (!data?.length) return null
 
