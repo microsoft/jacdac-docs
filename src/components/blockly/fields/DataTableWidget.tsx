@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { ReactNode, useContext } from "react"
 import WorkspaceContext from "../WorkspaceContext"
 import useBlockData from "../useBlockData"
 import { makeStyles } from "@material-ui/core"
@@ -10,6 +10,13 @@ interface StylesProps {
 }
 
 const useStyles = makeStyles(() => ({
+    empty: {
+        paddingLeft: "0.5rem",
+        paddingRight: "0.5rem",
+        background: "#fff",
+        color: "#000",
+        borderRadius: "0.25rem",
+    },
     root: (props: StylesProps) => ({
         paddingLeft: "0.5rem",
         paddingRight: "0.5rem",
@@ -41,13 +48,17 @@ const useStyles = makeStyles(() => ({
     },
 }))
 
-export function DataTableWidget(props: { tableHeight?: number }) {
-    const { tableHeight = TABLE_HEIGHT } = props
+export function DataTableWidget(props: {
+    tableHeight?: number
+    empty?: ReactNode
+}): JSX.Element {
+    const { tableHeight = TABLE_HEIGHT, empty } = props
     const { sourceBlock } = useContext(WorkspaceContext)
     const { data } = useBlockData<{ id?: string } & unknown>(sourceBlock)
     const classes = useStyles({ tableHeight })
 
-    if (!data?.length) return null
+    if (!data?.length)
+        return empty ? <span className={classes.empty}>{empty}</span> : null
 
     const columns = Object.keys(data[0] || {})
 
