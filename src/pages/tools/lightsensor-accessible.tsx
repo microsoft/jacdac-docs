@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import {
     REPORT_UPDATE,
     SRV_BUTTON,
+    SRV_LIGHT_LEVEL,
     SRV_MICROPHONE,
     SRV_LIGHT_LEVEL,
     LightLevelVariant,
