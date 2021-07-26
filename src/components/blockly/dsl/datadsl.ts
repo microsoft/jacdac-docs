@@ -2,14 +2,12 @@
 import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
-import DataTableField from "../fields/DataTableField"
 import {
     BlockDefinition,
     BlockReference,
     ButtonDefinition,
     CategoryDefinition,
     DATA_SCIENCE_STATEMENT_TYPE,
-    DummyInputDefinition,
     identityTransformData,
     NumberInputDefinition,
     OptionsInputDefinition,
@@ -39,7 +37,6 @@ import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
 import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
-import DataPreviewField from "../fields/DataPreviewField"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -56,7 +53,6 @@ const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
 const DATA_TABLE_TYPE = "DataTable"
-const DATA_SHOW_TABLE_BLOCK = "data_show_table"
 const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
 const DATA_BIN_BLOCK = "data_bin"
 const DATA_CORRELATION_BLOCK = "data_correlation"
@@ -68,26 +64,6 @@ const colour = "#777"
 const dataDsl: BlockDomainSpecificLanguage = {
     id: "dataScience",
     createBlocks: () => [
-        {
-            kind: "block",
-            type: DATA_SHOW_TABLE_BLOCK,
-            message0: "show table %1 %2",
-            args0: [
-                <DummyInputDefinition>{
-                    type: "input_dummy",
-                },
-                {
-                    type: DataTableField.KEY,
-                    name: "table",
-                },
-            ],
-            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
-            template: "meta",
-            inputsInline: false,
-            transformData: identityTransformData,
-        },
         {
             kind: "block",
             type: DATA_ARRANGE_BLOCK,
@@ -763,7 +739,6 @@ const dataDsl: BlockDomainSpecificLanguage = {
             name: "Operators",
             colour,
             contents: [
-                <BlockReference>{ kind: "block", type: DATA_SHOW_TABLE_BLOCK },
                 <BlockReference>{
                     kind: "block",
                     type: DATA_ARRANGE_BLOCK,
