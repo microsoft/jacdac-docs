@@ -49,18 +49,22 @@ const useStyles = makeStyles(() => ({
 }))
 
 export function DataTableWidget(props: {
+    transformed?: boolean
     tableHeight?: number
     empty?: ReactNode
 }): JSX.Element {
-    const { tableHeight = TABLE_HEIGHT, empty } = props
+    const { transformed, tableHeight = TABLE_HEIGHT, empty } = props
     const { sourceBlock } = useContext(WorkspaceContext)
-    const { data } = useBlockData<{ id?: string } & unknown>(sourceBlock)
+    const { data, transformedData } = useBlockData<{ id?: string } & unknown>(
+        sourceBlock
+    )
+    const table = transformed ? transformedData : data 
     const classes = useStyles({ tableHeight })
 
-    if (!data?.length)
+    if (!table?.length)
         return empty ? <span className={classes.empty}>{empty}</span> : null
 
-    const columns = Object.keys(data[0] || {})
+    const columns = Object.keys(table[0] || {})
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const renderCell = (v: any) =>
@@ -77,7 +81,7 @@ export function DataTableWidget(props: {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((r, i) => (
+                    {table.map((r, i) => (
                         <tr key={r.id || i}>
                             {columns.map(c => (
                                 <td key={c}>{renderCell(r[c])}</td>

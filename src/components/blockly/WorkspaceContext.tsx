@@ -68,6 +68,7 @@ export interface FieldWithServices {
 
 export class BlockServices extends JDEventSource {
     private _data: object[]
+    private _transformedData: object[]
     private _chartProps: object
 
     get data() {
@@ -76,14 +77,24 @@ export class BlockServices extends JDEventSource {
     set data(value: object[]) {
         if (this._data !== value) {
             this._data = value
+            this._transformedData = undefined
             this.emit(CHANGE)
         }
     }
-    setDataNoEvent(value: object[]) {
-        this._data = value;
+    get transformedData() {
+        return this._transformedData
     }
+    set transformedData(value: object[]) {
+        if (this._transformedData !== value) {
+            this._transformedData = value
+            this.emit(CHANGE)
+        }
+    }
+    
     clearData() {
-        this.data = undefined
+        this._data = undefined
+        this._transformedData = undefined
+        this.emit(CHANGE)
     }
 
     get chartProps() {

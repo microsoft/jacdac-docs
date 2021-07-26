@@ -558,7 +558,6 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             colour,
             template: "meta",
-            alwaysTransformData: true,
             dataPreviewField: true,
             transformData: (block: BlockSvg, data: object[]) => {
                 // grab the variable from the block
@@ -727,7 +726,6 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
-            alwaysTransformData: true,
             dataPreviewField: true,
             transformData: async (block, data) => {
                 const file = block.getField("file") as FileSaveField

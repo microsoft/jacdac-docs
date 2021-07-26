@@ -23,7 +23,13 @@ export default class DataPreviewField extends ReactField<ReactFieldJSON> {
     }
 
     renderField(): ReactNode {
-        return <DataTableWidget tableHeight={295} empty={"no data"} />
+        return (
+            <DataTableWidget
+                tableHeight={295}
+                empty={"no data"}
+                transformed={true}
+            />
+        )
     }
 }
 
