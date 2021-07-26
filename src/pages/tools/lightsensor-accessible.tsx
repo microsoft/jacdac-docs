@@ -3,7 +3,8 @@ import {
     REPORT_UPDATE,
     SRV_BUTTON,
     SRV_MICROPHONE,
-    SRV_REFLECTED_LIGHT,
+    SRV_LIGHT_LEVEL,
+    LightLevelVariant,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 import useServices from "../../components/hooks/useServices"
@@ -34,7 +35,7 @@ const TONE_THROTTLE = 100
 
 // this is a React component that gets run numerous time,
 // whenever a change is detected in the React state
-// for example, useServices is a hook that tracks the reflected light services,
+// for example, useServices is a hook that tracks the light level services,
 // so it will render again and update the light array whenever the bus connects/disconnects
 // a light sensor
 export default function LightsensorAccessible() {
@@ -46,9 +47,8 @@ export default function LightsensorAccessible() {
     // useServices accepts a number of filters and returns any services that match
     // get all led light sensor services
     // under the hood, it uses the bus and events.
-    const lightSensors = useServices({ serviceClass: SRV_REFLECTED_LIGHT})
+    const lightSensors = useServices({ serviceClass: SRV_LIGHT_LEVEL})
     console.log("light sensors: "  + lightSensors)
-    console.log(this.devices)
 
     // create a state variable to hold the service selected as our light sensor
     // when using setLightService, React will render again this component
@@ -65,6 +65,7 @@ export default function LightsensorAccessible() {
     const [volume, setVolume] = useState(1)
 
     const handleSelectLightService = light => () => {
+        console.log(light)
         lightService == light ? setLightService(undefined) : setLightService(light)
     }
     //handler for property selection to sonify.
@@ -74,7 +75,7 @@ export default function LightsensorAccessible() {
 
     // filter to only show light sensors in dashboard
     const dashboardDeviceFilter = (d: JDDevice) =>
-        d.hasService(SRV_REFLECTED_LIGHT)
+        d.hasService(SRV_LIGHT_LEVEL)
 
     // register for light sensor data events
     useEffect(() => {
@@ -83,7 +84,7 @@ export default function LightsensorAccessible() {
             REPORT_UPDATE,
             // don't trigger more than every 100ms
             throttle(async () => {
-                // get amount of reflected light
+                // get amount of light
                 //console.log(lightService.readingRegister.unpackedValue)
                 const [lightLevel] = lightService.readingRegister.unpackedValue
                 if(sonificationProperty == 'frequency')
@@ -117,7 +118,7 @@ export default function LightsensorAccessible() {
                             <>
                             <GridHeader title="Connect a device" />
                             <Grid item xs>
-                                <ConnectAlert serviceClass={SRV_REFLECTED_LIGHT}/>
+                                <ConnectAlert serviceClass={SRV_LIGHT_LEVEL}/>
                             </Grid>
                             </>
                         )}
@@ -140,6 +141,37 @@ export default function LightsensorAccessible() {
                                             }
                                         </Typography>
                                     </CardContent>
+                                    <CardActions>
+                                        <FormControl component="fieldset">
+                                            <FormLabel component="legend">
+                                                    Select property of sound to change
+                                            </FormLabel>
+                                                <RadioGroup
+                                                    aria-label="sonification property"
+                                                    name="soundProperty"
+                                                    value={sonificationProperty}
+                                                    onChange={
+                                                        handlePropertySelectionChange
+                                                    }>
+                                                <FormControlLabel
+                                                    value="frequency"
+                                                    control={<Radio />}
+                                                    label="buzzer frequency"
+                                                />
+                                                <FormControlLabel
+                                                    value="volume"
+                                                    control={<Radio />}
+                                                    label="buzzer volume"
+                                                />
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <Button
+                                            variant={"outlined"}
+                                            onClick={handleSelectLightService(lightSensor)}
+                                        >
+                                        {lightSensor === lightService ? "Stop streaming" : "Start streaming"}
+                                        </Button>
+                                    </CardActions>
                                 </Grid>
                             ))}
                             </>
