@@ -37,8 +37,9 @@ import {
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
-import { saveCSV, openCSV } from "./workers/csv.proxy"
+import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
+import DataTablePreviewField from "../fields/DataTablePreviewField"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -496,6 +497,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 {
                     type: BuiltinDataSetField.KEY,
                     name: "dataset",
+                },
+                {
+                    type: DataTablePreviewField.KEY,
+                    name: "preview",
                 },
             ],
             inputsInline: false,
