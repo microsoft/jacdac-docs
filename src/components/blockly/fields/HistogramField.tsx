@@ -11,13 +11,15 @@ const VegaLite = lazy(() => import("./VegaLite"))
 function HistogramWidget() {
     const { sourceBlock } = useContext(WorkspaceContext)
     const { data } = useBlockData(sourceBlock)
-
+    const hasData = !!data?.length
     // need to map data to vega-lite
     const index = sourceBlock?.getFieldValue("index")
 
+    if (!hasData || !index) return null
+
     console.log("histogram", { index, data })
 
-    const histogram_spec = {
+    const histogram_spec: any = {
         description: `Histogram of ${index}`,
         mark: { type: "bar", tooltip: true },
         encoding: {
