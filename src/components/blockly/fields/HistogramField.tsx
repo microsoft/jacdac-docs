@@ -6,6 +6,7 @@ import useBlockData from "../useBlockData"
 import { PointerBoundary } from "./PointerBoundary"
 import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
+import { CHART_HEIGHT, CHART_WIDTH } from "../toolbox"
 const VegaLite = lazy(() => import("./VegaLite"))
 
 function HistogramWidget() {
@@ -38,7 +39,12 @@ function HistogramWidget() {
             <div style={{ background: "#fff", borderRadius: "0.25rem" }}>
                 <PointerBoundary>
                     <Suspense>
-                        <VegaLite spec={histogram_spec} data={histogram_data} />
+                        <VegaLite
+                            width={CHART_WIDTH}
+                            height={CHART_HEIGHT}
+                            spec={histogram_spec}
+                            data={histogram_data}
+                        />
                     </Suspense>
                 </PointerBoundary>
             </div>
