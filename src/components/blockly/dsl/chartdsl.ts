@@ -186,7 +186,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: HISTOGRAM_BLOCK,
-            message0: "histogram index %1 %2 %3",
+            message0: "histogram of %1 %2 %3",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
