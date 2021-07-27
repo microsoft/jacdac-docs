@@ -6,7 +6,7 @@ import {
     Paper,
     Typography,
 } from "@material-ui/core"
-import React, { useCallback, useEffect, useRef } from "react"
+import React, { useCallback, useContext, useEffect, useRef } from "react"
 import {
     RESTART,
     SRV_CONTROL,
@@ -30,9 +30,9 @@ import DashboardServiceDetails from "./DashboardServiceDetails"
 import useDeviceName from "../devices/useDeviceName"
 import { DashboardDeviceProps } from "./Dashboard"
 import useIntersectionObserver from "../hooks/useIntersectionObserver"
-import { dependencyId } from "../../../jacdac-ts/src/jdom/node"
+import { dependencyId } from "../../../jacdac-ts/src/jdom/eventsource"
 import useMediaQueries from "../hooks/useMediaQueries"
-import { useSnackbar } from "notistack"
+import AppContext from "../AppContext"
 import { DeviceLostAlert } from "../alert/DeviceLostAlert"
 
 const ignoredServices = [SRV_CONTROL, SRV_LOGGER, SRV_SETTINGS, SRV_PROTO_TEST]
@@ -54,28 +54,29 @@ export default function DashboardDevice(
         showAvatar,
         showHeader,
     } = props
-    const name = useDeviceName(device)
-    const services = useChange(device, () =>
-        device
-            .services({ specification: true })
-            .filter(
-                service => ignoredServices.indexOf(service.serviceClass) < 0
-            )
-    )
-    const specification = useDeviceSpecification(device)
+    const { enqueueSnackbar } = useContext(AppContext)
     const { xs: mobile } = useMediaQueries()
+
+    const name = useDeviceName(device)
+    const specification = useDeviceSpecification(device)
+    const services = useChange(device, _ =>
+        _?.services({ specification: true }).filter(
+            service => ignoredServices.indexOf(service.serviceClass) < 0
+        )
+    )
+
+    // refresh when visible
     const serviceGridRef = useRef<HTMLDivElement>()
     const intersection = useIntersectionObserver(serviceGridRef)
     const visible = !!intersection?.isIntersecting
-    const { enqueueSnackbar } = useSnackbar()
 
-    useEffect(() =>
-        device?.subscribe(RESTART, () => {
-            console.debug(`${device.shortId} restarted...`)
-            enqueueSnackbar(`${device.shortId} restarted...`, {
-                variant: "warning",
-            })
-        })
+    // track restart events
+    useEffect(
+        () =>
+            device?.subscribe(RESTART, () =>
+                enqueueSnackbar(`${device.shortId} restarted...`, "info")
+            ),
+        [device]
     )
 
     const ServiceWidgets = useCallback(

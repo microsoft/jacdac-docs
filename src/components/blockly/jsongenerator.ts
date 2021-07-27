@@ -2,45 +2,8 @@ import Blockly from "blockly"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import { SMap, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import BlockDomainSpecificLanguage, { resolveDsl } from "./dsl/dsl"
-import ReactField from "./fields/ReactField"
-
-export interface VariableJSON {
-    // Boolean, Number, String, or service short id
-    type: string
-    id: string
-    name: string
-}
-
-export type FieldJSON = {
-    id?: string
-    value?: number | string | boolean
-    // Boolean, Number, String, or service short id
-    variabletype?: string
-    // and extra fields, subclass
-}
-
-export interface InputJSON {
-    type: number
-    name: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fields: SMap<FieldJSON>
-    child?: BlockJSON
-}
-
-export interface BlockJSON {
-    type: string
-    id: string
-    children?: BlockJSON[]
-    value?: string | number | boolean
-    inputs?: InputJSON[]
-    next?: BlockJSON
-    warning?: string
-}
-
-export interface WorkspaceJSON {
-    variables: VariableJSON[]
-    blocks: BlockJSON[]
-}
+import { ReactFieldBase } from "./fields/ReactFieldBase"
+import { VariableJSON, WorkspaceJSON, BlockJSON, InputJSON } from "../../../jacdac-ts/src/dsl/workspacejson"
 
 export function domToJSON(
     workspace: Blockly.Workspace,
@@ -94,9 +57,9 @@ export function domToJSON(
     const fieldToJSON = (field: Blockly.Field) => {
         if (field.isSerializable()) {
             // custom field can just return the value
-            if (field instanceof ReactField) {
+            if (field instanceof ReactFieldBase) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const value = (field as ReactField<any>).value
+                const value = (field as ReactFieldBase<any>).value
                 return { value }
             } else {
                 const container = Blockly.utils.xml.createElement("field")

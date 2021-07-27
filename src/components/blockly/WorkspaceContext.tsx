@@ -7,6 +7,7 @@ import React, {
     useEffect,
     useState,
 } from "react"
+import { WorkspaceJSON } from "../../../jacdac-ts/src/dsl/workspacejson"
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
@@ -14,7 +15,6 @@ import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import { VMProgramRunner } from "../../../jacdac-ts/src/vm/runner"
 import useChange from "../../jacdac/useChange"
 import ReactField from "./fields/ReactField"
-import { WorkspaceJSON } from "./jsongenerator"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
 export class WorkspaceServices extends JDEventSource {
@@ -68,6 +68,7 @@ export interface FieldWithServices {
 
 export class BlockServices extends JDEventSource {
     private _data: object[]
+    private _transformedData: object[]
     private _chartProps: object
 
     get data() {
@@ -76,14 +77,25 @@ export class BlockServices extends JDEventSource {
     set data(value: object[]) {
         if (this._data !== value) {
             this._data = value
+            this._transformedData = undefined
             this.emit(CHANGE)
         }
     }
-    setDataNoEvent(value: object[]) {
-        this._data = value;
+    get transformedData() {
+        return this._transformedData
     }
+    set transformedData(value: object[]) {
+        if (this._transformedData !== value) {
+            this._transformedData = value
+            // don't update immediately transformed data or it
+            // generates an update loop
+        }
+    }
+
     clearData() {
-        this.data = undefined
+        this._data = undefined
+        this._transformedData = undefined
+        this.emit(CHANGE)
     }
 
     get chartProps() {

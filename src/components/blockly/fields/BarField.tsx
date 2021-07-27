@@ -8,6 +8,7 @@ import { PointerBoundary } from "./PointerBoundary"
 import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
 import { tidyToNivo } from "./nivo"
+import { BAR_MAX_ITEMS, CHART_HEIGHT, CHART_WIDTH } from "../toolbox"
 const Bar = lazy(() => import("./Bar"))
 
 function BarChartWidget() {
@@ -20,7 +21,10 @@ function BarChartWidget() {
     const { series, labels } = tidyToNivo(
         data,
         [index, value],
-        ["index", "value"]
+        ["index", "value"],
+        {
+            sliceHead: BAR_MAX_ITEMS,
+        }
     )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { chartProps } = useBlockChartProps<any>(sourceBlock, {
@@ -59,7 +63,11 @@ function BarChartWidget() {
             <div style={{ background: "#fff", borderRadius: "0.25rem" }}>
                 <PointerBoundary>
                     <Suspense>
-                        <Bar width={388} height={240} {...chartProps} />
+                        <Bar
+                            width={CHART_WIDTH}
+                            height={CHART_HEIGHT}
+                            {...chartProps}
+                        />
                     </Suspense>
                 </PointerBoundary>
             </div>

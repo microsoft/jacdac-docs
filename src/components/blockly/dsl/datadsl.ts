@@ -2,14 +2,12 @@
 import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
-import DataTableField from "../fields/DataTableField"
 import {
     BlockDefinition,
     BlockReference,
     ButtonDefinition,
     CategoryDefinition,
     DATA_SCIENCE_STATEMENT_TYPE,
-    DummyInputDefinition,
     identityTransformData,
     NumberInputDefinition,
     OptionsInputDefinition,
@@ -37,8 +35,10 @@ import {
 } from "../../../workers/data/dist/node_modules/data.worker"
 import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
-import { saveCSV, openCSV } from "./workers/csv.proxy"
+import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
+import palette from "./palette"
+import { tidyHeaders } from "../fields/nivo"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -55,7 +55,6 @@ const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
 const DATA_TABLE_TYPE = "DataTable"
-const DATA_SHOW_TABLE_BLOCK = "data_show_table"
 const DATA_RECORD_WINDOW_BLOCK = "data_record_window"
 const DATA_BIN_BLOCK = "data_bin"
 const DATA_CORRELATION_BLOCK = "data_correlation"
@@ -63,35 +62,17 @@ const DATA_LINEAR_REGRESSION_BLOCK = "data_linear_regression"
 const DATA_LOAD_FILE_BLOCK = "data_load_file"
 const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
-const colour = "#777"
+const [datasetColour, operatorsColour, statisticsColour] = palette()
+const dataVariablesColour = "%{BKY_VARIABLES_HUE}"
+
 const dataDsl: BlockDomainSpecificLanguage = {
     id: "dataScience",
     createBlocks: () => [
         {
             kind: "block",
-            type: DATA_SHOW_TABLE_BLOCK,
-            message0: "show table %1 %2",
-            args0: [
-                <DummyInputDefinition>{
-                    type: "input_dummy",
-                },
-                {
-                    type: DataTableField.KEY,
-                    name: "table",
-                },
-            ],
-            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
-            template: "meta",
-            inputsInline: false,
-            transformData: identityTransformData,
-        },
-        {
-            kind: "block",
             type: DATA_ARRANGE_BLOCK,
             message0: "arrange %1 %2",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -108,6 +89,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
@@ -126,7 +108,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_DROP_BLOCK,
             message0: "drop %1 %2 %3",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -143,11 +125,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
-                const columns = [1, 2, 3].map(column =>
-                    b.getFieldValue(`column${column}`)
-                )
+                const columns = [1, 2, 3]
+                    .map(column => b.getFieldValue(`column${column}`))
+                    .filter(c => !!c)
                 return postTransformData(<DataDropRequest>{
                     type: "drop",
                     columns,
@@ -160,7 +143,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_SELECT_BLOCK,
             message0: "select %1 %2 %3",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -177,11 +160,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
-                const columns = [1, 2, 3].map(column =>
-                    b.getFieldValue(`column${column}`)
-                )
+                const columns = [1, 2, 3]
+                    .map(column => b.getFieldValue(`column${column}`))
+                    .filter(c => !!c)
                 return postTransformData(<DataSelectRequest>{
                     type: "select",
                     columns,
@@ -194,7 +178,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_FILTER_COLUMNS_BLOCK,
             message0: "filter %1 %2 %3",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -219,11 +203,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
-                const columns = [1, 2].map(column => {
-                    return b.getFieldValue(`column${column}`)
-                })
+                const columns = [1, 2]
+                    .map(column => b.getFieldValue(`column${column}`))
+                    .filter(c => !!c)
                 const logic = b.getFieldValue("logic")
                 return postTransformData(<DataFilterColumnsRequest>{
                     type: "filter_columns",
@@ -238,7 +223,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_FILTER_STRING_BLOCK,
             message0: "filter %1 %2 %3",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -263,6 +248,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
@@ -282,7 +268,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_MUTATE_COLUMNS_BLOCK,
             message0: "mutate %1 %2 %3 %4",
-            colour,
+            colour: operatorsColour,
             args0: [
                 <TextInputDefinition>{
                     type: "field_input",
@@ -315,6 +301,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const newcolumn = b.getFieldValue("newcolumn")
@@ -336,7 +323,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_MUTATE_NUMBER_BLOCK,
             message0: "mutate %1 %2 %3 %4",
-            colour,
+            colour: operatorsColour,
             args0: [
                 <TextInputDefinition>{
                     type: "field_input",
@@ -369,6 +356,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const newcolumn = b.getFieldValue("newcolumn")
@@ -390,7 +378,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_SUMMARIZE_BLOCK,
             message0: "summarize %1 calculate %2",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -409,13 +397,15 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
+                const columns = column ? [column] : tidyHeaders(data, "number")?.headers
                 const calc = b.getFieldValue("calc")
                 return postTransformData(<DataSummarizeRequest>{
                     type: "summarize",
-                    column,
+                    columns,
                     calc,
                     data,
                 })
@@ -426,7 +416,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_SUMMARIZE_BY_GROUP_BLOCK,
             message0: "group %1 by %2 calculate %3",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -440,15 +430,16 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "field_dropdown",
                     name: "calc",
                     options: [
-                        ["Mean", "mean"],
-                        ["Median", "med"],
-                        ["Min", "min"],
-                        ["Max", "max"],
+                        ["mean", "mean"],
+                        ["median", "med"],
+                        ["min", "min"],
+                        ["max", "max"],
                     ],
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
@@ -468,7 +459,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_COUNT_BLOCK,
             message0: "count %1",
-            colour,
+            colour: operatorsColour,
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -477,6 +468,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: BlockSvg, data: any[]) => {
                 const column = b.getFieldValue("column")
@@ -500,8 +492,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             inputsInline: false,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: datasetColour,
             template: "meta",
+            dataPreviewField: true,
             transformData: identityTransformData,
         },
         <BlockDefinition>{
@@ -519,8 +512,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             inputsInline: false,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: dataVariablesColour,
             template: "meta",
+            dataPreviewField: true,
             transformData: (block: BlockSvg) => {
                 const services = (block as BlockWithServices).jacdacServices
                 const data = services?.data
@@ -543,9 +537,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             inputsInline: false,
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: dataVariablesColour,
             template: "meta",
-            alwaysTransformData: true,
+            dataPreviewField: true,
             transformData: (block: BlockSvg, data: object[]) => {
                 // grab the variable from the block
                 const variable = block.getFieldValue("data")
@@ -577,8 +571,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             inputsInline: false,
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: operatorsColour,
             template: "meta",
+            dataPreviewField: true,
             transformData: async (
                 block: BlockSvg,
                 data: { time: number }[],
@@ -606,8 +601,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             inputsInline: false,
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: operatorsColour,
             template: "meta",
+            dataPreviewField: true,
             transformData: async (block: BlockSvg, data: object[]) => {
                 const column = block.getFieldValue("column")
                 return postTransformData(<DataBinRequest>{
@@ -634,8 +630,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             inputsInline: false,
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: statisticsColour,
             template: "meta",
+            dataPreviewField: true,
             transformData: async (block: BlockSvg, data: object[]) => {
                 const column1 = block.getFieldValue("column1")
                 const column2 = block.getFieldValue("column2")
@@ -664,8 +661,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             inputsInline: false,
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: statisticsColour,
             template: "meta",
+            dataPreviewField: true,
             transformData: async (block: BlockSvg, data: object[]) => {
                 const column1 = block.getFieldValue("column1")
                 const column2 = block.getFieldValue("column2")
@@ -680,7 +678,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: DATA_LOAD_FILE_BLOCK,
-            message0: "dataset from file %1",
+            message0: "load dataset from file %1",
             args0: [
                 {
                     type: FileOpenField.KEY,
@@ -688,9 +686,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 },
             ],
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: datasetColour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: true,
             transformData: identityTransformData,
         },
         {
@@ -705,10 +704,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-            colour,
+            colour: datasetColour,
             template: "meta",
             inputsInline: false,
-            alwaysTransformData: true,
+            dataPreviewField: true,
             transformData: async (block, data) => {
                 const file = block.getField("file") as FileSaveField
                 if (file?.fileHandle && data)
@@ -724,7 +723,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <CategoryDefinition>{
             kind: "category",
             name: "Data sets",
-            colour,
+            colour: datasetColour,
             contents: [
                 <BlockReference>{
                     kind: "block",
@@ -743,9 +742,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <CategoryDefinition>{
             kind: "category",
             name: "Operators",
-            colour,
+            colour: operatorsColour,
             contents: [
-                <BlockReference>{ kind: "block", type: DATA_SHOW_TABLE_BLOCK },
                 <BlockReference>{
                     kind: "block",
                     type: DATA_ARRANGE_BLOCK,
@@ -799,7 +797,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <CategoryDefinition>{
             kind: "category",
             name: "Statistics",
-            colour,
+            colour: statisticsColour,
             contents: [
                 <BlockReference>{
                     kind: "block",
@@ -814,7 +812,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <CategoryDefinition>{
             kind: "category",
             name: "Data variables",
-            colour,
+            colour: dataVariablesColour,
             contents: [
                 <ButtonDefinition>{
                     kind: "button",

@@ -39,7 +39,6 @@ import Breadcrumbs from "./ui/Breadcrumbs"
 import ForumIcon from "@material-ui/icons/Forum"
 import useMediaQueries from "./hooks/useMediaQueries"
 import { UIFlags } from "../jacdac/providerbus"
-import { useSnackbar } from "notistack"
 import { HideOnScroll } from "./ui/HideOnScroll"
 import OpenVMEditorButton from "./buttons/OpenVMEditorButton"
 
@@ -326,9 +325,10 @@ function LayoutWithContext(props: LayoutProps) {
     const { pageContext, path, location } = pageProps
     const { frontmatter } = pageContext || {}
     const makeCodeTool = /tools\/makecode-/.test(path)
-    const fullWidthTools = /^\/(tools\/(makecode-|vm-editor)|dashboard)/.test(
-        path
-    )
+    const fullWidthTools =
+        /^\/(tools\/(makecode-|vm-editor|data-science-editor)|dashboard)/.test(
+            path
+        )
     const {
         hideMainMenu = false,
         hideUnderConstruction = false,
@@ -342,8 +342,7 @@ function LayoutWithContext(props: LayoutProps) {
     const classes = useStyles()
 
     const { darkMode } = useContext(DarkModeContext)
-    const { drawerType, toolsMenu } = useContext(AppContext)
-    const { enqueueSnackbar } = useSnackbar()
+    const { drawerType, toolsMenu, enqueueSnackbar } = useContext(AppContext)
     const drawerOpen = drawerType !== DrawerType.None
     const { medium } = useMediaQueries()
     const container = !medium && !fullWidthTools
@@ -361,9 +360,7 @@ function LayoutWithContext(props: LayoutProps) {
             enqueueSnackbar(
                 `UNDER CONSTRUCTION - We are still working and changing the
             Jacdac specification. Do not build devices using Jacdac.`,
-                {
-                    variant: "warning",
-                }
+                `warning`
             )
     }, [])
 

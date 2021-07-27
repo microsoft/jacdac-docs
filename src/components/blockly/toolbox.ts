@@ -1,6 +1,7 @@
 import { SMap } from "../../../jacdac-ts/src/jdom/utils"
 import Blockly, { Block, Workspace } from "blockly"
 import { BlockWithServices } from "./WorkspaceContext"
+import { paletteColorByIndex } from "./dsl/palette"
 
 export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -63,8 +64,8 @@ export type RegisterTemplate =
     | "register_set"
     | "register_get"
     // server blocks
-    | "register_set_server"   // register name, expr hole for return value
-    | "register_get_server"   // register name, special expr block
+    | "register_set_server" // register name, expr hole for return value
+    | "register_get_server" // register name, special expr block
 
 export type CommandTemplate = "command" | "server" | "raiseNo" | "raiseArgs"
 
@@ -107,8 +108,8 @@ export interface BlockDefinition extends BlockReference {
         // eslint-disable-next-line @typescript-eslint/ban-types
     ) => Promise<object[]>
 
-    // run data transformation even when no follower
-    alwaysTransformData?: boolean
+    // show data preview field
+    dataPreviewField?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -172,12 +173,16 @@ export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
 
 export const TWIN_BLOCK = "jacdac_tools_twin"
 
-export const toolsColour = "#888"
+export const toolsColour = paletteColorByIndex(-1)
 
 export const CHART_WIDTH = 388
 export const CHART_HEIGHT = 240
 export const TABLE_WIDTH = CHART_WIDTH
 export const TABLE_HEIGHT = 480
+export const ANIMATE_MAX_ITEMS = 128
+export const PIE_MAX_ITEMS = 12
+export const BAR_MAX_ITEMS = 1 << 10
+export const SCATTER_MAX_ITEMS = 1 << 13
 
 export const VM_WARNINGS_CATEGORY = "vm"
 export const JSON_WARNINGS_CATEGORY = "json"
@@ -213,7 +218,7 @@ export interface CategoryDefinition extends ContentDefinition {
 export interface ButtonDefinition extends ContentDefinition {
     kind: "button"
     text: string
-    callbackKey: string,
+    callbackKey: string
     callback: (workspace: Workspace) => void
 }
 

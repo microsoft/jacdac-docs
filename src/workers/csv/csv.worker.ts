@@ -26,6 +26,15 @@ export interface CsvSaveRequest extends CsvFileRequest {
     data: object[]
 }
 
+export interface CsvUnparseRequest extends CsvRequest {
+    type: "unparse"
+    data: object[]
+}
+
+export interface CsvUnparseResponse extends CsvMessage {
+    text: string
+}
+
 export interface CsvParseRequest extends CsvRequest {
     type: "parse"
     source: string
@@ -42,8 +51,7 @@ export interface CsvFile {
     }[]
 }
 
-export interface CsvResponse extends CsvMessage {
-    worker: "csv"
+export interface CsvFileResponse extends CsvMessage {
     file: CsvFile
 }
 
@@ -102,20 +110,33 @@ const handlers: { [index: string]: (msg: CsvRequest) => Promise<object> } = {
             })
         })
     },
+    unparse: async (msg: CsvUnparseRequest) => {
+        const { data } = msg
+        const text = Papa.unparse(data)
+        return { text }
+    },
 }
 
 async function handleMessage(event: MessageEvent) {
     const message: CsvRequest = event.data
-    const { worker, type } = message
+    const { id, worker, type } = message
     if (worker !== "csv") return
 
-    const handler = handlers[type]
-    const resp = await handler(message)
-    self.postMessage({
-        id: message.id,
-        worker: "csv",
-        ...resp,
-    })
+    try {
+        const handler = handlers[type]
+        const resp = await handler(message)
+        self.postMessage({
+            id,
+            worker,
+            ...resp,
+        })
+    } catch (e) {
+        self.postMessage({
+            id,
+            worker,
+            error: e + "",
+        })
+    }
 }
 
 self.addEventListener("message", handleMessage)

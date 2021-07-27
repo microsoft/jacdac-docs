@@ -14,8 +14,9 @@ import {
     ToolboxConfiguration,
     visitToolbox,
 } from "./toolbox"
-import { WorkspaceJSON } from "./jsongenerator"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
+import { addDataPreviewField } from "./fields/DataPreviewField"
+import { WorkspaceJSON } from "../../../jacdac-ts/src/dsl/workspacejson"
 
 // overrides blockly emboss filter for svg elements
 Blockly.BlockSvg.prototype.setHighlighted = function (highlighted) {
@@ -40,6 +41,7 @@ function loadBlocks(
     const blocks = arrayConcatMany(
         dsls.map(dsl =>
             dsl?.createBlocks?.({ theme }).map(b => {
+                addDataPreviewField(b)
                 b.dsl = dsl.id // ensure DSL is set
                 return b
             })
@@ -112,16 +114,18 @@ export default function useToolbox(
         )
             .filter(cat => !!cat)
             .sort((l, r) => -(l.order - r.order))
-
+        const contents = dslsCategories.map(node =>
+            node.kind === "category"
+                ? patchCategoryJSONtoXML(node as CategoryDefinition)
+                : node
+        )
+        // remove trailing separators
+        while (contents[0]?.kind === "sep") contents.shift()
+        while (contents[contents.length - 1]?.kind === "sep") contents.pop()
+        //
         return <ToolboxConfiguration>{
             kind: "categoryToolbox",
-            contents: dslsCategories
-                .filter(cat => !!cat)
-                .map(node =>
-                    node.kind === "category"
-                        ? patchCategoryJSONtoXML(node as CategoryDefinition)
-                        : node
-                ),
+            contents,
         }
     }, [theme, dsls, source, (liveServices || []).map(srv => srv.id).join(",")])
     return toolboxConfiguration
