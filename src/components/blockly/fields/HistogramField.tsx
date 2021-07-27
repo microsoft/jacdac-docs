@@ -2,18 +2,14 @@ import React, { lazy, useContext } from "react"
 import WorkspaceContext from "../WorkspaceContext"
 import { ReactFieldJSON } from "./ReactField"
 import ReactInlineField from "./ReactInlineField"
-import useBlockChartProps from "../useBlockChartProps"
 import useBlockData from "../useBlockData"
 import { PointerBoundary } from "./PointerBoundary"
 import Suspense from "../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
-//import { tidyToNivo } from "./nivo"
-import { CHART_HEIGHT, CHART_WIDTH } from "../toolbox"
-//const ScatterPlot = lazy(() => import("./ScatterPlot"))
 const VegaLite = lazy(() => import("./VegaLite"))
 
 function HistogramWidget() {
-    const { sourceBlock, dragging } = useContext(WorkspaceContext)
+    const { sourceBlock } = useContext(WorkspaceContext)
     const { data } = useBlockData(sourceBlock)
 
     // need to map data to vega-lite
@@ -22,25 +18,18 @@ function HistogramWidget() {
     console.log("histogram", { index, data })
 
     const histogram_spec = {
-        "description": "Histogram of " + index,
-        "mark": {"type": "bar", "tooltip": true},
-        "encoding": {
-            "x": {"bin": true, "field": index},
-            "y": {"aggregate": "count"}
-          },
+        description: `Histogram of ${index}`,
+        mark: { type: "bar", tooltip: true },
+        encoding: {
+            x: { bin: true, field: index },
+            y: { aggregate: "count" },
+        },
         data: { name: "values" },
-      };
-      
-      const histogram_data = {
-        "values": data
-      }
-      
-    //   ReactDOM.render(
-    //     <VegaLite spec={spec} data={histogram_data} />,
-    //     document.getElementById('bar-container')
-    //   );
+    }
 
-    // if (histogram_data === undefined && Object.keys(histogram_data.values).length === 0) return null
+    const histogram_data = {
+        values: data,
+    }
 
     return (
         <NoSsr>
