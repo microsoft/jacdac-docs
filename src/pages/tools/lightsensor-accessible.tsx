@@ -27,7 +27,7 @@ import Dashboard from "../../components/dashboard/Dashboard"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import { useId } from "react-use-id-hook"
 
-const TONE_DURATION = 50
+const TONE_DURATION = 5 
 const TONE_THROTTLE = 100
 
 // this is a React component that gets run numerous time,

@@ -22,6 +22,7 @@ const TONE_THROTTLE = 100
 //sensed light and be added to 1000 to be sonified.
 const [toneFrequencyOffset, setToneFrequencyOfset] = useState(0)
 const [volume, setVolume] = useState(1)
+const { playTone, toggleBrowserAudio, browserAudio } = usePlayTone()
 
 
 //used to hold user selection of the property of the sound to vary. Default is the frequency.
@@ -32,7 +33,6 @@ const handlePropertySelectionChange = (event) => {
     setSonificationProperty(event.target.value)
 }
 
-const { playTone, toggleBrowserAudio, browserAudio } = usePlayTone()
 // identifiers for accessibility
 const sectionId = useId()
 
@@ -41,7 +41,7 @@ type AudioControlProps = {
     sensor: JDService;
     sensorClass: number;
     sensorService: JDService;
-    sensorSelection: (a: JDService) => null;
+    sensorSelection: (a: JDService) => void;
 };
 
 const AudioControls =  ({sensorTitle, sensor, sensorClass, sensorService, sensorSelection}:AudioControlProps) => {
