@@ -40,6 +40,7 @@ function HistogramWidget() {
                 <PointerBoundary>
                     <Suspense>
                         <VegaLite
+                            actions={false}
                             width={CHART_WIDTH}
                             height={CHART_HEIGHT}
                             spec={histogram_spec}
