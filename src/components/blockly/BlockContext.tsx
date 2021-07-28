@@ -15,7 +15,7 @@ import useLocalStorage from "../hooks/useLocalStorage"
 import { BlockWarning, collectWarnings } from "./blockwarning"
 import { registerDataSolver } from "./dsl/datasolver"
 import BlockDomainSpecificLanguage from "./dsl/dsl"
-import { domToJSON, WorkspaceJSON } from "./jsongenerator"
+import { domToJSON } from "./jsongenerator"
 import {
     JSON_WARNINGS_CATEGORY,
     NEW_PROJET_XML,
@@ -34,7 +34,11 @@ import {
 import AppContext from "../AppContext"
 import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
 import useFileStorage from "../hooks/useFileStorage"
-import BlockFile from "./blockfile"
+import {
+    WorkspaceFile,
+    WorkspaceJSON,
+} from "../../../jacdac-ts/src/dsl/workspacejson"
+import useEffectAsync from "../useEffectAsync"
 
 export interface BlockProps {
     editorId: string
@@ -106,17 +110,9 @@ export function BlockProvider(props: {
     const [dragging, setDragging] = useState(false)
     const [editorId, setEditorId] = useState("")
 
-    const setWorkspaceXml = async (xml: string) => {
-        setStoredXml(xml)
+    const setWorkspaceXml = (xml: string) => {
         _setWorkspaceXml(xml)
-        if (setWorkspaceFileContent) {
-            const file = {
-                editor: editorId,
-                xml,
-            }
-            const fileContent = JSON.stringify(file)
-            await setWorkspaceFileContent(fileContent)
-        }
+        setStoredXml(xml)
     }
 
     const setWarnings = (category: string, entries: BlockWarning[]) => {
@@ -201,7 +197,7 @@ export function BlockProvider(props: {
                       console.debug(`reading ${f.name}`)
                       const file = await f.getFile()
                       const text = await file.text()
-                      const json: BlockFile = JSON.parse(text) as BlockFile
+                      const json = JSON.parse(text) as WorkspaceFile
                       const { editor, xml } = json || {}
                       if (editor !== editorId)
                           throw new Error("Wrong block editor")
@@ -242,14 +238,20 @@ export function BlockProvider(props: {
         if (!workspace || dragging) return
 
         const newWorkspaceJSON = domToJSON(workspace, dsls)
-        if (
-            JSON.stringify(newWorkspaceJSON) !== JSON.stringify(workspaceJSON)
-        ) {
-            setWorkspaceJSON(newWorkspaceJSON)
-            const newWarnings = collectWarnings(newWorkspaceJSON)
-            setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
-        }
+        setWorkspaceJSON(newWorkspaceJSON)
+        const newWarnings = collectWarnings(newWorkspaceJSON)
+        setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
     }, [dsls, workspace, dragging, workspaceXml])
+    useEffectAsync(async () => {
+        if (!workspaceFileHandle) return
+        const file: WorkspaceFile = {
+            editor: editorId,
+            xml: workspaceXml,
+            json: workspaceJSON,
+        }
+        const fileContent = JSON.stringify(file)
+        await setWorkspaceFileContent(fileContent)
+    }, [editorId, workspaceFileHandle, workspaceJSON])
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ws = workspace as unknown as BlocklyWorkspaceWithServices

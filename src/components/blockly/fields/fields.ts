@@ -18,9 +18,11 @@ import LinePlotField from "./LinePlotField"
 import GaugeWidgetField from "./GaugeWidgetField"
 import BuiltinDataSetField from "./BuiltinDataSetField"
 import BarChartField from "./BarField"
-import PiePlotField from "./PieField"
+import HistogramField from "./HistogramField"
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
+import DataPreviewField from "./DataPreviewField"
+import BoxPlotField from "./BoxPlotField"
 
 import ExpandModelBlockField from "./ModelBlockFields/ExpandModelBlockField"
 import DatasetBlockField from "./ModelBlockFields/DatasetBlockField"
@@ -68,6 +70,7 @@ export function registerFields() {
 
         VariablesField,
         DataTableField,
+        DataPreviewField,
         DataColumnChooserField,
 
         BuiltinDataSetField,
@@ -75,7 +78,9 @@ export function registerFields() {
         ScatterPlotField,
         LinePlotField,
         BarChartField,
-        PiePlotField,
+
+        HistogramField,
+        BoxPlotField,
 
         ExpandModelBlockField,
         DatasetBlockField,

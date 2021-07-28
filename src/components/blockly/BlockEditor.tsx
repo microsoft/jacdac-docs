@@ -27,6 +27,12 @@ const useStyles = makeStyles((theme: Theme) =>
             "& .blocklyTreeIconOpen, & .blocklyTreeIconClosed": {
                 opacity: 0.5,
             },
+            "& .blocklyFieldButton.blocklyEditableText": {
+                cursor: "pointer",
+            },
+            "& .blocklyFieldButton.blocklyEditableText > .blocklyFieldRect": {
+                fill: "transparent !important",
+            },
         },
     })
 )
@@ -63,7 +69,7 @@ export default function BlockEditor(props: {
         workspaceConfiguration: {
             collapse: false,
             disable: false,
-            comments: false,
+            comments: true,
             css: true,
             trashcan: false,
             sounds: false,

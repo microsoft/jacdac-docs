@@ -11,7 +11,12 @@ import {
     Card,
     CardActions,
     CardContent,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
     Grid,
+    Radio,
+    RadioGroup,
     Typography,
 } from "@material-ui/core"
 import ConnectAlert from "../../components/alert/ConnectAlert"
@@ -41,11 +46,25 @@ export default function AccelerometerTheremin() {
     // under the hood, it uses the bus and events.
     const accelerometers = useServices({ serviceClass: SRV_ACCELEROMETER })
 
-    // create two state variables to hold the service selected as our accelerometer
-    // and the virtual buzzerServer created when someone turns audio on on the page
-    // when using setAccelService/setBuzzerServer, React will render again this component
+    // create a state variable to hold the service selected as our accelerometer
+    // when using setAccelService, React will render again this component
     const [accelService, setAccelService] = useState<JDService>()
+    // used to hold the value for the axis selected by the radio group. This is also used to set the axis of the accelerometer to sonify. Default value is X. meaning the X axis will be sonified by default.
+    const [axisToSonify, setAxisToSonify] = useState<"x" | "y" | "z">("x")
+    //used to hold user selection of the property of the sound to vary. Default is the frequency.
+    const [sonificationProperty, setSonificationProperty] =
+        useState("frequency")
 
+    // event handeler for radio button selection change for axis to sonify
+    const handleAccessChange = event => {
+        setAxisToSonify(event.target.value)
+        // todo: make sure an Aria alert gets generated indecating the access that has been selected when streaming starts, or when radio button selection changes.
+    }
+
+    //handler for property selection to sonify.
+    const handelPropertySelectionChange = event => {
+        setSonificationProperty(event.target.value)
+    }
     // use a closure to capture accel variable
     // act as a toggle for the button the indicates streaming state.
     const handleSelectAccelerometerService = accel => () => {
@@ -66,10 +85,34 @@ export default function AccelerometerTheremin() {
             // don't trigger more than every 100ms
             throttle(async () => {
                 // get x acceleration data
-                const [x] = accelService.readingRegister.unpackedValue
+                // const [x] = accelService.readingRegister.unpackedValue
                 // get all acceleration data
-                // const [x, y, z] = accelService.readingRegister.unpackedValue
-                await playTone(1000 + x * 1000, TONE_DURATION, 1)
+                let volume = 1
+                let toneFrequencyOffset = 0
+                const [x, y, z] = accelService.readingRegister.unpackedValue
+                if (sonificationProperty == "frequency") {
+                    if (axisToSonify == "x") {
+                        toneFrequencyOffset = x
+                    } else if (axisToSonify == "y") {
+                        toneFrequencyOffset = y
+                    } else {
+                        toneFrequencyOffset = z
+                    }
+                } else {
+                    if (axisToSonify == "x") {
+                        volume = (Math.abs(x) * 99) / 100.0
+                    } else if (axisToSonify == "y") {
+                        volume = (Math.abs(y) * 99) / 100.0
+                    } else {
+                        volume = (Math.abs(z) * 99) / 100.0
+                    }
+                }
+
+                await playTone(
+                    1000 + toneFrequencyOffset * 1000,
+                    TONE_DURATION,
+                    volume
+                )
             }, TONE_THROTTLE)
         )
 
@@ -133,6 +176,59 @@ export default function AccelerometerTheremin() {
                                             </Typography>
                                         </CardContent>
                                         <CardActions>
+                                            <FormControl component="fieldset">
+                                                <FormLabel component="legend">
+                                                    Select axis of the
+                                                    accelerometer to sonify
+                                                </FormLabel>
+                                                <RadioGroup
+                                                    aria-label="axis"
+                                                    name="axisToSonify"
+                                                    value={axisToSonify}
+                                                    onChange={
+                                                        handleAccessChange
+                                                    }
+                                                >
+                                                    <FormControlLabel
+                                                        value="x"
+                                                        control={<Radio />}
+                                                        label="X axis"
+                                                    />
+                                                    <FormControlLabel
+                                                        value="y"
+                                                        control={<Radio />}
+                                                        label="Y axis"
+                                                    />
+                                                    <FormControlLabel
+                                                        value="z"
+                                                        control={<Radio />}
+                                                        label="Z axis"
+                                                    />
+                                                </RadioGroup>
+                                                <FormLabel component="legend">
+                                                    Select property of the sound
+                                                    to change
+                                                </FormLabel>
+                                                <RadioGroup
+                                                    aria-label="sonification property"
+                                                    name="soundProperty"
+                                                    value={sonificationProperty}
+                                                    onChange={
+                                                        handelPropertySelectionChange
+                                                    }
+                                                >
+                                                    <FormControlLabel
+                                                        value="frequency"
+                                                        control={<Radio />}
+                                                        label="buzzer frequency"
+                                                    />
+                                                    <FormControlLabel
+                                                        value="volume"
+                                                        control={<Radio />}
+                                                        label="buzzer volume"
+                                                    />
+                                                </RadioGroup>
+                                            </FormControl>
                                             <Button
                                                 variant={"outlined"}
                                                 onClick={handleSelectAccelerometerService(

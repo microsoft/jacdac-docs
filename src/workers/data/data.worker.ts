@@ -13,6 +13,15 @@ import {
     tidy,
     mutate,
     count,
+    SummarizeSpec,
+    sliceHead,
+    sliceTail,
+    sliceMin,
+    sliceMax,
+    deviation,
+    sum,
+    variance,
+    sliceSample,
 } from "@tidyjs/tidy"
 import { bin } from "d3-array"
 import { sampleCorrelation, linearRegression } from "simple-statistics"
@@ -75,7 +84,7 @@ export interface DataMutateNumberRequest extends DataRequest {
 
 export interface DataSummarizeRequest extends DataRequest {
     type: "summarize"
-    column: string
+    columns: string[]
     calc: string
 }
 
@@ -115,6 +124,31 @@ export interface DataLinearRegressionRequest extends DataRequest {
     column2: string
 }
 
+export interface DataSliceOptions {
+    sliceHead?: number
+    sliceTail?: number
+    sliceSample?: number
+    
+    sliceMax?: number
+    sliceMin?: number
+    sliceColumn?: string
+}
+
+export interface DataSliceRequest extends DataRequest, DataSliceOptions {
+    type: "slice"
+}
+
+const summarizers = {
+    average: mean,
+    mean,
+    median,
+    min,
+    max,
+    sum,
+    deviation,
+    variance,
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handlers: { [index: string]: (props: any) => object[] } = {
     arrange: (props: DataArrangeRequest) => {
@@ -123,12 +157,12 @@ const handlers: { [index: string]: (props: any) => object[] } = {
     },
     select: (props: DataSelectRequest) => {
         const { columns, data } = props
-        if (!columns) return data
+        if (!columns?.length) return data
         else return tidy(data, select(columns.map(column => `${column}`)))
     },
     drop: (props: DataDropRequest) => {
         const { columns, data } = props
-        if (!columns) return data
+        if (!columns?.length) return data
         else return tidy(data, select(columns.map(column => `-${column}`)))
     },
     filter_string: (props: DataFilterStringRequest) => {
@@ -212,10 +246,9 @@ const handlers: { [index: string]: (props: any) => object[] } = {
     },
     mutate_columns: (props: DataMutateColumnsRequest) => {
         const { newcolumn, lhs, rhs, logic, data } = props
-        if (newcolumn === undefined || !lhs || !rhs || !logic) return data
+        if (!newcolumn || !lhs || !rhs || !logic) return data
 
         const calc = {}
-
         switch (logic) {
             case "plus":
                 calc[newcolumn] = d => d[lhs] + d[rhs]
@@ -257,7 +290,6 @@ const handlers: { [index: string]: (props: any) => object[] } = {
             return data
 
         const calc = {}
-
         switch (logic) {
             case "plus":
                 calc[newcolumn] = d => d[lhs] + rhs
@@ -294,83 +326,39 @@ const handlers: { [index: string]: (props: any) => object[] } = {
         }
     },
     summarize: (props: DataSummarizeRequest) => {
-        const { column, calc, data } = props
-        if (!column || !calc) return data
+        const { columns, calc, data } = props
+        if (!columns?.length || !calc) return data
 
-        switch (calc) {
-            case "mean":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    summarize({ mean: mean(column as any) })
-                )
-            case "med":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    summarize({ median: median(column as any) })
-                )
-            case "min":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    summarize({ min: min(column as any) })
-                )
-            case "max":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    summarize({ max: max(column as any) })
-                )
-            default:
-                return data
-        }
+        const summarizer = summarizers[calc]
+        if (!summarizer) return data
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const items: SummarizeSpec<Object> = {}
+        columns.forEach(column => (items[column] = summarizer(column)))
+        return tidy(data, summarize(items))
     },
     summarize_by_group: (props: DataSummarizeByGroupRequest) => {
         const { column, by, calc, data } = props
         if (!column || !by || !calc) return data
 
-        switch (calc) {
-            case "mean":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    groupBy(by as any, [
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        summarize({ mean: mean(column as any) }),
-                    ])
-                )
-            case "med":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    groupBy(by as any, [
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        summarize({ median: median(column as any) }),
-                    ])
-                )
-            case "min":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    groupBy(by as any, [summarize({ min: min(column as any) })])
-                )
-            case "max":
-                return tidy(
-                    data,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    groupBy(by as any, [summarize({ max: max(column as any) })])
-                )
-            default:
-                return data
-        }
+        const summarizer = summarizers[calc]
+        if (!summarizer) return data
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const items: SummarizeSpec<Object> = {}
+        items[column] = summarizer(column)
+        return tidy(
+            data,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            groupBy(by as any, [summarize(summarizer)])
+        )
     },
     count: (props: DataCountRequest) => {
         const { column, data } = props
         if (!column) return data
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return tidy(data, count(column as any))
+        return tidy(data, count(column as any, { name: "count" }))
     },
     record_window: (props: DataRecordWindowRequest) => {
         const { data, previousData, horizon } = props
@@ -409,6 +397,28 @@ const handlers: { [index: string]: (props: any) => object[] } = {
         return [
             { slope: linregmb.m.toFixed(3), intercept: linregmb.b.toFixed(3) },
         ]
+    },
+    slice: (props: DataSliceRequest) => {
+        const { data } = props
+        let index = 0
+        const tidied: object[] = data
+            ? (tidy(
+                  data,
+                  props.sliceHead ? sliceHead(props.sliceHead) : undefined,
+                  props.sliceTail ? sliceTail(props.sliceTail) : undefined,
+                  props.sliceSample
+                      ? sliceSample(props.sliceSample)
+                      : undefined,
+                  props.sliceMin
+                      ? sliceMin(props.sliceMin, props.sliceColumn)
+                      : undefined,
+                  props.sliceMax
+                      ? sliceMax(props.sliceMax, props.sliceColumn)
+                      : undefined,
+                  mutate({ index: () => index++ })
+              ) as object[])
+            : []
+        return tidied
     },
 }
 

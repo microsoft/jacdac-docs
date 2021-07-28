@@ -1,48 +1,23 @@
-import React, { useState, useContext, useEffect } from "react"
-import useEffectAsync from "../../components/useEffectAsync"
+import React, { useState, useContext, useEffect, useCallback } from "react"
 // tslint:disable-next-line: no-submodule-imports
-import { makeStyles, Theme } from "@material-ui/core/styles"
-import {
-    Grid,
-    Button,
-    TextField,
-    InputAdornment,
-    createStyles,
-    Switch,
-    Card,
-    CardActions,
-    Typography,
-} from "@material-ui/core"
+import { Grid, Button, TextField } from "@material-ui/core"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import ConnectAlert from "../../components/alert/ConnectAlert"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import StopIcon from "@material-ui/icons/Stop"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import SaveIcon from "@material-ui/icons/Save"
 import CheckCircle from "@material-ui/icons/CheckCircle"
+import CancelIcon from "@material-ui/icons/Cancel"
 // tslint:disable-next-line: no-submodule-imports
-import useChange from "../../jacdac/useChange"
 import useDevices from "../../components/hooks/useDevices"
 import {
-    CHANGE,
-    EVENT,
     PACKET_RECEIVE,
-    REPORT_UPDATE,
     SRV_CONTROL,
+    SRV_LED_PIXEL,
+    SRV_LED,
     SRV_ROLE_MANAGER,
-    SRV_SENSOR_AGGREGATOR,
 } from "../../../jacdac-ts/src/jdom/constants"
-import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
-import DataSetGrid from "../../components/DataSetGrid"
-import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
-import ReadingFieldGrid from "../../components/ReadingFieldGrid"
-import DeviceCardHeader from "../../components/DeviceCardHeader"
-import { SensorAggregatorClient } from "../../../jacdac-ts/src/jdom/sensoraggregatorclient"
-import { Link } from "gatsby-theme-material-ui"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
-import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import { Packet } from "../../../jacdac-ts/src/jdom/packet"
 // tslint:disable-next-line: no-submodule-imports
 import Table from "@material-ui/core/Table"
@@ -58,47 +33,27 @@ import TableHead from "@material-ui/core/TableHead"
 import TableRow from "@material-ui/core/TableRow"
 // tslint:disable-next-line: no-submodule-imports
 import Paper from "@material-ui/core/Paper"
-import PaperBox from "../../components/ui/PaperBox"
 import GridHeader from "../../components/ui/GridHeader"
-import ConnectButtons from "../../components/buttons/ConnectButtons"
 import Dashboard from "../../components/dashboard/Dashboard"
-import { FastRewindTwoTone } from "@material-ui/icons"
 import ServiceManagerContext from "../../components/ServiceManagerContext"
+import useEffectAsync from "../../components/useEffectAsync"
+import { delay } from "../../../jacdac-ts/src/jdom/utils"
+import { dependencyId } from "../../../jacdac-ts/src/jdom/eventsource"
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import { lightEncode } from "../../../jacdac-ts/src/jdom/light"
+import { LedPixelCmd, LedCmd } from "../../../jacdac-ts/src/jdom/constants"
+import { createStyles, makeStyles } from "@material-ui/core"
+import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
     createStyles({
-        table: {
-            minWidth: "10rem",
+        buttonFail: {
+            color: "white",
+            backgroundColor: "red",
         },
-        root: {
-            marginBottom: theme.spacing(1),
-        },
-        grow: {
-            flexGrow: 1,
-        },
-        field: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(1.5),
-        },
-        segment: {
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-        },
-        row: {
-            marginBottom: theme.spacing(0.5),
-        },
-        buttons: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(2),
-        },
-        trend: {
-            width: theme.spacing(10),
-        },
-        vmiddle: {
-            verticalAlign: "middle",
-        },
-        check: {
-            color: "green",
+        buttonSuccess: {
+            color: "white",
+            backgroundColor: "green",
         },
     })
 )
@@ -110,10 +65,13 @@ interface ServiceDescriptor {
 }
 
 interface DeviceDescriptor {
+    brain: boolean
     deviceIdentifier: string
     firmwareIdentifier: number
     services: ServiceDescriptor[]
     servicesSeen: ServiceDescriptor[]
+    pass: boolean
+    comment: string
 }
 
 interface DeviceDescriptorTable {
@@ -140,44 +98,54 @@ function dateString() {
     return date.toDateString().replace(/ /g, "-")
 }
 
-export function DataSetTable(props: {
+function isBrain(d: JDDevice) {
+    return !!d?.hasService(SRV_ROLE_MANAGER)
+}
+
+function DataSetTable(props: {
     dataSet: DeviceDescriptorTable
-    maxRows?: number
-    minRows?: number
+    updateDescriptor: (DeviceDescriptor) => void
     className?: string
 }) {
-    const { dataSet, maxRows, minRows, className } = props
-    const { headers, descriptors } = dataSet
     const classes = useStyles()
+    const { dataSet, updateDescriptor } = props
+    const { descriptors, headers } = dataSet
 
-    const data = dataSet.descriptors?.slice(
-        maxRows !== undefined ? -maxRows : 0
-    )
-    while (minRows !== undefined && data.length < minRows) data.push(undefined)
+    const setPass =
+        (deviceDescriptor: DeviceDescriptor, state: boolean) => () => {
+            deviceDescriptor.pass = state
+            updateDescriptor(deviceDescriptor)
+        }
+
+    const handleCommentChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const descriptor = descriptors.find(
+            d => d.deviceIdentifier == event.target.id
+        )
+        descriptor.comment = event.target.value
+        updateDescriptor(descriptor)
+    }
 
     return (
-        <TableContainer className={className} component={Paper}>
-            <Table
-                className={classes.table}
-                aria-label="simple table"
-                size="small"
-            >
+        <TableContainer component={Paper}>
+            <Table aria-label="device table" size="small">
                 <TableHead>
                     <TableRow>
                         {headers.map(header => (
-                            <TableCell align="right" key={`header` + header}>
+                            <TableCell align="right" key={header}>
                                 {header}
                             </TableCell>
                         ))}
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {data?.map((descriptor, index) => (
-                        <TableRow key={`row` + index}>
-                            <TableCell key={"cell0"} align="center">
+                    {descriptors?.map(descriptor => (
+                        <TableRow key={descriptor.deviceIdentifier}>
+                            <TableCell align="center">
                                 {descriptor.deviceIdentifier}
                             </TableCell>
-                            <TableCell key={"cell1"} align="center">
+                            <TableCell align="center">
                                 {descriptor.firmwareIdentifier &&
                                     descriptor.firmwareIdentifier.toString(16)}
                                 {descriptor.services.filter(service => {
@@ -186,23 +154,60 @@ export function DataSetTable(props: {
                                     )
                                 })?.length && "BRAIN"}
                             </TableCell>
-                            <TableCell key={"cell2"} align="center">
+                            <TableCell align="center">
                                 {descriptor.services.map(
                                     service => service.name + " "
                                 )}
                             </TableCell>
-                            <TableCell key={"cell3"} align="center">
+                            <TableCell align="center">
                                 {descriptor.servicesSeen.map(
                                     service => service.name + " "
                                 )}
                             </TableCell>
-                            <TableCell key={"cell4"} align="center">
+                            <TableCell align="center">
                                 {serviceArrayMatched(descriptor) && (
-                                    <div className={classes.check}>
-                                        <CheckCircle />
-                                        {"PASS"}
-                                    </div>
+                                    <span style={{ color: "green" }}>
+                                        <CheckCircle fontSize="small" />
+                                        PASS
+                                    </span>
                                 )}
+                            </TableCell>
+                            <TableCell align="center">
+                                {descriptor.pass && (
+                                    <Button
+                                        aria-label="Toggle pass state"
+                                        variant="contained"
+                                        className={classes.buttonSuccess}
+                                        onClick={setPass(descriptor, false)}
+                                        startIcon={
+                                            <CheckCircle fontSize="small" />
+                                        }
+                                    >
+                                        Pass
+                                    </Button>
+                                )}
+                                {!descriptor.pass && (
+                                    <Button
+                                        aria-label="Toggle pass state"
+                                        variant="contained"
+                                        className={classes.buttonFail}
+                                        onClick={setPass(descriptor, true)}
+                                        startIcon={
+                                            <CancelIcon fontSize="small" />
+                                        }
+                                    >
+                                        FAIL
+                                    </Button>
+                                )}
+                            </TableCell>
+                            <TableCell align="center">
+                                <TextField
+                                    onChange={handleCommentChange}
+                                    id={descriptor.deviceIdentifier}
+                                    label="Comment"
+                                    fullWidth
+                                    value={descriptor.comment}
+                                />
                             </TableCell>
                         </TableRow>
                     ))}
@@ -212,46 +217,85 @@ export function DataSetTable(props: {
     )
 }
 
+async function LEDTest(service: JDService) {
+    while (service.device.connected) {
+        for (let i = 0; i < 8; i++) {
+            const encoded = lightEncode(
+                `setone % #
+                    show 20`,
+                [i, 0xff0000]
+            )
+
+            if (service.device.connected)
+                await service?.sendCmdAsync(LedPixelCmd.Run, encoded)
+            await delay(200)
+        }
+    }
+}
+
+async function SingleRGBLEDTest(service: JDService) {
+    const pack = (r, g, b, animDelay) => {
+        const unpacked: [number, number, number, number] = [r, g, b, animDelay]
+        return jdpack("u8 u8 u8 u8", unpacked)
+    }
+
+    while (service.device.connected) {
+        await service.sendCmdAsync(LedCmd.Animate, pack(255, 0, 0, 200))
+        await delay(500)
+        await service.sendCmdAsync(LedCmd.Animate, pack(0, 255, 0, 200))
+        await delay(500)
+        await service.sendCmdAsync(LedCmd.Animate, pack(0, 0, 255, 200))
+        await delay(500)
+    }
+}
+
 export default function Commissioner() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const [filterBrains, setFilterBrains] = useState<boolean>(false) // todo allow remove brains
+    const [filterBrains, setFilterBrains] = useState<boolean>(true)
     const devices = useDevices({
+        announced: true,
         ignoreSelf: true,
         ignoreSimulators: true,
-    }).filter((d: JDDevice) => {
-        if (
-            filterBrains &&
-            d.services({ serviceClass: SRV_ROLE_MANAGER })?.length
-        )
-            return false
-        return true
-    })
+    }).filter(d => !filterBrains || !isBrain(d))
+    const [title, setTitle] = useState("")
     const [dataSet, setDataSet] = useState<DeviceDescriptor[]>()
     const tableHeaders = [
         "Device identifier",
         "Firmware identifier",
         "Services advertised",
         "Services seen",
+        "Packets seen",
         "Functional test pass",
+        "Comment",
     ]
-    const [table, setTable] = useState<DeviceDescriptorTable>({
-        descriptors: [],
-        headers: tableHeaders,
-    })
-
     const { fileStorage } = useContext(ServiceManagerContext)
-    const classes = useStyles()
 
-    useEffect(() => {
-        const usubArray = []
-        const newDataSet = dataSet || []
+    const testDevice = async (d: JDDevice) => {
+        d.identify()
 
-        devices.forEach(d => {
+        for (const srv of d.services()) {
+            switch (srv.serviceClass) {
+                case SRV_LED_PIXEL:
+                    LEDTest(srv)
+                    break
+                case SRV_LED:
+                    SingleRGBLEDTest(srv)
+                    break
+            }
+        }
+    }
+
+    useEffectAsync(async () => {
+        const newDataSet = (dataSet?.slice(0) || []).filter(
+            d => !filterBrains || !d.brain
+        )
+
+        for (const d of devices) {
             if (
                 newDataSet.filter(entry => entry.deviceIdentifier == d.deviceId)
                     ?.length
             )
-                return
+                continue
 
             const services = []
             d.services()
@@ -266,58 +310,62 @@ export default function Commissioner() {
                     })
                 })
             newDataSet.push({
+                brain: isBrain(d),
                 deviceIdentifier: d.deviceId,
-                firmwareIdentifier: d.firmwareIdentifier,
+                firmwareIdentifier: await d.resolveFirmwareIdentifier(3),
                 services,
                 servicesSeen: [],
+                pass: true,
+                comment: "",
             })
-        })
-
+            // launch tests
+            testDevice(d)
+        }
         setDataSet(newDataSet)
+    }, [dependencyId(devices), filterBrains])
 
-        return () => {
-            usubArray.forEach(usub => usub())
-        }
-    }, [devices])
+    const table = {
+        headers: tableHeaders,
+        descriptors: dataSet,
+    }
 
-    useEffect(() => {
-        console.log("UPDATE")
-        const newObj = {
-            headers: tableHeaders,
-            descriptors: dataSet,
-        }
-        setTable(newObj)
-    }, [dataSet])
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTitle(event.target.value)
+    }
 
-    useEffect(() => {
-        return bus.subscribe(PACKET_RECEIVE, (packet: Packet) => {
-            const newDataSet = dataSet.slice(0)
-            const contains = newDataSet
-                .find(
-                    descriptor =>
-                        descriptor.deviceIdentifier == packet.deviceIdentifier
-                )
-                .servicesSeen.filter(
-                    service =>
-                        service.serviceClass == packet.serviceClass &&
-                        service.serviceIndex == packet.serviceIndex
-                )
+    useEffect(
+        () =>
+            bus.subscribe(PACKET_RECEIVE, (packet: Packet) => {
+                const newDataSet = dataSet?.slice(0) || []
+                const contains = newDataSet
+                    .find(
+                        descriptor =>
+                            descriptor.deviceIdentifier ==
+                            packet.deviceIdentifier
+                    )
+                    .servicesSeen.filter(
+                        service =>
+                            service.serviceClass == packet.serviceClass &&
+                            service.serviceIndex == packet.serviceIndex
+                    )
 
-            if (contains.length) return
+                if (contains.length) return
 
-            newDataSet
-                .find(
-                    descriptor =>
-                        descriptor.deviceIdentifier == packet.deviceIdentifier
-                )
-                ?.servicesSeen.push({
-                    name: packet.friendlyServiceName,
-                    serviceClass: packet.serviceClass,
-                    serviceIndex: packet.serviceIndex,
-                })
-            setDataSet(newDataSet)
-        })
-    }, [bus, dataSet])
+                newDataSet
+                    .find(
+                        descriptor =>
+                            descriptor.deviceIdentifier ==
+                            packet.deviceIdentifier
+                    )
+                    ?.servicesSeen.push({
+                        name: packet.friendlyServiceName,
+                        serviceClass: packet.serviceClass,
+                        serviceIndex: packet.serviceIndex,
+                    })
+                setDataSet(newDataSet)
+            }),
+        [bus, dataSet]
+    )
 
     const handleOnClearClick = () => {
         setDataSet(undefined)
@@ -332,12 +380,16 @@ export default function Commissioner() {
             sep +
             "services" +
             sep +
-            "functional test pass" +
+            "Packets seen" +
+            sep +
+            "Functional test pass" +
+            sep +
+            "Comment" +
             lineEnding
         dataSet.forEach(descriptor => {
-            str += `${descriptor.deviceIdentifier}${sep}`
+            str += `0x${descriptor.deviceIdentifier}${sep}`
             if (descriptor.firmwareIdentifier)
-                str += `${descriptor.firmwareIdentifier}${sep}`
+                str += `0x${descriptor.firmwareIdentifier.toString(16)}${sep}`
             else if (
                 descriptor.services.find(
                     service => service.serviceClass == SRV_ROLE_MANAGER
@@ -350,64 +402,99 @@ export default function Commissioner() {
                 .map(service => service.name)
                 .join(" ")}${sep}`
 
-            if (serviceArrayMatched(descriptor)) str += `PASS${lineEnding}`
-            else str += `FAIL${lineEnding}`
+            if (serviceArrayMatched(descriptor)) str += `YES${sep}`
+            else str += `NO${sep}`
+
+            if (descriptor.pass) str += `PASS${sep}`
+            else str += `FAIL${sep}`
+
+            str += descriptor.comment + lineEnding
         })
-        fileStorage.saveText(`commissioning-${dateString()}.csv`, str)
+
+        const fileTitle = title.length ? `${title}-` : "" 
+        fileStorage.saveText(
+            `${fileTitle}commissioning-${dateString()}.csv`,
+            str
+        )
     }
 
-    const handleFilterBrains = () => {
-        filterBrains ? setFilterBrains(false) : setFilterBrains(true)
+    const handleFilterBrains = () => setFilterBrains(!filterBrains)
+    const deviceFilter = useCallback(
+        d => !filterBrains || !isBrain(d),
+        [filterBrains]
+    )
+
+    const handleUpdateDescriptor = descriptor => {
+        const newDataSet = dataSet?.slice(0) || []
+        const el = newDataSet.find(
+            d => d.deviceIdentifier == descriptor.deviceIdentifier
+        )
+        if (el) {
+            el.comment = descriptor.comment
+            el.pass = descriptor.pass
+            setDataSet(newDataSet)
+        }
     }
 
     return (
         <>
             <h1>Commissioner</h1>
             <Dashboard
+                hideSimulators={true}
                 showAvatar={true}
                 showHeader={true}
                 showConnect={true}
                 showStartSimulators={false}
+                deviceFilter={deviceFilter}
             />
             <Grid container spacing={1}>
                 <GridHeader title={"Commissioning data"} />
-                <Grid item xs={1}>
-                    <Button
-                        aria-label="Clear data"
-                        variant="contained"
-                        color="primary"
-                        onClick={handleOnClearClick}
-                    >
-                        Clear
-                    </Button>
-                </Grid>
-                <Grid item xs={2}>
-                    <Button
-                        aria-label="Clear data"
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleDownloadCSV}
-                        startIcon={<SaveIcon />}
-                    >
-                        Download CSV
-                    </Button>
-                </Grid>
-                <Grid item xs={2}>
-                    <Button
-                        aria-label="Clear data"
-                        variant="contained"
-                        onClick={handleFilterBrains}
-                    >
-                        {filterBrains
-                            ? "Stop filtering brains"
-                            : "Start filtering brains"}
-                    </Button>
+                <Grid item xs={12}>
+                    <Grid container spacing={1}>
+                        <Grid item>
+                            <Button
+                                aria-label="Clear data"
+                                variant="contained"
+                                color="primary"
+                                onClick={handleOnClearClick}
+                            >
+                                Clear
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                aria-label="Clear data"
+                                variant="contained"
+                                color="secondary"
+                                onClick={handleDownloadCSV}
+                                startIcon={<SaveIcon />}
+                            >
+                                Download CSV
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                aria-label="Clear data"
+                                variant="contained"
+                                onClick={handleFilterBrains}
+                            >
+                                {filterBrains ? "Show brains" : "Hide brains"}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                onChange={handleTitleChange}
+                                label="Title"
+                                fullWidth
+                                value={title}
+                            />
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12}>
                     <DataSetTable
-                        key="datasettable"
-                        className={classes.segment}
                         dataSet={table}
+                        updateDescriptor={handleUpdateDescriptor}
                     />
                 </Grid>
             </Grid>

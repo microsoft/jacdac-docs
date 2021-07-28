@@ -11,10 +11,13 @@ export default function useBlockData<T extends object>(
 ) {
     const services = (block as unknown as BlockWithServices)?.jacdacServices
     // data on the current node
-    const data = useChangeThrottled<BlockServices, T[]>(
-        services,
-        _ => _?.data as T[]
-    )
+    const { data, transformedData } = useChangeThrottled<
+        BlockServices,
+        { data: T[]; transformedData: T[] }
+    >(services, _ => ({
+        data: _?.data as T[],
+        transformedData: _?.transformedData as T[],
+    }))
     const setData = useCallback(
         (value: T[]) => {
             if (services) services.data = value
@@ -34,6 +37,11 @@ export default function useBlockData<T extends object>(
 
     // debounce with dragging
     const debounced = useDragDebounce(data)
+    const debouncedTransformedData = useDragDebounce(transformedData)
 
-    return { data: debounced, setData }
+    return {
+        data: debounced,
+        transformedData: debouncedTransformedData,
+        setData,
+    }
 }
