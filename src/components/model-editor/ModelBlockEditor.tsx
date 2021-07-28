@@ -9,7 +9,7 @@ import { addNewDataset, addNewClassifier } from "./ModelBlockModals"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
-import { visitWorkspace } from "../blockly/jsonvisitor"
+import { visitWorkspace } from "../../../jacdac-ts/src/dsl/workspacevisitor"
 
 // Randi copiedfrom AppContext
 import Suspense from "../ui/Suspense"
