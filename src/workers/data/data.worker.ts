@@ -18,7 +18,10 @@ import {
     sliceTail,
     sliceMin,
     sliceMax,
-    rename,
+    deviation,
+    sum,
+    variance,
+    sliceSample,
 } from "@tidyjs/tidy"
 import { bin } from "d3-array"
 import { sampleCorrelation, linearRegression } from "simple-statistics"
@@ -121,21 +124,29 @@ export interface DataLinearRegressionRequest extends DataRequest {
     column2: string
 }
 
-export interface DataTidyRequest extends DataRequest {
-    type: "tidy"
-    renaming: { [name: string]: string }
+export interface DataSliceOptions {
     sliceHead?: number
     sliceTail?: number
+    sliceSample?: number
+    
     sliceMax?: number
     sliceMin?: number
     sliceColumn?: string
 }
 
+export interface DataSliceRequest extends DataRequest, DataSliceOptions {
+    type: "slice"
+}
+
 const summarizers = {
     average: mean,
-    med: median,
-    min: min,
-    max: max,
+    mean,
+    median,
+    min,
+    max,
+    sum,
+    deviation,
+    variance,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -347,7 +358,7 @@ const handlers: { [index: string]: (props: any) => object[] } = {
         if (!column) return data
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return tidy(data, count(column as any))
+        return tidy(data, count(column as any, { name: "count" }))
     },
     record_window: (props: DataRecordWindowRequest) => {
         const { data, previousData, horizon } = props
@@ -387,26 +398,24 @@ const handlers: { [index: string]: (props: any) => object[] } = {
             { slope: linregmb.m.toFixed(3), intercept: linregmb.b.toFixed(3) },
         ]
     },
-    tidy: (props: DataTidyRequest) => {
-        const { data, renaming } = props
-        const labels = Object.keys(renaming)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // todo handle time
+    slice: (props: DataSliceRequest) => {
+        const { data } = props
         let index = 0
         const tidied: object[] = data
             ? (tidy(
                   data,
                   props.sliceHead ? sliceHead(props.sliceHead) : undefined,
                   props.sliceTail ? sliceTail(props.sliceTail) : undefined,
+                  props.sliceSample
+                      ? sliceSample(props.sliceSample)
+                      : undefined,
                   props.sliceMin
                       ? sliceMin(props.sliceMin, props.sliceColumn)
                       : undefined,
                   props.sliceMax
                       ? sliceMax(props.sliceMax, props.sliceColumn)
                       : undefined,
-                  mutate({ index: () => index++ }),
-                  select(labels),
-                  rename(renaming)
+                  mutate({ index: () => index++ })
               ) as object[])
             : []
         return tidied
