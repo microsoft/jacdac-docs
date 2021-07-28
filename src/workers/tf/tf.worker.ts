@@ -1,44 +1,140 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import * as tf from "@tensorflow/tfjs"
 
-
 export interface TFModelMessage {
-    worker: "tf";
-    id?: string;
+    worker: "tf"
+    id?: string
+    data?: any
 }
 
 export interface TFModelRequest extends TFModelMessage {
-    type?: string;
+    type?: string
 }
 
 export interface TFModelTrainRequest extends TFModelRequest {
-    type: "train";
-    trainDataJSON: string;
-    modelJSON: string;
+    type: "train",
+    trainingDataJSON: string,
+    modelDataJSON: string,
+}
+
+export interface TFModelTrainResponse extends TFModelMessage {
+    type: "train",
+    trainedWeightsJSON: string,
+    armModelJSON: string,
 }
 
 export interface TFModelPredictRequest extends TFModelRequest {
-    type: "predict";
-    testData: number[][];
-    modelJSON: string; // Randi TODO send trained model JSON as well? 
+    type: "predict",
+    testingDataJSON: string,
+    modelDataJSON: string,
+}
+
+export interface TFModelPredictResponse extends TFModelMessage {
+    type: "train",
+    predictionJSON: string,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handlers: { [index: string]: (props: any) => object[][] } = {
-    train: (props: TFModelTrainRequest) => {
-        return [{ trainedTFModel: null, armModel:null }, ]
+const handlers: { [index: string]: (props: any) => Promise<any> } = {
+    train: async (props: TFModelTrainRequest) => {
+        const { data } = props
+        let trainingInfo = []
+
+        // get dataset and training info 
+        //console.log("Randi got training info ", data.trainingParams)
+        const xs = tf.tensor(JSON.parse(data.xJSON))
+        const ys = tf.tensor(JSON.parse(data.yJSON))
+        let epochs, loss, optimizer, metrics
+
+        if (data.trainingParams) {
+            const params = JSON.parse(data.trainingParams)
+            epochs = params.epochs
+            loss = params.loss
+            optimizer = params.optimizer
+            metrics = params.metrics
+        } else {
+            console.warn("No training parameters sent, using defaults")
+            epochs = 250
+            loss = "categoricalCrossentropy"
+            optimizer = "adam"
+            metrics = ["accuracy"]
+        }
+
+        // get model
+        const modelObj = JSON.parse(data.modelJSON)
+        const model = await tf.loadLayersModel({
+            load: () => Promise.resolve(modelObj),
+        })
+        model.compile({
+            loss: loss,
+            optimizer: optimizer,
+            metrics: metrics,
+        })
+
+        // model.fit
+        await model
+            .fit(xs, ys, {
+                epochs: epochs,
+                callbacks: {
+                    onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
+                },
+            })
+            .then(info => {
+                trainingInfo = info.history.acc
+            })
+
+        // save model as model artifacts
+        let mod: tf.io.ModelArtifacts
+        await model.save({
+            save: m => {
+                mod = m
+                const res: tf.io.SaveResult = {
+                    modelArtifactsInfo: {
+                        dateSaved: new Date(),
+                        modelTopologyType: "JSON",
+                    },
+                }
+                return Promise.resolve(res)
+            },
+        })
+
+        // return weight data
+        const weightsJSON = JSON.stringify(Array.from(new Uint32Array(mod.weightData)))
+        const infoJSON = JSON.stringify(trainingInfo)
+        return [
+            { trainedWeightsBuffer: weightsJSON, trainingInfo: infoJSON },
+        ]
     },
-    predict: (props: TFModelPredictRequest) => {
-        return [{ prediction: null }, ]
-    }
+    predict: async (props: TFModelPredictRequest) => {
+        const { data } = props
+
+        // turn datasetjson into dataset
+        /// get dataset and training info
+        const zs = tf.tensor(JSON.parse(data.zJSON))
+
+        // get model
+        const modelObj = JSON.parse(data.modelJSON)
+        const weightObj = JSON.parse(data.weightsJSON)
+        modelObj.weightData = new Uint32Array(weightObj).buffer
+        const model = await tf.loadLayersModel({
+            load: () => Promise.resolve(modelObj),
+        })
+
+        // model.predict
+        const prediction = (await model.predict(zs)) as tf.Tensor
+        const predictJSON = JSON.stringify(await prediction.array())
+
+        // return prediction
+        return [{ prediction: predictJSON }]
+    },
 }
 
-function doSomething(message: TFModelRequest): object[] {
+async function dispatchAsyncMessages(message: TFModelRequest) {
     try {
         const handler = handlers[message.type]
-        return handler?.(message)
+        return await handler?.(message)
     } catch (e) {
-        console.debug(e)
+        console.error(e)
         return undefined
     }
 }
@@ -46,13 +142,19 @@ function doSomething(message: TFModelRequest): object[] {
 async function handleMessage(event: MessageEvent) {
     const message: TFModelRequest = event.data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { worker, trainingData, ...rest } = message
+    const { worker, ...rest } = message
     if (worker !== "tf") return
-    //console.debug("Jacdac data in:", {message})
-    const result = await doSomething(message)
-    //console.debug("Jacdac data out:", {message})
+
+    const result = await dispatchAsyncMessages(message)
+
     const resp = { worker, ...rest, data: result }
     self.postMessage(resp)
+}
+
+function onEpochEnd(epoch, logs) {
+    // Randi TODO add callback to send messages as it trains
+    self.postMessage({ type: "progress", data: logs })
+
 }
 
 self.addEventListener("message", handleMessage)

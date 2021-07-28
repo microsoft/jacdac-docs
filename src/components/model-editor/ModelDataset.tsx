@@ -1,7 +1,9 @@
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 
-import FieldDataSet, { Example, Recording } from "../FieldDataSet"
+import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
+
+import FieldDataSet, { Recording } from "../FieldDataSet"
 
 export class Dataset {
     constructor(
@@ -24,6 +26,12 @@ export default class ModelDataset extends JDEventSource {
 
     // maintain computed number of recordings and input data types to avoid recomputation
     totalRecordings: number
+
+    // maintain data in tensors
+    xs: tf.Tensor
+    ys: tf.Tensor
+    length: number
+    width: number
 
     constructor(
         public readonly labels?: string[],

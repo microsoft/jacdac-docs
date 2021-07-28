@@ -9,6 +9,8 @@ import Trend from "../Trend"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
+import DeleteIcon from "@material-ui/icons/Delete"
+// tslint:disable-next-line: match-default-export-name no-submodule-imports
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
@@ -16,8 +18,11 @@ import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import React, { useContext, useEffect, useState } from "react"
 
+import { BuzzerCmd } from "../../../jacdac-ts/src/jdom/constants"
+import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
+
+import * as tf from "@tensorflow/tfjs"
 import * as ml4f from "../../../ml4f/src/main"
-import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
 import postModelRequest from "../blockly/dsl/workers/tf.proxy"
 import {
     TFModelTrainRequest,
@@ -38,6 +43,8 @@ import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
 import MBModel from "./MBModel"
+import { ModeCommentTwoTone } from "@material-ui/icons"
+import workerProxy from "../blockly/dsl/workers/proxy"
 
 const LIVE_HORIZON = 100
 const NUM_EPOCHS = 250
@@ -97,25 +104,39 @@ export default function TrainModel(props: {
         )
     )
 
+    const isBuzzer = spec => {
+        return spec.shortId == "buzzer" //ledmatrix soundplayer
+    }
+    const buzzerServices = useChange(bus, bus =>
+        arrayConcatMany(
+            bus
+                .devices()
+                .map(device =>
+                    device.services().filter(srv => isBuzzer(srv.specification))
+                )
+        )
+    )
+
     const [pageReady, setPageReady] = useState(false)
     useEffect(() => {
         if (!pageReady) {
-            prepareDataset()
-            prepareModel()
+            prepareDataset(dataset)
+            prepareModel(model)
+            prepareTrainingTestingDatasets()
             setPageReady(true)
         }
-    }, [dataset])
+    }, [])
 
     /* For loading page */
-    const prepareDataset = () => {
+    const prepareDataset = (set: ModelDataset) => {
         // Assumptions: the sampling rate, sampling duration, and sensors used are constant
         let sampleLength = -1
         let sampleChannels = -1
         const x_data = []
         const y_data = []
 
-        for (const label of dataset.labels) {
-            dataset.getRecordingsWithLabel(label).forEach(table => {
+        for (const label of set.labels) {
+            set.getRecordingsWithLabel(label).forEach(table => {
                 if (sampleLength < table.length) {
                     sampleLength = table.length
                     sampleChannels = table.width
@@ -130,12 +151,12 @@ export default function TrainModel(props: {
                             sampleChannels
                     )
                 } /* else if (table.length != sampleLength) {
-
+                    // Randi decide what to do about different sized data
                 } */
                 // For x data, just add each sample as a new row into x_data
                 x_data.push(table.data())
 
-                y_data.push(dataset.labels.indexOf(label))
+                y_data.push(set.labels.indexOf(label))
             })
         }
 
@@ -144,94 +165,103 @@ export default function TrainModel(props: {
             sampleLength,
             sampleChannels,
         ])
-        const ys = tf.oneHot(
-            tf.tensor1d(y_data, "int32"),
-            dataset.labels.length
-        )
+        const ys = tf.oneHot(tf.tensor1d(y_data, "int32"), set.labels.length)
 
-        // Update model
-        model.labels = dataset.labels
-        model.inputShape = [sampleLength, sampleChannels]
-        model.outputShape = dataset.labels.length
-        model.xs = xs
-        model.ys = ys
-        setModel(model)
-        handleModelUpdate(model)
+        // save tensors with dataset object
+        set.xs = xs
+        set.ys = ys
+        set.length = sampleLength
+        set.width = sampleChannels
     }
 
-    const prepareModel = () => {
+    const prepareModel = (mod: MBModel) => {
         // Use a standard architecture for models made on this page
-        const modelLayers = model.model
-        console.log("Randi model input shape at prepareModel: ", model) // Randi TODO debug error: expected ndim 3, got 2
-        modelLayers.add(
-            tf.layers.conv1d({
-                inputShape: model.inputShape,
-                kernelSize: [4],
-                strides: 1,
-                filters: 16,
-                activation: "relu",
-            })
-        )
-        modelLayers.add(
-            tf.layers.maxPooling1d({
-                poolSize: [2],
-            })
-        )
-        modelLayers.add(
-            tf.layers.dropout({
-                rate: 0.1,
-            })
-        )
-        modelLayers.add(
-            tf.layers.conv1d({
-                kernelSize: [2],
-                strides: 1,
-                filters: 16,
-                activation: "relu",
-            })
-        )
-        modelLayers.add(
-            tf.layers.maxPooling1d({
-                poolSize: [2],
-            })
-        )
-        modelLayers.add(
-            tf.layers.dropout({
-                rate: 0.1,
-            })
-        )
-        modelLayers.add(
-            tf.layers.conv1d({
-                kernelSize: [2],
-                strides: 1,
-                filters: 16,
-                activation: "relu",
-            })
-        )
-        modelLayers.add(
-            tf.layers.dropout({
-                rate: 0.1,
-            })
-        )
-        // moving from 3-dimensional data to 2-dimensional requires a flattening layer
-        modelLayers.add(tf.layers.flatten())
-        // must end with a fully connected layer with size equal to number of labels
-        modelLayers.add(
-            tf.layers.dense({
-                units: model.outputShape,
-                activation: "softmax",
-            })
-        )
+        const modelLayers = mod.model
+        console.log("Randi model input shape at prepareModel: ", mod) // Randi TODO debug error: expected ndim 3, got 2
 
-        modelLayers.compile({
-            loss: "categoricalCrossentropy",
-            optimizer: "adam",
-            metrics: ["accuracy"],
-        })
+        if (!modelLayers.layers.length) {
+            console.log("Randi this model is empty let's fill it")
+            // create model from scratch
 
-        setModel(model)
-        handleModelUpdate(model)
+            // Update model
+            mod.labels = dataset.labels
+            mod.inputShape = [dataset.length, dataset.width]
+            mod.inputTypes = dataset.inputTypes
+            mod.outputShape = dataset.labels.length
 
+            modelLayers.add(
+                tf.layers.conv1d({
+                    inputShape: mod.inputShape,
+                    kernelSize: [4],
+                    strides: 1,
+                    filters: 16,
+                    activation: "relu",
+                })
+            )
+            modelLayers.add(
+                tf.layers.maxPooling1d({
+                    poolSize: [2],
+                })
+            )
+            modelLayers.add(
+                tf.layers.dropout({
+                    rate: 0.1,
+                })
+            )
+            modelLayers.add(
+                tf.layers.conv1d({
+                    kernelSize: [2],
+                    strides: 1,
+                    filters: 16,
+                    activation: "relu",
+                })
+            )
+            modelLayers.add(
+                tf.layers.maxPooling1d({
+                    poolSize: [2],
+                })
+            )
+            modelLayers.add(
+                tf.layers.dropout({
+                    rate: 0.1,
+                })
+            )
+            modelLayers.add(
+                tf.layers.conv1d({
+                    kernelSize: [2],
+                    strides: 1,
+                    filters: 16,
+                    activation: "relu",
+                })
+            )
+            modelLayers.add(
+                tf.layers.dropout({
+                    rate: 0.1,
+                })
+            )
+            // moving from 3-dimensional data to 2-dimensional requires a flattening layer
+            modelLayers.add(tf.layers.flatten())
+            // must end with a fully connected layer with size equal to number of labels
+            modelLayers.add(
+                tf.layers.dense({
+                    units: mod.outputShape,
+                    activation: "softmax",
+                })
+            )
+
+            modelLayers.compile({
+                loss: "categoricalCrossentropy",
+                optimizer: "adam",
+                metrics: ["accuracy"],
+            })
+        } else if (mod.status == "completed") {
+            // if model is ready, start predicting
+            setLiveRecording(newRecording(dataset.registerIds))
+            setRegisterIdsChecked(dataset.registerIds)
+        }
+    }
+
+    const prepareTrainingTestingDatasets = () => {
         // Create space to hold training log data
         const trainingLogDataset = {
             name: "training-logs",
@@ -254,113 +284,126 @@ export default function TrainModel(props: {
                 (label, idx) => chartPalette[idx % chartPalette.length]
             ),
         }
-        setLivePredictions(FieldDataSet.createFromFile(livePredictionDataset))
+        setLivePredictions({
+            predictionData: FieldDataSet.createFromFile(livePredictionDataset),
+            topClass: model.labels[0],
+        })
+    }
+
+    const deleteTFModel = () => {
+        if (confirm("Are you sure you want to delete current model?")) {
+            const newModel = new MBModel(model.name)
+            prepareModel(newModel)
+            console.log("Randi create new model ", newModel)
+            setModel(newModel)
+            handleModelUpdate(newModel)
+        }
     }
 
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
     const [trainingLogs, setTrainingLogs] = useState<FieldDataSet>(undefined)
 
-    const onEpochEnd = (epoch, logs) => {
-        // logs.loss, logs.acc
-        const newData = [logs.loss, logs.acc]
-        if (trainingLogs) trainingLogs.addData(newData)
-    }
-
     const trainTFModel = async () => {
         model.status = "running"
-        setModel(model)
+        model.inputTypes = dataset.inputTypes
         handleModelUpdate(model)
         setTrainEnabled(false)
 
-        // Train the model using the data
-        let acc = 0
-        const modelLayers = model.model
-        await modelLayers
-            .fit(model.xs, model.ys, {
-                epochs: NUM_EPOCHS, // Randi TODO save with model?
-                callbacks: {
-                    onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
-                },
-            })
-            .then(info => {
-                console.log("Initial accuracy: ", info.history.acc[0])
-                console.log(
-                    "Final accuracy: ",
-                    info.history.acc[info.history.acc.length - 1]
-                )
-                acc = info.history.acc[info.history.acc.length - 1] as number
-            })
-
-        // Compile code for MCU
-        const armcompiled = await ml4f.compileAndTest(model.model, {
-            verbose: true,
-            includeTest: true,
-            float16weights: false,
-            optimize: true,
+        // convert model and parameters to JSON
+        const modelObj = await model.toJSONAsync()
+        
+        // setup worker
+        // subscriber gets messages about training while training is happening
+        const stopWorkerSubscribe = workerProxy("tf").subscribe("message", (msg: any) => {
+            const newData = [msg.data.loss, msg.data.acc]
+            if (trainingLogs) trainingLogs.addData(newData)
         })
-        console.log(armcompiled)
-        // use armcompiled.machineCode
+        const trainResult = await postModelRequest({
+            worker: "tf",
+            type: "train",
+            data: {
+                xJSON: JSON.stringify(await dataset.xs.array()),
+                yJSON: JSON.stringify(await dataset.ys.array()),
+                trainingParams: JSON.stringify({
+                    epochs: NUM_EPOCHS,
+                    loss: "categoricalCrossentropy",
+                    optimizer: "adam",
+                    metrics: ["accuracy"],
+                }),
+                modelJSON: JSON.stringify(modelObj.model),
+            },
+        })
 
-        // Update model status
-        model.status = "completed"
-        model.trainingAcc = acc
-        setModel(model)
-        handleModelUpdate(model)
+        // stop subscriber after training
+        stopWorkerSubscribe()
 
-        // Update checked registers and live recording
-        setLiveRecording(newRecording(dataset.registerIds))
-        setRegisterIdsChecked(dataset.registerIds)
+        if (trainResult) {
+            // parse result from training
+            const weights = JSON.parse(trainResult[0].trainedWeightsBuffer)
+            const trainingHistory = JSON.parse(trainResult[0].trainingInfo)
 
-        setTrainEnabled(true)
-    }
-
-    /* For predicting with model */
-    const [topClass, setTopClass] = useState<string>("")
-    const [livePredictions, setLivePredictions] =
-        useState<FieldDataSet>(undefined)
-
-    const updatePrediction = async () => {
-        // Use the model to do inference on a data point the model hasn't seen before:
-        if (!datasetMatch || !liveRecording) return
-
-        let data = liveRecording.data()
-        data = data.slice(data.length - model.inputShape[0])
-        const liveInput = [data]
-
-        let top = model.labels[0]
-
-        if (data && data.length >= model.inputShape[0]) {
-            const liveOutput = []
-
-            // Get probability values from model
-            const prediction = (await model.model.predict(
-                tf.tensor3d(liveInput)
-            )) as tf.Tensor<tf.Rank>
-
-            // Save probability for each class in model object
-            model.labels.forEach((label, idx) => {
-                liveOutput.push(prediction.dataSync()[idx])
-
-                // update which class has highest confidence
-                if (liveOutput[label] > liveOutput[top]) top = label
+            modelObj.model.weightData = new Uint32Array(weights).buffer
+            const loadedModel = await tf.loadLayersModel({
+                load: () => Promise.resolve(modelObj.model),
             })
+            model.model = loadedModel
 
-            livePredictions.addData(liveOutput)
-            setTopClass(top)
+            // Compile code for MCU
+            const armcompiled = await ml4f.compileAndTest(model.model, {
+                verbose: true,
+                includeTest: true,
+                float16weights: false,
+                optimize: true,
+            })
+            console.log(armcompiled)
+            // use armcompiled.machineCode
+
+            // Update model status
+            model.status = "completed"
+            model.trainingAcc = trainingHistory[trainingHistory.length-1]
+            handleModelUpdate(model)
+
+            // Update checked registers and live recording
+            setLiveRecording(newRecording(dataset.registerIds))
+            setRegisterIdsChecked(dataset.registerIds)
+
+            setTrainEnabled(true)
+        } else {
+            model.status = "idle"
+            handleModelUpdate(model)
         }
     }
 
-    /* For displaying live data */
+    /* For predicting with model */
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
-    const [datasetMatch, setDatasetMatch] = useState(false)
 
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
+    const [livePredictions, setLivePredictions] = useState({
+        predictionData: undefined,
+        topClass: "",
+    })
 
     const recordingRegisters = readingRegisters.filter(
         reg => registerIdsChecked.indexOf(reg.id) > -1
     )
+    const liveRecordingMatchesModel = () => {
+        if (dataset && liveRecording) {
+            let matchingInputs = true
+            if (dataset.inputTypes) {
+                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) {
+                    matchingInputs = false
+                }
+            }
+            return matchingInputs
+        }
+        return false
+    }
+    const predictionEnabled =
+        !!recordingRegisters?.length &&
+        liveRecordingMatchesModel() &&
+        model.status == "completed"
 
     const handleRegisterCheck = (reg: JDRegister) => {
         const i = registerIdsChecked.indexOf(reg.id)
@@ -407,8 +450,47 @@ export default function TrainModel(props: {
             streamers.map(streamer => streamer())
         }
     }
+    const updatePrediction = async () => {
+        // Use the model to do inference on a data point the model hasn't seen before:
+        if (!predictionEnabled) return
+
+        let data = liveRecording.data()
+        data = data.slice(data.length - model.inputShape[0])
+        const liveInput = [data]
+
+        let topIdx = 0
+
+        if (data && data.length >= model.inputShape[0]) {
+            const liveOutput = []
+
+            // Get probability values from model
+            const modelJSON = await model.toJSONAsync()
+            const predResult = await postModelRequest({
+                worker: "tf",
+                type: "predict",
+                data: {
+                    zJSON: JSON.stringify(await tf.tensor3d(liveInput).array()),
+                    modelJSON: JSON.stringify(modelJSON.model),
+                    weightsJSON: JSON.stringify(modelJSON.weights),
+                },
+            })
+            const prediction = tf.tensor(JSON.parse(predResult[0].prediction))
+
+            // Save probability for each class in model object
+            model.labels.forEach((label, idx) => {
+                liveOutput.push(prediction.dataSync()[idx])
+
+                // update which class has highest confidence
+                if (liveOutput[idx] > liveOutput[topIdx]) topIdx = idx
+            })
+
+            livePredictions.predictionData.addData(liveOutput)
+            livePredictions.topClass = model.labels[topIdx]
+        }
+    }
+
     useEffect(() => {
-        const interval = setInterval(() => addRow(), 100) // Randi TODO grab interval from dataset? dataset.samplingInterval)
+        const interval = setInterval(() => addRow(), 100) // Randi TODO decide if sampling interval should be constant in dataset? dataset.samplingInterval)
         const stopStreaming = startStreamingRegisters()
 
         return () => {
@@ -416,19 +498,66 @@ export default function TrainModel(props: {
             stopStreaming()
         }
     }, [registerIdsChecked])
+
+    /* For tying prediction to action */
     useEffect(() => {
-        if (model.status == "completed" && dataset && liveRecording) {
-            if (dataset.inputTypes) {
-                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) {
-                    setDatasetMatch(false)
-                    console.error(
-                        "Mismatch between live data and current dataset: ",
-                        { d: dataset.inputTypes, lr: liveRecording }
-                    )
-                } else setDatasetMatch(true)
+        let interval
+        if (predictionEnabled) {
+            executePrediction()
+            interval = setInterval(() => executePrediction(), 1300)
+        }
+
+        return () => clearInterval(interval)
+    }, [predictionEnabled])
+
+    const playNote = note => {
+        const noteFreqs = {
+            C: 261,
+            E: 329,
+            F: 349,
+            G: 391,
+            A: 440,
+            B: 493,
+            C2: 523,
+            D2: 587,
+        }
+        if (buzzerServices.length) {
+            buzzerServices.forEach(service => {
+                const period = 1000000 / noteFreqs[note]
+                const duty = period / 2
+                const duration = 400
+                const data = jdpack<[number, number, number]>("u16 u16 u16", [
+                    period,
+                    duty,
+                    duration,
+                ])
+                //service.sendCmdAsync(BuzzerCmd.PlayTone, data)
+            })
+        }
+    }
+    const executePrediction = () => {
+        if (predictionEnabled && livePredictions.predictionData.rows) {
+            switch (livePredictions.topClass) {
+                case "one":
+                    playNote("C")
+                    playNote("E")
+                    playNote("G")
+                    break
+                case "four":
+                    playNote("F")
+                    playNote("A")
+                    playNote("C2")
+                    break
+                case "five":
+                    playNote("G")
+                    playNote("B")
+                    playNote("D2")
+                    break
+                default:
+                    break
             }
         }
-    }, [liveRecording, registerIdsChecked])
+    }
 
     /* For page management */
     const handleNext = () => {
@@ -451,7 +580,40 @@ export default function TrainModel(props: {
             {pageReady && (
                 <Grid container direction={"column"}>
                     <Grid item>
-                        <h3>Information Summary</h3>
+                        <h3>Info Summary</h3>
+                        <Accordion
+                            expanded={expanded === "modelSummary"}
+                            onChange={handleExpandedSummaryChange(
+                                "modelSummary"
+                            )}
+                        >
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <div>
+                                    <h4>Model</h4>
+                                    <p>
+                                        {expanded !== "modelSummary" && (
+                                            <span>
+                                                Training Status: {model.status}
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <div>
+                                    {model.summary.map((line, lineIdx) => {
+                                        return (
+                                            <span
+                                                key={"model-summary-" + lineIdx}
+                                            >
+                                                {" "}
+                                                {line} <br />
+                                            </span>
+                                        )
+                                    })}
+                                </div>
+                            </AccordionDetails>
+                        </Accordion>
                         <Accordion
                             expanded={expanded === "dataSummary"}
                             onChange={handleExpandedSummaryChange(
@@ -488,39 +650,21 @@ export default function TrainModel(props: {
                                 </div>
                             </AccordionDetails>
                         </Accordion>
-                        <Accordion
-                            expanded={expanded === "modelSummary"}
-                            onChange={handleExpandedSummaryChange(
-                                "modelSummary"
-                            )}
-                        >
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <div>
-                                    <h4>Model</h4>
-                                    <p>
-                                        {expanded !== "modelSummary" && (
-                                            <span>
-                                                Training Status: {model.status}
-                                            </span>
-                                        )}
-                                    </p>
-                                </div>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <div>
-                                    {model.summary.map((line, lineIdx) => {
-                                        return (
-                                            <span
-                                                key={"model-summary-" + lineIdx}
-                                            >
-                                                {" "}
-                                                {line} <br />
-                                            </span>
-                                        )
-                                    })}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
+                        <div className={classes.buttons}>
+                            <Button
+                                size="large"
+                                variant="contained"
+                                aria-label="delete existing model"
+                                title={
+                                    "Press to delete the machine learning model you have now"
+                                }
+                                onClick={deleteTFModel}
+                                startIcon={<DeleteIcon />}
+                                style={{ marginTop: 16 }}
+                            >
+                                Delete Model
+                            </Button>
+                        </div>
                         <div className={classes.buttons}>
                             <Button
                                 size="large"
@@ -544,8 +688,8 @@ export default function TrainModel(props: {
                     </Grid>
                     <Grid item>
                         <h3>Training Results</h3>
-                        <div key="liveData">
-                            {trainingLogs && (
+                        {!!trainingLogs.length && (
+                            <div key="liveData">
                                 <div>
                                     <FiberManualRecordIcon
                                         className={classes.vmiddle}
@@ -572,106 +716,103 @@ export default function TrainModel(props: {
                                         gradient={false}
                                     />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <p>Final Training Accuracy: {model.trainingAcc}</p>
                         <br />
                     </Grid>
-                    {model.status === "completed" && (
-                        <Grid item>
-                            <h3>Live Testing</h3>
-                            <div key="predict">
-                                <span>
-                                    {" "}
-                                    Top Class:{" "}
-                                    {model.status == "completed"
-                                        ? topClass
-                                        : "--"}{" "}
-                                </span>
-                                <br />
-                            </div>
-                            <div key="liveData">
-                                {liveRecording && (
-                                    <div>
-                                        {model.labels.map(label => {
-                                            return (
-                                                <span
-                                                    key={
-                                                        "prediction-key-" +
-                                                        label
-                                                    }
-                                                >
-                                                    <FiberManualRecordIcon
-                                                        className={
-                                                            classes.vmiddle
-                                                        }
-                                                        fontSize="small"
-                                                        style={{
-                                                            color: livePredictions.colorOf(
-                                                                undefined,
-                                                                label
-                                                            ),
-                                                        }}
-                                                    />
-                                                    {label}
-                                                </span>
-                                            )
-                                        })}
-                                        <Trend
-                                            key="live-data-predictions"
-                                            height={12}
-                                            dataSet={livePredictions}
-                                            horizon={LIVE_HORIZON}
-                                            dot={true}
-                                            gradient={true}
-                                        />
-                                        <Trend
-                                            key="live-data-trends"
-                                            height={12}
-                                            dataSet={liveRecording}
-                                            horizon={LIVE_HORIZON}
-                                            dot={true}
-                                            gradient={true}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                            <Accordion
-                                expanded={expanded === "chooseSensors"}
-                                onChange={handleExpandedSummaryChange(
-                                    "chooseSensors"
-                                )}
-                            >
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                >
+                    <Grid item>
+                        <h3>Live Testing</h3>
+                        <div key="predict">
+                            <span>
+                                {" "}
+                                Top Class:{" "}
+                                {model.status == "completed"
+                                    ? livePredictions.topClass
+                                    : "--"}{" "}
+                            </span>
+                            <br />
+                        </div>
+                        <div key="liveData">
+                            {liveRecording && (
+                                <div>
+                                    {model.labels.map(label => {
+                                        return (
+                                            <span
+                                                key={"prediction-key-" + label}
+                                            >
+                                                <FiberManualRecordIcon
+                                                    className={classes.vmiddle}
+                                                    fontSize="small"
+                                                    style={{
+                                                        color: livePredictions.predictionData.colorOf(
+                                                            undefined,
+                                                            label
+                                                        ),
+                                                    }}
+                                                />
+                                                {label}
+                                            </span>
+                                        )
+                                    })}
+                                    <Trend
+                                        key="live-data-predictions"
+                                        height={12}
+                                        dataSet={livePredictions.predictionData}
+                                        horizon={LIVE_HORIZON}
+                                        dot={true}
+                                        gradient={true}
+                                    />
+                                    <Trend
+                                        key="live-data-trends"
+                                        height={12}
+                                        dataSet={liveRecording}
+                                        horizon={LIVE_HORIZON}
+                                        dot={true}
+                                        gradient={true}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <Accordion
+                            expanded={expanded === "chooseSensors"}
+                            onChange={handleExpandedSummaryChange(
+                                "chooseSensors"
+                            )}
+                        >
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <div>
                                     <h4>Select input sensors</h4>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <div key="sensors">
-                                        {!readingRegisters.length && (
-                                            <span>Waiting for sensors...</span>
-                                        )}
-                                        {!!readingRegisters.length && (
-                                            <ReadingFieldGrid
-                                                readingRegisters={
-                                                    readingRegisters
-                                                }
-                                                registerIdsChecked={
-                                                    registerIdsChecked
-                                                }
-                                                recording={false}
-                                                liveDataSet={liveRecording}
-                                                handleRegisterCheck={
-                                                    handleRegisterCheck
-                                                }
-                                            />
-                                        )}
-                                    </div>
-                                </AccordionDetails>
-                            </Accordion>
-                        </Grid>
-                    )}
+                                    {!predictionEnabled && (
+                                        <p>
+                                            Sensors should match:{" "}
+                                            {dataset.inputTypes.join(", ")}{" "}
+                                        </p>
+                                    )}
+                                </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <div key="sensors">
+                                    {!readingRegisters.length && (
+                                        <span>Waiting for sensors...</span>
+                                    )}
+                                    {!!readingRegisters.length && (
+                                        <ReadingFieldGrid
+                                            readingRegisters={readingRegisters}
+                                            registerIdsChecked={
+                                                registerIdsChecked
+                                            }
+                                            recording={false}
+                                            liveDataSet={liveRecording}
+                                            handleRegisterCheck={
+                                                handleRegisterCheck
+                                            }
+                                        />
+                                    )}
+                                </div>
+                            </AccordionDetails>
+                        </Accordion>
+                    </Grid>
                     <Grid
                         item
                         style={{ display: "flex", justifyContent: "flex-end" }}

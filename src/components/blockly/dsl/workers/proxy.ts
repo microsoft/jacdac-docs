@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
+import { JDEventSource } from "../../../../../jacdac-ts/src/jdom/eventsource"
 import { assert, SMap } from "../../../../../jacdac-ts/src/jdom/utils"
 import createCsvWorker from "../../../../workers/csv/workerloader"
 import createDataWorker from "../../../../workers/data/workerloader"
@@ -17,12 +18,13 @@ export interface WorkerResponse {
     error?: string
 }
 
-export class WorkerProxy {
+export class WorkerProxy extends JDEventSource {
     readonly pendings: SMap<{
         resolve: (res: any) => void
         reject: (err: any) => void
     }> = {}
     constructor(readonly worker: Worker, readonly workerid: VMType) {
+        super()
         this.worker.addEventListener("message", this.handleMessage.bind(this))
     }
 
@@ -33,6 +35,8 @@ export class WorkerProxy {
         if (pending) {
             assert(worker === message.worker)
             pending.resolve(message)
+        } else {
+            this.emit("message", event.data)
         }
     }
 

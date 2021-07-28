@@ -20,10 +20,11 @@ import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import ModelDataset from "./ModelDataset"
 
+import { saveCSV } from "../blockly/dsl/workers/csv.proxy"
 import ServiceManagerContext from "../ServiceManagerContext"
+import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 
 import useChange from "../../jacdac/useChange"
-import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
@@ -157,7 +158,7 @@ export default function CollectData(props: {
     const handleLabelChange = newLabel => {
         setCurrentClassLabel(newLabel)
     }
-    const handleDownloadDataset = () => {
+    const handleDownloadDataset = async () => {
         const csv = dataset.toCSV()
         fileStorage.saveText(`${dataset.labelOptions.join("")}dataset.csv`, csv)
     }
@@ -262,12 +263,13 @@ export default function CollectData(props: {
         setRecordingName("recording" + totalRecordings)
     }, [totalRecordings])
     useEffect(() => {
+        let matchingInputs = true
         if (dataset && liveRecording) {
             if (dataset.inputTypes) {
-                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) setDatasetMatch(false)
-                else setDatasetMatch(true)
+                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) matchingInputs = false
             }
         }
+        setDatasetMatch(matchingInputs) 
     }, [liveRecording])
 
     const handleDatasetUpdate = dataset => {
