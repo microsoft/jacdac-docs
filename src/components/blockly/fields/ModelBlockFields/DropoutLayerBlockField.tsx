@@ -15,7 +15,7 @@ export interface DropoutLayerFieldValue {
 
 function LayerParameterWidget(props: {
     initFieldValue: DropoutLayerFieldValue
-    setFieldValue: (DropoutLayerFieldValue) => void
+    setFieldValue: (f: DropoutLayerFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

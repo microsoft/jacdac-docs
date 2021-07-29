@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
+import { MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../../../jacdac-ts/src/jdom/eventsource"
 import { assert, SMap } from "../../../../../jacdac-ts/src/jdom/utils"
 import createCsvWorker from "../../../../workers/csv/workerloader"
@@ -36,7 +37,7 @@ export class WorkerProxy extends JDEventSource {
             assert(worker === message.worker)
             pending.resolve(message)
         } else {
-            this.emit("message", event.data)
+            this.emit(MESSAGE, event.data)
         }
     }
 

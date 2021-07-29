@@ -1,8 +1,6 @@
-import React, { useContext,
-                useEffect,
-                useState } from "react"
+import React, { useContext, useState } from "react"
 
-import { Grid,} from "@material-ui/core"
+import { Grid } from "@material-ui/core"
 import AddCircleIcon from "@material-ui/icons/AddCircleOutline"
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircleOutline"
 import IconButtonWithTooltip from "../../../ui/IconButtonWithTooltip"
@@ -13,36 +11,44 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 
 function ExpandIconWidget() {
-    const { sourceBlock, workspaceJSON } = useContext(WorkspaceContext)
+    const { sourceBlock } = useContext(WorkspaceContext)
 
     const initializeParametersVisible = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<unknown>
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<unknown>
         if (parameterField) return parameterField.areParametersVisible()
 
         return false
     }
-    const [parametersVisible, setParametersVisible] = useState(initializeParametersVisible())
+    const [parametersVisible, setParametersVisible] = useState(
+        initializeParametersVisible()
+    )
 
     const handleExpandBlock = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<unknown>
-        if (parameterField) {            
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<unknown>
+        if (parameterField) {
             parameterField.setParametersVisible(!parametersVisible)
             // make sure parameters visible is aligned with the block
-            setParametersVisible(parameterField.areParametersVisible()) 
+            setParametersVisible(parameterField.areParametersVisible())
         }
     }
 
     return (
-        <Grid
-            container
-            spacing={1}
-        >
+        <Grid container spacing={1}>
             <Grid item>
                 <IconButtonWithTooltip
-                    style={{ backgroundColor: 'transparent' }}
+                    style={{ backgroundColor: "transparent" }}
                     onClick={handleExpandBlock}
-                    title="Expand dataset block to see all dataset info" >
-                    {parametersVisible ? <RemoveCircleIcon /> : <AddCircleIcon />}
+                    title="Expand dataset block to see all dataset info"
+                >
+                    {parametersVisible ? (
+                        <RemoveCircleIcon />
+                    ) : (
+                        <AddCircleIcon />
+                    )}
                 </IconButtonWithTooltip>
             </Grid>
         </Grid>
@@ -68,7 +74,7 @@ export default class ExpandModelBlockField extends ReactInlineField {
     }
 
     getText_() {
-        return ','
+        return ","
     }
 
     renderInlineField() {

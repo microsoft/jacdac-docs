@@ -20,7 +20,7 @@ export interface DatasetBlockFieldValue {
 
 function DatasetParameterWidget(props: {
         initFieldValue: DatasetBlockFieldValue
-        setFieldValue: (DatasetBlockFieldValue) => void
+        setFieldValue: (f: DatasetBlockFieldValue) => void
     }) {
     const { initFieldValue, setFieldValue } = props
 

@@ -18,13 +18,15 @@ export interface KNNBlockFieldValue {
 
 function KNNParameterWidget(props: {
     initFieldValue: KNNBlockFieldValue
-    setFieldValue: (KNNBlockFieldValue) => void
+    setFieldValue: (f: KNNBlockFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 
     const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
+    const [parametersVisible, setParametersVisible] = useState(
+        initFieldValue.parametersVisible
+    )
     const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
@@ -54,21 +56,28 @@ function KNNParameterWidget(props: {
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<KNNBlockField>
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<KNNBlockField>
         setParametersVisible(parameterField.areParametersVisible())
     }
 
     const updateParameters = () => {
-        const trainingSetField = sourceBlock.getField("KNN_TRAINING") as FieldVariable
+        const trainingSetField = sourceBlock.getField(
+            "KNN_TRAINING"
+        ) as FieldVariable
         const kValueField = sourceBlock.getField("KNN_K_VALUE") as FieldNumber
 
-        console.log("Randi KNN update parameters", {trainingSetField, kValueField})
-        
+        console.log("Randi KNN update parameters", {
+            trainingSetField,
+            kValueField,
+        })
+
         // find the associated dataset and...
         //     copy the class labels parameter
         //     get the total numSamples
         // calculate how quickly the model should run given the size of K and number of samples
-        // calcualte how large the model is given the number of samples 
+        // calcualte how large the model is given the number of samples
     }
 
     const handleViewModel = () => {
@@ -76,43 +85,45 @@ function KNNParameterWidget(props: {
     }
 
     return (
-        <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
-            <Grid item>
-                <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"}
-                </Box>
-                <Box color="text.secondary">
-                    Model size: {modelSize}
-                </Box>
-                <Box color="text.secondary">
-                    Cycles: {modelCycles}
-                </Box>
-            </Grid>
-            <Grid item>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleViewModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Compile
-                    </Button>
-                </Tooltip>
-            </Grid>
-        </Grid>
-        } </>
+        <>
+            {" "}
+            {parametersVisible && (
+                <Grid container spacing={1} direction={"row"}>
+                    <Grid item>
+                        <Box color="text.secondary">
+                            Classes:{" "}
+                            {classes.length ? classes.join(", ") : "none"}
+                        </Box>
+                        <Box color="text.secondary">
+                            Model size: {modelSize}
+                        </Box>
+                        <Box color="text.secondary">Cycles: {modelCycles}</Box>
+                    </Grid>
+                    <Grid item>
+                        <Tooltip title="Open modal to view and run classifier">
+                            <Button
+                                onClick={handleViewModel}
+                                startIcon={<AutorenewIcon />}
+                                variant="outlined"
+                                size="small"
+                            >
+                                Compile
+                            </Button>
+                        </Tooltip>
+                    </Grid>
+                </Grid>
+            )}{" "}
+        </>
     )
 }
-
 
 export default class KNNBlockField extends ReactParameterField<KNNBlockFieldValue> {
     static KEY = "knn_block_field_key"
     static EDITABLE = false
-    
+
     constructor(value: string) {
         super(value)
-        this.updateFieldValue = this.updateFieldValue.bind(this);
+        this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -148,16 +159,23 @@ export default class KNNBlockField extends ReactParameterField<KNNBlockFieldValu
     updateFieldValue(msg: KNNBlockFieldValue) {
         this.value = {
             ...this.value, // don't copy over visibility (will cause loop)
-            modelSize:msg.modelSize,
-            modelCycles:msg.modelCycles,
-            classes:msg.classes,
+            modelSize: msg.modelSize,
+            modelCycles: msg.modelCycles,
+            classes: msg.classes,
         }
     }
 
     renderInlineField(): ReactNode {
-        return ( <> {  <KNNParameterWidget 
-            initFieldValue={this.value}
-            setFieldValue={this.updateFieldValue} />} </>)
-        
+        return (
+            <>
+                {" "}
+                {
+                    <KNNParameterWidget
+                        initFieldValue={this.value}
+                        setFieldValue={this.updateFieldValue}
+                    />
+                }{" "}
+            </>
+        )
     }
 }

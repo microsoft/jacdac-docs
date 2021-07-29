@@ -1,5 +1,13 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
-import { Grid, Box, Button, Tooltip, TextField, Select, MenuItem } from "@material-ui/core"
+import {
+    Grid,
+    Box,
+    Button,
+    Tooltip,
+    TextField,
+    Select,
+    MenuItem,
+} from "@material-ui/core"
 import AutorenewIcon from "@material-ui/icons/Autorenew"
 //import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -25,18 +33,22 @@ export interface NeuralNetworkBlockFieldValue {
 
 function NNParameterWidget(props: {
     initFieldValue: NeuralNetworkBlockFieldValue
-    setFieldValue: (NeuralNetworkBlockFieldValue) => void
+    setFieldValue: (f: NeuralNetworkBlockFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 
     const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
+    const [parametersVisible, setParametersVisible] = useState(
+        initFieldValue.parametersVisible
+    )
     const [numLayers, setNumLayers] = useState(initFieldValue.numLayers)
     const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
-    const [learningRate, setLearningRate] = useState(initFieldValue.learningRate)
+    const [learningRate, setLearningRate] = useState(
+        initFieldValue.learningRate
+    )
     const [optimizer, setOptimizer] = useState<string>(initFieldValue.optimizer)
     const [batchSize, setBatchSize] = useState(initFieldValue.batchSize)
     const [numEpochs, setNumEpochs] = useState(initFieldValue.numEpochs)
@@ -44,7 +56,16 @@ function NNParameterWidget(props: {
     useEffect(() => {
         // push changes to source block after state values update
         sendUpdate()
-    }, [numLayers, modelSize, modelCycles, classes, learningRate, optimizer, batchSize, numEpochs])
+    }, [
+        numLayers,
+        modelSize,
+        modelCycles,
+        classes,
+        learningRate,
+        optimizer,
+        batchSize,
+        numEpochs,
+    ])
 
     const sendUpdate = () => {
         // push changes to field values to the parent
@@ -71,16 +92,20 @@ function NNParameterWidget(props: {
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<NeuralNetworkBlockFieldValue>
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<NeuralNetworkBlockFieldValue>
         setParametersVisible(parameterField.areParametersVisible())
     }
 
     const updateParameters = () => {
-        const trainingSetField = sourceBlock.getField("NN_TRAINING") as FieldVariable
+        const trainingSetField = sourceBlock.getField(
+            "NN_TRAINING"
+        ) as FieldVariable
         console.log("Randi NN update parameters: ", trainingSetField)
-        
+
         // gather all the layers
-        const layerBlocks = sourceBlock.getChildren(false)  // seems to only return the top block, not all of them. so I implement my own get all children
+        const layerBlocks = sourceBlock.getChildren(false) // seems to only return the top block, not all of them. so I implement my own get all children
         let allLayerBlocks = []
 
         if (layerBlocks.length > 0) {
@@ -106,13 +131,16 @@ function NNParameterWidget(props: {
 
         for (const child of childBlocks) {
             const nextChild = child.getNextBlock()
-            if (nextChild) // should I check type?
+            if (nextChild)
+                // should I check type?
                 childBlocks.push(nextChild)
         }
         return childBlocks
     }
 
-    const handleChangedLearningRate = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangedLearningRate = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         const newValue = event.target.valueAsNumber
         // Randi TODO give some sort of error message for inappropriate values
         if (newValue && !isNaN(newValue)) {
@@ -120,7 +148,9 @@ function NNParameterWidget(props: {
         }
     }
 
-    const handleChangedEpochs = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangedEpochs = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         const newValue = event.target.valueAsNumber
         // Randi TODO give some sort of error message for numbers smaller than 1
         if (newValue && !isNaN(newValue)) {
@@ -128,7 +158,9 @@ function NNParameterWidget(props: {
         }
     }
 
-    const handleChangedBatchSize = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangedBatchSize = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         const newValue = event.target.valueAsNumber
         // Randi TODO give some sort of error message for numbers larger than the number of samples
         if (newValue && !isNaN(newValue)) {
@@ -136,7 +168,7 @@ function NNParameterWidget(props: {
         }
     }
 
-    const handleChangedOptimizer = (event) => {
+    const handleChangedOptimizer = event => {
         const newValue = event.target.value
         // Randi TODO give some sort of error message for invalid optimizer choices
         if (newValue) setOptimizer(newValue)
@@ -148,92 +180,100 @@ function NNParameterWidget(props: {
     }
 
     return (
-        <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
-            <Grid item style={{ display: "inline-flex", width:300 }}>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleViewModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Train Model
-                    </Button>
-                </Tooltip>
-            </Grid>
-            <Grid item>
-                <Box color="text.secondary">
-                Learning rate 
-                <Tooltip title="Update the learning rate">
-                    <TextField
-                        id={"windowId"}
-                        type="number"
-                        size="small"
-                        variant="outlined"
-                        value={learningRate}
-                        onChange={handleChangedLearningRate}
-                    />
-                </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Optimizer 
-                    <Tooltip title="Update the optimizer">                     
-                    <Select
-                        id="optimizerId"
-                        variant="outlined"
-                        value={optimizer}
-                        onChange={handleChangedOptimizer}
-                        >
-                        <MenuItem value="adam">Adam</MenuItem>
-                        <MenuItem value="sgd">SGD</MenuItem>
-                        <MenuItem value="adagrad">Adagrad</MenuItem>
-                        <MenuItem value="adadelta">Adadelta</MenuItem>
-                    </Select>
-                    </Tooltip>                    
-                </Box>
-                <Box color="text.secondary">
-                    Batch size
-                    <Tooltip title="Update the batch size to train on"> 
-                    <TextField
-                        id={"strideId"}
-                        type="number"
-                        size="small"
-                        variant="outlined"
-                        value={batchSize}
-                        onChange={handleChangedBatchSize}
-                    />
-                    </Tooltip>                    
-                </Box>
-                <Box color="text.secondary">
-                    Epochs
-                    <Tooltip title="Update the batch size to train on"> 
-                    <TextField
-                        id={"strideId"}
-                        type="number"
-                        size="small"
-                        variant="outlined"
-                        value={numEpochs}
-                        onChange={handleChangedEpochs}
-                    />
-                    </Tooltip>                    
-                </Box>
-            </Grid>
-            <Grid item>
-                <Box color="text.secondary">
-                    No. of Layers: {numLayers}  <br />
-                    Classes: {classes.length ? classes.join(", ") : "none"}  <br />
-                    Model size: {modelSize}  <br />
-                    Cycles: {modelCycles}  <br />
-                </Box>
-            </Grid>
-        </Grid>
-        } </>
+        <>
+            {" "}
+            {parametersVisible && (
+                <Grid container spacing={1} direction={"row"}>
+                    <Grid item style={{ display: "inline-flex", width: 300 }}>
+                        <Tooltip title="Open modal to view and run classifier">
+                            <Button
+                                onClick={handleViewModel}
+                                startIcon={<AutorenewIcon />}
+                                variant="outlined"
+                                size="small"
+                            >
+                                Train Model
+                            </Button>
+                        </Tooltip>
+                    </Grid>
+                    <Grid item>
+                        <Box color="text.secondary">
+                            Learning rate
+                            <Tooltip title="Update the learning rate">
+                                <TextField
+                                    id={"windowId"}
+                                    type="number"
+                                    size="small"
+                                    variant="outlined"
+                                    value={learningRate}
+                                    onChange={handleChangedLearningRate}
+                                />
+                            </Tooltip>
+                        </Box>
+                        <Box color="text.secondary">
+                            Optimizer
+                            <Tooltip title="Update the optimizer">
+                                <Select
+                                    id="optimizerId"
+                                    variant="outlined"
+                                    value={optimizer}
+                                    onChange={handleChangedOptimizer}
+                                >
+                                    <MenuItem value="adam">Adam</MenuItem>
+                                    <MenuItem value="sgd">SGD</MenuItem>
+                                    <MenuItem value="adagrad">Adagrad</MenuItem>
+                                    <MenuItem value="adadelta">
+                                        Adadelta
+                                    </MenuItem>
+                                </Select>
+                            </Tooltip>
+                        </Box>
+                        <Box color="text.secondary">
+                            Batch size
+                            <Tooltip title="Update the batch size to train on">
+                                <TextField
+                                    id={"strideId"}
+                                    type="number"
+                                    size="small"
+                                    variant="outlined"
+                                    value={batchSize}
+                                    onChange={handleChangedBatchSize}
+                                />
+                            </Tooltip>
+                        </Box>
+                        <Box color="text.secondary">
+                            Epochs
+                            <Tooltip title="Update the batch size to train on">
+                                <TextField
+                                    id={"strideId"}
+                                    type="number"
+                                    size="small"
+                                    variant="outlined"
+                                    value={numEpochs}
+                                    onChange={handleChangedEpochs}
+                                />
+                            </Tooltip>
+                        </Box>
+                    </Grid>
+                    <Grid item>
+                        <Box color="text.secondary">
+                            No. of Layers: {numLayers} <br />
+                            Classes:{" "}
+                            {classes.length ? classes.join(", ") : "none"}{" "}
+                            <br />
+                            Model size: {modelSize} <br />
+                            Cycles: {modelCycles} <br />
+                        </Box>
+                    </Grid>
+                </Grid>
+            )}{" "}
+        </>
     )
 }
 
 export default class NeuralNetworkBlockField extends ReactParameterField<NeuralNetworkBlockFieldValue> {
     static KEY = "nn_block_field_key"
-    
+
     constructor(value: string) {
         super(value)
         this.updateFieldValue = this.updateFieldValue.bind(this)
@@ -271,7 +311,7 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
     }
 
     getText_() {
-        const { numLayers} = this.value
+        const { numLayers } = this.value
 
         return `${numLayers} layer(s)`
     }
@@ -291,9 +331,16 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
     }
 
     renderInlineField(): ReactNode {
-        return ( <> {  <NNParameterWidget 
-            initFieldValue={this.value}
-            setFieldValue={this.updateFieldValue} />} </>)
-        
+        return (
+            <>
+                {" "}
+                {
+                    <NNParameterWidget
+                        initFieldValue={this.value}
+                        setFieldValue={this.updateFieldValue}
+                    />
+                }{" "}
+            </>
+        )
     }
 }
