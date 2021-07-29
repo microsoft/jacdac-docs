@@ -1,6 +1,10 @@
+import { Block } from "blockly"
+import type { VisualizationSpec } from "react-vega"
+import type { AnyMark } from "vega-lite/build/src/mark"
 import VegaChartField from "../fields/chart/VegaChartField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import DataPreviewField from "../fields/DataPreviewField"
+import { tidyHeaders, tidyResolveFieldColumn } from "../fields/tidy"
 import {
     BlockReference,
     CategoryDefinition,
@@ -80,7 +84,7 @@ const vegaDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: VEGA_ENCODING_BLOCK,
-            message0: "encoding %1 with field %2 %3 %4",
+            message0: "encoding %1 as %2",
             args0: [
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -98,18 +102,11 @@ const vegaDsl: BlockDomainSpecificLanguage = {
                         "radius",
                         "radius2",
                     ].map(s => [s, s]),
+                    name: "channel",
                 },
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
                     name: "field",
-                },
-                <DummyInputDefinition>{
-                    type: "input_dummy",
-                },
-                <StatementInputDefinition>{
-                    type: "input_statement",
-                    name: "fields",
-                    check: VEGA_ENCODING_OPTIONS_TYPE,
                 },
             ],
             previousStatement: VEGA_STATEMENT_TYPE,
@@ -132,6 +129,43 @@ const vegaDsl: BlockDomainSpecificLanguage = {
             colour,
         },
     ],
+}
+
+export function blockToVisualizationSpec(
+    sourceBlock: Block,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    data: object[]
+): VisualizationSpec {
+    const { headers, types } = tidyHeaders(data)
+    const mark: AnyMark = sourceBlock.getFieldValue("mark")
+    const spec: VisualizationSpec = {
+        mark,
+        encoding: {},
+        data: { name: "values" },
+    }
+
+    let child = sourceBlock.getInputTargetBlock("fields")
+    while (child) {
+        switch (child.type) {
+            case VEGA_ENCODING_BLOCK: {
+                const channel = child.getFieldValue("channel")
+                const field = tidyResolveFieldColumn(data, child, "field")
+                console.log({ child, channel, field })
+                if (channel && field) {
+                    const type = types[headers.indexOf(field)]
+                    spec.encoding[channel] = {
+                        field,
+                        type: type === "number" ? "quantitative" : "nominal",
+                    }
+                }
+                break
+            }
+        }
+
+        child = child.getNextBlock()
+    }
+
+    return spec
 }
 
 export default vegaDsl
