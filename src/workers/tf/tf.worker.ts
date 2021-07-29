@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import * as tf from "@tensorflow/tfjs"
+import { Tensor, loadLayersModel, tensor, io } from "@tensorflow/tfjs"
 
 export interface TFModelMessage {
     worker: "tf"
@@ -12,26 +12,26 @@ export interface TFModelRequest extends TFModelMessage {
 }
 
 export interface TFModelTrainRequest extends TFModelRequest {
-    type: "train",
-    trainingDataJSON: string,
-    modelDataJSON: string,
+    type: "train"
+    trainingDataJSON: string
+    modelDataJSON: string
 }
 
 export interface TFModelTrainResponse extends TFModelMessage {
-    type: "train",
-    trainedWeightsJSON: string,
-    armModelJSON: string,
+    type: "train"
+    trainedWeightsJSON: string
+    armModelJSON: string
 }
 
 export interface TFModelPredictRequest extends TFModelRequest {
-    type: "predict",
-    testingDataJSON: string,
-    modelDataJSON: string,
+    type: "predict"
+    testingDataJSON: string
+    modelDataJSON: string
 }
 
 export interface TFModelPredictResponse extends TFModelMessage {
-    type: "train",
-    predictionJSON: string,
+    type: "train"
+    predictionJSON: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,10 +40,10 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
         const { data } = props
         let trainingInfo = []
 
-        // get dataset and training info 
+        // get dataset and training info
         //console.log("Randi got training info ", data.trainingParams)
-        const xs = tf.tensor(JSON.parse(data.xJSON))
-        const ys = tf.tensor(JSON.parse(data.yJSON))
+        const xs = tensor(JSON.parse(data.xJSON))
+        const ys = tensor(JSON.parse(data.yJSON))
         let epochs, loss, optimizer, metrics
 
         if (data.trainingParams) {
@@ -62,7 +62,7 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
 
         // get model
         const modelObj = JSON.parse(data.modelJSON)
-        const model = await tf.loadLayersModel({
+        const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
         model.compile({
@@ -84,11 +84,11 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
             })
 
         // save model as model artifacts
-        let mod: tf.io.ModelArtifacts
+        let mod: io.ModelArtifacts
         await model.save({
             save: m => {
                 mod = m
-                const res: tf.io.SaveResult = {
+                const res: io.SaveResult = {
                     modelArtifactsInfo: {
                         dateSaved: new Date(),
                         modelTopologyType: "JSON",
@@ -99,29 +99,29 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
         })
 
         // return weight data
-        const weightsJSON = JSON.stringify(Array.from(new Uint32Array(mod.weightData)))
+        const weightsJSON = JSON.stringify(
+            Array.from(new Uint32Array(mod.weightData))
+        )
         const infoJSON = JSON.stringify(trainingInfo)
-        return [
-            { trainedWeightsBuffer: weightsJSON, trainingInfo: infoJSON },
-        ]
+        return [{ trainedWeightsBuffer: weightsJSON, trainingInfo: infoJSON }]
     },
     predict: async (props: TFModelPredictRequest) => {
         const { data } = props
 
         // turn datasetjson into dataset
         /// get dataset and training info
-        const zs = tf.tensor(JSON.parse(data.zJSON))
+        const zs = tensor(JSON.parse(data.zJSON))
 
         // get model
         const modelObj = JSON.parse(data.modelJSON)
         const weightObj = JSON.parse(data.weightsJSON)
         modelObj.weightData = new Uint32Array(weightObj).buffer
-        const model = await tf.loadLayersModel({
+        const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
 
         // model.predict
-        const prediction = (await model.predict(zs)) as tf.Tensor
+        const prediction = (await model.predict(zs)) as Tensor
         const predictJSON = JSON.stringify(await prediction.array())
 
         // return prediction
@@ -154,7 +154,6 @@ async function handleMessage(event: MessageEvent) {
 function onEpochEnd(epoch, logs) {
     // Randi TODO add callback to send messages as it trains
     self.postMessage({ type: "progress", data: logs })
-
 }
 
 self.addEventListener("message", handleMessage)
