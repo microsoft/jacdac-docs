@@ -8,7 +8,7 @@ import {
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
-import LinePlotField from "../fields/LinePlotField"
+import LinePlotField from "../fields/chart/LinePlotField"
 import BarChartField from "../fields/chart/BarField"
 import HistogramField from "../fields/chart/HistogramField"
 import DataTableField from "../fields/DataTableField"
