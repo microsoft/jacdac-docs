@@ -1,4 +1,4 @@
-import ScatterPlotField from "../fields/ScatterPlotField"
+import ScatterPlotField from "../fields/chart/ScatterPlotField"
 import {
     BlockReference,
     CategoryDefinition,
@@ -9,12 +9,12 @@ import {
 import BlockDomainSpecificLanguage from "./dsl"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import LinePlotField from "../fields/LinePlotField"
-import BarChartField from "../fields/BarField"
-import HistogramField from "../fields/HistogramField"
+import BarChartField from "../fields/chart/BarField"
+import HistogramField from "../fields/chart/HistogramField"
 import DataTableField from "../fields/DataTableField"
 import { paletteColorByIndex } from "./palette"
 import DataPreviewField from "../fields/DataPreviewField"
-import BoxPlotField from "../fields/BoxPlotField"
+import BoxPlotField from "../fields/chart/BoxPlotField"
 
 const SCATTERPLOT_BLOCK = "chart_scatterplot"
 const LINEPLOT_BLOCK = "chart_lineplot"
