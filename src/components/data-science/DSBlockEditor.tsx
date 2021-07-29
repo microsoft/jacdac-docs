@@ -9,7 +9,6 @@ import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
 import dataDsl from "../blockly/dsl/datadsl"
 import chartDsl from "../blockly/dsl/chartdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
-import vegaDsl from "../blockly/dsl/vegadsl"
 
 const DS_EDITOR_ID = "ds"
 const DS_SOURCE_STORAGE_KEY = "tools:dseditor"
@@ -45,7 +44,7 @@ function DSEditorWithContext() {
 
 export default function DSBlockEditor() {
     const dsls = useMemo(() => {
-        return [dataDsl, chartDsl, vegaDsl, fieldsDsl]
+        return [dataDsl, chartDsl, fieldsDsl]
     }, [])
 
     return (

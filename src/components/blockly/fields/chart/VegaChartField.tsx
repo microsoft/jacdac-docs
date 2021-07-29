@@ -7,7 +7,7 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import useBlockData from "../../useBlockData"
 import VegaLiteWidget from "./VegaLiteWidget"
-import { blockToVisualizationSpec } from "../../dsl/vegadsl"
+import { blockToVisualizationSpec } from "../../dsl/chartdsl"
 import { useEffect } from "react"
 
 function VegaChartWidget() {
