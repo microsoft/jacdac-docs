@@ -122,7 +122,6 @@ export interface BlockWithServices extends BlockSvg {
 
 export interface WorkspaceContextProps {
     workspace?: WorkspaceSvg
-    workspaceJSON?: WorkspaceJSON
     dragging?: boolean
     sourceBlock?: Block
     sourceId?: string
@@ -136,7 +135,6 @@ export interface WorkspaceContextProps {
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
     workspace: undefined,
-    workspaceJSON: undefined,
     dragging: false,
     sourceBlock: undefined,
     flyout: false,
@@ -165,7 +163,6 @@ export function WorkspaceProvider(props: {
     const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
     const roleManager = useChange(services, _ => _?.roleManager)
     const runner = useChange(services, _ => _?.runner)
-    const workspaceJSON = useChange(services, _ => _?.workspaceJSON)
     const [dragging, setDragging] = useState(!!workspace?.isDragging())
 
     const resolveRole = () => {
@@ -234,7 +231,6 @@ export function WorkspaceProvider(props: {
             value={{
                 sourceBlock,
                 workspace,
-                workspaceJSON,
                 dragging,
                 sourceId,
                 services,
