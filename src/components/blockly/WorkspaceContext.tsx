@@ -35,7 +35,7 @@ export class WorkspaceServices extends JDEventSource {
     set workspaceJSON(value: WorkspaceJSON) {
         if (value !== this._workspaceJSON) {
             this._workspaceJSON = value
-            this.emit(WORKSPACE_CHANGE)
+            this.emit(WorkspaceServices.WORKSPACE_CHANGE)
         }
     }
 
