@@ -18,6 +18,8 @@ import ReactField from "./fields/ReactField"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
 export class WorkspaceServices extends JDEventSource {
+    static readonly WORKSPACE_CHANGE = "workspaceChange"
+
     private _workspaceJSON: WorkspaceJSON
     private _runner: VMProgramRunner
     private _roleManager: RoleManager
@@ -31,8 +33,10 @@ export class WorkspaceServices extends JDEventSource {
     }
 
     set workspaceJSON(value: WorkspaceJSON) {
-        this._workspaceJSON = value
-        //this.emit(CHANGE)
+        if (value !== this._workspaceJSON) {
+            this._workspaceJSON = value
+            this.emit(WORKSPACE_CHANGE)
+        }
     }
 
     get runner() {
