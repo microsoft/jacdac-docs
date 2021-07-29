@@ -23,6 +23,7 @@ import BoxPlotField from "./chart/BoxPlotField"
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
 import DataPreviewField from "./DataPreviewField"
+import VegaChartField from "./chart/VegaChartField"
 
 let reactFieldShadows: BlockDefinition[]
 export function registerFields() {
@@ -69,6 +70,7 @@ export function registerFields() {
 
         HistogramField,
         BoxPlotField,
+        VegaChartField,
 
         FileSaveField,
         FileOpenField,

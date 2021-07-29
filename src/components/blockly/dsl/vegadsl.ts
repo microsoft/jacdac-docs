@@ -1,4 +1,4 @@
-import ScatterPlotField from "../fields/chart/ScatterPlotField"
+import VegaChartField from "../fields/chart/VegaChartField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import DataPreviewField from "../fields/DataPreviewField"
 import {
@@ -65,8 +65,8 @@ const vegaDsl: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: ScatterPlotField.KEY,
-                    name: "plot",
+                    type: VegaChartField.KEY,
+                    name: "chart",
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
