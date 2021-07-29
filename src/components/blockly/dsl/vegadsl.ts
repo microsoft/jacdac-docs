@@ -14,6 +14,7 @@ import {
     identityTransformData,
     OptionsInputDefinition,
     StatementInputDefinition,
+    TextInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 import { paletteColorByIndex } from "./palette"
@@ -21,7 +22,6 @@ import { paletteColorByIndex } from "./palette"
 const VEGA_LAYER_BLOCK = "vega_layer"
 const VEGA_ENCODING_BLOCK = "vega_encoding"
 const VEGA_STATEMENT_TYPE = "vegaStatementType"
-const VEGA_ENCODING_OPTIONS_TYPE = "vegaEncodingOptionStatementType"
 
 const colour = paletteColorByIndex(5)
 const vegaDsl: BlockDomainSpecificLanguage = {
@@ -30,7 +30,7 @@ const vegaDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: VEGA_LAYER_BLOCK,
-            message0: "chart %1 %2 %3 %4 %5 %6",
+            message0: "chart %1 title %2 %3 %4 %5 %6 %7",
             args0: [
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -52,6 +52,10 @@ const vegaDsl: BlockDomainSpecificLanguage = {
                         "trail",
                     ].map(s => [s, s]),
                     name: "mark",
+                },
+                <TextInputDefinition>{
+                    type: "field_input",
+                    name: "title",
                 },
                 {
                     type: DataPreviewField.KEY,
@@ -138,7 +142,9 @@ export function blockToVisualizationSpec(
 ): VisualizationSpec {
     const { headers, types } = tidyHeaders(data)
     const mark: AnyMark = sourceBlock.getFieldValue("mark")
+    const title: string = sourceBlock.getFieldValue("title")
     const spec: VisualizationSpec = {
+        title,
         mark,
         encoding: {},
         data: { name: "values" },
