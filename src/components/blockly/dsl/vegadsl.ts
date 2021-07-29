@@ -1,4 +1,6 @@
+import ScatterPlotField from "../fields/chart/ScatterPlotField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
+import DataPreviewField from "../fields/DataPreviewField"
 import {
     BlockReference,
     CategoryDefinition,
@@ -24,14 +26,18 @@ const vegaDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: VEGA_LAYER_BLOCK,
-            message0: "chart %1 %2 %3",
+            message0: "chart %1 %2 %3 %4 %5 %6",
             args0: [
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
                     options: [
+                        "arc",
                         "area",
                         "bar",
+                        "boxplot",
                         "circle",
+                        "errorband",
+                        "errorbar",
                         "line",
                         "point",
                         "rect",
@@ -39,8 +45,13 @@ const vegaDsl: BlockDomainSpecificLanguage = {
                         "square",
                         "text",
                         "tick",
+                        "trail",
                     ].map(s => [s, s]),
                     name: "mark",
+                },
+                {
+                    type: DataPreviewField.KEY,
+                    name: "preview",
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -50,12 +61,20 @@ const vegaDsl: BlockDomainSpecificLanguage = {
                     name: "fields",
                     check: VEGA_STATEMENT_TYPE,
                 },
+                <DummyInputDefinition>{
+                    type: "input_dummy",
+                },
+                {
+                    type: ScatterPlotField.KEY,
+                    name: "plot",
+                },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
@@ -91,13 +110,14 @@ const vegaDsl: BlockDomainSpecificLanguage = {
                     type: "input_statement",
                     name: "fields",
                     check: VEGA_ENCODING_OPTIONS_TYPE,
-                },                
+                },
             ],
             previousStatement: VEGA_STATEMENT_TYPE,
             nextStatement: VEGA_STATEMENT_TYPE,
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
     ],
