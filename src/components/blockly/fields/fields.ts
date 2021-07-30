@@ -12,17 +12,18 @@ import WatchValueField from "./WatchValueField"
 import LogViewField from "./LogViewField"
 import VariablesField from "./VariablesFields"
 import DataTableField from "./DataTableField"
-import ScatterPlotField from "./ScatterPlotField"
 import DataColumnChooserField from "./DataColumnChooserField"
-import LinePlotField from "./LinePlotField"
+import LinePlotField from "./chart/LinePlotField"
 import GaugeWidgetField from "./GaugeWidgetField"
 import BuiltinDataSetField from "./BuiltinDataSetField"
-import BarChartField from "./BarField"
-import HistogramField from "./HistogramField"
+import ScatterPlotField from "./chart/ScatterPlotField"
+import BarChartField from "./chart/BarField"
+import HistogramField from "./chart/HistogramField"
+import BoxPlotField from "./chart/BoxPlotField"
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
 import DataPreviewField from "./DataPreviewField"
-import BoxPlotField from "./BoxPlotField"
+import VegaChartField from "./chart/VegaChartField"
 
 import ExpandModelBlockField from "./ModelBlockFields/ExpandModelBlockField"
 import DataSetBlockField from "./ModelBlockFields/DataSetBlockField"
@@ -81,6 +82,7 @@ export function registerFields() {
 
         HistogramField,
         BoxPlotField,
+        VegaChartField,
 
         ExpandModelBlockField,
         DataSetBlockField,
