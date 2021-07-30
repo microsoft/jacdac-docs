@@ -1,11 +1,9 @@
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 
-import * as tf from "@tensorflow/tfjs" /* RANDI TODO replace this with tf worker*/
-
 import FieldDataSet, { Recording } from "../FieldDataSet"
 
-export class Dataset {
+export class DataSet {
     constructor(
         public readonly inputTypes: string[],
         public readonly recordings: { [label: string]: Recording[] },
@@ -14,9 +12,20 @@ export class Dataset {
     ) {}
 }
 
-export default class ModelDataset extends JDEventSource {
-    static createFromFile(datasetJSONObj: Dataset): ModelDataset {
-        const set = new ModelDataset()
+export function arraysEqual(a:string[], b:string[]): boolean {
+    if (a === b) return true
+    if (a == null || b == null) return false
+    if (a.length !== b.length) return false
+
+    for (let i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false
+    }
+    return true
+}
+
+export default class ModelDataSet extends JDEventSource {
+    static createFromFile(datasetJSONObj: DataSet): ModelDataSet {
+        const set = new ModelDataSet()
         const { recordings, registerIds } = datasetJSONObj
         set.addRecordingsFromFile(recordings, registerIds) // add recordings and update total recordings
         return set
@@ -28,8 +37,8 @@ export default class ModelDataset extends JDEventSource {
     totalRecordings: number
 
     // maintain data in tensors
-    xs: tf.Tensor
-    ys: tf.Tensor
+    xs: number[]
+    ys: number[]
     length: number
     width: number
 
@@ -55,22 +64,6 @@ export default class ModelDataset extends JDEventSource {
         return this.totalRecordings
     }
 
-    arraysEqual(a, b) {
-        if (a === b) return true
-        if (a == null || b == null) return false
-        if (a.length !== b.length) return false
-
-        // If you don't care about the order of the elements inside
-        // the array, you should sort both arrays here.
-        // Please note that calling sort on an array will modify that array.
-        // you might want to clone your array first.
-
-        for (let i = 0; i < a.length; ++i) {
-            if (a[i] !== b[i]) return false
-        }
-        return true
-    }
-
     getRecordingsWithLabel(label: string) {
         return this.recordings[label]
     }
@@ -88,7 +81,7 @@ export default class ModelDataset extends JDEventSource {
 
             this.totalRecordings += 1
             this.emit(CHANGE)
-        } else if (this.arraysEqual(recording.headerList, this.inputTypes)) {
+        } else if (arraysEqual(recording.headerList, this.inputTypes)) {
             // Check if label is already in dataset
             if (this.labels.indexOf(label) < 0) {
                 // If not, add the new label to the dataset
@@ -152,17 +145,16 @@ export default class ModelDataset extends JDEventSource {
     }
 
     get summary() {
-        if (this.labels.length <= 0) return ["Classes: none", "Input Types: none"]
+        if (this.labels.length <= 0) return ["Classes: none"]
 
         const modelInfo = []
         const classes = []
         this.labels.forEach(label => {
             classes.push(
-                label + " [" + this.recordings[label].length + " sample(s)]")
+                label + " [" + this.recordings[label].length + " sample(s)]"
+            )
         })
         modelInfo.push("Classes: " + classes.join(", "))
-        
-        modelInfo.push("\nInput Type(s): " + this.inputTypes.join(", "))
 
         return modelInfo
     }

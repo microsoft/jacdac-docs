@@ -1,5 +1,27 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import * as tf from "@tensorflow/tfjs"
+import {
+    io,
+    layers,
+    loadLayersModel,
+    oneHot,
+    sequential,
+    tensor1d,
+    tensor3d,
+    Tensor,
+    tensor,
+} from "@tensorflow/tfjs"
+
+export interface TFModelObj {
+    name: string
+    inputShape: number[]
+    inputTypes: string[]
+    labels: string[]
+    modelJSON: string
+    outputShape: number
+    status: string
+    trainingAcc: number
+    weights: number[]
+}
 
 export interface TFModelMessage {
     worker: "tf"
@@ -12,26 +34,113 @@ export interface TFModelRequest extends TFModelMessage {
 }
 
 export interface TFModelTrainRequest extends TFModelRequest {
-    type: "train",
-    trainingDataJSON: string,
-    modelDataJSON: string,
+    type: "train"
+    data: {
+        modelBlockJSON: string
+        model: TFModelObj
+        xData: number[]
+        yData: number[]
+    }
 }
 
 export interface TFModelTrainResponse extends TFModelMessage {
-    type: "train",
-    trainedWeightsJSON: string,
-    armModelJSON: string,
+    type: "train"
+    data: {
+        modelJSON: string
+        modelWeights: ArrayBuffer
+        trainingInfo: number[]
+    }
 }
 
 export interface TFModelPredictRequest extends TFModelRequest {
-    type: "predict",
-    testingDataJSON: string,
-    modelDataJSON: string,
+    type: "predict"
+    data: {
+        model: TFModelObj
+        zData: number[][]
+    }
 }
 
 export interface TFModelPredictResponse extends TFModelMessage {
-    type: "train",
-    predictionJSON: string,
+    type: "train"
+    data: {
+        prediction: number[]
+    }
+}
+
+// send an object with model as blockly JSON
+function buildModelFromJSON(model: TFModelObj, modelBlockJSON: string) {
+    const modelLayers = sequential()
+    const epochs = 250
+
+    if (modelBlockJSON == "") {
+        modelLayers.add(
+            layers.conv1d({
+                inputShape: model.inputShape,
+                kernelSize: [4],
+                strides: 1,
+                filters: 16,
+                activation: "relu",
+            })
+        )
+        modelLayers.add(
+            layers.maxPooling1d({
+                poolSize: [2],
+            })
+        )
+        modelLayers.add(
+            layers.dropout({
+                rate: 0.1,
+            })
+        )
+        modelLayers.add(
+            layers.conv1d({
+                kernelSize: [2],
+                strides: 1,
+                filters: 16,
+                activation: "relu",
+            })
+        )
+        modelLayers.add(
+            layers.maxPooling1d({
+                poolSize: [2],
+            })
+        )
+        modelLayers.add(
+            layers.dropout({
+                rate: 0.1,
+            })
+        )
+        modelLayers.add(
+            layers.conv1d({
+                kernelSize: [2],
+                strides: 1,
+                filters: 16,
+                activation: "relu",
+            })
+        )
+        modelLayers.add(
+            layers.dropout({
+                rate: 0.1,
+            })
+        )
+        // moving from 3-dimensional data to 2-dimensional requires a flattening layer
+        modelLayers.add(layers.flatten())
+        // must end with a fully connected layer with size equal to number of labels
+        modelLayers.add(
+            layers.dense({
+                units: model.outputShape,
+                activation: "softmax",
+            })
+        )
+
+        modelLayers.compile({
+            loss: "categoricalCrossentropy",
+            optimizer: "adam",
+            metrics: ["accuracy"],
+        })
+    }
+
+    return { model: modelLayers, epochs: epochs }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,36 +149,22 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
         const { data } = props
         let trainingInfo = []
 
-        // get dataset and training info 
-        //console.log("Randi got training info ", data.trainingParams)
-        const xs = tf.tensor(JSON.parse(data.xJSON))
-        const ys = tf.tensor(JSON.parse(data.yJSON))
-        let epochs, loss, optimizer, metrics
-
-        if (data.trainingParams) {
-            const params = JSON.parse(data.trainingParams)
-            epochs = params.epochs
-            loss = params.loss
-            optimizer = params.optimizer
-            metrics = params.metrics
-        } else {
-            console.warn("No training parameters sent, using defaults")
-            epochs = 250
-            loss = "categoricalCrossentropy"
-            optimizer = "adam"
-            metrics = ["accuracy"]
-        }
+        // get dataset and training info
+        const xs = tensor3d(data.xData, [
+            data.xData.length,
+            data.model.inputShape[0],
+            data.model.inputShape[1],
+        ])
+        const ys = oneHot(
+            tensor1d(data.yData, "int32"),
+            data.model.labels.length
+        )
 
         // get model
-        const modelObj = JSON.parse(data.modelJSON)
-        const model = await tf.loadLayersModel({
-            load: () => Promise.resolve(modelObj),
-        })
-        model.compile({
-            loss: loss,
-            optimizer: optimizer,
-            metrics: metrics,
-        })
+        const { epochs, model } = buildModelFromJSON(
+            data.model,
+            data.modelBlockJSON
+        )
 
         // model.fit
         await model
@@ -84,11 +179,11 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
             })
 
         // save model as model artifacts
-        let mod: tf.io.ModelArtifacts
+        let mod: io.ModelArtifacts
         await model.save({
             save: m => {
                 mod = m
-                const res: tf.io.SaveResult = {
+                const res: io.SaveResult = {
                     modelArtifactsInfo: {
                         dateSaved: new Date(),
                         modelTopologyType: "JSON",
@@ -97,35 +192,38 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
                 return Promise.resolve(res)
             },
         })
+        const weights = mod.weightData
+        mod.weightData = null
 
-        // return weight data
-        const weightsJSON = JSON.stringify(Array.from(new Uint32Array(mod.weightData)))
-        const infoJSON = JSON.stringify(trainingInfo)
-        return [
-            { trainedWeightsBuffer: weightsJSON, trainingInfo: infoJSON },
-        ]
+        // return data
+        const responseMsg = {
+            modelJSON: JSON.stringify(mod),
+            modelWeights: weights,
+            trainingInfo: trainingInfo,
+        }
+        return responseMsg
     },
     predict: async (props: TFModelPredictRequest) => {
         const { data } = props
 
         // turn datasetjson into dataset
         /// get dataset and training info
-        const zs = tf.tensor(JSON.parse(data.zJSON))
+        const zs = tensor(data.zData)
 
         // get model
-        const modelObj = JSON.parse(data.modelJSON)
-        const weightObj = JSON.parse(data.weightsJSON)
-        modelObj.weightData = new Uint32Array(weightObj).buffer
-        const model = await tf.loadLayersModel({
+        const modelObj = JSON.parse(data.model.modelJSON)
+        modelObj.weightData = new Uint32Array(data.model.weights).buffer
+        //modelObj.weightData = new Uint32Array(weightObj).buffer
+        const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
 
         // model.predict
-        const prediction = (await model.predict(zs)) as tf.Tensor
-        const predictJSON = JSON.stringify(await prediction.array())
+        const prediction = (await model.predict(zs)) as Tensor
+        const predictArr = await prediction.dataSync()
 
         // return prediction
-        return [{ prediction: predictJSON }]
+        return { prediction: predictArr }
     },
 }
 
@@ -152,9 +250,7 @@ async function handleMessage(event: MessageEvent) {
 }
 
 function onEpochEnd(epoch, logs) {
-    // Randi TODO add callback to send messages as it trains
     self.postMessage({ type: "progress", data: logs })
-
 }
 
 self.addEventListener("message", handleMessage)
