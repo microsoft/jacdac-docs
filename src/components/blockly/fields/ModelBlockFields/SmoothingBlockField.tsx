@@ -14,7 +14,7 @@ export interface SmoothingBlockFieldValue {
 
 function SmoothingParameterWidget(props: {
     initFieldValue: SmoothingBlockFieldValue
-    setFieldValue: (SmoothingBlockFieldValue) => void
+    setFieldValue: (f: SmoothingBlockFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

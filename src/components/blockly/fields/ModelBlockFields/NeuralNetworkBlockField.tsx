@@ -36,7 +36,7 @@ export interface NeuralNetworkBlockFieldValue {
 
 function NNParameterWidget(props: {
     initFieldValue: NeuralNetworkBlockFieldValue
-    setFieldValue: (NeuralNetworkBlockFieldValue) => void
+    setFieldValue: (f: NeuralNetworkBlockFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

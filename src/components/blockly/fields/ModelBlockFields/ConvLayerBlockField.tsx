@@ -28,7 +28,7 @@ export interface ConvLayerFieldValue {
 
 function LayerParameterWidget(props: {
     initFieldValue: ConvLayerFieldValue
-    setFieldValue: (ConvLayerFieldValue) => void
+    setFieldValue: (f: ConvLayerFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

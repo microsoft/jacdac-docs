@@ -17,7 +17,7 @@ export interface RecordingBlockFieldValue {
 
 function RecordingParameterWidget(props: {
     initFieldValue: RecordingBlockFieldValue
-    setFieldValue: (RecordingBlockFieldValue) => void
+    setFieldValue: (f: RecordingBlockFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

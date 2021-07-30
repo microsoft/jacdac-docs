@@ -18,7 +18,7 @@ export interface PoolingLayerFieldValue {
 
 function LayerParameterWidget(props: {
     initFieldValue: PoolingLayerFieldValue
-    setFieldValue: (PoolingLayerFieldValue) => void
+    setFieldValue: (f: PoolingLayerFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

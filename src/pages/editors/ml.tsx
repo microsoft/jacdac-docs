@@ -3,5 +3,4 @@ import ModelBlockEditor from "../../components/model-editor/ModelBlockEditor"
 
 export default function Page() {
     return <ModelBlockEditor />
-    {/* <ModelEditor /> */}
 }

@@ -18,7 +18,7 @@ export interface KNNBlockFieldValue {
 
 function KNNParameterWidget(props: {
     initFieldValue: KNNBlockFieldValue
-    setFieldValue: (KNNBlockFieldValue) => void
+    setFieldValue: (f: KNNBlockFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 

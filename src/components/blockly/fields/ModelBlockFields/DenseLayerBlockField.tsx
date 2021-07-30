@@ -24,7 +24,7 @@ export interface DenseLayerFieldValue {
 
 function LayerParameterWidget(props: {
     initFieldValue: DenseLayerFieldValue
-    setFieldValue: (DenseLayerFieldValue) => void
+    setFieldValue: (f: DenseLayerFieldValue) => void
 }) {
     const { initFieldValue, setFieldValue } = props
 
