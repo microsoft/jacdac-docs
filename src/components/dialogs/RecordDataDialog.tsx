@@ -39,7 +39,7 @@ import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 import { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
 import { MB_CLASS_VAR_TYPE, MODEL_BLOCKS } from "../model-editor/modelblockdsl"
-import RecordingBlockField from "../blockly/fields/ModelBlockFields/RecordingBlockField"
+import RecordingBlockField from "../blockly/fields/mb/RecordingBlockField"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({

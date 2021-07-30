@@ -173,60 +173,55 @@ export default function ModelPlayground() {
         }
     }
 
+    if (!pageReady) return null
     return (
-        <>
-            {" "}
-            {pageReady && (
-                <Box mb={2}>
-                    <h1>ML Model Creator</h1>
-                    <p>
-                        This page allows you to collect data from Jacdac sensors
-                        and use them to train a neural network model that does
-                        classification.
-                    </p>
+        <Box mb={2}>
+            <h1>ML Model Creator</h1>
+            <p>
+                This page allows you to collect data from Jacdac sensors and use
+                them to train a neural network model that does classification.
+            </p>
 
-                    <Tabs
-                        value={tab}
-                        onChange={handleTabChange}
-                        aria-label="View specification formats"
-                    >
-                        <Tab label={`1 - Collect Data`} />
-                        <Tab
-                            label={`2 - Train Model`}
-                            disabled={dataset.labels.length < 2}
-                        />
-                        <Tab
-                            label={`3 - Test and Deploy`}
-                            disabled={tfModel.status !== "completed"}
-                        />
-                    </Tabs>
-                    <TabPanel value={tab} index={0}>
-                        <CollectData
-                            reactStyle={classes}
-                            chartPalette={chartPalette}
-                            dataset={dataset}
-                            onChange={handleDataChange}
-                            onNext={nextTab}
-                        />
-                    </TabPanel>
-                    <TabPanel value={tab} index={1}>
-                        <TrainModel
-                            reactStyle={classes}
-                            dataset={dataset}
-                            model={tfModel}
-                            onChange={handleModelChange}
-                            onNext={nextTab}
-                        />
-                    </TabPanel>
-                    <TabPanel value={tab} index={2}>
-                        <ModelOutput
-                            reactStyle={classes}
-                            chartPalette={chartPalette}
-                            model={tfModel}
-                        />
-                    </TabPanel>
-                </Box>
-            )}{" "}
-        </>
+            <Tabs
+                value={tab}
+                onChange={handleTabChange}
+                aria-label="View specification formats"
+            >
+                <Tab label={`1 - Collect Data`} />
+                <Tab
+                    label={`2 - Train Model`}
+                    disabled={dataset.labels.length < 2}
+                />
+                <Tab
+                    label={`3 - Test and Deploy`}
+                    disabled={tfModel.status !== "completed"}
+                />
+            </Tabs>
+            <TabPanel value={tab} index={0}>
+                <CollectData
+                    reactStyle={classes}
+                    chartPalette={chartPalette}
+                    dataset={dataset}
+                    onChange={handleDataChange}
+                    onNext={nextTab}
+                />
+            </TabPanel>
+            <TabPanel value={tab} index={1}>
+                <TrainModel
+                    reactStyle={classes}
+                    dataset={dataset}
+                    model={tfModel}
+                    onChange={handleModelChange}
+                    onNext={nextTab}
+                />
+            </TabPanel>
+            <TabPanel value={tab} index={2}>
+                <ModelOutput
+                    reactStyle={classes}
+                    chartPalette={chartPalette}
+                    model={tfModel}
+                />
+            </TabPanel>
+        </Box>
     )
 }

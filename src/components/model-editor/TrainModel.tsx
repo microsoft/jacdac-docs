@@ -214,148 +214,131 @@ export default function TrainModel(props: {
             setExpanded(isExpanded ? panel : false)
         }
 
+    if (!pageReady) return null
     return (
-        <>
-            {" "}
-            {pageReady && (
-                <Grid container direction={"column"}>
-                    <Grid item>
-                        <h3>Model Summary</h3>
-                        <Accordion
-                            expanded={expanded === "modelSummary"}
-                            onChange={handleExpandedSummaryChange(
-                                "modelSummary"
+        <Grid container direction={"column"}>
+            <Grid item>
+                <h3>Model Summary</h3>
+                <Accordion
+                    expanded={expanded === "modelSummary"}
+                    onChange={handleExpandedSummaryChange("modelSummary")}
+                >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <div>
+                            {expanded !== "modelSummary" && (
+                                <span>
+                                    Classes: {model.labels.join(", ")} <br />
+                                    Training Status: {model.status} <br />
+                                </span>
                             )}
-                        >
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <div>
-                                    {expanded !== "modelSummary" && (
-                                        <span>
-                                            Classes: {model.labels.join(", ")}{" "}
-                                            <br />
-                                            Training Status: {model.status}{" "}
-                                            <br />
-                                        </span>
-                                    )}
-                                </div>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <div>
-                                    {dataset.summary.map((line, lineIdx) => {
-                                        return (
-                                            <span
-                                                key={
-                                                    "dataset-summary-" + lineIdx
-                                                }
-                                            >
-                                                {" "}
-                                                {line} <br />
-                                            </span>
-                                        )
-                                    })}
-                                    {model.summary.map((line, lineIdx) => {
-                                        return (
-                                            <span
-                                                key={"model-summary-" + lineIdx}
-                                            >
-                                                {" "}
-                                                {line} <br />
-                                            </span>
-                                        )
-                                    })}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
-                        <div className={classes.buttons}>
-                            <Button
-                                size="large"
-                                variant="contained"
-                                aria-label="delete existing model"
-                                title={
-                                    "Press to delete the machine learning model you have now"
-                                }
-                                onClick={deleteTFModel}
-                                startIcon={<DeleteIcon />}
-                                style={{ marginTop: 16 }}
-                            >
-                                Delete Model
-                            </Button>
                         </div>
-                        <div className={classes.buttons}>
-                            <Button
-                                size="large"
-                                variant="contained"
-                                color={"primary"}
-                                aria-label="start training model"
-                                title={
-                                    trainEnabled
-                                        ? "Press to start training machine learning model"
-                                        : "You must have at least two classes to train a model. Go back to first tab."
-                                }
-                                onClick={trainTFModel}
-                                startIcon={<PlayArrowIcon />}
-                                disabled={!trainEnabled}
-                                style={{ marginTop: 16 }}
-                            >
-                                Train Model
-                            </Button>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <div>
+                            {dataset.summary.map((line, lineIdx) => {
+                                return (
+                                    <span key={"dataset-summary-" + lineIdx}>
+                                        {" "}
+                                        {line} <br />
+                                    </span>
+                                )
+                            })}
+                            {model.summary.map((line, lineIdx) => {
+                                return (
+                                    <span key={"model-summary-" + lineIdx}>
+                                        {" "}
+                                        {line} <br />
+                                    </span>
+                                )
+                            })}
                         </div>
-                        <br />
-                    </Grid>
-                    <Grid item>
-                        <h3>Training Results</h3>
-                        {!!trainingLogs.length && (
-                            <div key="liveData">
-                                <div>
-                                    <FiberManualRecordIcon
-                                        className={classes.vmiddle}
-                                        fontSize="small"
-                                        style={{
-                                            color: ACC_COLOR,
-                                        }}
-                                    />
-                                    Accuracy
-                                    <FiberManualRecordIcon
-                                        className={classes.vmiddle}
-                                        fontSize="small"
-                                        style={{
-                                            color: LOSS_COLOR,
-                                        }}
-                                    />
-                                    Loss
-                                    <Trend
-                                        key="training-trends"
-                                        height={12}
-                                        dataSet={trainingLogs}
-                                        horizon={NUM_EPOCHS}
-                                        dot={true}
-                                        gradient={true}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        <p>Final Training Accuracy: {model.trainingAcc}</p>
-                        <br />
-                    </Grid>
-
-                    <Grid
-                        item
-                        style={{ display: "flex", justifyContent: "flex-end" }}
+                    </AccordionDetails>
+                </Accordion>
+                <div className={classes.buttons}>
+                    <Button
+                        size="large"
+                        variant="contained"
+                        aria-label="delete existing model"
+                        title={
+                            "Press to delete the machine learning model you have now"
+                        }
+                        onClick={deleteTFModel}
+                        startIcon={<DeleteIcon />}
+                        style={{ marginTop: 16 }}
                     >
-                        <div className={classes.buttons}>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                endIcon={<NavigateNextIcon />}
-                                disabled={model.status !== "completed"}
-                                onClick={handleNext}
-                            >
-                                Next
-                            </Button>
+                        Delete Model
+                    </Button>
+                </div>
+                <div className={classes.buttons}>
+                    <Button
+                        size="large"
+                        variant="contained"
+                        color={"primary"}
+                        aria-label="start training model"
+                        title={
+                            trainEnabled
+                                ? "Press to start training machine learning model"
+                                : "You must have at least two classes to train a model. Go back to first tab."
+                        }
+                        onClick={trainTFModel}
+                        startIcon={<PlayArrowIcon />}
+                        disabled={!trainEnabled}
+                        style={{ marginTop: 16 }}
+                    >
+                        Train Model
+                    </Button>
+                </div>
+                <br />
+            </Grid>
+            <Grid item>
+                <h3>Training Results</h3>
+                {!!trainingLogs.length && (
+                    <div key="liveData">
+                        <div>
+                            <FiberManualRecordIcon
+                                className={classes.vmiddle}
+                                fontSize="small"
+                                style={{
+                                    color: ACC_COLOR,
+                                }}
+                            />
+                            Accuracy
+                            <FiberManualRecordIcon
+                                className={classes.vmiddle}
+                                fontSize="small"
+                                style={{
+                                    color: LOSS_COLOR,
+                                }}
+                            />
+                            Loss
+                            <Trend
+                                key="training-trends"
+                                height={12}
+                                dataSet={trainingLogs}
+                                horizon={NUM_EPOCHS}
+                                dot={true}
+                                gradient={true}
+                            />
                         </div>
-                    </Grid>
-                </Grid>
-            )}{" "}
-        </>
+                    </div>
+                )}
+                <p>Final Training Accuracy: {model.trainingAcc}</p>
+                <br />
+            </Grid>
+
+            <Grid item style={{ display: "flex", justifyContent: "flex-end" }}>
+                <div className={classes.buttons}>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        endIcon={<NavigateNextIcon />}
+                        disabled={model.status !== "completed"}
+                        onClick={handleNext}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </Grid>
+        </Grid>
     )
 }

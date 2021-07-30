@@ -304,105 +304,93 @@ export default function ModelOutput(props: {
             setExpanded(isExpanded ? panel : false)
         }
 
+    if (!pageReady) return null
     return (
-        <>
-            {" "}
-            {pageReady && (
-                <Grid container direction={"column"}>
-                    <Grid item>
-                        <h3>Live Testing</h3>
-                        <div key="predict">
-                            <span>
-                                {" "}
-                                Top Class:{" "}
-                                {model.status == "completed"
-                                    ? livePredictions.topClass
-                                    : "--"}{" "}
-                            </span>
-                            <br />
-                        </div>
-                        <div key="liveData">
-                            {liveRecording && (
-                                <div>
-                                    {model.labels.map(label => {
-                                        return (
-                                            <span
-                                                key={"prediction-key-" + label}
-                                            >
-                                                <FiberManualRecordIcon
-                                                    className={classes.vmiddle}
-                                                    fontSize="small"
-                                                    style={{
-                                                        color: livePredictions.predictionData.colorOf(
-                                                            undefined,
-                                                            label
-                                                        ),
-                                                    }}
-                                                />
-                                                {label}
-                                            </span>
-                                        )
-                                    })}
-                                    <Trend
-                                        key="live-data-predictions"
-                                        height={12}
-                                        dataSet={livePredictions.predictionData}
-                                        horizon={LIVE_HORIZON}
-                                        dot={true}
-                                        gradient={true}
-                                    />
-                                    <Trend
-                                        key="live-data-trends"
-                                        height={12}
-                                        dataSet={liveRecording}
-                                        horizon={LIVE_HORIZON}
-                                        dot={true}
-                                        gradient={true}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <Accordion
-                            expanded={expanded === "chooseSensors"}
-                            onChange={handleExpandedSummaryChange(
-                                "chooseSensors"
-                            )}
-                        >
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <div>
-                                    <h4>Select input sensors</h4>
-                                    {!predictionEnabled && (
-                                        <p>
-                                            Sensors should match:{" "}
-                                            {model.inputTypes.join(", ")}{" "}
-                                        </p>
-                                    )}
-                                </div>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <div key="sensors">
-                                    {!readingRegisters.length && (
-                                        <span>Waiting for sensors...</span>
-                                    )}
-                                    {!!readingRegisters.length && (
-                                        <ReadingFieldGrid
-                                            readingRegisters={readingRegisters}
-                                            registerIdsChecked={
-                                                registerIdsChecked
-                                            }
-                                            recording={false}
-                                            liveDataSet={liveRecording}
-                                            handleRegisterCheck={
-                                                handleRegisterCheck
-                                            }
+        <Grid container direction={"column"}>
+            <Grid item>
+                <h3>Live Testing</h3>
+                <div key="predict">
+                    <span>
+                        {" "}
+                        Top Class:{" "}
+                        {model.status == "completed"
+                            ? livePredictions.topClass
+                            : "--"}{" "}
+                    </span>
+                    <br />
+                </div>
+                <div key="liveData">
+                    {liveRecording && (
+                        <div>
+                            {model.labels.map(label => {
+                                return (
+                                    <span key={"prediction-key-" + label}>
+                                        <FiberManualRecordIcon
+                                            className={classes.vmiddle}
+                                            fontSize="small"
+                                            style={{
+                                                color: livePredictions.predictionData.colorOf(
+                                                    undefined,
+                                                    label
+                                                ),
+                                            }}
                                         />
-                                    )}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
-                    </Grid>
-                </Grid>
-            )}{" "}
-        </>
+                                        {label}
+                                    </span>
+                                )
+                            })}
+                            <Trend
+                                key="live-data-predictions"
+                                height={12}
+                                dataSet={livePredictions.predictionData}
+                                horizon={LIVE_HORIZON}
+                                dot={true}
+                                gradient={true}
+                            />
+                            <Trend
+                                key="live-data-trends"
+                                height={12}
+                                dataSet={liveRecording}
+                                horizon={LIVE_HORIZON}
+                                dot={true}
+                                gradient={true}
+                            />
+                        </div>
+                    )}
+                </div>
+                <Accordion
+                    expanded={expanded === "chooseSensors"}
+                    onChange={handleExpandedSummaryChange("chooseSensors")}
+                >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <div>
+                            <h4>Select input sensors</h4>
+                            {!predictionEnabled && (
+                                <p>
+                                    Sensors should match:{" "}
+                                    {model.inputTypes.join(", ")}{" "}
+                                </p>
+                            )}
+                        </div>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <div key="sensors">
+                            {!readingRegisters.length && (
+                                <span>Waiting for sensors...</span>
+                            )}
+                            {!!readingRegisters.length && (
+                                <ReadingFieldGrid
+                                    readingRegisters={readingRegisters}
+                                    registerIdsChecked={registerIdsChecked}
+                                    recording={false}
+                                    liveDataSet={liveRecording}
+                                    handleRegisterCheck={handleRegisterCheck}
+                                />
+                            )}
+                        </div>
+                    </AccordionDetails>
+                </Accordion>
+            </Grid>
+        </Grid>
     )
 }
