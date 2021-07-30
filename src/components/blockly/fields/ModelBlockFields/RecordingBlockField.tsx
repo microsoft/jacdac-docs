@@ -15,7 +15,7 @@ export interface RecordingBlockFieldValue {
     inputTypes: string[]
 }
 
-function RecordingParameterWidget( props: {
+function RecordingParameterWidget(props: {
     initFieldValue: RecordingBlockFieldValue
     setFieldValue: (RecordingBlockFieldValue) => void
 }) {
@@ -23,10 +23,14 @@ function RecordingParameterWidget( props: {
 
     const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
+    const [parametersVisible, setParametersVisible] = useState(
+        initFieldValue.parametersVisible
+    )
     const [numSamples, setNumSamples] = useState(initFieldValue.numSamples)
     const [timestamp, setTimestamp] = useState(initFieldValue.timestamp)
-    const [inputTypes, setInputTypes] = useState<string[]>(initFieldValue.inputTypes)
+    const [inputTypes, setInputTypes] = useState<string[]>(
+        initFieldValue.inputTypes
+    )
 
     const handleEditRecording = () => {
         // update parameters based on changes to this recording
@@ -36,7 +40,7 @@ function RecordingParameterWidget( props: {
         //setLatestTimestamp()
         //setInputTypes()
     }
-    const handleDownloadDataset = () => {
+    const handleDownloadDataSet = () => {
         console.log("Download dataset")
     }
 
@@ -48,7 +52,7 @@ function RecordingParameterWidget( props: {
     const sendUpdate = () => {
         const updatedFieldValue = {
             parametersVisible: parametersVisible,
-            numSamples: numSamples, 
+            numSamples: numSamples,
             timestamp: timestamp,
             inputTypes: inputTypes,
         }
@@ -61,21 +65,24 @@ function RecordingParameterWidget( props: {
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<RecordingBlockFieldValue>
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<RecordingBlockFieldValue>
         setParametersVisible(parameterField.areParametersVisible())
     }
 
+    if (!parametersVisible) return null
     return (
-        <> {parametersVisible &&
         <Grid container spacing={1}>
             <Grid item>
                 <Box color="text.secondary">
-                    No. of Samples: {numSamples} <br/>
-                    Input type(s): {inputTypes.length ? inputTypes.join(", ") : "none"}
+                    No. of Samples: {numSamples} <br />
+                    Input type(s):{" "}
+                    {inputTypes.length ? inputTypes.join(", ") : "none"}
                 </Box>
             </Grid>
             <Grid item style={{ display: "inline-flex" }}>
-            <Tooltip title="Add or remove samples from this recording">
+                <Tooltip title="Add or remove samples from this recording">
                     <Button
                         onClick={handleEditRecording}
                         startIcon={<EditIcon />}
@@ -87,7 +94,7 @@ function RecordingParameterWidget( props: {
                 </Tooltip>
                 <Tooltip title="Download recording as csv file">
                     <Button
-                        onClick={handleDownloadDataset}
+                        onClick={handleDownloadDataSet}
                         startIcon={<DownloadIcon />}
                         variant="outlined"
                         size="small"
@@ -96,14 +103,14 @@ function RecordingParameterWidget( props: {
                     </Button>
                 </Tooltip>
             </Grid>
-        </Grid>} </>
+        </Grid>
     )
 }
 
 export default class RecordingBlockField extends ReactParameterField<RecordingBlockFieldValue> {
     static KEY = "recording_block_field_key"
     static EDITABLE = false
-    
+
     constructor(value: string) {
         super(value)
         this.updateFieldValue = this.updateFieldValue.bind(this)
@@ -121,7 +128,7 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
             inputTypes: [],
         }
     }
-    
+
     areParametersVisible() {
         const { parametersVisible } = this.value
         return parametersVisible
@@ -133,6 +140,7 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
             parametersVisible: visible,
         }
         this.value = updatedValue
+        this.rerender()
     }
 
     getText_() {
@@ -140,20 +148,22 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
 
         return `${numSamples} sample(s)`
     }
-    
+
     updateFieldValue(msg: RecordingBlockFieldValue) {
         this.value = {
             ...this.value, // don't copy over visibility (will cause loop)
-            numSamples:msg.numSamples,
-            timestamp:msg.timestamp,
-            inputTypes:msg.inputTypes,
+            numSamples: msg.numSamples,
+            timestamp: msg.timestamp,
+            inputTypes: msg.inputTypes,
         }
     }
 
     renderInlineField(): ReactNode {
-        return ( <> {  <RecordingParameterWidget 
-            initFieldValue={this.value}
-            setFieldValue={this.updateFieldValue} />} </>)
-        
+        return (
+            <RecordingParameterWidget
+                initFieldValue={this.value}
+                setFieldValue={this.updateFieldValue}
+            />
+        )
     }
 }

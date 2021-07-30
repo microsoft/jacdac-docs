@@ -6,11 +6,12 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
+import { RecordingBlockFieldValue } from "./RecordingBlockField"
+import { getAllChildBlocks } from "../fields"
 import WorkspaceContext from "../../WorkspaceContext"
 import Blockly, { FieldVariable } from "blockly"
-import { RecordingBlockFieldValue } from "./RecordingBlockField"
 
-export interface DatasetBlockFieldValue {
+export interface DataSetBlockFieldValue {
     parametersVisible: boolean
     numRecordings: number
     numSamples: number
@@ -18,24 +19,28 @@ export interface DatasetBlockFieldValue {
     inputs: string[]
 }
 
-function DatasetParameterWidget(props: {
-        initFieldValue: DatasetBlockFieldValue
-        setFieldValue: (DatasetBlockFieldValue) => void
-    }) {
+function DataSetParameterWidget(props: {
+    initFieldValue: DataSetBlockFieldValue
+    setFieldValue: (DataSetBlockFieldValue) => void
+}) {
     const { initFieldValue, setFieldValue } = props
 
     const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
-    const [numRecordings, setNumRecordings] = useState(initFieldValue.numRecordings)
+    const [parametersVisible, setParametersVisible] = useState(
+        initFieldValue.parametersVisible
+    )
+    const [numRecordings, setNumRecordings] = useState(
+        initFieldValue.numRecordings
+    )
     const [numSamples, setNumSamples] = useState(initFieldValue.numSamples)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
     const [inputs, setInputs] = useState<string[]>(initFieldValue.inputs)
 
-    const handleSplitDataset = () => {
+    const handleSplitDataSet = () => {
         console.log("Split dataset")
     }
-    const handleDownloadDataset = () => {
+    const handleDownloadDataSet = () => {
         console.log("Download dataset")
     }
 
@@ -65,7 +70,9 @@ function DatasetParameterWidget(props: {
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const datasetParameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<DatasetBlockFieldValue>
+        const datasetParameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<DataSetBlockFieldValue>
         setParametersVisible(datasetParameterField.areParametersVisible())
     }
 
@@ -87,67 +94,65 @@ function DatasetParameterWidget(props: {
 
     const updateRecordings = () => {
         // update the recordings
-        const childrenBlocks = sourceBlock.getChildren(false) // seems to only return the top block, not all of them. so I implement my own get all children
-        let allRecordingBlocks = []
+
+        // gather all the layers
+        let numRecordings = 0
+        let numSamples = 0
         const updatedClasses = []
         let updatedInputs = []
-        let totalSamples = 0
 
-        if (childrenBlocks.length > 0) {
-            const childBlock = childrenBlocks[0]
-            allRecordingBlocks = getAllChildBlocks(childBlock)
-            //console.log("Randi all children", childBlocks)
-            for (const block of allRecordingBlocks) {
-                // get the block parameters for the recording
-                const recordingParameterField = block.getField("BLOCK_PARAMS") as ReactParameterField<RecordingBlockFieldValue>
-                totalSamples += recordingParameterField.value.numSamples
+        let layerBlock = sourceBlock.getInputTargetBlock("DATASET_RECORDINGS")
+        while (layerBlock) {
+            // get the block parameters for the recording
+            const recordingParameterField = layerBlock.getField(
+                "BLOCK_PARAMS"
+            ) as ReactParameterField<RecordingBlockFieldValue>
+            numSamples += recordingParameterField.value.numSamples
 
-                // make sure that all recording blocks have the same input types
-                const recordingBlockInputs = recordingParameterField.value.inputTypes
-                if (updatedInputs.length == 0) updatedInputs = recordingBlockInputs
-                if (!arraysEqual(updatedInputs, recordingBlockInputs)) {
-                    // Randi TODO attach warning to this block; gotta do this in ModelBlockEditor
-                    console.log("Randi error with input types in block")
-                }
-                
-                // get the class name parameter and add it to the list of classes
-                const classNameField = block.getField("CLASS_NAME") as FieldVariable
-                const className = classNameField.getVariable().name
-                if (!updatedClasses.includes(className)) updatedClasses.push(className)
+            // make sure that all recording blocks have the same input types
+            const recordingBlockInputs =
+                recordingParameterField.value.inputTypes
+            if (!updatedInputs.length) updatedInputs = recordingBlockInputs
+            if (!arraysEqual(updatedInputs, recordingBlockInputs)) {
+                // Randi TODO attach warning to this block; gotta do this in ModelBlockEditor
+                console.error(
+                    "Error, recording block inputs do not match dataset",
+                    { block: recordingBlockInputs, dataset: updatedInputs }
+                )
             }
+
+            // get the class name parameter and add it to the list of classes
+            const classNameField = layerBlock.getField(
+                "CLASS_NAME"
+            ) as FieldVariable
+            const className = classNameField.getVariable().name
+            if (!updatedClasses.includes(className))
+                updatedClasses.push(className)
+
+            numRecordings += 1
+            layerBlock = layerBlock.getNextBlock()
         }
 
-        setNumRecordings(allRecordingBlocks.length)
-        setNumSamples(totalSamples)
+        setNumRecordings(numRecordings)
+        setNumSamples(numSamples)
         setClasses(updatedClasses)
         setInputs(updatedInputs)
     }
 
-    const getAllChildBlocks = (startingChildBlock: Blockly.Block) => {
-        const recordingBlockType = "model_block_recording"
-        const childBlocks = [startingChildBlock]
-
-        for (const child of childBlocks) {
-            const nextChild = child.getNextBlock()
-            if (nextChild && nextChild.type == recordingBlockType)
-                childBlocks.push(nextChild)
-        }
-        return childBlocks
-    }
-
+    if (!parametersVisible) return null
     return (
-        <> {parametersVisible &&
         <Grid container spacing={1} direction={"row"}>
             <Grid item style={{ display: "inline-flex" }}>
                 <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"} <br />
+                    Classes: {classes.length ? classes.join(", ") : "none"}{" "}
+                    <br />
                     Input type(s): {inputs.length ? inputs.join(", ") : "none"}
                 </Box>
             </Grid>
             <Grid item style={{ display: "inline-flex" }}>
                 <Tooltip title="Automatically split dataset e.g. to create a test dataset">
                     <Button
-                        onClick={handleSplitDataset}
+                        onClick={handleSplitDataSet}
                         startIcon={<CallSplitIcon />}
                         variant="outlined"
                         size="small"
@@ -157,7 +162,7 @@ function DatasetParameterWidget(props: {
                 </Tooltip>
                 <Tooltip title="Download dataset as csv file">
                     <Button
-                        onClick={handleDownloadDataset}
+                        onClick={handleDownloadDataSet}
                         startIcon={<DownloadIcon />}
                         variant="outlined"
                         size="small"
@@ -167,21 +172,20 @@ function DatasetParameterWidget(props: {
                 </Tooltip>
             </Grid>
         </Grid>
-        } </>
     )
 }
 
-export default class DatasetBlockField extends ReactParameterField<DatasetBlockFieldValue> {
+export default class DataSetBlockField extends ReactParameterField<DataSetBlockFieldValue> {
     static KEY = "dataset_block_field_key"
     static EDITABLE = false
 
     constructor(value: string) {
         super(value)
-        this.updateFieldValue = this.updateFieldValue.bind(this);
+        this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
     static fromJson(options: ReactFieldJSON) {
-        return new DatasetBlockField(options?.value)
+        return new DataSetBlockField(options?.value)
     }
 
     get defaultValue() {
@@ -213,20 +217,22 @@ export default class DatasetBlockField extends ReactParameterField<DatasetBlockF
         return `${totalRecordings} recording(s)`
     }
 
-    updateFieldValue(msg: DatasetBlockFieldValue) {
+    updateFieldValue(msg: DataSetBlockFieldValue) {
         this.value = {
             ...this.value, // don't copy over visibility (will cause loop)
             numRecordings: msg.numRecordings,
-            numSamples:msg.numSamples,
-            classes:msg.classes,
-            inputs:msg.inputs,
+            numSamples: msg.numSamples,
+            classes: msg.classes,
+            inputs: msg.inputs,
         }
     }
 
     renderInlineField(): ReactNode {
-        return ( <> {  <DatasetParameterWidget 
-            initFieldValue={this.value}
-            setFieldValue={this.updateFieldValue} />} </>)
-        
+        return (
+            <DataSetParameterWidget
+                initFieldValue={this.value}
+                setFieldValue={this.updateFieldValue}
+            />
+        )
     }
 }

@@ -37,6 +37,9 @@ import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
+import { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
+import { MB_CLASS_VAR_TYPE, MODEL_BLOCKS } from "../model-editor/modelblockdsl"
+import RecordingBlockField from "../blockly/fields/ModelBlockFields/RecordingBlockField"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -87,22 +90,22 @@ function createDataSet(
 
 export default function BlocklyDataRecordingDialog(props: {
     open: boolean
-    onDone: (values) => void
+    onDone: (recording:FieldDataSet[], blockId: string) => void
     onClose: () => void
-    allClassVars: string[]
     recordingCount: number
+    workspace: WorkspaceSvg
 }) {
-    const { open, onDone, onClose, allClassVars, recordingCount } = props
+    const { open, onDone, onClose, recordingCount, workspace } = props
     const [dialogType, setDialogType] = useState<
         "chooseSensors" | "recordData"
     >("chooseSensors")
 
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-
+    
     const classes = useStyles()
     const chartPalette = useChartPalette()
     const { fileStorage } = useContext(ServiceManagerContext)
 
+    const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
             bus.devices().map(device =>
@@ -113,6 +116,18 @@ export default function BlocklyDataRecordingDialog(props: {
             )
         )
     )
+
+    const getWorkspaceClasses = (): string[] => {
+        // get updated list of class variables
+        const classes = workspace
+            .getVariablesOfType(MB_CLASS_VAR_TYPE)
+            .map(function (classVar) {
+                return classVar.name
+            })
+        if (classes.length == 0) return ["class1"]
+        return classes
+    }
+
 
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
@@ -150,7 +165,9 @@ export default function BlocklyDataRecordingDialog(props: {
     const [isRecording, setIsRecording] = useState(false)
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
-    const [currentRecording, setCurrentRecording] = useState<FieldDataSet[]>([])
+    const [currentRecording, ] = useState({
+        recording: [],
+        blockId: ""})
 
     const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
     const [samplingDuration, setSamplingDuration] = useState("2")
@@ -191,8 +208,7 @@ export default function BlocklyDataRecordingDialog(props: {
     const stopRecording = () => {
         if (isRecording) {
             // add new samples to recording
-            currentRecording.push(liveRecording)
-            setCurrentRecording(currentRecording)
+            currentRecording.recording.push(liveRecording)
             setTotalSamples(totalSamples + 1)
 
             // refresh live recording
@@ -223,8 +239,8 @@ export default function BlocklyDataRecordingDialog(props: {
         else startRecording()
     }
     const handleDeleteSample = (sample: FieldDataSet) => {
-        const i = currentRecording.indexOf(sample)
-        if (i > -1) currentRecording.splice(i, 1)
+        const i = currentRecording.recording.indexOf(sample)
+        if (i > -1) currentRecording.recording.splice(i, 1)
     }
     const updateLiveData = () => {
         setLiveRecording(liveRecording)
@@ -266,28 +282,74 @@ export default function BlocklyDataRecordingDialog(props: {
         }
     }, [isRecording, dialogType, samplingIntervalDelayi, samplingCount])
 
-    /* For interface controls */
+    /* For placing a block on the workspace */
+    const addNewRecording = () => {
+        // Create new block for this recording
+        if (className != null && className != undefined) {
+            // Get or create new class typed variable
+            // (createVariable will return an existing variable if one with a particular name already exists)
+            const classVar = workspace.createVariable(
+                className,
+                MB_CLASS_VAR_TYPE
+            )
 
+            // Create new recording block on the workspace
+            const newRecordingBlock = workspace.newBlock(
+                MODEL_BLOCKS + "recording"
+            ) as BlockSvg
+            currentRecording.blockId = newRecordingBlock.id
+
+            // Automatically insert the recording name into the new block
+            const recordingNameField = newRecordingBlock.getField(
+                "RECORDING_NAME"
+            ) as FieldVariable
+            recordingNameField.setValue(recordingName)
+
+            // Automatically insert the class name into the new block
+            const classNameField = newRecordingBlock.getField(
+                "CLASS_NAME"
+            ) as FieldVariable
+            classNameField.setValue(classVar.getId())
+
+            // Save recording data to block
+            const blockParamsField = newRecordingBlock.getField(
+                "BLOCK_PARAMS"
+            ) as RecordingBlockField
+            const recordingBlockParams = {
+                parametersVisible: null,
+                numSamples: currentRecording.recording.length,
+                timestamp: currentRecording.recording[0].startTimestamp,
+                inputTypes: currentRecording.recording[0].headers,
+            }
+            blockParamsField.updateFieldValue(recordingBlockParams)
+
+            newRecordingBlock.initSvg()
+            newRecordingBlock.render(false)
+            workspace.centerOnBlock(newRecordingBlock.id)
+        }
+    }
+
+    /* For interface controls */
     const resetInputs = () => {
         setClassName("class1")
         setRecordingName("recording" + recordingCount)
         setSamplingIntervalDelay("100")
         setSamplingDuration("2")
     }
-    const handleDownloadDataset = () => {
-        const recordingCountHeader = `Number of recordings,${currentRecording.length}`
+    const handleDownloadDataSet = () => {
+        const recordingCountHeader = `Number of recordings,${currentRecording.recording.length}`
 
         const recordingData: string[] = []
-        currentRecording.forEach(recording => {
+        currentRecording.recording.forEach(sample => {
             recordingData.push(
                 "Recording metadata," +
-                    recording.name +
+                    sample.name +
                     "," +
-                    recording.rows.length +
+                    sample.rows.length +
                     "," +
                     className
             )
-            recordingData.push(recording.toCSV())
+            recordingData.push(sample.toCSV())
         })
         const recordData = recordingData.join("\n")
 
@@ -309,15 +371,15 @@ export default function BlocklyDataRecordingDialog(props: {
     }
 
     const handleDone = () => {
+        // create new recording block
+        addNewRecording()
+
         // reset the user inputs
         resetInputs()
 
         // call the done function
-        onDone({
-            recordingName: recordingName,
-            className: className,
-            recording: currentRecording,
-        })
+        const { recording, blockId } = currentRecording
+        onDone(recording, blockId)
 
         onClose()
     }
@@ -343,7 +405,7 @@ export default function BlocklyDataRecordingDialog(props: {
                                         <Autocomplete
                                             className={classes.field}
                                             disabled={isRecording}
-                                            options={allClassVars}
+                                            options={getWorkspaceClasses()}
                                             style={{
                                                 width: 250,
                                                 display: "inline-flex",
@@ -409,20 +471,20 @@ export default function BlocklyDataRecordingDialog(props: {
                                         <h4>
                                             Recorded samples
                                             <IconButtonWithTooltip
-                                                onClick={handleDownloadDataset}
+                                                onClick={handleDownloadDataSet}
                                                 title="Download all recording data"
                                                 disabled={
-                                                    currentRecording.length == 0
+                                                    currentRecording.recording.length == 0
                                                 }
                                             >
                                                 <DownloadIcon />
                                             </IconButtonWithTooltip>
                                         </h4>
-                                        {currentRecording.length > 0 ? (
+                                        {currentRecording.recording.length ? (
                                             <ClassDataSetGrid
                                                 key={"samples-" + recordingName}
                                                 label={className}
-                                                tables={currentRecording}
+                                                tables={currentRecording.recording}
                                                 handleDeleteTable={
                                                     handleDeleteSample
                                                 }
@@ -525,7 +587,7 @@ export default function BlocklyDataRecordingDialog(props: {
                             variant="contained"
                             color="primary"
                             endIcon={<NavigateNextIcon />}
-                            disabled={currentRecording.length < 1}
+                            disabled={!currentRecording.recording.length}
                             onClick={handleDone}
                         >
                             Done

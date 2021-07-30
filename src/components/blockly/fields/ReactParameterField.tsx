@@ -1,4 +1,3 @@
-// This file was added by Randi Williams (intern)
 // This class is meant to be extended by ModelBlock classes that store
 //   parameter values and information for different bocks. It copies
 //   much of the functionality from ReactInlineField but also includes

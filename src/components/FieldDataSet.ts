@@ -32,7 +32,7 @@ export class Recording {
     ) {}
 }
 
-export default class FieldDataSet extends JDEventSource {
+export default class FielddataSet extends JDEventSource {
     readonly id = Math.random().toString()
     readonly rows: Example[]
     headers: string[]
@@ -49,30 +49,30 @@ export default class FieldDataSet extends JDEventSource {
         name: string,
         palette: string[],
         maxRows?: number
-    ): FieldDataSet {
+    ): FielddataSet {
         const fields = arrayConcatMany(registers.map(reg => reg.fields))
         const colors = fields.map((f, i) => palette[i % palette.length])
-        const set = new FieldDataSet(bus, name, fields, colors)
+        const set = new FielddataSet(bus, name, fields, colors)
         if (maxRows !== undefined) set.maxRows = maxRows
         return set
     }
 
-    static createFromFile(dataset: {
+    static createFromFile(dataSet: {
         name: string
         rows: Example[]
         headers: string[]
         units: string[]
         colors?: string[]
-    }): FieldDataSet {
-        const set = new FieldDataSet(null, dataset.name, null, dataset.colors)
+    }): FielddataSet {
+        const set = new FielddataSet(null, dataSet.name, null, dataSet.colors)
 
-        dataset.rows.forEach(row => {
+        dataSet.rows.forEach(row => {
             const { timestamp, data } = row
             set.addExample(timestamp, data)
         })
-        set.units = dataset.units
-        set.headers = dataset.headers
-        set.colors = dataset.colors
+        set.units = dataSet.units
+        set.headers = dataSet.headers
+        set.colors = dataSet.colors
 
         return set
     }

@@ -14,13 +14,6 @@ import DeleteAllIcon from "@material-ui/icons/DeleteSweep"
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 
-import Trend from "../Trend"
-import ClassDataSetGrid from "../ClassDataSetGrid"
-import ReadingFieldGrid from "../ReadingFieldGrid"
-import FieldDataSet from "../FieldDataSet"
-import ModelDataset from "./ModelDataset"
-
-import { saveCSV } from "../blockly/dsl/workers/csv.proxy"
 import ServiceManagerContext from "../ServiceManagerContext"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 
@@ -31,6 +24,12 @@ import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
 import { throttle } from "../../../jacdac-ts/src/jdom/utils"
+
+import Trend from "../Trend"
+import ClassDataSetGrid from "../ClassDataSetGrid"
+import ReadingFieldGrid from "../ReadingFieldGrid"
+import FieldDataSet from "../FieldDataSet"
+import ModelDataSet, { arraysEqual } from "./ModelDataSet"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -47,31 +46,16 @@ function createDataSet(
 
     return set
 }
-function arraysEqual(a, b) {
-    if (a === b) return true
-    if (a == null || b == null) return false
-    if (a.length !== b.length) return false
-
-    // If you don't care about the order of the elements inside
-    // the array, you should sort both arrays here.
-    // Please note that calling sort on an array will modify that array.
-    // you might want to clone your array first.
-
-    for (let i = 0; i < a.length; ++i) {
-        if (a[i] !== b[i]) return false
-    }
-    return true
-}
 
 export default function CollectData(props: {
     reactStyle: any
     chartPalette: string[]
-    dataset: ModelDataset
+    dataset: ModelDataSet
     onChange: (dataset) => void
     onNext: (dataset) => void
 }) {
-    const { chartPalette, onChange, onNext } = props // Randi originally dataset was in here and
-    const [dataset, setDataset] = useState<ModelDataset>(props.dataset) // Randi this said undefined
+    const { chartPalette, onChange, onNext } = props
+    const [dataset, setDataSet] = useState<ModelDataSet>(props.dataset)
     const classes = props.reactStyle
 
     const { fileStorage } = useContext(ServiceManagerContext)
@@ -130,7 +114,7 @@ export default function CollectData(props: {
     const [currentClassLabel, setCurrentClassLabel] = useState("class1")
     const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
     const [samplingDuration, setSamplingDuration] = useState("2")
-    const [datasetMatch, setDatasetMatch] = useState(false)
+    const [datasetMatch, setDataSetMatch] = useState(false)
     const recordingRegisters = readingRegisters.filter(
         reg => registerIdsChecked.indexOf(reg.id) > -1
     )
@@ -158,15 +142,15 @@ export default function CollectData(props: {
     const handleLabelChange = newLabel => {
         setCurrentClassLabel(newLabel)
     }
-    const handleDownloadDataset = async () => {
+    const handleDownloadDataSet = async () => {
         const csv = dataset.toCSV()
         fileStorage.saveText(`${dataset.labelOptions.join("")}dataset.csv`, csv)
     }
-    const handleDeleteDataset = () => {
+    const handleDeleteDataSet = () => {
         if (confirm("Are you sure you want to delete all recorded samples?")) {
-            const newDataset = new ModelDataset()
-            handleDatasetUpdate(newDataset)
-            setDataset(newDataset)
+            const newDataSet = new ModelDataSet()
+            handleDataSetUpdate(newDataSet)
+            setDataSet(newDataSet)
 
             resetDataCollection()
         }
@@ -186,8 +170,8 @@ export default function CollectData(props: {
                 registerIdsChecked
             )
             setTotalRecordings(totalRecordings + 1)
-            setDataset(dataset)
-            handleDatasetUpdate(dataset)
+            setDataSet(dataset)
+            handleDataSetUpdate(dataset)
 
             // create new live recording
             setLiveRecording(newRecording(registerIdsChecked, true))
@@ -218,8 +202,8 @@ export default function CollectData(props: {
     }
     const handleDeleteRecording = (recording: FieldDataSet) => {
         dataset.removeRecording(recording)
-        setDataset(dataset)
-        handleDatasetUpdate(dataset)
+        setDataSet(dataset)
+        handleDataSetUpdate(dataset)
     }
     const updateLiveData = () => {
         setLiveRecording(liveRecording)
@@ -269,10 +253,10 @@ export default function CollectData(props: {
                 if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) matchingInputs = false
             }
         }
-        setDatasetMatch(matchingInputs) 
+        setDataSetMatch(matchingInputs) 
     }, [liveRecording])
 
-    const handleDatasetUpdate = dataset => {
+    const handleDataSetUpdate = dataset => {
         onChange(dataset)
     }
     const handleNext = () => {
@@ -283,16 +267,16 @@ export default function CollectData(props: {
         <Grid container direction={"column"}>
             <Grid item>
                 <h2>
-                    Current Dataset
+                    Current DataSet
                     <IconButtonWithTooltip
-                        onClick={handleDownloadDataset}
+                        onClick={handleDownloadDataSet}
                         title="Download all recording data"
                         disabled={dataset.numRecordings == 0}
                     >
                         <DownloadIcon />
                     </IconButtonWithTooltip>
                     <IconButtonWithTooltip
-                        onClick={handleDeleteDataset}
+                        onClick={handleDeleteDataSet}
                         title="Delete all recording data"
                         disabled={dataset.numRecordings == 0}
                     >

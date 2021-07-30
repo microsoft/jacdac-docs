@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React from "react"
 
 import { Card, CardContent, CardHeader, Grid } from "@material-ui/core"
 import { IconButton } from "gatsby-theme-material-ui"
@@ -7,7 +7,6 @@ import DeleteIcon from "@material-ui/icons/Delete"
 
 import Trend from "./Trend"
 import FieldDataSet from "./FieldDataSet"
-import ServiceManagerContext from "./ServiceManagerContext"
 
 export default function ClassDataSetGrid(props: {
     label: string
@@ -15,13 +14,7 @@ export default function ClassDataSetGrid(props: {
     handleDeleteTable?: (table: FieldDataSet) => void
 }) {
     const { label, tables, handleDeleteTable } = props
-    const { fileStorage } = useContext(ServiceManagerContext)
 
-    const handleDownload = (table: FieldDataSet) => () => {
-        const sep = ","
-        const csv = table.toCSV(sep)
-        fileStorage.saveText(`${table.name}.csv`, csv)
-    }
     const handleDelete = (table: FieldDataSet) => () => handleDeleteTable(table)
 
     return (
@@ -36,7 +29,10 @@ export default function ClassDataSetGrid(props: {
                             <Grid item key={`result` + table.id}>
                                 <Trend dataSet={table} height={8} mini={true} />
                                 {handleDeleteTable && (
-                                    <IconButton onClick={handleDelete(table)}>
+                                    <IconButton
+                                        onClick={handleDelete(table)}
+                                        title="Delete this sample"
+                                    >
                                         <DeleteIcon />
                                     </IconButton>
                                 )}

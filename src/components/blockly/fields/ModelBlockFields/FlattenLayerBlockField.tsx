@@ -19,10 +19,18 @@ function LayerParameterWidget(props: {
 
     const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(initFieldValue.parametersVisible)
-    const [numTrainableParams, setNumTrainableParams] = useState(initFieldValue.numTrainableParams)
-    const [runTimeInCycles, setRunTimeInCycles] = useState(initFieldValue.runTimeInCycles)
-    const [outputShape, setOutputShape] = useState<number[]>(initFieldValue.outputShape)
+    const [parametersVisible, setParametersVisible] = useState(
+        initFieldValue.parametersVisible
+    )
+    const [numTrainableParams, setNumTrainableParams] = useState(
+        initFieldValue.numTrainableParams
+    )
+    const [runTimeInCycles, setRunTimeInCycles] = useState(
+        initFieldValue.runTimeInCycles
+    )
+    const [outputShape, setOutputShape] = useState<number[]>(
+        initFieldValue.outputShape
+    )
 
     useEffect(() => {
         // update based on source block's parameter visibility field
@@ -33,12 +41,16 @@ function LayerParameterWidget(props: {
     }, [workspaceJSON])
 
     const updateVisibility = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<FlattenLayerFieldValue>
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<FlattenLayerFieldValue>
         setParametersVisible(parameterField.areParametersVisible())
     }
 
     const updateModelParameters = () => {
-        const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<FlattenLayerFieldValue>
+        const parameterField = sourceBlock.getField(
+            "BLOCK_PARAMS"
+        ) as ReactParameterField<FlattenLayerFieldValue>
         console.log("Randi update block parameters: ", parameterField)
 
         // calculate the size of this layer (based on size of previous layer as well as parameters here)
@@ -46,27 +58,25 @@ function LayerParameterWidget(props: {
         // update the number of cycles it will take to run (based on the size of this layer)
     }
 
+    if (!parametersVisible) return null
     return (
-        <> {parametersVisible && <Grid container spacing={1} direction={"row"}>
+        <Grid container spacing={1} direction={"row"}>
             <Grid item>
                 <Box color="text.secondary">
                     No. of Parameters: {numTrainableParams}
                 </Box>
-                <Box color="text.secondary">
-                    Cycles: {runTimeInCycles}
-                </Box>
+                <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
                 <Box color="text.secondary">
                     Shape: [{outputShape.join(", ")}]
                 </Box>
             </Grid>
         </Grid>
-        } </>
     )
 }
 
 export default class FlattenLayerBlockField extends ReactParameterField<FlattenLayerFieldValue> {
     static KEY = "flatten_layer_block_field_key"
-    
+
     constructor(value: string) {
         super(value)
     }
@@ -79,9 +89,9 @@ export default class FlattenLayerBlockField extends ReactParameterField<FlattenL
         return {
             parametersVisible: false,
             numTrainableParams: 0,
-            runTimeInCycles: 0, 
-            outputShape: [0,0],
-            rate: 0.1
+            runTimeInCycles: 0,
+            outputShape: [0, 0],
+            rate: 0.1,
         }
     }
 
@@ -103,8 +113,6 @@ export default class FlattenLayerBlockField extends ReactParameterField<FlattenL
     }
 
     renderInlineField(): ReactNode {
-        return ( <> {  <LayerParameterWidget 
-            initFieldValue={this.value} />} </>)
-        
+        return <LayerParameterWidget initFieldValue={this.value} />
     }
 }

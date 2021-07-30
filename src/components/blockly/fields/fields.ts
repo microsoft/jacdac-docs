@@ -25,7 +25,7 @@ import DataPreviewField from "./DataPreviewField"
 import BoxPlotField from "./BoxPlotField"
 
 import ExpandModelBlockField from "./ModelBlockFields/ExpandModelBlockField"
-import DatasetBlockField from "./ModelBlockFields/DatasetBlockField"
+import DataSetBlockField from "./ModelBlockFields/DataSetBlockField"
 import RecordingBlockField from "./ModelBlockFields/RecordingBlockField"
 import SmoothingBlockField from "./ModelBlockFields/SmoothingBlockField"
 import KNNBlockField from "./ModelBlockFields/KNNBlockField"
@@ -83,7 +83,7 @@ export function registerFields() {
         BoxPlotField,
 
         ExpandModelBlockField,
-        DatasetBlockField,
+        DataSetBlockField,
         RecordingBlockField,
         SmoothingBlockField,
         KNNBlockField,

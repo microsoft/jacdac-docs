@@ -12,34 +12,34 @@ export function openBlankDialog() {
 }
 
 // handling dialogs within Blockly
-export function addNewDataset(workspace) {
+export function addNewDataSet(workspace) {
     // prompt user for dataset name
-    Blockly.prompt("Enter new dataset name:", "", newDatasetName => {
+    Blockly.prompt("Enter new dataset name:", "", newDataSetName => {
         // check if name is already used
-        if (newDatasetName != null && newDatasetName != undefined) {
+        if (newDataSetName != null && newDataSetName != undefined) {
             if (
-                newDatasetName != "" &&
-                !Variables.nameUsedWithAnyType(newDatasetName, workspace)
+                newDataSetName != "" &&
+                !Variables.nameUsedWithAnyType(newDataSetName, workspace)
             ) {
                 // get or create new dataset typed variable
-                const newDatasetVar = workspace.createVariable(
-                    newDatasetName,
+                const newDataSetVar = workspace.createVariable(
+                    newDataSetName,
                     MB_DATASET_VAR_TYPE
                 )
 
                 // create new dataset block on the workspace
-                const newDatasetBlock = workspace.newBlock(
+                const newDataSetBlock = workspace.newBlock(
                     MODEL_BLOCKS + "dataset"
                 ) as BlockSvg
 
                 // automatically insert the variable name into the new block
-                const field = newDatasetBlock.getField("DATASET_NAME") as FieldVariable
-                field.setValue(newDatasetVar.getId())
+                const field = newDataSetBlock.getField("DATASET_NAME") as FieldVariable
+                field.setValue(newDataSetVar.getId())
 
                 // add new block to the screen
-                newDatasetBlock.initSvg()
-                newDatasetBlock.render(false)
-                workspace.centerOnBlock(newDatasetBlock.id)
+                newDataSetBlock.initSvg()
+                newDataSetBlock.render(false)
+                workspace.centerOnBlock(newDataSetBlock.id)
             } else {
                 setTimeout(
                     () =>
@@ -55,7 +55,6 @@ export function addNewDataset(workspace) {
 
 // Randi TODO is this too redundant with creating a dataset?
 export function addNewClassifier(workspace) {
-    // Randi TODO should this gui be fancy?
     // prompt user for variable name
     Blockly.prompt(`Enter new classifier name:`, ``, newVariableName => {
         // check if name is already used

@@ -8,7 +8,7 @@ import {
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
 import ExpandModelBlockField from "../blockly/fields/ModelBlockFields/ExpandModelBlockField"
-import DatasetBlockField from "../blockly/fields/ModelBlockFields/DatasetBlockField"
+import DataSetBlockField from "../blockly/fields/ModelBlockFields/DataSetBlockField"
 import RecordingBlockField from "../blockly/fields/ModelBlockFields/RecordingBlockField"
 import SmoothingBlockField from "../blockly/fields/ModelBlockFields/SmoothingBlockField"
 import KNNBlockField from "../blockly/fields/ModelBlockFields/KNNBlockField"
@@ -20,7 +20,7 @@ import FlattenLayerBlockField from "../blockly/fields/ModelBlockFields/FlattenLa
 import DenseLayerBlockField from "../blockly/fields/ModelBlockFields/DenseLayerBlockField"
 
 export const MODEL_BLOCKS = "model_block_"
-export const MB_DATASET_VAR_TYPE = "ModelBlockDataset"
+export const MB_DATASET_VAR_TYPE = "ModelBlockDataSet"
 export const MB_CLASS_VAR_TYPE = "ModelBlockClass"
 export const MB_CLASSIFIER_VAR_TYPE = "ModelBlockClassifier"
 
@@ -36,7 +36,7 @@ export class ModelBlockDomainSpecificLanguage
     id = "modelBlocks"
     createBlocks() {
         const blocks: BlockDefinition[] = [
-            /* Dataset blocks */
+            /* DataSet blocks */
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "dataset",
@@ -57,7 +57,7 @@ export class ModelBlockDomainSpecificLanguage
                 message1: "%1",
                 args1: [
                     {
-                        type: DatasetBlockField.KEY,
+                        type: DataSetBlockField.KEY,
                         name: "BLOCK_PARAMS",
                     },
                 ],
@@ -397,7 +397,7 @@ export class ModelBlockDomainSpecificLanguage
     createCategory() {
         return [<CategoryDefinition>(<unknown>{
                 kind: "category",
-                name: "Dataset",
+                name: "DataSet",
                 colour: dataset_color,
                 contents: [
                     {
@@ -411,12 +411,12 @@ export class ModelBlockDomainSpecificLanguage
                     },
                     {
                         kind: "label",
-                        text: "Datasets",
+                        text: "DataSets",
                     },
                     {
                         kind: "button",
                         text: "Create new dataset...",
-                        callbackKey: "createNewDatasetButton",
+                        callbackKey: "createNewDataSetButton",
                     },
                     {
                         kind: "block",

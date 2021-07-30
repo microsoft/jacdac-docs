@@ -21,11 +21,12 @@ function ExpandIconWidget() {
 
         return false
     }
-    const [parametersVisible, setParametersVisible] = useState(initializeParametersVisible())
+    const [parametersVisible, setParametersVisible] = useState(false) // initializeParametersVisible())
 
     const handleExpandBlock = () => {
         const parameterField = sourceBlock.getField("BLOCK_PARAMS") as ReactParameterField<unknown>
-        if (parameterField) {            
+        if (parameterField) {        
+            //parameterField.setParametersVisible(!parameterField.areParametersVisible())
             parameterField.setParametersVisible(!parametersVisible)
             // make sure parameters visible is aligned with the block
             setParametersVisible(parameterField.areParametersVisible()) 
