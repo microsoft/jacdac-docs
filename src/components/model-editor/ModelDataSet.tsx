@@ -12,7 +12,7 @@ export class DataSet {
     ) {}
 }
 
-export function arraysEqual(a:string[], b:string[]): boolean {
+export function arraysEqual(a: string[], b: string[]): boolean {
     if (a === b) return true
     if (a == null || b == null) return false
     if (a.length !== b.length) return false
@@ -30,8 +30,6 @@ export default class ModelDataSet extends JDEventSource {
         set.addRecordingsFromFile(recordings, registerIds) // add recordings and update total recordings
         return set
     }
-
-    readonly id = Math.random().toString()
 
     // maintain computed number of recordings and input data types to avoid recomputation
     totalRecordings: number

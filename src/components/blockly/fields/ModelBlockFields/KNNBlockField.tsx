@@ -41,7 +41,7 @@ function KNNParameterWidget(props: {
         const updatedValue = {
             parametersVisible: parametersVisible, // don't actually change this
             modelSize: modelSize,
-            modelCylces: modelCycles,
+            modelCycles: modelCycles,
             classes: classes,
         }
         setFieldValue(updatedValue)

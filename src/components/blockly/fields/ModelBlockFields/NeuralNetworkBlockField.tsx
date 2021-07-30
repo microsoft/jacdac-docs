@@ -119,11 +119,11 @@ function NNParameterWidget(props: {
         while (layerBlock) {
             //console.log("Randi NN next child", layerBlock.type)
             // get the block parameters for the layer
-            
+
             numLayers += 1
             layerBlock = layerBlock.getNextBlock()
         }
-        
+
         // calculate how quickly the model should run
         // calculate how large the model is
 
@@ -169,7 +169,7 @@ function NNParameterWidget(props: {
         // Randi TODO give some sort of error message for invalid optimizer choices
         if (newValue) setOptimizer(newValue)
     }
-    
+
     const handleChangedLossFn = event => {
         const newValue = event.target.value
         // Randi TODO give some sort of error message for invalid loss fn choice
@@ -267,8 +267,12 @@ function NNParameterWidget(props: {
                             value={lossFn}
                             onChange={handleChangedLossFn}
                         >
-                            <MenuItem value="categoricalCrossentropy">Categorical Crossentropy</MenuItem>
-                            <MenuItem value="meanSquaredError">Mean Squared Error</MenuItem>
+                            <MenuItem value="categoricalCrossentropy">
+                                Categorical Crossentropy
+                            </MenuItem>
+                            <MenuItem value="meanSquaredError">
+                                Mean Squared Error
+                            </MenuItem>
                             <MenuItem value="hinge">Hinge Loss</MenuItem>
                         </Select>
                     </Tooltip>
@@ -326,7 +330,7 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
             batchSize: 32,
             numEpochs: 200,
             lossFn: "categoricalCrossentropy",
-            metrics: "accuracy,"
+            metrics: "accuracy,",
         }
     }
 

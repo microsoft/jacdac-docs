@@ -13,7 +13,6 @@ import React, { useContext, useEffect, useState } from "react"
 import { BuzzerCmd } from "../../../jacdac-ts/src/jdom/constants"
 import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 
-import { tensor, tensor3d } from "@tensorflow/tfjs"
 import { predictRequest } from "../blockly/dsl/workers/tf.proxy"
 import {
     TFModelPredictRequest,
@@ -58,7 +57,7 @@ export default function ModelOutput(props: {
 }) {
     const classes = props.reactStyle
     const { chartPalette } = props
-    const [model, ] = useState<MBModel>(props.model)
+    const [model] = useState<MBModel>(props.model)
 
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
@@ -210,8 +209,9 @@ export default function ModelOutput(props: {
                     model: model.toJSON(),
                 },
             } as TFModelPredictRequest
-            const predResult = await predictRequest(predictMsg)
-
+            const predResult = (await predictRequest(
+                predictMsg
+            )) as TFModelPredictResponse
 
             // Save probability for each class in model object
             const prediction = predResult.data.prediction
@@ -405,5 +405,4 @@ export default function ModelOutput(props: {
             )}{" "}
         </>
     )
-
 }

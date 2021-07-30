@@ -1,8 +1,6 @@
-
 import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
-import modelBlockDsl, {
+import {
     MODEL_BLOCKS,
-    MB_CLASS_VAR_TYPE,
     MB_DATASET_VAR_TYPE,
     MB_CLASSIFIER_VAR_TYPE,
 } from "./modelblockdsl"
@@ -33,7 +31,9 @@ export function addNewDataSet(workspace) {
                 ) as BlockSvg
 
                 // automatically insert the variable name into the new block
-                const field = newDataSetBlock.getField("DATASET_NAME") as FieldVariable
+                const field = newDataSetBlock.getField(
+                    "DATASET_NAME"
+                ) as FieldVariable
                 field.setValue(newDataSetVar.getId())
 
                 // add new block to the screen
@@ -75,7 +75,9 @@ export function addNewClassifier(workspace) {
                 ) as BlockSvg
 
                 // automatically insert the variable name into the new block
-                const field = newBlock.getField("CLASSIFIER_NAME") as FieldVariable
+                const field = newBlock.getField(
+                    "CLASSIFIER_NAME"
+                ) as FieldVariable
                 field.setValue(newVariable.getId())
 
                 // add new block to the screen

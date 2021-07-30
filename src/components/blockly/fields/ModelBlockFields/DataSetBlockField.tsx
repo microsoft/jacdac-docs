@@ -7,9 +7,8 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import { RecordingBlockFieldValue } from "./RecordingBlockField"
-import { getAllChildBlocks } from "../fields"
 import WorkspaceContext from "../../WorkspaceContext"
-import Blockly, { FieldVariable } from "blockly"
+import { FieldVariable } from "blockly"
 
 export interface DataSetBlockFieldValue {
     parametersVisible: boolean

@@ -250,10 +250,11 @@ export default function CollectData(props: {
         let matchingInputs = true
         if (dataset && liveRecording) {
             if (dataset.inputTypes) {
-                if (!arraysEqual(dataset.inputTypes, liveRecording.headers)) matchingInputs = false
+                if (!arraysEqual(dataset.inputTypes, liveRecording.headers))
+                    matchingInputs = false
             }
         }
-        setDataSetMatch(matchingInputs) 
+        setDataSetMatch(matchingInputs)
     }, [liveRecording])
 
     const handleDataSetUpdate = dataset => {
@@ -350,7 +351,7 @@ export default function CollectData(props: {
                             onInputChange={(event, newValue) =>
                                 handleLabelChange(newValue)
                             }
-                            getOptionSelected={(option, value) => true}
+                            getOptionSelected={() => true}
                         />
                         <TextField
                             className={classes.field}

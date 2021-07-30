@@ -108,26 +108,46 @@ function ModelBlockEditorWithContext() {
                 // Collect data for dataset blocks
                 // Randi TODO remove from allRecordings anything that is no longer present on the workspace
                 if (block.type == MODEL_BLOCKS + "dataset") {
-                    console.log(`Randi dataset block: `, {name: block.inputs[0].fields["dataset_name"], id:block.id, block:block})
+                    console.log(`Randi dataset block: `, {
+                        name: block.inputs[0].fields["dataset_name"],
+                        id: block.id,
+                        block: block,
+                    })
                     // get all nested recordings
-                    const recordingBlock = block.inputs.filter(input => input.name=="DATASET_RECORDINGS")[0].child 
+                    const recordingBlock = block.inputs.filter(
+                        input => input.name == "DATASET_RECORDINGS"
+                    )[0].child
                     if (recordingBlock) {
-                        console.log(`Randi recording data: `, {recording: allRecordings[recordingBlock.id], block:recordingBlock })
-                        recordingBlock.children?.forEach(childBlock => 
-                            console.log(`Randi recording data: `, {recording: allRecordings[childBlock.id], block:childBlock })
+                        console.log(`Randi recording data: `, {
+                            recording: allRecordings[recordingBlock.id],
+                            block: recordingBlock,
+                        })
+                        recordingBlock.children?.forEach(childBlock =>
+                            console.log(`Randi recording data: `, {
+                                recording: allRecordings[childBlock.id],
+                                block: childBlock,
+                            })
                         )
                     }
                 }
                 // Collect layers for neural network blocks
-                else if (block.type == MODEL_BLOCKS + "nn") { 
+                else if (block.type == MODEL_BLOCKS + "nn") {
                     // Randi TODO delete recordings that are no longer present on the workspace
-                    console.log(`Randi neural network block: `, {name: block.inputs[0].fields["classifier_name"], id:block.id, block:block})
+                    console.log(`Randi neural network block: `, {
+                        name: block.inputs[0].fields["classifier_name"],
+                        id: block.id,
+                        block: block,
+                    })
                     // get all nested layers
-                    const layerBlock = block?.inputs.filter(input => input.name=="NN_LAYERS")[0].child
+                    const layerBlock = block?.inputs.filter(
+                        input => input.name == "NN_LAYERS"
+                    )[0].child
                     if (layerBlock) {
-                        console.log(`Randi layer data: `, {block:layerBlock })
-                        layerBlock.children?.forEach(childBlock => 
-                            console.log(`Randi layer data: `, {block:childBlock })
+                        console.log(`Randi layer data: `, { block: layerBlock })
+                        layerBlock.children?.forEach(childBlock =>
+                            console.log(`Randi layer data: `, {
+                                block: childBlock,
+                            })
                         )
                     }
                 } else {

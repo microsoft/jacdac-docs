@@ -18,7 +18,6 @@ import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import React, { useEffect, useState } from "react"
 
-import { compileAndTest } from "../../../ml4f/src/main"
 import { trainRequest } from "../blockly/dsl/workers/tf.proxy"
 import {
     TFModelTrainRequest,
@@ -151,7 +150,7 @@ export default function TrainModel(props: {
                 if (trainingLogs) trainingLogs.addData(newData)
             }
         )
-        
+
         const trainMsg = {
             worker: "tf",
             type: "train",
@@ -162,7 +161,9 @@ export default function TrainModel(props: {
                 modelBlockJSON: "",
             },
         } as TFModelTrainRequest
-        const trainResult = (await trainRequest(trainMsg)) as TFModelTrainResponse
+        const trainResult = (await trainRequest(
+            trainMsg
+        )) as TFModelTrainResponse
 
         // stop subscriber after training
         stopWorkerSubscribe()

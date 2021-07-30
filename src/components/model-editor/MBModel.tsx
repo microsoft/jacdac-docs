@@ -1,8 +1,6 @@
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 
 export default class MBModel extends JDEventSource {
-    readonly id = Math.random().toString()
-
     // maintain computed number of examples and input data types to avoid recomputation
     inputShape: number[]
     inputTypes: string[]
@@ -33,7 +31,8 @@ export default class MBModel extends JDEventSource {
         mbModel.outputShape = modelObj.outputShape
 
         mbModel.trainingAcc = modelObj.trainingAcc || 0
-        mbModel.weightData = new Uint32Array(modelObj.weights).buffer || new ArrayBuffer(0)
+        mbModel.weightData =
+            new Uint32Array(modelObj.weights).buffer || new ArrayBuffer(0)
 
         return mbModel
     }

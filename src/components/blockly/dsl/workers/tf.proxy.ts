@@ -26,9 +26,10 @@ export async function trainRequest(
     // Randi TODO check for missing data e.g. if (!message.trainingData) return undefined
 
     const worker = workerProxy("tf")
-    const res = await worker.postMessage<TFModelTrainRequest, TFModelTrainResponse>(
-        message
-    )
+    const res = await worker.postMessage<
+        TFModelTrainRequest,
+        TFModelTrainResponse
+    >(message)
     return res
 }
 
@@ -39,8 +40,9 @@ export async function predictRequest(
     // Randi TODO check for missing data e.g. if (!message.trainingData) return undefined
 
     const worker = workerProxy("tf")
-    const res = await worker.postMessage<TFModelPredictRequest, TFModelPredictResponse>(
-        message
-    )
+    const res = await worker.postMessage<
+        TFModelPredictRequest,
+        TFModelPredictResponse
+    >(message)
     return res
 }
