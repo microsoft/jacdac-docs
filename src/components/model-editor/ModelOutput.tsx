@@ -14,7 +14,7 @@ import { BuzzerCmd } from "../../../jacdac-ts/src/jdom/constants"
 import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 
 import { predictRequest } from "../blockly/dsl/workers/tf.proxy"
-import {
+import type {
     TFModelPredictRequest,
     TFModelPredictResponse,
 } from "../../workers/tf/dist/node_modules/tf.worker"

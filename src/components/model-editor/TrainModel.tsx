@@ -19,7 +19,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import React, { useEffect, useState } from "react"
 
 import { trainRequest } from "../blockly/dsl/workers/tf.proxy"
-import {
+import type {
     TFModelTrainRequest,
     TFModelTrainResponse,
 } from "../../workers/tf/dist/node_modules/tf.worker"
