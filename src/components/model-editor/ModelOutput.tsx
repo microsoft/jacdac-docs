@@ -17,7 +17,7 @@ import { predictRequest } from "../blockly/dsl/workers/tf.proxy"
 import type {
     TFModelPredictRequest,
     TFModelPredictResponse,
-} from "../../workers/tf/tf.worker.messages"
+} from "../../workers/tf/dist/node_modules/tf.worker"
 
 import useChange from "../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"

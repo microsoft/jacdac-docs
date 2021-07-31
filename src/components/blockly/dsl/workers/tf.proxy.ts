@@ -5,7 +5,7 @@ import type {
     TFModelPredictRequest,
     TFModelPredictResponse,
     TFModelMessage,
-} from "../../../../workers/tf/tf.worker.messages"
+} from "../../../../workers/tf/dist/node_modules/tf.worker"
 import workerProxy from "./proxy"
 
 export async function postModelRequest(
