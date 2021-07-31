@@ -22,7 +22,7 @@ import { trainRequest } from "../blockly/dsl/workers/tf.proxy"
 import type {
     TFModelTrainRequest,
     TFModelTrainResponse,
-} from "../../workers/tf/dist/node_modules/tf.worker"
+} from "../../workers/tf/tf.worker.messages"
 
 import FieldDataSet from "../FieldDataSet"
 import ModelDataSet from "./ModelDataSet"
