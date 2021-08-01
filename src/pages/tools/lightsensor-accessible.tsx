@@ -27,7 +27,7 @@ import Dashboard from "../../components/dashboard/Dashboard"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import { useId } from "react-use-id-hook"
 
-const TONE_DURATION = 5 
+const TONE_DURATION = 5
 const TONE_THROTTLE = 100
 
 // this is a React component that gets run numerous time,
@@ -44,8 +44,8 @@ export default function LightsensorAccessible() {
     // useServices accepts a number of filters and returns any services that match
     // get all led light sensor services
     // under the hood, it uses the bus and events.
-    const lightSensors = useServices({ serviceClass: SRV_LIGHT_LEVEL})
-    console.log("light sensors: "  + lightSensors)
+    const lightSensors = useServices({ serviceClass: SRV_LIGHT_LEVEL })
+    console.log("light sensors: " + lightSensors)
     console.log(typeof lightSensors)
 
     // create a state variable to hold the service selected as our light sensor
@@ -53,11 +53,12 @@ export default function LightsensorAccessible() {
     const [lightService, setLightService] = useState<JDService>()
 
     //used to hold user selection of the property of the sound to vary. Default is the frequency.
-    const [sonificationProperty, setSonificationProperty] = useState('frequency')
+    const [sonificationProperty, setSonificationProperty] =
+        useState("frequency")
 
-     //Used to store frequency modifier/offset for tones. 
-     //Setting default state to 0 as this will eventually be set to the 
-     //sensed light and be added to 1000 to be sonified.
+    //Used to store frequency modifier/offset for tones.
+    //Setting default state to 0 as this will eventually be set to the
+    //sensed light and be added to 1000 to be sonified.
     const [toneFrequencyOffset, setToneFrequencyOfset] = useState(0)
 
     const [volume, setVolume] = useState(1)
@@ -65,16 +66,17 @@ export default function LightsensorAccessible() {
     const handleSelectLightService = light => () => {
         console.log("light: " + light)
         console.log(typeof light)
-        lightService == light ? setLightService(undefined) : setLightService(light)
+        lightService == light
+            ? setLightService(undefined)
+            : setLightService(light)
     }
     //handler for property selection to sonify.
-    const handlePropertySelectionChange = (event) => {
+    const handlePropertySelectionChange = event => {
         setSonificationProperty(event.target.value)
     }
 
     // filter to only show light sensors in dashboard
-    const dashboardDeviceFilter = (d: JDDevice) =>
-        d.hasService(SRV_LIGHT_LEVEL)
+    const dashboardDeviceFilter = (d: JDDevice) => d.hasService(SRV_LIGHT_LEVEL)
 
     // register for light sensor data events
     useEffect(() => {
@@ -86,14 +88,17 @@ export default function LightsensorAccessible() {
                 // get amount of light
                 //console.log(lightService.readingRegister.unpackedValue)
                 const [lightLevel] = lightService.readingRegister.unpackedValue
-                if(sonificationProperty == 'frequency')
-                {
+                if (sonificationProperty == "frequency") {
                     setToneFrequencyOfset(lightLevel)
-                } else{
-                    setVolume(lightLevel%0.99)  
+                } else {
+                    setVolume(lightLevel % 0.99)
                 }
-                
-                await playTone(1000 + toneFrequencyOffset * 1000, TONE_DURATION, volume)
+
+                await playTone(
+                    1000 + toneFrequencyOffset * 1000,
+                    TONE_DURATION,
+                    volume
+                )
             }, TONE_THROTTLE)
         )
 
@@ -105,80 +110,101 @@ export default function LightsensorAccessible() {
         <>
             <section id={sectionId}>
                 <Grid container spacing={2}>
-                    <GridHeader title="Audio controls"/>
+                    <GridHeader title="Audio controls" />
                     <Grid item xs={12}>
-                        <Button variant={"outlined"}
-                            onClick={toggleBrowserAudio}>
+                        <Button
+                            variant={"outlined"}
+                            onClick={toggleBrowserAudio}
+                        >
                             {browserAudio
                                 ? "Stop browser audio"
                                 : "Start browser audio"}
                         </Button>
                         {!lightSensors && (
                             <>
-                            <GridHeader title="Connect a device" />
-                            <Grid item xs>
-                                <ConnectAlert serviceClass={SRV_LIGHT_LEVEL}/>
-                            </Grid>
+                                <GridHeader title="Connect a device" />
+                                <Grid item xs>
+                                    <ConnectAlert
+                                        serviceClass={SRV_LIGHT_LEVEL}
+                                    />
+                                </Grid>
                             </>
                         )}
                         {lightSensors.length && (
                             <>
-                            <GridHeader title="Available Lightsensors"/>
-                            {lightSensors.map(lightSensor => (
-                                <Grid item xs={12} sm={6} lg={4} xl={3} key={lightSensor.id}>
-                                    <Card>
-                                        <DeviceCardHeader device={lightSensor.device}
-                                                           showAvatar={true}
-                                                           showMedia={true}/>
-                                        
-                                    </Card>
-                                    <CardContent>
-                                        <Typography variant="h5">
-                                            {(lightSensor === lightService ? "Streaming from " : "") +
-                                                        (lightSensor.device.physical ? "Physical" : "Virtual") + 
-                                                        `LightSensor ${lightSensor.friendlyName}` 
-                                            }
-                                        </Typography>
-                                    </CardContent>
-                                    <CardActions>
-                                        <FormControl component="fieldset">
-                                            <FormLabel component="legend">
-                                                    Select property of sound to change
-                                            </FormLabel>
+                                <GridHeader title="Available Lightsensors" />
+                                {lightSensors.map(lightSensor => (
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        sm={6}
+                                        lg={4}
+                                        xl={3}
+                                        key={lightSensor.id}
+                                    >
+                                        <Card>
+                                            <DeviceCardHeader
+                                                device={lightSensor.device}
+                                                showAvatar={true}
+                                                showMedia={true}
+                                            />
+                                        </Card>
+                                        <CardContent>
+                                            <Typography variant="h5">
+                                                {(lightSensor === lightService
+                                                    ? "Streaming from "
+                                                    : "") +
+                                                    (lightSensor.device.physical
+                                                        ? "Physical"
+                                                        : "Virtual") +
+                                                    `LightSensor ${lightSensor.friendlyName}`}
+                                            </Typography>
+                                        </CardContent>
+                                        <CardActions>
+                                            <FormControl component="fieldset">
+                                                <FormLabel component="legend">
+                                                    Select property of sound to
+                                                    change
+                                                </FormLabel>
                                                 <RadioGroup
                                                     aria-label="sonification property"
                                                     name="soundProperty"
                                                     value={sonificationProperty}
                                                     onChange={
                                                         handlePropertySelectionChange
-                                                    }>
-                                                <FormControlLabel
-                                                    value="frequency"
-                                                    control={<Radio />}
-                                                    label="buzzer frequency"
-                                                />
-                                                <FormControlLabel
-                                                    value="volume"
-                                                    control={<Radio />}
-                                                    label="buzzer volume"
-                                                />
-                                            </RadioGroup>
-                                        </FormControl>
-                                        <Button
-                                            variant={"outlined"}
-                                            onClick={handleSelectLightService(lightSensor)}
-                                        >
-                                        {lightSensor === lightService ? "Stop streaming" : "Start streaming"}
-                                        </Button>
-                                    </CardActions>
-                                </Grid>
-                            ))}
+                                                    }
+                                                >
+                                                    <FormControlLabel
+                                                        value="frequency"
+                                                        control={<Radio />}
+                                                        label="buzzer frequency"
+                                                    />
+                                                    <FormControlLabel
+                                                        value="volume"
+                                                        control={<Radio />}
+                                                        label="buzzer volume"
+                                                    />
+                                                </RadioGroup>
+                                            </FormControl>
+                                            <Button
+                                                variant={"outlined"}
+                                                onClick={handleSelectLightService(
+                                                    lightSensor
+                                                )}
+                                            >
+                                                {lightSensor === lightService
+                                                    ? "Stop streaming"
+                                                    : "Start streaming"}
+                                            </Button>
+                                        </CardActions>
+                                    </Grid>
+                                ))}
                             </>
                         )}
                     </Grid>
                 </Grid>
             </section>
             <Dashboard deviceFilter={dashboardDeviceFilter} />
-        </>    
-        )
+        </>
+    )
 }
