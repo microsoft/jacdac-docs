@@ -103,6 +103,7 @@
     "slug": "^5.1.0",
     "three": "^0.131.1",
     "trim": "^1.0.1",
+    "tty-browserify": "^0.0.1",
     "use-debounce": "^7.0.0",
     "use-editable": "^2.3.3",
     "util": "^0.12.4",

@@ -350,6 +350,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     const fallback = {
         util: require.resolve("util/"),
         os: require.resolve("os-browserify/browser"),
+        tty: require.resolve("tty-browserify"),
     }
     if (stage.startsWith("develop")) {
         setWebpackConfig({
