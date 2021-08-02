@@ -4,12 +4,13 @@ import type { JSONSchema4 } from "json-schema"
 import { Grid, TextField } from "@material-ui/core"
 import SwitchWithLabel from "./SwitchWithLabel"
 
-function TypeForm(props: {
+function SchemaForm(props: {
     schema: JSONSchema4
+    required?: boolean
     value: object
     setValue: (newValue: object) => void
 }) {
-    const { schema, value, setValue } = props
+    const { schema, required, value, setValue } = props
     const { type, title, description } = schema
 
     switch (type) {
@@ -19,6 +20,7 @@ function TypeForm(props: {
                 <Grid item xs={12}>
                     <TextField
                         title={title}
+                        required={required}
                         helperText={description}
                         type="number"
                         value={value}
@@ -31,6 +33,7 @@ function TypeForm(props: {
                 <Grid item xs={12}>
                     <TextField
                         title={title}
+                        required={required}
                         helperText={description}
                         type="text"
                         value={value}
@@ -43,12 +46,26 @@ function TypeForm(props: {
                 <Grid item xs={12}>
                     <SwitchWithLabel
                         title={title}
+                        required={required}
                         label={description}
                         checked={!!value}
                         onChange={setValue}
                     />
                 </Grid>
             )
+        case "object": {
+            const { properties, required } = schema
+            return (
+                <Grid item xs={12}>
+                    <PropertiesForm
+                        properties={properties}
+                        required={required}
+                        value={value}
+                        setValue={setValue}
+                    />
+                </Grid>
+            )
+        }
     }
 
     return null
@@ -56,10 +73,11 @@ function TypeForm(props: {
 
 function PropertiesForm(props: {
     properties: { [index: string]: JSONSchema4 }
+    required: false | string[]
     value: object
     setValue: (newValue: object) => void
 }) {
-    const { properties, value, setValue } = props
+    const { properties, required, value, setValue } = props
     const handleSetValue =
         (key: string, value: object) => (newValue: object) => {
             setValue({ ...value, key: newValue })
@@ -71,33 +89,12 @@ function PropertiesForm(props: {
                 <Grid item key={key}>
                     <SchemaForm
                         schema={schema}
+                        required={required && required.indexOf(key) > -1}
                         value={value[key]}
                         setValue={handleSetValue(key, value)}
                     />
                 </Grid>
             ))}
-        </>
-    )
-}
-
-function SchemaForm(props: {
-    schema: JSONSchema4
-    value: object
-    setValue: (newValue: object) => void
-}) {
-    const { schema, value, setValue } = props
-    const { properties } = schema
-
-    return (
-        <>
-            <TypeForm schema={schema} value={value} setValue={setValue} />
-            {properties && (
-                <PropertiesForm
-                    properties={properties}
-                    value={value}
-                    setValue={setValue}
-                />
-            )}
         </>
     )
 }
