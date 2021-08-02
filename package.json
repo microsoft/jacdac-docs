@@ -101,6 +101,7 @@
     "sanitize-html": "^2.4.0",
     "simple-statistics": "^7.7.0",
     "slug": "^5.1.0",
+    "stream-browserify": "^3.0.0",
     "three": "^0.131.1",
     "trim": "^1.0.1",
     "tty-browserify": "^0.0.1",
