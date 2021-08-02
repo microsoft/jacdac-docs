@@ -1,22 +1,24 @@
-import { Grid } from "@material-ui/core"
 import type { JSONSchema4 } from "json-schema"
 import React from "react"
+import MaterialJsonSchemaForm from "react-jsonschema-form-material-ui"
 
 export default function JSONSchemaForm(props: {
-    schema: JSONSchema4,
-    value: object,
+    schema: JSONSchema4
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    value: object
+    // eslint-disable-next-line @typescript-eslint/ban-types
     setValue: (newValue: object) => void
 }) {
     const { schema, value, setValue } = props
-    const { properties = {} } = schema
 
     return (
-        <Grid container spacing={1} style={{ background: "#fff" }}>
-            {Object.entries(properties).map((key, prop) => (
-                <Grid item key={key}></Grid>
-            ))}
-        </Grid>
+        <MaterialJsonSchemaForm
+            schema={schema}
+            formData={value}
+            onChange={setValue}
+            onSubmit={submittedData =>
+                console.log("form submitted", submittedData)
+            }
+        />
     )
-}
-
 }
