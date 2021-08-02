@@ -69,7 +69,7 @@ function PropertiesForm(props: {
         <>
             {Object.entries(properties).map(([key, schema]) => (
                 <Grid item key={key}>
-                    <TypeForm
+                    <SchemaForm
                         schema={schema}
                         value={value[key]}
                         setValue={handleSetValue(key, value)}
@@ -80,7 +80,7 @@ function PropertiesForm(props: {
     )
 }
 
-export default function JSONSchemaForm(props: {
+function SchemaForm(props: {
     schema: JSONSchema4
     value: object
     setValue: (newValue: object) => void
@@ -89,7 +89,7 @@ export default function JSONSchemaForm(props: {
     const { properties } = schema
 
     return (
-        <Grid container spacing={1}>
+        <>
             <TypeForm schema={schema} value={value} setValue={setValue} />
             {properties && (
                 <PropertiesForm
@@ -98,6 +98,20 @@ export default function JSONSchemaForm(props: {
                     setValue={setValue}
                 />
             )}
+        </>
+    )
+}
+
+export default function JSONSchemaForm(props: {
+    schema: JSONSchema4
+    value: object
+    setValue: (newValue: object) => void
+}) {
+    const { schema, value, setValue } = props
+
+    return (
+        <Grid container spacing={1}>
+            <SchemaForm schema={schema} value={value} setValue={setValue} />
         </Grid>
     )
 }
