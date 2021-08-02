@@ -1,30 +1,18 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import React, { ReactNode } from "react"
 import ReactField, { ReactFieldJSON } from "./ReactField"
-import DataTableWidget from "./DataTableWidget"
-import {
-    BlockDefinition,
-    DataPreviewInputDefinition,
-    identityTransformData,
-    TABLE_PREVIEW_MAX_ITEMS,
-} from "../toolbox"
 import { Grid } from "@material-ui/core"
-
-export interface JSONFieldSchema {
-    name: string;
-    title: string
-    type: "number" | "text" | "checkbox"    
-}
+import { JSONSchema4 } from "json-schema"
 
 export interface JSONSettingsOptions extends ReactFieldJSON {
-    spec?: JSONFieldSchema[]
+    schema?: JSONSchema4
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
     static KEY = "jacdac_field_json_settings"
     SERIALIZABLE = true
-    spec: JSONFieldSchema[]
+    schema: JSONSchema4
 
     static fromJson(options: ReactFieldJSON) {
         return new JSONSettingsField(options?.value, undefined, options)
@@ -34,7 +22,7 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(value: string, validator?: any, options?: JSONSettingsOptions) {
         super(value, validator, options)
-        this.spec = options?.spec || []
+        this.schema = options?.schema || []
     }
 
     protected initCustomView(): SVGElement {
@@ -44,30 +32,20 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
     }
 
     getText_() {
-        return "👀"
+        return "⚙️"
     }
 
     renderField(): ReactNode {
+        const { schema } = this.schema
+        const { properties = {} } = schema
+
+        const value = this.value
+
         return (
             <Grid container spacing={1} style={{ background: "#fff" }}>
-                <Grid item xs={6}>
-                    <DataTableWidget
-                        label="before"
-                        tableHeight={295}
-                        empty={"no data"}
-                        transformed={false}
-                        maxItems={TABLE_PREVIEW_MAX_ITEMS}
-                    />
-                </Grid>
-                <Grid item xs={6}>
-                    <DataTableWidget
-                        label="after"
-                        tableHeight={295}
-                        empty={"no data"}
-                        transformed={true}
-                        maxItems={TABLE_PREVIEW_MAX_ITEMS}
-                    />
-                </Grid>
+                {Object.entries(properties).map((key, prop) => (
+                    <Grid item key={key}></Grid>
+                ))}
             </Grid>
         )
     }
