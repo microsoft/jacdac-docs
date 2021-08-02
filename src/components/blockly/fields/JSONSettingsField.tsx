@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import React, { ReactNode } from "react"
+import React, { lazy, ReactNode } from "react"
 import ReactField, { ReactFieldJSON } from "./ReactField"
-import { Grid } from "@material-ui/core"
-import { JSONSchema4 } from "json-schema"
+import type { JSONSchema4 } from "json-schema"
+import Suspense from "../../ui/Suspense"
+const JSONSchemaForm = lazy(() => import("../../ui/JSONSchemaForm"))
 
 export interface JSONSettingsOptions extends ReactFieldJSON {
     schema?: JSONSchema4
@@ -37,16 +38,18 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
 
     renderField(): ReactNode {
         const { schema } = this.schema
-        const { properties = {} } = schema
 
         const value = this.value
+        const setValue = (newValue: object) => this.setValue(newValue)
 
         return (
-            <Grid container spacing={1} style={{ background: "#fff" }}>
-                {Object.entries(properties).map((key, prop) => (
-                    <Grid item key={key}></Grid>
-                ))}
-            </Grid>
+            <Suspense>
+                <JSONSchemaForm
+                    schema={schema}
+                    value={value}
+                    setValue={setValue}
+                />
+            </Suspense>
         )
     }
 }
