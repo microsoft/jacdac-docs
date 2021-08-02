@@ -5,6 +5,10 @@ import {
     MB_CLASSIFIER_VAR_TYPE,
 } from "./modelblockdsl"
 
+export function openBlankDialog() {
+    console.log("A dialog!")
+}
+
 // handling dialogs within Blockly
 export function addNewDataSet(workspace) {
     // prompt user for dataset name
@@ -93,7 +97,7 @@ export function addNewClassifier(workspace) {
     })
 }
 
-/*export function open...toggleRecordDataDialog() {
+/*export function toggleRecordDataDialog() {
     const b = !recordDataDialogVisible
     setRecordDataDialogVisible(b)
 }*/

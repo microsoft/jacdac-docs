@@ -17,6 +17,7 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import { FieldVariable } from "blockly"
 
+import { openBlankDialog } from "../../../model-editor/ModelBlockModals"
 import { useId } from "react-use-id-hook"
 
 export interface NeuralNetworkBlockFieldValue {
@@ -183,6 +184,7 @@ function NNParameterWidget(props: {
 
     const handleViewModel = () => {
         console.log("Open NN classifier modal")
+        openBlankDialog()
     }
 
     if (!parametersVisible) return null

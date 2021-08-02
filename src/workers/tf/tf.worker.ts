@@ -248,8 +248,6 @@ async function handleMessage(event: MessageEvent) {
     if (worker !== "tf") return
 
     const resp = await dispatchAsyncMessages(message)
-
-    //const resp = { worker, ...rest, data: result }
     self.postMessage(resp)
 }
 

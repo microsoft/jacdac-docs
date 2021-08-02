@@ -104,7 +104,6 @@ async function createDeviceQRPages(actions) {
         const p = `/devices/codes/${vanity}/`
         const r = { fromPath: p, toPath: `/devices/microsoft/research/` }
         await createRedirect(r)
-        console.log(r)
     }
     console.log(`devices qr code redirect created`)
 }
@@ -354,9 +353,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
                 alias: {
                     "react-dom": "@hot-loader/react-dom",
                 },
-                fallback: {
-                    util: require.resolve("util/"),
-                },
+                fallback: { util: require.resolve("util/") },
             },
             plugins,
         })
@@ -364,6 +361,9 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     if (stage === "build-javascript" || stage === "build-html") {
         console.log(`enabling ignore filters`)
         setWebpackConfig({
+            resolve: {
+                fallback: { util: require.resolve("util/") },
+            },
             plugins,
         })
     }

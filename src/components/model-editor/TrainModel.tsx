@@ -45,7 +45,6 @@ export default function TrainModel(props: {
     const [model, setModel] = useState<MBModel>(props.model)
 
     const [pageReady, setPageReady] = useState(false)
-
     useEffect(() => {
         if (!pageReady) {
             prepareDataSet(dataset)
