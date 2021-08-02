@@ -26,6 +26,10 @@ import type { VisualizationSpec } from "react-vega"
 import type { AnyMark } from "vega-lite/build/src/mark"
 import { tidyHeaders, tidyResolveFieldColumn } from "../fields/tidy"
 import { Block } from "blockly"
+import type { JSONSchema4 } from "json-schema"
+import JSONSettingsField, {
+    JSONSettingsInputDefinition,
+} from "../fields/JSONSettingsField"
 
 const SCATTERPLOT_BLOCK = "chart_scatterplot"
 const LINEPLOT_BLOCK = "chart_lineplot"
@@ -37,6 +41,23 @@ const CHART_SHOW_TABLE_BLOCK = "chart_show_table"
 const VEGA_LAYER_BLOCK = "vega_layer"
 const VEGA_ENCODING_BLOCK = "vega_encoding"
 const VEGA_STATEMENT_TYPE = "vegaStatementType"
+
+const encodingSchema: JSONSchema4 = {
+    properties: {
+        title: {
+            type: "string",
+            title: "Axis title"
+        },
+        min: {
+            type: "number",
+            title: "Axis domain minimum"
+        },
+        max: {
+            type: "number",
+            title: "Axis domain maximum"
+        },
+    },
+}
 
 const colour = paletteColorByIndex(4)
 const chartDsl: BlockDomainSpecificLanguage = {
@@ -286,7 +307,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: VEGA_ENCODING_BLOCK,
-            message0: "encoding %1 as %2 title %3",
+            message0: "encoding %1 as %2 %3",
             args0: [
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -310,10 +331,11 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     type: DataColumnChooserField.KEY,
                     name: "field",
                 },
-                <TextInputDefinition>{
-                    type: "field_input",
-                    name: "title"
-                }
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: encodingSchema,
+                },
             ],
             previousStatement: VEGA_STATEMENT_TYPE,
             nextStatement: VEGA_STATEMENT_TYPE,

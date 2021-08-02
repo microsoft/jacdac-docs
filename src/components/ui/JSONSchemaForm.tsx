@@ -1,6 +1,6 @@
-import type { JSONSchema4 } from "json-schema"
 import React from "react"
 import MaterialJsonSchemaForm from "react-jsonschema-form-material-ui"
+import type { JSONSchema4 } from "json-schema"
 
 export default function JSONSchemaForm(props: {
     schema: JSONSchema4

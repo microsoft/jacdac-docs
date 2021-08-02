@@ -3,10 +3,15 @@ import React, { lazy, ReactNode } from "react"
 import ReactField, { ReactFieldJSON } from "./ReactField"
 import type { JSONSchema4 } from "json-schema"
 import Suspense from "../../ui/Suspense"
+import { InputDefinition } from "../toolbox"
 const JSONSchemaForm = lazy(() => import("../../ui/JSONSchemaForm"))
-
 export interface JSONSettingsOptions extends ReactFieldJSON {
     schema?: JSONSchema4
+}
+
+export interface JSONSettingsInputDefinition extends InputDefinition {
+    type: "jacdac_field_json_settings"
+    schema: JSONSchema4
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
