@@ -21,7 +21,7 @@ function RecordingParameterWidget(props: {
 }) {
     const { initFieldValue, setFieldValue } = props
 
-    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
+    const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
     const [parametersVisible, setParametersVisible] = useState(
         initFieldValue.parametersVisible
@@ -62,7 +62,7 @@ function RecordingParameterWidget(props: {
     useEffect(() => {
         // update based on source block's parameter visibility field
         updateVisibility()
-    }, [workspaceJSON])
+    }, [workspace])
 
     const updateVisibility = () => {
         const parameterField = sourceBlock.getField(

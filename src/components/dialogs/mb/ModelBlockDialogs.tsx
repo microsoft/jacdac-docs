@@ -1,9 +1,59 @@
-import Blockly, { BlockSvg, FieldVariable, Variables } from "blockly"
+import React, { useEffect, useContext, useState, lazy } from "react"
+
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
+
+import Blockly, {
+    BlockSvg,
+    FieldVariable,
+    Variables,
+    WorkspaceSvg,
+} from "blockly"
 import {
     MODEL_BLOCKS,
+    MB_CLASS_VAR_TYPE,
     MB_DATASET_VAR_TYPE,
     MB_CLASSIFIER_VAR_TYPE,
-} from "./modelblockdsl"
+} from "../../model-editor/modelblockdsl"
+
+import FieldDataSet from "../../FieldDataSet"
+import MBModel from "../../model-editor/MBModel"
+import ModelDataSet from "../../model-editor/ModelDataSet"
+import Suspense from "../../ui/Suspense"
+import useChartPalette from "../../useChartPalette"
+
+const RecordDataDialog = lazy(() => import("./RecordDataDialog"))
+
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            marginBottom: theme.spacing(1),
+        },
+        grow: {
+            flexGrow: 1,
+        },
+        field: {
+            marginRight: theme.spacing(1),
+            marginBottom: theme.spacing(1.5),
+        },
+        segment: {
+            marginTop: theme.spacing(2),
+            marginBottom: theme.spacing(2),
+        },
+        row: {
+            marginBottom: theme.spacing(0.5),
+        },
+        buttons: {
+            marginRight: theme.spacing(1),
+            marginBottom: theme.spacing(2),
+        },
+        trend: {
+            width: theme.spacing(10),
+        },
+        vmiddle: {
+            verticalAlign: "middle",
+        },
+    })
+)
 
 // handling dialogs within Blockly
 export function addNewDataSet(workspace) {
@@ -93,7 +143,43 @@ export function addNewClassifier(workspace) {
     })
 }
 
-/*export function open...toggleRecordDataDialog() {
-    const b = !recordDataDialogVisible
-    setRecordDataDialogVisible(b)
-}*/
+export default function ModelBlockDialogs(props: {
+    onRecordingDone: (recording: FieldDataSet[], blockId: string) => void
+    onTrainingDone: (
+        model: MBModel,
+        modelName: string,
+        dataset: ModelDataSet,
+        datasetName: string
+    ) => void
+    recordingCount: number
+    workspace: WorkspaceSvg
+}) {
+    const { onRecordingDone, onTrainingDone, recordingCount, workspace } = props
+    const [recordDataDialogVisible, setRecordDataDialogVisible] =
+        useState<boolean>(false)
+    const [trainModelDialogVisible, setTrainModelDialogVisible] =
+        useState<boolean>(false)
+
+    const classes = useStyles()
+    const chartPalette = useChartPalette()
+
+    return (
+        <>
+            {" "}
+            {recordDataDialogVisible && (
+                <Suspense>
+                    <RecordDataDialog
+                        classes={classes}
+                        chartPalette={chartPalette}
+                        open={recordDataDialogVisible}
+                        onDone={onRecordingDone}
+                        onClose={toggleRecordDataDialog}
+                        recordingCount={recordingCount}
+                        workspace={workspace}
+                    />
+                </Suspense>
+            )}
+            {/*trainModelDialogVisible && <Suspense></Suspense>*/}
+        </>
+    )
+}

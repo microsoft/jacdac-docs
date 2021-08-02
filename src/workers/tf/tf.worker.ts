@@ -29,11 +29,11 @@ export interface TFModelMessage {
     data?: any
 }
 
-export interface TFModelRequest extends TFModelMessage {
+export interface TFModelRequestResponse extends TFModelMessage {
     type?: string
 }
 
-export interface TFModelTrainRequest extends TFModelRequest {
+export interface TFModelTrainRequest extends TFModelRequestResponse {
     type: "train"
     data: {
         modelBlockJSON: string
@@ -43,7 +43,7 @@ export interface TFModelTrainRequest extends TFModelRequest {
     }
 }
 
-export interface TFModelTrainResponse extends TFModelMessage {
+export interface TFModelTrainResponse extends TFModelRequestResponse {
     type: "train"
     data: {
         modelJSON: string
@@ -52,7 +52,7 @@ export interface TFModelTrainResponse extends TFModelMessage {
     }
 }
 
-export interface TFModelPredictRequest extends TFModelRequest {
+export interface TFModelPredictRequest extends TFModelRequestResponse {
     type: "predict"
     data: {
         model: TFModelObj
@@ -60,8 +60,8 @@ export interface TFModelPredictRequest extends TFModelRequest {
     }
 }
 
-export interface TFModelPredictResponse extends TFModelMessage {
-    type: "train"
+export interface TFModelPredictResponse extends TFModelRequestResponse {
+    type: "predict"
     data: {
         prediction: number[]
     }
@@ -144,7 +144,9 @@ function buildModelFromJSON(model: TFModelObj, modelBlockJSON: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handlers: { [index: string]: (props: any) => Promise<any> } = {
+const handlers: {
+    [index: string]: (props: TFModelMessage) => Promise<TFModelMessage>
+} = {
     train: async (props: TFModelTrainRequest) => {
         const { data } = props
         let trainingInfo = []
@@ -196,12 +198,12 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
         mod.weightData = null
 
         // return data
-        const responseMsg = {
+        const result = {
             modelJSON: JSON.stringify(mod),
             modelWeights: weights,
             trainingInfo: trainingInfo,
         }
-        return responseMsg
+        return { ...props, data: result }
     },
     predict: async (props: TFModelPredictRequest) => {
         const { data } = props
@@ -223,11 +225,13 @@ const handlers: { [index: string]: (props: any) => Promise<any> } = {
         const predictArr = await prediction.dataSync()
 
         // return prediction
-        return { prediction: predictArr }
+
+        const result = { prediction: predictArr }
+        return { ...props, data: result }
     },
 }
 
-async function dispatchAsyncMessages(message: TFModelRequest) {
+async function dispatchAsyncMessages(message: TFModelRequestResponse) {
     try {
         const handler = handlers[message.type]
         return await handler?.(message)
@@ -238,14 +242,14 @@ async function dispatchAsyncMessages(message: TFModelRequest) {
 }
 
 async function handleMessage(event: MessageEvent) {
-    const message: TFModelRequest = event.data
+    const message: TFModelRequestResponse = event.data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { worker, ...rest } = message
     if (worker !== "tf") return
 
-    const result = await dispatchAsyncMessages(message)
+    const resp = await dispatchAsyncMessages(message)
 
-    const resp = { worker, ...rest, data: result }
+    //const resp = { worker, ...rest, data: result }
     self.postMessage(resp)
 }
 

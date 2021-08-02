@@ -7,10 +7,9 @@ import {
     DialogActions,
     DialogContent,
     TextField,
-    createStyles,
     InputAdornment,
 } from "@material-ui/core"
-import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import StopIcon from "@material-ui/icons/Stop"
@@ -21,57 +20,29 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import { Autocomplete } from "@material-ui/lab"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 
-import ReadingFieldGrid from "../ReadingFieldGrid"
-import FieldDataSet from "../FieldDataSet"
-import ClassDataSetGrid from "../ClassDataSetGrid"
-import Trend from "../Trend"
+import ReadingFieldGrid from "../../ReadingFieldGrid"
+import FieldDataSet from "../../FieldDataSet"
+import ClassDataSetGrid from "../../ClassDataSetGrid"
+import Trend from "../../Trend"
 
-import useChange from "../../jacdac/useChange"
-import useChartPalette from "../useChartPalette"
-import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import ServiceManagerContext from "../ServiceManagerContext"
+import useChange from "../../../jacdac/useChange"
+import useChartPalette from "../../useChartPalette"
+import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
+import ServiceManagerContext from "../../ServiceManagerContext"
 
-import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
-import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
-import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
-import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
-import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"
-import { throttle } from "../../../jacdac-ts/src/jdom/utils"
+import { arrayConcatMany } from "../../../../jacdac-ts/src/jdom/utils"
+import { JDRegister } from "../../../../jacdac-ts/src/jdom/register"
+import { isSensor } from "../../../../jacdac-ts/src/jdom/spec"
+import { JDBus } from "../../../../jacdac-ts/src/jdom/bus"
+import { REPORT_UPDATE } from "../../../../jacdac-ts/src/jdom/constants"
+import { throttle } from "../../../../jacdac-ts/src/jdom/utils"
 import { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
-import { MB_CLASS_VAR_TYPE, MODEL_BLOCKS } from "../model-editor/modelblockdsl"
-import RecordingBlockField from "../blockly/fields/mb/RecordingBlockField"
+import {
+    MB_CLASS_VAR_TYPE,
+    MODEL_BLOCKS,
+} from "../../model-editor/modelblockdsl"
+import RecordingBlockField from "../../blockly/fields/mb/RecordingBlockField"
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            marginBottom: theme.spacing(1),
-        },
-        grow: {
-            flexGrow: 1,
-        },
-        field: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(1.5),
-        },
-        segment: {
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-        },
-        row: {
-            marginBottom: theme.spacing(0.5),
-        },
-        buttons: {
-            marginRight: theme.spacing(1),
-            marginBottom: theme.spacing(2),
-        },
-        trend: {
-            width: theme.spacing(10),
-        },
-        vmiddle: {
-            verticalAlign: "middle",
-        },
-    })
-)
 const LIVE_HORIZON = 24
 function createDataSet(
     bus: JDBus,
@@ -89,20 +60,27 @@ function createDataSet(
 }
 
 export default function BlocklyDataRecordingDialog(props: {
+    classes: any
+    chartPalette: string[]
     open: boolean
-    onDone: (recording:FieldDataSet[], blockId: string) => void
+    onDone: (recording: FieldDataSet[], blockId: string) => void
     onClose: () => void
     recordingCount: number
     workspace: WorkspaceSvg
 }) {
-    const { open, onDone, onClose, recordingCount, workspace } = props
+    const {
+        classes,
+        chartPalette,
+        open,
+        onDone,
+        onClose,
+        recordingCount,
+        workspace,
+    } = props
     const [dialogType, setDialogType] = useState<
         "chooseSensors" | "recordData"
     >("chooseSensors")
 
-    
-    const classes = useStyles()
-    const chartPalette = useChartPalette()
     const { fileStorage } = useContext(ServiceManagerContext)
 
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -127,7 +105,6 @@ export default function BlocklyDataRecordingDialog(props: {
         if (classes.length == 0) return ["class1"]
         return classes
     }
-
 
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
@@ -165,9 +142,10 @@ export default function BlocklyDataRecordingDialog(props: {
     const [isRecording, setIsRecording] = useState(false)
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
-    const [currentRecording, ] = useState({
+    const [currentRecording] = useState({
         recording: [],
-        blockId: ""})
+        blockId: "",
+    })
 
     const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
     const [samplingDuration, setSamplingDuration] = useState("2")
@@ -474,7 +452,8 @@ export default function BlocklyDataRecordingDialog(props: {
                                                 onClick={handleDownloadDataSet}
                                                 title="Download all recording data"
                                                 disabled={
-                                                    currentRecording.recording.length == 0
+                                                    currentRecording.recording
+                                                        .length == 0
                                                 }
                                             >
                                                 <DownloadIcon />
@@ -484,7 +463,9 @@ export default function BlocklyDataRecordingDialog(props: {
                                             <ClassDataSetGrid
                                                 key={"samples-" + recordingName}
                                                 label={className}
-                                                tables={currentRecording.recording}
+                                                tables={
+                                                    currentRecording.recording
+                                                }
                                                 handleDeleteTable={
                                                     handleDeleteSample
                                                 }

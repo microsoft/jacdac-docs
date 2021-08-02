@@ -14,8 +14,9 @@ import { visitWorkspace } from "../../../jacdac-ts/src/dsl/workspacevisitor"
 import Suspense from "../ui/Suspense"
 import { visitToolbox } from "../blockly/toolbox"
 import FieldDataSet from "../FieldDataSet"
-
-const RecordDataDialog = lazy(() => import("../dialogs/RecordDataDialog"))
+import ModelBlockDialogs from "../dialogs/mb/RecordDataDialog"
+import MBModel from "./MBModel"
+import ModelDataSet from "./ModelDataSet"
 
 const MB_EDITOR_ID = "mb"
 const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
@@ -61,24 +62,55 @@ function ModelBlockEditorWithContext() {
     const [allDataSets, setAllDataSets] = useState(getDataSetsFromLocalStorage) // dictionary of dataset vars and ModelDataSet objs
     const [allModels, setAllModels] = useState(getModelsFromLocalStorage) // dictionary of model vars and MBModel objs
 
+    // control dialogs
+    const [recordDataDialogVisible, setRecordDataDialogVisible] =
+        useState<boolean>(false)
+    const [trainModelDialogVisible, setTrainModelDialogVisible] =
+        useState<boolean>(false)
+    const toggleRecordingDialog = () => toggleDialog("recording")
+    const toggleModelDialog = () => toggleDialog("model")
+    const toggleDialog = (dialog: string) => {
+        if (dialog == "recording") {
+            // update visibility of recording dialog
+            const b = !recordDataDialogVisible
+            setRecordDataDialogVisible(b)
+        } else if (dialog == "model") {
+            // update visibility of training dialog
+            const b = !trainModelDialogVisible
+            setTrainModelDialogVisible(b)
+        }
+    }
+
     // block context handles hosting blockly
     const { workspace, workspaceJSON, toolboxConfiguration } =
         useContext(BlockContext)
 
-    const [recordDataDialogVisible, setRecordDataDialogVisible] =
-        useState<boolean>(false)
-    const toggleRecordDataDialog = () => {
-        // update visibility of recording dialog
-        const b = !recordDataDialogVisible
-        setRecordDataDialogVisible(b)
-    }
-    const updateAllRecordings = (
+    const onCloseRecordingDialog = (
         recording: FieldDataSet[],
         blockId: string
     ) => {
-        // Add recording data to list of recordings
-        allRecordings[blockId] = recording
-        updateLocalStorage(allRecordings, null, null)
+        if (recording && blockId) {
+            // Add recording data to list of recordings
+            allRecordings[blockId] = recording
+            updateLocalStorage(allRecordings, null, null)
+        }
+        // close dialog
+        toggleDialog("recording")
+    }
+    const onCloseModelDialog = (
+        model: MBModel,
+        modelName: string,
+        dataset: ModelDataSet,
+        datasetName: string
+    ) => {
+        if (model && modelName && dataset && datasetName) {
+            // Add compiled dataset and model to all
+            allDataSets[datasetName] = dataset
+            allModels[modelName] = model
+            updateLocalStorage(null, null, allModels)
+        }
+        // close dialog
+        toggleDialog("model")
     }
 
     const updateLocalStorage = (newRecordings, newDataSets, newModels) => {
@@ -159,7 +191,7 @@ function ModelBlockEditorWithContext() {
 
     const buttonsWithDialogs = {
         createNewDataSetButton: addNewDataSet,
-        createNewRecordingButton: toggleRecordDataDialog,
+        createNewRecordingButton: toggleRecordDialog,
         createNewClassifierButton: addNewClassifier,
     }
     // set button callbacks
@@ -180,17 +212,14 @@ function ModelBlockEditorWithContext() {
         <>
             <BlockEditor editorId={MB_EDITOR_ID} />
             {Flags.diagnostics && <BlockDiagnostics />}
-            {recordDataDialogVisible && (
-                <Suspense>
-                    <RecordDataDialog
-                        open={recordDataDialogVisible}
-                        onDone={updateAllRecordings}
-                        onClose={toggleRecordDataDialog}
-                        recordingCount={Object.keys(allRecordings).length}
-                        workspace={workspace}
-                    />
-                </Suspense>
-            )}
+            <Suspense>
+                <ModelBlockDialogs
+                    onRecordingDone={updateAllRecordings}
+                    onTrainingDone={updateAllModels}
+                    recordingsCount={Object.keys(allRecordings).length}
+                    workspace={workspace}
+                />
+            </Suspense>
         </>
     )
 }

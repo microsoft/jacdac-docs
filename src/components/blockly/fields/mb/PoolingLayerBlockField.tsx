@@ -22,7 +22,7 @@ function LayerParameterWidget(props: {
 }) {
     const { initFieldValue, setFieldValue } = props
 
-    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
+    const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
     const [parametersVisible, setParametersVisible] = useState(
         initFieldValue.parametersVisible
@@ -65,7 +65,7 @@ function LayerParameterWidget(props: {
 
         // update should happen after model is compiled
         updateModelParameters()
-    }, [workspaceJSON])
+    }, [workspace])
 
     const updateVisibility = () => {
         const parameterField = sourceBlock.getField(

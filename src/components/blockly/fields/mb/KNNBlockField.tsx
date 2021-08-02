@@ -22,7 +22,7 @@ function KNNParameterWidget(props: {
 }) {
     const { initFieldValue, setFieldValue } = props
 
-    const { workspaceJSON, sourceBlock } = useContext(WorkspaceContext)
+    const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
     const [parametersVisible, setParametersVisible] = useState(
         initFieldValue.parametersVisible
@@ -53,7 +53,7 @@ function KNNParameterWidget(props: {
 
         // update based on source block's associated training dataset and k value
         updateParameters()
-    }, [workspaceJSON])
+    }, [workspace])
 
     const updateVisibility = () => {
         const parameterField = sourceBlock.getField(

@@ -354,6 +354,9 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
                 alias: {
                     "react-dom": "@hot-loader/react-dom",
                 },
+                fallback: {
+                    util: require.resolve("util/"),
+                },
             },
             plugins,
         })
