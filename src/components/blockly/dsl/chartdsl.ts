@@ -42,19 +42,27 @@ const VEGA_LAYER_BLOCK = "vega_layer"
 const VEGA_ENCODING_BLOCK = "vega_encoding"
 const VEGA_STATEMENT_TYPE = "vegaStatementType"
 
-const encodingSchema: JSONSchema4 = {
+const chartSettingsSchema: JSONSchema4 = {
     properties: {
         title: {
             type: "string",
-            title: "Axis title"
+            title: "Chart title",
+        },
+    },
+}
+const encodingSettingsSchema: JSONSchema4 = {
+    properties: {
+        title: {
+            type: "string",
+            title: "Axis title",
         },
         min: {
             type: "number",
-            title: "Axis domain minimum"
+            title: "Axis domain minimum",
         },
         max: {
             type: "number",
-            title: "Axis domain maximum"
+            title: "Axis domain maximum",
         },
     },
 }
@@ -75,12 +83,18 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     type: DataTableField.KEY,
                     name: "table",
                 },
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
+                },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
@@ -98,9 +112,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     name: "y",
                     dataType: "number",
                 },
-                {
-                    type: DataPreviewField.KEY,
-                    name: "preview",
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -115,6 +130,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
@@ -131,9 +147,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     name: "value",
                     dataType: "number",
                 },
-                {
-                    type: DataPreviewField.KEY,
-                    name: "preview",
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -148,6 +165,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
@@ -165,9 +183,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     name: "y",
                     dataType: "number",
                 },
-                {
-                    type: DataPreviewField.KEY,
-                    name: "preview",
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -182,6 +201,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: true,
             transformData: identityTransformData,
         },
         {
@@ -194,9 +214,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     name: "index",
                     dataType: "number",
                 },
-                {
-                    type: DataPreviewField.KEY,
-                    name: "preview",
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -211,6 +232,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
@@ -227,9 +249,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     name: "value",
                     dataType: "number",
                 },
-                {
-                    type: DataPreviewField.KEY,
-                    name: "preview",
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -244,12 +267,13 @@ const chartDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
             kind: "block",
             type: VEGA_LAYER_BLOCK,
-            message0: "chart %1 title %2 %3 %4 %5 %6 %7",
+            message0: "chart %1 %2 %3 %4 %5 %6",
             args0: [
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -272,13 +296,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     ].map(s => [s, s]),
                     name: "mark",
                 },
-                <TextInputDefinition>{
-                    type: "field_input",
-                    name: "title",
-                },
-                {
-                    type: DataPreviewField.KEY,
-                    name: "preview",
+                <JSONSettingsInputDefinition>{
+                    type: JSONSettingsField.KEY,
+                    name: "settings",
+                    schema: chartSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -334,7 +355,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
                     name: "settings",
-                    schema: encodingSchema,
+                    schema: encodingSettingsSchema,
                 },
             ],
             previousStatement: VEGA_STATEMENT_TYPE,
