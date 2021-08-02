@@ -37,6 +37,10 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
         return undefined
     }
 
+    get defaultValue() {
+        return {}
+    }
+
     getText_() {
         return "⚙️"
     }
