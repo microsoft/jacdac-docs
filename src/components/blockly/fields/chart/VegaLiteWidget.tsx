@@ -1,4 +1,4 @@
-import React, { lazy, useContext, useState } from "react"
+import React, { lazy, useContext, useMemo, useState } from "react"
 import WorkspaceContext from "../../WorkspaceContext"
 import useBlockData from "../../useBlockData"
 import { PointerBoundary } from "../PointerBoundary"
@@ -9,6 +9,7 @@ import type { VisualizationSpec } from "react-vega"
 import type { DataSliceOptions } from "../../../../workers/data/dist/node_modules/data.worker"
 import useEffectAsync from "../../../useEffectAsync"
 import { tidySlice } from "./../tidy"
+
 const VegaLite = lazy(() => import("./VegaLite"))
 
 export default function VegaLiteWidget(props: {
@@ -20,6 +21,9 @@ export default function VegaLiteWidget(props: {
     const { data } = useBlockData(sourceBlock)
     // eslint-disable-next-line @typescript-eslint/ban-types
     const [vegaData, setVegaData] = useState<{ values: object[] }>(undefined)
+    const settings = sourceBlock?.getFieldValue("settings")
+    // TODO merge json
+    const fullSpec = useMemo(() => spec, [spec, settings])
 
     useEffectAsync(
         async mounted => {
@@ -51,7 +55,7 @@ export default function VegaLiteWidget(props: {
                             }}
                             width={CHART_WIDTH}
                             height={CHART_HEIGHT}
-                            spec={spec}
+                            spec={fullSpec}
                             data={vegaData}
                             renderer={renderer}
                             tooltip={true}
