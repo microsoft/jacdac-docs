@@ -10,7 +10,6 @@ import {
     OptionsInputDefinition,
     SeparatorDefinition,
     StatementInputDefinition,
-    TextInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
@@ -19,7 +18,6 @@ import BarChartField from "../fields/chart/BarField"
 import HistogramField from "../fields/chart/HistogramField"
 import DataTableField from "../fields/DataTableField"
 import { paletteColorByIndex } from "./palette"
-import DataPreviewField from "../fields/DataPreviewField"
 import BoxPlotField from "../fields/chart/BoxPlotField"
 import VegaChartField from "../fields/chart/VegaChartField"
 import type { VisualizationSpec } from "react-vega"
@@ -50,7 +48,7 @@ const chartSettingsSchema: JSONSchema4 = {
         },
     },
 }
-const encodingSettingsSchema: JSONSchema4 = {
+const axisSchema: JSONSchema4 = {
     properties: {
         title: {
             type: "string",
@@ -66,6 +64,22 @@ const encodingSettingsSchema: JSONSchema4 = {
         },
     },
 }
+const char2DSettingsSchema: JSONSchema4 = {
+    properties: {
+        title: {
+            type: "string",
+            title: "Chart title",
+        },
+        axis: {
+            type: "object",
+            properties: {
+                x: axisSchema,
+                y: axisSchema,
+            },
+        },
+    },
+}
+const encodingSettingsSchema: JSONSchema4 = axisSchema
 
 const colour = paletteColorByIndex(4)
 const chartDsl: BlockDomainSpecificLanguage = {
@@ -115,7 +129,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
                     name: "settings",
-                    schema: chartSettingsSchema,
+                    schema: char2DSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -186,7 +200,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
                     name: "settings",
-                    schema: chartSettingsSchema,
+                    schema: char2DSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
