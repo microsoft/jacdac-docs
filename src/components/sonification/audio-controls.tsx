@@ -64,8 +64,7 @@ export default function AudioControls(Props: AudioControlProps) {
                 // get amount of light
                 //console.log(lightService.readingRegister.unpackedValue)
                 console.log(Props.sensorService)
-                const [sensorValue] =
-                    Props.sensorService.readingRegister.unpackedValue
+                const [sensorValue] = Props.sensor.readingRegister.unpackedValue
                 if (sonificationProperty == "frequency") {
                     setToneFrequencyOfset(sensorValue)
                 } else {
@@ -82,7 +81,7 @@ export default function AudioControls(Props: AudioControlProps) {
 
         // cleanup callback
         return () => unsubs?.()
-    }, [Props.sensorService, playTone]) // re-register if light sensor changes
+    }, [Props.sensor, playTone]) // re-register if light sensor changes
     return (
         <>
             <section id={sectionId}>
