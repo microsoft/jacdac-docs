@@ -41,6 +41,7 @@ const VEGA_ENCODING_BLOCK = "vega_encoding"
 const VEGA_STATEMENT_TYPE = "vegaStatementType"
 
 const chartSettingsSchema: JSONSchema4 = {
+    type: "object",
     properties: {
         title: {
             type: "string",
@@ -49,22 +50,24 @@ const chartSettingsSchema: JSONSchema4 = {
     },
 }
 const axisSchema: JSONSchema4 = {
+    type: "object",
     properties: {
         title: {
             type: "string",
-            title: "Axis title",
+            title: "Title",
         },
         min: {
             type: "number",
-            title: "Axis domain minimum",
+            title: "Domain minimum",
         },
         max: {
             type: "number",
-            title: "Axis domain maximum",
+            title: "Domain maximum",
         },
     },
 }
 const char2DSettingsSchema: JSONSchema4 = {
+    type: "object",
     properties: {
         title: {
             type: "string",
@@ -73,8 +76,8 @@ const char2DSettingsSchema: JSONSchema4 = {
         axis: {
             type: "object",
             properties: {
-                x: axisSchema,
-                y: axisSchema,
+                x: { title: "X Axis", ...axisSchema },
+                y: { title: "Y Axis", ...axisSchema },
             },
         },
     },
@@ -88,7 +91,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: CHART_SHOW_TABLE_BLOCK,
-            message0: "show table %1 %2",
+            message0: "show table %1 %2 %3",
             args0: [
                 <DummyInputDefinition>{
                     type: "input_dummy",
