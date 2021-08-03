@@ -20,8 +20,6 @@
     "@mdx-js/mdx": "^1.6.22",
     "@mdx-js/react": "^1.6.22",
     "@octokit/core": "^3.5.1",
-    "@react-formless/core": "^1.14.0",
-    "@react-formless/utils": "^1.13.1",
     "@react-three/drei": "^7.0.6",
     "@react-three/fiber": "^7.0.4",
     "@tensorflow/tfjs": "~3.8.0",
