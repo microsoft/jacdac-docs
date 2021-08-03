@@ -33,6 +33,9 @@ export interface AudioControlProps {
 }
 
 export default function AudioControls(Props: AudioControlProps) {
+    // const { sensorTitle, sensor, sensorClass, sensorService, sensorSelection } = props
+    // I get a slint error "'sensorTitle' is missing in props validation" with the above line.
+
     //Used to store frequency modifier/offset for tones.
     //Setting default state to 0 as this will eventually be set to the
     //sensed light and be added to 1000 to be sonified.
