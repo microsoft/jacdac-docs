@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import React from "react"
 import type { JSONSchema4 } from "json-schema"
-import { Grid, TextField, Typography } from "@material-ui/core"
+import { Grid, TextField } from "@material-ui/core"
 import SwitchWithLabel from "./SwitchWithLabel"
 import { useId } from "react-use-id-hook"
+import GridHeader from "./GridHeader"
 
 function SchemaForm(props: {
     schema: JSONSchema4
@@ -103,13 +104,7 @@ function SchemaForm(props: {
             const { properties, required } = schema
             return (
                 <>
-                    {title && (
-                        <Grid item xs={12}>
-                            <Typography variant="caption" color="inherit">
-                                {title}
-                            </Typography>
-                        </Grid>
-                    )}
+                    {title && <GridHeader title={title} />}
                     <Grid item xs={12}>
                         <PropertiesForm
                             properties={properties}
