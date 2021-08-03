@@ -105,14 +105,12 @@ function SchemaForm(props: {
             return (
                 <>
                     {title && <GridHeader title={title} />}
-                    <Grid item xs={12}>
-                        <PropertiesForm
-                            properties={properties}
-                            required={required}
-                            value={value}
-                            setValue={setValue}
-                        />
-                    </Grid>
+                    <PropertiesForm
+                        properties={properties}
+                        required={required}
+                        value={value}
+                        setValue={setValue}
+                    />
                 </>
             )
         }
@@ -132,7 +130,6 @@ function PropertiesForm(props: {
     const handleSetValue = (key: string, v: any) => (newValue: any) => {
         setValue({ ...(v || {}), [key]: newValue })
     }
-    console.log("properties", { properties, required, value })
 
     return (
         <>

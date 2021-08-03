@@ -35,7 +35,7 @@ function JSONSettingsWidget(props: {
     return (
         <div
             style={{
-                minWidth: "22rem",
+                maxWidth: "22rem",
                 minHeight: "20rem",
                 padding: "0.5rem",
             }}
