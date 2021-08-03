@@ -31,6 +31,7 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
     constructor(value: string, validator?: any, options?: JSONSettingsOptions) {
         super(value, validator, options)
         this.schema = options?.schema || {}
+        this.darkMode = "light"
         assert(!!this.schema, "schema missing")
     }
 
@@ -58,6 +59,7 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
             <div
                 style={{
                     minWidth: "22rem",
+                    minHeight: "20rem",
                     padding: "0.5rem",
                 }}
             >
