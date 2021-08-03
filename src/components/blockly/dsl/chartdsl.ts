@@ -56,6 +56,15 @@ const axisSchema: JSONSchema4 = {
             type: "string",
             title: "Title",
         },
+    },
+}
+const axisNumberSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        title: {
+            type: "string",
+            title: "Title",
+        },
         min: {
             type: "number",
             title: "Domain minimum",
@@ -72,20 +81,12 @@ const encodingSettingsSchema: JSONSchema4 = {
         axis: axisSchema,
     },
 }
-const encodings2DSettingsSchema: JSONSchema4 = {
+const encodingNumberSettingsSchema: JSONSchema4 = {
     type: "object",
     properties: {
-        x: {
-            title: "X",
-            ...encodingSettingsSchema,
-        },
-        y: {
-            title: "Y",
-            ...encodingSettingsSchema,
-        },
+        axis: axisNumberSchema,
     },
 }
-
 const char2DSettingsSchema: JSONSchema4 = {
     type: "object",
     properties: {
@@ -93,7 +94,38 @@ const char2DSettingsSchema: JSONSchema4 = {
             type: "string",
             title: "Chart title",
         },
-        encoding: encodings2DSettingsSchema,
+        encoding: {
+            type: "object",
+            properties: {
+                x: {
+                    title: "X",
+                    ...encodingNumberSettingsSchema,
+                },
+                y: {
+                    title: "Y",
+                    ...encodingNumberSettingsSchema,
+                },
+            },
+        },
+    },
+}
+const charMapSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        title: {
+            type: "string",
+            title: "Chart title",
+        },
+        encoding: {
+            index: {
+                title: "Index",
+                ...encodingSettingsSchema,
+            },
+            value: {
+                title: "Value",
+                ...encodingNumberSettingsSchema,
+            },
+        },
     },
 }
 
@@ -104,7 +136,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: CHART_SHOW_TABLE_BLOCK,
-            message0: "show table %1 %2 %3",
+            message0: "show table %1 %2",
             args0: [
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -112,11 +144,6 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 {
                     type: DataTableField.KEY,
                     name: "table",
-                },
-                <JSONSettingsInputDefinition>{
-                    type: JSONSettingsField.KEY,
-                    name: "settings",
-                    schema: chartSettingsSchema,
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
@@ -180,7 +207,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
                     name: "settings",
-                    schema: chartSettingsSchema,
+                    schema: charMapSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -231,7 +258,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
             colour,
             template: "meta",
             inputsInline: false,
-            dataPreviewField: true,
+            dataPreviewField: false,
             transformData: identityTransformData,
         },
         {
@@ -282,7 +309,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
                     name: "settings",
-                    schema: chartSettingsSchema,
+                    schema: charMapSettingsSchema,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",
@@ -358,7 +385,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: VEGA_ENCODING_BLOCK,
-            message0: "encoding %1 as %2 %3",
+            message0: "encoding %1 as %2",
             args0: [
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
