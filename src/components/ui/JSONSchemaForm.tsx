@@ -3,30 +3,70 @@ import React from "react"
 import type { JSONSchema4 } from "json-schema"
 import { Grid, TextField, Typography } from "@material-ui/core"
 import SwitchWithLabel from "./SwitchWithLabel"
+import { useId } from "react-use-id-hook"
 
 function SchemaForm(props: {
     schema: JSONSchema4
     required?: boolean
     value: object
-    setValue: (newValue: object) => void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setValue: (newValue: any) => void
 }) {
     const { schema, required, value, setValue } = props
     const { type, title, description } = schema
-    console.log("type", { type, title, description, value })
+    const id = useId()
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.value || "")
+    }
+
+    const handleNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const v = parseFloat(event.target.value)
+        if (!isNaN(v)) setValue(v)
+    }
+    const handleIntegerChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const v = parseInt(event.target.value)
+        if (!isNaN(v)) setValue(v)
+    }
+    const handleCheckedChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        checked: boolean
+    ) => {
+        setValue(checked)
+    }
 
     switch (type) {
         case "number":
+            return (
+                <Grid item xs={12}>
+                    <TextField
+                        id={id}
+                        label={title}
+                        required={required}
+                        helperText={description}
+                        variant="outlined"
+                        type="number"
+                        value={value}
+                        fullWidth={true}
+                        onChange={handleNumberChange}
+                    />
+                </Grid>
+            )
         case "integer":
             return (
                 <Grid item xs={12}>
                     <TextField
+                        id={id}
                         label={title}
                         required={required}
                         helperText={description}
+                        variant="outlined"
                         type="number"
                         value={value}
                         fullWidth={true}
-                        onChange={setValue}
+                        onChange={handleIntegerChange}
                     />
                 </Grid>
             )
@@ -34,13 +74,15 @@ function SchemaForm(props: {
             return (
                 <Grid item xs={12}>
                     <TextField
+                        id={id}
                         label={title}
                         required={required}
                         helperText={description}
+                        variant="outlined"
                         type="text"
                         value={value}
                         fullWidth={true}
-                        onChange={setValue}
+                        onChange={handleChange}
                     />
                 </Grid>
             )
@@ -48,11 +90,12 @@ function SchemaForm(props: {
             return (
                 <Grid item xs={12}>
                     <SwitchWithLabel
+                        id={id}
                         required={required}
                         label={title}
                         title={description}
                         checked={!!value}
-                        onChange={setValue}
+                        onChange={handleCheckedChange}
                     />
                 </Grid>
             )
@@ -62,7 +105,9 @@ function SchemaForm(props: {
                 <>
                     {title && (
                         <Grid item xs={12}>
-                            <Typography variant="caption" color="inherit">{title}</Typography>
+                            <Typography variant="caption" color="inherit">
+                                {title}
+                            </Typography>
                         </Grid>
                     )}
                     <Grid item xs={12}>
@@ -88,22 +133,22 @@ function PropertiesForm(props: {
     setValue: (newValue: object) => void
 }) {
     const { properties, required, value, setValue } = props
-    const handleSetValue = (key: string, v: object) => (newValue: object) => {
-        setValue({ ...(v || {}), key: newValue })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleSetValue = (key: string, v: any) => (newValue: any) => {
+        setValue({ ...(v || {}), [key]: newValue })
     }
     console.log("properties", { properties, required, value })
 
     return (
         <>
             {Object.entries(properties).map(([key, schema]) => (
-                <Grid item key={key}>
-                    <SchemaForm
-                        schema={schema}
-                        required={required && required.indexOf(key) > -1}
-                        value={value?.[key]}
-                        setValue={handleSetValue(key, value)}
-                    />
-                </Grid>
+                <SchemaForm
+                    key={key}
+                    schema={schema}
+                    required={required && required.indexOf(key) > -1}
+                    value={value?.[key]}
+                    setValue={handleSetValue(key, value)}
+                />
             ))}
         </>
     )
@@ -112,13 +157,14 @@ function PropertiesForm(props: {
 export default function JSONSchemaForm(props: {
     schema: JSONSchema4
     value: object
-    setValue: (newValue: object) => void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setValue: (newValue: any) => void
     className?: string
 }) {
     const { schema, value, setValue, className } = props
 
     return (
-        <Grid container spacing={2} className={className}>
+        <Grid container spacing={1} className={className}>
             <SchemaForm schema={schema} value={value} setValue={setValue} />
         </Grid>
     )

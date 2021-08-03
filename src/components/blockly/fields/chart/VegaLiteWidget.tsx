@@ -12,6 +12,23 @@ import { tidySlice } from "./../tidy"
 
 const VegaLite = lazy(() => import("./VegaLite"))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function clone(v: any) {
+    return v ? JSON.parse(JSON.stringify(v)) : v
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isKV(v: any) {
+    return !!v && typeof v === "object" && !Array.isArray(v)
+}
+// eslint-disable-next-line @typescript-eslint/ban-types
+function jsonMergeFrom(trg: object, src: object) {
+    if (!src) return
+    Object.keys(src).forEach(k => {
+        if (isKV(trg[k]) && isKV(src[k])) jsonMergeFrom(trg[k], src[k])
+        else trg[k] = clone(src[k])
+    })
+}
+
 export default function VegaLiteWidget(props: {
     spec: VisualizationSpec
     slice?: DataSliceOptions
@@ -23,7 +40,12 @@ export default function VegaLiteWidget(props: {
     const [vegaData, setVegaData] = useState<{ values: object[] }>(undefined)
     const settings = sourceBlock?.getFieldValue("settings")
     // TODO merge json
-    const fullSpec = useMemo(() => spec, [spec, settings])
+    const fullSpec = useMemo(
+        () => jsonMergeFrom(clone(spec), settings),
+        [spec, settings]
+    )
+
+    console.log("vega", { spec, settings, fullSpec })
 
     useEffectAsync(
         async mounted => {

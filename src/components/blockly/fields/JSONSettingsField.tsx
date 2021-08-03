@@ -7,21 +7,6 @@ import { InputDefinition } from "../toolbox"
 import { assert } from "../../../../jacdac-ts/src/jdom/utils"
 const JSONSchemaForm = lazy(() => import("../../ui/JSONSchemaForm"))
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function clone(v: any) {
-    return v ? JSON.parse(JSON.stringify(v)) : v
-}
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isKV(v: any) {
-    return !!v && typeof v === "object" && !Array.isArray(v)
-}
-function jsonMergeFrom(trg: object, src: object) {
-    if (!src) return
-    Object.keys(src).forEach(k => {
-        if (isKV(trg[k]) && isKV(src[k])) jsonMergeFrom(trg[k], src[k])
-        else trg[k] = clone(src[k])
-    })
-}
 export interface JSONSettingsOptions extends ReactFieldJSON {
     schema?: JSONSchema4
 }
@@ -65,10 +50,10 @@ export default class JSONSettingsField extends ReactField<ReactFieldJSON> {
 
     renderField(): ReactNode {
         const { schema, value = {} } = this
-        const setValue = (newValue: object) => this.setValue(newValue)
-
-        console.log(`render`, { schema, value })
-
+        const setValue = (newValue: object) => {
+            console.log(`field set value`, { newValue })
+            this.value = newValue
+        }
         return (
             <div
                 style={{
