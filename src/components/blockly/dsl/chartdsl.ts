@@ -66,6 +66,26 @@ const axisSchema: JSONSchema4 = {
         },
     },
 }
+const encodingSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        axis: axisSchema,
+    },
+}
+const encodings2DSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        x: {
+            title: "X",
+            ...encodingSettingsSchema,
+        },
+        y: {
+            title: "Y",
+            ...encodingSettingsSchema,
+        },
+    },
+}
+
 const char2DSettingsSchema: JSONSchema4 = {
     type: "object",
     properties: {
@@ -73,16 +93,9 @@ const char2DSettingsSchema: JSONSchema4 = {
             type: "string",
             title: "Chart title",
         },
-        axis: {
-            type: "object",
-            properties: {
-                x: { title: "X Axis", ...axisSchema },
-                y: { title: "Y Axis", ...axisSchema },
-            },
-        },
+        encodings: encodings2DSettingsSchema,
     },
 }
-const encodingSettingsSchema: JSONSchema4 = axisSchema
 
 const colour = paletteColorByIndex(4)
 const chartDsl: BlockDomainSpecificLanguage = {
@@ -368,11 +381,6 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
                     name: "field",
-                },
-                <JSONSettingsInputDefinition>{
-                    type: JSONSettingsField.KEY,
-                    name: "settings",
-                    schema: encodingSettingsSchema,
                 },
             ],
             previousStatement: VEGA_STATEMENT_TYPE,
