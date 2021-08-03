@@ -37,10 +37,12 @@ function DataSetParameterWidget(props: {
     const [inputs, setInputs] = useState<string[]>(initFieldValue.inputs)
 
     const handleSplitDataSet = () => {
-        console.log("Split dataset")
+        console.log("Split dataset modal")
+        sourceBlock.data = "click.split"
     }
     const handleDownloadDataSet = () => {
         console.log("Download dataset")
+        sourceBlock.data = "click.download"
     }
 
     useEffect(() => {

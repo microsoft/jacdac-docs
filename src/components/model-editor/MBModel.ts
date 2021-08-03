@@ -48,7 +48,7 @@ export default class MBModel extends JDEventSource {
 
         this.labels = this.labels || []
         this.modelJSON = this.modelJSON || ""
-        this.status = this.status || "idle"
+        this.status = this.status || "untrained"
 
         this.weightData = new ArrayBuffer(0)
     }
@@ -71,7 +71,7 @@ export default class MBModel extends JDEventSource {
             labels: this.labels,
             modelJSON: this.modelJSON,
             outputShape: this.outputShape,
-            status: this.status || "idle",
+            status: this.status || "untrained",
             trainingAcc: this.trainingAcc || 0,
             weights: Array.from(new Uint32Array(this.weightData)),
         }

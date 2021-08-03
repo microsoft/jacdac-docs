@@ -18,7 +18,6 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import { Autocomplete } from "@material-ui/lab"
-import { makeStyles, Theme } from "@material-ui/core/styles"
 
 import ReadingFieldGrid from "../../ReadingFieldGrid"
 import FieldDataSet from "../../FieldDataSet"
@@ -26,7 +25,6 @@ import ClassDataSetGrid from "../../ClassDataSetGrid"
 import Trend from "../../Trend"
 
 import useChange from "../../../jacdac/useChange"
-import useChartPalette from "../../useChartPalette"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import ServiceManagerContext from "../../ServiceManagerContext"
 
@@ -64,19 +62,9 @@ export default function BlocklyDataRecordingDialog(props: {
     chartPalette: string[]
     open: boolean
     onDone: (recording: FieldDataSet[], blockId: string) => void
-    onClose: () => void
-    recordingCount: number
     workspace: WorkspaceSvg
 }) {
-    const {
-        classes,
-        chartPalette,
-        open,
-        onDone,
-        onClose,
-        recordingCount,
-        workspace,
-    } = props
+    const { classes, chartPalette, open, onDone, workspace } = props
     const [dialogType, setDialogType] = useState<
         "chooseSensors" | "recordData"
     >("chooseSensors")
@@ -110,7 +98,7 @@ export default function BlocklyDataRecordingDialog(props: {
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [totalSamples, setTotalSamples] = useState(0)
     const [recordingName, setRecordingName] = useState(
-        "recording" + recordingCount
+        "recording0" //  + recordingCount
     )
     const [className, setClassName] = useState("class1")
 
@@ -310,7 +298,7 @@ export default function BlocklyDataRecordingDialog(props: {
     /* For interface controls */
     const resetInputs = () => {
         setClassName("class1")
-        setRecordingName("recording" + recordingCount)
+        setRecordingName("recording0") // + recordingCount)
         setSamplingIntervalDelay("100")
         setSamplingDuration("2")
     }
@@ -338,7 +326,7 @@ export default function BlocklyDataRecordingDialog(props: {
         // reset the user inputs
         resetInputs()
         // close the modal
-        onClose()
+        onDone(null, null)
     }
     const handleNext = () => {
         // begin recording live data
@@ -355,227 +343,216 @@ export default function BlocklyDataRecordingDialog(props: {
         // reset the user inputs
         resetInputs()
 
-        // call the done function
+        // call the done function and close modal
         const { recording, blockId } = currentRecording
         onDone(recording, blockId)
-
-        onClose()
     }
 
-    return (
-        <Dialog open={open} onClose={onClose}>
-            {dialogType == "chooseSensors" ? (
-                <>
-                    <DialogContent>
-                        <Grid container direction={"column"}>
-                            <Grid item>
-                                <h2>Collect new recording</h2>
-                                {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
-                                <div key="sensors">
-                                    <div className={classes.row}>
-                                        <TextField
-                                            className={classes.field}
-                                            label="Recording name"
-                                            value={recordingName}
-                                            variant="outlined"
-                                            onChange={handleRecordingNameChange}
-                                        />
-                                        <Autocomplete
-                                            className={classes.field}
-                                            disabled={isRecording}
-                                            options={getWorkspaceClasses()}
-                                            style={{
-                                                width: 250,
-                                                display: "inline-flex",
-                                            }}
-                                            renderInput={params => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Class label"
-                                                    variant="outlined"
-                                                />
-                                            )}
-                                            value={className}
-                                            onInputChange={(event, newValue) =>
-                                                handleClassNameChange(newValue)
-                                            }
-                                        />
-                                    </div>
-                                    <h3>Collect data from</h3>
-                                    {!readingRegisters.length && (
-                                        <span>Waiting for sensors...</span>
-                                    )}
-                                    {!!readingRegisters.length && (
-                                        <ReadingFieldGrid
-                                            readingRegisters={readingRegisters}
-                                            registerIdsChecked={
-                                                registerIdsChecked
-                                            }
-                                            recording={isRecording}
-                                            liveDataSet={liveRecording}
-                                            handleRegisterCheck={
-                                                handleRegisterCheck
-                                            }
-                                        />
-                                    )}
-                                </div>
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button variant="contained" onClick={handleCancel}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<NavigateNextIcon />}
-                            disabled={!registerIdsChecked.length}
-                            onClick={handleNext}
-                        >
-                            Next
-                        </Button>
-                    </DialogActions>
-                </>
-            ) : (
-                // recordData
-                <>
-                    <DialogContent>
-                        <Grid container direction={"column"}>
-                            <Grid item>
-                                <h3>Edit recording: {recordingName}</h3>
-                                <div key="recordedData">
-                                    <div key="recordings">
-                                        <h4>
-                                            Recorded samples
-                                            <IconButtonWithTooltip
-                                                onClick={handleDownloadDataSet}
-                                                title="Download all recording data"
-                                                disabled={
-                                                    currentRecording.recording
-                                                        .length == 0
-                                                }
-                                            >
-                                                <DownloadIcon />
-                                            </IconButtonWithTooltip>
-                                        </h4>
-                                        {currentRecording.recording.length ? (
-                                            <ClassDataSetGrid
-                                                key={"samples-" + recordingName}
-                                                label={className}
-                                                tables={
-                                                    currentRecording.recording
-                                                }
-                                                handleDeleteTable={
-                                                    handleDeleteSample
-                                                }
+    if (dialogType == "chooseSensors")
+        return (
+            <Dialog open={open} onClose={handleCancel}>
+                <DialogContent>
+                    <Grid container direction={"column"}>
+                        <Grid item>
+                            <h2>Collect new recording</h2>
+                            {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
+                            <div key="sensors">
+                                <div className={classes.row}>
+                                    <TextField
+                                        className={classes.field}
+                                        label="Recording name"
+                                        value={recordingName}
+                                        variant="outlined"
+                                        onChange={handleRecordingNameChange}
+                                    />
+                                    <Autocomplete
+                                        className={classes.field}
+                                        disabled={isRecording}
+                                        options={getWorkspaceClasses()}
+                                        style={{
+                                            width: 250,
+                                            display: "inline-flex",
+                                        }}
+                                        renderInput={params => (
+                                            <TextField
+                                                {...params}
+                                                label="Class label"
+                                                variant="outlined"
                                             />
-                                        ) : (
-                                            <span>None</span>
                                         )}
-                                    </div>
+                                        value={className}
+                                        onInputChange={(event, newValue) =>
+                                            handleClassNameChange(newValue)
+                                        }
+                                    />
                                 </div>
-                            </Grid>
-                            <Grid item>
-                                <br />
-                            </Grid>
-                            <Grid item>
-                                <div key="record">
-                                    <div className={classes.row}>
-                                        <h4>Add more samples</h4>
-                                        <TextField
-                                            className={classes.field}
-                                            error={errorSamplingDuration}
-                                            disabled={isRecording}
-                                            label="Sampling duration"
-                                            value={samplingDuration}
-                                            variant="outlined"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        s
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            onChange={
-                                                handleSamplingDurationChange
+                                <h3>Collect data from</h3>
+                                {!readingRegisters.length && (
+                                    <span>Waiting for sensors...</span>
+                                )}
+                                {!!readingRegisters.length && (
+                                    <ReadingFieldGrid
+                                        readingRegisters={readingRegisters}
+                                        registerIdsChecked={registerIdsChecked}
+                                        recording={isRecording}
+                                        liveDataSet={liveRecording}
+                                        handleRegisterCheck={
+                                            handleRegisterCheck
+                                        }
+                                    />
+                                )}
+                            </div>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={handleCancel}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<NavigateNextIcon />}
+                        disabled={!registerIdsChecked.length}
+                        onClick={handleNext}
+                    >
+                        Next
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
+    else
+        return (
+            // recordData
+            <Dialog open={open} onClose={handleCancel}>
+                <DialogContent>
+                    <Grid container direction={"column"}>
+                        <Grid item>
+                            <h3>Edit recording: {recordingName}</h3>
+                            <div key="recordedData">
+                                <div key="recordings">
+                                    <h4>
+                                        Recorded samples
+                                        <IconButtonWithTooltip
+                                            onClick={handleDownloadDataSet}
+                                            title="Download all recording data"
+                                            disabled={
+                                                currentRecording.recording
+                                                    .length == 0
                                             }
-                                        />
-                                        <TextField
-                                            className={classes.field}
-                                            error={errorSamplingIntervalDelay}
-                                            disabled={isRecording}
-                                            label="Sampling interval"
-                                            value={samplingIntervalDelay}
-                                            variant="outlined"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        ms
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            onChange={
-                                                handleSamplingIntervalChange
-                                            }
-                                        />
-                                    </div>
-                                    <div className={classes.buttons}>
-                                        <Button
-                                            size="large"
-                                            variant="contained"
-                                            color={
-                                                isRecording
-                                                    ? "secondary"
-                                                    : "primary"
-                                            }
-                                            aria-label="start/stop recording"
-                                            title="start/stop recording"
-                                            onClick={toggleRecording}
-                                            startIcon={
-                                                isRecording ? (
-                                                    <StopIcon />
-                                                ) : (
-                                                    <PlayArrowIcon />
-                                                )
-                                            }
-                                            disabled={!startEnabled}
                                         >
-                                            {isRecording ? "Stop" : "Start"}
-                                        </Button>
-                                    </div>
-                                </div>
-                                <div key="liveData">
-                                    {liveRecording && (
-                                        <Trend
-                                            key="trends"
-                                            height={12}
-                                            dataSet={liveRecording}
-                                            horizon={LIVE_HORIZON}
-                                            dot={true}
-                                            gradient={true}
+                                            <DownloadIcon />
+                                        </IconButtonWithTooltip>
+                                    </h4>
+                                    {currentRecording.recording.length ? (
+                                        <ClassDataSetGrid
+                                            key={"samples-" + recordingName}
+                                            label={className}
+                                            tables={currentRecording.recording}
+                                            handleDeleteTable={
+                                                handleDeleteSample
+                                            }
                                         />
+                                    ) : (
+                                        <span>None</span>
                                     )}
                                 </div>
-                            </Grid>
+                            </div>
                         </Grid>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button variant="contained" onClick={handleCancel}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<NavigateNextIcon />}
-                            disabled={!currentRecording.recording.length}
-                            onClick={handleDone}
-                        >
-                            Done
-                        </Button>
-                    </DialogActions>
-                </>
-            )}
-        </Dialog>
-    )
+                        <Grid item>
+                            <br />
+                        </Grid>
+                        <Grid item>
+                            <div key="record">
+                                <div className={classes.row}>
+                                    <h4>Add more samples</h4>
+                                    <TextField
+                                        className={classes.field}
+                                        error={errorSamplingDuration}
+                                        disabled={isRecording}
+                                        label="Sampling duration"
+                                        value={samplingDuration}
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    s
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        onChange={handleSamplingDurationChange}
+                                    />
+                                    <TextField
+                                        className={classes.field}
+                                        error={errorSamplingIntervalDelay}
+                                        disabled={isRecording}
+                                        label="Sampling interval"
+                                        value={samplingIntervalDelay}
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    ms
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        onChange={handleSamplingIntervalChange}
+                                    />
+                                </div>
+                                <div className={classes.buttons}>
+                                    <Button
+                                        size="large"
+                                        variant="contained"
+                                        color={
+                                            isRecording
+                                                ? "secondary"
+                                                : "primary"
+                                        }
+                                        aria-label="start/stop recording"
+                                        title="start/stop recording"
+                                        onClick={toggleRecording}
+                                        startIcon={
+                                            isRecording ? (
+                                                <StopIcon />
+                                            ) : (
+                                                <PlayArrowIcon />
+                                            )
+                                        }
+                                        disabled={!startEnabled}
+                                    >
+                                        {isRecording ? "Stop" : "Start"}
+                                    </Button>
+                                </div>
+                            </div>
+                            <div key="liveData">
+                                {liveRecording && (
+                                    <Trend
+                                        key="trends"
+                                        height={12}
+                                        dataSet={liveRecording}
+                                        horizon={LIVE_HORIZON}
+                                        dot={true}
+                                        gradient={true}
+                                    />
+                                )}
+                            </div>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={handleCancel}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<NavigateNextIcon />}
+                        disabled={!currentRecording.recording.length}
+                        onClick={handleDone}
+                    >
+                        Done
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
 }

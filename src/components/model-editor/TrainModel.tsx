@@ -16,46 +16,45 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 
 import { trainRequest } from "../blockly/dsl/workers/tf.proxy"
 import type {
     TFModelTrainRequest,
     TFModelTrainResponse,
 } from "../../workers/tf/dist/node_modules/tf.worker"
-
-import FieldDataSet from "../FieldDataSet"
-import ModelDataSet, { arraysEqual } from "./ModelDataSet"
-import MBModel from "./MBModel"
 import workerProxy from "../blockly/dsl/workers/proxy"
 
+import FieldDataSet from "../FieldDataSet"
+import MBDataSet, { arraysEqual } from "./MBDataSet"
+import MBModel from "./MBModel"
+import useChange from "../../jacdac/useChange"
+
 const NUM_EPOCHS = 250
-const LOSS_COLOR = "#8b0000"
-const ACC_COLOR = "#77dd77"
+const LOSS_COLOR1 = "#8b0000"
+const LOSS_COLOR2 = "#3f0000"
+const ACC_COLOR1 = "#77dd77"
+const ACC_COLOR2 = "#165916"
+const TRAINING_COLOR = "#0f2080"
+const VAL_COLOR = "#f5793a"
 
 export default function TrainModel(props: {
     reactStyle: any
-    dataset: ModelDataSet
+    dataset: MBDataSet
     model: MBModel
     onChange: (model) => void
     onNext: (model) => void
 }) {
     const classes = props.reactStyle
-    const { dataset, onChange, onNext } = props
-    const [model, setModel] = useState<MBModel>(props.model)
+    const { dataset, model, onChange, onNext } = props
 
-    const [pageReady, setPageReady] = useState(false)
     useEffect(() => {
-        if (!pageReady) {
-            prepareDataSet(dataset)
-            prepareModel(model)
-            prepareTrainingLogs()
-            setPageReady(true)
-        }
+        prepareDataSet(dataset)
+        prepareModel(model)
     }, [])
 
     /* For loading page */
-    const prepareDataSet = (set: ModelDataSet) => {
+    const prepareDataSet = (set: MBDataSet) => {
         // Assumptions: the sampling rate, sampling duration, and sensors used are constant
         let sampleLength = -1
         let sampleChannels = -1
@@ -78,7 +77,7 @@ export default function TrainModel(props: {
                             sampleChannels
                     )
                 } /* else if (table.length != sampleLength) {
-                    // Randi decide what to do about different sized data
+                    // decide what to do about different sized data
                 } */
                 // For x data, just add each sample as a new row into x_data
                 xData.push(table.data())
@@ -103,7 +102,6 @@ export default function TrainModel(props: {
             mod.inputTypes = dataset.inputTypes
             mod.outputShape = dataset.labels.length
 
-            setModel(mod)
             handleModelUpdate(mod)
         } else if (
             !arraysEqual(mod.labels, dataset.labels) ||
@@ -116,35 +114,40 @@ export default function TrainModel(props: {
         }
     }
 
-    const prepareTrainingLogs = () => {
+    const prepareTrainingLogs = (colors: string[]) => {
         // Create space to hold training log data
         const trainingLogDataSet = {
             name: "training-logs",
             rows: [],
-            headers: ["loss", "acc"],
+            headers: ["training", "val"],
             units: ["/", "/"],
-            colors: [LOSS_COLOR, ACC_COLOR],
+            colors: colors,
         }
         const set = FieldDataSet.createFromFile(trainingLogDataSet)
-        set.addData([0, 0])
-        setTrainingLogs(set)
+        return set
     }
 
     const deleteTFModel = () => {
         if (confirm("Are you sure you want to delete current model?")) {
             const newModel = new MBModel(model.name)
             prepareModel(newModel)
-            setModel(newModel)
             handleModelUpdate(newModel)
         }
     }
 
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
-    const [trainingLogs, setTrainingLogs] = useState<FieldDataSet>(undefined)
+    const trainingAccLog = useMemo(() => {
+        return prepareTrainingLogs([TRAINING_COLOR, VAL_COLOR])
+    }, [])
+    const trainingLossLog = useMemo(() => {
+        return prepareTrainingLogs([TRAINING_COLOR, VAL_COLOR])
+    }, [])
+    useChange(trainingAccLog)
+    useChange(trainingLossLog)
 
     const trainTFModel = async () => {
-        model.status = "running"
+        model.status = "training"
         model.inputTypes = dataset.inputTypes
         handleModelUpdate(model)
         setTrainEnabled(false)
@@ -154,8 +157,11 @@ export default function TrainModel(props: {
         const stopWorkerSubscribe = workerProxy("tf").subscribe(
             "message",
             (msg: any) => {
-                const newData = [msg.data.loss, msg.data.acc]
-                if (trainingLogs) trainingLogs.addData(newData)
+                console.log("Training data ", msg.data)
+                const lossData = [msg.data.loss, msg.data.val_loss]
+                const accData = [msg.data.acc, msg.data.val_acc]
+                if (trainingLossLog) trainingLossLog.addData(lossData)
+                if (trainingAccLog) trainingAccLog.addData(accData)
             }
         )
 
@@ -182,9 +188,7 @@ export default function TrainModel(props: {
             model.weightData = trainResult.data.modelWeights
             model.modelJSON = trainResult.data.modelJSON
 
-            console.log("Randi training result ", trainResult)
-
-            // Randi TODO decide when/how to compule arm code
+            // Randi TODO decide when/how to compile arm code
             // Compile code for MCU
             /*const armcompiled = await compileAndTest(model.model, {
                 verbose: true,
@@ -196,13 +200,13 @@ export default function TrainModel(props: {
             // use armcompiled.machineCode
 
             // Update model status
-            model.status = "completed"
+            model.status = "trained"
             model.trainingAcc = trainingHistory[trainingHistory.length - 1]
             handleModelUpdate(model)
 
             setTrainEnabled(true)
         } else {
-            model.status = "idle"
+            model.status = "untrained"
             handleModelUpdate(model)
         }
     }
@@ -222,7 +226,6 @@ export default function TrainModel(props: {
             setExpanded(isExpanded ? panel : false)
         }
 
-    if (!pageReady) return null
     return (
         <Grid container direction={"column"}>
             <Grid item>
@@ -300,29 +303,59 @@ export default function TrainModel(props: {
             </Grid>
             <Grid item>
                 <h3>Training Results</h3>
-                {!!trainingLogs.length && (
-                    <div key="liveData">
+                {!!trainingLossLog.length && (
+                    <div key="training-log-loss">
                         <div>
                             <FiberManualRecordIcon
                                 className={classes.vmiddle}
                                 fontSize="small"
                                 style={{
-                                    color: ACC_COLOR,
+                                    color: TRAINING_COLOR,
                                 }}
                             />
-                            Accuracy
+                            Training Loss
                             <FiberManualRecordIcon
                                 className={classes.vmiddle}
                                 fontSize="small"
                                 style={{
-                                    color: LOSS_COLOR,
+                                    color: VAL_COLOR,
                                 }}
                             />
-                            Loss
+                            Validation Loss
                             <Trend
-                                key="training-trends"
+                                key="training-loss-trends"
                                 height={12}
-                                dataSet={trainingLogs}
+                                dataSet={trainingLossLog}
+                                horizon={NUM_EPOCHS}
+                                dot={true}
+                                gradient={true}
+                            />
+                        </div>
+                    </div>
+                )}
+                {!!trainingAccLog.length && (
+                    <div key="training-log-acc-data">
+                        <div>
+                            <FiberManualRecordIcon
+                                className={classes.vmiddle}
+                                fontSize="small"
+                                style={{
+                                    color: TRAINING_COLOR,
+                                }}
+                            />
+                            Training Accuracy
+                            <FiberManualRecordIcon
+                                className={classes.vmiddle}
+                                fontSize="small"
+                                style={{
+                                    color: VAL_COLOR,
+                                }}
+                            />
+                            Validation Accuracy
+                            <Trend
+                                key="training-acc-trends"
+                                height={12}
+                                dataSet={trainingAccLog}
                                 horizon={NUM_EPOCHS}
                                 dot={true}
                                 gradient={true}
@@ -333,14 +366,13 @@ export default function TrainModel(props: {
                 <p>Final Training Accuracy: {model.trainingAcc}</p>
                 <br />
             </Grid>
-
             <Grid item style={{ display: "flex", justifyContent: "flex-end" }}>
                 <div className={classes.buttons}>
                     <Button
                         variant="contained"
                         color="secondary"
                         endIcon={<NavigateNextIcon />}
-                        disabled={model.status !== "completed"}
+                        disabled={model.status !== "trained"}
                         onClick={handleNext}
                     >
                         Next

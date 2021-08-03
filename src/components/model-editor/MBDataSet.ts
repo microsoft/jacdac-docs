@@ -23,9 +23,9 @@ export function arraysEqual(a: string[], b: string[]): boolean {
     return true
 }
 
-export default class ModelDataSet extends JDEventSource {
-    static createFromFile(datasetJSONObj: DataSet): ModelDataSet {
-        const set = new ModelDataSet()
+export default class MBDataSet extends JDEventSource {
+    static createFromFile(datasetJSONObj: DataSet): MBDataSet {
+        const set = new MBDataSet()
         const { recordings, registerIds } = datasetJSONObj
         set.addRecordingsFromFile(recordings, registerIds) // add recordings and update total recordings
         return set
@@ -41,16 +41,18 @@ export default class ModelDataSet extends JDEventSource {
     width: number
 
     constructor(
-        public readonly labels?: string[],
-        public readonly recordings?: { [label: string]: FieldDataSet[] },
-        public inputTypes?: string[],
-        public registerIds?: string[]
+        public name: string,
+        public labels?: string[],
+        public recordings?: { [label: string]: FieldDataSet[] },
+        public inputTypes?: string[]
     ) {
         super()
 
-        this.labels = []
-        this.recordings = {}
-        this.totalRecordings = 0
+        this.name = name
+        this.labels = labels || []
+        this.recordings = recordings || {}
+        this.totalRecordings = this.countTotalRecordings()
+        this.inputTypes = inputTypes || []
     }
 
     get labelOptions() {

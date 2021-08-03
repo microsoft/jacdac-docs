@@ -29,7 +29,7 @@ import Trend from "../Trend"
 import ClassDataSetGrid from "../ClassDataSetGrid"
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
-import ModelDataSet, { arraysEqual } from "./ModelDataSet"
+import MBDataSet, { arraysEqual } from "./MBDataSet"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -50,12 +50,12 @@ function createDataSet(
 export default function CollectData(props: {
     reactStyle: any
     chartPalette: string[]
-    dataset: ModelDataSet
+    dataset: MBDataSet
     onChange: (dataset) => void
     onNext: (dataset) => void
 }) {
     const { chartPalette, onChange, onNext } = props
-    const [dataset, setDataSet] = useState<ModelDataSet>(props.dataset)
+    const [dataset, setDataSet] = useState<MBDataSet>(props.dataset)
     const classes = props.reactStyle
 
     const { fileStorage } = useContext(ServiceManagerContext)
@@ -148,7 +148,7 @@ export default function CollectData(props: {
     }
     const handleDeleteDataSet = () => {
         if (confirm("Are you sure you want to delete all recorded samples?")) {
-            const newDataSet = new ModelDataSet()
+            const newDataSet = new MBDataSet()
             handleDataSetUpdate(newDataSet)
             setDataSet(newDataSet)
 

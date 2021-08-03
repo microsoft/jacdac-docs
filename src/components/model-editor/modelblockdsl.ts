@@ -397,7 +397,7 @@ export class ModelBlockDomainSpecificLanguage
     createCategory() {
         return [<CategoryDefinition>(<unknown>{
                 kind: "category",
-                name: "DataSet",
+                name: "Dataset",
                 colour: dataset_color,
                 contents: [
                     {
@@ -425,20 +425,6 @@ export class ModelBlockDomainSpecificLanguage
                 ],
             }), <CategoryDefinition>(<unknown>{
                 kind: "category",
-                name: "Preprocessing",
-                colour: processing_color,
-                contents: [
-                    {
-                        kind: "block",
-                        type: MODEL_BLOCKS + "standardize",
-                    },
-                    {
-                        kind: "block",
-                        type: MODEL_BLOCKS + "smooth",
-                    },
-                ],
-            }), <CategoryDefinition>(<unknown>{
-                kind: "category",
                 name: "Learning",
                 colour: learning_color,
                 contents: [
@@ -446,18 +432,6 @@ export class ModelBlockDomainSpecificLanguage
                         kind: "button",
                         text: "Create new ML classifier...",
                         callbackKey: "createNewClassifierButton",
-                    },
-                    {
-                        kind: "label",
-                        text: "K Nearest Neighbors",
-                    },
-                    {
-                        kind: "block",
-                        type: MODEL_BLOCKS + "knn",
-                    },
-                    {
-                        kind: "label",
-                        text: "Neural Networks",
                     },
                     {
                         kind: "block",

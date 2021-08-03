@@ -11,6 +11,8 @@ import {
     tensor,
 } from "@tensorflow/tfjs"
 
+import { compileAndTest } from "../../../ml4f"
+
 export interface TFModelObj {
     name: string
     inputShape: number[]
@@ -172,6 +174,7 @@ const handlers: {
         await model
             .fit(xs, ys, {
                 epochs: epochs,
+                validationSplit: 0.2,
                 callbacks: {
                     onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
                 },
@@ -196,6 +199,15 @@ const handlers: {
         })
         const weights = mod.weightData
         mod.weightData = null
+
+        /*console.log("Beginning arm compile")
+        const armcompiled = await compileAndTest(model, {
+            verbose: true,
+            includeTest: true,
+            float16weights: false,
+            optimize: true,
+        })
+        console.log(armcompiled)*/
 
         // return data
         const result = {

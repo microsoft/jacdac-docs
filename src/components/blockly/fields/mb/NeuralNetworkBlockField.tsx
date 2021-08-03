@@ -182,9 +182,9 @@ function NNParameterWidget(props: {
         if (newValue) setMetrics(newValue)
     }
 
-    const handleViewModel = () => {
+    const handleTrainModel = () => {
         console.log("Open NN classifier modal")
-        openBlankDialog()
+        sourceBlock.data = "click.train"
     }
 
     if (!parametersVisible) return null
@@ -193,12 +193,12 @@ function NNParameterWidget(props: {
             <Grid item style={{ display: "inline-flex", width: 300 }}>
                 <Tooltip title="Open modal to view and run classifier">
                     <Button
-                        onClick={handleViewModel}
+                        onClick={handleTrainModel}
                         startIcon={<AutorenewIcon />}
                         variant="outlined"
                         size="small"
                     >
-                        Train Model
+                        Train
                     </Button>
                 </Tooltip>
             </Grid>

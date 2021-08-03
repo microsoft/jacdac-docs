@@ -31,7 +31,7 @@ import { throttle } from "../../../jacdac-ts/src/jdom/utils"
 
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
-import { arraysEqual } from "./ModelDataSet"
+import { arraysEqual } from "./MBDataSet"
 import MBModel from "./MBModel"
 
 const LIVE_HORIZON = 100
@@ -140,7 +140,7 @@ export default function ModelOutput(props: {
     const predictionEnabled =
         !!recordingRegisters?.length &&
         liveRecordingMatchesModel() &&
-        model.status == "completed"
+        model.status == "trained"
 
     const handleRegisterCheck = (reg: JDRegister) => {
         const i = registerIdsChecked.indexOf(reg.id)
@@ -167,7 +167,7 @@ export default function ModelOutput(props: {
     const updateLiveData = () => {
         setLiveRecording(liveRecording)
         setLiveDataTimestamp(bus.timestamp)
-        if (model.status == "completed") updatePrediction()
+        if (model.status == "trained") updatePrediction()
     }
     const throttleUpdate = throttle(() => updateLiveData(), 30)
     // interval add data entry
@@ -313,7 +313,7 @@ export default function ModelOutput(props: {
                     <span>
                         {" "}
                         Top Class:{" "}
-                        {model.status == "completed"
+                        {model.status == "trained"
                             ? livePredictions.topClass
                             : "--"}{" "}
                     </span>

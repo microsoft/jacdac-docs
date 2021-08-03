@@ -17,11 +17,12 @@ import {
 
 import FieldDataSet from "../../FieldDataSet"
 import MBModel from "../../model-editor/MBModel"
-import ModelDataSet from "../../model-editor/ModelDataSet"
+import MBDataSet from "../../model-editor/MBDataSet"
 import Suspense from "../../ui/Suspense"
 import useChartPalette from "../../useChartPalette"
 
 const RecordDataDialog = lazy(() => import("./RecordDataDialog"))
+const TrainModelDialog = lazy(() => import("./TrainModelDialog"))
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -144,42 +145,63 @@ export function addNewClassifier(workspace) {
 }
 
 export default function ModelBlockDialogs(props: {
+    recordDataDialogVisible: boolean
+    trainModelDialogVisible: boolean
     onRecordingDone: (recording: FieldDataSet[], blockId: string) => void
-    onTrainingDone: (
-        model: MBModel,
-        modelName: string,
-        dataset: ModelDataSet,
-        datasetName: string
-    ) => void
-    recordingCount: number
+    onTrainingDone: (model: MBModel) => void
     workspace: WorkspaceSvg
+    dataset: MBDataSet
+    model: MBModel
 }) {
-    const { onRecordingDone, onTrainingDone, recordingCount, workspace } = props
-    const [recordDataDialogVisible, setRecordDataDialogVisible] =
-        useState<boolean>(false)
-    const [trainModelDialogVisible, setTrainModelDialogVisible] =
-        useState<boolean>(false)
+    const {
+        recordDataDialogVisible,
+        trainModelDialogVisible,
+        onRecordingDone,
+        onTrainingDone,
+        workspace,
+        dataset,
+        model,
+    } = props
 
     const classes = useStyles()
     const chartPalette = useChartPalette()
 
-    return (
-        <>
-            {" "}
-            {recordDataDialogVisible && (
-                <Suspense>
-                    <RecordDataDialog
-                        classes={classes}
-                        chartPalette={chartPalette}
-                        open={recordDataDialogVisible}
-                        onDone={onRecordingDone}
-                        onClose={toggleRecordDataDialog}
-                        recordingCount={recordingCount}
-                        workspace={workspace}
-                    />
-                </Suspense>
-            )}
-            {/*trainModelDialogVisible && <Suspense></Suspense>*/}
-        </>
-    )
+    if (recordDataDialogVisible) {
+        return (
+            <Suspense>
+                <RecordDataDialog
+                    classes={classes}
+                    chartPalette={chartPalette}
+                    open={recordDataDialogVisible}
+                    onDone={onRecordingDone}
+                    workspace={workspace}
+                />
+            </Suspense>
+        )
+    } else if (trainModelDialogVisible) {
+        return (
+            <Suspense>
+                <TrainModelDialog
+                    classes={classes}
+                    chartPalette={chartPalette}
+                    open={trainModelDialogVisible}
+                    onDone={onTrainingDone}
+                    dataset={dataset}
+                    model={model}
+                />
+            </Suspense>
+        )
+    } /* else if (splitDatasetDialogVisible) {
+        return (
+            <Suspense>
+                <SplitDataDialog
+                    classes={classes}
+                    chartPalette={chartPalette}
+                    open={splitDatasetDialogVisible}
+                    onDone={onDatasetEditDone}
+                    workspace={workspace}
+                />
+            </Suspense>
+        )
+    } */ else return null
 }

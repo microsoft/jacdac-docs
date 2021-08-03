@@ -9,7 +9,7 @@ import CollectData from "./CollectData"
 import TrainModel from "./TrainModel"
 import ModelOutput from "./ModelOutput"
 
-import ModelDataSet from "./ModelDataSet"
+import MBDataSet from "./MBDataSet"
 import MBModel from "./MBModel"
 
 //Dashboard.tsx
@@ -57,7 +57,7 @@ export default function ModelPlayground() {
     const classes = useStyles()
     const chartPalette = useChartPalette()
 
-    const [dataset, setDataSet] = useState<ModelDataSet>(new ModelDataSet())
+    const [dataset, setDataSet] = useState<MBDataSet>(new MBDataSet())
     const [tfModel, setTFModel] = useState<MBModel>(new MBModel(MODEL_NAME))
     const [tab, setTab] = useState<number>(0)
 
@@ -71,7 +71,7 @@ export default function ModelPlayground() {
                 const modelEditorData = JSON.parse(storedDataJSON)
                 if (modelEditorData["dataset"])
                     setDataSet(
-                        ModelDataSet.createFromFile(modelEditorData["dataset"])
+                        MBDataSet.createFromFile(modelEditorData["dataset"])
                     )
                 if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
                 if (modelEditorData["model"]) {
@@ -168,7 +168,7 @@ export default function ModelPlayground() {
     const nextTab = () => {
         if (tab == 0 && dataset.labels.length >= 2) {
             setTab(1)
-        } else if (tab == 1 && tfModel.status == "completed") {
+        } else if (tab == 1 && tfModel.status == "trained") {
             setTab(2)
         }
     }
@@ -196,7 +196,7 @@ export default function ModelPlayground() {
                     label={`3 - Test Model`}
                     disabled={
                         dataset.labels.length < 2 ||
-                        tfModel.status !== "completed"
+                        tfModel.status !== "trained"
                     }
                 />
             </Tabs>

@@ -1,5 +1,5 @@
 import type {
-    TFModelRequest,
+    TFModelRequestResponse,
     TFModelTrainRequest,
     TFModelTrainResponse,
     TFModelPredictRequest,
@@ -9,13 +9,14 @@ import type {
 import workerProxy from "./proxy"
 
 export async function postModelRequest(
-    message: TFModelRequest
+    message: TFModelRequestResponse
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<any> {
     const worker = workerProxy("tf")
-    const res = await worker.postMessage<TFModelRequest, TFModelMessage>(
-        message
-    )
+    const res = await worker.postMessage<
+        TFModelRequestResponse,
+        TFModelMessage
+    >(message)
     return res?.data
 }
 
