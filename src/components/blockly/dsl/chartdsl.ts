@@ -93,7 +93,7 @@ const char2DSettingsSchema: JSONSchema4 = {
             type: "string",
             title: "Chart title",
         },
-        encodings: encodings2DSettingsSchema,
+        encoding: encodings2DSettingsSchema,
     },
 }
 

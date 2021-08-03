@@ -28,7 +28,7 @@ function JSONSettingsWidget(props: {
     const [editValue, setEditValue] = useState(value)
 
     useEffect(
-        () => events.subscribe(UNMOUNT, () => setValue(value)),
+        () => events.subscribe(UNMOUNT, () => setValue(editValue)),
         [editValue]
     )
 
