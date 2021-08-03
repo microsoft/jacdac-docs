@@ -9,6 +9,7 @@ import type { VisualizationSpec } from "react-vega"
 import type { DataSliceOptions } from "../../../../workers/data/dist/node_modules/data.worker"
 import useEffectAsync from "../../../useEffectAsync"
 import { tidySlice } from "./../tidy"
+import { JSONTryParse } from "../../../../../jacdac-ts/src/jdom/utils"
 
 const VegaLite = lazy(() => import("./VegaLite"))
 
@@ -38,12 +39,14 @@ export default function VegaLiteWidget(props: {
     const { data } = useBlockData(sourceBlock)
     // eslint-disable-next-line @typescript-eslint/ban-types
     const [vegaData, setVegaData] = useState<{ values: object[] }>(undefined)
-    const settings = sourceBlock?.getFieldValue("settings")
+    const settings = JSONTryParse(sourceBlock?.getFieldValue("settings"))
     // TODO merge json
-    const fullSpec = useMemo(
-        () => jsonMergeFrom(clone(spec), settings),
-        [spec, settings]
-    )
+    const fullSpec = useMemo(() => {
+        if (!settings) return spec
+        const s = clone(spec)
+        jsonMergeFrom(s, settings)
+        return s
+    }, [spec, settings])
 
     console.log("vega", { spec, settings, fullSpec })
 
