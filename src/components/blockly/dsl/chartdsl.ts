@@ -328,7 +328,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: BOX_PLOT_BLOCK,
-            message0: "boxplot of %1 by %2 group %3 %4 %5 %6",
+            message0: "boxplot of index %1 value %2 group %3 %4 %5 %6",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
