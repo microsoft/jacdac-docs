@@ -40,6 +40,7 @@ const VEGA_LAYER_BLOCK = "vega_layer"
 const VEGA_ENCODING_BLOCK = "vega_encoding"
 const VEGA_STATEMENT_TYPE = "vegaStatementType"
 
+
 const chartSettingsSchema: JSONSchema4 = {
     type: "object",
     properties: {
@@ -227,7 +228,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: LINEPLOT_BLOCK,
-            message0: "line chart with x %1 y %2 %3 %4 %5",
+            message0: "line chart with x %1 y %2 group by %3 %4 %5 %6",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -238,6 +239,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     type: DataColumnChooserField.KEY,
                     name: "y",
                     dataType: "number",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "group",
                 },
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,

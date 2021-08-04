@@ -20,9 +20,9 @@ function BoxPlotWidget() {
 
     const spec: VisualizationSpec = {
         description: `Box plot of ${index}`,
-        mark: "boxplot",
+        mark: { type: "boxplot" },
         encoding: {
-            x: { field: index, type: "nominal" },
+            x: { field: index, type: "nominal", scale: { zero: false } },
             y: { field: value, type: "quantitative", scale: { zero: false } },
         },
         data: { name: "values" },

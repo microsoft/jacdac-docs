@@ -21,10 +21,10 @@ function ScatterPlotWidget() {
     }
     const spec: VisualizationSpec = {
         description: `Scatter plot of ${x}x${y}`,
-        mark: "point",
+        mark: { type: "point" },
         encoding: {
             x: { field: x, type: "quantitative", scale: { zero: false } },
-            y: { field: y, type: "quantitative" },
+            y: { field: y, type: "quantitative", scale: { zero: false } },
         },
         data: { name: "values" },
     }
