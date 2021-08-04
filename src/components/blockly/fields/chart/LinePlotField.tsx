@@ -20,7 +20,7 @@ function LinePlotWidget() {
     }
     const spec: VisualizationSpec = {
         description: `Line plot of ${x}x${y}`,
-        mark: { type: "line", point: true },
+        mark: { type: "line", point: true, tooltip: true },
         encoding: {
             x: { field: x, type: "quantitative", scale: { zero: false } },
             y: { field: y, type: "quantitative", scale: { zero: false } },

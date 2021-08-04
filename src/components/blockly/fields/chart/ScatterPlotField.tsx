@@ -26,7 +26,7 @@ function ScatterPlotWidget() {
     }
     const spec: VisualizationSpec = {
         description: `Scatter plot of ${x}x${y}`,
-        mark: { type: "point", filled: true },
+        mark: { type: "point", filled: true, tooltip: true },
         encoding: {
             x: {
                 field: x,

@@ -24,7 +24,7 @@ function BarWidget() {
     }
     const spec: VisualizationSpec = {
         description: `Bar plot of ${index} x ${value}`,
-        mark: { type: "bar", cornerRadius: BAR_CORNER_RADIUS },
+        mark: { type: "bar", cornerRadius: BAR_CORNER_RADIUS, tooltip: true },
         encoding: {
             x: { field: index, type: "nominal" },
             y: { field: value, type: "quantitative" },

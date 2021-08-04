@@ -328,7 +328,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: BOX_PLOT_BLOCK,
-            message0: "boxplot of %1 by %2 %3 %4 %5",
+            message0: "boxplot of %1 by %2 group %3 %4 %5 %6",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -339,6 +339,10 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     name: "value",
                     dataType: "number",
                 },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "group",
+                },                
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
                     name: "settings",
