@@ -135,8 +135,24 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: CHART_SHOW_TABLE_BLOCK,
-            message0: "show table %1 %2",
+            message0: "show table %1 %2 %3 %4 %5 %6",
             args0: [
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column0",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column1",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column2",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "column3",
+                },
                 <DummyInputDefinition>{
                     type: "input_dummy",
                 },
