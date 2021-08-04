@@ -193,6 +193,7 @@ export const CHART_SVG_MAX_ITEMS = 256
 export const BAR_MAX_ITEMS = 1 << 10
 export const SCATTER_MAX_ITEMS = 1 << 13
 export const LINE_MAX_ITEMS = 1 << 10
+export const BAR_CORNER_RADIUS = 2
 
 export const TABLE_WIDTH = CHART_WIDTH
 export const TABLE_HEIGHT = 480

@@ -13,6 +13,11 @@ function ScatterPlotWidget() {
     const { data } = useBlockData(sourceBlock)
     const x = tidyResolveHeader(data, sourceBlock?.getFieldValue("x"), "number")
     const y = tidyResolveHeader(data, sourceBlock?.getFieldValue("y"), "number")
+    const size = tidyResolveHeader(
+        data,
+        sourceBlock?.getFieldValue("size"),
+        "number"
+    )
 
     if (!x || !y) return null
 
@@ -21,13 +26,24 @@ function ScatterPlotWidget() {
     }
     const spec: VisualizationSpec = {
         description: `Scatter plot of ${x}x${y}`,
-        mark: { type: "point" },
+        mark: { type: "point", filled: true },
         encoding: {
-            x: { field: x, type: "quantitative", scale: { zero: false } },
+            x: {
+                field: x,
+                type: "quantitative",
+                scale: { zero: false },
+            },
             y: { field: y, type: "quantitative", scale: { zero: false } },
         },
         data: { name: "values" },
     }
+    if (size)
+        spec.encoding.size = {
+            field: size,
+            type: "quantitative",
+            scale: { zero: false },
+        }
+
     return <VegaLiteWidget spec={spec} slice={sliceOptions} />
 }
 

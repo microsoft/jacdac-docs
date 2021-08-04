@@ -40,7 +40,6 @@ const VEGA_LAYER_BLOCK = "vega_layer"
 const VEGA_ENCODING_BLOCK = "vega_encoding"
 const VEGA_STATEMENT_TYPE = "vegaStatementType"
 
-
 const chartSettingsSchema: JSONSchema4 = {
     type: "object",
     properties: {
@@ -157,7 +156,8 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: SCATTERPLOT_BLOCK,
-            message0: "scatterplot with x %1 y %2 %3 %4 %5",
+            message0:
+                "scatterplot with x %1 y %2 size by %3 group by %4 %5 %6 %7",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -168,6 +168,15 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     type: DataColumnChooserField.KEY,
                     name: "y",
                     dataType: "number",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "size",
+                    dataType: "number",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "group",
                 },
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
@@ -268,12 +277,16 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: HISTOGRAM_BLOCK,
-            message0: "histogram of %1 %2 %3 %4",
+            message0: "histogram of %1 group by %2 %3 %4 %5",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
                     name: "index",
                     dataType: "number",
+                },
+                {
+                    type: DataColumnChooserField.KEY,
+                    name: "group",
                 },
                 <JSONSettingsInputDefinition>{
                     type: JSONSettingsField.KEY,
@@ -438,6 +451,13 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <SeparatorDefinition>{
                     kind: "sep",
                 },
+            ],
+            colour,
+        },
+    ],
+}
+
+/*
                 <LabelDefinition>{
                     kind: "label",
                     text: "Custom",
@@ -450,11 +470,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                     kind: "block",
                     type: VEGA_ENCODING_BLOCK,
                 },
-            ],
-            colour,
-        },
-    ],
-}
+*/
 
 export default chartDsl
 
