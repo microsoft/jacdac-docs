@@ -187,7 +187,7 @@ export const TWIN_BLOCK = "jacdac_tools_twin"
 
 export const toolsColour = paletteColorByIndex(-1)
 
-export const CHART_WIDTH = 388
+export const CHART_WIDTH = 468
 export const CHART_HEIGHT = 240
 export const CHART_SVG_MAX_ITEMS = 256
 export const BAR_MAX_ITEMS = 1 << 10

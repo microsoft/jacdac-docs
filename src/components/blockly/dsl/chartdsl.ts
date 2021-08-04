@@ -173,7 +173,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: SCATTERPLOT_BLOCK,
             message0:
-                "scatterplot with x %1 y %2 size by %3 group by %4 %5 %6 %7",
+                "scatterplot with x %1 y %2 size %3 group %4 %5 %6 %7",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -253,7 +253,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: LINEPLOT_BLOCK,
-            message0: "line chart with x %1 y %2 group by %3 %4 %5 %6",
+            message0: "line chart with x %1 y %2 group %3 %4 %5 %6",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
@@ -293,7 +293,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
         {
             kind: "block",
             type: HISTOGRAM_BLOCK,
-            message0: "histogram of %1 group by %2 %3 %4 %5",
+            message0: "histogram of %1 group %2 %3 %4 %5",
             args0: [
                 {
                     type: DataColumnChooserField.KEY,
