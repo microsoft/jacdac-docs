@@ -60,7 +60,9 @@ export default class FileOpenField extends FieldDropdown {
         const sourceBlock = this.getSourceBlock() as BlockWithServices
         const workspace = sourceBlock?.workspace as WorkspaceWithServices
         const services = workspace?.jacdacServices
-        this._files = await listFiles(services?.directory, ".csv")
+        const directory = services?.directory
+        this._files = await listFiles(directory, ".csv")
+        console.log(`sync files`, { directory, files: this._files })
     }
 
     getOptions(): string[][] {
