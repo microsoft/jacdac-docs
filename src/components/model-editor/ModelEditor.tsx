@@ -16,6 +16,7 @@ import MBModel from "./MBModel"
 
 const MODEL_EDITOR = "model_editor" // create prefix for model editor page
 const MODEL_NAME = MODEL_EDITOR + "-model"
+export const DATASET_NAME = MODEL_EDITOR + "-dataset"
 export const MODEL_EDITOR_STORAGE_KEY = "model-editor-data-json"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -57,7 +58,9 @@ export default function ModelPlayground() {
     const classes = useStyles()
     const chartPalette = useChartPalette()
 
-    const [dataset, setDataSet] = useState<MBDataSet>(new MBDataSet())
+    const [dataset, setDataSet] = useState<MBDataSet>(
+        new MBDataSet(DATASET_NAME)
+    )
     const [tfModel, setTFModel] = useState<MBModel>(new MBModel(MODEL_NAME))
     const [tab, setTab] = useState<number>(0)
 
@@ -71,7 +74,10 @@ export default function ModelPlayground() {
                 const modelEditorData = JSON.parse(storedDataJSON)
                 if (modelEditorData["dataset"])
                     setDataSet(
-                        MBDataSet.createFromFile(modelEditorData["dataset"])
+                        MBDataSet.createFromFile(
+                            DATASET_NAME,
+                            modelEditorData["dataset"]
+                        )
                     )
                 if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
                 if (modelEditorData["model"]) {

@@ -9,6 +9,7 @@ import {
     tensor3d,
     Tensor,
     tensor,
+    Sequential,
 } from "@tensorflow/tfjs"
 
 import { compileAndTest } from "../../../ml4f"
@@ -50,7 +51,9 @@ export interface TFModelTrainResponse extends TFModelRequestResponse {
     data: {
         modelJSON: string
         modelWeights: ArrayBuffer
-        trainingInfo: number[]
+        modelSummary: string[]
+        trainingLogs: number[]
+        armModel: string
     }
 }
 
@@ -69,77 +72,167 @@ export interface TFModelPredictResponse extends TFModelRequestResponse {
     }
 }
 
-// send an object with model as blockly JSON
-function buildModelFromJSON(model: TFModelObj, modelBlockJSON: string) {
-    const modelLayers = sequential()
-    const epochs = 250
+function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
+    let layer
+    const params = layerObj.inputs[1].fields.block_params.value
+    switch (layerObj.type) {
+        case "model_block_conv_layer":
+            if (inputShape) {
+                layer = layers.conv1d({
+                    inputShape: inputShape,
+                    kernelSize: [params.kernelSize],
+                    strides: params.strideSize,
+                    filters: params.numFilters,
+                    activation: params.activation,
+                })
+            } else {
+                layer = layers.conv1d({
+                    kernelSize: [params.kernelSize],
+                    strides: params.strideSize,
+                    filters: params.numFilters,
+                    activation: params.activation,
+                })
+            }
 
-    if (modelBlockJSON == "") {
-        modelLayers.add(
-            layers.conv1d({
-                inputShape: model.inputShape,
-                kernelSize: [4],
-                strides: 1,
-                filters: 16,
-                activation: "relu",
+            break
+        case "model_block_max_pool_layer":
+            layer = layers.maxPooling1d({
+                poolSize: [params.poolSize],
             })
-        )
-        modelLayers.add(
-            layers.maxPooling1d({
-                poolSize: [2],
+            break
+        case "model_block_dropout_layer":
+            layer = layers.dropout({
+                rate: params.rate,
             })
-        )
-        modelLayers.add(
-            layers.dropout({
-                rate: 0.1,
-            })
-        )
-        modelLayers.add(
-            layers.conv1d({
-                kernelSize: [2],
-                strides: 1,
-                filters: 16,
-                activation: "relu",
-            })
-        )
-        modelLayers.add(
-            layers.maxPooling1d({
-                poolSize: [2],
-            })
-        )
-        modelLayers.add(
-            layers.dropout({
-                rate: 0.1,
-            })
-        )
-        modelLayers.add(
-            layers.conv1d({
-                kernelSize: [2],
-                strides: 1,
-                filters: 16,
-                activation: "relu",
-            })
-        )
-        modelLayers.add(
-            layers.dropout({
-                rate: 0.1,
-            })
-        )
-        // moving from 3-dimensional data to 2-dimensional requires a flattening layer
-        modelLayers.add(layers.flatten())
-        // must end with a fully connected layer with size equal to number of labels
-        modelLayers.add(
-            layers.dense({
-                units: model.outputShape,
-                activation: "softmax",
-            })
-        )
+            break
+        case "model_block_flatten_layer":
+            layer = layers.flatten()
+            break
+        case "model_block_dense_layer":
+            if (outputShape) {
+                layer = layers.dense({
+                    units: outputShape,
+                    activation: params.activation,
+                })
+            } else {
+                layer = layers.dense({
+                    units: params.numUnits,
+                    activation: params.activation,
+                })
+            }
+            break
+    }
+    return layer
+}
 
-        modelLayers.compile({
-            loss: "categoricalCrossentropy",
-            optimizer: "adam",
-            metrics: ["accuracy"],
+function buildDefaultModel(
+    modelLayers: Sequential,
+    inputShape: number[],
+    outputShape: number
+) {
+    modelLayers.add(
+        layers.conv1d({
+            inputShape: inputShape,
+            kernelSize: [4],
+            strides: 1,
+            filters: 16,
+            activation: "relu",
         })
+    )
+    modelLayers.add(
+        layers.maxPooling1d({
+            poolSize: [2],
+        })
+    )
+    modelLayers.add(
+        layers.dropout({
+            rate: 0.1,
+        })
+    )
+    modelLayers.add(
+        layers.conv1d({
+            kernelSize: [2],
+            strides: 1,
+            filters: 16,
+            activation: "relu",
+        })
+    )
+    modelLayers.add(
+        layers.maxPooling1d({
+            poolSize: [2],
+        })
+    )
+    modelLayers.add(
+        layers.dropout({
+            rate: 0.1,
+        })
+    )
+    modelLayers.add(
+        layers.conv1d({
+            kernelSize: [2],
+            strides: 1,
+            filters: 16,
+            activation: "relu",
+        })
+    )
+    modelLayers.add(
+        layers.dropout({
+            rate: 0.1,
+        })
+    )
+    // moving from 3-dimensional data to 2-dimensional requires a flattening layer
+    modelLayers.add(layers.flatten())
+    // must end with a fully connected layer with size equal to number of labels
+    modelLayers.add(
+        layers.dense({
+            units: outputShape,
+            activation: "softmax",
+        })
+    )
+
+    modelLayers.compile({
+        loss: "categoricalCrossentropy",
+        optimizer: "adam",
+        metrics: ["acc"],
+    })
+}
+
+// send an object with model as blockly JSON
+function buildModelFromJSON(model: TFModelObj, block: any) {
+    const modelLayers = sequential()
+    let epochs = 250
+
+    if (block == "") {
+        buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
+    } else {
+        console.log("Randi nn block ", block)
+        // Collect layers for neural network blocks
+        const layerBlock = block.inputs[3].child
+        let layer = addLayer(layerBlock, model.inputShape, null)
+        console.log("Randi add first layer ", layer)
+        modelLayers.add(layer)
+        if (layerBlock) {
+            layerBlock.children?.forEach((childBlock, idx) => {
+                if (idx == layerBlock.children.length - 1) {
+                    // last layer should be a dense layer with units equal to output shape
+                    layer = addLayer(childBlock, null, model.outputShape)
+                } else {
+                    layer = addLayer(childBlock, null, null)
+                }
+                modelLayers.add(layer)
+                console.log("Randi add layer ", layer)
+            })
+        }
+
+        const params = block.inputs[2].fields.block_params.value
+        modelLayers.compile({
+            loss: params.lossFn,
+            optimizer: params.optimizer,
+            metrics: [params.metrics],
+        })
+
+        console.log("Randi done adding layers ", modelLayers)
+        epochs = params.numEpochs
     }
 
     return { model: modelLayers, epochs: epochs }
@@ -151,9 +244,8 @@ const handlers: {
 } = {
     train: async (props: TFModelTrainRequest) => {
         const { data } = props
-        let trainingInfo = []
 
-        // get dataset and training info
+        // get dataset
         const xs = tensor3d(data.xData, [
             data.xData.length,
             data.model.inputShape[0],
@@ -171,6 +263,7 @@ const handlers: {
         )
 
         // model.fit
+        let trainingLogs = [] // space to save training loss and accuracy data
         await model
             .fit(xs, ys, {
                 epochs: epochs,
@@ -180,8 +273,12 @@ const handlers: {
                 },
             })
             .then(info => {
-                trainingInfo = info.history.acc
+                trainingLogs = info.history.acc
             })
+
+        // save summary of model
+        const modelSummary = []
+        model.summary(null, null, line => modelSummary.push(line))
 
         // save model as model artifacts
         let mod: io.ModelArtifacts
@@ -197,37 +294,39 @@ const handlers: {
                 return Promise.resolve(res)
             },
         })
+        // remove weight data from model artifacts and save separately
+        //   it seems that model won't save correctly otherwise
         const weights = mod.weightData
         mod.weightData = null
 
-        /*console.log("Beginning arm compile")
+        // compile arm model for mcu
         const armcompiled = await compileAndTest(model, {
             verbose: true,
             includeTest: true,
             float16weights: false,
             optimize: true,
         })
-        console.log(armcompiled)*/
 
         // return data
         const result = {
             modelJSON: JSON.stringify(mod),
             modelWeights: weights,
-            trainingInfo: trainingInfo,
+            modelSummary: modelSummary,
+            trainingLogs: trainingLogs,
+            armModel: JSON.stringify(armcompiled),
         }
         return { ...props, data: result }
     },
     predict: async (props: TFModelPredictRequest) => {
         const { data } = props
 
-        // turn datasetjson into dataset
-        /// get dataset and training info
+        /// get dataset
         const zs = tensor(data.zData)
 
         // get model
         const modelObj = JSON.parse(data.model.modelJSON)
+        // load weight data into model before loading the model
         modelObj.weightData = new Uint32Array(data.model.weights).buffer
-        //modelObj.weightData = new Uint32Array(weightObj).buffer
         const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
@@ -237,8 +336,8 @@ const handlers: {
         const predictArr = await prediction.dataSync()
 
         // return prediction
-
         const result = { prediction: predictArr }
+
         return { ...props, data: result }
     },
 }

@@ -30,6 +30,7 @@ import ClassDataSetGrid from "../ClassDataSetGrid"
 import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import MBDataSet, { arraysEqual } from "./MBDataSet"
+import { DATASET_NAME } from "./ModelEditor"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -143,12 +144,11 @@ export default function CollectData(props: {
         setCurrentClassLabel(newLabel)
     }
     const handleDownloadDataSet = async () => {
-        const csv = dataset.toCSV()
-        fileStorage.saveText(`${dataset.labelOptions.join("")}dataset.csv`, csv)
+        fileStorage.saveText(`${dataset.name}.csv`, dataset.toCSV())
     }
     const handleDeleteDataSet = () => {
         if (confirm("Are you sure you want to delete all recorded samples?")) {
-            const newDataSet = new MBDataSet()
+            const newDataSet = new MBDataSet(DATASET_NAME)
             handleDataSetUpdate(newDataSet)
             setDataSet(newDataSet)
 

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 import { NoSsr } from "@material-ui/core"
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockEditor from "../blockly/BlockEditor"
-import Blockly from "blockly"
+import Blockly, { FieldVariable } from "blockly"
 import shadowDsl from "../blockly/dsl/shadowdsl"
 import modelBlockDsl, { MODEL_BLOCKS } from "./modelblockdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
@@ -25,35 +25,35 @@ const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
 const MB_DATA_STORAGE_KEY = "model-block-data-json"
 
 function getRecordingsFromLocalStorage() {
+    // check local storage for blocks
     const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
     if (dataObj == null || dataObj == undefined) return {}
     const modelEditorData = JSON.parse(dataObj)
 
-    // construct new recordings object
-    const allRecordings = {}
+    // add recordings from local storage
+    const rBlocks = {}
     for (const id in modelEditorData["recordings"]) {
         const recordings = modelEditorData["recordings"][id]
-        allRecordings[id] = recordings.map(recording => {
+        rBlocks[id] = recordings.map(recording => {
             return FieldDataSet.createFromFile(recording)
         })
     }
-    return allRecordings
+    return rBlocks
 }
 
-function getDataSetsFromLocalStorage() {
-    return []
-    /*const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
+async function getModelsFromLocalStorage() {
+    const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
     if (dataObj == null || dataObj == undefined) return {}
     const modelEditorData = JSON.parse(dataObj)
-    return MBModel.createFromFile(modelEditorData["datasets"])*/
-}
 
-function getModelsFromLocalStorage() {
-    return []
-    /*const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
-    if (dataObj == null || dataObj == undefined) return {}
-    const modelEditorData = JSON.parse(dataObj)
-    return MBModel.createFromFile(modelEditorData["model"])*/
+    // construct new models object
+    const allModels = {}
+    for (const name in modelEditorData["models"]) {
+        const data = modelEditorData["models"][name]
+        const model = await MBModel.createFromFile(data)
+        allModels[name] = model
+    }
+    return allModels
 }
 
 function ModelBlockEditorWithContext() {
@@ -62,33 +62,68 @@ function ModelBlockEditorWithContext() {
         useContext(BlockContext)
 
     /* For data storage */
-    const [currentDataset, setCurrentDataset] = useState(undefined)
+    const [currentDataSet, setCurrentDataSet] = useState(undefined)
     const [currentModel, setCurrentModel] = useState(undefined)
-    // dictionary of recording block ids and FieldDataSet arrays
-    const allRecordings = useMemo(getRecordingsFromLocalStorage, [])
-    // dictionary of dataset vars and MBDataSet objs
-    const allDataSets = useMemo(getDataSetsFromLocalStorage, [])
     // dictionary of model vars and MBModel objs
     const allModels = useMemo(getModelsFromLocalStorage, [])
-    const updateLocalStorage = (newRecordings, newDataSets, newModels) => {
+    const allRecordings = useMemo(getRecordingsFromLocalStorage, [])
+    const updateLocalStorage = (newRecordings, newModels) => {
         const recordings = newRecordings || allRecordings
-        const datasets = newDataSets || allDataSets
         const models = newModels || allModels
 
         // convert dataset object to JSON string
         const modelBlocksDataJSON = JSON.stringify({
             recordings: recordings,
-            datasets: datasets,
             models: models,
         })
         // save JSON string in local storage
         localStorage.setItem(MB_DATA_STORAGE_KEY, modelBlocksDataJSON)
         console.log("Randi updating saved data for blocks: ", {
             recordings,
-            datasets,
             models,
         })
     }
+
+    /* For workspace changes */
+    const getDataSetBlocks = () => {
+        const dBlocks = {}
+        visitWorkspace(workspaceJSON, {
+            visitBlock: block => {
+                // Collect dataset blocks
+                if (block.type == MODEL_BLOCKS + "dataset") {
+                    const datasetName =
+                        block.inputs[0].fields["dataset_name"].value?.toString()
+                    if (datasetName) dBlocks[datasetName] = block
+                }
+            },
+        })
+        return dBlocks
+    }
+    const getModelBlocks = () => {
+        const mBlocks = {}
+        visitWorkspace(workspaceJSON, {
+            visitBlock: block => {
+                // Collect model blocks
+                if (block.type == MODEL_BLOCKS + "nn") {
+                    const modelName =
+                        block.inputs[0].fields[
+                            "classifier_name"
+                        ].value?.toString()
+                    if (modelName) mBlocks[modelName] = block
+                }
+            },
+        })
+        return mBlocks
+    }
+    useEffect(() => {
+        visitWorkspace(workspaceJSON, {
+            visitBlock: block => {
+                console.log(`block ${block.type}`, { block })
+            },
+        })
+    }, [workspaceJSON])
+    const modelBlocks = useMemo(getModelBlocks, [workspaceJSON])
+    const dataSetBlocks = useMemo(getDataSetBlocks, [workspaceJSON])
 
     /* For dialog handling */
     const [recordDataDialogVisible, setRecordDataDialogVisible] =
@@ -112,10 +147,78 @@ function ModelBlockEditorWithContext() {
         createNewRecordingButton: toggleRecordDataDialog,
         createNewClassifierButton: addNewClassifier,
     }
-    // set button callbacks
+    const onCloseRecordingDialog = (
+        recording: FieldDataSet[],
+        blockId: string
+    ) => {
+        if (recording && blockId) {
+            // Add recording data to list of recordings
+            allRecordings[blockId] = recording
+            updateLocalStorage(allRecordings, null)
+        }
+        // close dialog
+        toggleRecordDataDialog()
+    }
+    const onModelTrained = (model: MBModel) => {
+        if (model) {
+            // Add trained model to record of allModels
+            allModels[model.name] = model
+            updateLocalStorage(null, allModels)
+        }
+    }
+    const onCloseModelDialog = () => {
+        // reset dataset and model that gets passed to dialogs
+        setCurrentDataSet(undefined)
+        setCurrentModel(undefined)
+
+        // close dialog
+        toggleModelDialog()
+    }
+    const handleOpenTrainingModal = (
+        clickedBlock: Blockly.Block
+    ): { model: MBModel; dataset: MBDataSet } => {
+        // setup model for training
+        const modelName = clickedBlock.getField("CLASSIFIER_NAME").getText()
+        let selectedModel: MBModel = allModels[modelName]
+        if (selectedModel) {
+            // check if model has changed since last training
+            if (selectedModel.blockJSON !== modelBlocks[modelName]) {
+                selectedModel.status = "untrained"
+                selectedModel.blockJSON = modelBlocks[modelName]
+            }
+        } else {
+            selectedModel = new MBModel(modelName)
+            // grab the block json
+            selectedModel.blockJSON = modelBlocks[modelName]
+        }
+
+        // setup dataset for training
+        const datasetName = clickedBlock.getField("NN_TRAINING").getText()
+        const trainingDataset = new MBDataSet(datasetName)
+        const datasetBlock = dataSetBlocks[datasetName]
+
+        // grab nested recording blocks and place them in the dataset
+        const recordingBlock = datasetBlock?.inputs.filter(
+            input => input.name == "DATASET_RECORDINGS"
+        )[0].child
+        if (recordingBlock) {
+            let className = recordingBlock?.inputs[0].fields?.class_name?.value
+            allRecordings[recordingBlock.id].forEach(recording => {
+                trainingDataset.addRecording(recording, className, null)
+            })
+            recordingBlock.children?.forEach(childBlock => {
+                className = childBlock?.inputs[0].fields?.class_name?.value
+                allRecordings[childBlock.id].forEach(recording => {
+                    trainingDataset.addRecording(recording, className, null)
+                })
+            })
+        }
+        return { model: selectedModel, dataset: trainingDataset }
+    }
+
+    /* For button callbacks */
     useEffect(() => {
         // register callbacks buttons with custom dialogs
-        console.log("Randi toolbox config ", toolboxConfiguration)
         visitToolbox(toolboxConfiguration, {
             visitButton: btn => {
                 if (btn.callbackKey in buttonsWithDialogs) {
@@ -126,30 +229,11 @@ function ModelBlockEditorWithContext() {
             },
         })
     }, [toolboxConfiguration])
-    const onCloseRecordingDialog = (
-        recording: FieldDataSet[],
-        blockId: string
-    ) => {
-        if (recording && blockId) {
-            // Add recording data to list of recordings
-            allRecordings[blockId] = recording
-            updateLocalStorage(allRecordings, null, null)
-        }
-        // close dialog
-        toggleRecordDataDialog()
-    }
-    const onCloseModelDialog = (model: MBModel) => {
-        if (model) {
-            // Add trained model to record of allModels
-            allModels[model.name] = model
-            updateLocalStorage(null, null, allModels)
-        }
-        // reset dataset and model props
 
-        // close dialog
-        toggleModelDialog()
-    }
-    const handleBlockClick = event => {
+    const handleWorkspaceChange = event => {
+        if (event.type == Blockly.Events.BLOCK_DELETE) {
+            delete allRecordings[event.blockId]
+        }
         if (event.type == Blockly.Events.CLICK && event.blockId) {
             const clickedBlock = workspace.getBlockById(event.blockId)
             if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
@@ -160,22 +244,12 @@ function ModelBlockEditorWithContext() {
                     console.log("Randi got a split command ", clickedBlock)
                 } else if (command == "train") {
                     console.log("Randi got a train command ", clickedBlock)
-                    // get classifier name and dataset to update props to model block dialog
-                    const modelName = clickedBlock
-                        .getField("CLASSIFIER_NAME")
-                        .getText()
-                    const datasetName = clickedBlock
-                        .getField("NN_TRAINING")
-                        .getText()
+                    const { model, dataset } =
+                        handleOpenTrainingModal(clickedBlock)
+                    setCurrentModel(model)
+                    setCurrentDataSet(dataset)
 
-                    // Randi TODO ensure that allDataset and allModels is always up to date at this point
-                    const createdModel =
-                        allModels[modelName] || new MBModel(modelName)
-                    const createdDataSet =
-                        allDataSets[datasetName] || new MBDataSet(datasetName)
-                    setCurrentModel(createdModel)
-                    setCurrentDataset(createdDataSet)
-
+                    // open the training modal
                     toggleModelDialog()
                 } else if (command == "record") {
                     console.log(
@@ -194,70 +268,12 @@ function ModelBlockEditorWithContext() {
         }
     }
     useEffect(() => {
-        console.log("Randi ", workspace)
-        if (workspace) workspace.addChangeListener(handleBlockClick)
+        if (workspace) workspace.addChangeListener(handleWorkspaceChange)
 
         return () => {
-            if (workspace) workspace.removeChangeListener(handleBlockClick)
+            if (workspace) workspace.removeChangeListener(handleWorkspaceChange)
         }
-    }, [workspace])
-
-    /* For checking blocks and assigning warnings */
-    // run this when workspaceJSON changes
-    useEffect(() => {
-        visitWorkspace(workspaceJSON, {
-            visitBlock: block => {
-                // Collect data for dataset blocks
-                // Randi TODO remove from allRecordings anything that is no longer present on the workspace
-                if (block.type == MODEL_BLOCKS + "dataset") {
-                    console.log(`Randi dataset block: `, {
-                        name: block.inputs[0].fields["dataset_name"],
-                        id: block.id,
-                        block: block,
-                    })
-                    // get all nested recordings
-                    const recordingBlock = block.inputs.filter(
-                        input => input.name == "DATASET_RECORDINGS"
-                    )[0].child
-                    if (recordingBlock) {
-                        console.log(`Randi recording data: `, {
-                            recording: allRecordings[recordingBlock.id],
-                            block: recordingBlock,
-                        })
-                        recordingBlock.children?.forEach(childBlock =>
-                            console.log(`Randi recording data: `, {
-                                recording: allRecordings[childBlock.id],
-                                block: childBlock,
-                            })
-                        )
-                    }
-                }
-                // Collect layers for neural network blocks
-                else if (block.type == MODEL_BLOCKS + "nn") {
-                    // Randi TODO delete recordings that are no longer present on the workspace
-                    console.log(`Randi neural network block: `, {
-                        name: block.inputs[0].fields["classifier_name"],
-                        id: block.id,
-                        block: block,
-                    })
-                    // get all nested layers
-                    const layerBlock = block?.inputs.filter(
-                        input => input.name == "NN_LAYERS"
-                    )[0].child
-                    if (layerBlock) {
-                        console.log(`Randi layer data: `, { block: layerBlock })
-                        layerBlock.children?.forEach(childBlock =>
-                            console.log(`Randi layer data: `, {
-                                block: childBlock,
-                            })
-                        )
-                    }
-                } else {
-                    console.log(`block ${block.type}`, { block })
-                }
-            },
-        })
-    }, [workspaceJSON])
+    }, [workspace, workspaceJSON])
 
     return (
         <>
@@ -268,9 +284,10 @@ function ModelBlockEditorWithContext() {
                     recordDataDialogVisible={recordDataDialogVisible}
                     trainModelDialogVisible={trainModelDialogVisible}
                     onRecordingDone={onCloseRecordingDialog}
+                    onModelUpdate={onModelTrained}
                     onTrainingDone={onCloseModelDialog}
                     workspace={workspace}
-                    dataset={currentDataset}
+                    dataset={currentDataSet}
                     model={currentModel}
                 />
             </Suspense>

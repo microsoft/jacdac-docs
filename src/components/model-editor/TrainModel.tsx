@@ -9,14 +9,19 @@ import Trend from "../Trend"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import DeleteIcon from "@material-ui/icons/Delete"
-// tslint:disable-next-line: match-default-export-name no-submodule-imports
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
-import React, { useEffect, useMemo, useState } from "react"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import DownloadIcon from "@material-ui/icons/GetApp"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import DeleteAllIcon from "@material-ui/icons/DeleteSweep"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import React, { useContext, useEffect, useMemo, useState } from "react"
+
+import ServiceManagerContext from "../ServiceManagerContext"
 
 import { trainRequest } from "../blockly/dsl/workers/tf.proxy"
 import type {
@@ -31,10 +36,6 @@ import MBModel from "./MBModel"
 import useChange from "../../jacdac/useChange"
 
 const NUM_EPOCHS = 250
-const LOSS_COLOR1 = "#8b0000"
-const LOSS_COLOR2 = "#3f0000"
-const ACC_COLOR1 = "#77dd77"
-const ACC_COLOR2 = "#165916"
 const TRAINING_COLOR = "#0f2080"
 const VAL_COLOR = "#f5793a"
 
@@ -46,6 +47,8 @@ export default function TrainModel(props: {
     onNext: (model) => void
 }) {
     const classes = props.reactStyle
+    const { fileStorage } = useContext(ServiceManagerContext)
+
     const { dataset, model, onChange, onNext } = props
 
     useEffect(() => {
@@ -53,7 +56,7 @@ export default function TrainModel(props: {
         prepareModel(model)
     }, [])
 
-    /* For loading page */
+    /* For managing props */
     const prepareDataSet = (set: MBDataSet) => {
         // Assumptions: the sampling rate, sampling duration, and sensors used are constant
         let sampleLength = -1
@@ -127,14 +130,6 @@ export default function TrainModel(props: {
         return set
     }
 
-    const deleteTFModel = () => {
-        if (confirm("Are you sure you want to delete current model?")) {
-            const newModel = new MBModel(model.name)
-            prepareModel(newModel)
-            handleModelUpdate(newModel)
-        }
-    }
-
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
     const trainingAccLog = useMemo(() => {
@@ -184,20 +179,11 @@ export default function TrainModel(props: {
 
         if (trainResult) {
             // handle result from training
-            const trainingHistory = trainResult.data.trainingInfo
+            const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
+            model.modelSummary = trainResult.data.modelSummary
             model.modelJSON = trainResult.data.modelJSON
-
-            // Randi TODO decide when/how to compile arm code
-            // Compile code for MCU
-            /*const armcompiled = await compileAndTest(model.model, {
-                verbose: true,
-                includeTest: true,
-                float16weights: false,
-                optimize: true,
-            })
-            console.log(armcompiled)*/
-            // use armcompiled.machineCode
+            model.armModel = trainResult.data.armModel
 
             // Update model status
             model.status = "trained"
@@ -218,6 +204,17 @@ export default function TrainModel(props: {
     const handleModelUpdate = model => {
         onChange(model)
     }
+    const handleDownloadModel = () => {
+        // Randi TODO also download arm model (as a zip file?)
+        fileStorage.saveText(`${model.name}.json`, JSON.stringify(model))
+    }
+    const deleteTFModel = () => {
+        if (confirm("Are you sure you want to delete current model?")) {
+            const newModel = new MBModel(model.name)
+            prepareModel(newModel)
+            handleModelUpdate(newModel)
+        }
+    }
 
     const [expanded, setExpanded] = React.useState<string | false>(false)
     const handleExpandedSummaryChange =
@@ -229,14 +226,32 @@ export default function TrainModel(props: {
     return (
         <Grid container direction={"column"}>
             <Grid item>
-                <h3>Model Summary</h3>
+                <h3>
+                    Current Model
+                    <IconButtonWithTooltip
+                        onClick={handleDownloadModel}
+                        title="Download all recording data"
+                        disabled={dataset.numRecordings == 0}
+                    >
+                        <DownloadIcon />
+                    </IconButtonWithTooltip>
+                    <IconButtonWithTooltip
+                        onClick={deleteTFModel}
+                        title="Delete current model information"
+                    >
+                        <DeleteAllIcon />
+                    </IconButtonWithTooltip>
+                </h3>
+
                 <Accordion
                     expanded={expanded === "modelSummary"}
                     onChange={handleExpandedSummaryChange("modelSummary")}
                 >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <div>
-                            {expanded !== "modelSummary" && (
+                            {expanded == "modelSummary" ? (
+                                <h2> Summary </h2>
+                            ) : (
                                 <span>
                                     Classes: {model.labels.join(", ")} <br />
                                     Training Status: {model.status} <br />
@@ -265,21 +280,6 @@ export default function TrainModel(props: {
                         </div>
                     </AccordionDetails>
                 </Accordion>
-                <div className={classes.buttons}>
-                    <Button
-                        size="large"
-                        variant="contained"
-                        aria-label="delete existing model"
-                        title={
-                            "Press to delete the machine learning model you have now"
-                        }
-                        onClick={deleteTFModel}
-                        startIcon={<DeleteIcon />}
-                        style={{ marginTop: 16 }}
-                    >
-                        Delete Model
-                    </Button>
-                </div>
                 <div className={classes.buttons}>
                     <Button
                         size="large"

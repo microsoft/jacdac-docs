@@ -9,6 +9,11 @@ export default class MBModel extends JDEventSource {
     // maintain training info about the model
     trainingAcc: number
     weightData: ArrayBuffer
+    armModel: string
+    modelSummary: string[]
+
+    // maintain the blockJSON that goes with this model
+    blockJSON: string
 
     static async createFromFile(modelObj: {
         name: string
@@ -54,13 +59,14 @@ export default class MBModel extends JDEventSource {
     }
 
     get summary() {
-        const modelSummary = [
+        const modelInfo = [
             "Training Status: " + this.status,
             "Input Types: " + this.inputTypes,
-            "JSON: " + this.modelJSON, // Randi TODO generate summary of layers
         ]
 
-        return modelSummary
+        if (this.modelSummary && this.modelSummary.length > 0)
+            return [...modelInfo, ...this.modelSummary]
+        return modelInfo
     }
 
     toJSON() {

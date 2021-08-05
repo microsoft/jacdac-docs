@@ -18,6 +18,11 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import DownloadIcon from "@material-ui/icons/GetApp"
+import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
+
+import ServiceManagerContext from "../../ServiceManagerContext"
 
 import { trainRequest } from "../../blockly/dsl/workers/tf.proxy"
 import type {
@@ -35,33 +40,68 @@ const TRAINING_COLOR = "#0f2080"
 const VAL_COLOR = "#f5793a"
 const NUM_EPOCHS = 250
 
-export default function BlocklyTrainModelDialog(props: {
+export default function TrainModelDialog(props: {
     classes: any
     chartPalette: string[]
     open: boolean
-    onDone: (model: MBModel) => void
+    onModelUpdate: (model: MBModel) => void
+    onDone: () => void
     dataset: MBDataSet
     model: MBModel
 }) {
-    const { classes, chartPalette, open, onDone, dataset, model } = props
+    const { classes, open, onModelUpdate, onDone, dataset, model } = props
+    const { fileStorage } = useContext(ServiceManagerContext)
+
     const [dialogType, setDialogType] = useState<"trainModel" | "evalModel">(
         "trainModel"
     )
 
     useEffect(() => {
-        const set = dataset
-        console.log("Randi check if dataset is ready ", {
-            xs: set.xs,
-            ys: set.ys,
-            length: set.length,
-            width: set.width,
-        })
-        prepareModel(model)
-    }, [])
+        if (dataset && model) {
+            prepareDataSet(dataset)
+            prepareModel(model)
+        }
+    }, [dataset, model])
 
-    /* For training model */
-    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
+    /* For preparing props */
+    const prepareDataSet = (set: MBDataSet) => {
+        // Assumptions: the sampling rate, sampling duration, and sensors used are constant
+        let sampleLength = -1
+        let sampleChannels = -1
+        const xData = []
+        const yData = []
 
+        for (const label of set.labels) {
+            set.getRecordingsWithLabel(label).forEach(table => {
+                if (sampleLength < table.length) {
+                    sampleLength = table.length
+                    sampleChannels = table.width
+                } else if (table.width != sampleChannels) {
+                    setTrainEnabled(false)
+                    alert(
+                        "All input data must have the same shape: " +
+                            table.name +
+                            "\n Has " +
+                            table.width +
+                            " inputs instead of " +
+                            sampleChannels
+                    )
+                } /* else if (table.length != sampleLength) {
+                    // decide what to do about different sized data
+                } */
+                // For x data, just add each sample as a new row into x_data
+                xData.push(table.data())
+
+                yData.push(set.labels.indexOf(label))
+            })
+        }
+
+        // save tensors with dataset object
+        set.xs = xData
+        set.ys = yData
+        set.length = sampleLength
+        set.width = sampleChannels
+    }
     const prepareModel = (mod: MBModel) => {
         // If this is a brand new model, get it setup with a standard CNN architecture
         if (mod.modelJSON == "") {
@@ -101,6 +141,8 @@ export default function BlocklyTrainModelDialog(props: {
     useChange(trainingAccLog)
     useChange(trainingLossLog)
 
+    /* For training model */
+    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
     const trainTFModel = async () => {
         model.status = "training"
         model.inputTypes = dataset.inputTypes
@@ -111,7 +153,6 @@ export default function BlocklyTrainModelDialog(props: {
         const stopWorkerSubscribe = workerProxy("tf").subscribe(
             "message",
             (msg: any) => {
-                console.log("Training data ", msg.data)
                 const lossData = [msg.data.loss, msg.data.val_loss]
                 const accData = [msg.data.acc, msg.data.val_acc]
                 if (trainingLossLog) trainingLossLog.addData(lossData)
@@ -126,7 +167,7 @@ export default function BlocklyTrainModelDialog(props: {
                 xData: dataset.xs,
                 yData: dataset.ys,
                 model: model.toJSON(),
-                modelBlockJSON: "",
+                modelBlockJSON: model.blockJSON,
             },
         } as TFModelTrainRequest
         const trainResult = (await trainRequest(
@@ -138,25 +179,16 @@ export default function BlocklyTrainModelDialog(props: {
 
         if (trainResult) {
             // handle result from training
-            const trainingHistory = trainResult.data.trainingInfo
+            const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
             model.modelJSON = trainResult.data.modelJSON
-
-            // Randi TODO decide when/how to compile arm code
-            // Compile code for MCU
-            /*const armcompiled = await compileAndTest(model.model, {
-                verbose: true,
-                includeTest: true,
-                float16weights: false,
-                optimize: true,
-            })
-            console.log(armcompiled)*/
-            // use armcompiled.machineCode
+            model.modelSummary = trainResult.data.modelSummary
+            model.armModel = trainResult.data.armModel
 
             // Update model status
             model.status = "trained"
             model.trainingAcc = trainingHistory[trainingHistory.length - 1]
-
+            onModelUpdate(model)
             setTrainEnabled(true)
         } else model.status = "untrained"
     }
@@ -167,18 +199,15 @@ export default function BlocklyTrainModelDialog(props: {
         // reset the user inputs
         resetInputs()
         // close the modal
-        onDone(null)
+        onDone()
     }
     const handleNext = () => {
         // go to the next page
         setDialogType("evalModel")
     }
-    const handleDone = () => {
-        // reset the user inputs
-        resetInputs()
-
-        // call the done function
-        onDone(null)
+    const handleDownloadModel = () => {
+        // Randi TODO also download arm model (as a zip file?)
+        fileStorage.saveText(`${model.name}.json`, JSON.stringify(model))
     }
     const [expanded, setExpanded] = React.useState<string | false>(false)
     const handleExpandedSummaryChange =
@@ -193,7 +222,16 @@ export default function BlocklyTrainModelDialog(props: {
                 <DialogContent>
                     <Grid container direction={"column"}>
                         <Grid item>
-                            <h3>Model Summary</h3>
+                            <h3>
+                                Current Model
+                                <IconButtonWithTooltip
+                                    onClick={handleDownloadModel}
+                                    title="Download all recording data"
+                                    disabled={dataset.numRecordings == 0}
+                                >
+                                    <DownloadIcon />
+                                </IconButtonWithTooltip>
+                            </h3>
                             <Accordion
                                 expanded={expanded === "modelSummary"}
                                 onChange={handleExpandedSummaryChange(
@@ -204,7 +242,9 @@ export default function BlocklyTrainModelDialog(props: {
                                     expandIcon={<ExpandMoreIcon />}
                                 >
                                     <div>
-                                        {expanded !== "modelSummary" && (
+                                        {expanded == "modelSummary" ? (
+                                            <h2> Summary </h2>
+                                        ) : (
                                             <span>
                                                 Classes:{" "}
                                                 {model.labels.join(", ")} <br />
@@ -242,7 +282,8 @@ export default function BlocklyTrainModelDialog(props: {
                                                     }
                                                 >
                                                     {" "}
-                                                    {line} <br />
+                                                    {line}
+                                                    <br />
                                                 </span>
                                             )
                                         })}
@@ -346,7 +387,7 @@ export default function BlocklyTrainModelDialog(props: {
                         color="primary"
                         endIcon={<NavigateNextIcon />}
                         disabled={false}
-                        onClick={handleDone}
+                        onClick={handleCancel}
                     >
                         Done
                     </Button>

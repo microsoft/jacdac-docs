@@ -148,7 +148,8 @@ export default function ModelBlockDialogs(props: {
     recordDataDialogVisible: boolean
     trainModelDialogVisible: boolean
     onRecordingDone: (recording: FieldDataSet[], blockId: string) => void
-    onTrainingDone: (model: MBModel) => void
+    onModelUpdate: (model: MBModel) => void
+    onTrainingDone: () => void
     workspace: WorkspaceSvg
     dataset: MBDataSet
     model: MBModel
@@ -157,6 +158,7 @@ export default function ModelBlockDialogs(props: {
         recordDataDialogVisible,
         trainModelDialogVisible,
         onRecordingDone,
+        onModelUpdate,
         onTrainingDone,
         workspace,
         dataset,
@@ -185,6 +187,7 @@ export default function ModelBlockDialogs(props: {
                     classes={classes}
                     chartPalette={chartPalette}
                     open={trainModelDialogVisible}
+                    onModelUpdate={onModelUpdate}
                     onDone={onTrainingDone}
                     dataset={dataset}
                     model={model}

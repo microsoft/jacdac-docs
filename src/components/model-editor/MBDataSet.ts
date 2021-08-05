@@ -24,8 +24,8 @@ export function arraysEqual(a: string[], b: string[]): boolean {
 }
 
 export default class MBDataSet extends JDEventSource {
-    static createFromFile(datasetJSONObj: DataSet): MBDataSet {
-        const set = new MBDataSet()
+    static createFromFile(name: string, datasetJSONObj: DataSet): MBDataSet {
+        const set = new MBDataSet(name)
         const { recordings, registerIds } = datasetJSONObj
         set.addRecordingsFromFile(recordings, registerIds) // add recordings and update total recordings
         return set
@@ -33,6 +33,9 @@ export default class MBDataSet extends JDEventSource {
 
     // maintain computed number of recordings and input data types to avoid recomputation
     totalRecordings: number
+
+    // save what registers this dataset was created with
+    registerIds: string[]
 
     // maintain data in tensors
     xs: number[]
