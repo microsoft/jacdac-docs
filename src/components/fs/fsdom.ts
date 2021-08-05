@@ -36,11 +36,11 @@ export class FileSystemFile extends JDEventSource {
         if (this._text === undefined) this.sync()
         return this._text
     }
-
+   
     async write(text: string) {
         await writeFileText(this.handle, text)
         if (this._text !== text) {
-            this._text = t
+            this._text = text
             this.emit(CHANGE)
         }
     }
