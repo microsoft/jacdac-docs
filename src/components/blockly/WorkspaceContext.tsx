@@ -14,13 +14,14 @@ import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import RoleManager from "../../../jacdac-ts/src/servers/rolemanager"
 import { VMProgramRunner } from "../../../jacdac-ts/src/vm/runner"
 import useChange from "../../jacdac/useChange"
+import { FileSystemDirectory } from "../fs/fsdom"
 import ReactField from "./fields/ReactField"
 import useWorkspaceEvent from "./useWorkspaceEvent"
 
 export class WorkspaceServices extends JDEventSource {
     static readonly WORKSPACE_CHANGE = "workspaceChange"
 
-    private _directory: FileSystemDirectoryHandle
+    private _directory: FileSystemDirectory
 
     private _workspaceJSON: WorkspaceJSON
     private _runner: VMProgramRunner
@@ -63,10 +64,10 @@ export class WorkspaceServices extends JDEventSource {
         }
     }
 
-    get directory() {
+    get workingDirectory() {
         return this._directory
     }
-    set directory(value: FileSystemDirectoryHandle) {
+    set workingDirectory(value: FileSystemDirectory) {
         if (this._directory !== value) {
             this._directory = value
             // don't notify

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Block, FieldDropdown } from "blockly"
-import { listFiles, readFileText } from "../../fs/fs"
 import { parseCSV } from "../dsl/workers/csv.proxy"
 import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
 import { ReactFieldJSON } from "./ReactField"
@@ -8,7 +7,6 @@ import { ReactFieldJSON } from "./ReactField"
 export default class FileOpenField extends FieldDropdown {
     static KEY = "jacdac_field_file_open"
     SERIALIZABLE = true
-    private _files: FileSystemFileHandle[]
     // eslint-disable-next-line @typescript-eslint/ban-types
     private _data: object[]
 
@@ -25,7 +23,7 @@ export default class FileOpenField extends FieldDropdown {
     }
 
     getOptions(): string[][] {
-        const options = (this._files || []).map(f => [f.name, f.name])
+        const options = this.resolveFiles()?.map(f => [f.name, f.name]) || []
         const value = this.getValue()
 
         return options.length < 1
@@ -45,7 +43,7 @@ export default class FileOpenField extends FieldDropdown {
 
     setSourceBlock(block: Block) {
         super.setSourceBlock(block)
-        this.syncFiles().then(() => this.updateData())
+        this.updateData()
     }
 
     doValueUpdate_(newValue) {
@@ -54,36 +52,24 @@ export default class FileOpenField extends FieldDropdown {
     }
 
     notifyServicesChanged() {
-        this.syncFiles().then(() => this.updateData())
+        this.updateData()
     }
 
-    private async syncFiles() {
+    private resolveFiles() {
         const sourceBlock = this.getSourceBlock() as BlockWithServices
         const workspace = sourceBlock?.workspace as WorkspaceWithServices
         const services = workspace?.jacdacServices
-        const directory = services?.directory
-        this._files = await listFiles(directory, ".csv")
-        console.log(`sync files`, {
-            directory,
-            file: this.getValue(),
-            files: this._files,
-            data: this._data,
-        })
-        if (!this._data) this.parseSource()
+        const directory = services?.workingDirectory
+        return directory?.files.filter(f => /\.csv$/i.test(f.name))
     }
 
     private async parseSource() {
         const filename = this.getValue()
-        const file = this._files?.find(f => f.name === filename)
-        console.log(`file source update`, {
-            filename,
-            file,
-            files: this._files?.slice(0),
-        })
+        const file = this.resolveFiles()?.find(f => f.name === filename)
         if (file) {
             try {
                 console.debug(`file: loading ${file.name}`)
-                const source = await readFileText(file)
+                const source = await file.textAsync()
                 console.debug(`file: loaded ${(source?.length || 0) / 1024}kb`)
                 if (source) {
                     const csv = await parseCSV(source)
