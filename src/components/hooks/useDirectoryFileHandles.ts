@@ -3,6 +3,24 @@ import AppContext from "../AppContext"
 import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
 
+export async function writeFileContent(
+    fileHandle: FileSystemFileHandle,
+    content: string
+) {
+    const file = await fileHandle.createWritable({
+        keepExistingData: false,
+    })
+    try {
+        await file.write(content)
+    } finally {
+        try {
+            await file.close()
+        } catch (e) {
+            console.debug(`file close error`, { e })
+        }
+    }
+}
+
 export default function useDirectoryFileHandles(storageKey: string) {
     const { directory: root, ...rest } = useDirectoryHandle(storageKey)
     const { setError } = useContext(AppContext)
@@ -48,11 +66,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
                 const fileHandle = await handle.getFileHandle(filename, {
                     create: true,
                 })
-                const file = await fileHandle.createWritable({
-                    keepExistingData: false,
-                })
-                await file.write(content)
-                await file.close()
+                writeFileContent(fileHandle, content)
             }
             return handle
         } catch (e) {
