@@ -19,7 +19,7 @@ import BlockEditor from "../blockly/BlockEditor"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import vmDsls from "./vmdsls"
 import { VMStatus } from "../../../jacdac-ts/src/vm/runner"
-import { VM_WARNINGS_CATEGORY } from "../blockly/toolbox"
+import { VM_WARNINGS_CATEGORY, WORKSPACE_FILENAME } from "../blockly/toolbox"
 import FileTabs from "../fs/FileTabs"
 import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
 
@@ -38,8 +38,8 @@ function VMEditorWithContext() {
         roleManager,
         setWarnings,
         dragging,
-        workspaceFileHandle,
-        setWorkspaceFileHandle,
+        workspaceDirectoryHandle,
+        setWorkspaceDirectoryHandle,
     } = useContext(BlockContext)
     const [program, setProgram] = useState<VMProgram>()
     const autoStart = true
@@ -92,13 +92,14 @@ function VMEditorWithContext() {
 
     return (
         <Grid container direction="column" spacing={1}>
-            {!!setWorkspaceFileHandle && (
+            {!!setWorkspaceDirectoryHandle && (
                 <Grid item xs={12}>
                     <FileTabs
                         storageKey={VM_SOURCE_STORAGE_KEY}
-                        selectedFileHandle={workspaceFileHandle}
-                        onFileHandleSelected={setWorkspaceFileHandle}
-                        onFileHandleCreated={setWorkspaceFileHandle}
+                        selectedDirectoryHandle={workspaceDirectoryHandle}
+                        onDirectoryHandleSelected={setWorkspaceDirectoryHandle}
+                        onDirectoryHandleCreated={setWorkspaceDirectoryHandle}
+                        newFileName={WORKSPACE_FILENAME}
                         newFileContent={VM_NEW_FILE_CONTENT}
                     />
                 </Grid>

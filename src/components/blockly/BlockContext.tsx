@@ -20,6 +20,7 @@ import {
     JSON_WARNINGS_CATEGORY,
     NEW_PROJET_XML,
     ToolboxConfiguration,
+    WORKSPACE_FILENAME,
 } from "./toolbox"
 import useBlocklyEvents from "./useBlocklyEvents"
 import useBlocklyPlugins from "./useBlocklyPlugins"
@@ -56,7 +57,8 @@ export interface BlockProps {
     setWarnings: (category: string, warnings: BlockWarning[]) => void
 
     workspaceFileHandle: FileSystemFileHandle
-    setWorkspaceFileHandle: (file: FileSystemFileHandle) => void
+    workspaceDirectoryHandle: FileSystemDirectoryHandle
+    setWorkspaceDirectoryHandle: (directory: FileSystemDirectoryHandle) => void
 }
 
 const BlockContext = createContext<BlockProps>({
@@ -74,7 +76,8 @@ const BlockContext = createContext<BlockProps>({
     setWorkspaceXml: () => {},
 
     workspaceFileHandle: undefined,
-    setWorkspaceFileHandle: undefined,
+    workspaceDirectoryHandle: undefined,
+    setWorkspaceDirectoryHandle: undefined,
 })
 BlockContext.displayName = "Block"
 
@@ -91,6 +94,8 @@ export function BlockProvider(props: {
 }) {
     const { storageKey, dsls, children, onBeforeSaveWorkspaceFile } = props
     const { setError } = useContext(AppContext)
+    const [workspaceDirectoryHandle, setWorkspaceDirectoryHandle] =
+        useState<FileSystemDirectoryHandle>()
     const [workspaceFileHandle, setFileHandle] =
         useState<FileSystemFileHandle>()
     const [storedXml, setStoredXml] = useLocalStorage(
@@ -243,6 +248,14 @@ export function BlockProvider(props: {
         const newWarnings = collectWarnings(newWorkspaceJSON)
         setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
     }, [dsls, workspace, dragging, workspaceXml])
+    // track current folder
+    useEffectAsync(async () => {
+        const newWorkspaceFileHandle =
+            await workspaceDirectoryHandle?.getFileHandle(WORKSPACE_FILENAME, {
+                create: true,
+            })
+        setWorkspaceFileHandle(newWorkspaceFileHandle)
+    }, [workspaceDirectoryHandle])
     useEffectAsync(async () => {
         if (!workspaceFileHandle) return
         const file: WorkspaceFile = {
@@ -318,7 +331,8 @@ export function BlockProvider(props: {
                 setWorkspace,
                 setWorkspaceXml,
                 workspaceFileHandle,
-                setWorkspaceFileHandle,
+                workspaceDirectoryHandle,
+                setWorkspaceDirectoryHandle
             }}
         >
             {children}

@@ -9,6 +9,7 @@ import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
 import dataDsl from "../blockly/dsl/datadsl"
 import chartDsl from "../blockly/dsl/chartdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
+import { WORKSPACE_FILENAME } from "../blockly/toolbox"
 
 const DS_EDITOR_ID = "ds"
 const DS_SOURCE_STORAGE_KEY = "tools:dseditor"
@@ -18,18 +19,19 @@ const DS_NEW_FILE_CONTENT = JSON.stringify({
 } as WorkspaceFile)
 
 function DSEditorWithContext() {
-    const { workspaceFileHandle, setWorkspaceFileHandle } =
+    const { workspaceDirectoryHandle, setWorkspaceDirectoryHandle } =
         useContext(BlockContext)
 
     return (
         <Grid container direction="column" spacing={1}>
-            {!!setWorkspaceFileHandle && (
+            {!!setWorkspaceDirectoryHandle && (
                 <Grid item xs={12}>
                     <FileTabs
                         storageKey={DS_SOURCE_STORAGE_KEY}
-                        selectedFileHandle={workspaceFileHandle}
-                        onFileHandleSelected={setWorkspaceFileHandle}
-                        onFileHandleCreated={setWorkspaceFileHandle}
+                        selectedDirectoryHandle={workspaceDirectoryHandle}
+                        onDirectoryHandleSelected={setWorkspaceDirectoryHandle}
+                        onDirectoryHandleCreated={setWorkspaceDirectoryHandle}
+                        newFileName={WORKSPACE_FILENAME}
                         newFileContent={DS_NEW_FILE_CONTENT}
                     />
                 </Grid>

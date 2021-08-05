@@ -4,37 +4,57 @@ import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
 
 export default function useDirectoryFileHandles(storageKey: string) {
-    const { directory, ...rest } = useDirectoryHandle(storageKey)
+    const { directory: root, ...rest } = useDirectoryHandle(storageKey)
     const { setError } = useContext(AppContext)
-    const [files, setFiles] = useState<FileSystemFileHandle[]>([])
+
+    // root level directories
+    const [directories, setDirectories] = useState<FileSystemDirectoryHandle[]>(
+        []
+    )
+    // current project directory
+    const [directory, setDirectory] = useState<FileSystemDirectoryHandle>()
 
     const refresh = async () => {
-        const values = directory?.values()
-        const newFiles: FileSystemFileHandle[] = []
-        if (values) {
-            for await (const entry of values) {
-                if (entry.kind === "file") newFiles.push(entry)
+        // refresh list of subfolders
+        const rootValues = root?.values()
+        const newDirectories: FileSystemDirectoryHandle[] = []
+        if (rootValues) {
+            for await (const entry of rootValues) {
+                if (entry.kind === "directory") newDirectories.push(entry)
             }
         }
-        setFiles(newFiles)
-        return newFiles
+        setDirectories(newDirectories)
+
+        // refresh directory
+        const newDirectory = newDirectories?.find(
+            d => d.name === directory?.name
+        )
+        setDirectory(newDirectory)
+
+        return newDirectories
     }
 
-    const createFile = async (
-        filename: string,
-        content: string
-    ): Promise<FileSystemFileHandle> => {
+    const createDirectory = async (
+        name: string,
+        filename?: string,
+        content?: string
+    ): Promise<FileSystemDirectoryHandle> => {
+        if (!root) return undefined
         try {
-            const fileHandle = await directory.getFileHandle(filename, {
+            const handle = await root.getDirectoryHandle(filename, {
                 create: true,
             })
-            const file = await fileHandle.createWritable({
-                keepExistingData: false,
-            })
-            await file.write(content)
-            await file.close()
-            const newFiles = await refresh()
-            return newFiles.find(f => f.name === filename)
+            if (filename) {
+                const fileHandle = await handle.getFileHandle(filename, {
+                    create: true,
+                })
+                const file = await fileHandle.createWritable({
+                    keepExistingData: false,
+                })
+                await file.write(content)
+                await file.close()
+            }
+            return handle
         } catch (e) {
             setError(e)
             return undefined
@@ -46,10 +66,11 @@ export default function useDirectoryFileHandles(storageKey: string) {
     }, [directory])
 
     return {
+        root,
         directory,
-        files,
-        createFile,
-        refresh,
+        directories,
+        createDirectory,
+        refresh: () => refresh(),
         ...rest,
     }
 }
