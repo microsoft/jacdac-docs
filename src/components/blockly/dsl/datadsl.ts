@@ -713,7 +713,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_LINEAR_REGRESSION_BLOCK,
-            message0: "linear regression of x %1 y %2 %3 %4 %5 %6 %7",
+            message0: "linear regression of x %1 y %2 %3 %4 %5",
             args0: [
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
@@ -729,15 +729,6 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: DataPreviewField.KEY,
                     name: "preview",
                     compare: true,
-                },
-                <DummyInputDefinition>{
-                    type: "input_dummy",
-                },
-                {
-                    type: DataTableField.KEY,
-                    name: "table",
-                    transformed: true,
-                    small: true,
                 },
                 <DummyInputDefinition>{
                     type: "input_dummy",

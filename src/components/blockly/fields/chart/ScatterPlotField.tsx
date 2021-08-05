@@ -11,7 +11,7 @@ import { humanify } from "../../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 function ScatterPlotWidget(props: { linearRegression?: boolean }) {
     const { linearRegression } = props
     const { sourceBlock } = useContext(WorkspaceContext)
-    const { data } = useBlockData(sourceBlock)
+    const { data, transformedData } = useBlockData(sourceBlock)
     const x = tidyResolveHeader(data, sourceBlock?.getFieldValue("x"), "number")
     const y = tidyResolveHeader(data, sourceBlock?.getFieldValue("y"), "number")
     const size = tidyResolveHeader(
@@ -51,7 +51,12 @@ function ScatterPlotWidget(props: { linearRegression?: boolean }) {
         }
 
     if (linearRegression) {
+        const { slope, intercept } = (transformedData?.[0] || {}) as any
         spec = {
+            title:
+                slope !== undefined
+                    ? `slope: ${slope}, intercept: ${intercept}`
+                    : undefined,
             layer: [
                 spec,
                 {
