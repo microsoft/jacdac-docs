@@ -113,8 +113,8 @@ export default function FileTabs(props: {
     selectedDirectoryHandle: FileSystemDirectoryHandle
     onDirectoryHandleSelected: (directory: FileSystemDirectoryHandle) => void
     onDirectoryHandleCreated: (directory: FileSystemDirectoryHandle) => void
-    newFileName: string
-    newFileContent: string
+    newFileName?: string
+    newFileContent?: string
 }) {
     const {
         storageKey,
