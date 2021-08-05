@@ -5,40 +5,40 @@ import { parseCSV } from "../dsl/workers/csv.proxy"
 import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
 import { ReactFieldJSON } from "./ReactField"
 
-// inline browser-fs-access until issue of ssr is fixed
-const getFileWithHandle = async handle => {
-    const file = await handle.getFile()
-    file.handle = handle
-    return file
-}
-const fileOpen = async (options: any = {}) => {
-    const accept = {}
-    if (options.mimeTypes) {
-        options.mimeTypes.map(mimeType => {
-            accept[mimeType] = options.extensions || []
-        })
-    } else {
-        accept["*/*"] = options.extensions || []
-    }
-    const handleOrHandles = await window.showOpenFilePicker({
-        types: [
-            {
-                description: options.description || "",
-                accept: accept,
-            },
-        ],
-        multiple: options.multiple || false,
-    })
-    const files = await Promise.all(handleOrHandles.map(getFileWithHandle))
-    if (options.multiple) {
-        return files
-    }
-    return files[0]
-}
-interface FileOpenFieldValue {
-    name: string
-    source: string
-}
+// // inline browser-fs-access until issue of ssr is fixed
+// const getFileWithHandle = async handle => {
+//     const file = await handle.getFile()
+//     file.handle = handle
+//     return file
+// }
+// const fileOpen = async (options: any = {}) => {
+//     const accept = {}
+//     if (options.mimeTypes) {
+//         options.mimeTypes.map(mimeType => {
+//             accept[mimeType] = options.extensions || []
+//         })
+//     } else {
+//         accept["*/*"] = options.extensions || []
+//     }
+//     const handleOrHandles = await window.showOpenFilePicker({
+//         types: [
+//             {
+//                 description: options.description || "",
+//                 accept: accept,
+//             },
+//         ],
+//         multiple: options.multiple || false,
+//     })
+//     const files = await Promise.all(handleOrHandles.map(getFileWithHandle))
+//     if (options.multiple) {
+//         return files
+//     }
+//     return files[0]
+// }
+// interface FileOpenFieldValue {
+//     name: string
+//     source: string
+// }
 
 export default class FileOpenField extends FieldDropdown {
     static KEY = "jacdac_field_file_open"
