@@ -126,7 +126,7 @@ export default function FileTabs(props: {
     } = props
     const {
         directories,
-        directory,
+        currentDirectory,
         supported,
         showDirectoryPicker,
         clearDirectory,
@@ -147,9 +147,11 @@ export default function FileTabs(props: {
                 <Chip
                     clickable
                     avatar={<OpenInBrowserIcon />}
-                    label={directory?.name || "open directory"}
+                    label={currentDirectory?.name || "open directory"}
                     onClick={handleOpenDirectory}
-                    onDelete={directory ? handleCloseDirectory : undefined}
+                    onDelete={
+                        currentDirectory ? handleCloseDirectory : undefined
+                    }
                 />
             </Grid>
             {directories?.map(directory => (
@@ -161,7 +163,7 @@ export default function FileTabs(props: {
                     />
                 </Grid>
             ))}
-            {directory && (
+            {createDirectory && (
                 <Grid item>
                     <NewFileDialogButton
                         createDirectory={createDirectory}

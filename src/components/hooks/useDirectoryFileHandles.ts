@@ -30,7 +30,8 @@ export default function useDirectoryFileHandles(storageKey: string) {
         []
     )
     // current project directory
-    const [directory, setDirectory] = useState<FileSystemDirectoryHandle>()
+    const [currentDirectory, setCurrentDirectory] =
+        useState<FileSystemDirectoryHandle>()
 
     const refresh = async () => {
         // refresh list of subfolders
@@ -44,10 +45,16 @@ export default function useDirectoryFileHandles(storageKey: string) {
         setDirectories(newDirectories)
 
         // refresh directory
-        const newDirectory = newDirectories?.find(
-            d => d.name === directory?.name
+        const newCurrentDirectory = newDirectories?.find(
+            d => d.name === currentDirectory?.name
         )
-        setDirectory(newDirectory)
+        setCurrentDirectory(newCurrentDirectory)
+
+        console.log({
+            root,
+            directories: newDirectories,
+            currentDirectory: newCurrentDirectory,
+        })
 
         return newDirectories
     }
@@ -77,13 +84,13 @@ export default function useDirectoryFileHandles(storageKey: string) {
 
     useEffectAsync(async () => {
         await refresh()
-    }, [directory])
+    }, [currentDirectory])
 
     return {
         root,
-        directory,
+        currentDirectory,
         directories,
-        createDirectory,
+        createDirectory: root ? createDirectory : undefined,
         refresh: () => refresh(),
         ...rest,
     }
