@@ -837,15 +837,15 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     callback: (workspace: Workspace) => {
                         const services = (workspace as WorkspaceWithServices)
                             ?.jacdacServices
-                        const directory = services?.directory
+                        const directory = services?.workingDirectory
                         if (!directory)
                             alert(
                                 "You need to open a directory to import a dataset."
                             )
                         else {
-                            importCSVFilesIntoWorkspace(directory).then(() => {
-                                alert("Datasets imported!")
-                            })
+                            importCSVFilesIntoWorkspace(directory.handle)
+                                .then(() => directory.sync())
+                                .then(() => alert("Datasets imported!"))
                         }
                     },
                 },
