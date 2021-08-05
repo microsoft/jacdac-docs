@@ -27,16 +27,6 @@ export default function useDirectoryHandle(storageKey: string) {
     const [directory, setDirectory] = useState<FileSystemDirectoryHandle>()
 
     const supported = fileSystemHandleSupported()
-    const showDirectoryPicker = supported
-        ? async (options?: DirectoryPickerOptions) => {
-              try {
-                  const dir = await window.showDirectoryPicker(options)
-                  if (dir !== directory) directories.set(storageKey, dir)
-              } catch (e) {
-                  console.debug(e)
-              }
-          }
-        : undefined
     const clearDirectory = () => directories?.set(storageKey, undefined)
 
     // reload directory from DB
@@ -64,7 +54,6 @@ export default function useDirectoryHandle(storageKey: string) {
     )
     return {
         supported,
-        showDirectoryPicker,
         directory,
         clearDirectory,
     }
