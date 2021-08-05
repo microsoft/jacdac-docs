@@ -70,7 +70,7 @@ export class WorkspaceServices extends JDEventSource {
     set directory(value: FileSystemDirectoryHandle) {
         if (this._directory !== value) {
             this._directory = value
-            this.emit(CHANGE)
+            // don't notify
         }
     }
 }
