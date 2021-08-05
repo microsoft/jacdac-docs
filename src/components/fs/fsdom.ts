@@ -46,6 +46,7 @@ export class FileSystem extends JDEventSource {
             await writeFileText(fileHandle, content)
         }
         await this.root.sync()
+        this.workingDirectory = this.root.directories.find(d => d.name === name)
     }
 }
 
