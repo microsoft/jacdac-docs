@@ -663,16 +663,16 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_CORRELATION_BLOCK,
-            message0: "correlation %1 %2 %3 %4 %5",
+            message0: "correlation of %1 %2 %3 %4 %5",
             args0: [
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
-                    name: "column1",
+                    name: "x",
                     dataType: "number",
                 },
                 {
                     type: DataColumnChooserField.KEY,
-                    name: "column2",
+                    name: "y",
                     dataType: "number",
                 },
                 {
@@ -698,18 +698,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
             dataPreviewField: false,
             passthroughData: true,
             transformData: async (b: BlockSvg, data: object[]) => {
-                const column1 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column1",
-                    "number"
-                )
-                const column2 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column2",
-                    "number"
-                )
+                const column1 = tidyResolveFieldColumn(data, b, "x", "number")
+                const column2 = tidyResolveFieldColumn(data, b, "y", "number")
                 if (!column1 || !column2) return Promise.resolve([])
                 return postTransformData(<DataCorrelationRequest>{
                     type: "correlation",
@@ -722,16 +712,16 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_LINEAR_REGRESSION_BLOCK,
-            message0: "linear regression %1 %2 %3 %4 %5",
+            message0: "linear regression of x %1 y %2 %3 %4 %5",
             args0: [
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
-                    name: "column1",
+                    name: "x",
                     dataType: "number",
                 },
                 {
                     type: DataColumnChooserField.KEY,
-                    name: "column2",
+                    name: "y",
                     dataType: "number",
                 },
                 {
@@ -757,18 +747,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
             dataPreviewField: false,
             passthroughData: true,
             transformData: async (b: BlockSvg, data: object[]) => {
-                const column1 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column1",
-                    "number"
-                )
-                const column2 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column2",
-                    "number"
-                )
+                const column1 = tidyResolveFieldColumn(data, b, "x", "number")
+                const column2 = tidyResolveFieldColumn(data, b, "y", "number")
                 if (!column1 || !column2) return Promise.resolve([])
                 return postTransformData(<DataLinearRegressionRequest>{
                     type: "linear_regression",
