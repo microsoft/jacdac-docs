@@ -43,12 +43,13 @@ export default class FileOpenField extends FieldDropdown {
     static KEY = "jacdac_field_file_open"
     SERIALIZABLE = true
     filename: string
-    private _files: FileSystemFileHandle[] = []
+    private _files: FileSystemFileHandle[]
     // eslint-disable-next-line @typescript-eslint/ban-types
     private _data: object[]
 
     constructor(options?: any) {
         super(() => [["", ""]], null, options)
+        this._files = []
     }
 
     static fromJson(options: any) {
@@ -59,11 +60,11 @@ export default class FileOpenField extends FieldDropdown {
         const sourceBlock = this.getSourceBlock() as BlockWithServices
         const workspace = sourceBlock?.workspace as WorkspaceWithServices
         const services = workspace?.jacdacServices
-        this._files = (await listFiles(services.directory, ".csv")) || []
+        this._files = await listFiles(services?.directory, ".csv")
     }
 
     getOptions(): string[][] {
-        const options = this._files.map(f => [f.name, f.name])
+        const options = (this._files || []).map(f => [f.name, f.name])
         const value = this.getValue()
 
         return options.length < 1
@@ -96,7 +97,7 @@ export default class FileOpenField extends FieldDropdown {
 
     private async parseSource() {
         const filename = this.getValue()
-        const file = this._files.find(f => f === filename)
+        const file = this._files?.find(f => f === filename)
         if (file) {
             try {
                 console.debug(`file: loading ${file.name}`)
