@@ -46,6 +46,7 @@ import {
 } from "../fields/tidy"
 import DataTableField from "../fields/DataTableField"
 import DataPreviewField from "../fields/DataPreviewField"
+import ScatterPlotField from "../fields/chart/ScatterPlotField"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -712,7 +713,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_LINEAR_REGRESSION_BLOCK,
-            message0: "linear regression of x %1 y %2 %3 %4 %5",
+            message0: "linear regression of x %1 y %2 %3 %4 %5 %6 %7",
             args0: [
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
@@ -737,6 +738,14 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     name: "table",
                     transformed: true,
                     small: true,
+                },
+                <DummyInputDefinition>{
+                    type: "input_dummy",
+                },
+                {
+                    type: ScatterPlotField.KEY,
+                    name: "plot",
+                    linearRegression: true,
                 },
             ],
             inputsInline: false,
