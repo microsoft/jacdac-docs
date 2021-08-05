@@ -251,7 +251,8 @@ export function BlockProvider(props: {
     // track current folder
     useEffectAsync(async () => {
         const wws = workspace as unknown as WorkspaceWithServices
-        wws.jacdacServices.directory = workspaceDirectoryHandle
+        if (wws?.jacdacServices)
+            wws.jacdacServices.directory = workspaceDirectoryHandle
         const newWorkspaceFileHandle =
             await workspaceDirectoryHandle?.getFileHandle(WORKSPACE_FILENAME, {
                 create: true,

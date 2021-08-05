@@ -3,6 +3,7 @@ import { Block, FieldDropdown } from "blockly"
 import { listFiles, readFileText } from "../../fs/fs"
 import { parseCSV } from "../dsl/workers/csv.proxy"
 import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
+import { ReactFieldJSON } from "./ReactField"
 
 // inline browser-fs-access until issue of ssr is fixed
 const getFileWithHandle = async handle => {
@@ -42,18 +43,21 @@ interface FileOpenFieldValue {
 export default class FileOpenField extends FieldDropdown {
     static KEY = "jacdac_field_file_open"
     SERIALIZABLE = true
-    filename: string
     private _files: FileSystemFileHandle[]
     // eslint-disable-next-line @typescript-eslint/ban-types
     private _data: object[]
 
-    constructor(options?: any) {
-        super(() => [["", ""]], null, options)
+    static fromJson(options: ReactFieldJSON) {
+        return new FileOpenField(options)
+    }
+
+    constructor(options?: ReactFieldJSON) {
+        super(() => [["", ""]], undefined, options)
         this._files = []
     }
 
-    static fromJson(options: any) {
-        return new FileOpenField(options)
+    fromXml(fieldElement: Element) {
+        this.setValue(fieldElement.textContent)
     }
 
     private async syncFiles() {
@@ -74,8 +78,9 @@ export default class FileOpenField extends FieldDropdown {
             : [...options, ["", ""]]
     }
 
-    fromXml(fieldElement: Element) {
-        this.setValue(fieldElement.textContent)
+    doClassValidation_(newValue?: string) {
+        // skip super class validationervices chan
+        return newValue
     }
 
     init() {
@@ -99,7 +104,12 @@ export default class FileOpenField extends FieldDropdown {
 
     private async parseSource() {
         const filename = this.getValue()
-        const file = this._files?.find(f => f === filename)
+        const file = this._files?.find(f => f.name === filename)
+        console.log(`file open update`, {
+            filename,
+            file,
+            files: this._files?.slice(0),
+        })
         if (file) {
             try {
                 console.debug(`file: loading ${file.name}`)

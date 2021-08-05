@@ -38,9 +38,12 @@ export default class DataColumnChooserField extends FieldDropdown {
                 .filter((h, i) => !this.dataType || types[i] === this.dataType)
                 .map(h => [humanify(h), h]) || []
         const value = this.getValue()
-        return options.length < 1
-            ? [[humanify(value || ""), value || ""]]
-            : [...options, ["", ""]]
+        const r =
+            options.length < 1
+                ? [[humanify(value || ""), value || ""]]
+                : [...options, ["", ""]]
+        console.log(`options`, { r })
+        return r
     }
 
     doClassValidation_(newValue?: string) {
