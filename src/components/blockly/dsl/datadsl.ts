@@ -84,7 +84,7 @@ const [datasetColour, operatorsColour, computeColour, statisticsColour] =
     palette()
 const dataVariablesColour = "%{BKY_VARIABLES_HUE}"
 const calcOptions = [
-    "average",
+    "mean",
     "median",
     "min",
     "max",
