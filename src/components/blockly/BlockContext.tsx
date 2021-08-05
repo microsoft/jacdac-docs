@@ -203,6 +203,12 @@ export function BlockProvider(props: {
         }
     }, [workspace])
     useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const wws = workspace as unknown as WorkspaceWithServices
+        const services = wws?.jacdacServices
+        if (services) services.workingDirectory = workspaceDirectory
+    }, [workspace, workspaceDirectory])
+    useEffect(() => {
         if (!workspace || dragging) return
 
         const newWorkspaceJSON = domToJSON(workspace, dsls)
