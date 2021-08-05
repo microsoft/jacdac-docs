@@ -104,7 +104,7 @@ export default function FileTabs(props: {
     newFileContent?: string
 }) {
     const { newFileName, newFileContent } = props
-    const { fileSystem } = useContext(FileSystemContext)
+    const { fileSystem, showDirectoryPicker } = useContext(FileSystemContext)
     const root = useChange(fileSystem, _ => _?.root)
     const workingDirectory = useChange(fileSystem, _ => _?.workingDirectory)
     const directories = useChange(root, _ => _?.directories)
