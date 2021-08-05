@@ -1,4 +1,6 @@
+import { Workspace } from "blockly"
 import { SMap } from "../../../jacdac-ts/src/jdom/utils"
+import { WorkspaceWithServices } from "../blockly/WorkspaceContext"
 
 export async function writeFileText(
     fileHandle: FileSystemFileHandle,
@@ -96,4 +98,16 @@ export async function importFiles(
         })
         await writeFileText(to, content)
     }
+}
+
+
+export async function importCSVFilesIntoWorkspace(workspace: Workspace) {
+    const directory = (workspace as WorkspaceWithServices)
+        ?.jacdacServices?.directory
+    if (!directory) return
+    const files = await fileOpen({
+        multiple: true,
+        mimeTypes: { ["text/csv"]: [".csv"] },
+    })
+    importFiles(directory, files)
 }

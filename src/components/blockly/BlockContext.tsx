@@ -274,7 +274,7 @@ export function BlockProvider(props: {
     }, [editorId, workspaceFileHandle, workspaceJSON])
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = workspace as unknown as BlocklyWorkspaceWithServices
+        const ws = workspace as unknown as WorkspaceWithServices
         const services = ws?.jacdacServices
         if (services) services.workspaceJSON = workspaceJSON
     }, [workspace, workspaceJSON])

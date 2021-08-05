@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {
-    Block,
-    BlockSvg,
-    Events,
-    FieldVariable,
-    Variables,
-    Workspace,
-} from "blockly"
+import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import {
@@ -41,7 +34,7 @@ import type {
     DataCorrelationRequest,
     DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
-import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
+import { BlockWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
 import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
@@ -54,7 +47,7 @@ import {
 import DataTableField from "../fields/DataTableField"
 import DataPreviewField from "../fields/DataPreviewField"
 import ScatterPlotField from "../fields/chart/ScatterPlotField"
-import { fileOpen, importFiles } from "../../fs/fs"
+import { importCSVFilesIntoWorkspace } from "../../fs/fs"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -833,16 +826,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     kind: "button",
                     text: "Import dataset",
                     callbackKey: DATA_ADD_DATASET_CALLBACK,
-                    callback: async (workspace: Workspace) => {
-                        const directory = (workspace as WorkspaceWithServices)
-                            ?.jacdacServices?.directory
-                        if (!directory) return
-                        const files = await fileOpen({
-                            multiple: true,
-                            mimeTypes: { ["text/csv"]: [".csv"] },
-                        })
-                        importFiles(directory, files)
-                    },
+                    callback: importCSVFilesIntoWorkspace,
                 },
             ],
         },
