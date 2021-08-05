@@ -135,7 +135,7 @@ export function BlockProvider(props: {
 
     const toolboxConfiguration = useToolbox(dsls, workspaceJSON)
     const initializeBlockServices = (block: BlockWithServices) => {
-        if (block.jacdacServices?.initialized) return
+        if (block?.jacdacServices?.initialized) return
 
         let services = block.jacdacServices
         if (!services) {

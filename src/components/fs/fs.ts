@@ -105,5 +105,5 @@ export async function importCSVFilesIntoWorkspace(
         multiple: true,
         mimeTypes: { ["text/csv"]: [".csv"] },
     })
-    importFiles(directory, files)
+    await importFiles(directory, files)
 }
