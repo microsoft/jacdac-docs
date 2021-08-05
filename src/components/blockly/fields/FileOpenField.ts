@@ -66,7 +66,13 @@ export default class FileOpenField extends FieldDropdown {
         const services = workspace?.jacdacServices
         const directory = services?.directory
         this._files = await listFiles(directory, ".csv")
-        console.log(`sync files`, { directory, files: this._files })
+        console.log(`sync files`, {
+            directory,
+            file: this.getValue(),
+            files: this._files,
+            data: this._data,
+        })
+        if (!this._data) this.parseSource()
     }
 
     getOptions(): string[][] {
@@ -105,7 +111,7 @@ export default class FileOpenField extends FieldDropdown {
     private async parseSource() {
         const filename = this.getValue()
         const file = this._files?.find(f => f.name === filename)
-        console.log(`file open update`, {
+        console.log(`file source update`, {
             filename,
             file,
             files: this._files?.slice(0),
