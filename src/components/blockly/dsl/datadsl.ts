@@ -271,6 +271,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "rhs",
+                    spellcheck: false,
+                    text: "0",
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
@@ -300,6 +302,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "newcolumn",
+                    spellcheck: false,
                 },
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
@@ -357,6 +360,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "newcolumn",
+                    spellcheck: false,
                 },
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
@@ -492,6 +496,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "field_number",
                     name: "count",
                     min: 1,
+                    precision: 1,
+                    value: 100,
                 },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",

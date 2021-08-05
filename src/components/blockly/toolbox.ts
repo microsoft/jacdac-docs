@@ -34,6 +34,7 @@ export interface VariableInputDefinition extends InputDefinition {
 export interface TextInputDefinition extends InputDefinition {
     type: "field_input"
     text?: string
+    spellcheck?: boolean
 }
 
 export interface OptionsInputDefinition extends InputDefinition {
