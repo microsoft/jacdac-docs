@@ -125,9 +125,7 @@ export default function FileTabs(props: {
                     avatar={<OpenInBrowserIcon />}
                     label={root?.name || "open directory"}
                     onClick={handleOpenDirectory}
-                    onDelete={
-                        workingDirectory ? handleCloseDirectory : undefined
-                    }
+                    onDelete={root ? handleCloseDirectory : undefined}
                 />
             </Grid>
             {directories?.map(directory => (
