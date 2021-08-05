@@ -42,7 +42,6 @@ export default class DataColumnChooserField extends FieldDropdown {
             options.length < 1
                 ? [[humanify(value || ""), value || ""]]
                 : [...options, ["", ""]]
-        console.log(`options`, { r })
         return r
     }
 
