@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Block, FieldDropdown } from "blockly"
-import { readFileText } from "../../fs/fs"
+import { listFiles, readFileText } from "../../fs/fs"
 import { parseCSV } from "../dsl/workers/csv.proxy"
 import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
 
@@ -39,12 +39,11 @@ interface FileOpenFieldValue {
     source: string
 }
 
-const MAX_SIZE = 1_000_000 // 1Mb
-
 export default class FileOpenField extends FieldDropdown {
     static KEY = "jacdac_field_file_open"
     SERIALIZABLE = true
     filename: string
+    private _files: FileSystemFileHandle[] = []
     // eslint-disable-next-line @typescript-eslint/ban-types
     private _data: object[]
 
@@ -56,18 +55,15 @@ export default class FileOpenField extends FieldDropdown {
         return new FileOpenField(options)
     }
 
-    private getFiles() {
+    private async syncFiles() {
         const sourceBlock = this.getSourceBlock() as BlockWithServices
         const workspace = sourceBlock?.workspace as WorkspaceWithServices
         const services = workspace?.jacdacServices
-        return services?.files || []
+        this._files = (await listFiles(services.directory, ".csv")) || []
     }
 
     getOptions(): string[][] {
-        const files = this.getFiles()
-        const options = files
-            .filter(f => /\.csv$/i.test(f.name))
-            .map(f => [f.name, f.name])
+        const options = this._files.map(f => [f.name, f.name])
         const value = this.getValue()
 
         return options.length < 1
@@ -100,7 +96,7 @@ export default class FileOpenField extends FieldDropdown {
 
     private async parseSource() {
         const filename = this.getValue()
-        const file = this.getFiles().find(f => f.name === filename)
+        const file = this._files.find(f => f === filename)
         if (file) {
             try {
                 console.debug(`file: loading ${file.name}`)
@@ -119,6 +115,8 @@ export default class FileOpenField extends FieldDropdown {
     }
 
     private async updateData() {
+        await this.syncFiles()
+
         const block = this.getSourceBlock() as BlockWithServices
         const services = block?.jacdacServices
         if (!services) return

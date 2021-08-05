@@ -35,11 +35,15 @@ export async function listDirectories(directory: FileSystemDirectoryHandle) {
     return r
 }
 
-export async function listFiles(directory: FileSystemDirectoryHandle) {
+export async function listFiles(
+    directory: FileSystemDirectoryHandle,
+    extension?: string
+) {
     const values = directory?.values()
-    const r: FileSystemFileHandle[] = []
+    let r: FileSystemFileHandle[] = []
     for await (const entry of values) {
         if (entry.kind === "file") r.push(entry)
     }
+    if (extension) r = r.filter(f => f.name.endsWith(extension))
     return r
 }
