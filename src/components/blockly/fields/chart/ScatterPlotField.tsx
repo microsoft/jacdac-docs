@@ -25,7 +25,6 @@ function ScatterPlotWidget() {
         sliceSample: SCATTER_MAX_ITEMS,
     }
     const spec: VisualizationSpec = {
-        description: `Scatter plot of ${x}x${y}`,
         mark: { type: "point", filled: true, tooltip: true },
         encoding: {
             x: {
