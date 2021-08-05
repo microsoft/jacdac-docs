@@ -1,6 +1,6 @@
 import { useState, useContext } from "react"
 import AppContext from "../AppContext"
-import { listDirectories, listFiles } from "../fs/fs"
+import { listDirectories, listFiles, writeFileText } from "../fs/fs"
 import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
 
@@ -49,9 +49,10 @@ export default function useDirectoryFileHandles(storageKey: string) {
                 const fileHandle = await handle.getFileHandle(filename, {
                     create: true,
                 })
-                writeFileContent(fileHandle, content)
+                await writeFileText(fileHandle, content)
             }
-            return handle
+            const newDirectories = await refresh()
+            return newDirectories.find(d => d.name === handle.name)
         } catch (e) {
             setError(e)
             return undefined
