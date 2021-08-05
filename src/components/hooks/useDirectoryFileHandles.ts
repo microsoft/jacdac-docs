@@ -66,7 +66,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
     ): Promise<FileSystemDirectoryHandle> => {
         if (!root) return undefined
         try {
-            const handle = await root.getDirectoryHandle(filename, {
+            const handle = await root.getDirectoryHandle(name, {
                 create: true,
             })
             if (filename) {
