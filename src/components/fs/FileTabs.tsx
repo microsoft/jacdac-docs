@@ -8,7 +8,7 @@ import {
     DialogActions,
     Button,
 } from "@material-ui/core"
-import React, { ChangeEvent, useRef, useState } from "react"
+import React, { ChangeEvent, useEffect, useRef, useState } from "react"
 import useDirectoryFileHandles from "../hooks/useDirectoryFileHandles"
 import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
 import AddIcon from "@material-ui/icons/Add"
@@ -140,6 +140,14 @@ export default function FileTabs(props: {
     const handleCloseDirectory = clearDirectory
     const handleDirectoryHandleSelected = handle => () =>
         onDirectoryHandleSelected(handle)
+
+    // when directory change and no current directory,
+    // select first one
+    useEffect(() => {
+        if (!currentDirectory && !!directories?.length) {
+            onDirectoryHandleSelected(directories[0])
+        }
+    }, [directories])
 
     if (!supported) return null
     return (
