@@ -180,22 +180,25 @@ export const CODE_STATEMENT_TYPE = "Code"
 export const DATA_SCIENCE_STATEMENT_TYPE = "DataScienceStatement"
 
 export const MODEL_BLOCK_CLASS_STATEMENT_TYPE = "ModelBlockClassStatement"
-export const MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE = "ModelBlockPreprocessStatement"
+export const MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE =
+    "ModelBlockPreprocessStatement"
 export const MODEL_BLOCK_LAYER_STATEMENT_TYPE = "ModelBlockLayerStatement"
 
 export const TWIN_BLOCK = "jacdac_tools_twin"
 
 export const toolsColour = paletteColorByIndex(-1)
 
-export const CHART_WIDTH = 388
+export const CHART_WIDTH = 468
 export const CHART_HEIGHT = 240
 export const CHART_SVG_MAX_ITEMS = 256
 export const BAR_MAX_ITEMS = 1 << 10
 export const SCATTER_MAX_ITEMS = 1 << 13
 export const LINE_MAX_ITEMS = 1 << 10
+export const BAR_CORNER_RADIUS = 2
 
 export const TABLE_WIDTH = CHART_WIDTH
 export const TABLE_HEIGHT = 480
+export const SMALL_TABLE_HEIGHT = 128
 export const TABLE_PREVIEW_MAX_ITEMS = 48
 
 export const VM_WARNINGS_CATEGORY = "vm"
