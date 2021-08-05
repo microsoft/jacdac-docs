@@ -26,11 +26,11 @@ import useBlocklyEvents from "./useBlocklyEvents"
 import useBlocklyPlugins from "./useBlocklyPlugins"
 import useToolbox, { useToolboxButtons } from "./useToolbox"
 import {
-    BlocklyWorkspaceWithServices,
     BlockServices,
     BlockWithServices,
     FieldWithServices,
     WorkspaceServices,
+    WorkspaceWithServices,
 } from "./WorkspaceContext"
 import AppContext from "../AppContext"
 import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
@@ -228,13 +228,13 @@ export function BlockProvider(props: {
     // role manager
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = workspace as unknown as BlocklyWorkspaceWithServices
+        const ws = workspace as unknown as WorkspaceWithServices
         const services = ws?.jacdacServices
         if (services) services.roleManager = roleManager
     }, [workspace, roleManager])
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const wws = workspace as unknown as BlocklyWorkspaceWithServices
+        const wws = workspace as unknown as WorkspaceWithServices
         if (wws && !wws.jacdacServices) {
             wws.jacdacServices = new WorkspaceServices()
             wws.jacdacServices.roleManager = roleManager
@@ -332,7 +332,7 @@ export function BlockProvider(props: {
                 setWorkspaceXml,
                 workspaceFileHandle,
                 workspaceDirectoryHandle,
-                setWorkspaceDirectoryHandle
+                setWorkspaceDirectoryHandle,
             }}
         >
             {children}

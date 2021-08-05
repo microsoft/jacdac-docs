@@ -1,6 +1,6 @@
 import { useState, useContext } from "react"
 import AppContext from "../AppContext"
-import { writeFileContent } from "../fs/fs"
+import { listDirectories, listFiles } from "../fs/fs"
 import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
 
@@ -19,13 +19,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
 
     const refresh = async () => {
         // refresh list of subfolders
-        const rootValues = root?.values()
-        const newDirectories: FileSystemDirectoryHandle[] = []
-        if (rootValues) {
-            for await (const entry of rootValues) {
-                if (entry.kind === "directory") newDirectories.push(entry)
-            }
-        }
+        const newDirectories = await listDirectories(root)
         setDirectories(newDirectories)
 
         // refresh directory
@@ -35,13 +29,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
         setCurrentDirectory(newCurrentDirectory)
 
         // refresh files
-        const newCurrentFiles: FileSystemFileHandle[] = []
-        if (newCurrentDirectory) {
-            const values = newCurrentDirectory?.values()
-            for await (const entry of values) {
-                if (entry.kind === "file") newCurrentFiles.push(entry)
-            }
-        }
+        const newCurrentFiles = await listFiles(newCurrentDirectory)
         setCurrentFiles(newCurrentFiles)
 
         return newDirectories

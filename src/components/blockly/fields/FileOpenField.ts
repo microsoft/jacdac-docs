@@ -34,7 +34,6 @@ const fileOpen = async (options: any = {}) => {
     }
     return files[0]
 }
-
 interface FileOpenFieldValue {
     name: string
     source: string
@@ -78,10 +77,6 @@ export default class FileOpenField extends FieldDropdown {
 
     fromXml(fieldElement: Element) {
         this.setValue(fieldElement.textContent)
-    }
-
-    getText_() {
-        return (this.value_ as FileOpenFieldValue)?.name || "..."
     }
 
     init() {
@@ -128,22 +123,5 @@ export default class FileOpenField extends FieldDropdown {
         const services = block?.jacdacServices
         if (!services) return
         services.data = this._data
-    }
-
-    showEditor_() {
-        this.openFileHandle()
-    }
-
-    private async openFileHandle() {
-        const file = await fileOpen({
-            mimeTypes: ["text/csv"],
-            extensions: [".csv"],
-            description: "CSV data sets",
-            multiple: false,
-        })
-        if (!file) return
-        this.setValue(<FileOpenFieldValue>{
-            name: file.name,
-        })
     }
 }

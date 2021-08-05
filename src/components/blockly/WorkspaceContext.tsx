@@ -67,20 +67,9 @@ export class WorkspaceServices extends JDEventSource {
     get directory() {
         return this._directory
     }
-    get files() {
-        return this._files?.slice(0)
-    }
-    setCurrentDirectory(
-        directory: FileSystemDirectoryHandle,
-        files: FileSystemFileHandle[]
-    ) {
-        if (
-            directory !== this.directory ||
-            files.map(f => f.name).join() !==
-                this._files.map(f => f.name).join()
-        ) {
-            this._directory = directory
-            this._files = files
+    set directory(value: FileSystemDirectoryHandle) {
+        if (this._directory !== value) {
+            this._directory = value
             this.emit(CHANGE)
         }
     }
