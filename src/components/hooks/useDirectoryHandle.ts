@@ -58,7 +58,10 @@ export default function useDirectoryHandle(storageKey: string) {
                     dir = undefined
                 }
             }
-            if (dir !== directory) setDirectory(dir)
+            if (dir !== directory) {
+                console.debug(`set directory`, { storageKey, dir })
+                setDirectory(dir)
+            }
         },
         [storageKey]
     )

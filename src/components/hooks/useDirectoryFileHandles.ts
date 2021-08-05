@@ -84,7 +84,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
 
     useEffectAsync(async () => {
         await refresh()
-    }, [currentDirectory])
+    }, [root])
 
     return {
         root,

@@ -125,6 +125,7 @@ export default function FileTabs(props: {
         onDirectoryHandleCreated,
     } = props
     const {
+        root,
         directories,
         currentDirectory,
         supported,
@@ -135,8 +136,8 @@ export default function FileTabs(props: {
 
     const gridRef = useRef()
     const keyboardProps = useKeyboardNavigationProps(gridRef.current)
-    const handleOpenDirectory = () => showDirectoryPicker()
-    const handleCloseDirectory = () => clearDirectory()
+    const handleOpenDirectory = showDirectoryPicker
+    const handleCloseDirectory = clearDirectory
     const handleDirectoryHandleSelected = handle => () =>
         onDirectoryHandleSelected(handle)
 
@@ -147,7 +148,7 @@ export default function FileTabs(props: {
                 <Chip
                     clickable
                     avatar={<OpenInBrowserIcon />}
-                    label={currentDirectory?.name || "open directory"}
+                    label={root?.name || "open directory"}
                     onClick={handleOpenDirectory}
                     onDelete={
                         currentDirectory ? handleCloseDirectory : undefined
