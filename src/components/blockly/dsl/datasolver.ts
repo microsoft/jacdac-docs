@@ -40,7 +40,6 @@ export function registerDataSolver(block: BlockWithServices) {
 
             // check if pass through
             const def = resolveBlockDefinition(block.type)
-            console.log(`def`, { def })
             if (def?.passthroughData) newData = services.data
 
             if (nextServices) nextServices.data = newData
