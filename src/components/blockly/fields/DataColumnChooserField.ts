@@ -10,11 +10,12 @@ export interface DataColumnChooseOptions extends ReactFieldJSON {
 
 export default class DataColumnChooserField extends FieldDropdown {
     static KEY = "jacdac_field_data_column_chooser"
+    SERIALIZABLE = true
+    dataType: string
 
     static fromJson(options: ReactFieldJSON) {
         return new DataColumnChooserField(options)
     }
-    dataType: string
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     // the first argument is a dummy and never used

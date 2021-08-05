@@ -1,25 +1,8 @@
 import { useState, useContext } from "react"
 import AppContext from "../AppContext"
+import { writeFileContent } from "../fs/fs"
 import useEffectAsync from "../useEffectAsync"
 import useDirectoryHandle from "./useDirectoryHandle"
-
-export async function writeFileContent(
-    fileHandle: FileSystemFileHandle,
-    content: string
-) {
-    const file = await fileHandle.createWritable({
-        keepExistingData: false,
-    })
-    try {
-        await file.write(content)
-    } finally {
-        try {
-            await file.close()
-        } catch (e) {
-            console.debug(`file close error`, { e })
-        }
-    }
-}
 
 export default function useDirectoryFileHandles(storageKey: string) {
     const { directory: root, ...rest } = useDirectoryHandle(storageKey)
@@ -32,6 +15,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
     // current project directory
     const [currentDirectory, setCurrentDirectory] =
         useState<FileSystemDirectoryHandle>()
+    const [currentFiles, setCurrentFiles] = useState<FileSystemFileHandle[]>([])
 
     const refresh = async () => {
         // refresh list of subfolders
@@ -50,11 +34,15 @@ export default function useDirectoryFileHandles(storageKey: string) {
         )
         setCurrentDirectory(newCurrentDirectory)
 
-        console.log({
-            root,
-            directories: newDirectories,
-            currentDirectory: newCurrentDirectory,
-        })
+        // refresh files
+        const newCurrentFiles: FileSystemFileHandle[] = []
+        if (newCurrentDirectory) {
+            const values = newCurrentDirectory?.values()
+            for await (const entry of values) {
+                if (entry.kind === "file") newCurrentFiles.push(entry)
+            }
+        }
+        setCurrentFiles(newCurrentFiles)
 
         return newDirectories
     }
@@ -89,6 +77,7 @@ export default function useDirectoryFileHandles(storageKey: string) {
     return {
         root,
         currentDirectory,
+        currentFiles,
         directories,
         createDirectory: root ? createDirectory : undefined,
         refresh: () => refresh(),

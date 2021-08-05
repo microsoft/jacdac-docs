@@ -20,6 +20,9 @@ import useWorkspaceEvent from "./useWorkspaceEvent"
 export class WorkspaceServices extends JDEventSource {
     static readonly WORKSPACE_CHANGE = "workspaceChange"
 
+    private _directory: FileSystemDirectoryHandle
+    private _files: FileSystemFileHandle[] = []
+
     private _workspaceJSON: WorkspaceJSON
     private _runner: VMProgramRunner
     private _roleManager: RoleManager
@@ -60,9 +63,30 @@ export class WorkspaceServices extends JDEventSource {
             this.emit(CHANGE)
         }
     }
+
+    get directory() {
+        return this._directory
+    }
+    get files() {
+        return this._files?.slice(0)
+    }
+    setCurrentDirectory(
+        directory: FileSystemDirectoryHandle,
+        files: FileSystemFileHandle[]
+    ) {
+        if (
+            directory !== this.directory ||
+            files.map(f => f.name).join() !==
+                this._files.map(f => f.name).join()
+        ) {
+            this._directory = directory
+            this._files = files
+            this.emit(CHANGE)
+        }
+    }
 }
 
-export interface BlocklyWorkspaceWithServices extends WorkspaceSvg {
+export interface WorkspaceWithServices extends WorkspaceSvg {
     jacdacServices: WorkspaceServices
 }
 
@@ -160,7 +184,7 @@ export function WorkspaceProvider(props: {
     )
     const sourceId = sourceBlock?.id
     const workspace = sourceBlock?.workspace as WorkspaceSvg
-    const services = (workspace as BlocklyWorkspaceWithServices)?.jacdacServices
+    const services = (workspace as WorkspaceWithServices)?.jacdacServices
     const roleManager = useChange(services, _ => _?.roleManager)
     const runner = useChange(services, _ => _?.runner)
     const [dragging, setDragging] = useState(!!workspace?.isDragging())

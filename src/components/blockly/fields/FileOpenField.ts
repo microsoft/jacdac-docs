@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Block, Field } from "blockly"
+import { Block, FieldDropdown } from "blockly"
+import { readFileText } from "../../fs/fs"
 import { parseCSV } from "../dsl/workers/csv.proxy"
-import { BlockWithServices, FieldWithServices } from "../WorkspaceContext"
+import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
 
 // inline browser-fs-access until issue of ssr is fixed
 const getFileWithHandle = async handle => {
@@ -39,38 +40,44 @@ interface FileOpenFieldValue {
     source: string
 }
 
-const MAX_SIZE = 100_000 // 100kb
-export default class FileOpenField extends Field implements FieldWithServices {
+const MAX_SIZE = 1_000_000 // 1Mb
+
+export default class FileOpenField extends FieldDropdown {
     static KEY = "jacdac_field_file_open"
     SERIALIZABLE = true
+    filename: string
     // eslint-disable-next-line @typescript-eslint/ban-types
     private _data: object[]
-    private initialized = false
 
     constructor(options?: any) {
-        super("...", null, options)
+        super(() => [["", ""]], null, options)
     }
 
     static fromJson(options: any) {
         return new FileOpenField(options)
     }
 
-    toXml(fieldElement: Element) {
-        const text = JSON.stringify(this.value_)
-        if (text?.length < MAX_SIZE) fieldElement.textContent = text
-        else fieldElement.textContent = ""
-        return fieldElement
+    private getFiles() {
+        const sourceBlock = this.getSourceBlock() as BlockWithServices
+        const workspace = sourceBlock?.workspace as WorkspaceWithServices
+        const services = workspace?.jacdacServices
+        return services?.files || []
+    }
+
+    getOptions(): string[][] {
+        const files = this.getFiles()
+        const options = files
+            .filter(f => /\.csv$/i.test(f.name))
+            .map(f => [f.name, f.name])
+        const value = this.getValue()
+
+        return options.length < 1
+            ? [[value || "", value || ""]]
+            : [...options, ["", ""]]
     }
 
     fromXml(fieldElement: Element) {
-        try {
-            const v = JSON.parse(fieldElement.textContent)
-            this.value_ = v
-            this.parseSource()
-        } catch (e) {
-            console.log(e, { text: fieldElement.textContent })
-            this.value_ = undefined
-        }
+        this.setValue(fieldElement.textContent)
     }
 
     getText_() {
@@ -79,7 +86,6 @@ export default class FileOpenField extends Field implements FieldWithServices {
 
     init() {
         super.init()
-        this.initialized = true
         this.updateData()
     }
 
@@ -98,11 +104,22 @@ export default class FileOpenField extends Field implements FieldWithServices {
     }
 
     private async parseSource() {
-        const source = (this.value_ as FileOpenFieldValue)?.source
-        if (source) {
-            const csv = await parseCSV(source)
-            this._data = csv?.data
-            this.updateData()
+        const filename = this.getValue()
+        const file = this.getFiles().find(f => f.name === filename)
+        if (file) {
+            try {
+                console.debug(`file: loading ${file.name}`)
+                const source = await readFileText(file)
+                console.debug(`file: loaded ${(source?.length || 0) / 1024}kb`)
+                if (source) {
+                    const csv = await parseCSV(source)
+                    this._data = csv?.data
+                    this.updateData()
+                }
+            } catch (e) {
+                console.log(e)
+                this.value_ = undefined
+            }
         }
     }
 
@@ -125,13 +142,8 @@ export default class FileOpenField extends Field implements FieldWithServices {
             multiple: false,
         })
         if (!file) return
-
-        console.debug(`file: loading ${file.name}`)
-        const source = await file.text()
-        console.debug(`file: loaded ${(source?.length || 0) / 1024}kb`)
         this.setValue(<FileOpenFieldValue>{
             name: file.name,
-            source,
         })
     }
 }
