@@ -116,6 +116,7 @@ export default function FileTabs(props: {
         (fileSystem.workingDirectory = handle)
 
     if (!fileSystem) return null
+
     return (
         <Grid ref={gridRef} container spacing={1} {...keyboardProps}>
             <Grid item>
@@ -138,7 +139,7 @@ export default function FileTabs(props: {
                     />
                 </Grid>
             ))}
-            {newFileName && newFileContent && (
+            {workingDirectory && newFileName && newFileContent && (
                 <Grid item>
                     <NewFileDialogButton
                         newFileName={newFileName}

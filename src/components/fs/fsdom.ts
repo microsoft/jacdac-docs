@@ -69,7 +69,8 @@ export class FileSystemFile extends JDEventSource {
         await writeFileText(this.handle, text)
         if (this._text !== text) {
             this._text = text
-            this.emit(CHANGE)
+            // don't signal
+            // this.emit(CHANGE)
         }
     }
 
