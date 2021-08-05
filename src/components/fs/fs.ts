@@ -1,3 +1,5 @@
+import { SMap } from "../../../jacdac-ts/src/jdom/utils"
+
 export async function writeFileText(
     fileHandle: FileSystemFileHandle,
     content: string
@@ -48,4 +50,50 @@ export async function listFiles(
         }
     if (extension) r = r.filter(f => f.name.endsWith(extension))
     return r
+}
+
+export async function fileOpen(
+    options: {
+        mimeTypes?: SMap<string[]>
+        extensions?: string
+        description?: string
+        multiple?: boolean
+    } = {}
+): Promise<FileSystemFileHandle[]> {
+    const accept = {}
+    if (options.mimeTypes) {
+        Object.keys(options.mimeTypes).map(mimeType => {
+            accept[mimeType] = options.mimeTypes[mimeType]
+        })
+    } else {
+        accept["*/*"] = options.extensions || []
+    }
+    const files = await window.showOpenFilePicker({
+        types: [
+            {
+                description: options.description || "",
+                accept: accept,
+            },
+        ],
+        multiple: options.multiple || false,
+        excludeAcceptAllOption: true,
+    })
+    console.debug(`open file picker`, { files })
+    return files
+}
+
+export async function importFiles(
+    directory: FileSystemDirectoryHandle,
+    files: FileSystemFileHandle[]
+) {
+    if (!directory || !files?.length) return
+
+    for (const file of files) {
+        console.debug(`importing ${file.name} -> ${directory.name}`)
+        const content = await readFileText(file)
+        const to = await directory.getFileHandle(file.name, {
+            create: true,
+        })
+        await writeFileText(to, content)
+    }
 }

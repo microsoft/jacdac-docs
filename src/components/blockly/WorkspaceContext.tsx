@@ -21,7 +21,6 @@ export class WorkspaceServices extends JDEventSource {
     static readonly WORKSPACE_CHANGE = "workspaceChange"
 
     private _directory: FileSystemDirectoryHandle
-    private _files: FileSystemFileHandle[] = []
 
     private _workspaceJSON: WorkspaceJSON
     private _runner: VMProgramRunner

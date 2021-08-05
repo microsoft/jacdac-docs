@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
+import {
+    Block,
+    BlockSvg,
+    Events,
+    FieldVariable,
+    Variables,
+    Workspace,
+} from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import {
@@ -34,7 +41,7 @@ import type {
     DataCorrelationRequest,
     DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
-import { BlockWithServices } from "../WorkspaceContext"
+import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
 import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
@@ -47,6 +54,7 @@ import {
 import DataTableField from "../fields/DataTableField"
 import DataPreviewField from "../fields/DataPreviewField"
 import ScatterPlotField from "../fields/chart/ScatterPlotField"
+import { fileOpen, importFiles } from "../../fs/fs"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -63,6 +71,7 @@ const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
+const DATA_ADD_DATASET_CALLBACK = "data_add_dataset_variable"
 const DATA_TABLE_TYPE = "DataTable"
 const DATA_BIN_BLOCK = "data_bin"
 const DATA_CORRELATION_BLOCK = "data_correlation"
@@ -819,6 +828,21 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_SAVE_FILE_BLOCK,
+                },
+                <ButtonDefinition>{
+                    kind: "button",
+                    text: "Import dataset",
+                    callbackKey: DATA_ADD_DATASET_CALLBACK,
+                    callback: async (workspace: Workspace) => {
+                        const directory = (workspace as WorkspaceWithServices)
+                            ?.jacdacServices?.directory
+                        if (!directory) return
+                        const files = await fileOpen({
+                            multiple: true,
+                            mimeTypes: { ["text/csv"]: [".csv"] },
+                        })
+                        importFiles(directory, files)
+                    },
                 },
             ],
         },
