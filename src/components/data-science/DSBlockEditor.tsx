@@ -10,6 +10,7 @@ import dataDsl from "../blockly/dsl/datadsl"
 import chartDsl from "../blockly/dsl/chartdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import { WORKSPACE_FILENAME } from "../blockly/toolbox"
+import { FileSystemProvider } from "../FileSystemContext"
 
 const DS_EDITOR_ID = "ds"
 const DS_SOURCE_STORAGE_KEY = "tools:dseditor"
@@ -51,9 +52,11 @@ export default function DSBlockEditor() {
 
     return (
         <NoSsr>
-            <BlockProvider storageKey={DS_SOURCE_STORAGE_KEY} dsls={dsls}>
-                <DSEditorWithContext />
-            </BlockProvider>
+            <FileSystemProvider>
+                <BlockProvider storageKey={DS_SOURCE_STORAGE_KEY} dsls={dsls}>
+                    <DSEditorWithContext />
+                </BlockProvider>
+            </FileSystemProvider>
         </NoSsr>
     )
 }

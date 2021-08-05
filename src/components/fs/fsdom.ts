@@ -4,7 +4,7 @@ import { readFileText, writeFileText } from "./fs"
 
 export class FileSystem extends JDEventSource {
     private _root: FileSystemDirectory
-    private _currentDirectory: FileSystemDirectory
+    private _workingDirectory: FileSystemDirectory
 
     constructor() {
         super()
@@ -16,8 +16,36 @@ export class FileSystem extends JDEventSource {
     set root(d: FileSystemDirectory) {
         if (d !== this._root) {
             this._root = d
+            this._workingDirectory = undefined
             this.emit(CHANGE)
         }
+    }
+
+    get workingDirectory(): FileSystemDirectory {
+        return this._workingDirectory
+    }
+    set workingDirectory(d: FileSystemDirectory) {
+        if (d !== this._workingDirectory) {
+            this._workingDirectory = d
+            this.emit(CHANGE)
+        }
+    }
+
+    async createWorkingDirectory(
+        name: string,
+        filename?: string,
+        content?: string
+    ): Promise<void> {
+        const handle = await this.root.handle.getDirectoryHandle(name, {
+            create: true,
+        })
+        if (filename) {
+            const fileHandle = await handle.getFileHandle(filename, {
+                create: true,
+            })
+            await writeFileText(fileHandle, content)
+        }
+        await this.root.sync()
     }
 }
 
@@ -36,7 +64,7 @@ export class FileSystemFile extends JDEventSource {
         if (this._text === undefined) this.sync()
         return this._text
     }
-   
+
     async write(text: string) {
         await writeFileText(this.handle, text)
         if (this._text !== text) {
@@ -79,21 +107,50 @@ export class FileSystemDirectory extends JDEventSource {
         return this._files.slice(0) || []
     }
 
-    getOrCreatefile(name: string): FileSystemFile {
+    directory(
+        name: string,
+        options?: { create?: boolean }
+    ): FileSystemDirectory {
+        const existing = this._directories.find(f => f.name === name)
+        if (existing) return existing
+
+        if (options?.create) {
+            // create file in the background
+            this.handle
+                .getDirectoryHandle(name, {
+                    create: true,
+                })
+                .then(nf => {
+                    const nfn = new FileSystemDirectory(nf)
+                    this._directories.push(nfn)
+                    this._directories.sort((l, r) =>
+                        l.name.localeCompare(r.name)
+                    )
+                    this.emit(CHANGE)
+                })
+        }
+
+        // no file yet
+        return undefined
+    }
+
+    file(name: string, options?: { create?: boolean }): FileSystemFile {
         const existing = this._files.find(f => f.name === name)
         if (existing) return existing
 
-        // create file in the background
-        this.handle
-            .getFileHandle(name, {
-                create: true,
-            })
-            .then(nf => {
-                const nfn = new FileSystemFile(nf)
-                this._files.push(nfn)
-                this._files.sort((l, r) => l.name.localeCompare(r.name))
-                this.emit(CHANGE)
-            })
+        if (options?.create) {
+            // create file in the background
+            this.handle
+                .getFileHandle(name, {
+                    create: true,
+                })
+                .then(nf => {
+                    const nfn = new FileSystemFile(nf)
+                    this._files.push(nfn)
+                    this._files.sort((l, r) => l.name.localeCompare(r.name))
+                    this.emit(CHANGE)
+                })
+        }
 
         // no file yet
         return undefined

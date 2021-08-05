@@ -8,15 +8,17 @@ import {
     DialogActions,
     Button,
 } from "@material-ui/core"
-import React, { ChangeEvent, useEffect, useRef, useState } from "react"
-import useDirectoryFileHandles from "../hooks/useDirectoryFileHandles"
+import React, { ChangeEvent, useContext, useRef, useState } from "react"
 import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
 import AddIcon from "@material-ui/icons/Add"
 import { useId } from "react-use-id-hook"
 import useKeyboardNavigationProps from "../hooks/useKeyboardNavigationProps"
+import FileSystemContext from "../FileSystemContext"
+import useChange from "../../jacdac/useChange"
+import { FileSystemDirectory } from "./fsdom"
 
 function FileSystemHandleChip(props: {
-    directory: FileSystemHandle
+    directory: FileSystemDirectory
     selected?: boolean
     onClick: () => void
 }) {
@@ -33,21 +35,11 @@ function FileSystemHandleChip(props: {
 }
 
 function NewFileDialogButton(props: {
-    createDirectory: (
-        name: string,
-        filename: string,
-        content: string
-    ) => Promise<FileSystemDirectoryHandle>
     newFileName: string
     newFileContent: string
-    onDirectoryHandleCreated: (directory: FileSystemDirectoryHandle) => void
 }) {
-    const {
-        createDirectory,
-        newFileName,
-        newFileContent,
-        onDirectoryHandleCreated,
-    } = props
+    const { newFileName, newFileContent } = props
+    const { fileSystem } = useContext(FileSystemContext)
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState("")
     const valueId = useId()
@@ -59,12 +51,11 @@ function NewFileDialogButton(props: {
     const handleOk = async () => {
         setOpen(false)
         const name = value.toLocaleLowerCase().replace(/\s+/g, "")
-        const directoryHandle = await createDirectory(
+        await fileSystem.createWorkingDirectory(
             name,
             newFileName,
             newFileContent
         )
-        onDirectoryHandleCreated(directoryHandle)
     }
     const handleCancel = () => setOpen(false)
     const handleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -109,47 +100,22 @@ function NewFileDialogButton(props: {
 }
 
 export default function FileTabs(props: {
-    storageKey: string
-    selectedDirectoryHandle: FileSystemDirectoryHandle
-    onDirectoryHandleSelected: (directory: FileSystemDirectoryHandle) => void
-    onDirectoryHandleCreated: (directory: FileSystemDirectoryHandle) => void
     newFileName?: string
     newFileContent?: string
 }) {
-    const {
-        storageKey,
-        selectedDirectoryHandle: selectedFileHandle,
-        onDirectoryHandleSelected,
-        newFileName,
-        newFileContent,
-        onDirectoryHandleCreated,
-    } = props
-    const {
-        root,
-        directories,
-        currentDirectory,
-        supported,
-        showDirectoryPicker,
-        clearDirectory,
-        createDirectory,
-    } = useDirectoryFileHandles(storageKey)
-
+    const { newFileName, newFileContent } = props
+    const { fileSystem } = useContext(FileSystemContext)
+    const root = useChange(fileSystem, _ => _?.root)
+    const workingDirectory = useChange(fileSystem, _ => _?.workingDirectory)
+    const directories = useChange(root, _ => _?.directories)
     const gridRef = useRef()
     const keyboardProps = useKeyboardNavigationProps(gridRef.current)
     const handleOpenDirectory = showDirectoryPicker
-    const handleCloseDirectory = clearDirectory
+    const handleCloseDirectory = () => (fileSystem.workingDirectory = undefined)
     const handleDirectoryHandleSelected = handle => () =>
-        onDirectoryHandleSelected(handle)
+        (fileSystem.workingDirectory = handle)
 
-    // when directory change and no current directory,
-    // select first one
-    useEffect(() => {
-        if (!currentDirectory && !!directories?.length) {
-            onDirectoryHandleSelected(directories[0])
-        }
-    }, [directories])
-
-    if (!supported) return null
+    if (!fileSystem) return null
     return (
         <Grid ref={gridRef} container spacing={1} {...keyboardProps}>
             <Grid item>
@@ -159,7 +125,7 @@ export default function FileTabs(props: {
                     label={root?.name || "open directory"}
                     onClick={handleOpenDirectory}
                     onDelete={
-                        currentDirectory ? handleCloseDirectory : undefined
+                        workingDirectory ? handleCloseDirectory : undefined
                     }
                 />
             </Grid>
@@ -167,18 +133,16 @@ export default function FileTabs(props: {
                 <Grid item key={directory.name}>
                     <FileSystemHandleChip
                         directory={directory}
-                        selected={directory === selectedFileHandle}
+                        selected={directory === workingDirectory}
                         onClick={handleDirectoryHandleSelected(directory)}
                     />
                 </Grid>
             ))}
-            {createDirectory && (
+            {newFileName && newFileContent && (
                 <Grid item>
                     <NewFileDialogButton
-                        createDirectory={createDirectory}
                         newFileName={newFileName}
                         newFileContent={newFileContent}
-                        onDirectoryHandleCreated={onDirectoryHandleCreated}
                     />
                 </Grid>
             )}

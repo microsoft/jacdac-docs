@@ -14,7 +14,6 @@ import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
 import workspaceJSONToVMProgram from "./VMgenerator"
-import { BlocklyWorkspaceWithServices } from "../blockly/WorkspaceContext"
 import BlockEditor from "../blockly/BlockEditor"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import vmDsls from "./vmdsls"
@@ -22,6 +21,7 @@ import { VMStatus } from "../../../jacdac-ts/src/vm/runner"
 import { VM_WARNINGS_CATEGORY, WORKSPACE_FILENAME } from "../blockly/toolbox"
 import FileTabs from "../fs/FileTabs"
 import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
+import { FileSystemProvider } from "../FileSystemContext"
 
 const VM_EDITOR_ID = "vm"
 const VM_SOURCE_STORAGE_KEY = "tools:vmeditor"
@@ -135,17 +135,19 @@ export default function VMEditor() {
 
     return (
         <NoSsr>
-            <BlockProvider
-                storageKey={VM_SOURCE_STORAGE_KEY}
-                dsls={dsls}
-                onBeforeSaveWorkspaceFile={
-                    Flags.diagnostics
-                        ? handleOnBeforeSaveWorkspaceFile
-                        : undefined
-                }
-            >
-                <VMEditorWithContext />
-            </BlockProvider>
+            <FileSystemProvider>
+                <BlockProvider
+                    storageKey={VM_SOURCE_STORAGE_KEY}
+                    dsls={dsls}
+                    onBeforeSaveWorkspaceFile={
+                        Flags.diagnostics
+                            ? handleOnBeforeSaveWorkspaceFile
+                            : undefined
+                    }
+                >
+                    <VMEditorWithContext />
+                </BlockProvider>
+            </FileSystemProvider>
         </NoSsr>
     )
 }

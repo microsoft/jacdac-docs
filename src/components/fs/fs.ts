@@ -1,5 +1,9 @@
 import { SMap } from "../../../jacdac-ts/src/jdom/utils"
 
+export function fileSystemHandleSupported() {
+    return typeof window !== "undefined" && !!window.showDirectoryPicker
+}
+
 export async function writeFileText(
     fileHandle: FileSystemFileHandle,
     content: string

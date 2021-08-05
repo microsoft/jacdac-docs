@@ -33,13 +33,13 @@ import {
     WorkspaceWithServices,
 } from "./WorkspaceContext"
 import AppContext from "../AppContext"
-import { fileSystemHandleSupported } from "../hooks/useDirectoryHandle"
-import useFileStorage from "../hooks/useFileStorage"
 import {
     WorkspaceFile,
     WorkspaceJSON,
 } from "../../../jacdac-ts/src/dsl/workspacejson"
 import useEffectAsync from "../useEffectAsync"
+import useChange from "../../jacdac/useChange"
+import FileSystemContext from "../FileSystemContext"
 
 export interface BlockProps {
     editorId: string
@@ -55,10 +55,6 @@ export interface BlockProps {
     setWorkspace: (ws: WorkspaceSvg) => void
     setWorkspaceXml: (value: string) => void
     setWarnings: (category: string, warnings: BlockWarning[]) => void
-
-    workspaceFileHandle: FileSystemFileHandle
-    workspaceDirectoryHandle: FileSystemDirectoryHandle
-    setWorkspaceDirectoryHandle: (directory: FileSystemDirectoryHandle) => void
 }
 
 const BlockContext = createContext<BlockProps>({
@@ -74,10 +70,6 @@ const BlockContext = createContext<BlockProps>({
     setWarnings: () => {},
     setWorkspace: () => {},
     setWorkspaceXml: () => {},
-
-    workspaceFileHandle: undefined,
-    workspaceDirectoryHandle: undefined,
-    setWorkspaceDirectoryHandle: undefined,
 })
 BlockContext.displayName = "Block"
 
@@ -87,22 +79,22 @@ export default BlockContext
 
 // eslint-disable-next-line react/prop-types
 export function BlockProvider(props: {
-    storageKey?: string
+    storageKey: string
     dsls: BlockDomainSpecificLanguage[]
     onBeforeSaveWorkspaceFile?: (file: WorkspaceFile) => void
     children: ReactNode
 }) {
     const { storageKey, dsls, children, onBeforeSaveWorkspaceFile } = props
     const { setError } = useContext(AppContext)
-    const [workspaceDirectoryHandle, setWorkspaceDirectoryHandle] =
-        useState<FileSystemDirectoryHandle>()
-    const [workspaceFileHandle, setFileHandle] =
-        useState<FileSystemFileHandle>()
+    const { fileSystem } = useContext(FileSystemContext)
+    const workspaceDirectory = useChange(fileSystem, _ => _?.workingDirectory)
+    const workspaceFile = useChange(workspaceDirectory, _ =>
+        _?.file(WORKSPACE_FILENAME, { create: true })
+    )
     const [storedXml, setStoredXml] = useLocalStorage(
         storageKey,
         NEW_PROJET_XML
     )
-    const setWorkspaceFileContent = useFileStorage(workspaceFileHandle)
     const roleManager = useRoleManager()
     const [workspace, setWorkspace] = useState<WorkspaceSvg>(undefined)
     const [workspaceXml, _setWorkspaceXml] = useState<string>(storedXml)
@@ -191,34 +183,23 @@ export function BlockProvider(props: {
         }
     }
 
-    const setWorkspaceFileHandle: (f: FileSystemFileHandle) => Promise<void> =
-        fileSystemHandleSupported()
-            ? async f => {
-                  if (!f) {
-                      setFileHandle(f)
-                      return
-                  }
-
-                  try {
-                      console.debug(`reading ${f.name}`)
-                      const file = await f.getFile()
-                      const text = await file.text()
-                      const json = JSON.parse(text) as WorkspaceFile
-                      const { editor, xml } = json || {}
-                      if (editor !== editorId)
-                          throw new Error("Wrong block editor")
-                      // try loading xml into a dummy blockly workspace
-                      const dom = Xml.textToDom(xml || DEFAULT_XML)
-                      // all good, load in workspace
-                      workspace.clear()
-                      Xml.domToWorkspace(dom, workspace)
-                      setFileHandle(f)
-                  } catch (e) {
-                      setError(e)
-                      setFileHandle(undefined)
-                  }
-              }
-            : undefined
+    useChange(workspaceFile, _ => {
+        if (!_) return
+        try {
+            const text = _.text
+            const json = JSON.parse(text) as WorkspaceFile
+            const { editor, xml } = json || {}
+            if (editor !== editorId) throw new Error("Wrong block editor")
+            // try loading xml into a dummy blockly workspace
+            const dom = Xml.textToDom(xml || DEFAULT_XML)
+            // all good, load in workspace
+            workspace.clear()
+            Xml.domToWorkspace(dom, workspace)
+        } catch (e) {
+            setError(e)
+            if (fileSystem) fileSystem.workingDirectory = undefined
+        }
+    })
 
     // plugins
     useBlocklyPlugins(workspace)
@@ -248,19 +229,8 @@ export function BlockProvider(props: {
         const newWarnings = collectWarnings(newWorkspaceJSON)
         setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
     }, [dsls, workspace, dragging, workspaceXml])
-    // track current folder
     useEffectAsync(async () => {
-        const wws = workspace as unknown as WorkspaceWithServices
-        if (wws?.jacdacServices)
-            wws.jacdacServices.directory = workspaceDirectoryHandle
-        const newWorkspaceFileHandle =
-            await workspaceDirectoryHandle?.getFileHandle(WORKSPACE_FILENAME, {
-                create: true,
-            })
-        setWorkspaceFileHandle(newWorkspaceFileHandle)
-    }, [workspaceDirectoryHandle])
-    useEffectAsync(async () => {
-        if (!workspaceFileHandle) return
+        if (!workspaceFile) return
         const file: WorkspaceFile = {
             editor: editorId,
             xml: workspaceXml,
@@ -270,8 +240,8 @@ export function BlockProvider(props: {
         dsls.forEach(dsl => dsl.onBeforeSaveWorkspaceFile?.(file))
         onBeforeSaveWorkspaceFile?.(file)
         const fileContent = JSON.stringify(file)
-        await setWorkspaceFileContent(fileContent)
-    }, [editorId, workspaceFileHandle, workspaceJSON])
+        workspaceFile?.write(fileContent)
+    }, [editorId, workspaceFile, workspaceJSON])
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ws = workspace as unknown as WorkspaceWithServices
@@ -333,9 +303,6 @@ export function BlockProvider(props: {
                 setWarnings,
                 setWorkspace,
                 setWorkspaceXml,
-                workspaceFileHandle,
-                workspaceDirectoryHandle,
-                setWorkspaceDirectoryHandle,
             }}
         >
             {children}

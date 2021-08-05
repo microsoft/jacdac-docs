@@ -1,6 +1,7 @@
 import { useContext, useMemo, useState } from "react"
 import { useChangeAsync } from "../../jacdac/useChange"
 import DbContext from "../DbContext"
+import { fileSystemHandleSupported } from "../fs/fs"
 
 async function verifyPermission(fileHandle: FileSystemHandle) {
     if (!fileHandle) return false
@@ -18,10 +19,6 @@ async function verifyPermission(fileHandle: FileSystemHandle) {
     }
     // The user didn't grant permission, so return false.
     return false
-}
-
-export function fileSystemHandleSupported() {
-    return typeof window !== "undefined" && !!window.showDirectoryPicker
 }
 
 export default function useDirectoryHandle(storageKey: string) {
