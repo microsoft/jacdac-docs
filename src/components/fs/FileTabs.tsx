@@ -75,13 +75,13 @@ function NewFileDialogButton(props: {
         <>
             <Chip
                 clickable
-                label="new file..."
+                label="new project..."
                 icon={<AddIcon />}
                 onClick={handleOpen}
             />
-            <Dialog open={open}>
+            <Dialog open={open} fullWidth={true}>
                 <DialogContent>
-                    <DialogContentText>Choose a file name</DialogContentText>
+                    <DialogContentText>Choose a project name</DialogContentText>
                     <TextField
                         id={valueId}
                         value={value}
