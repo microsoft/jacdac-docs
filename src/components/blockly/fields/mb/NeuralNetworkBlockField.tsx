@@ -17,7 +17,6 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import { FieldVariable } from "blockly"
 
-import { openBlankDialog } from "../../../model-editor/ModelBlockModals"
 import { useId } from "react-use-id-hook"
 
 export interface NeuralNetworkBlockFieldValue {
@@ -26,7 +25,6 @@ export interface NeuralNetworkBlockFieldValue {
     modelSize: number
     modelCycles: number
     classes: string[]
-    learningRate: number
     optimizer: string
     batchSize: number
     numEpochs: number
@@ -49,9 +47,6 @@ function NNParameterWidget(props: {
     const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
-    const [learningRate, setLearningRate] = useState(
-        initFieldValue.learningRate
-    )
     const [optimizer, setOptimizer] = useState<string>(initFieldValue.optimizer)
     const [batchSize, setBatchSize] = useState(initFieldValue.batchSize)
     const [numEpochs, setNumEpochs] = useState(initFieldValue.numEpochs)
@@ -66,7 +61,6 @@ function NNParameterWidget(props: {
         modelSize,
         modelCycles,
         classes,
-        learningRate,
         optimizer,
         batchSize,
         numEpochs,
@@ -82,7 +76,6 @@ function NNParameterWidget(props: {
             modelSize: modelSize,
             modelCycles: modelCycles,
             classes: classes,
-            learningRate: learningRate,
             optimizer: optimizer,
             batchSize: batchSize,
             numEpochs: numEpochs,
@@ -132,16 +125,6 @@ function NNParameterWidget(props: {
         //     get the total numSamples
 
         setNumLayers(numLayers)
-    }
-
-    const handleChangedLearningRate = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const newValue = event.target.valueAsNumber
-        // Randi TODO give some sort of error message for inappropriate values
-        if (newValue && !isNaN(newValue)) {
-            setLearningRate(newValue)
-        }
     }
 
     const handleChangedEpochs = (
@@ -203,19 +186,6 @@ function NNParameterWidget(props: {
                 </Tooltip>
             </Grid>
             <Grid item>
-                <Box color="text.secondary">
-                    Learning rate
-                    <Tooltip title="Update the learning rate">
-                        <TextField
-                            id={useId() + "windowSize"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={learningRate}
-                            onChange={handleChangedLearningRate}
-                        />
-                    </Tooltip>
-                </Box>
                 <Box color="text.secondary">
                     Optimizer
                     <Tooltip title="Update the optimizer">
@@ -325,12 +295,11 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
             modelSize: 0,
             modelCycles: 0,
             classes: [],
-            learningRate: 0.001,
             optimizer: "adam",
             batchSize: 32,
             numEpochs: 200,
             lossFn: "categoricalCrossentropy",
-            metrics: "accuracy,",
+            metrics: "acc",
         }
     }
 
@@ -360,7 +329,6 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
             numLayers: msg.numLayers,
             modelCycles: msg.modelCycles,
             classes: msg.classes,
-            learningRate: msg.learningRate,
             optimizer: msg.optimizer,
             batchSize: msg.batchSize,
             numEpochs: msg.numEpochs,
