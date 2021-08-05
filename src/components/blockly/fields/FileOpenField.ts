@@ -53,26 +53,10 @@ export default class FileOpenField extends FieldDropdown {
 
     constructor(options?: ReactFieldJSON) {
         super(() => [["", ""]], undefined, options)
-        this._files = []
     }
 
     fromXml(fieldElement: Element) {
         this.setValue(fieldElement.textContent)
-    }
-
-    private async syncFiles() {
-        const sourceBlock = this.getSourceBlock() as BlockWithServices
-        const workspace = sourceBlock?.workspace as WorkspaceWithServices
-        const services = workspace?.jacdacServices
-        const directory = services?.directory
-        this._files = await listFiles(directory, ".csv")
-        console.log(`sync files`, {
-            directory,
-            file: this.getValue(),
-            files: this._files,
-            data: this._data,
-        })
-        if (!this._data) this.parseSource()
     }
 
     getOptions(): string[][] {
@@ -96,7 +80,7 @@ export default class FileOpenField extends FieldDropdown {
 
     setSourceBlock(block: Block) {
         super.setSourceBlock(block)
-        this.updateData()
+        this.syncFiles().then(() => this.updateData())
     }
 
     doValueUpdate_(newValue) {
@@ -105,7 +89,22 @@ export default class FileOpenField extends FieldDropdown {
     }
 
     notifyServicesChanged() {
-        this.updateData()
+        this.syncFiles().then(() => this.updateData())
+    }
+
+    private async syncFiles() {
+        const sourceBlock = this.getSourceBlock() as BlockWithServices
+        const workspace = sourceBlock?.workspace as WorkspaceWithServices
+        const services = workspace?.jacdacServices
+        const directory = services?.directory
+        this._files = await listFiles(directory, ".csv")
+        console.log(`sync files`, {
+            directory,
+            file: this.getValue(),
+            files: this._files,
+            data: this._data,
+        })
+        if (!this._data) this.parseSource()
     }
 
     private async parseSource() {
@@ -134,8 +133,6 @@ export default class FileOpenField extends FieldDropdown {
     }
 
     private async updateData() {
-        await this.syncFiles()
-
         const block = this.getSourceBlock() as BlockWithServices
         const services = block?.jacdacServices
         if (!services) return
