@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
+import {
+    Block,
+    BlockSvg,
+    Events,
+    FieldVariable,
+    Variables,
+    Workspace,
+    alert,
+} from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import {
@@ -34,7 +42,7 @@ import type {
     DataCorrelationRequest,
     DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
-import { BlockWithServices } from "../WorkspaceContext"
+import { BlockWithServices, WorkspaceWithServices } from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
 import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
@@ -826,7 +834,15 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     kind: "button",
                     text: "Import dataset",
                     callbackKey: DATA_ADD_DATASET_CALLBACK,
-                    callback: importCSVFilesIntoWorkspace,
+                    callback: (workspace: Workspace) => {
+                        const directory = (workspace as WorkspaceWithServices)
+                            ?.jacdacServices?.directory
+                        if (!directory)
+                            alert(
+                                "You need to open a directory to import a dataset."
+                            )
+                        else importCSVFilesIntoWorkspace(directory)
+                    },
                 },
             ],
         },
