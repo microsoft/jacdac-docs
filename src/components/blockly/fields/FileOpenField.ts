@@ -17,7 +17,7 @@ export default class FileOpenField extends FieldDropdown {
     constructor(options?: ReactFieldJSON) {
         super(() => [["", ""]], undefined, options)
     }
-
+    
     fromXml(fieldElement: Element) {
         this.setValue(fieldElement.textContent)
     }

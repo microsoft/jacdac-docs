@@ -111,7 +111,7 @@ export default function FileTabs(props: {
     const gridRef = useRef()
     const keyboardProps = useKeyboardNavigationProps(gridRef.current)
     const handleOpenDirectory = showDirectoryPicker
-    const handleCloseDirectory = () => (fileSystem.workingDirectory = undefined)
+    const handleCloseDirectory = () => (fileSystem.root = undefined)
     const handleDirectoryHandleSelected = handle => () =>
         (fileSystem.workingDirectory = handle)
 
