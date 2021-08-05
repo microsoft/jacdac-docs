@@ -65,6 +65,11 @@ export class FileSystemFile extends JDEventSource {
         return this._text
     }
 
+    async textAsync() {
+        await this.sync()
+        return this._text
+    }
+
     async write(text: string) {
         await writeFileText(this.handle, text)
         if (this._text !== text) {

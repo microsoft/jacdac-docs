@@ -182,25 +182,6 @@ export function BlockProvider(props: {
             handleBlockChange(cev.blockId)
         }
     }
-
-    useChange(workspaceFile, _ => {
-        if (!_) return
-        try {
-            const text = _.text
-            const json = JSON.parse(text) as WorkspaceFile
-            const { editor, xml } = json || {}
-            if (editor !== editorId) throw new Error("Wrong block editor")
-            // try loading xml into a dummy blockly workspace
-            const dom = Xml.textToDom(xml || DEFAULT_XML)
-            // all good, load in workspace
-            workspace.clear()
-            Xml.domToWorkspace(dom, workspace)
-        } catch (e) {
-            setError(e)
-            if (fileSystem) fileSystem.workingDirectory = undefined
-        }
-    })
-
     // plugins
     useBlocklyPlugins(workspace)
     useBlocklyEvents(workspace)
@@ -229,6 +210,28 @@ export function BlockProvider(props: {
         const newWarnings = collectWarnings(newWorkspaceJSON)
         setWarnings(JSON_WARNINGS_CATEGORY, newWarnings)
     }, [dsls, workspace, dragging, workspaceXml])
+    useEffectAsync(
+        async mounted => {
+            if (!workspaceFile) return
+            try {
+                const text = await workspaceFile.textAsync()
+                if (!mounted()) return
+
+                const json = JSON.parse(text) as WorkspaceFile
+                const { editor, xml } = json || {}
+                if (editor !== editorId) throw new Error("Wrong block editor")
+                // try loading xml into a dummy blockly workspace
+                const dom = Xml.textToDom(xml || DEFAULT_XML)
+                // all good, load in workspace
+                workspace.clear()
+                Xml.domToWorkspace(dom, workspace)
+            } catch (e) {
+                if (mounted()) setError(e)
+                if (fileSystem) fileSystem.workingDirectory = undefined
+            }
+        },
+        [workspaceFile]
+    )
     useEffectAsync(async () => {
         if (!workspaceFile) return
         const file: WorkspaceFile = {
