@@ -29,9 +29,10 @@ export async function readFileText(fileHandle: FileSystemFileHandle) {
 export async function listDirectories(directory: FileSystemDirectoryHandle) {
     const values = directory?.values()
     const r: FileSystemDirectoryHandle[] = []
-    for await (const entry of values) {
-        if (entry.kind === "directory") r.push(entry)
-    }
+    if (values)
+        for await (const entry of values) {
+            if (entry.kind === "directory") r.push(entry)
+        }
     return r
 }
 
@@ -41,9 +42,10 @@ export async function listFiles(
 ) {
     const values = directory?.values()
     let r: FileSystemFileHandle[] = []
-    for await (const entry of values) {
-        if (entry.kind === "file") r.push(entry)
-    }
+    if (values)
+        for await (const entry of values) {
+            if (entry.kind === "file") r.push(entry)
+        }
     if (extension) r = r.filter(f => f.name.endsWith(extension))
     return r
 }
