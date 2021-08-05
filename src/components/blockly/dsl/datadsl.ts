@@ -696,6 +696,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour: statisticsColour,
             template: "meta",
             dataPreviewField: false,
+            passthroughData: true,
             transformData: async (b: BlockSvg, data: object[]) => {
                 const column1 = tidyResolveFieldColumn(
                     data,
@@ -754,6 +755,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour: statisticsColour,
             template: "meta",
             dataPreviewField: false,
+            passthroughData: true,
             transformData: async (b: BlockSvg, data: object[]) => {
                 const column1 = tidyResolveFieldColumn(
                     data,
