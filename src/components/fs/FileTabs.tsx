@@ -139,7 +139,7 @@ export default function FileTabs(props: {
                     />
                 </Grid>
             ))}
-            {workingDirectory && newFileName && newFileContent && (
+            {root && newFileName && newFileContent && (
                 <Grid item>
                     <NewFileDialogButton
                         newFileName={newFileName}

@@ -94,6 +94,7 @@ export class FileSystemDirectory extends JDEventSource {
 
     constructor(readonly handle: FileSystemDirectoryHandle) {
         super()
+        this.sync()
     }
 
     get name() {
