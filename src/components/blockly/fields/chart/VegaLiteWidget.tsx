@@ -1,11 +1,11 @@
-import React, { lazy, useContext, useMemo, useState } from "react"
+import React, { lazy, useContext, useMemo, useRef, useState } from "react"
 import WorkspaceContext from "../../WorkspaceContext"
 import useBlockData from "../../useBlockData"
 import { PointerBoundary } from "../PointerBoundary"
 import Suspense from "../../../ui/Suspense"
 import { NoSsr } from "@material-ui/core"
 import { CHART_HEIGHT, CHART_SVG_MAX_ITEMS, CHART_WIDTH } from "../../toolbox"
-import type { VisualizationSpec } from "react-vega"
+import type { View, VisualizationSpec } from "react-vega"
 import type { DataSliceOptions } from "../../../../workers/data/dist/node_modules/data.worker"
 import useEffectAsync from "../../../useEffectAsync"
 import { tidyResolveHeader, tidySlice } from "./../tidy"
@@ -31,12 +31,6 @@ function jsonMergeFrom(trg: object, src: object) {
     })
 }
 
-const ACTIONS = {
-    export: { png: true, svg: true },
-    source: false,
-    compiled: false,
-    editor: false,
-}
 export default function VegaLiteWidget(props: {
     spec: VisualizationSpec
     slice?: DataSliceOptions
@@ -46,9 +40,13 @@ export default function VegaLiteWidget(props: {
     const { data } = useBlockData(sourceBlock)
     // eslint-disable-next-line @typescript-eslint/ban-types
     const [vegaData, setVegaData] = useState<{ values: object[] }>(undefined)
+    const viewRef = useRef<View>()
 
     const group = tidyResolveHeader(data, sourceBlock?.getFieldValue("group"))
     const settings = JSONTryParse(sourceBlock?.getFieldValue("settings"))
+    const handleNewView = (view: View) => (viewRef.current = view)
+
+    console.log(`view`, { view: viewRef.current })
 
     // TODO merge json
     const fullSpec = useMemo(() => {
@@ -108,13 +106,14 @@ export default function VegaLiteWidget(props: {
                 <PointerBoundary>
                     <Suspense>
                         <VegaLite
-                            actions={ACTIONS}
+                            actions={false}
                             width={CHART_WIDTH}
                             height={CHART_HEIGHT}
                             spec={fullSpec}
                             data={vegaData}
                             renderer={renderer}
                             tooltip={true}
+                            onNewView={handleNewView}
                         />
                     </Suspense>
                 </PointerBoundary>
