@@ -1,15 +1,21 @@
 import React, { useContext, useEffect, useMemo, useState } from "react"
-import { NoSsr } from "@material-ui/core"
+import { Grid, NoSsr } from "@material-ui/core"
+import FileTabs from "../fs/FileTabs"
+
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockEditor from "../blockly/BlockEditor"
-import Blockly, { FieldVariable } from "blockly"
+import Blockly from "blockly"
 import shadowDsl from "../blockly/dsl/shadowdsl"
 import modelBlockDsl, { MODEL_BLOCKS } from "./modelblockdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
-import Flags from "../../../jacdac-ts/src/jdom/flags"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
 import { visitWorkspace } from "../../../jacdac-ts/src/dsl/workspacevisitor"
 
+import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
+import { WORKSPACE_FILENAME } from "../blockly/toolbox"
+import FileSystemContext, { FileSystemProvider } from "../FileSystemContext"
+
+import Flags from "../../../jacdac-ts/src/jdom/flags"
 import Suspense from "../ui/Suspense"
 import { visitToolbox } from "../blockly/toolbox"
 import FieldDataSet from "../FieldDataSet"
@@ -23,6 +29,10 @@ import MBDataSet from "./MBDataSet"
 const MB_EDITOR_ID = "mb"
 const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
 const MB_DATA_STORAGE_KEY = "model-block-data-json"
+const MB_NEW_FILE_CONTENT = JSON.stringify({
+    editor: MB_EDITOR_ID,
+    xml: "",
+} as WorkspaceFile)
 
 function getRecordingsFromLocalStorage() {
     // check local storage for blocks
@@ -60,6 +70,8 @@ function ModelBlockEditorWithContext() {
     // block context handles hosting blockly
     const { workspace, workspaceJSON, toolboxConfiguration } =
         useContext(BlockContext)
+
+    const { fileSystem } = useContext(FileSystemContext)
 
     /* For data storage */
     const [currentDataSet, setCurrentDataSet] = useState(undefined)
@@ -233,8 +245,11 @@ function ModelBlockEditorWithContext() {
     const handleWorkspaceChange = event => {
         if (event.type == Blockly.Events.BLOCK_DELETE) {
             delete allRecordings[event.blockId]
-        }
-        if (event.type == Blockly.Events.CLICK && event.blockId) {
+        } else if (event.type == Blockly.Events.BLOCK_CREATE) {
+            const createdBlock = workspace.getBlockById(event.blockId)
+            const paramField = createdBlock.getField("expand_button")
+            //if (paramField) paramField.
+        } else if (event.type == Blockly.Events.CLICK && event.blockId) {
             const clickedBlock = workspace.getBlockById(event.blockId)
             if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
                 const command = clickedBlock.data.split(".")[1]
@@ -276,22 +291,33 @@ function ModelBlockEditorWithContext() {
     }, [workspace, workspaceJSON])
 
     return (
-        <>
-            <BlockEditor editorId={MB_EDITOR_ID} />
+        <Grid container direction="column" spacing={1}>
+            {!!fileSystem && (
+                <Grid item xs={12}>
+                    <FileTabs
+                        newFileName={WORKSPACE_FILENAME}
+                        newFileContent={MB_NEW_FILE_CONTENT}
+                    />
+                </Grid>
+            )}
+            <Grid item xs={12}>
+                <BlockEditor editorId={MB_EDITOR_ID} />
+                {Flags.diagnostics && <BlockDiagnostics />}
+                <Suspense>
+                    <ModelBlockDialogs
+                        recordDataDialogVisible={recordDataDialogVisible}
+                        trainModelDialogVisible={trainModelDialogVisible}
+                        onRecordingDone={onCloseRecordingDialog}
+                        onModelUpdate={onModelTrained}
+                        onTrainingDone={onCloseModelDialog}
+                        workspace={workspace}
+                        dataset={currentDataSet}
+                        model={currentModel}
+                    />
+                </Suspense>
+            </Grid>
             {Flags.diagnostics && <BlockDiagnostics />}
-            <Suspense>
-                <ModelBlockDialogs
-                    recordDataDialogVisible={recordDataDialogVisible}
-                    trainModelDialogVisible={trainModelDialogVisible}
-                    onRecordingDone={onCloseRecordingDialog}
-                    onModelUpdate={onModelTrained}
-                    onTrainingDone={onCloseModelDialog}
-                    workspace={workspace}
-                    dataset={currentDataSet}
-                    model={currentModel}
-                />
-            </Suspense>
-        </>
+        </Grid>
     )
 }
 
@@ -301,9 +327,11 @@ export default function ModelBlockEditor() {
     }, [])
     return (
         <NoSsr>
-            <BlockProvider storageKey={MB_SOURCE_STORAGE_KEY} dsls={dsls}>
-                <ModelBlockEditorWithContext />
-            </BlockProvider>
+            <FileSystemProvider>
+                <BlockProvider storageKey={MB_SOURCE_STORAGE_KEY} dsls={dsls}>
+                    <ModelBlockEditorWithContext />
+                </BlockProvider>
+            </FileSystemProvider>
         </NoSsr>
     )
 }
