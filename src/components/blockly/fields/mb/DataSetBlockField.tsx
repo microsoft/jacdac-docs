@@ -86,7 +86,7 @@ function DataSetParameterWidget(props: {
         while (layerBlock) {
             // get the block parameters for the recording
             const recordingParameterField = layerBlock.getField(
-                "BLOCK_PARAMS"
+                "EXPAND_BUTTON"
             ) as ReactParameterField<RecordingBlockFieldValue>
             numSamples += recordingParameterField.value.numSamples
 

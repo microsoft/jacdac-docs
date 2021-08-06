@@ -21,7 +21,6 @@ export interface ConvLayerFieldValue {
     numFilters: number
     kernelSize: number
     strideSize: number
-    padding: boolean
     activation: string
 }
 
@@ -45,13 +44,12 @@ function LayerParameterWidget(props: {
     const [numFilters, setNumFilters] = useState(initFieldValue.numFilters)
     const [kernelSize, setKernelSize] = useState(initFieldValue.kernelSize)
     const [strideSize, setStrideSize] = useState(initFieldValue.strideSize)
-    const [padding, setPadding] = useState(initFieldValue.padding)
     const [activation, setActivation] = useState(initFieldValue.activation)
 
     useEffect(() => {
         // push changes to source block after state values update
         sendUpdate()
-    }, [numFilters, kernelSize, strideSize, padding, activation])
+    }, [numFilters, kernelSize, strideSize, activation])
 
     const sendUpdate = () => {
         // push changes to field values to the parent
@@ -62,7 +60,6 @@ function LayerParameterWidget(props: {
             numFilters: numFilters,
             kernelSize: kernelSize,
             strideSize: strideSize,
-            padding: padding,
             activation: activation,
         }
         setFieldValue(updatedValue)
@@ -109,10 +106,6 @@ function LayerParameterWidget(props: {
         }
     }
 
-    const handleChangedPadding = () => {
-        setPadding(!padding)
-    }
-
     const handleChangedActivation = event => {
         const newValue = event.target.value
         if (newValue) setActivation(newValue)
@@ -156,18 +149,6 @@ function LayerParameterWidget(props: {
                             variant="outlined"
                             value={strideSize}
                             onChange={handleChangedStrides}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Padding
-                    <Tooltip title="Update whether to use padding or not">
-                        <Checkbox
-                            checked={padding}
-                            onChange={handleChangedPadding}
-                            name="paddingCheckbox"
-                            style={{ backgroundColor: "transparent" }}
-                            color="default"
                         />
                     </Tooltip>
                 </Box>
@@ -223,7 +204,6 @@ export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFi
             numFilters: 1,
             kernelSize: 1,
             strideSize: 1,
-            padding: false,
             activation: "relu",
         }
     }
@@ -238,7 +218,6 @@ export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFi
             numFilters: msg.numFilters,
             kernelSize: msg.kernelSize,
             strideSize: msg.strideSize,
-            padding: msg.padding,
             activation: msg.activation,
         }
     }
