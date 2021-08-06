@@ -331,11 +331,11 @@ export class ModelBlockDomainSpecificLanguage
                     },
                     {
                         kind: "label",
-                        text: "DataSets",
+                        text: "Datasets",
                     },
                     {
                         kind: "button",
-                        text: "Create new dataset...",
+                        text: "Create new dataset variable...",
                         callbackKey: "createNewDataSetButton",
                     },
                     {
@@ -350,7 +350,7 @@ export class ModelBlockDomainSpecificLanguage
                 contents: [
                     {
                         kind: "button",
-                        text: "Create new ML classifier...",
+                        text: "Create new classifier variable...",
                         callbackKey: "createNewClassifierButton",
                     },
                     {
