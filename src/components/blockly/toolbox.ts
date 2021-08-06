@@ -34,6 +34,7 @@ export interface VariableInputDefinition extends InputDefinition {
 export interface TextInputDefinition extends InputDefinition {
     type: "field_input"
     text?: string
+    spellcheck?: boolean
 }
 
 export interface OptionsInputDefinition extends InputDefinition {
@@ -118,6 +119,9 @@ export interface BlockDefinition extends BlockReference {
 
     // show data preview field
     dataPreviewField?: boolean | "after"
+
+    // pass original data to the next node, ignoring transformed data
+    passthroughData?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -204,6 +208,8 @@ export const TABLE_PREVIEW_MAX_ITEMS = 48
 export const VM_WARNINGS_CATEGORY = "vm"
 export const JSON_WARNINGS_CATEGORY = "json"
 export const MB_WARNINGS_CATEGORY = "mb"
+
+export const WORKSPACE_FILENAME = `blocks.json`
 
 export interface ContentDefinition {
     kind: "category" | "sep" | "button" | "label" | "block"

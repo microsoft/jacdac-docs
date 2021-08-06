@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Block, BlockSvg, Events, FieldVariable, Variables } from "blockly"
+import {
+    Block,
+    BlockSvg,
+    Events,
+    FieldVariable,
+    Variables,
+    Workspace,
+    alert,
+} from "blockly"
 import BuiltinDataSetField from "../fields/BuiltinDataSetField"
 import DataColumnChooserField from "../fields/DataColumnChooserField"
 import {
@@ -34,7 +42,10 @@ import type {
     DataCorrelationRequest,
     DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
-import { BlockWithServices } from "../WorkspaceContext"
+import {
+    BlockWithServices,
+    resolveWorkspaceServices,
+} from "../WorkspaceContext"
 import FileSaveField from "../fields/FileSaveField"
 import { saveCSV } from "./workers/csv.proxy"
 import FileOpenField from "../fields/FileOpenField"
@@ -46,6 +57,8 @@ import {
 } from "../fields/tidy"
 import DataTableField from "../fields/DataTableField"
 import DataPreviewField from "../fields/DataPreviewField"
+import ScatterPlotField from "../fields/chart/ScatterPlotField"
+import { importCSVFilesIntoWorkspace } from "../../fs/fs"
 
 const DATA_ARRANGE_BLOCK = "data_arrange"
 const DATA_SELECT_BLOCK = "data_select"
@@ -62,6 +75,7 @@ const DATA_ADD_VARIABLE_CALLBACK = "data_add_variable"
 const DATA_DATAVARIABLE_READ_BLOCK = "data_dataset_read"
 const DATA_DATAVARIABLE_WRITE_BLOCK = "data_dataset_write"
 const DATA_DATASET_BUILTIN_BLOCK = "data_dataset_builtin"
+const DATA_ADD_DATASET_CALLBACK = "data_add_dataset_variable"
 const DATA_TABLE_TYPE = "DataTable"
 const DATA_BIN_BLOCK = "data_bin"
 const DATA_CORRELATION_BLOCK = "data_correlation"
@@ -73,7 +87,7 @@ const [datasetColour, operatorsColour, computeColour, statisticsColour] =
     palette()
 const dataVariablesColour = "%{BKY_VARIABLES_HUE}"
 const calcOptions = [
-    "average",
+    "mean",
     "median",
     "min",
     "max",
@@ -271,6 +285,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "rhs",
+                    spellcheck: false,
+                    text: "0",
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
@@ -300,6 +316,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "newcolumn",
+                    spellcheck: false,
                 },
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
@@ -357,6 +374,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <TextInputDefinition>{
                     type: "field_input",
                     name: "newcolumn",
+                    spellcheck: false,
                 },
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
@@ -492,6 +510,8 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "field_number",
                     name: "count",
                     min: 1,
+                    precision: 1,
+                    value: 100,
                 },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
@@ -548,6 +568,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             kind: "block",
             type: DATA_DATASET_BUILTIN_BLOCK,
             message0: "dataset %1",
+            tooltip: "Loads a builtin dataset",
             args0: [
                 {
                     type: BuiltinDataSetField.KEY,
@@ -656,16 +677,16 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_CORRELATION_BLOCK,
-            message0: "correlation %1 %2 %3 %4 %5",
+            message0: "correlation of %1 %2 %3 %4 %5",
             args0: [
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
-                    name: "column1",
+                    name: "x",
                     dataType: "number",
                 },
                 {
                     type: DataColumnChooserField.KEY,
-                    name: "column2",
+                    name: "y",
                     dataType: "number",
                 },
                 {
@@ -689,19 +710,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour: statisticsColour,
             template: "meta",
             dataPreviewField: false,
+            passthroughData: true,
             transformData: async (b: BlockSvg, data: object[]) => {
-                const column1 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column1",
-                    "number"
-                )
-                const column2 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column2",
-                    "number"
-                )
+                const column1 = tidyResolveFieldColumn(data, b, "x", "number")
+                const column2 = tidyResolveFieldColumn(data, b, "y", "number")
                 if (!column1 || !column2) return Promise.resolve([])
                 return postTransformData(<DataCorrelationRequest>{
                     type: "correlation",
@@ -714,16 +726,16 @@ const dataDsl: BlockDomainSpecificLanguage = {
         <BlockDefinition>{
             kind: "block",
             type: DATA_LINEAR_REGRESSION_BLOCK,
-            message0: "linear regression %1 %2 %3 %4 %5",
+            message0: "linear regression of x %1 y %2 %3 %4 %5",
             args0: [
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
-                    name: "column1",
+                    name: "x",
                     dataType: "number",
                 },
                 {
                     type: DataColumnChooserField.KEY,
-                    name: "column2",
+                    name: "y",
                     dataType: "number",
                 },
                 {
@@ -735,10 +747,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "input_dummy",
                 },
                 {
-                    type: DataTableField.KEY,
-                    name: "table",
-                    transformed: true,
-                    small: true,
+                    type: ScatterPlotField.KEY,
+                    name: "plot",
+                    linearRegression: true,
                 },
             ],
             inputsInline: false,
@@ -747,19 +758,10 @@ const dataDsl: BlockDomainSpecificLanguage = {
             colour: statisticsColour,
             template: "meta",
             dataPreviewField: false,
+            passthroughData: true,
             transformData: async (b: BlockSvg, data: object[]) => {
-                const column1 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column1",
-                    "number"
-                )
-                const column2 = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column2",
-                    "number"
-                )
+                const column1 = tidyResolveFieldColumn(data, b, "x", "number")
+                const column2 = tidyResolveFieldColumn(data, b, "y", "number")
                 if (!column1 || !column2) return Promise.resolve([])
                 return postTransformData(<DataLinearRegressionRequest>{
                     type: "linear_regression",
@@ -830,6 +832,24 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_SAVE_FILE_BLOCK,
+                },
+                <ButtonDefinition>{
+                    kind: "button",
+                    text: "Import dataset",
+                    callbackKey: DATA_ADD_DATASET_CALLBACK,
+                    callback: (workspace: Workspace) => {
+                        const services = resolveWorkspaceServices(workspace)
+                        const directory = services?.workingDirectory
+                        if (!directory)
+                            alert(
+                                "You need to open a directory to import a dataset."
+                            )
+                        else {
+                            importCSVFilesIntoWorkspace(directory.handle)
+                                .then(() => directory.sync())
+                                .then(() => alert("Datasets imported!"))
+                        }
+                    },
                 },
             ],
         },
