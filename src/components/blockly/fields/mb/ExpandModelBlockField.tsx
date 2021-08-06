@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 
 import { Grid } from "@material-ui/core"
 import AddCircleIcon from "@material-ui/icons/AddCircleOutline"
@@ -22,8 +22,10 @@ import PoolingLayerBlockField from "./PoolingLayerBlockField"
 import DropoutLayerBlockField from "./DropoutLayerBlockField"
 import FlattenLayerBlockField from "./FlattenLayerBlockField"
 import KNNBlockField from "./KNNBlockField"
+import Blockly, { Block } from "blockly"
 
-const REMOVABLE_INPUT = "removable"
+const REMOVABLE_INPUT = "REMOVABLE_INPUT"
+const LAYER_INPUT = "LAYER_INPUTS"
 
 function ExpandIconWidget() {
     const { sourceBlock } = useContext(WorkspaceContext)
@@ -37,17 +39,6 @@ function ExpandIconWidget() {
         return null
     }
 
-    const [parametersVisible, setParametersVisible] = useState(() => {
-        const fieldValue = getCurrentValue()
-        if (fieldValue) {
-            const paramsVisible = fieldValue["parametersVisible"]
-            //if (paramsVisible)
-            // RANDI TODO add the new field here
-            return paramsVisible
-        }
-        return false
-    })
-
     const updateCurrentValue = (paramName: string, newParam: any) => {
         const expandField = sourceBlock.getField(
             "EXPAND_BUTTON"
@@ -58,36 +49,57 @@ function ExpandIconWidget() {
         expandField.doValueUpdate_(JSON.stringify(value))
     }
 
+    const addRemovableInput = (block: Block) => {
+        block
+            .appendDummyInput(REMOVABLE_INPUT)
+            .appendField(getBlockFieldType(block.type), "BLOCK_PARAMS")
+
+        // TODO. This is a hack, no moving blocks that are open
+        block.setMovable(false)
+
+        // make sure that the block goes before the input statement field
+        if (block.getInput(LAYER_INPUT))
+            block.moveInputBefore(REMOVABLE_INPUT, LAYER_INPUT)
+    }
+
     const getBlockFieldType = (blockType: string) => {
         const currentValue = getCurrentValue()
-        if (currentValue) {
-            switch (blockType) {
-                case MODEL_BLOCKS + "dataset":
-                    return new DataSetBlockField("", currentValue)
-                case MODEL_BLOCKS + "recording":
-                    return new RecordingBlockField("", currentValue)
-                case MODEL_BLOCKS + "smooth":
-                    return new SmoothingBlockField("", currentValue)
-                case MODEL_BLOCKS + "nn":
-                    return new NeuralNetworkBlockField("", currentValue)
-                case MODEL_BLOCKS + "conv_layer":
-                    return new ConvLayerBlockField("", currentValue)
-                case MODEL_BLOCKS + "dense_layer":
-                    return new DenseLayerBlockField("", currentValue)
-                case MODEL_BLOCKS + "dropout_layer":
-                    return new DropoutLayerBlockField("", currentValue)
-                case MODEL_BLOCKS + "flatten_layer":
-                    return new FlattenLayerBlockField("", currentValue)
-                case MODEL_BLOCKS + "max_pool_layer":
-                    return new PoolingLayerBlockField("", currentValue)
-                case MODEL_BLOCKS + "knn":
-                    return new KNNBlockField("", currentValue)
-                default:
-                    console.error("Got inappropriate input for expanding block")
-                    return null
-            }
+        switch (blockType) {
+            case MODEL_BLOCKS + "dataset":
+                return new DataSetBlockField("", currentValue)
+            case MODEL_BLOCKS + "recording":
+                return new RecordingBlockField("", currentValue)
+            case MODEL_BLOCKS + "smooth":
+                return new SmoothingBlockField("", currentValue)
+            case MODEL_BLOCKS + "nn":
+                return new NeuralNetworkBlockField("", currentValue)
+            case MODEL_BLOCKS + "conv_layer":
+                return new ConvLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "dense_layer":
+                return new DenseLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "dropout_layer":
+                return new DropoutLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "flatten_layer":
+                return new FlattenLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "max_pool_layer":
+                return new PoolingLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "knn":
+                return new KNNBlockField("", currentValue)
+            default:
+                console.error("Got inappropriate input for expanding block")
+                return null
         }
     }
+
+    const [parametersVisible, setParametersVisible] = useState(() => {
+        const fieldValue = getCurrentValue()
+        if (fieldValue) {
+            const paramsVisible = fieldValue["parametersVisible"]
+            if (paramsVisible) addRemovableInput(sourceBlock)
+            return paramsVisible
+        }
+        return false
+    })
 
     const handleExpandBlock = () => {
         const parameterField = sourceBlock.getField(
@@ -103,20 +115,15 @@ function ExpandIconWidget() {
             // identify which input to remove and remove it
             parameterField.getParentInput().name = REMOVABLE_INPUT
             sourceBlock.removeInput(REMOVABLE_INPUT)
+            // Randi TODO. This is a hack, no moving blocks that are open
+            sourceBlock.setMovable(true)
 
             // update the value of the expand button field
             updateCurrentValue("parametersVisible", false)
             setParametersVisible(false)
         } else {
             // add a removable field with the appropriate field type
-            // RANDI TODO don't add this just anywhere, add it ater the expandfieldinput
-            //    look for LAYER_INPUTS
-            sourceBlock
-                .appendDummyInput(REMOVABLE_INPUT)
-                .appendField(
-                    getBlockFieldType(sourceBlock.type),
-                    "BLOCK_PARAMS"
-                )
+            addRemovableInput(sourceBlock)
 
             // update the value of the expand button field
             updateCurrentValue("parametersVisible", true)
