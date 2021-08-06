@@ -31,6 +31,12 @@ function jsonMergeFrom(trg: object, src: object) {
     })
 }
 
+const ACTIONS = {
+    export: { png: true, svg: true },
+    source: false,
+    compiled: false,
+    editor: false,
+}
 export default function VegaLiteWidget(props: {
     spec: VisualizationSpec
     slice?: DataSliceOptions
@@ -45,8 +51,6 @@ export default function VegaLiteWidget(props: {
     const group = tidyResolveHeader(data, sourceBlock?.getFieldValue("group"))
     const settings = JSONTryParse(sourceBlock?.getFieldValue("settings"))
     const handleNewView = (view: View) => (viewRef.current = view)
-
-    console.log(`view`, { view: viewRef.current })
 
     // TODO merge json
     const fullSpec = useMemo(() => {
@@ -106,7 +110,7 @@ export default function VegaLiteWidget(props: {
                 <PointerBoundary>
                     <Suspense>
                         <VegaLite
-                            actions={false}
+                            actions={ACTIONS}
                             width={CHART_WIDTH}
                             height={CHART_HEIGHT}
                             spec={fullSpec}
