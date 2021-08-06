@@ -9,7 +9,6 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 
 export interface RecordingBlockFieldValue {
-    parametersVisible: boolean
     numSamples: number
     timestamp: number
     inputTypes: string[]
@@ -23,9 +22,6 @@ function RecordingParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [numSamples, setNumSamples] = useState(initFieldValue.numSamples)
     const [timestamp, setTimestamp] = useState(initFieldValue.timestamp)
     const [inputTypes, setInputTypes] = useState<string[]>(
@@ -51,7 +47,6 @@ function RecordingParameterWidget(props: {
 
     const sendUpdate = () => {
         const updatedFieldValue = {
-            parametersVisible: parametersVisible,
             numSamples: numSamples,
             timestamp: timestamp,
             inputTypes: inputTypes,
@@ -59,19 +54,7 @@ function RecordingParameterWidget(props: {
         setFieldValue(updatedFieldValue)
     }
 
-    useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-    }, [workspace])
 
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<RecordingBlockFieldValue>
-        setParametersVisible(parameterField.areParametersVisible())
-    }
-
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1}>
             <Grid item>
@@ -111,8 +94,10 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
     static KEY = "recording_block_field_key"
     static EDITABLE = false
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -122,25 +107,10 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             numSamples: 0,
             timestamp: 0,
             inputTypes: [],
         }
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
-        this.rerender()
     }
 
     getText_() {

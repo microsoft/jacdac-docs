@@ -7,7 +7,6 @@ import WorkspaceContext from "../../WorkspaceContext"
 import { useId } from "react-use-id-hook"
 
 export interface DropoutLayerFieldValue {
-    parametersVisible: boolean
     numTrainableParams: number
     runTimeInCycles: number
     outputShape: number[]
@@ -22,9 +21,6 @@ function LayerParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [numTrainableParams, setNumTrainableParams] = useState(
         initFieldValue.numTrainableParams
     )
@@ -44,7 +40,6 @@ function LayerParameterWidget(props: {
     const sendUpdate = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            parametersVisible: parametersVisible, // don't actually change this
             numTrainableParams: numTrainableParams, // don't actually change this
             runTimeInCycles: runTimeInCycles, // don't actually change this
             outputShape: outputShape, // don't actually change this
@@ -53,20 +48,6 @@ function LayerParameterWidget(props: {
         setFieldValue(updatedValue)
     }
 
-    useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-
-        // update should happen after model is compiled
-        updateModelParameters()
-    }, [workspace])
-
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<DropoutLayerFieldValue>
-        setParametersVisible(parameterField.areParametersVisible())
-    }
 
     const updateModelParameters = () => {
         const parameterField = sourceBlock.getField(
@@ -87,7 +68,6 @@ function LayerParameterWidget(props: {
         }
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item>
@@ -121,8 +101,10 @@ function LayerParameterWidget(props: {
 export default class DropoutLayerBlockField extends ReactParameterField<DropoutLayerFieldValue> {
     static KEY = "dropout_layer_block_field_key"
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -132,7 +114,6 @@ export default class DropoutLayerBlockField extends ReactParameterField<DropoutL
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             numTrainableParams: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
@@ -142,19 +123,6 @@ export default class DropoutLayerBlockField extends ReactParameterField<DropoutL
 
     getText_() {
         return ``
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
     }
 
     updateFieldValue(msg: DropoutLayerFieldValue) {

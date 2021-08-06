@@ -14,7 +14,6 @@ import WorkspaceContext from "../../WorkspaceContext"
 import { useId } from "react-use-id-hook"
 
 export interface DenseLayerFieldValue {
-    parametersVisible: boolean
     numTrainableParams: number
     runTimeInCycles: number
     outputShape: number[]
@@ -30,9 +29,6 @@ function LayerParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [numTrainableParams, setNumTrainableParams] = useState(
         initFieldValue.numTrainableParams
     )
@@ -53,7 +49,6 @@ function LayerParameterWidget(props: {
     const sendUpdate = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            parametersVisible: parametersVisible, // don't actually change this
             numTrainableParams: numTrainableParams, // don't actually change this
             runTimeInCycles: runTimeInCycles, // don't actually change this
             outputShape: outputShape, // don't actually change this
@@ -64,19 +59,9 @@ function LayerParameterWidget(props: {
     }
 
     useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-
         // update should happen after model is compiled
         updateModelParameters()
     }, [workspace])
-
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<DenseLayerFieldValue>
-        setParametersVisible(parameterField.areParametersVisible())
-    }
 
     const updateModelParameters = () => {
         const parameterField = sourceBlock.getField(
@@ -102,7 +87,6 @@ function LayerParameterWidget(props: {
         if (newValue) setActivation(newValue)
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item>
@@ -152,8 +136,10 @@ function LayerParameterWidget(props: {
 export default class DenseLayerBlockField extends ReactParameterField<DenseLayerFieldValue> {
     static KEY = "dense_layer_block_field_key"
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -163,7 +149,6 @@ export default class DenseLayerBlockField extends ReactParameterField<DenseLayer
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             numTrainableParams: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
@@ -176,25 +161,8 @@ export default class DenseLayerBlockField extends ReactParameterField<DenseLayer
         return ``
     }
 
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
-    }
-
     updateFieldValue(msg: DenseLayerFieldValue) {
-        this.value = {
-            ...this.value, // don't copy over visibility or params set by model compile (will cause loop)
-            numUnits: msg.numUnits,
-            activation: msg.activation,
-        }
+        this.value = msg
     }
 
     renderInlineField(): ReactNode {

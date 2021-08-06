@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
+import React, { ReactNode, useContext, useState } from "react"
 import { Grid, Box } from "@material-ui/core"
 
 import { ReactFieldJSON } from "../ReactField"
@@ -6,7 +6,6 @@ import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 
 export interface FlattenLayerFieldValue {
-    parametersVisible: boolean
     numTrainableParams: number
     runTimeInCycles: number
     outputShape: number[]
@@ -19,9 +18,6 @@ function LayerParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [numTrainableParams, setNumTrainableParams] = useState(
         initFieldValue.numTrainableParams
     )
@@ -31,21 +27,6 @@ function LayerParameterWidget(props: {
     const [outputShape, setOutputShape] = useState<number[]>(
         initFieldValue.outputShape
     )
-
-    useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-
-        // update should happen after model is compiled
-        updateModelParameters()
-    }, [workspace])
-
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<FlattenLayerFieldValue>
-        setParametersVisible(parameterField.areParametersVisible())
-    }
 
     const updateModelParameters = () => {
         const parameterField = sourceBlock.getField(
@@ -58,7 +39,6 @@ function LayerParameterWidget(props: {
         // update the number of cycles it will take to run (based on the size of this layer)
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item>
@@ -77,8 +57,10 @@ function LayerParameterWidget(props: {
 export default class FlattenLayerBlockField extends ReactParameterField<FlattenLayerFieldValue> {
     static KEY = "flatten_layer_block_field_key"
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -87,7 +69,6 @@ export default class FlattenLayerBlockField extends ReactParameterField<FlattenL
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             numTrainableParams: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
@@ -97,19 +78,6 @@ export default class FlattenLayerBlockField extends ReactParameterField<FlattenL
 
     getText_() {
         return ``
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
     }
 
     renderInlineField(): ReactNode {

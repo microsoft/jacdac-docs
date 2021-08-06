@@ -20,7 +20,6 @@ import { FieldVariable } from "blockly"
 import { useId } from "react-use-id-hook"
 
 export interface NeuralNetworkBlockFieldValue {
-    parametersVisible: boolean
     numLayers: number
     modelSize: number
     modelCycles: number
@@ -40,9 +39,6 @@ function NNParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [numLayers, setNumLayers] = useState(initFieldValue.numLayers)
     const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
@@ -71,7 +67,6 @@ function NNParameterWidget(props: {
     const sendUpdate = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            parametersVisible: parametersVisible, // don't actually change this
             numLayers: numLayers,
             modelSize: modelSize,
             modelCycles: modelCycles,
@@ -86,19 +81,9 @@ function NNParameterWidget(props: {
     }
 
     useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-
         // update based on source block's associated training dataset and parameters
         updateParameters()
     }, [workspace])
-
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<NeuralNetworkBlockFieldValue>
-        setParametersVisible(parameterField.areParametersVisible())
-    }
 
     const updateParameters = () => {
         const trainingSetField = sourceBlock.getField(
@@ -108,7 +93,7 @@ function NNParameterWidget(props: {
 
         // gather all the layers
         let numLayers = 0
-        let layerBlock = sourceBlock.getInputTargetBlock("NN_LAYERS")
+        let layerBlock = sourceBlock.getInputTargetBlock("LAYER_INPUTS")
         while (layerBlock) {
             //console.log("Randi NN next child", layerBlock.type)
             // get the block parameters for the layer
@@ -170,7 +155,6 @@ function NNParameterWidget(props: {
         sourceBlock.data = "click.train"
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item style={{ display: "inline-flex", width: 300 }}>
@@ -279,8 +263,10 @@ function NNParameterWidget(props: {
 export default class NeuralNetworkBlockField extends ReactParameterField<NeuralNetworkBlockFieldValue> {
     static KEY = "nn_block_field_key"
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -290,7 +276,6 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             numLayers: 0,
             modelSize: 0,
             modelCycles: 0,
@@ -301,19 +286,6 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
             lossFn: "categoricalCrossentropy",
             metrics: "acc",
         }
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
     }
 
     getText_() {

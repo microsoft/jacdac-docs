@@ -11,7 +11,6 @@ import WorkspaceContext from "../../WorkspaceContext"
 import { FieldVariable } from "blockly"
 
 export interface DataSetBlockFieldValue {
-    parametersVisible: boolean
     numRecordings: number
     numSamples: number
     classes: string[]
@@ -26,9 +25,6 @@ function DataSetParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [numRecordings, setNumRecordings] = useState(
         initFieldValue.numRecordings
     )
@@ -53,7 +49,6 @@ function DataSetParameterWidget(props: {
     const sendUpdate = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            parametersVisible: parametersVisible, // don't actually change this
             numRecordings: numRecordings,
             numSamples: numSamples,
             classes: classes,
@@ -63,19 +58,9 @@ function DataSetParameterWidget(props: {
     }
 
     useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-
         // update based on source block's associated recording blocks
         updateRecordings()
     }, [workspace])
-
-    const updateVisibility = () => {
-        const datasetParameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<DataSetBlockFieldValue>
-        setParametersVisible(datasetParameterField.areParametersVisible())
-    }
 
     function arraysEqual(a: any[], b: any[]) {
         if (!a || !b) return false
@@ -97,7 +82,7 @@ function DataSetParameterWidget(props: {
         const updatedClasses = []
         let updatedInputs = []
 
-        let layerBlock = sourceBlock.getInputTargetBlock("DATASET_RECORDINGS")
+        let layerBlock = sourceBlock.getInputTargetBlock("LAYER_INPUTS")
         while (layerBlock) {
             // get the block parameters for the recording
             const recordingParameterField = layerBlock.getField(
@@ -135,7 +120,6 @@ function DataSetParameterWidget(props: {
         setInputs(updatedInputs)
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item style={{ display: "inline-flex" }}>
@@ -175,8 +159,10 @@ export default class DataSetBlockField extends ReactParameterField<DataSetBlockF
     static KEY = "dataset_block_field_key"
     static EDITABLE = false
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -186,25 +172,11 @@ export default class DataSetBlockField extends ReactParameterField<DataSetBlockF
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             numRecordings: 0,
             numSamples: 0,
             classes: [],
             inputs: [],
         }
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
     }
 
     getText_() {

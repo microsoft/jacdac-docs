@@ -115,13 +115,13 @@ function ModelBlockEditorWithContext() {
         })
         return mBlocks
     }
-    useEffect(() => {
+    /*useEffect(() => {
         visitWorkspace(workspaceJSON, {
             visitBlock: block => {
                 console.log(`block ${block.type}`, { block })
             },
         })
-    }, [workspaceJSON])
+    }, [workspaceJSON])*/
     const modelBlocks = useMemo(getModelBlocks, [workspaceJSON])
     const dataSetBlocks = useMemo(getDataSetBlocks, [workspaceJSON])
 
@@ -199,7 +199,7 @@ function ModelBlockEditorWithContext() {
 
         // grab nested recording blocks and place them in the dataset
         const recordingBlock = datasetBlock?.inputs.filter(
-            input => input.name == "DATASET_RECORDINGS"
+            input => input.name == "LAYER_INPUTS"
         )[0].child
         if (recordingBlock) {
             let className = recordingBlock?.inputs[0].fields?.class_name?.value

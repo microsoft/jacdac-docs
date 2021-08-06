@@ -8,16 +8,6 @@ import {
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
 import ExpandModelBlockField from "../blockly/fields/mb/ExpandModelBlockField"
-import DataSetBlockField from "../blockly/fields/mb/DataSetBlockField"
-import RecordingBlockField from "../blockly/fields/mb/RecordingBlockField"
-import SmoothingBlockField from "../blockly/fields/mb/SmoothingBlockField"
-import KNNBlockField from "../blockly/fields/mb/KNNBlockField"
-import NeuralNetworkBlockField from "../blockly/fields/mb/NeuralNetworkBlockField"
-import ConvLayerBlockField from "../blockly/fields/mb/ConvLayerBlockField"
-import PoolingLayerBlockField from "../blockly/fields/mb/PoolingLayerBlockField"
-import DropoutLayerBlockField from "../blockly/fields/mb/DropoutLayerBlockField"
-import FlattenLayerBlockField from "../blockly/fields/mb/FlattenLayerBlockField"
-import DenseLayerBlockField from "../blockly/fields/mb/DenseLayerBlockField"
 
 export const MODEL_BLOCKS = "model_block_"
 export const MB_DATASET_VAR_TYPE = "ModelBlockDataSet"
@@ -57,15 +47,8 @@ export class ModelBlockDomainSpecificLanguage
                 message1: "%1",
                 args1: [
                     {
-                        type: DataSetBlockField.KEY,
-                        name: "BLOCK_PARAMS",
-                    },
-                ],
-                message2: "%1",
-                args2: [
-                    {
                         type: "input_statement",
-                        name: "DATASET_RECORDINGS",
+                        name: "LAYER_INPUTS",
                         check: [MODEL_BLOCK_CLASS_STATEMENT_TYPE],
                     },
                 ],
@@ -96,13 +79,6 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
-                    },
-                ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: RecordingBlockField.KEY,
-                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -138,13 +114,6 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
-                    },
-                ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: SmoothingBlockField.KEY,
-                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -189,15 +158,8 @@ export class ModelBlockDomainSpecificLanguage
                 message2: "%1",
                 args2: [
                     {
-                        type: NeuralNetworkBlockField.KEY,
-                        name: "BLOCK_PARAMS",
-                    },
-                ],
-                message3: "%1",
-                args3: [
-                    {
                         type: "input_statement",
-                        name: "NN_LAYERS",
+                        name: "LAYER_INPUTS",
                         check: [
                             MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
                             MODEL_BLOCK_LAYER_STATEMENT_TYPE,
@@ -218,13 +180,6 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
-                    },
-                ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: ConvLayerBlockField.KEY,
-                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -248,13 +203,6 @@ export class ModelBlockDomainSpecificLanguage
                         name: "EXPAND_BUTTON",
                     },
                 ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: PoolingLayerBlockField.KEY,
-                        name: "BLOCK_PARAMS",
-                    },
-                ],
                 inputsInline: false,
                 previousStatement: [
                     MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
@@ -273,13 +221,6 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
-                    },
-                ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: DropoutLayerBlockField.KEY,
-                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -302,13 +243,6 @@ export class ModelBlockDomainSpecificLanguage
                         name: "EXPAND_BUTTON",
                     },
                 ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: FlattenLayerBlockField.KEY,
-                        name: "BLOCK_PARAMS",
-                    },
-                ],
                 inputsInline: false,
                 previousStatement: [
                     MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
@@ -327,13 +261,6 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         type: ExpandModelBlockField.KEY,
                         name: "EXPAND_BUTTON",
-                    },
-                ],
-                message1: "%1",
-                args1: [
-                    {
-                        type: DenseLayerBlockField.KEY,
-                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,
@@ -376,13 +303,6 @@ export class ModelBlockDomainSpecificLanguage
                         type: "field_number",
                         name: "KNN_K_VALUE",
                         value: 3,
-                    },
-                ],
-                message2: "%1",
-                args2: [
-                    {
-                        type: KNNBlockField.KEY,
-                        name: "BLOCK_PARAMS",
                     },
                 ],
                 inputsInline: false,

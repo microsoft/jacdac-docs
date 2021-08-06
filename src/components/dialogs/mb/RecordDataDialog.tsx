@@ -40,6 +40,7 @@ import {
     MODEL_BLOCKS,
 } from "../../model-editor/modelblockdsl"
 import RecordingBlockField from "../../blockly/fields/mb/RecordingBlockField"
+import ExpandModelBlockField from "../../blockly/fields/mb/ExpandModelBlockField"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -278,16 +279,16 @@ export default function BlocklyDataRecordingDialog(props: {
             classNameField.setValue(classVar.getId())
 
             // Save recording data to block
-            const blockParamsField = newRecordingBlock.getField(
-                "BLOCK_PARAMS"
-            ) as RecordingBlockField
+            const recordingBlockField = newRecordingBlock.getField(
+                "EXPAND_BUTTON"
+            ) as ExpandModelBlockField
             const recordingBlockParams = {
                 parametersVisible: null,
                 numSamples: currentRecording.recording.length,
                 timestamp: currentRecording.recording[0].startTimestamp,
                 inputTypes: currentRecording.recording[0].headers,
             }
-            blockParamsField.updateFieldValue(recordingBlockParams)
+            recordingBlockField.updateFieldValue(recordingBlockParams)
 
             newRecordingBlock.initSvg()
             newRecordingBlock.render(false)

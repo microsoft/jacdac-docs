@@ -109,14 +109,15 @@ function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
             layer = layers.flatten()
             break
         case "model_block_dense_layer":
-            if (outputShape) {
+            if (inputShape) {
                 layer = layers.dense({
-                    units: outputShape,
+                    inputShape: inputShape,
+                    units: outputShape || params.numUnits,
                     activation: params.activation,
                 })
             } else {
                 layer = layers.dense({
-                    units: params.numUnits,
+                    units: outputShape || params.numUnits,
                     activation: params.activation,
                 })
             }
@@ -205,11 +206,9 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
     if (block == "") {
         buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
     } else {
-        console.log("Randi nn block ", block)
         // Collect layers for neural network blocks
         const layerBlock = block.inputs[3].child
         let layer = addLayer(layerBlock, model.inputShape, null)
-        console.log("Randi add first layer ", layer)
         modelLayers.add(layer)
         if (layerBlock) {
             layerBlock.children?.forEach((childBlock, idx) => {
@@ -220,7 +219,6 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
                     layer = addLayer(childBlock, null, null)
                 }
                 modelLayers.add(layer)
-                console.log("Randi add layer ", layer)
             })
         }
 
@@ -231,7 +229,6 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
             metrics: [params.metrics],
         })
 
-        console.log("Randi done adding layers ", modelLayers)
         epochs = params.numEpochs
     }
 
@@ -262,6 +259,10 @@ const handlers: {
             data.modelBlockJSON
         )
 
+        // save summary of model
+        const modelSummary = []
+        model.summary(null, null, line => modelSummary.push(line))
+
         // model.fit
         let trainingLogs = [] // space to save training loss and accuracy data
         await model
@@ -275,10 +276,6 @@ const handlers: {
             .then(info => {
                 trainingLogs = info.history.acc
             })
-
-        // save summary of model
-        const modelSummary = []
-        model.summary(null, null, line => modelSummary.push(line))
 
         // save model as model artifacts
         let mod: io.ModelArtifacts
@@ -300,12 +297,13 @@ const handlers: {
         mod.weightData = null
 
         // compile arm model for mcu
-        const armcompiled = await compileAndTest(model, {
+        /*const armcompiled = await compileAndTest(model, {
             verbose: true,
             includeTest: true,
             float16weights: false,
             optimize: true,
-        })
+        })*/
+        const armcompiled = ""
 
         // return data
         const result = {

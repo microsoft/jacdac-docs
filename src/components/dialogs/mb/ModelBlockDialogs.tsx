@@ -118,7 +118,7 @@ export function addNewClassifier(workspace) {
 
                 // create new dataset block on the workspace
                 const newBlock = workspace.newBlock(
-                    MODEL_BLOCKS + "knn"
+                    MODEL_BLOCKS + "nn"
                 ) as BlockSvg
 
                 // automatically insert the variable name into the new block

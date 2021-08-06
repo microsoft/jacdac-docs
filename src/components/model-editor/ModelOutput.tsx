@@ -84,12 +84,8 @@ export default function ModelOutput(props: {
         )
     )
 
-    const [pageReady, setPageReady] = useState(false)
     useEffect(() => {
-        if (!pageReady) {
-            prepareTestingLogs()
-            setPageReady(true)
-        }
+        prepareTestingLogs()
     }, [])
 
     /* For loading page */
@@ -298,13 +294,12 @@ export default function ModelOutput(props: {
     }
 
     const [expanded, setExpanded] = React.useState<string | false>(false)
-    const handleExpandedSummaryChange =
+    const handleExpandedSensorsChange =
         (panel: string) =>
         (event: React.ChangeEvent<unknown>, isExpanded: boolean) => {
             setExpanded(isExpanded ? panel : false)
         }
 
-    if (!pageReady) return null
     return (
         <Grid container direction={"column"}>
             <Grid item>
@@ -360,7 +355,7 @@ export default function ModelOutput(props: {
                 </div>
                 <Accordion
                     expanded={expanded === "chooseSensors"}
-                    onChange={handleExpandedSummaryChange("chooseSensors")}
+                    onChange={handleExpandedSensorsChange("chooseSensors")}
                 >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <div>

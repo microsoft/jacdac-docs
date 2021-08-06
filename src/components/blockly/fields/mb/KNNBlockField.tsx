@@ -10,7 +10,6 @@ import WorkspaceContext from "../../WorkspaceContext"
 import { FieldNumber, FieldVariable } from "blockly"
 
 export interface KNNBlockFieldValue {
-    parametersVisible: boolean
     modelSize: number
     modelCycles: number
     classes: string[]
@@ -23,10 +22,7 @@ function KNNParameterWidget(props: {
     const { initFieldValue, setFieldValue } = props
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
-
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
+    
     const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
@@ -39,27 +35,11 @@ function KNNParameterWidget(props: {
     const sendUpdate = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            parametersVisible: parametersVisible, // don't actually change this
             modelSize: modelSize,
             modelCycles: modelCycles,
             classes: classes,
         }
         setFieldValue(updatedValue)
-    }
-
-    useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-
-        // update based on source block's associated training dataset and k value
-        updateParameters()
-    }, [workspace])
-
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<KNNBlockField>
-        setParametersVisible(parameterField.areParametersVisible())
     }
 
     const updateParameters = () => {
@@ -73,18 +53,14 @@ function KNNParameterWidget(props: {
             kValueField,
         })
 
-        // find the associated dataset and...
-        //     copy the class labels parameter
-        //     get the total numSamples
         // calculate how quickly the model should run given the size of K and number of samples
-        // calcualte how large the model is given the number of samples
+        // calculate how large the model is given the number of samples
     }
 
     const handleViewModel = () => {
         console.log("Open KNN classifier modal")
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item>
@@ -114,8 +90,10 @@ export default class KNNBlockField extends ReactParameterField<KNNBlockFieldValu
     static KEY = "knn_block_field_key"
     static EDITABLE = false
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -125,24 +103,10 @@ export default class KNNBlockField extends ReactParameterField<KNNBlockFieldValu
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             modelSize: 0,
             modelCycles: 0,
             classes: [],
         }
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
     }
 
     getText_() {

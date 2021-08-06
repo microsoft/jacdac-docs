@@ -7,7 +7,6 @@ import WorkspaceContext from "../../WorkspaceContext"
 import { useId } from "react-use-id-hook"
 
 export interface SmoothingBlockFieldValue {
-    parametersVisible: boolean
     windowSize: number
     strideSize: number
 }
@@ -20,23 +19,8 @@ function SmoothingParameterWidget(props: {
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
-    const [parametersVisible, setParametersVisible] = useState(
-        initFieldValue.parametersVisible
-    )
     const [windowSize, setWindowSize] = useState(initFieldValue.windowSize)
     const [strideSize, setStrideSize] = useState(initFieldValue.strideSize)
-
-    useEffect(() => {
-        // update based on source block's parameter visibility field
-        updateVisibility()
-    }, [workspace])
-
-    const updateVisibility = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<SmoothingBlockFieldValue>
-        setParametersVisible(parameterField.areParametersVisible())
-    }
 
     const handleChangedWindow = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -65,7 +49,6 @@ function SmoothingParameterWidget(props: {
 
     const sendUpdate = () => {
         const updatedValue = {
-            parametersVisible: parametersVisible, // don't actually change this
             windowSize: windowSize,
             strideSize: strideSize,
         }
@@ -73,7 +56,6 @@ function SmoothingParameterWidget(props: {
         setFieldValue(updatedValue)
     }
 
-    if (!parametersVisible) return null
     return (
         <Grid container spacing={1}>
             <Grid item>
@@ -111,8 +93,10 @@ function SmoothingParameterWidget(props: {
 export default class SmoothingBlockField extends ReactParameterField<SmoothingBlockFieldValue> {
     static KEY = "smoothing_block_field_key"
 
-    constructor(value: string) {
+    constructor(value: string, previousValue?: any) {
         super(value)
+        if (previousValue)
+            this.value = { ...this.defaultValue, ...previousValue }
         this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
@@ -122,23 +106,9 @@ export default class SmoothingBlockField extends ReactParameterField<SmoothingBl
 
     get defaultValue() {
         return {
-            parametersVisible: false,
             windowSize: 3,
             strideSize: 3,
         }
-    }
-
-    areParametersVisible() {
-        const { parametersVisible } = this.value
-        return parametersVisible
-    }
-
-    setParametersVisible(visible) {
-        const updatedValue = {
-            ...this.value,
-            parametersVisible: visible,
-        }
-        this.value = updatedValue
     }
 
     getText_() {
