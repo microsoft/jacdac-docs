@@ -28,15 +28,28 @@ export interface TFModelObj {
 
 export interface TFModelMessage {
     worker: "tf"
+    type?: string
     id?: string
     data?: any
 }
 
-export interface TFModelRequestResponse extends TFModelMessage {
-    type?: string
+export interface TFModelCompileRequest extends TFModelMessage {
+    type: "compile"
+    data: {
+        modelBlockJSON: string
+        model: TFModelObj
+    }
 }
 
-export interface TFModelTrainRequest extends TFModelRequestResponse {
+export interface TFModelCompileResponse extends TFModelMessage {
+    type: "compile"
+    data: {
+        modelJSON: string
+        modelSummary: string[]
+    }
+}
+
+export interface TFModelTrainRequest extends TFModelMessage {
     type: "train"
     data: {
         modelBlockJSON: string
@@ -46,18 +59,18 @@ export interface TFModelTrainRequest extends TFModelRequestResponse {
     }
 }
 
-export interface TFModelTrainResponse extends TFModelRequestResponse {
+export interface TFModelTrainResponse extends TFModelMessage {
     type: "train"
     data: {
-        modelJSON: string
+        modelJSON: string // Randi TODO remove
         modelWeights: ArrayBuffer
-        modelSummary: string[]
+        modelSummary: string[] // Randi TODO remove
         trainingLogs: number[]
         armModel: string
     }
 }
 
-export interface TFModelPredictRequest extends TFModelRequestResponse {
+export interface TFModelPredictRequest extends TFModelMessage {
     type: "predict"
     data: {
         model: TFModelObj
@@ -65,7 +78,7 @@ export interface TFModelPredictRequest extends TFModelRequestResponse {
     }
 }
 
-export interface TFModelPredictResponse extends TFModelRequestResponse {
+export interface TFModelPredictResponse extends TFModelMessage {
     type: "predict"
     data: {
         prediction: number[]
@@ -74,7 +87,7 @@ export interface TFModelPredictResponse extends TFModelRequestResponse {
 
 function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
     let layer
-    const params = layerObj.inputs[1].fields.block_params.value
+    const params = layerObj.inputs[0].fields.expand_button.value
     switch (layerObj.type) {
         case "model_block_conv_layer":
             if (inputShape) {
@@ -207,7 +220,10 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
         buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
     } else {
         // Collect layers for neural network blocks
-        const layerBlock = block.inputs[3].child
+        const layerBlock = block.inputs.filter(
+            input => input.name == "LAYER_INPUTS"
+        )[0].child
+        console.log("Randi layer block ", layerBlock)
         let layer = addLayer(layerBlock, model.inputShape, null)
         modelLayers.add(layer)
         if (layerBlock) {
@@ -222,7 +238,7 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
             })
         }
 
-        const params = block.inputs[2].fields.block_params.value
+        const params = block.inputs[1].fields.expand_button.value
         modelLayers.compile({
             loss: params.lossFn,
             optimizer: params.optimizer,
@@ -239,6 +255,41 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
 const handlers: {
     [index: string]: (props: TFModelMessage) => Promise<TFModelMessage>
 } = {
+    compile: async (props: TFModelCompileRequest) => {
+        const { data } = props
+
+        // get model
+        const { epochs, model } = buildModelFromJSON(
+            data.model,
+            data.modelBlockJSON
+        )
+
+        // save summary of model
+        const modelSummary = []
+        model.summary(null, null, line => modelSummary.push(line))
+
+        // save model as model artifacts
+        let mod: io.ModelArtifacts
+        await model.save({
+            save: m => {
+                mod = m
+                const res: io.SaveResult = {
+                    modelArtifactsInfo: {
+                        dateSaved: new Date(),
+                        modelTopologyType: "JSON",
+                    },
+                }
+                return Promise.resolve(res)
+            },
+        })
+
+        // return data
+        const result = {
+            modelJSON: JSON.stringify(mod),
+            modelSummary: modelSummary,
+        }
+        return { ...props, data: result }
+    },
     train: async (props: TFModelTrainRequest) => {
         const { data } = props
 
@@ -340,7 +391,7 @@ const handlers: {
     },
 }
 
-async function dispatchAsyncMessages(message: TFModelRequestResponse) {
+async function dispatchAsyncMessages(message: TFModelMessage) {
     try {
         const handler = handlers[message.type]
         return await handler?.(message)
@@ -351,7 +402,7 @@ async function dispatchAsyncMessages(message: TFModelRequestResponse) {
 }
 
 async function handleMessage(event: MessageEvent) {
-    const message: TFModelRequestResponse = event.data
+    const message: TFModelMessage = event.data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { worker, ...rest } = message
     if (worker !== "tf") return
