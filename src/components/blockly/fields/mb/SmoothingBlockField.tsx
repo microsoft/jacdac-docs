@@ -104,6 +104,7 @@ export default class SmoothingBlockField extends ReactParameterField<SmoothingBl
         return new SmoothingBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             windowSize: 3,

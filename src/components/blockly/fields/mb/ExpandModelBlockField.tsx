@@ -49,7 +49,7 @@ function ExpandIconWidget() {
         expandField.doValueUpdate_(JSON.stringify(value))
     }
 
-    const addRemovableInput = (block: Block) => {
+    const appendParamInput = (block: Block) => {
         block
             .appendDummyInput(REMOVABLE_INPUT)
             .appendField(getBlockFieldType(block.type), "BLOCK_PARAMS")
@@ -95,7 +95,7 @@ function ExpandIconWidget() {
         const fieldValue = getCurrentValue()
         if (fieldValue) {
             const paramsVisible = fieldValue["parametersVisible"]
-            if (paramsVisible) addRemovableInput(sourceBlock)
+            if (paramsVisible) appendParamInput(sourceBlock)
             return paramsVisible
         }
         return false
@@ -123,7 +123,7 @@ function ExpandIconWidget() {
             setParametersVisible(false)
         } else {
             // add a removable field with the appropriate field type
-            addRemovableInput(sourceBlock)
+            appendParamInput(sourceBlock)
 
             // update the value of the expand button field
             updateCurrentValue("parametersVisible", true)

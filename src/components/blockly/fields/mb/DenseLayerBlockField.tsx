@@ -91,7 +91,7 @@ function LayerParameterWidget(props: {
         <Grid container spacing={1} direction={"row"}>
             <Grid item>
                 <Box color="text.secondary">
-                    No. of filters
+                    Units
                     <Tooltip title="Update the number of units">
                         <TextField
                             id={useId() + "filters"}
@@ -147,6 +147,7 @@ export default class DenseLayerBlockField extends ReactParameterField<DenseLayer
         return new DenseLayerBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numTrainableParams: 0,

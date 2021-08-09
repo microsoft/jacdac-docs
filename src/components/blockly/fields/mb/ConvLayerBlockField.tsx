@@ -115,7 +115,7 @@ function LayerParameterWidget(props: {
         <Grid container spacing={1} direction={"row"}>
             <Grid item>
                 <Box color="text.secondary">
-                    No. of filters
+                    filters
                     <Tooltip title="Update the kernel size">
                         <TextField
                             id={useId() + "filters"}
@@ -128,7 +128,7 @@ function LayerParameterWidget(props: {
                     </Tooltip>
                 </Box>
                 <Box color="text.secondary">
-                    Kernel size
+                    kernel size
                     <Tooltip title="Update the kernel size">
                         <TextField
                             id={useId() + "kernelSize"}
@@ -141,7 +141,7 @@ function LayerParameterWidget(props: {
                     </Tooltip>
                 </Box>
                 <Box color="text.secondary">
-                    Stride
+                    stride
                     <Tooltip title="Update the stride">
                         <TextField
                             id={useId() + "stride"}
@@ -153,7 +153,7 @@ function LayerParameterWidget(props: {
                     </Tooltip>
                 </Box>
                 <Box color="text.secondary">
-                    Activation
+                    activation
                     <Tooltip title="Update the activation function">
                         <Select
                             id={useId() + "activation"}
@@ -161,10 +161,10 @@ function LayerParameterWidget(props: {
                             value={activation}
                             onChange={handleChangedActivation}
                         >
-                            <MenuItem value="linear">Linear</MenuItem>
-                            <MenuItem value="sigmoid">Sigmoid</MenuItem>
-                            <MenuItem value="relu">Relu</MenuItem>
-                            <MenuItem value="tanh">Tanh</MenuItem>
+                            <MenuItem value="linear">linear</MenuItem>
+                            <MenuItem value="sigmoid">sigmoid</MenuItem>
+                            <MenuItem value="relu">relu</MenuItem>
+                            <MenuItem value="tanh">tanh</MenuItem>
                         </Select>
                     </Tooltip>
                 </Box>
@@ -175,7 +175,7 @@ function LayerParameterWidget(props: {
                 </Box>
                 <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
                 <Box color="text.secondary">
-                    Shape: [{outputShape.join(", ")}]
+                    Output shape: [{outputShape.join(", ")}]
                 </Box>
             </Grid>
         </Grid>
@@ -196,6 +196,7 @@ export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFi
         return new ConvLayerBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numTrainableParams: 0,

@@ -1,7 +1,8 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
 import { Grid, Box, Button, Tooltip } from "@material-ui/core"
-import CallSplitIcon from "@material-ui/icons/CallSplit"
 import DownloadIcon from "@material-ui/icons/GetApp"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import ViewIcon from "@material-ui/icons/Visibility"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
 import { ReactFieldJSON } from "../ReactField"
@@ -32,9 +33,9 @@ function DataSetParameterWidget(props: {
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
     const [inputs, setInputs] = useState<string[]>(initFieldValue.inputs)
 
-    const handleSplitDataSet = () => {
-        console.log("Split dataset modal")
-        sourceBlock.data = "click.split"
+    const handleViewDataSet = () => {
+        console.log("View and edit dataset modal")
+        sourceBlock.data = "click.edit"
     }
     const handleDownloadDataSet = () => {
         console.log("Download dataset")
@@ -123,23 +124,17 @@ function DataSetParameterWidget(props: {
     return (
         <Grid container spacing={1} direction={"row"}>
             <Grid item style={{ display: "inline-flex" }}>
-                <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"}{" "}
-                    <br />
-                    Input type(s): {inputs.length ? inputs.join(", ") : "none"}
-                </Box>
-            </Grid>
-            <Grid item style={{ display: "inline-flex" }}>
-                <Tooltip title="Automatically split dataset e.g. to create a test dataset">
+                <Tooltip title="View this data set and perform actions like splitting it">
                     <Button
-                        onClick={handleSplitDataSet}
-                        startIcon={<CallSplitIcon />}
+                        onClick={handleViewDataSet}
+                        startIcon={<ViewIcon />}
                         variant="outlined"
                         size="small"
                     >
-                        Split
+                        View
                     </Button>
                 </Tooltip>
+                &ensp;
                 <Tooltip title="Download dataset as csv file">
                     <Button
                         onClick={handleDownloadDataSet}
@@ -150,6 +145,13 @@ function DataSetParameterWidget(props: {
                         Download
                     </Button>
                 </Tooltip>
+            </Grid>
+            <Grid item style={{ display: "inline-flex" }}>
+                <Box color="text.secondary">
+                    Classes: {classes.length ? classes.join(", ") : "none"}{" "}
+                    <br />
+                    Input type(s): {inputs.length ? inputs.join(", ") : "none"}
+                </Box>
             </Grid>
         </Grid>
     )
@@ -170,6 +172,7 @@ export default class DataSetBlockField extends ReactParameterField<DataSetBlockF
         return new DataSetBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numRecordings: 0,

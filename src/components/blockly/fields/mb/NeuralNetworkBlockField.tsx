@@ -1,15 +1,18 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
 import {
-    Grid,
     Box,
     Button,
-    Tooltip,
-    TextField,
-    Select,
+    createStyles,
+    Grid,
     MenuItem,
+    Select,
+    TextField,
+    Tooltip,
 } from "@material-ui/core"
+import { makeStyles, Theme } from "@material-ui/core/styles"
 import AutorenewIcon from "@material-ui/icons/Autorenew"
-//import DownloadIcon from "@material-ui/icons/GetApp"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
 import { ReactFieldJSON } from "../ReactField"
@@ -19,9 +22,17 @@ import { FieldVariable } from "blockly"
 
 import { useId } from "react-use-id-hook"
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        numberField: {
+            marginBottom: theme.spacing(1),
+        },
+    })
+)
+
 export interface NeuralNetworkBlockFieldValue {
     numLayers: number
-    modelSize: number
+    numParams: number
     modelCycles: number
     classes: string[]
     optimizer: string
@@ -35,12 +46,13 @@ function NNParameterWidget(props: {
     initFieldValue: NeuralNetworkBlockFieldValue
     setFieldValue: (f: NeuralNetworkBlockFieldValue) => void
 }) {
+    const styles = useStyles()
     const { initFieldValue, setFieldValue } = props
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
     const [numLayers, setNumLayers] = useState(initFieldValue.numLayers)
-    const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
+    const [numParams, setNumParams] = useState(initFieldValue.numParams)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
     const [optimizer, setOptimizer] = useState<string>(initFieldValue.optimizer)
@@ -54,7 +66,7 @@ function NNParameterWidget(props: {
         sendUpdate()
     }, [
         numLayers,
-        modelSize,
+        numParams,
         modelCycles,
         classes,
         optimizer,
@@ -68,7 +80,7 @@ function NNParameterWidget(props: {
         // push changes to field values to the parent
         const updatedValue = {
             numLayers: numLayers,
-            modelSize: modelSize,
+            numParams: numParams,
             modelCycles: modelCycles,
             classes: classes,
             optimizer: optimizer,
@@ -155,23 +167,16 @@ function NNParameterWidget(props: {
         sourceBlock.data = "click.train"
     }
 
+    const handleDownloadModel = () => {
+        console.log("Download model")
+        sourceBlock.data = "click.download"
+    }
+
     return (
         <Grid container spacing={1} direction={"row"}>
-            <Grid item style={{ display: "inline-flex", width: 300 }}>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleTrainModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Train
-                    </Button>
-                </Tooltip>
-            </Grid>
             <Grid item>
                 <Box color="text.secondary">
-                    Optimizer
+                    optimizer&ensp;
                     <Tooltip title="Update the optimizer">
                         <Select
                             id={useId() + "optimizer"}
@@ -187,20 +192,26 @@ function NNParameterWidget(props: {
                     </Tooltip>
                 </Box>
                 <Box color="text.secondary">
-                    Batch size
-                    <Tooltip title="Update the batch size to train on">
-                        <TextField
-                            id={useId() + "stride"}
-                            type="number"
-                            size="small"
+                    loss&ensp;
+                    <Tooltip title="Update the loss function">
+                        <Select
+                            id={useId() + "lossFn"}
                             variant="outlined"
-                            value={batchSize}
-                            onChange={handleChangedBatchSize}
-                        />
+                            value={lossFn}
+                            onChange={handleChangedLossFn}
+                        >
+                            <MenuItem value="categoricalCrossentropy">
+                                categorical crossentropy
+                            </MenuItem>
+                            <MenuItem value="meanSquaredError">
+                                mean squared error
+                            </MenuItem>
+                            <MenuItem value="hinge">hinge loss</MenuItem>
+                        </Select>
                     </Tooltip>
                 </Box>
                 <Box color="text.secondary">
-                    Epochs
+                    epochs&ensp;
                     <Tooltip title="Update the batch size to train on">
                         <TextField
                             id={useId() + "epochs"}
@@ -212,47 +223,34 @@ function NNParameterWidget(props: {
                         />
                     </Tooltip>
                 </Box>
-                <Box color="text.secondary">
-                    Loss Fn
-                    <Tooltip title="Update the loss function">
-                        <Select
-                            id={useId() + "lossFn"}
-                            variant="outlined"
-                            value={lossFn}
-                            onChange={handleChangedLossFn}
-                        >
-                            <MenuItem value="categoricalCrossentropy">
-                                Categorical Crossentropy
-                            </MenuItem>
-                            <MenuItem value="meanSquaredError">
-                                Mean Squared Error
-                            </MenuItem>
-                            <MenuItem value="hinge">Hinge Loss</MenuItem>
-                        </Select>
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Metrics
-                    <Tooltip title="Update the metrics">
-                        <Select
-                            id={useId() + "metrics"}
-                            variant="outlined"
-                            value={metrics}
-                            onChange={handleChangedMetrics}
-                        >
-                            <MenuItem value="acc">Accuracy</MenuItem>
-                            <MenuItem value="prec">Precision</MenuItem>
-                            <MenuItem value="recall">Recall</MenuItem>
-                        </Select>
-                    </Tooltip>
-                </Box>
+            </Grid>
+            <Grid item style={{ display: "inline-flex", width: 300 }}>
+                <Tooltip title="Open modal to view and run classifier">
+                    <Button
+                        onClick={handleTrainModel}
+                        startIcon={<AutorenewIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Train
+                    </Button>
+                </Tooltip>
+                &ensp;
+                <Tooltip title="Download model JSON and weights file">
+                    <Button
+                        onClick={handleDownloadModel}
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Download
+                    </Button>
+                </Tooltip>
             </Grid>
             <Grid item>
                 <Box color="text.secondary">
                     No. of Layers: {numLayers} <br />
-                    Classes: {classes.length ? classes.join(", ") : "none"}{" "}
-                    <br />
-                    Model size: {modelSize} <br />
+                    No. of Parameters: {numParams} <br />
                     Cycles: {modelCycles} <br />
                 </Box>
             </Grid>
@@ -274,10 +272,11 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
         return new NeuralNetworkBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numLayers: 0,
-            modelSize: 0,
+            numParams: 0,
             modelCycles: 0,
             classes: [],
             optimizer: "adam",
@@ -297,7 +296,7 @@ export default class NeuralNetworkBlockField extends ReactParameterField<NeuralN
     updateFieldValue(msg: NeuralNetworkBlockFieldValue) {
         this.value = {
             ...this.value, // don't copy over visibility (will cause loop)
-            modelSize: msg.modelSize,
+            numParams: msg.numParams,
             numLayers: msg.numLayers,
             modelCycles: msg.modelCycles,
             classes: msg.classes,

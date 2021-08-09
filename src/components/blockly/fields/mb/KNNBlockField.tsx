@@ -22,7 +22,7 @@ function KNNParameterWidget(props: {
     const { initFieldValue, setFieldValue } = props
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
-    
+
     const [modelSize, setModelSize] = useState(initFieldValue.modelSize)
     const [modelCycles, setModelCycles] = useState(initFieldValue.modelCycles)
     const [classes, setClasses] = useState<string[]>(initFieldValue.classes)
@@ -101,6 +101,7 @@ export default class KNNBlockField extends ReactParameterField<KNNBlockFieldValu
         return new KNNBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             modelSize: 0,

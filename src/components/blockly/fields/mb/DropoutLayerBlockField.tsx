@@ -112,6 +112,7 @@ export default class DropoutLayerBlockField extends ReactParameterField<DropoutL
         return new DropoutLayerBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numTrainableParams: 0,

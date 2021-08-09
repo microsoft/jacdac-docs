@@ -31,6 +31,7 @@ function RecordingParameterWidget(props: {
     const handleEditRecording = () => {
         // update parameters based on changes to this recording
         console.log("Edit recording")
+        sourceBlock.data = "click.record"
 
         //setNumSamples()
         //setLatestTimestamp()
@@ -38,6 +39,7 @@ function RecordingParameterWidget(props: {
     }
     const handleDownloadDataSet = () => {
         console.log("Download dataset")
+        sourceBlock.data = "click.download"
     }
 
     useEffect(() => {
@@ -54,7 +56,6 @@ function RecordingParameterWidget(props: {
         setFieldValue(updatedFieldValue)
     }
 
-
     return (
         <Grid container spacing={1}>
             <Grid item>
@@ -65,16 +66,6 @@ function RecordingParameterWidget(props: {
                 </Box>
             </Grid>
             <Grid item style={{ display: "inline-flex" }}>
-                <Tooltip title="Add or remove samples from this recording">
-                    <Button
-                        onClick={handleEditRecording}
-                        startIcon={<EditIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Edit
-                    </Button>
-                </Tooltip>
                 <Tooltip title="Download recording as csv file">
                     <Button
                         onClick={handleDownloadDataSet}
@@ -105,6 +96,7 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
         return new RecordingBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numSamples: 0,

@@ -157,6 +157,7 @@ export default class PoolingLayerBlockField extends ReactParameterField<PoolingL
         return new PoolingLayerBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numTrainableParams: 0,

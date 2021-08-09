@@ -67,12 +67,12 @@ export default class FlattenLayerBlockField extends ReactParameterField<FlattenL
         return new FlattenLayerBlockField(options?.value)
     }
 
+    /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
             numTrainableParams: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
-            rate: 0.1,
         }
     }
 
