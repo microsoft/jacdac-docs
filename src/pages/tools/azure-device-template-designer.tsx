@@ -1,4 +1,4 @@
-import { Grid, TextField, Typography } from "@material-ui/core"
+import { Grid, TextField } from "@material-ui/core"
 import React, { ChangeEvent, useMemo } from "react"
 import { clone, uniqueName } from "../../../jacdac-ts/src/jdom/utils"
 import useLocalStorage from "../../components/hooks/useLocalStorage"
@@ -12,8 +12,9 @@ import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
 import Snippet from "../../components/ui/Snippet"
 import PaperBox from "../../components/ui/PaperBox"
 import { useId } from "react-use-id-hook"
-import { Link } from "gatsby-theme-material-ui"
+import { Button, Link } from "gatsby-theme-material-ui"
 import {
+    serviceSpecificationDTMI,
     serviceSpecificationToComponent,
     serviceSpecificationToDTDL,
 } from "../../../jacdac-ts/src/azure-iot/dtdlspec"
@@ -108,6 +109,7 @@ function validateTwinComponent(
 
 const AZURE_IOT_CENTRAL_DOMAIN = "azureiotcentraldomain"
 const AZURE_IOT_CENTRAL_API_KEY = "azureiotcentraliotkey"
+const AZURE_IOT_API_VERSION = "?api-version=1.0"
 
 function ApiKeyManager() {
     const [domain] = useLocalStorage<string>(AZURE_IOT_CENTRAL_DOMAIN)
@@ -187,6 +189,47 @@ export default function AzureDeviceTemplateDesigner() {
         })
         update()
     }
+
+    const apiFetch = async (
+        method: "GET" | "POST" | "PATCH" | "PUT",
+        path: string,
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        body?: object
+    ) => {
+        const url = `${domain}/api/${path}${AZURE_IOT_API_VERSION}`
+        const options: RequestInit = {
+            method,
+            headers: {
+                authorization: apiToken,
+                Accept: "application/json",
+            },
+            body: body && JSON.stringify(body),
+        }
+        if (
+            options.method === "POST" ||
+            options.method === "PUT" ||
+            options.method === "PATCH"
+        )
+            options.headers["Content-Type"] = "application/json"
+        const res = await fetch(url, options)
+        return res
+    }
+    const handleUploadTemplate = (template: TemplateComponent) => async () => {
+        const { service } = template
+        const { shortId } = service
+        const dtmi = serviceSpecificationDTMI(service)
+        const capabilityModel = serviceSpecificationToDTDL(service)
+        const path = `deviceTemplates/${dtmi}`
+        const exists = (await apiFetch("GET", path)).status === 200
+        console.log(`iotc: template ${dtmi} ${exists ? "exists" : "missing"}`)
+        const res = await apiFetch(exists ? "PATCH" : "PUT", path, {
+            "@type": ["ModelDefinition"],
+            displayName: shortId,
+            capabilityModel,
+        })
+        console.log(`iotc: upload template ${res.status}`, res)
+    }
+
     return (
         <>
             <h1>Azure Device Template Designer</h1>
@@ -259,7 +302,17 @@ export default function AzureDeviceTemplateDesigner() {
                                     4
                                 )}
                                 mode="json"
-                                download={c.name}
+                                actions={
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={!domain || !apiToken}
+                                        onClick={handleUploadTemplate(c)}
+                                        title="Import the service template into your Azure IoT Central application (requires domain and API token)."
+                                    >
+                                        Import template
+                                    </Button>
+                                }
                             />
                         </PaperBox>
                     </Grid>
