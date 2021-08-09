@@ -1,5 +1,5 @@
 import { Grid, TextField } from "@material-ui/core"
-import React, { ChangeEvent, useMemo } from "react"
+import React, { ChangeEvent, useContext, useMemo, useState } from "react"
 import { clone, uniqueName } from "../../../jacdac-ts/src/jdom/utils"
 import useLocalStorage from "../../components/hooks/useLocalStorage"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -21,6 +21,8 @@ import {
 import ApiKeyAccordion from "../../components/ApiKeyAccordion"
 import GridHeader from "../../components/ui/GridHeader"
 import { useSecret } from "../../components/hooks/useSecret"
+import Alert from "../../components/ui/Alert"
+import AppContext from "../../components/AppContext"
 
 interface TemplateComponent {
     name: string
@@ -145,9 +147,39 @@ function ApiKeyManager() {
     )
 }
 
+function twinToDTDL(twin: TemplateSpec, merged: boolean) {
+    const dtdl = {
+        "@type": "Interface",
+        "@id": `dtmi:jacdac:device:${escapeName(twin.displayName)};1`,
+        displayName: twin.displayName,
+        contents: [],
+        "@context": DTDL_CONTEXT,
+    }
+    if (merged) {
+        twin.components.forEach(({ name, service }) => {
+            const srvDTDL = serviceSpecificationToDTDL(service)
+            srvDTDL.contents.forEach(ctn => {
+                ctn.name = `${name}${ctn.name}`
+            })
+            dtdl.contents = [...dtdl.contents, srvDTDL.contents]
+        })
+    } else {
+        dtdl.contents = [
+            ...dtdl.contents,
+            ...twin.components.map(c =>
+                serviceSpecificationToComponent(c.service, c.name)
+            ),
+        ]
+    }
+
+    return dtdl
+}
+
 export default function AzureDeviceTemplateDesigner() {
     const variant = "outlined"
+    const merged = true
     const domainId = useId()
+    const { enqueueSnackbar, setError } = useContext(AppContext)
     const [domain, setDomain] = useLocalStorage<string>(
         AZURE_IOT_CENTRAL_DOMAIN,
         ""
@@ -160,16 +192,9 @@ export default function AzureDeviceTemplateDesigner() {
             components: [],
         } as TemplateSpec
     )
+    const [apiError, setApiError] = useState("")
 
-    const dtdl = {
-        "@type": "Interface",
-        "@id": `dtmi:jacdac:device:${escapeName(twin.displayName)};1`,
-        displayName: twin.displayName,
-        contents: twin.components.map(c =>
-            serviceSpecificationToComponent(c.service, c.name)
-        ),
-        "@context": DTDL_CONTEXT,
-    }
+    const dtdl = twinToDTDL(twin, merged)
     const dtdlSource = JSON.stringify(dtdl, null, 2)
 
     const handleDomainChange = (ev: ChangeEvent<HTMLInputElement>) =>
@@ -221,6 +246,8 @@ export default function AzureDeviceTemplateDesigner() {
         // eslint-disable-next-line @typescript-eslint/ban-types
         capabilityModel: object
     ) => {
+        setApiError("")
+        setError("")
         const path = `deviceTemplates/${dtmi}`
         const current = await apiFetch("GET", path)
         const exists = current.status === 200
@@ -231,10 +258,18 @@ export default function AzureDeviceTemplateDesigner() {
             capabilityModel,
         }
         const res = await apiFetch(exists ? "PATCH" : "PUT", path, body)
+        const success = res.status === 200
+        const resj = await res.json()
         console.log(`iotc: upload template ${res.status}`, {
-            res: await res.json(),
+            resj,
             body,
         })
+        if (!success) {
+            setApiError(resj.error?.message)
+            setError(resj.error?.message)
+        } else {
+            enqueueSnackbar("Device imported!")
+        }
     }
 
     const handleUploadModel = async () => {
@@ -303,13 +338,17 @@ export default function AzureDeviceTemplateDesigner() {
                 <Grid item xs={12}>
                     <AddServiceIconButton onAdd={handleAddService} />
                 </Grid>
+                {apiError && (
+                    <Grid item xs={12}>
+                        <Alert severity="error">{apiError}</Alert>
+                    </Grid>
+                )}
                 <Grid item xs={12}>
                     <PaperBox>
                         <Snippet
                             caption={"template"}
                             value={dtdlSource}
                             mode="json"
-                            download="model"
                             actions={
                                 <Button
                                     variant="outlined"
@@ -324,32 +363,33 @@ export default function AzureDeviceTemplateDesigner() {
                         />
                     </PaperBox>
                 </Grid>
-                {twin.components?.map(c => (
-                    <Grid item xs={12} key={c.name}>
-                        <PaperBox>
-                            <Snippet
-                                caption={c.name}
-                                value={JSON.stringify(
-                                    serviceSpecificationToDTDL(c.service),
-                                    null,
-                                    4
-                                )}
-                                mode="json"
-                                actions={
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        disabled={!domain || !apiToken}
-                                        onClick={handleUploadTemplate(c)}
-                                        title="Import the service template into your Azure IoT Central application (requires domain and API token)."
-                                    >
-                                        Import template
-                                    </Button>
-                                }
-                            />
-                        </PaperBox>
-                    </Grid>
-                ))}
+                {!merged &&
+                    twin.components?.map(c => (
+                        <Grid item xs={12} key={c.name}>
+                            <PaperBox>
+                                <Snippet
+                                    caption={c.name}
+                                    value={JSON.stringify(
+                                        serviceSpecificationToDTDL(c.service),
+                                        null,
+                                        4
+                                    )}
+                                    mode="json"
+                                    actions={
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            disabled={!domain || !apiToken}
+                                            onClick={handleUploadTemplate(c)}
+                                            title="Import the service template into your Azure IoT Central application (requires domain and API token)."
+                                        >
+                                            Import template
+                                        </Button>
+                                    }
+                                />
+                            </PaperBox>
+                        </Grid>
+                    ))}
             </Grid>
         </>
     )
