@@ -5,8 +5,8 @@ import FileTabs from "../fs/FileTabs"
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockEditor from "../blockly/BlockEditor"
 import Blockly from "blockly"
-import shadowDsl from "../blockly/dsl/shadowdsl"
 import modelBlockDsl, { MODEL_BLOCKS } from "./modelblockdsl"
+import shadowDsl from "../blockly/dsl/shadowdsl"
 import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
 import { visitWorkspace } from "../../../jacdac-ts/src/dsl/workspacevisitor"
@@ -14,6 +14,7 @@ import { visitWorkspace } from "../../../jacdac-ts/src/dsl/workspacevisitor"
 import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
 import { WORKSPACE_FILENAME } from "../blockly/toolbox"
 import FileSystemContext, { FileSystemProvider } from "../FileSystemContext"
+import ServiceManagerContext from "../ServiceManagerContext"
 
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import Suspense from "../ui/Suspense"
@@ -51,7 +52,7 @@ function getRecordingsFromLocalStorage() {
     return rBlocks
 }
 
-async function getModelsFromLocalStorage() {
+function getModelsFromLocalStorage() {
     const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
     if (dataObj == null || dataObj == undefined) return {}
     const modelEditorData = JSON.parse(dataObj)
@@ -60,7 +61,7 @@ async function getModelsFromLocalStorage() {
     const allModels = {}
     for (const name in modelEditorData["models"]) {
         const data = modelEditorData["models"][name]
-        const model = await MBModel.createFromFile(data)
+        const model = MBModel.createFromFile(data)
         allModels[name] = model
     }
     return allModels
@@ -72,6 +73,7 @@ function ModelBlockEditorWithContext() {
         useContext(BlockContext)
 
     const { fileSystem } = useContext(FileSystemContext)
+    const { fileStorage } = useContext(ServiceManagerContext)
 
     /* For data storage */
     const [currentDataSet, setCurrentDataSet] = useState(undefined)
@@ -143,7 +145,7 @@ function ModelBlockEditorWithContext() {
     const [trainModelDialogVisible, setTrainModelDialogVisible] =
         useState<boolean>(false)
     const toggleRecordDataDialog = () => toggleDialog("recording")
-    const toggleModelDialog = () => toggleDialog("model")
+    const toggleTrainModelDialog = () => toggleDialog("model")
     const toggleDialog = (dialog: string) => {
         console.log("Randi toggle dialog ", dialog)
         if (dialog == "recording") {
@@ -152,43 +154,56 @@ function ModelBlockEditorWithContext() {
         } else if (dialog == "model") {
             const b = !trainModelDialogVisible
             setTrainModelDialogVisible(b)
-        } // else if split dataset
+        } // else if edit dataset
     }
     const buttonsWithDialogs = {
         createNewDataSetButton: addNewDataSet,
         createNewRecordingButton: toggleRecordDataDialog,
         createNewClassifierButton: addNewClassifier,
     }
-    const onCloseRecordingDialog = (
-        recording: FieldDataSet[],
-        blockId: string
-    ) => {
+    const updateRecording = (recording: FieldDataSet[], blockId: string) => {
         if (recording && blockId) {
             // Add recording data to list of recordings
             allRecordings[blockId] = recording
             updateLocalStorage(allRecordings, null)
         }
+    }
+    const closeRecordingModal = (
+        recording: FieldDataSet[],
+        blockId: string
+    ) => {
+        // save the new recording
+        updateRecording(recording, blockId)
+
         // close dialog
         toggleRecordDataDialog()
     }
-    const onModelTrained = (model: MBModel) => {
-        if (model) {
-            // Add trained model to record of allModels
-            allModels[model.name] = model
-            updateLocalStorage(null, allModels)
-        }
-    }
-    const onCloseModelDialog = () => {
-        // reset dataset and model that gets passed to dialogs
-        setCurrentDataSet(undefined)
-        setCurrentModel(undefined)
 
-        // close dialog
-        toggleModelDialog()
+    const assembleDataSet = (datasetName: string) => {
+        // setup dataset for training
+        const dataset = new MBDataSet(datasetName)
+        const datasetBlock = dataSetBlocks[datasetName]
+
+        // grab nested recording blocks and place them in the dataset
+        const recordingBlock = datasetBlock?.inputs.filter(
+            input => input.name == "LAYER_INPUTS"
+        )[0].child
+        if (recordingBlock) {
+            let className = recordingBlock?.inputs[0].fields?.class_name?.value
+            allRecordings[recordingBlock.id].forEach(recording => {
+                dataset.addRecording(recording, className, null)
+            })
+            recordingBlock.children?.forEach(childBlock => {
+                className = childBlock?.inputs[0].fields?.class_name?.value
+                allRecordings[childBlock.id].forEach(recording => {
+                    dataset.addRecording(recording, className, null)
+                })
+            })
+        }
+
+        return dataset
     }
-    const handleOpenTrainingModal = (
-        clickedBlock: Blockly.Block
-    ): { model: MBModel; dataset: MBDataSet } => {
+    const openTrainingModal = (clickedBlock: Blockly.Block) => {
         // setup model for training
         const modelName = clickedBlock.getField("CLASSIFIER_NAME").getText()
         let selectedModel: MBModel = allModels[modelName]
@@ -206,26 +221,29 @@ function ModelBlockEditorWithContext() {
 
         // setup dataset for training
         const datasetName = clickedBlock.getField("NN_TRAINING").getText()
-        const trainingDataset = new MBDataSet(datasetName)
-        const datasetBlock = dataSetBlocks[datasetName]
+        const trainingDataset = assembleDataSet(datasetName)
 
-        // grab nested recording blocks and place them in the dataset
-        const recordingBlock = datasetBlock?.inputs.filter(
-            input => input.name == "LAYER_INPUTS"
-        )[0].child
-        if (recordingBlock) {
-            let className = recordingBlock?.inputs[0].fields?.class_name?.value
-            allRecordings[recordingBlock.id].forEach(recording => {
-                trainingDataset.addRecording(recording, className, null)
-            })
-            recordingBlock.children?.forEach(childBlock => {
-                className = childBlock?.inputs[0].fields?.class_name?.value
-                allRecordings[childBlock.id].forEach(recording => {
-                    trainingDataset.addRecording(recording, className, null)
-                })
-            })
+        // update the model and dataset to pass to the modal
+        setCurrentModel(selectedModel)
+        setCurrentDataSet(trainingDataset)
+
+        // open the training modal
+        toggleTrainModelDialog()
+    }
+    const updateModel = (model: MBModel) => {
+        if (model) {
+            // Add trained model to record of allModels
+            allModels[model.name] = model
+            updateLocalStorage(null, allModels)
         }
-        return { model: selectedModel, dataset: trainingDataset }
+    }
+    const closeTrainingModal = () => {
+        // reset dataset and model that gets passed to dialogs
+        setCurrentDataSet(undefined)
+        setCurrentModel(undefined)
+
+        // close dialog
+        toggleTrainModelDialog()
     }
 
     /* For button callbacks */
@@ -242,45 +260,97 @@ function ModelBlockEditorWithContext() {
         })
     }, [toolboxConfiguration])
 
+    /* For block button clicks */
     const handleWorkspaceChange = event => {
         if (event.type == Blockly.Events.BLOCK_DELETE) {
             delete allRecordings[event.blockId]
-        } else if (event.type == Blockly.Events.BLOCK_CREATE) {
-            const createdBlock = workspace.getBlockById(event.blockId)
-            const paramField = createdBlock.getField("expand_button")
-            //if (paramField) paramField.
         } else if (event.type == Blockly.Events.CLICK && event.blockId) {
             const clickedBlock = workspace.getBlockById(event.blockId)
             if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
                 const command = clickedBlock.data.split(".")[1]
                 if (command == "download") {
                     console.log("Randi got a download command ", clickedBlock)
-                } else if (command == "split") {
-                    console.log("Randi got a split command ", clickedBlock)
-                } else if (command == "train") {
-                    console.log("Randi got a train command ", clickedBlock)
-                    const { model, dataset } =
-                        handleOpenTrainingModal(clickedBlock)
-                    setCurrentModel(model)
-                    setCurrentDataSet(dataset)
-
-                    // open the training modal
-                    toggleModelDialog()
-                } else if (command == "record") {
+                    // find the correct recording, dataset, or model to downlaod
+                    if (allRecordings[clickedBlock.id]) {
+                        // get recording, recording name, and class name
+                        const recording = allRecordings[clickedBlock.id]
+                        const recordingName = clickedBlock
+                            .getField("RECORDING_NAME")
+                            .getText()
+                        const className = clickedBlock
+                            .getField("CLASS_NAME")
+                            .getText()
+                        downloadRecordings(recording, recordingName, className)
+                    } else {
+                        // we have a model or dataset
+                        if (clickedBlock.type == MODEL_BLOCKS + "dataset") {
+                            const datasetName = clickedBlock
+                                .getField("DATASET_NAME")
+                                .getText()
+                            const dataset = assembleDataSet(datasetName)
+                            downloadFile(dataset.toCSV(), datasetName, "csv")
+                        } else if (clickedBlock.type == MODEL_BLOCKS + "nn") {
+                            const modelName = clickedBlock
+                                .getField("CLASSIFIER_NAME")
+                                .getText()
+                            const model: MBModel = allModels[modelName]
+                            downloadFile(
+                                JSON.stringify(model),
+                                modelName,
+                                "json"
+                            )
+                        }
+                    }
+                } else if (command == "edit") {
                     console.log(
-                        "Randi got an edit recording command ",
+                        "Randi got a edit dataset command ",
                         clickedBlock
                     )
-                    toggleRecordDataDialog()
+                    //openDataSetModal(clickedBlock)
+                } else if (command == "train") {
+                    console.log("Randi got a train command ", clickedBlock)
+                    openTrainingModal(clickedBlock)
                 } else {
                     console.error(
                         "Received unknown block click command ",
                         command
                     )
                 }
+                // clear the command
                 clickedBlock.data = null
             }
         }
+    }
+    const downloadRecordings = (
+        recordings: FieldDataSet[],
+        recordingName: string,
+        className: string
+    ) => {
+        const recordingCountHeader = `Number of recordings,${recordings.length}`
+
+        const recordingData: string[] = []
+        recordings.forEach(sample => {
+            recordingData.push(
+                "Recording metadata," +
+                    sample.name +
+                    "," +
+                    sample.rows.length +
+                    "," +
+                    className
+            )
+            recordingData.push(sample.toCSV())
+        })
+        const recordData = recordingData.join("\n")
+
+        const csv: string[] = [recordingCountHeader, recordData]
+        downloadFile(csv.join("\n"), recordingName, "csv")
+    }
+    const downloadFile = (
+        content: string,
+        fileName: string,
+        fileType: string
+    ) => {
+        fileStorage.saveText(`${fileName}.${fileType}`, content)
     }
     useEffect(() => {
         if (workspace) workspace.addChangeListener(handleWorkspaceChange)
@@ -307,9 +377,9 @@ function ModelBlockEditorWithContext() {
                     <ModelBlockDialogs
                         recordDataDialogVisible={recordDataDialogVisible}
                         trainModelDialogVisible={trainModelDialogVisible}
-                        onRecordingDone={onCloseRecordingDialog}
-                        onModelUpdate={onModelTrained}
-                        onTrainingDone={onCloseModelDialog}
+                        onRecordingDone={closeRecordingModal}
+                        onModelUpdate={updateModel}
+                        onTrainingDone={closeTrainingModal}
                         workspace={workspace}
                         dataset={currentDataSet}
                         model={currentModel}

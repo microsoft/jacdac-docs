@@ -26,7 +26,6 @@ import Trend from "../../Trend"
 
 import useChange from "../../../jacdac/useChange"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
-import ServiceManagerContext from "../../ServiceManagerContext"
 
 import { arrayConcatMany } from "../../../../jacdac-ts/src/jdom/utils"
 import { JDRegister } from "../../../../jacdac-ts/src/jdom/register"
@@ -39,8 +38,8 @@ import {
     MB_CLASS_VAR_TYPE,
     MODEL_BLOCKS,
 } from "../../model-editor/modelblockdsl"
-import RecordingBlockField from "../../blockly/fields/mb/RecordingBlockField"
 import ExpandModelBlockField from "../../blockly/fields/mb/ExpandModelBlockField"
+import ServiceManagerContext from "../../ServiceManagerContext"
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -321,7 +320,7 @@ export default function BlocklyDataRecordingDialog(props: {
         const recordData = recordingData.join("\n")
 
         const csv: string[] = [recordingCountHeader, recordData]
-        fileStorage.saveText(`${recordingName}dataset.csv`, csv.join("\n"))
+        fileStorage.saveText(`${recordingName}.csv`, csv.join("\n"))
     }
     const handleCancel = () => {
         // reset the user inputs
@@ -351,7 +350,12 @@ export default function BlocklyDataRecordingDialog(props: {
 
     if (dialogType == "chooseSensors")
         return (
-            <Dialog open={open} onClose={handleCancel}>
+            <Dialog
+                open={open}
+                onClose={handleCancel}
+                fullWidth={true}
+                maxWidth={"md"}
+            >
                 <DialogContent>
                     <Grid container direction={"column"}>
                         <Grid item>
@@ -425,7 +429,12 @@ export default function BlocklyDataRecordingDialog(props: {
     else
         return (
             // recordData
-            <Dialog open={open} onClose={handleCancel}>
+            <Dialog
+                open={open}
+                onClose={handleCancel}
+                fullWidth={true}
+                maxWidth={"md"}
+            >
                 <DialogContent>
                     <Grid container direction={"column"}>
                         <Grid item>
