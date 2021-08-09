@@ -192,6 +192,7 @@ export default function AzureDeviceTemplateDesigner() {
             components: [],
         } as TemplateSpec
     )
+    const [apiWorking, setApiWorking] = useState(false)
     const [apiError, setApiError] = useState("")
 
     const dtdl = twinToDTDL(twin, merged)
@@ -246,29 +247,36 @@ export default function AzureDeviceTemplateDesigner() {
         // eslint-disable-next-line @typescript-eslint/ban-types
         capabilityModel: object
     ) => {
-        setApiError("")
-        setError("")
-        const path = `deviceTemplates/${dtmi}`
-        const current = await apiFetch("GET", path)
-        const exists = current.status === 200
-        console.log(`iotc: template ${dtmi} ${exists ? "exists" : "missing"}`)
-        const body = {
-            "@type": ["ModelDefinition", "DeviceModel"],
-            displayName,
-            capabilityModel,
-        }
-        const res = await apiFetch(exists ? "PATCH" : "PUT", path, body)
-        const success = res.status === 200
-        const resj = await res.json()
-        console.log(`iotc: upload template ${res.status}`, {
-            resj,
-            body,
-        })
-        if (!success) {
-            setApiError(resj.error?.message)
-            setError(resj.error?.message)
-        } else {
-            enqueueSnackbar("Device imported!")
+        try {
+            setApiWorking(true)
+            setApiError("")
+            setError("")
+            const path = `deviceTemplates/${dtmi}`
+            const current = await apiFetch("GET", path)
+            const exists = current.status === 200
+            console.log(
+                `iotc: template ${dtmi} ${exists ? "exists" : "missing"}`
+            )
+            const body = {
+                "@type": ["ModelDefinition", "DeviceModel"],
+                displayName,
+                capabilityModel,
+            }
+            const res = await apiFetch(exists ? "PATCH" : "PUT", path, body)
+            const success = res.status === 200
+            const resj = await res.json()
+            console.log(`iotc: upload template ${res.status}`, {
+                resj,
+                body,
+            })
+            if (!success) {
+                setApiError(resj.error?.message)
+                setError(resj.error?.message)
+            } else {
+                enqueueSnackbar("Device imported!")
+            }
+        } finally {
+            setApiWorking(false)
         }
     }
 
@@ -353,7 +361,9 @@ export default function AzureDeviceTemplateDesigner() {
                                 <Button
                                     variant="outlined"
                                     size="small"
-                                    disabled={!domain || !apiToken}
+                                    disabled={
+                                        apiWorking || !domain || !apiToken
+                                    }
                                     onClick={handleUploadModel}
                                     title="Import the device template into your Azure IoT Central application (requires domain and API token)."
                                 >
