@@ -249,13 +249,13 @@ export default function CollectData(props: {
     useEffect(() => {
         let matchingInputs = true
         if (dataset && liveRecording) {
-            if (dataset.inputTypes) {
+            if (dataset.inputTypes.length) {
                 if (!arraysEqual(dataset.inputTypes, liveRecording.headers))
                     matchingInputs = false
             }
         }
         setDataSetMatch(matchingInputs)
-    }, [liveRecording])
+    }, [registerIdsChecked, liveRecording])
 
     const handleDataSetUpdate = dataset => {
         onChange(dataset)
