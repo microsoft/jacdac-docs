@@ -163,7 +163,7 @@ export default function AzureDeviceTemplateDesigner() {
 
     const dtdl = {
         "@type": "Interface",
-        "@id": `dtmi:jacdac:devices:${escapeName(twin.displayName)};1`,
+        "@id": `dtmi:jacdac:device:${escapeName(twin.displayName)};1`,
         displayName: twin.displayName,
         contents: twin.components.map(c =>
             serviceSpecificationToComponent(c.service, c.name)
@@ -196,7 +196,7 @@ export default function AzureDeviceTemplateDesigner() {
         // eslint-disable-next-line @typescript-eslint/ban-types
         body?: object
     ) => {
-        const url = `${domain}/api/${path}${AZURE_IOT_API_VERSION}`
+        const url = `${domain}api/${path}${AZURE_IOT_API_VERSION}`
         const options: RequestInit = {
             method,
             headers: {
@@ -214,20 +214,42 @@ export default function AzureDeviceTemplateDesigner() {
         const res = await fetch(url, options)
         return res
     }
+
+    const uploadTemplate = async (
+        dtmi: string,
+        displayName: string,
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        capabilityModel: object
+    ) => {
+        const path = `deviceTemplates/${dtmi}`
+        const current = await apiFetch("GET", path)
+        const exists = current.status === 200
+        console.log(`iotc: template ${dtmi} ${exists ? "exists" : "missing"}`)
+        const body = {
+            "@type": ["ModelDefinition", "DeviceModel"],
+            displayName,
+            capabilityModel,
+        }
+        const res = await apiFetch(exists ? "PATCH" : "PUT", path, body)
+        console.log(`iotc: upload template ${res.status}`, {
+            res: await res.json(),
+            body,
+        })
+    }
+
+    const handleUploadModel = async () => {
+        await uploadTemplate(
+            `dtmi:jacdac:devicemodel:${escapeName(twin.displayName)};1`,
+            twin.displayName,
+            dtdl
+        )
+    }
     const handleUploadTemplate = (template: TemplateComponent) => async () => {
         const { service } = template
         const { shortId } = service
-        const dtmi = serviceSpecificationDTMI(service)
+        const dtmi = serviceSpecificationDTMI(service, "servicemodel")
         const capabilityModel = serviceSpecificationToDTDL(service)
-        const path = `deviceTemplates/${dtmi}`
-        const exists = (await apiFetch("GET", path)).status === 200
-        console.log(`iotc: template ${dtmi} ${exists ? "exists" : "missing"}`)
-        const res = await apiFetch(exists ? "PATCH" : "PUT", path, {
-            "@type": ["ModelDefinition"],
-            displayName: shortId,
-            capabilityModel,
-        })
-        console.log(`iotc: upload template ${res.status}`, res)
+        await uploadTemplate(dtmi, shortId, capabilityModel)
     }
 
     return (
@@ -288,6 +310,17 @@ export default function AzureDeviceTemplateDesigner() {
                             value={dtdlSource}
                             mode="json"
                             download="model"
+                            actions={
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    disabled={!domain || !apiToken}
+                                    onClick={handleUploadModel}
+                                    title="Import the device template into your Azure IoT Central application (requires domain and API token)."
+                                >
+                                    Import template
+                                </Button>
+                            }
                         />
                     </PaperBox>
                 </Grid>
