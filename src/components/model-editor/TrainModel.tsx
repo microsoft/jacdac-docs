@@ -23,8 +23,10 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 
 import ServiceManagerContext from "../ServiceManagerContext"
 
-import { trainRequest } from "../blockly/dsl/workers/tf.proxy"
+import { compileRequest, trainRequest } from "../blockly/dsl/workers/tf.proxy"
 import type {
+    TFModelCompileRequest,
+    TFModelCompileResponse,
     TFModelTrainRequest,
     TFModelTrainResponse,
 } from "../../workers/tf/dist/node_modules/tf.worker"
@@ -104,17 +106,33 @@ export default function TrainModel(props: {
             mod.inputShape = [dataset.length, dataset.width]
             mod.inputTypes = dataset.inputTypes
             mod.outputShape = dataset.labels.length
-
-            handleModelUpdate(mod)
         } else if (
             !arraysEqual(mod.labels, dataset.labels) ||
             !arraysEqual(mod.inputTypes, dataset.inputTypes)
         ) {
             // If there is already a model, make sure it matches the current dataset
             //   if it does not, reset the model
-            const newModel = new MBModel(model.name)
+            const newModel = new MBModel(mod.name)
             prepareModel(newModel)
         }
+
+        /* compile model */
+        const compileMsg = {
+            worker: "tf",
+            type: "compile",
+            data: {
+                modelBlockJSON: "",
+                model: model.toJSON(),
+            },
+        } as TFModelCompileRequest
+        compileRequest(compileMsg).then(result => {
+            if (result) {
+                mod.modelJSON = result.data.modelJSON
+                mod.modelSummary = result.data.modelSummary
+                mod.trainingParams = result.data.trainingParams
+                handleModelUpdate(mod)
+            }
+        })
     }
 
     const prepareTrainingLogs = (colors: string[]) => {
@@ -164,10 +182,10 @@ export default function TrainModel(props: {
             worker: "tf",
             type: "train",
             data: {
+                trainingParams: model.trainingParams,
+                model: model.toJSON(),
                 xData: dataset.xs,
                 yData: dataset.ys,
-                model: model.toJSON(),
-                modelBlockJSON: "",
             },
         } as TFModelTrainRequest
         const trainResult = (await trainRequest(
@@ -181,8 +199,6 @@ export default function TrainModel(props: {
             // handle result from training
             const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
-            model.modelSummary = trainResult.data.modelSummary
-            model.modelJSON = trainResult.data.modelJSON
             model.armModel = trainResult.data.armModel
 
             // Update model status

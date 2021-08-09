@@ -27,10 +27,13 @@ import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
 import ServiceManagerContext from "../../ServiceManagerContext"
 
 import {
+    compileRequest,
     trainRequest,
     predictRequest,
 } from "../../blockly/dsl/workers/tf.proxy"
 import type {
+    TFModelCompileRequest,
+    TFModelCompileResponse,
     TFModelTrainRequest,
     TFModelTrainResponse,
     TFModelPredictRequest,
@@ -171,6 +174,23 @@ export default function TrainModelDialog(props: {
             const newModel = new MBModel(model.name)
             prepareModel(newModel)
         }
+
+        // setup model from block definition
+        const compileMsg = {
+            worker: "tf",
+            type: "compile",
+            data: {
+                modelBlockJSON: mod.blockJSON,
+                model: model.toJSON(),
+            },
+        } as TFModelCompileRequest
+        compileRequest(compileMsg).then(result => {
+            if (result) {
+                mod.modelJSON = result.data.modelJSON
+                mod.modelSummary = result.data.modelSummary
+                mod.trainingParams = result.data.trainingParams
+            }
+        })
     }
     const prepareTrainingLogs = (colors: string[]) => {
         // Create space to hold training log data
@@ -241,7 +261,7 @@ export default function TrainModelDialog(props: {
                 xData: dataset.xs,
                 yData: dataset.ys,
                 model: model.toJSON(),
-                modelBlockJSON: model.blockJSON,
+                trainingParams: model.trainingParams,
             },
         } as TFModelTrainRequest
         const trainResult = (await trainRequest(
@@ -255,8 +275,6 @@ export default function TrainModelDialog(props: {
             // handle result from training
             const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
-            model.modelJSON = trainResult.data.modelJSON
-            model.modelSummary = trainResult.data.modelSummary
             model.armModel = trainResult.data.armModel
 
             // Update model status
@@ -432,7 +450,12 @@ export default function TrainModelDialog(props: {
 
     if (dialogType == "trainModel")
         return (
-            <Dialog open={open} onClose={handleCancel}>
+            <Dialog
+                open={open}
+                onClose={handleCancel}
+                fullWidth={true}
+                maxWidth={"md"}
+            >
                 <DialogContent>
                     <Grid container direction={"column"}>
                         <Grid item>
@@ -610,7 +633,12 @@ export default function TrainModelDialog(props: {
         )
     if (dialogType == "evalModel")
         return (
-            <Dialog open={open} onClose={handleCancel}>
+            <Dialog
+                open={open}
+                onClose={handleCancel}
+                fullWidth={true}
+                maxWidth={"md"}
+            >
                 <DialogContent>
                     <Grid container direction={"column"}>
                         <Grid item>

@@ -26,6 +26,13 @@ export interface TFModelObj {
     weights: number[]
 }
 
+export interface TFModelTrainingParams {
+    loss: string
+    optimizer: string
+    metrics: string[]
+    epochs: number
+}
+
 export interface TFModelMessage {
     worker: "tf"
     type?: string
@@ -46,13 +53,14 @@ export interface TFModelCompileResponse extends TFModelMessage {
     data: {
         modelJSON: string
         modelSummary: string[]
+        trainingParams: TFModelTrainingParams
     }
 }
 
 export interface TFModelTrainRequest extends TFModelMessage {
     type: "train"
     data: {
-        modelBlockJSON: string
+        trainingParams: TFModelTrainingParams
         model: TFModelObj
         xData: number[]
         yData: number[]
@@ -62,9 +70,7 @@ export interface TFModelTrainRequest extends TFModelMessage {
 export interface TFModelTrainResponse extends TFModelMessage {
     type: "train"
     data: {
-        modelJSON: string // Randi TODO remove
         modelWeights: ArrayBuffer
-        modelSummary: string[] // Randi TODO remove
         trainingLogs: number[]
         armModel: string
     }
@@ -203,29 +209,31 @@ function buildDefaultModel(
             activation: "softmax",
         })
     )
-
-    modelLayers.compile({
-        loss: "categoricalCrossentropy",
-        optimizer: "adam",
-        metrics: ["acc"],
-    })
 }
 
 // send an object with model as blockly JSON
 function buildModelFromJSON(model: TFModelObj, block: any) {
     const modelLayers = sequential()
-    let epochs = 250
+    let trainingParams = {
+        loss: "categoricalCrossentropy",
+        optimizer: "adam",
+        metrics: ["acc"],
+        epochs: 250,
+    }
 
     if (block == "") {
         buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
     } else {
-        // Collect layers for neural network blocks
+        // block layers for model architecture
+
+        // the first block will be here
         const layerBlock = block.inputs.filter(
             input => input.name == "LAYER_INPUTS"
         )[0].child
-        console.log("Randi layer block ", layerBlock)
         let layer = addLayer(layerBlock, model.inputShape, null)
         modelLayers.add(layer)
+
+        // subsequent blocks (if any) are children of the first block
         if (layerBlock) {
             layerBlock.children?.forEach((childBlock, idx) => {
                 if (idx == layerBlock.children.length - 1) {
@@ -238,17 +246,17 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
             })
         }
 
-        const params = block.inputs[1].fields.expand_button.value
-        modelLayers.compile({
-            loss: params.lossFn,
-            optimizer: params.optimizer,
-            metrics: [params.metrics],
-        })
-
-        epochs = params.numEpochs
+        // parameters for training model
+        const blockParams = block.inputs[1].fields.expand_button.value
+        trainingParams = {
+            loss: blockParams.lossFn,
+            optimizer: blockParams.optimizer,
+            metrics: [blockParams.metrics],
+            epochs: blockParams.numEpochs,
+        }
     }
 
-    return { model: modelLayers, epochs: epochs }
+    return { model: modelLayers, params: trainingParams }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -259,7 +267,7 @@ const handlers: {
         const { data } = props
 
         // get model
-        const { epochs, model } = buildModelFromJSON(
+        const { model, params } = buildModelFromJSON(
             data.model,
             data.modelBlockJSON
         )
@@ -282,11 +290,13 @@ const handlers: {
                 return Promise.resolve(res)
             },
         })
+        mod.weightData = null
 
         // return data
         const result = {
             modelJSON: JSON.stringify(mod),
             modelSummary: modelSummary,
+            trainingParams: params,
         }
         return { ...props, data: result }
     },
@@ -305,20 +315,24 @@ const handlers: {
         )
 
         // get model
-        const { epochs, model } = buildModelFromJSON(
-            data.model,
-            data.modelBlockJSON
-        )
+        const modelObj = JSON.parse(data.model.modelJSON)
+        const model = await loadLayersModel({
+            load: () => Promise.resolve(modelObj),
+        })
 
-        // save summary of model
-        const modelSummary = []
-        model.summary(null, null, line => modelSummary.push(line))
+        // compile model
+        const params = data.trainingParams
+        model.compile({
+            loss: params.loss,
+            optimizer: params.optimizer,
+            metrics: params.metrics,
+        })
 
         // model.fit
         let trainingLogs = [] // space to save training loss and accuracy data
         await model
             .fit(xs, ys, {
-                epochs: epochs,
+                epochs: params.epochs,
                 validationSplit: 0.2,
                 callbacks: {
                     onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
@@ -358,9 +372,7 @@ const handlers: {
 
         // return data
         const result = {
-            modelJSON: JSON.stringify(mod),
             modelWeights: weights,
-            modelSummary: modelSummary,
             trainingLogs: trainingLogs,
             armModel: JSON.stringify(armcompiled),
         }
