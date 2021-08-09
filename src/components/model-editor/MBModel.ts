@@ -1,4 +1,5 @@
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
+import type { TFModelTrainingParams } from "../../workers/tf/dist/node_modules/tf.worker"
 
 export default class MBModel extends JDEventSource {
     // maintain info about the dataset this model was created for
@@ -7,15 +8,16 @@ export default class MBModel extends JDEventSource {
     outputShape: number
 
     // maintain training info about the model
-    trainingAcc: number
-    weightData: ArrayBuffer
     armModel: string
+    trainingAcc: number
     modelSummary: string[]
+    weightData: ArrayBuffer
+    trainingParams: TFModelTrainingParams
 
     // maintain the blockJSON that goes with this model
     blockJSON: string
 
-    static async createFromFile(modelObj: {
+    static createFromFile(modelObj: {
         name: string
         inputShape: number[]
         inputTypes: string[]
