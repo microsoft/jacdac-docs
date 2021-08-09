@@ -1,4 +1,10 @@
-import { Grid, TextField } from "@material-ui/core"
+import {
+    Card,
+    CardActions,
+    CardContent,
+    Grid,
+    TextField,
+} from "@material-ui/core"
 import React, { ChangeEvent, useContext, useMemo, useState } from "react"
 import { clone, uniqueName } from "../../../jacdac-ts/src/jdom/utils"
 import useLocalStorage from "../../components/hooks/useLocalStorage"
@@ -23,6 +29,16 @@ import GridHeader from "../../components/ui/GridHeader"
 import { useSecret } from "../../components/hooks/useSecret"
 import Alert from "../../components/ui/Alert"
 import AppContext from "../../components/AppContext"
+import useDevices from "../../components/hooks/useDevices"
+import DeviceCardHeader from "../../components/DeviceCardHeader"
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import {
+    SRV_BOOTLOADER,
+    SRV_CONTROL,
+    SRV_LOGGER,
+    SRV_PROTO_TEST,
+    SRV_ROLE_MANAGER,
+} from "../../../jacdac-ts/src/jdom/constants"
 
 interface TemplateComponent {
     name: string
@@ -175,10 +191,18 @@ function twinToDTDL(twin: TemplateSpec, merged: boolean) {
     return dtdl
 }
 
+const ignoredServices = [
+    SRV_CONTROL,
+    SRV_LOGGER,
+    SRV_ROLE_MANAGER,
+    SRV_PROTO_TEST,
+    SRV_BOOTLOADER,
+]
 export default function AzureDeviceTemplateDesigner() {
     const variant = "outlined"
     const merged = true
     const domainId = useId()
+    const devices = useDevices({ ignoreSelf: true, announced: true })
     const { enqueueSnackbar, setError } = useContext(AppContext)
     const [domain, setDomain] = useLocalStorage<string>(
         AZURE_IOT_CENTRAL_DOMAIN,
@@ -295,6 +319,21 @@ export default function AzureDeviceTemplateDesigner() {
         await uploadTemplate(dtmi, shortId, capabilityModel)
     }
 
+    const handleSelectDevice = (device: JDDevice) => async () => {
+        const services = device
+            .services()
+            .filter(srv => ignoredServices.indexOf(srv.serviceClass) < 0)
+        await Promise.all(services.map(srv => srv.resolveInstanceName()))
+        const newTwin: TemplateSpec = {
+            displayName: twin.displayName,
+            components: services.map(service => ({
+                name: service.instanceName,
+                service: service.specification,
+            })),
+        }
+        setTwin(newTwin)
+    }
+
     return (
         <>
             <h1>Azure Device Template Designer</h1>
@@ -323,6 +362,36 @@ export default function AzureDeviceTemplateDesigner() {
                 <Grid item xs={12}>
                     <ApiKeyManager />
                 </Grid>
+                <GridHeader title="Devices" />
+                {devices.map(device => (
+                    <Grid key={device.id} item xs={4}>
+                        <Card>
+                            <DeviceCardHeader
+                                device={device}
+                                showAvatar={true}
+                            />
+                            <CardContent>
+                                {device
+                                    .services()
+                                    .filter(
+                                        srv =>
+                                            ignoredServices.indexOf(
+                                                srv.serviceClass
+                                            ) < 0
+                                    )
+                                    .map(srv => srv.name).join(", ")}
+                            </CardContent>
+                            <CardActions>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleSelectDevice(device)}
+                                >
+                                    import services
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
                 <GridHeader title="Model" />
                 <Grid item xs={12}>
                     <TextField
