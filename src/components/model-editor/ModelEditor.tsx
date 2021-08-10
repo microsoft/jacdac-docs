@@ -64,33 +64,20 @@ export default function ModelPlayground() {
     const [tfModel, setTFModel] = useState<MBModel>(new MBModel(MODEL_NAME))
     const [tab, setTab] = useState<number>(0)
 
-    const [pageReady, setPageReady] = useState(false)
     useEffect(() => {
-        if (!pageReady) {
-            const storedDataJSON = localStorage.getItem(
-                MODEL_EDITOR_STORAGE_KEY
-            )
-            if (storedDataJSON) {
-                const modelEditorData = JSON.parse(storedDataJSON)
-                if (modelEditorData["dataset"])
-                    setDataSet(
-                        MBDataSet.createFromFile(
-                            DATASET_NAME,
-                            modelEditorData["dataset"]
-                        )
+        const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+        if (storedDataJSON) {
+            const modelEditorData = JSON.parse(storedDataJSON)
+            if (modelEditorData["dataset"])
+                setDataSet(
+                    MBDataSet.createFromFile(
+                        DATASET_NAME,
+                        modelEditorData["dataset"]
                     )
-                if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
-                if (modelEditorData["model"]) {
-                    MBModel.createFromFile(modelEditorData["model"]).then(
-                        storedModel => {
-                            setTFModel(storedModel)
-                            setPageReady(true)
-                        }
-                    )
-                } else {
-                    setPageReady(true)
-                }
-            } else setPageReady(true)
+                )
+            if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
+            if (modelEditorData["model"])
+                setTFModel(MBModel.createFromFile(modelEditorData["model"]))
         }
     }, [])
 
@@ -179,7 +166,6 @@ export default function ModelPlayground() {
         }
     }
 
-    if (!pageReady) return null
     return (
         <Box mb={2}>
             <h1>ML Model Creator</h1>

@@ -163,6 +163,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 {
                     type: DataTableField.KEY,
                     name: "table",
+                    selectColumns: true,
                 },
             ],
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
@@ -503,6 +504,7 @@ const chartDsl: BlockDomainSpecificLanguage = {
                 <DataColumnInputDefinition>{
                     type: DataColumnChooserField.KEY,
                     name: "field",
+                    parentData: true
                 },
                 <OptionsInputDefinition>{
                     type: "field_dropdown",
