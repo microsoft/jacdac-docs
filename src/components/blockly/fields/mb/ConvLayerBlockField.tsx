@@ -202,8 +202,8 @@ export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFi
             numTrainableParams: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
-            numFilters: 1,
-            kernelSize: 1,
+            numFilters: 16,
+            kernelSize: 2,
             strideSize: 1,
             activation: "relu",
         }
