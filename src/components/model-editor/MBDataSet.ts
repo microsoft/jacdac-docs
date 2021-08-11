@@ -33,6 +33,7 @@ export default class MBDataSet extends JDEventSource {
 
     // maintain computed number of recordings and input data types to avoid recomputation
     totalRecordings: number
+    interval: number
 
     // save what registers this dataset was created with
     registerIds: string[]
@@ -63,10 +64,6 @@ export default class MBDataSet extends JDEventSource {
         return this.labels
     }
 
-    get numRecordings() {
-        return this.totalRecordings
-    }
-
     getRecordingsWithLabel(label: string) {
         return this.recordings[label]
     }
@@ -77,14 +74,16 @@ export default class MBDataSet extends JDEventSource {
         registerIds: string[]
     ) {
         if (this.totalRecordings == 0) {
+            // the first recording added to the dataset determines its parameters
             this.labels.push(label)
             this.recordings[label] = [recording]
-            this.inputTypes = recording.headerList
+            this.inputTypes = recording.headers
+            this.interval = recording.interval
             this.registerIds = registerIds
 
             this.totalRecordings += 1
             this.emit(CHANGE)
-        } else if (arraysEqual(recording.headerList, this.inputTypes)) {
+        } else if (arraysEqual(recording.headers, this.inputTypes)) {
             // Check if label is already in dataset
             if (this.labels.indexOf(label) < 0) {
                 // If not, add the new label to the dataset
@@ -164,6 +163,7 @@ export default class MBDataSet extends JDEventSource {
 
     toCSV() {
         const recordingCountHeader = `Number of recordings,${this.totalRecordings}`
+        const recordingIntervalHeader = `Interval,${this.interval}`
 
         const recordingData: string[] = []
         this.labels.forEach(label => {
@@ -181,7 +181,11 @@ export default class MBDataSet extends JDEventSource {
         })
         const recordData = recordingData.join("\n")
 
-        const csv: string[] = [recordingCountHeader, recordData]
+        const csv: string[] = [
+            recordingCountHeader,
+            recordingIntervalHeader,
+            recordData,
+        ]
         return csv.join("\n")
     }
 }

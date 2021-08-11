@@ -191,7 +191,7 @@ export default function ModelOutput(props: {
         data = data.slice(data.length - model.inputShape[0])
         const liveInput = [data]
 
-        let topIdx = 0
+        let topLabel = model.labels[0]
 
         if (data && data.length >= model.inputShape[0]) {
             const liveOutput = []
@@ -211,20 +211,20 @@ export default function ModelOutput(props: {
 
             // Save probability for each class in model object
             const prediction = predResult.data.prediction
-            model.labels.forEach((label, idx) => {
-                liveOutput.push(prediction[idx])
+            model.labels.forEach(label => {
+                liveOutput.push(prediction[label])
 
                 // update which class has highest confidence
-                if (liveOutput[idx] > liveOutput[topIdx]) topIdx = idx
+                if (liveOutput[label] > liveOutput[topLabel]) topLabel = label
             })
 
             livePredictions.predictionData.addData(liveOutput)
-            livePredictions.topClass = model.labels[topIdx]
+            livePredictions.topClass = topLabel
         }
     }
 
     useEffect(() => {
-        const interval = setInterval(() => addRow(), 100) // Randi TODO decide if sampling interval should be constant in dataset? dataset.samplingInterval)
+        const interval = setInterval(() => addRow(), model.inputInterval)
         const stopStreaming = startStreamingRegisters()
 
         return () => {

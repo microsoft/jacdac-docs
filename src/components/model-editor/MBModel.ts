@@ -5,6 +5,7 @@ export default class MBModel extends JDEventSource {
     // maintain info about the dataset this model was created for
     inputShape: number[]
     inputTypes: string[]
+    inputInterval: number
     outputShape: number
 
     // maintain training info about the model
@@ -21,6 +22,7 @@ export default class MBModel extends JDEventSource {
         name: string
         inputShape: number[]
         inputTypes: string[]
+        inputInterval: number
         labels: string[]
         modelJSON: string
         outputShape: number
@@ -36,6 +38,7 @@ export default class MBModel extends JDEventSource {
         )
         mbModel.inputShape = modelObj.inputShape
         mbModel.inputTypes = modelObj.inputTypes
+        mbModel.inputInterval = modelObj.inputInterval || 100
         mbModel.outputShape = modelObj.outputShape
 
         mbModel.trainingAcc = modelObj.trainingAcc || 0
@@ -76,6 +79,7 @@ export default class MBModel extends JDEventSource {
             name: this.name,
             inputShape: this.inputShape,
             inputTypes: this.inputTypes,
+            inputInterval: this.inputInterval,
             labels: this.labels,
             modelJSON: this.modelJSON,
             outputShape: this.outputShape,
