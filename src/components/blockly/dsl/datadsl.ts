@@ -41,6 +41,11 @@ import type {
     DataCorrelationRequest,
     DataLinearRegressionRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
+import { predictRequest } from "../../blockly/dsl/workers/tf.proxy"
+import type {
+    TFModelPredictRequest,
+    TFModelPredictResponse,
+} from "../../../workers/tf/dist/node_modules/tf.worker"
 import {
     BlockWithServices,
     resolveBlockServices,
@@ -83,6 +88,10 @@ const DATA_LINEAR_REGRESSION_BLOCK = "data_linear_regression"
 const DATA_LOAD_FILE_BLOCK = "data_load_file"
 const DATA_SAVE_FILE_BLOCK = "data_save_file"
 const DATA_COMMENT_BLOCK = "data_comment_block"
+
+export const MODEL_BLOCKS = "model_block_"
+export const MB_CLASSIFIER_VAR_TYPE = "ModelBlockClassifier"
+const MODEL_ADD_VARIABLE_CALLBACK = "model_add_variable"
 
 const [datasetColour, operatorsColour, computeColour, statisticsColour] =
     palette()
@@ -774,6 +783,62 @@ const dataDsl: BlockDomainSpecificLanguage = {
         },
         {
             kind: "block",
+            type: MODEL_BLOCKS + "prediction",
+            message0: "predict with %1",
+            args0: [
+                {
+                    type: "field_variable",
+                    name: "CLASSIFIER_NAME",
+                    variable: "classifier1",
+                    variableTypes: [MB_CLASSIFIER_VAR_TYPE],
+                    defaultType: MB_CLASSIFIER_VAR_TYPE,
+                },
+            ],
+            inputsInline: false,
+            previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            colour: statisticsColour,
+            template: "meta",
+            dataPreviewField: true,
+            passthroughData: false,
+            transformData: async (b: Block, data: object[]) => {
+                const storedDataJSON = localStorage.getItem(
+                    "model-editor-data-json"
+                )
+                const model = JSON.parse(storedDataJSON)["model"]
+                if (data) data = data.slice(data.length - model.inputShape[0])
+
+                if (data && data.length >= model.inputShape[0]) {
+                    const inputData = [data.map(row => [row["pressure"]])]
+                    const predictMsg = {
+                        worker: "tf",
+                        type: "predict",
+                        data: {
+                            zData: inputData,
+                            model: model,
+                        },
+                    } as TFModelPredictRequest
+                    const predResult = (await predictRequest(
+                        predictMsg
+                    )) as TFModelPredictResponse
+
+                    const transposedResult = []
+                    for (const label in predResult.data.prediction) {
+                        transposedResult.push({
+                            label: label,
+                            confidence: predResult.data.prediction[label],
+                        })
+                    }
+
+                    return transposedResult
+                }
+                return Promise.resolve([])
+            },
+            tooltip: "Use this block to run inference on vm sensor data.",
+            helpUrl: "",
+        },
+        {
+            kind: "block",
             type: DATA_LOAD_FILE_BLOCK,
             message0: "load dataset from file %1",
             args0: [
@@ -959,6 +1024,25 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 <BlockReference>{
                     kind: "block",
                     type: DATA_LINEAR_REGRESSION_BLOCK,
+                },
+                {
+                    kind: "label",
+                    text: "ML classifiers",
+                },
+                /*<ButtonDefinition>{
+                    kind: "button",
+                    text: `Add classifier variable`,
+                    callbackKey: MODEL_ADD_VARIABLE_CALLBACK,
+                    callback: workspace =>
+                        Variables.createVariableButtonHandler(
+                            workspace,
+                            null,
+                            MB_CLASSIFIER_VAR_TYPE
+                        ),
+                },*/
+                <BlockReference>{
+                    kind: "block",
+                    type: MODEL_BLOCKS + "prediction",
                 },
             ],
         },
