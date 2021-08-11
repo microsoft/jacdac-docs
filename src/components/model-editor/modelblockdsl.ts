@@ -7,11 +7,6 @@ import {
     MODEL_BLOCK_LAYER_STATEMENT_TYPE,
 } from "../blockly/toolbox"
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
-import { predictRequest } from "../blockly/dsl/workers/tf.proxy"
-import type {
-    TFModelPredictRequest,
-    TFModelPredictResponse,
-} from "../../workers/tf/dist/node_modules/tf.worker"
 
 import ExpandModelBlockField from "../blockly/fields/mb/ExpandModelBlockField"
 
@@ -414,11 +409,11 @@ export class ModelBlockDomainSpecificLanguage
                     },
                     {
                         kind: "block",
-                        type: MODEL_BLOCKS + "nn",
+                        blockxml: `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":4,"numParams":0,"modelCycles":0,"classes":[],"optimizer":"adam","batchSize":32,"numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_conv_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numTrainableParams":0,"runTimeInCycles":0,"outputShape":[0,0],"numFilters":1,"kernelSize":1,"strideSize":1,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_conv_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numTrainableParams":0,"runTimeInCycles":0,"outputShape":[0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
                     },
                     {
                         kind: "block",

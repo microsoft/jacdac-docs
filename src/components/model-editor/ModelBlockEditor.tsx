@@ -123,7 +123,22 @@ function ModelBlockEditorWithContext() {
                         block.inputs[0].fields[
                             "classifier_name"
                         ].value?.toString()
-                    if (modelName) mBlocks[modelName] = block
+                    if (modelName) {
+                        mBlocks[modelName] = block
+                        // associate block with model
+                        const model = allModels[modelName]
+                        if (model.blockJSON) {
+                            // if block JSON already exists on a model, make sure it lines up
+                            // if not, mark the model as untrained
+                            if (
+                                JSON.stringify(block) !=
+                                JSON.stringify(model.blockJSON)
+                            ) {
+                                model.blockJSON = block
+                                model.status = "untrained"
+                            }
+                        } else model.blockJSON = block
+                    }
                 }
             },
         })
@@ -207,15 +222,9 @@ function ModelBlockEditorWithContext() {
         // setup model for training
         const modelName = clickedBlock.getField("CLASSIFIER_NAME").getText()
         let selectedModel: MBModel = allModels[modelName]
-        if (selectedModel) {
-            // check if model has changed since last training
-            if (selectedModel.blockJSON !== modelBlocks[modelName]) {
-                selectedModel.status = "untrained"
-                selectedModel.blockJSON = modelBlocks[modelName]
-            }
-        } else {
+        if (!selectedModel) {
+            // if the model does not exist in storage, create new model variable
             selectedModel = new MBModel(modelName)
-            // grab the block json
             selectedModel.blockJSON = modelBlocks[modelName]
         }
 
@@ -269,7 +278,6 @@ function ModelBlockEditorWithContext() {
             if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
                 const command = clickedBlock.data.split(".")[1]
                 if (command == "download") {
-                    console.log("Randi got a download command ", clickedBlock)
                     // find the correct recording, dataset, or model to downlaod
                     if (allRecordings[clickedBlock.id]) {
                         // get recording, recording name, and class name
@@ -367,6 +375,7 @@ function ModelBlockEditorWithContext() {
                     <FileTabs
                         newFileName={WORKSPACE_FILENAME}
                         newFileContent={MB_NEW_FILE_CONTENT}
+                        hideFiles={true}
                     />
                 </Grid>
             )}

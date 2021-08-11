@@ -76,8 +76,9 @@ export default function ModelPlayground() {
                     )
                 )
             if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
-            if (modelEditorData["model"])
+            if (modelEditorData["model"]) {
                 setTFModel(MBModel.createFromFile(modelEditorData["model"]))
+            }
         }
     }, [])
 
