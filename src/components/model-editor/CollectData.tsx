@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from "react"
+import React, { lazy, useEffect, useContext, useState } from "react"
 
 import { Grid, TextField, InputAdornment } from "@material-ui/core"
 import { Button } from "gatsby-theme-material-ui"
@@ -31,6 +31,9 @@ import ReadingFieldGrid from "../ReadingFieldGrid"
 import FieldDataSet from "../FieldDataSet"
 import MBDataSet, { arraysEqual } from "./MBDataSet"
 import { DATASET_NAME } from "./ModelEditor"
+import Suspense from "../ui/Suspense"
+
+const DataSetChart = lazy(() => import("./DataSetChart"))
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -57,6 +60,7 @@ export default function CollectData(props: {
 }) {
     const { chartPalette, onChange, onNext } = props
     const [dataset, setDataSet] = useState<MBDataSet>(props.dataset)
+    const [dataTimestamp, setDataTimestamp] = useState(0)
     const classes = props.reactStyle
 
     const { fileStorage } = useContext(ServiceManagerContext)
@@ -79,7 +83,6 @@ export default function CollectData(props: {
     )
 
     const [isRecording, setIsRecording] = useState(false)
-    const [, setRecordingLength] = useState(0)
     const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
     const [, setLiveDataTimestamp] = useState(0)
 
@@ -90,7 +93,7 @@ export default function CollectData(props: {
                   readingRegisters.filter(
                       reg => registerIds.indexOf(reg.id) > -1
                   ),
-                  `${currentClassLabel}$${dataset.numRecordings}`,
+                  `${currentClassLabel}$${dataset.totalRecordings}`,
                   live,
                   chartPalette
               )
@@ -172,6 +175,7 @@ export default function CollectData(props: {
             setTotalRecordings(totalRecordings + 1)
             setDataSet(dataset)
             handleDataSetUpdate(dataset)
+            setDataTimestamp(Date.now())
 
             // create new live recording
             setLiveRecording(newRecording(registerIdsChecked, true))
@@ -207,7 +211,6 @@ export default function CollectData(props: {
     }
     const updateLiveData = () => {
         setLiveRecording(liveRecording)
-        setRecordingLength(liveRecording.rows.length)
         setLiveDataTimestamp(bus.timestamp)
     }
     const throttleUpdate = throttle(() => updateLiveData(), 30)
@@ -272,20 +275,20 @@ export default function CollectData(props: {
                     <IconButtonWithTooltip
                         onClick={handleDownloadDataSet}
                         title="Download all recording data"
-                        disabled={dataset.numRecordings == 0}
+                        disabled={dataset.totalRecordings == 0}
                     >
                         <DownloadIcon />
                     </IconButtonWithTooltip>
                     <IconButtonWithTooltip
                         onClick={handleDeleteDataSet}
                         title="Delete all recording data"
-                        disabled={dataset.numRecordings == 0}
+                        disabled={dataset.totalRecordings == 0}
                     >
                         <DeleteAllIcon />
                     </IconButtonWithTooltip>
                 </h2>
                 <div key="recordedData">
-                    {dataset.numRecordings > 0 ? (
+                    {dataset.totalRecordings > 0 ? (
                         <div key="recordings">
                             <p>
                                 Input type(s): {dataset.inputTypes.join(",")}{" "}
@@ -300,6 +303,15 @@ export default function CollectData(props: {
                                     handleDeleteTable={handleDeleteRecording}
                                 />
                             ))}
+                            <br />
+                            <Suspense>
+                                <DataSetChart
+                                    dataset={dataset}
+                                    currentRecording={liveRecording}
+                                    currentLabel={currentClassLabel}
+                                    timestamp={dataTimestamp}
+                                />
+                            </Suspense>
                         </div>
                     ) : (
                         <p>Empty</p>

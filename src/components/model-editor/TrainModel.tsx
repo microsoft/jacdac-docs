@@ -5,13 +5,10 @@ import {
     Button,
     Grid,
 } from "@material-ui/core"
-import Trend from "../Trend"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
-// tslint:disable-next-line: match-default-export-name no-submodule-imports
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -19,27 +16,23 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DeleteAllIcon from "@material-ui/icons/DeleteSweep"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { lazy, useContext, useEffect, useState } from "react"
+import Suspense from "../ui/Suspense"
 
 import ServiceManagerContext from "../ServiceManagerContext"
 
 import { compileRequest, trainRequest } from "../blockly/dsl/workers/tf.proxy"
 import type {
     TFModelCompileRequest,
-    TFModelCompileResponse,
     TFModelTrainRequest,
     TFModelTrainResponse,
 } from "../../workers/tf/dist/node_modules/tf.worker"
 import workerProxy from "../blockly/dsl/workers/proxy"
 
-import FieldDataSet from "../FieldDataSet"
 import MBDataSet, { arraysEqual } from "./MBDataSet"
 import MBModel from "./MBModel"
-import useChange from "../../jacdac/useChange"
 
-const NUM_EPOCHS = 250
-const TRAINING_COLOR = "#0f2080"
-const VAL_COLOR = "#f5793a"
+const LossAccChart = lazy(() => import("./LossAccChart"))
 
 export default function TrainModel(props: {
     reactStyle: any
@@ -105,6 +98,7 @@ export default function TrainModel(props: {
             mod.labels = dataset.labels
             mod.inputShape = [dataset.length, dataset.width]
             mod.inputTypes = dataset.inputTypes
+            mod.inputInterval = dataset.interval
             mod.outputShape = dataset.labels.length
         } else if (
             !arraysEqual(mod.labels, dataset.labels) ||
@@ -133,31 +127,15 @@ export default function TrainModel(props: {
                 handleModelUpdate(mod)
             }
         })
-    }
 
-    const prepareTrainingLogs = (colors: string[]) => {
-        // Create space to hold training log data
-        const trainingLogDataSet = {
-            name: "training-logs",
-            rows: [],
-            headers: ["training", "val"],
-            units: ["/", "/"],
-            colors: colors,
-        }
-        const set = FieldDataSet.createFromFile(trainingLogDataSet)
-        return set
+        setTrainEnabled(dataset.labels.length >= 2)
     }
 
     /* For training model */
-    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
-    const trainingAccLog = useMemo(() => {
-        return prepareTrainingLogs([TRAINING_COLOR, VAL_COLOR])
-    }, [])
-    const trainingLossLog = useMemo(() => {
-        return prepareTrainingLogs([TRAINING_COLOR, VAL_COLOR])
-    }, [])
-    useChange(trainingAccLog)
-    useChange(trainingLossLog)
+    const [trainEnabled, setTrainEnabled] = useState(false)
+    const [vegaTrainingLoss, setVegaLoss] = useState([])
+    const [vegaTrainingAcc, setVegaAcc] = useState([])
+    const [logTimestamp, setTrainingLogTimestamp] = useState(0)
 
     const trainTFModel = async () => {
         model.status = "training"
@@ -170,11 +148,28 @@ export default function TrainModel(props: {
         const stopWorkerSubscribe = workerProxy("tf").subscribe(
             "message",
             (msg: any) => {
-                console.log("Training data ", msg.data)
-                const lossData = [msg.data.loss, msg.data.val_loss]
-                const accData = [msg.data.acc, msg.data.val_acc]
-                if (trainingLossLog) trainingLossLog.addData(lossData)
-                if (trainingAccLog) trainingAccLog.addData(accData)
+                const epoch = vegaTrainingLoss.length / 2 + 1
+                vegaTrainingLoss.push({
+                    epoch: epoch,
+                    loss: msg.data.loss,
+                    dataset: "training",
+                })
+                vegaTrainingLoss.push({
+                    epoch: epoch,
+                    loss: msg.data.val_loss,
+                    dataset: "validation",
+                })
+                vegaTrainingAcc.push({
+                    epoch: epoch,
+                    acc: msg.data.acc,
+                    dataset: "training",
+                })
+                vegaTrainingAcc.push({
+                    epoch: epoch,
+                    acc: msg.data.val_acc,
+                    dataset: "validation",
+                })
+                setTrainingLogTimestamp(Date.now())
             }
         )
 
@@ -229,6 +224,9 @@ export default function TrainModel(props: {
             const newModel = new MBModel(model.name)
             prepareModel(newModel)
             handleModelUpdate(newModel)
+
+            setVegaLoss([])
+            setVegaAcc([])
         }
     }
 
@@ -247,7 +245,7 @@ export default function TrainModel(props: {
                     <IconButtonWithTooltip
                         onClick={handleDownloadModel}
                         title="Download all recording data"
-                        disabled={dataset.numRecordings == 0}
+                        disabled={dataset.totalRecordings == 0}
                     >
                         <DownloadIcon />
                     </IconButtonWithTooltip>
@@ -319,66 +317,15 @@ export default function TrainModel(props: {
             </Grid>
             <Grid item>
                 <h3>Training Results</h3>
-                {!!trainingLossLog.length && (
-                    <div key="training-log-loss">
-                        <div>
-                            <FiberManualRecordIcon
-                                className={classes.vmiddle}
-                                fontSize="small"
-                                style={{
-                                    color: TRAINING_COLOR,
-                                }}
-                            />
-                            Training Loss
-                            <FiberManualRecordIcon
-                                className={classes.vmiddle}
-                                fontSize="small"
-                                style={{
-                                    color: VAL_COLOR,
-                                }}
-                            />
-                            Validation Loss
-                            <Trend
-                                key="training-loss-trends"
-                                height={12}
-                                dataSet={trainingLossLog}
-                                horizon={NUM_EPOCHS}
-                                dot={true}
-                                gradient={true}
-                            />
-                        </div>
-                    </div>
-                )}
-                {!!trainingAccLog.length && (
-                    <div key="training-log-acc-data">
-                        <div>
-                            <FiberManualRecordIcon
-                                className={classes.vmiddle}
-                                fontSize="small"
-                                style={{
-                                    color: TRAINING_COLOR,
-                                }}
-                            />
-                            Training Accuracy
-                            <FiberManualRecordIcon
-                                className={classes.vmiddle}
-                                fontSize="small"
-                                style={{
-                                    color: VAL_COLOR,
-                                }}
-                            />
-                            Validation Accuracy
-                            <Trend
-                                key="training-acc-trends"
-                                height={12}
-                                dataSet={trainingAccLog}
-                                horizon={NUM_EPOCHS}
-                                dot={true}
-                                gradient={true}
-                            />
-                        </div>
-                    </div>
-                )}
+                <div key="vega-test">
+                    <Suspense>
+                        <LossAccChart
+                            lossData={vegaTrainingLoss}
+                            accData={vegaTrainingAcc}
+                            timestamp={logTimestamp}
+                        />
+                    </Suspense>
+                </div>
                 <p>Final Training Accuracy: {model.trainingAcc}</p>
                 <br />
             </Grid>

@@ -39,9 +39,10 @@ export default class FielddataSet extends JDEventSource {
     units: string[]
     maxRows = -1
 
-    // maintain computed min/max to avoid recomputation
+    // maintain computed min/max/rms to avoid recomputation
     mins: number[]
     maxs: number[]
+    rms: number[]
 
     static create(
         bus: JDBus,
@@ -96,6 +97,15 @@ export default class FielddataSet extends JDEventSource {
         return row?.timestamp
     }
 
+    get interval() {
+        if (this.rows.length >= 2) {
+            const first = this.rows[0]
+            const second = this.rows[1]
+            return second.timestamp - first.timestamp
+        }
+        return 0
+    }
+
     get duration() {
         const first = this.rows[0]
         const last = this.rows[this.rows.length - 1]
@@ -108,10 +118,6 @@ export default class FielddataSet extends JDEventSource {
 
     get width() {
         return this.headers.length
-    }
-
-    get headerList() {
-        return this.headers
     }
 
     data(flatten?: boolean) {
@@ -157,10 +163,17 @@ export default class FielddataSet extends JDEventSource {
                 if (r == 0) {
                     this.mins = row.data.slice(0)
                     this.maxs = row.data.slice(0)
+                    this.rms = row.data.slice(0)
                 } else {
+                    const n = r
                     for (let i = 0; i < row.data.length; ++i) {
                         this.mins[i] = Math.min(this.mins[i], row.data[i])
                         this.maxs[i] = Math.max(this.maxs[i], row.data[i])
+                        this.rms[i] = Math.sqrt(
+                            (Math.pow(this.rms[i], 2) * (n - 1) +
+                                Math.pow(row.data[i], 2)) /
+                                n
+                        )
                     }
                 }
             }
@@ -169,10 +182,17 @@ export default class FielddataSet extends JDEventSource {
             if (!this.mins) {
                 this.mins = data.slice(0)
                 this.maxs = data.slice(0)
+                this.rms = data.slice(0)
             } else {
+                const n = this.rows.length
                 for (let i = 0; i < data.length; ++i) {
                     this.mins[i] = Math.min(this.mins[i], data[i])
                     this.maxs[i] = Math.max(this.maxs[i], data[i])
+                    this.rms[i] = Math.sqrt(
+                        (Math.pow(this.rms[i], 2) * (n - 1) +
+                            Math.pow(data[i], 2)) /
+                            n
+                    )
                 }
             }
         }
