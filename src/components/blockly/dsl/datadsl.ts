@@ -360,8 +360,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
             dataPreviewField: true,
             transformData: (b: Block, data: object[]) => {
                 const newcolumn = b.getFieldValue("newcolumn")
-                const lhs = tidyResolveFieldColumn(data, b, "lhs", "number")
-                const rhs = tidyResolveFieldColumn(data, b, "rhs", "number")
+                const lhs = tidyResolveFieldColumn(data, b, "lhs", {
+                    type: "number",
+                })
+                const rhs = tidyResolveFieldColumn(data, b, "rhs", {
+                    type: "number",
+                })
                 const logic = b.getFieldValue("logic")
                 if (!newcolumn || !lhs || !rhs) return Promise.resolve(data)
                 return postTransformData(<DataMutateColumnsRequest>{
@@ -418,7 +422,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: Block, data: object[]) => {
                 const newcolumn = b.getFieldValue("newcolumn")
-                const lhs = tidyResolveFieldColumn(data, b, "lhs", "number")
+                const lhs = tidyResolveFieldColumn(data, b, "lhs", {
+                    type: "number",
+                })
                 const rhs = b.getFieldValue("rhs")
                 const logic = b.getFieldValue("logic")
                 if (!newcolumn || !lhs) return Promise.resolve(data)
@@ -455,12 +461,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transformData: (b: Block, data: any[]) => {
-                const columns = tidyResolveFieldColumns(
-                    data,
-                    b,
-                    "column",
-                    "number"
-                )
+                const columns = tidyResolveFieldColumns(data, b, "column", {
+                    type: "number",
+                })
                 const calc = b.getFieldValue("calc")
                 return postTransformData(<DataSummarizeRequest>{
                     type: "summarize",
@@ -670,12 +673,9 @@ const dataDsl: BlockDomainSpecificLanguage = {
             template: "meta",
             dataPreviewField: true,
             transformData: async (b: Block, data: object[]) => {
-                const column = tidyResolveFieldColumn(
-                    data,
-                    b,
-                    "column",
-                    "number"
-                )
+                const column = tidyResolveFieldColumn(data, b, "column", {
+                    type: "number",
+                })
                 if (!column) return Promise.resolve([])
                 return postTransformData(<DataBinRequest>{
                     type: "bin",
@@ -722,8 +722,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
             dataPreviewField: false,
             passthroughData: true,
             transformData: async (b: Block, data: object[]) => {
-                const column1 = tidyResolveFieldColumn(data, b, "x", "number")
-                const column2 = tidyResolveFieldColumn(data, b, "y", "number")
+                const column1 = tidyResolveFieldColumn(data, b, "x", {
+                    type: "number",
+                })
+                const column2 = tidyResolveFieldColumn(data, b, "y", {
+                    type: "number",
+                })
                 if (!column1 || !column2) return Promise.resolve([])
                 return postTransformData(<DataCorrelationRequest>{
                     type: "correlation",
@@ -770,8 +774,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
             dataPreviewField: false,
             passthroughData: true,
             transformData: async (b: Block, data: object[]) => {
-                const column1 = tidyResolveFieldColumn(data, b, "x", "number")
-                const column2 = tidyResolveFieldColumn(data, b, "y", "number")
+                const column1 = tidyResolveFieldColumn(data, b, "x", {
+                    type: "number",
+                })
+                const column2 = tidyResolveFieldColumn(data, b, "y", {
+                    type: "number",
+                })
                 if (!column1 || !column2) return Promise.resolve([])
                 return postTransformData(<DataLinearRegressionRequest>{
                     type: "linear_regression",
