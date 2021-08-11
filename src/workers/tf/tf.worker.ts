@@ -18,6 +18,7 @@ export interface TFModelObj {
     name: string
     inputShape: number[]
     inputTypes: string[]
+    inputInterval: number
     labels: string[]
     modelJSON: string
     outputShape: number
@@ -132,12 +133,12 @@ function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
                 layer = layers.dense({
                     inputShape: inputShape,
                     units: outputShape || params.numUnits,
-                    activation: params.activation,
+                    activation: outputShape ? "softmax" : params.activation,
                 })
             } else {
                 layer = layers.dense({
                     units: outputShape || params.numUnits,
-                    activation: params.activation,
+                    activation: outputShape ? "softmax" : params.activation,
                 })
             }
             break
@@ -362,13 +363,12 @@ const handlers: {
         mod.weightData = null
 
         // compile arm model for mcu
-        /*const armcompiled = await compileAndTest(model, {
+        const armcompiled = await compileAndTest(model, {
             verbose: true,
             includeTest: true,
             float16weights: false,
             optimize: true,
-        })*/
-        const armcompiled = ""
+        })
 
         // return data
         const result = {
@@ -383,7 +383,6 @@ const handlers: {
 
         /// get dataset
         const zs = tensor(data.zData)
-
         // get model
         const modelObj = JSON.parse(data.model.modelJSON)
         // load weight data into model before loading the model
@@ -393,11 +392,16 @@ const handlers: {
         })
 
         // model.predict
-        const prediction = (await model.predict(zs)) as Tensor
-        const predictArr = await prediction.dataSync()
+        const predResult = (await model.predict(zs)) as Tensor
+        const predictArr = await predResult.dataSync()
+
+        const prediction = {}
+        for (const idx in predictArr) {
+            prediction[data.model.labels[idx]] = predictArr[idx]
+        }
 
         // return prediction
-        const result = { prediction: predictArr }
+        const result = { prediction: prediction }
 
         return { ...props, data: result }
     },
