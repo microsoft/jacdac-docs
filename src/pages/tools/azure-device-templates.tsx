@@ -103,7 +103,7 @@ export default function AzureDeviceTemplateDesigner() {
             `${dtdl.displayName} (${dtmi}) upload ${
                 success ? "success" : "error"
             } (${status}) `,
-            { status, response }
+            { status, body: JSON.stringify(body), response }
         )
 
         return {
@@ -121,16 +121,6 @@ export default function AzureDeviceTemplateDesigner() {
             setWorking(true)
             setError("")
             setOutput("")
-
-            // upload services
-            for (const spec of specifications) {
-                const dtmi = serviceSpecificationDTMI(spec, "template")
-                const dtdl = serviceSpecificationToDTDL(spec)
-                const { success } = await apiPutTemplate(dtmi, dtdl)
-                if (!success) return
-            }
-
-            // upload device gateway
             {
                 const { success } = await apiPutTemplate(
                     toDTMI(["template", "device"]),
@@ -146,13 +136,21 @@ export default function AzureDeviceTemplateDesigner() {
                                 target: [],
                             },
                         ],
-                        displayName: "power-device",
+                        displayName: "device",
                         "@context": [
                             "dtmi:iotcentral:context;2",
                             "dtmi:dtdl:context;2",
                         ],
                     } as DTDLSchema
                 )
+                if (!success) return
+            }
+
+            // upload services
+            for (const spec of specifications) {
+                const dtmi = serviceSpecificationDTMI(spec, "template")
+                const dtdl = serviceSpecificationToDTDL(spec)
+                const { success } = await apiPutTemplate(dtmi, dtdl)
                 if (!success) return
             }
         } catch (e) {
