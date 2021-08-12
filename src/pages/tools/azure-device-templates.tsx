@@ -9,11 +9,13 @@ import ApiKeyAccordion from "../../components/ApiKeyAccordion"
 import { useSecret } from "../../components/hooks/useSecret"
 import Alert from "../../components/ui/Alert"
 import {
+    serviceSpecificationDTMI,
     serviceSpecificationsWithDTDL,
     serviceSpecificationToDTDL,
     toDTMI,
 } from "../../../jacdac-ts/src/azure-iot/dtdlspec"
 import useMounted from "../../components/hooks/useMounted"
+import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 
 const AZURE_IOT_CENTRAL_DOMAIN = "azureiotcentraldomain"
 const AZURE_IOT_CENTRAL_API_KEY = "azureiotcentraliotkey"
@@ -69,17 +71,22 @@ export default function AzureDeviceTemplateDesigner() {
     const handleDomainChange = (ev: ChangeEvent<HTMLInputElement>) =>
         setDomain(ev.target.value)
 
-    const apiPutTemplate = async (dtdl: DTDLNode) => {
-        const dtmi = dtdl["@id"]
+    const apiPutTemplate = async (dtmi: string, dtdl: DTDLNode) => {
         const path = `deviceTemplates/${dtmi}`
         const url = `${domain}api/${path}${AZURE_IOT_API_VERSION}`
+        const body = {
+            "@type": ["ModelDefinition", "DeviceModel"],
+            displayName: dtdl.displayName,
+            capabilityModel: dtdl,
+            contents: [dtdl],
+        }
         const options: RequestInit = {
             method: "PUT",
             headers: {
                 authorization: apiToken,
                 Accept: "application/json",
             },
-            body: JSON.stringify(dtdl),
+            body: JSON.stringify(body),
         }
         if (
             options.method === "POST" ||
@@ -92,13 +99,12 @@ export default function AzureDeviceTemplateDesigner() {
         const success = status === 200
         const response = await res.json()
 
-        if (mounted()) {
-            setOutput(
-                `${output}\n${dtmi} upload ${
-                    success ? "success" : "error"
-                } (${status}) `
-            )
-        }
+        console.debug(
+            `${dtdl.displayName} (${dtmi}) upload ${
+                success ? "success" : "error"
+            } (${status}) `,
+            { status, response }
+        )
 
         return {
             status,
@@ -108,36 +114,46 @@ export default function AzureDeviceTemplateDesigner() {
     }
 
     const handleUpload = async () => {
-        const specifications = serviceSpecificationsWithDTDL()
+        const specifications = serviceSpecificationsWithDTDL().filter(spec =>
+            isSensor(spec)
+        )
         try {
             setWorking(true)
             setError("")
             setOutput("")
 
-            // upload device gateway
-            apiPutTemplate({
-                "@id": toDTMI(["device"]),
-                "@type": "Interface",
-                contents: [
-                    {
-                        "@id": toDTMI(["sensor"]),
-                        "@type": ["Relationship", "GatewayDevice"],
-                        displayName: "sensor",
-                        name: "sensor",
-                        target: [],
-                    },
-                ],
-                displayName: "power-device",
-                "@context": [
-                    "dtmi:iotcentral:context;2",
-                    "dtmi:dtdl:context;2",
-                ],
-            } as DTDLSchema)
-
             // upload services
             for (const spec of specifications) {
+                const dtmi = serviceSpecificationDTMI(spec, "template")
                 const dtdl = serviceSpecificationToDTDL(spec)
-                await apiPutTemplate(dtdl)
+                const { success } = await apiPutTemplate(dtmi, dtdl)
+                if (!success) return
+            }
+
+            // upload device gateway
+            {
+                const { success } = await apiPutTemplate(
+                    toDTMI(["template", "device"]),
+                    {
+                        "@id": toDTMI(["device"]),
+                        "@type": "Interface",
+                        contents: [
+                            {
+                                "@id": toDTMI(["sensor"]),
+                                "@type": ["Relationship", "GatewayDevice"],
+                                displayName: "sensor",
+                                name: "sensor",
+                                target: [],
+                            },
+                        ],
+                        displayName: "power-device",
+                        "@context": [
+                            "dtmi:iotcentral:context;2",
+                            "dtmi:dtdl:context;2",
+                        ],
+                    } as DTDLSchema
+                )
+                if (!success) return
             }
         } catch (e) {
             if (mounted()) {
