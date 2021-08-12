@@ -1,10 +1,10 @@
-import { Grid, TextField } from "@material-ui/core"
+import { Grid, TextField, Link } from "@material-ui/core"
 import React, { ChangeEvent, useState } from "react"
 import useLocalStorage from "../../components/hooks/useLocalStorage"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import { DTDLNode, DTDLSchema } from "../../../jacdac-ts/src/azure-iot/dtdl"
 import { useId } from "react-use-id-hook"
-import { Button, Link } from "gatsby-theme-material-ui"
+import { Button } from "gatsby-theme-material-ui"
 import ApiKeyAccordion from "../../components/ApiKeyAccordion"
 import { useSecret } from "../../components/hooks/useSecret"
 import Alert from "../../components/ui/Alert"
@@ -162,6 +162,8 @@ export default function AzureDeviceTemplateDesigner() {
                 )
                 if (!success) return
             }
+
+            setOutput("All services added successfully!")
         } catch (e) {
             if (mounted()) {
                 setError(e.message)
@@ -174,13 +176,10 @@ export default function AzureDeviceTemplateDesigner() {
 
     return (
         <>
-            <h1>Azure Device Template Importer</h1>
+            <h1>Azure Device Templates</h1>
             <p>
-                This page can import the{" "}
-                <Link href="https://github.com/Azure/opendigitaltwins-dtdl/">
-                    device twin
-                </Link>{" "}
-                template used in Azure IoT Central.
+                This page import device templates into your Azure IoT Central
+                application.
             </p>
             <Grid container direction="row" spacing={2}>
                 <Grid item xs={12}>
@@ -203,19 +202,38 @@ export default function AzureDeviceTemplateDesigner() {
                     </Grid>
                 )}
                 <Grid item xs={12}>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        disabled={working || !domain || !apiToken}
-                        onClick={handleUpload}
-                        title="Import the device template into your Azure IoT Central application (requires domain and API token)."
-                    >
-                        Upload template into your Azure IoT Central application
-                    </Button>
+                    <Grid container spacing={1}>
+                        <Grid item>
+                            {" "}
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                disabled={working || !domain || !apiToken}
+                                onClick={handleUpload}
+                                title="Import the device template into your Azure IoT Central application (requires domain and API token)."
+                            >
+                                Upload device templates
+                            </Button>
+                        </Grid>
+                        {domain && (
+                            <Grid item>
+                                <Link
+                                    variant="caption"
+                                    href={`${domain}device-templates`}
+                                    target={"_blank"}
+                                >
+                                    Open device templates
+                                </Link>
+                            </Grid>
+                        )}
+                    </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                    <pre>{output}</pre>
-                </Grid>
+                {output && (
+                    <Grid item xs={12}>
+                        <Alert severity="success">{output}</Alert>
+                    </Grid>
+                )}
             </Grid>
         </>
     )
