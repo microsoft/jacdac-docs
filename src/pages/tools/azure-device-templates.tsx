@@ -71,11 +71,15 @@ export default function AzureDeviceTemplateDesigner() {
     const handleDomainChange = (ev: ChangeEvent<HTMLInputElement>) =>
         setDomain(ev.target.value)
 
-    const apiPutTemplate = async (dtmi: string, dtdl: DTDLNode) => {
+    const apiPutTemplate = async (
+        dtmi: string,
+        type: string,
+        dtdl: DTDLNode
+    ) => {
         const path = `deviceTemplates/${dtmi}`
         const url = `${domain}api/${path}${AZURE_IOT_API_VERSION}`
         const body = {
-            "@type": ["ModelDefinition", "DeviceModel"],
+            "@type": ["ModelDefinition", type],
             displayName: dtdl.displayName,
             capabilityModel: dtdl,
             contents: [dtdl],
@@ -124,6 +128,7 @@ export default function AzureDeviceTemplateDesigner() {
             {
                 const { success } = await apiPutTemplate(
                     toDTMI(["template", "device"]),
+                    "GatewayModel",
                     {
                         "@id": toDTMI(["device"]),
                         "@type": "Interface",
@@ -150,7 +155,11 @@ export default function AzureDeviceTemplateDesigner() {
             for (const spec of specifications) {
                 const dtmi = serviceSpecificationDTMI(spec, "template")
                 const dtdl = serviceSpecificationToDTDL(spec)
-                const { success } = await apiPutTemplate(dtmi, dtdl)
+                const { success } = await apiPutTemplate(
+                    dtmi,
+                    "DeviceModel",
+                    dtdl
+                )
                 if (!success) return
             }
         } catch (e) {
