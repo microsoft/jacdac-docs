@@ -43,7 +43,7 @@ export default function useFirmwareRepos(showAllRepos?: boolean) {
                         firmwares.push(firmwareIdentifier);
                 }
                 catch (e) {
-                    console.warn(`bootloader firmware identifier failed`, e)
+                    console.warn(`bootloader product identifier failed`, e)
                 }
             }
             repos = firmwares.map(fw => deviceSpecificationFromFirmwareIdentifier(fw)?.repo)

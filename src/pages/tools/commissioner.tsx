@@ -280,7 +280,7 @@ export default function Commissioner() {
     const [dataSet, setDataSet] = useState<DeviceDescriptor[]>()
     const tableHeaders = [
         "Device identifier",
-        "Firmware identifier",
+        "Product identifier",
         "Services advertised",
         "Services seen",
         "Packets seen",
@@ -405,7 +405,7 @@ export default function Commissioner() {
         let str =
             "device identifier" +
             sep +
-            "firmware identifier" +
+            "product identifier" +
             sep +
             "services" +
             sep +

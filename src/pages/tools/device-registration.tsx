@@ -113,7 +113,7 @@ export default function DeviceRegistration() {
         announced: true,
         physical: true,
         ignoreSelf: true,
-        firmwareIdentifier: true,
+        productIdentifier: true,
     })
     const updateDevice = () => {
         setDevice(clone(device))
@@ -213,7 +213,7 @@ export default function DeviceRegistration() {
         // device.firmwares.push(parseInt(uniqueFirmwareId(), 16))
         updateDevice()
     }
-    const handleFirmwareAddRandomClick = () => {
+    const handleProductIdentifierAddRandomClick = () => {
         device.productIdentifiers.push(parseInt(uniqueFirmwareId(), 16))
         updateDevice()
     }
@@ -257,7 +257,7 @@ export default function DeviceRegistration() {
         await urlReg.refresh(true)
 
         const fw = await dev.resolveProductIdentifier()
-        if (fw) device.firmwares = [fw]
+        if (fw) device.productIdentifiers = [fw]
         device.services = dev.serviceClasses.slice(1)
         device.description = descrReg.stringValue
         device.link = urlReg.stringValue
@@ -323,8 +323,8 @@ export default function DeviceRegistration() {
                 </Grid>
                 <Grid item xs={12}>
                     <PaperBox elevation={1}>
-                        <Typography>Firmwares</Typography>
-                        {device.firmwares?.map((id, i) => {
+                        <Typography>Product Identifiers</Typography>
+                        {device.productIdentifiers?.map((id, i) => {
                             const blob = firmwareBlobs?.find(
                                 b => b.productIdentifier == id
                             )
@@ -349,14 +349,14 @@ export default function DeviceRegistration() {
                             )
                         })}
                         <IconButtonWithTooltip
-                            title="Add random firmware identifier"
-                            onClick={handleFirmwareAddRandomClick}
+                            title="Add random product identifier"
+                            onClick={handleProductIdentifierAddRandomClick}
                         >
                             <CreateIcon />
                         </IconButtonWithTooltip>
                         {firmwareBlobs && (
                             <IconButtonWithTooltip
-                                title="Add firmware identifier from repository"
+                                title="Add product identifier from repository"
                                 aria-controls={firmwareMenuId}
                                 aria-haspopup="true"
                                 onClick={handleFirmwareAddClick}
@@ -388,8 +388,8 @@ export default function DeviceRegistration() {
                             ))}
                         </Menu>
                         <Typography variant="caption" component="div">
-                            Firmware identifiers uniquely identify your module
-                            on the Jacdac bus. Each revision of your firmware
+                            Product identifiers uniquely identify your hardware
+                            on the Jacdac bus. Each revision of your hardware
                             may have a different identifier.
                         </Typography>
                     </PaperBox>

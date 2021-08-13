@@ -117,7 +117,7 @@ export default function RandomGenerator(props: {
     const title = device
         ? "Random Device Identifier"
         : firmware
-        ? "Random Firmware Identifier"
+        ? "Random Product Identifier"
         : "Random Service Identifier"
     return (
         <NoSsr>
