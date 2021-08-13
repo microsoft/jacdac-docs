@@ -104,7 +104,7 @@ export default function DeviceRegistration() {
             id: "my-device",
             name: "My device",
             services: [],
-            firmwares: [],
+            productIdentifiers: [],
             repo: "",
         } as jdspec.DeviceSpec
     )
@@ -203,7 +203,7 @@ export default function DeviceRegistration() {
         updateDevice()
     }
     const handleDeleteFirmware = (i: number) => () => {
-        device.firmwares.splice(i, 1)
+        device.productIdentifiers.splice(i, 1)
         updateDevice()
     }
     const handleFirmwareAddClick = (
@@ -214,14 +214,14 @@ export default function DeviceRegistration() {
         updateDevice()
     }
     const handleFirmwareAddRandomClick = () => {
-        device.firmwares.push(parseInt(uniqueFirmwareId(), 16))
+        device.productIdentifiers.push(parseInt(uniqueFirmwareId(), 16))
         updateDevice()
     }
     const handleFirmwareAddClose = (blob: FirmwareBlob) => () => {
         setFirmwaresAnchorEl(null)
         const id = blob?.productIdentifier
         if (id !== undefined) {
-            device.firmwares.push(id)
+            device.productIdentifiers.push(id)
             device.name = blob.name
             updateDeviceId()
             updateDevice()
@@ -256,7 +256,7 @@ export default function DeviceRegistration() {
         const urlReg = controlService.register(ControlReg.DeviceUrl)
         await urlReg.refresh(true)
 
-        const fw = await dev.resolveFirmwareIdentifier()
+        const fw = await dev.resolveProductIdentifier()
         if (fw) device.firmwares = [fw]
         device.services = dev.serviceClasses.slice(1)
         device.description = descrReg.stringValue
