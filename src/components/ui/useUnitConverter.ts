@@ -20,7 +20,7 @@ export function useUnitConverters() {
         setConverter: (unit: string, name: string) => {
             const newSettings = { ...settings }
             newSettings[unit] = name
-            setSettings(`new using ${name}`)
+            setSettings(newSettings)
         },
     }
 }
