@@ -5,7 +5,7 @@ import useLocalStorage from "../hooks/useLocalStorage"
 const adapters: Record<string, Record<string, (v: number) => number>> = {
     "°C": {
         "°C": v => v,
-        "°F": v => (5 / 9) * v + 32,
+        "°F": v => (9 / 5) * v + 32,
     },
 }
 
