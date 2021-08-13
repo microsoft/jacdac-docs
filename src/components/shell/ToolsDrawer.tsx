@@ -17,7 +17,7 @@ import {
 } from "../layout"
 import AppContext from "../AppContext"
 import { OpenInNew } from "@material-ui/icons"
-import { unitConverters } from "../ui/useUnitConverter"
+import { useUnitConverters } from "../ui/useUnitConverter"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import ChevronRightIcon from "@material-ui/icons/ChevronRight"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -112,15 +112,14 @@ export default function ToolsDrawer() {
         useContext(AppContext)
     const { enqueueSnackbar } = useContext(AppContext)
     const { toggleDarkMode, darkMode } = useContext(DarkModeContext)
-    const { converters, setConverter } = unitConverters()
+    const { converters, setConverter } = useUnitConverters()
     const handleUnitClick =
         (unit: string, name: string, names: string[]) => () => {
             const index = (names.indexOf(name) + 1) % names.length
             const newName = names[index]
-            console.debug(`new unit: ${unit} -> ${newName}`)
             setConverter(unit, newName)
             enqueueSnackbar(
-                `Using ${name} for ${resolveUnit(unit).name}`,
+                `Using ${newName} for ${resolveUnit(unit).name}`,
                 "success"
             )
         }

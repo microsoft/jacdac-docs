@@ -9,7 +9,7 @@ const adapters: Record<string, Record<string, (v: number) => number>> = {
     },
 }
 
-export function unitConverters() {
+export function useUnitConverters() {
     const [settings, setSettings] = useLocalStorage("jacdac:unitconverters", {})
     return {
         converters: Object.keys(adapters).map(unit => ({
@@ -24,14 +24,19 @@ export function unitConverters() {
         },
     }
 }
+const identity = (v: number) => v
 
-export default function useUnitConverter(unit: jdspec.Unit) {
+export default function useUnitConverter(unit: jdspec.Unit): {
+    name?: string
+    converter: (v: number) => number
+    names?: string[]
+} {
     if (!unit)
         return {
             converter: v => v,
         }
 
-    const [settings, setSettings] = useLocalStorage("jacdac:unitconverters", {})
+    const [settings] = useLocalStorage("jacdac:unitconverters", {})
 
     const adapter = adapters[unit]
     if (!adapter)
@@ -40,14 +45,12 @@ export default function useUnitConverter(unit: jdspec.Unit) {
         }
 
     const name = settings[unit]
-    const converter = adapter[name]
+    const converter = adapter[name] || identity
     const names = Object.keys(adapter)
-    const setName = (name: string) => setSettings({ ...settings, unit: name })
 
     return {
         name,
         converter,
         names,
-        setName,
     }
 }
