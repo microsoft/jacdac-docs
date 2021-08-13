@@ -9,6 +9,7 @@ const {
     identifierToUrlPath,
     serviceSpecificationToDTDL,
     DTMIToRoute,
+    deviceSpecificationFromProductIdentifier,
 } = require(`./jacdac-ts/dist/jacdac.cjs`)
 const { IgnorePlugin } = require("webpack")
 const AVATAR_SIZE = 64
@@ -103,8 +104,11 @@ async function createDeviceQRPages(actions) {
     for (const qr of data) {
         const vanity = qr[vanitycol].trim()
         const productid = parseInt(qr[productidcol], 16)
+        const spec = deviceSpecificationFromProductIdentifier(productid)
         const p = `/devices/codes/${vanity}/`
-        const toPath = isNaN(productid) ? `/devices/microsoft/research/` : `/devices/0x${productid.toString(16)}/`
+        const toPath = spec
+            ? `/devices/0x${productid.toString(16)}/`
+            : `/devices/microsoft/research/`
         const r = { fromPath: p, toPath }
         console.debug(r)
         await createRedirect(r)
