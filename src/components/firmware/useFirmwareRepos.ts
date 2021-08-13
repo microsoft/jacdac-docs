@@ -15,7 +15,7 @@ export default function useFirmwareRepos(showAllRepos?: boolean) {
     const bootloaders = devices.filter(device => device.hasService(SRV_BOOTLOADER));
     const registers = devices
         .filter(device => !device.hasService(SRV_BOOTLOADER)) // not a bootloader
-        .map(device => device.service(0)?.register(ControlReg.FirmwareIdentifier))
+        .map(device => device.service(0)?.register(ControlReg.ProductIdentifier))
         .filter(reg => !!reg);
 
     useEffectAsync(async (mounted) => {

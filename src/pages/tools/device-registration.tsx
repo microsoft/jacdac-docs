@@ -219,7 +219,7 @@ export default function DeviceRegistration() {
     }
     const handleFirmwareAddClose = (blob: FirmwareBlob) => () => {
         setFirmwaresAnchorEl(null)
-        const id = blob?.firmwareIdentifier
+        const id = blob?.productIdentifier
         if (id !== undefined) {
             device.firmwares.push(id)
             device.name = blob.name
@@ -326,7 +326,7 @@ export default function DeviceRegistration() {
                         <Typography>Firmwares</Typography>
                         {device.firmwares?.map((id, i) => {
                             const blob = firmwareBlobs?.find(
-                                b => b.firmwareIdentifier == id
+                                b => b.productIdentifier == id
                             )
                             return (
                                 <Box
@@ -373,8 +373,8 @@ export default function DeviceRegistration() {
                         >
                             {firmwareBlobs?.map(blob => (
                                 <MenuItem
-                                    key={blob.firmwareIdentifier}
-                                    value={blob.firmwareIdentifier.toString(16)}
+                                    key={blob.productIdentifier}
+                                    value={blob.productIdentifier.toString(16)}
                                     onClick={handleFirmwareAddClose(blob)}
                                 >
                                     {blob.name}

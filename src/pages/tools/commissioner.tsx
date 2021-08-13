@@ -150,8 +150,8 @@ function DataSetTable(props: {
                                 {descriptor.deviceIdentifier}
                             </TableCell>
                             <TableCell align="center">
-                                {descriptor.firmwareIdentifier &&
-                                    descriptor.firmwareIdentifier.toString(16)}
+                                {descriptor.productIdentifier &&
+                                    descriptor.productIdentifier.toString(16)}
                                 {descriptor.services.filter(service => {
                                     return (
                                         service.serviceClass == SRV_ROLE_MANAGER
@@ -417,8 +417,8 @@ export default function Commissioner() {
             lineEnding
         dataSet.forEach(descriptor => {
             str += `0x${descriptor.deviceIdentifier}${sep}`
-            if (descriptor.firmwareIdentifier)
-                str += `0x${descriptor.firmwareIdentifier.toString(16)}${sep}`
+            if (descriptor.productIdentifier)
+                str += `0x${descriptor.productIdentifier.toString(16)}${sep}`
             else if (
                 descriptor.services.find(
                     service => service.serviceClass == SRV_ROLE_MANAGER
