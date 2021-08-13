@@ -71,7 +71,7 @@ interface ServiceDescriptor {
 interface DeviceDescriptor {
     brain: boolean
     deviceIdentifier: string
-    firmwareIdentifier: number
+    productIdentifier: number
     services: ServiceDescriptor[]
     servicesSeen: ServiceDescriptor[]
     pass: boolean
@@ -344,7 +344,7 @@ export default function Commissioner() {
             newDataSet.push({
                 brain: isBrain(d),
                 deviceIdentifier: d.deviceId,
-                firmwareIdentifier: await d.resolveFirmwareIdentifier(3),
+                productIdentifier: await d.resolveProductIdentifier(3),
                 services,
                 servicesSeen: [],
                 pass: true,
