@@ -12,6 +12,8 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 import DeleteAllIcon from "@material-ui/icons/DeleteSweep"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
+import AddIcon from "@material-ui/icons/Add"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 
 import ServiceManagerContext from "../ServiceManagerContext"
@@ -32,8 +34,9 @@ import FieldDataSet from "../FieldDataSet"
 import MBDataSet, { arraysEqual } from "./MBDataSet"
 import { DATASET_NAME } from "./ModelEditor"
 import Suspense from "../ui/Suspense"
+import AppContext from "../AppContext"
 
-const DataSetChart = lazy(() => import("./DataSetChart"))
+const DataSetPlot = lazy(() => import("./components/DataSetPlot"))
 
 const LIVE_HORIZON = 24
 function createDataSet(
@@ -52,6 +55,7 @@ function createDataSet(
 }
 
 export default function CollectData(props: {
+    chartProps: any
     reactStyle: any
     chartPalette: string[]
     dataset: MBDataSet
@@ -62,9 +66,11 @@ export default function CollectData(props: {
     const [dataset, setDataSet] = useState<MBDataSet>(props.dataset)
     const [dataTimestamp, setDataTimestamp] = useState(0)
     const classes = props.reactStyle
+    const chartProps = props.chartProps
 
     const { fileStorage } = useContext(ServiceManagerContext)
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
+    const { toggleShowDeviceHostsDialog } = useContext(AppContext)
     const readingRegisters = useChange(bus, bus =>
         arrayConcatMany(
             bus.devices().map(device =>
@@ -75,6 +81,7 @@ export default function CollectData(props: {
             )
         )
     )
+
     /* For choosing sensors */
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [totalRecordings, setTotalRecordings] = useState(0)
@@ -288,7 +295,7 @@ export default function CollectData(props: {
                     </IconButtonWithTooltip>
                 </h2>
                 <div key="recordedData">
-                    {dataset.totalRecordings > 0 ? (
+                    {dataset.totalRecordings ? (
                         <div key="recordings">
                             <p>
                                 Input type(s): {dataset.inputTypes.join(",")}{" "}
@@ -305,10 +312,11 @@ export default function CollectData(props: {
                             ))}
                             <br />
                             <Suspense>
-                                <DataSetChart
+                                <DataSetPlot
+                                    chartProps={chartProps}
+                                    reactStyle={classes}
                                     dataset={dataset}
-                                    currentRecording={liveRecording}
-                                    currentLabel={currentClassLabel}
+                                    predictedLabels={null}
                                     timestamp={dataTimestamp}
                                 />
                             </Suspense>
@@ -322,7 +330,15 @@ export default function CollectData(props: {
                 <h2>Collect More Data</h2>
                 {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
                 <div key="sensors">
-                    <h3>Select input sensors</h3>
+                    <h3>
+                        Select input sensors&nbsp;
+                        <IconButtonWithTooltip
+                            title="start simulator"
+                            onClick={toggleShowDeviceHostsDialog}
+                        >
+                            <AddIcon />
+                        </IconButtonWithTooltip>
+                    </h3>
                     {!readingRegisters.length && (
                         <span>Waiting for sensors...</span>
                     )}

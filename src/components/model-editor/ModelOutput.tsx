@@ -51,11 +51,14 @@ function createDataSet(
 }
 
 export default function ModelOutput(props: {
+    chartProps: any
     reactStyle: any
     chartPalette: string[]
     model: MBModel
 }) {
     const classes = props.reactStyle
+    const chartProps = props.chartProps
+
     const { chartPalette } = props
     const [model] = useState<MBModel>(props.model)
 
@@ -209,17 +212,20 @@ export default function ModelOutput(props: {
                 predictMsg
             )) as TFModelPredictResponse
 
-            // Save probability for each class in model object
-            const prediction = predResult.data.prediction
-            model.labels.forEach(label => {
-                liveOutput.push(prediction[label])
+            if (predResult) {
+                // Save probability for each class in model object
+                const prediction = predResult.data.prediction
+                model.labels.forEach(label => {
+                    liveOutput.push(prediction[label])
 
-                // update which class has highest confidence
-                if (liveOutput[label] > liveOutput[topLabel]) topLabel = label
-            })
+                    // update which class has highest confidence
+                    if (liveOutput[label] > liveOutput[topLabel])
+                        topLabel = label
+                })
 
-            livePredictions.predictionData.addData(liveOutput)
-            livePredictions.topClass = topLabel
+                livePredictions.predictionData.addData(liveOutput)
+                livePredictions.topClass = topLabel
+            }
         }
     }
 
