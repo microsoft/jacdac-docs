@@ -10,7 +10,6 @@ import Blockly, {
 } from "blockly"
 import {
     MODEL_BLOCKS,
-    MB_CLASS_VAR_TYPE,
     MB_DATASET_VAR_TYPE,
     MB_CLASSIFIER_VAR_TYPE,
 } from "../../model-editor/modelblockdsl"
@@ -57,7 +56,7 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 // handling dialogs within Blockly
-export function addNewDataSet(workspace) {
+export function addNewDataSet(workspace: WorkspaceSvg) {
     // prompt user for dataset name
     Blockly.prompt("Enter new dataset name:", "", newDataSetName => {
         // check if name is already used
@@ -101,7 +100,7 @@ export function addNewDataSet(workspace) {
 }
 
 // Randi TODO is this too redundant with creating a dataset?
-export function addNewClassifier(workspace) {
+export function addNewClassifier(workspace: WorkspaceSvg) {
     // prompt user for variable name
     Blockly.prompt(`Enter new classifier name:`, ``, newVariableName => {
         // check if name is already used
@@ -110,27 +109,18 @@ export function addNewClassifier(workspace) {
                 newVariableName != "" &&
                 !Variables.nameUsedWithAnyType(newVariableName, workspace)
             ) {
-                // get or creat new dataset typed variable
-                const newVariable = workspace.createVariable(
+                // get or create new classifier typed variable
+                workspace.createVariable(
                     newVariableName,
                     MB_CLASSIFIER_VAR_TYPE
                 )
 
-                // create new dataset block on the workspace
-                const newBlock = workspace.newBlock(
-                    MODEL_BLOCKS + "nn"
-                ) as BlockSvg
-
-                // automatically insert the variable name into the new block
-                const field = newBlock.getField(
-                    "CLASSIFIER_NAME"
-                ) as FieldVariable
-                field.setValue(newVariable.getId())
-
-                // add new block to the screen
-                newBlock.initSvg()
-                newBlock.render(false)
-                workspace.centerOnBlock(newBlock.id)
+                // create new block with new classifier name
+                workspace.paste(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newVariableName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":4,"numParams":0,"modelCycles":0,"classes":[],"optimizer":"adam","batchSize":32,"numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="TRAIN_BUTTON">{}</field></block>`
+                    )
+                )
             } else {
                 setTimeout(
                     () =>
