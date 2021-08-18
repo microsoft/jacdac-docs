@@ -21,6 +21,7 @@ import WorkspaceContext from "../../WorkspaceContext"
 import { FieldVariable } from "blockly"
 
 import { useId } from "react-use-id-hook"
+import { PointerBoundary } from "../PointerBoundary"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -162,99 +163,68 @@ function NNParameterWidget(props: {
         if (newValue) setMetrics(newValue)
     }
 
-    const handleTrainModel = () => {
-        console.log("Open NN classifier modal")
-        sourceBlock.data = "click.train"
-    }
-
-    const handleDownloadModel = () => {
-        console.log("Download model")
-        sourceBlock.data = "click.download"
-    }
-
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item>
-                <Box color="text.secondary">
-                    optimizer&ensp;
-                    <Tooltip title="Update the optimizer">
-                        <Select
-                            id={useId() + "optimizer"}
-                            variant="outlined"
-                            value={optimizer}
-                            onChange={handleChangedOptimizer}
-                        >
-                            <MenuItem value="adam">Adam</MenuItem>
-                            <MenuItem value="sgd">SGD</MenuItem>
-                            <MenuItem value="adagrad">Adagrad</MenuItem>
-                            <MenuItem value="adadelta">Adadelta</MenuItem>
-                        </Select>
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    loss&ensp;
-                    <Tooltip title="Update the loss function">
-                        <Select
-                            id={useId() + "lossFn"}
-                            variant="outlined"
-                            value={lossFn}
-                            onChange={handleChangedLossFn}
-                        >
-                            <MenuItem value="categoricalCrossentropy">
-                                categorical crossentropy
-                            </MenuItem>
-                            <MenuItem value="meanSquaredError">
-                                mean squared error
-                            </MenuItem>
-                            <MenuItem value="hinge">hinge loss</MenuItem>
-                        </Select>
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    epochs&ensp;
-                    <Tooltip title="Update the batch size to train on">
-                        <TextField
-                            id={useId() + "epochs"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={numEpochs}
-                            onChange={handleChangedEpochs}
-                        />
-                    </Tooltip>
-                </Box>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"row"}>
+                <Grid item xs={12}>
+                    <Box color="text.secondary">
+                        optimizer&ensp;
+                        <Tooltip title="Update the optimizer">
+                            <Select
+                                id={useId() + "optimizer"}
+                                variant="outlined"
+                                value={optimizer}
+                                onChange={handleChangedOptimizer}
+                            >
+                                <MenuItem value="adam">adam</MenuItem>
+                                <MenuItem value="sgd">SGD</MenuItem>
+                                <MenuItem value="adagrad">adagrad</MenuItem>
+                                <MenuItem value="adadelta">adadelta</MenuItem>
+                            </Select>
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        loss&ensp;
+                        <Tooltip title="Update the loss function">
+                            <Select
+                                id={useId() + "lossFn"}
+                                variant="outlined"
+                                value={lossFn}
+                                onChange={handleChangedLossFn}
+                            >
+                                <MenuItem value="categoricalCrossentropy">
+                                    CCE
+                                </MenuItem>
+                                <MenuItem value="meanSquaredError">
+                                    MSE
+                                </MenuItem>
+                                <MenuItem value="hinge">hinge</MenuItem>
+                            </Select>
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        epochs&ensp;
+                        <Tooltip title="Update the batch size to train on">
+                            <TextField
+                                id={useId() + "epochs"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={numEpochs}
+                                onChange={handleChangedEpochs}
+                            />
+                        </Tooltip>
+                    </Box>
+                </Grid>
+                <Grid item>
+                    <Box color="text.secondary">
+                        No. of Layers: {numLayers} <br />
+                        No. of Parameters: {numParams} <br />
+                        Cycles: {modelCycles} <br />
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item style={{ display: "inline-flex", width: 300 }}>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleTrainModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Train
-                    </Button>
-                </Tooltip>
-                &ensp;
-                <Tooltip title="Download model JSON and weights file">
-                    <Button
-                        onClick={handleDownloadModel}
-                        startIcon={<DownloadIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Download
-                    </Button>
-                </Tooltip>
-            </Grid>
-            <Grid item>
-                <Box color="text.secondary">
-                    No. of Layers: {numLayers} <br />
-                    No. of Parameters: {numParams} <br />
-                    Cycles: {modelCycles} <br />
-                </Box>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 

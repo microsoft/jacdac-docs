@@ -4,6 +4,8 @@ import { Grid, Box, TextField, Tooltip } from "@material-ui/core"
 import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
+
+import { PointerBoundary } from "../PointerBoundary"
 import { useId } from "react-use-id-hook"
 
 export interface SmoothingBlockFieldValue {
@@ -57,36 +59,38 @@ function SmoothingParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1}>
-            <Grid item>
-                <Box color="text.secondary">
-                    Window size
-                    <Tooltip title="Update the window size, larger values lead to more smoothing">
-                        <TextField
-                            id={useId() + "windowSize"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={windowSize}
-                            onChange={handleChangedWindow}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Stride size
-                    <Tooltip title="Update the stride size, larger values lead to less smoothing">
-                        <TextField
-                            id={useId() + "stride"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={strideSize}
-                            onChange={handleChangedStride}
-                        />
-                    </Tooltip>
-                </Box>
+        <PointerBoundary>
+            <Grid container spacing={1}>
+                <Grid item>
+                    <Box color="text.secondary">
+                        Window size
+                        <Tooltip title="Update the window size, larger values lead to more smoothing">
+                            <TextField
+                                id={useId() + "windowSize"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={windowSize}
+                                onChange={handleChangedWindow}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        Stride size
+                        <Tooltip title="Update the stride size, larger values lead to less smoothing">
+                            <TextField
+                                id={useId() + "stride"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={strideSize}
+                                onChange={handleChangedStride}
+                            />
+                        </Tooltip>
+                    </Box>
+                </Grid>
             </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 

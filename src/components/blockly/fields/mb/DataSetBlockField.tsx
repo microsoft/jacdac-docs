@@ -11,6 +11,8 @@ import { RecordingBlockFieldValue } from "./RecordingBlockField"
 import WorkspaceContext from "../../WorkspaceContext"
 import { FieldVariable } from "blockly"
 
+import { PointerBoundary } from "../PointerBoundary"
+
 export interface DataSetBlockFieldValue {
     numRecordings: number
     numSamples: number
@@ -122,38 +124,41 @@ function DataSetParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item style={{ display: "inline-flex" }}>
-                <Tooltip title="View this data set and perform actions like splitting it">
-                    <Button
-                        onClick={handleViewDataSet}
-                        startIcon={<ViewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        View
-                    </Button>
-                </Tooltip>
-                &ensp;
-                <Tooltip title="Download dataset as csv file">
-                    <Button
-                        onClick={handleDownloadDataSet}
-                        startIcon={<DownloadIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Download
-                    </Button>
-                </Tooltip>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"row"}>
+                <Grid item style={{ display: "inline-flex" }}>
+                    <Tooltip title="View this data set and perform actions like splitting it">
+                        <Button
+                            onClick={handleViewDataSet}
+                            startIcon={<ViewIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            View
+                        </Button>
+                    </Tooltip>
+                    &ensp;
+                    <Tooltip title="Download dataset as csv file">
+                        <Button
+                            onClick={handleDownloadDataSet}
+                            startIcon={<DownloadIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            Download
+                        </Button>
+                    </Tooltip>
+                </Grid>
+                <Grid item style={{ display: "inline-flex" }}>
+                    <Box color="text.secondary">
+                        Classes: {classes.length ? classes.join(", ") : "none"}{" "}
+                        <br />
+                        Input type(s):{" "}
+                        {inputs.length ? inputs.join(", ") : "none"}
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item style={{ display: "inline-flex" }}>
-                <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"}{" "}
-                    <br />
-                    Input type(s): {inputs.length ? inputs.join(", ") : "none"}
-                </Box>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 

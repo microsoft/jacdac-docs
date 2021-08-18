@@ -8,6 +8,7 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 import { FieldNumber, FieldVariable } from "blockly"
+import { PointerBoundary } from "../PointerBoundary"
 
 export interface KNNBlockFieldValue {
     modelSize: number
@@ -62,27 +63,29 @@ function KNNParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item>
-                <Box color="text.secondary">
-                    Classes: {classes.length ? classes.join(", ") : "none"}
-                </Box>
-                <Box color="text.secondary">Model size: {modelSize}</Box>
-                <Box color="text.secondary">Cycles: {modelCycles}</Box>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"row"}>
+                <Grid item>
+                    <Box color="text.secondary">
+                        Classes: {classes.length ? classes.join(", ") : "none"}
+                    </Box>
+                    <Box color="text.secondary">Model size: {modelSize}</Box>
+                    <Box color="text.secondary">Cycles: {modelCycles}</Box>
+                </Grid>
+                <Grid item>
+                    <Tooltip title="Open modal to view and run classifier">
+                        <Button
+                            onClick={handleViewModel}
+                            startIcon={<AutorenewIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            Compile
+                        </Button>
+                    </Tooltip>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleViewModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Compile
-                    </Button>
-                </Tooltip>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 

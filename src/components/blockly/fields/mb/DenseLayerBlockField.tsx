@@ -11,6 +11,7 @@ import {
 import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
+import { PointerBoundary } from "../PointerBoundary"
 import { useId } from "react-use-id-hook"
 
 export interface DenseLayerFieldValue {
@@ -88,48 +89,49 @@ function LayerParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item>
-                <Box color="text.secondary">
-                    Units
-                    <Tooltip title="Update the number of units">
-                        <TextField
-                            id={useId() + "filters"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={numUnits}
-                            onChange={handleChangedUnits}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Activation
-                    <Tooltip title="Update the activation function">
-                        <Select
-                            id={useId() + "activation"}
-                            variant="outlined"
-                            value={activation}
-                            onChange={handleChangedActivation}
-                        >
-                            <MenuItem value="linear">Linear</MenuItem>
-                            <MenuItem value="sigmoid">Sigmoid</MenuItem>
-                            <MenuItem value="relu">Relu</MenuItem>
-                            <MenuItem value="tanh">Tanh</MenuItem>
-                        </Select>
-                    </Tooltip>
-                </Box>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"row"}>
+                <Grid item>
+                    <Box color="text.secondary">
+                        Units
+                        <Tooltip title="Update the number of units">
+                            <TextField
+                                id={useId() + "filters"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={numUnits}
+                                onChange={handleChangedUnits}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        Activation
+                        <Tooltip title="Update the activation function">
+                            <Select
+                                id={useId() + "activation"}
+                                variant="outlined"
+                                value={activation}
+                                onChange={handleChangedActivation}
+                            >
+                                <MenuItem value="softmax">softmax</MenuItem>
+                                <MenuItem value="linear">linear</MenuItem>
+                                <MenuItem value="relu">relu</MenuItem>
+                            </Select>
+                        </Tooltip>
+                    </Box>
+                </Grid>
+                {/*<Grid item>
+                    <Box color="text.secondary">
+                        No. of Parameters: {numTrainableParams}
+                    </Box>
+                    <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
+                    <Box color="text.secondary">
+                        Shape: [{outputShape.join(", ")}]
+                    </Box>
+                </Grid>*/}
             </Grid>
-            <Grid item>
-                <Box color="text.secondary">
-                    No. of Parameters: {numTrainableParams}
-                </Box>
-                <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
-                <Box color="text.secondary">
-                    Shape: [{outputShape.join(", ")}]
-                </Box>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 

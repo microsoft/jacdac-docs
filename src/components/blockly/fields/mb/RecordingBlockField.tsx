@@ -8,6 +8,8 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 
+import { PointerBoundary } from "../PointerBoundary"
+
 export interface RecordingBlockFieldValue {
     numSamples: number
     timestamp: number
@@ -57,27 +59,29 @@ function RecordingParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1}>
-            <Grid item>
-                <Box color="text.secondary">
-                    No. of Samples: {numSamples} <br />
-                    Input type(s):{" "}
-                    {inputTypes.length ? inputTypes.join(", ") : "none"}
-                </Box>
+        <PointerBoundary>
+            <Grid container spacing={1}>
+                <Grid item>
+                    <Box color="text.secondary">
+                        No. of Samples: {numSamples} <br />
+                        Input type(s):{" "}
+                        {inputTypes.length ? inputTypes.join(", ") : "none"}
+                    </Box>
+                </Grid>
+                <Grid item style={{ display: "inline-flex" }}>
+                    <Tooltip title="Download recording as csv file">
+                        <Button
+                            onClick={handleDownloadDataSet}
+                            startIcon={<DownloadIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            Download
+                        </Button>
+                    </Tooltip>
+                </Grid>
             </Grid>
-            <Grid item style={{ display: "inline-flex" }}>
-                <Tooltip title="Download recording as csv file">
-                    <Button
-                        onClick={handleDownloadDataSet}
-                        startIcon={<DownloadIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Download
-                    </Button>
-                </Tooltip>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 

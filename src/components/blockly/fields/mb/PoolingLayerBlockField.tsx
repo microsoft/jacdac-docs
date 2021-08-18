@@ -4,6 +4,8 @@ import { Grid, Box, TextField, Tooltip, Checkbox } from "@material-ui/core"
 import { ReactFieldJSON } from "../ReactField"
 import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
+
+import { PointerBoundary } from "../PointerBoundary"
 import { useId } from "react-use-id-hook"
 
 export interface PoolingLayerFieldValue {
@@ -90,56 +92,58 @@ function LayerParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item>
-                <Box color="text.secondary">
-                    Pool size
-                    <Tooltip title="Update the pool size">
-                        <TextField
-                            id={useId() + "poolSize"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={poolSize}
-                            onChange={handleChangedPoolSize}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Stride
-                    <Tooltip title="Update the stride">
-                        <TextField
-                            id={useId() + "stride"}
-                            size="small"
-                            variant="outlined"
-                            value={strideSize}
-                            onChange={handleChangedStrides}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    Padding
-                    <Tooltip title="Update whether to use padding or not">
-                        <Checkbox
-                            checked={padding}
-                            onChange={handleChangedPadding}
-                            name="paddingCheckbox"
-                            style={{ backgroundColor: "transparent" }}
-                            color="default"
-                        />
-                    </Tooltip>
-                </Box>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"row"}>
+                <Grid item>
+                    <Box color="text.secondary">
+                        Pool size
+                        <Tooltip title="Update the pool size">
+                            <TextField
+                                id={useId() + "poolSize"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={poolSize}
+                                onChange={handleChangedPoolSize}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        Stride
+                        <Tooltip title="Update the stride">
+                            <TextField
+                                id={useId() + "stride"}
+                                size="small"
+                                variant="outlined"
+                                value={strideSize}
+                                onChange={handleChangedStrides}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        Padding
+                        <Tooltip title="Update whether to use padding or not">
+                            <Checkbox
+                                checked={padding}
+                                onChange={handleChangedPadding}
+                                name="paddingCheckbox"
+                                style={{ backgroundColor: "transparent" }}
+                                color="default"
+                            />
+                        </Tooltip>
+                    </Box>
+                </Grid>
+                <Grid item>
+                    <Box color="text.secondary">
+                        No. of Parameters: {numTrainableParams}
+                    </Box>
+                    <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
+                    <Box color="text.secondary">
+                        Shape: [{outputShape.join(", ")}]
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Box color="text.secondary">
-                    No. of Parameters: {numTrainableParams}
-                </Box>
-                <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
-                <Box color="text.secondary">
-                    Shape: [{outputShape.join(", ")}]
-                </Box>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 
