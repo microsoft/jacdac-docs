@@ -83,6 +83,8 @@ function ExpandIconWidget() {
                 return new FlattenLayerBlockField("", currentValue)
             case MODEL_BLOCKS + "max_pool_layer":
                 return new PoolingLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "avg_pool_layer":
+                return new PoolingLayerBlockField("", currentValue)
             case MODEL_BLOCKS + "knn":
                 return new KNNBlockField("", currentValue)
             default:
