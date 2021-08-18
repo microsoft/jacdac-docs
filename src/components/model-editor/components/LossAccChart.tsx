@@ -1,27 +1,31 @@
-import React, { lazy, useEffect } from "react"
-import Suspense from "../ui/Suspense"
+import React, { lazy } from "react"
+import Suspense from "../../ui/Suspense"
 
-const VegaLite = lazy(() => import("../blockly/fields/chart/VegaLite"))
+const VegaLite = lazy(() => import("../../blockly/fields/chart/VegaLite"))
 
 export default function LossAccChart(props: {
+    chartProps: any
     lossData: number[]
     accData: number[]
     timestamp: number
 }) {
     const { lossData, accData, timestamp } = props
+    const chartProps = props.chartProps
 
     return (
         <Suspense>
             <VegaLite
                 spec={{
                     title: { timestamp },
+                    width: chartProps.CHART_WIDTH,
+                    height: chartProps.CHART_HEIGHT,
                     data: { values: accData },
                     mark: {
                         type: "line",
                         interpolate: "monotone",
                     },
                     encoding: {
-                        x: { field: "epoch", type: "temporal" },
+                        x: { field: "epoch", type: "quantitative" },
                         y: {
                             field: "acc",
                             type: "quantitative",
@@ -29,6 +33,10 @@ export default function LossAccChart(props: {
                         color: {
                             field: "dataset",
                             type: "nominal",
+                            legend: null,
+                            scale: {
+                                range: chartProps.PALETTE,
+                            },
                         },
                     },
                 }}
@@ -36,13 +44,15 @@ export default function LossAccChart(props: {
             <VegaLite
                 spec={{
                     title: { timestamp },
+                    width: chartProps.CHART_WIDTH,
+                    height: chartProps.CHART_HEIGHT,
                     data: { values: lossData },
                     mark: {
                         type: "line",
                         interpolate: "monotone",
                     },
                     encoding: {
-                        x: { field: "epoch", type: "temporal" },
+                        x: { field: "epoch", type: "quantitative" },
                         y: {
                             field: "loss",
                             type: "quantitative",
@@ -50,6 +60,9 @@ export default function LossAccChart(props: {
                         color: {
                             field: "dataset",
                             type: "nominal",
+                            scale: {
+                                range: chartProps.PALETTE,
+                            },
                         },
                     },
                 }}
