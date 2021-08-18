@@ -1,7 +1,6 @@
 import {
     BlockDefinition,
     CategoryDefinition,
-    DATA_SCIENCE_STATEMENT_TYPE,
     MODEL_BLOCK_CLASS_STATEMENT_TYPE,
     MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
     MODEL_BLOCK_LAYER_STATEMENT_TYPE,
@@ -9,6 +8,7 @@ import {
 import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 
 import ExpandModelBlockField from "../blockly/fields/mb/ExpandModelBlockField"
+import NNModelBlockButton from "../blockly/fields/mb/NNBlockField"
 
 export const MODEL_BLOCKS = "model_block_"
 export const MB_DATASET_VAR_TYPE = "ModelBlockDataSet"
@@ -20,7 +20,6 @@ const class_color = "#2466A8"
 const processing_color = "#ac2469"
 const learning_color = "#561234"
 const layer_color = "#97207a"
-const prediction_color = "#359b73"
 
 export class ModelBlockDomainSpecificLanguage
     implements BlockDomainSpecificLanguage
@@ -160,6 +159,13 @@ export class ModelBlockDomainSpecificLanguage
                 message2: "%1",
                 args2: [
                     {
+                        type: NNModelBlockButton.KEY,
+                        name: "TRAIN_BUTTON",
+                    },
+                ],
+                message3: "%1",
+                args3: [
+                    {
                         type: "input_statement",
                         name: "LAYER_INPUTS",
                         check: [
@@ -199,6 +205,26 @@ export class ModelBlockDomainSpecificLanguage
                 kind: "block",
                 type: MODEL_BLOCKS + "max_pool_layer",
                 message0: "max pooling layer %1",
+                args0: [
+                    {
+                        type: ExpandModelBlockField.KEY,
+                        name: "EXPAND_BUTTON",
+                    },
+                ],
+                inputsInline: false,
+                previousStatement: [
+                    MODEL_BLOCK_PREPROCESS_STATEMENT_TYPE,
+                    MODEL_BLOCK_LAYER_STATEMENT_TYPE,
+                ],
+                nextStatement: MODEL_BLOCK_LAYER_STATEMENT_TYPE,
+                colour: layer_color,
+                tooltip: "",
+                helpUrl: "",
+            } as BlockDefinition,
+            {
+                kind: "block",
+                type: MODEL_BLOCKS + "avg_pool_layer",
+                message0: "average pooling layer %1",
                 args0: [
                     {
                         type: ExpandModelBlockField.KEY,
@@ -312,58 +338,6 @@ export class ModelBlockDomainSpecificLanguage
                 tooltip: "",
                 helpUrl: "",
             } as BlockDefinition,
-            /* Prediction blocks */
-            {
-                kind: "block",
-                type: MODEL_BLOCKS + "prediction",
-                message0: "predict with %1",
-                args0: [
-                    {
-                        type: "field_variable",
-                        name: "CLASSIFIER_NAME",
-                        variable: "classifier1",
-                        variableTypes: [MB_CLASSIFIER_VAR_TYPE],
-                        defaultType: MB_CLASSIFIER_VAR_TYPE,
-                    },
-                ],
-                inputsInline: false,
-                previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
-                nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
-                colour: prediction_color,
-                template: "meta",
-                dataPreviewField: false,
-                passthroughData: true,
-                /*transformData: async (b: Block, data: object[]) => {
-                    const column1 = tidyResolveFieldColumn(
-                        data,
-                        b,
-                        "x",
-                        "number"
-                    )
-                    const column2 = tidyResolveFieldColumn(
-                        data,
-                        b,
-                        "y",
-                        "number"
-                    )
-                    if (!column1 || !column2) return Promise.resolve([])
-                    const predictMsg = {
-                        worker: "tf",
-                        type: "predict",
-                        data: {
-                            zData: liveInput,
-                            model: model.toJSON(),
-                        },
-                    } as TFModelPredictRequest
-                    const predResult = (await predictRequest(
-                        predictMsg
-                    )) as TFModelPredictResponse
-
-                    return predResult.data.prediction
-                },*/
-                tooltip: "Use this block to run inference on vm sensor data.",
-                helpUrl: "",
-            } as BlockDefinition,
         ]
         return blocks
     }
@@ -409,7 +383,7 @@ export class ModelBlockDomainSpecificLanguage
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":4,"numParams":0,"modelCycles":0,"classes":[],"optimizer":"adam","batchSize":32,"numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field></block>`,
+                        blockxml: `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":4,"numParams":0,"modelCycles":0,"classes":[],"optimizer":"adam","batchSize":32,"numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="TRAIN_BUTTON">{}</field></block>`,
                     },
                     {
                         kind: "block",
@@ -418,6 +392,10 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         kind: "block",
                         blockxml: `<block type="model_block_max_pool_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numTrainableParams":0,"runTimeInCycles":0,"outputShape":[0,0],"poolSize":2,"strideSize":1,"padding":false}</field></block>`,
+                    },
+                    {
+                        kind: "block",
+                        blockxml: `<block type="model_block_avg_pool_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numTrainableParams":0,"runTimeInCycles":0,"outputShape":[0,0],"poolSize":2,"strideSize":1,"padding":false}</field></block>`,
                     },
                     {
                         kind: "block",
@@ -430,16 +408,6 @@ export class ModelBlockDomainSpecificLanguage
                     {
                         kind: "block",
                         blockxml: `<block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numTrainableParams":0,"runTimeInCycles":0,"outputShape":[0,0],"numUnits":4,"activation":"relu"}</field></block>`,
-                    },
-                ],
-            }), <CategoryDefinition>(<unknown>{
-                kind: "category",
-                name: "Predictions",
-                colour: prediction_color,
-                contents: [
-                    {
-                        kind: "block",
-                        type: MODEL_BLOCKS + "prediction",
                     },
                 ],
             })]

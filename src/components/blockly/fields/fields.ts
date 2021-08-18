@@ -34,6 +34,7 @@ import RecordingBlockField from "./mb/RecordingBlockField"
 import SmoothingBlockField from "./mb/SmoothingBlockField"
 import KNNBlockField from "./mb/KNNBlockField"
 import NeuralNetworkBlockField from "./mb/NeuralNetworkBlockField"
+import NNModelBlockButton from "./mb/NNBlockField"
 import ConvLayerBlockField from "./mb/ConvLayerBlockField"
 import PoolingLayerBlockField from "./mb/PoolingLayerBlockField"
 import DropoutLayerBlockField from "./mb/DropoutLayerBlockField"
@@ -95,6 +96,7 @@ export function registerFields() {
         SmoothingBlockField,
         KNNBlockField,
         NeuralNetworkBlockField,
+        NNModelBlockButton,
         ConvLayerBlockField,
         PoolingLayerBlockField,
         DropoutLayerBlockField,
