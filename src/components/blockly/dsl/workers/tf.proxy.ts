@@ -24,7 +24,10 @@ export async function compileRequest(
     message: TFModelCompileRequest
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<TFModelCompileResponse> {
-    // Randi TODO check for missing data e.g. if (!message.trainingData) return undefined
+    if (!message.data.model || !message.data.modelBlockJSON) {
+        console.log("Randi something is missing in compiling ", message.data)
+        return undefined
+    }
 
     const worker = workerProxy("tf")
     const res = await worker.postMessage<
@@ -38,7 +41,15 @@ export async function trainRequest(
     message: TFModelTrainRequest
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<TFModelTrainResponse> {
-    // Randi TODO check for missing data e.g. if (!message.trainingData) return undefined
+    if (
+        !message.data.model ||
+        !message.data.trainingParams ||
+        !message.data.xData ||
+        !message.data.yData
+    ) {
+        console.log("Randi something is missing in training ", message.data)
+        return undefined
+    }
 
     const worker = workerProxy("tf")
     const res = await worker.postMessage<
@@ -52,7 +63,10 @@ export async function predictRequest(
     message: TFModelPredictRequest
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<TFModelPredictResponse> {
-    // Randi TODO check for missing data e.g. if (!message.trainingData) return undefined
+    if (!message.data.model || !message.data.zData) {
+        console.log("Randi something is missing in predicting ", message.data)
+        return undefined
+    }
 
     const worker = workerProxy("tf")
     const res = await worker.postMessage<
