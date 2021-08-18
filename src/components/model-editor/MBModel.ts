@@ -1,5 +1,11 @@
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
+import { LayerStats } from "../../../ml4f/built/ml4f"
 import type { TFModelTrainingParams } from "../../workers/tf/dist/node_modules/tf.worker"
+
+export interface ModelStats {
+    total: LayerStats
+    layers: LayerStats[]
+}
 
 export default class MBModel extends JDEventSource {
     // maintain info about the dataset this model was created for
@@ -11,6 +17,7 @@ export default class MBModel extends JDEventSource {
     // maintain training info about the model
     armModel: string
     trainingAcc: number
+    modelStats: ModelStats
     modelSummary: string[]
     weightData: ArrayBuffer
     trainingParams: TFModelTrainingParams
@@ -24,7 +31,7 @@ export default class MBModel extends JDEventSource {
         inputTypes: string[]
         inputInterval: number
         labels: string[]
-        modelJSON: string
+        modelJSON: any
         outputShape: number
         status?: string
         trainingAcc?: number
@@ -51,7 +58,7 @@ export default class MBModel extends JDEventSource {
     constructor(
         public name: string,
         public labels?: string[],
-        public modelJSON?: string,
+        public modelJSON?: any,
         public status?: string
     ) {
         super()
@@ -69,8 +76,24 @@ export default class MBModel extends JDEventSource {
             "Input Types: " + this.inputTypes,
         ]
 
-        if (this.modelSummary && this.modelSummary.length > 0)
-            return [...modelInfo, ...this.modelSummary]
+        if (this.modelStats && this.modelStats.layers.length) {
+            const numBytes = this.modelStats.total.weightBytes
+            const numParams = numBytes / 4 // for microbit
+            const numCycles = this.modelStats.total.optimizedCycles
+            const executionTimeMs = numCycles / 64000 // for microbit at 64MHz
+            const archSummary = [
+                `---------------------------------------------------`, // line break
+                `Total no. of layers: ${this.modelStats.layers.length}`,
+                `Total no. of parameters: ${numParams}`,
+                `Total model size: ${numBytes} bytes`,
+                `Execution time: ${numCycles} cycles (${executionTimeMs.toPrecision(
+                    2
+                )}ms @ 64MHz)`,
+            ]
+
+            return [...modelInfo, ...archSummary]
+        }
+
         return modelInfo
     }
 

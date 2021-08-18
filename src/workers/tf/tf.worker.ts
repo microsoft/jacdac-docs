@@ -12,7 +12,8 @@ import {
     Sequential,
 } from "@tensorflow/tfjs"
 
-import { compileAndTest } from "../../../ml4f"
+import { compileAndTest, compileModel } from "../../../ml4f"
+import type { LayerStats } from "../../../ml4f"
 
 export interface TFModelObj {
     name: string
@@ -20,7 +21,7 @@ export interface TFModelObj {
     inputTypes: string[]
     inputInterval: number
     labels: string[]
-    modelJSON: string
+    modelJSON: any
     outputShape: number
     status: string
     trainingAcc: number
@@ -52,8 +53,8 @@ export interface TFModelCompileRequest extends TFModelMessage {
 export interface TFModelCompileResponse extends TFModelMessage {
     type: "compile"
     data: {
-        modelJSON: string
-        modelSummary: string[]
+        modelJSON: any
+        modelStats: LayerStats[]
         trainingParams: TFModelTrainingParams
     }
 }
@@ -63,7 +64,7 @@ export interface TFModelTrainRequest extends TFModelMessage {
     data: {
         trainingParams: TFModelTrainingParams
         model: TFModelObj
-        xData: number[]
+        xData: number[][][]
         yData: number[]
     }
 }
@@ -72,6 +73,7 @@ export interface TFModelTrainResponse extends TFModelMessage {
     type: "train"
     data: {
         modelWeights: ArrayBuffer
+        yPrediction: number[]
         trainingLogs: number[]
         armModel: string
     }
@@ -117,6 +119,11 @@ function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
             break
         case "model_block_max_pool_layer":
             layer = layers.maxPooling1d({
+                poolSize: [params.poolSize],
+            })
+            break
+        case "model_block_avg_pool_layer":
+            layer = layers.avgPooling1d({
                 poolSize: [params.poolSize],
             })
             break
@@ -222,7 +229,7 @@ function buildModelFromJSON(model: TFModelObj, block: any) {
         epochs: 250,
     }
 
-    if (block == "") {
+    if (block == "default") {
         buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
     } else {
         // block layers for model architecture
@@ -273,9 +280,13 @@ const handlers: {
             data.modelBlockJSON
         )
 
-        // save summary of model
-        const modelSummary = []
-        model.summary(null, null, line => modelSummary.push(line))
+        // save compiled model stats
+        const compiledModel = await compileModel(model, {
+            verbose: false,
+            float16weights: true,
+            optimize: true,
+        })
+        const stats = [...compiledModel.stats.layers, compiledModel.stats.total]
 
         // save model as model artifacts
         let mod: io.ModelArtifacts
@@ -295,14 +306,22 @@ const handlers: {
 
         // return data
         const result = {
-            modelJSON: JSON.stringify(mod),
-            modelSummary: modelSummary,
+            modelJSON: mod,
+            modelStats: stats,
             trainingParams: params,
         }
         return { ...props, data: result }
     },
     train: async (props: TFModelTrainRequest) => {
         const { data } = props
+
+        if (
+            data.xData[0].length != data.model.inputShape[0] ||
+            data.xData[0][0].length != data.model.inputShape[1]
+        ) {
+            console.error("Input data does not match expected shape of model.")
+            return { ...props, data: undefined }
+        }
 
         // get dataset
         const xs = tensor3d(data.xData, [
@@ -316,7 +335,7 @@ const handlers: {
         )
 
         // get model
-        const modelObj = JSON.parse(data.model.modelJSON)
+        const modelObj = data.model.modelJSON
         const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
@@ -343,6 +362,9 @@ const handlers: {
                 trainingLogs = info.history.acc
             })
 
+        // get model's prediction for training dataset
+        const trainingPrediction = (await model.predict(xs)) as Tensor
+
         // save model as model artifacts
         let mod: io.ModelArtifacts
         await model.save({
@@ -364,15 +386,16 @@ const handlers: {
 
         // compile arm model for mcu
         const armcompiled = await compileAndTest(model, {
-            verbose: true,
+            verbose: false,
             includeTest: true,
-            float16weights: false,
+            float16weights: true,
             optimize: true,
         })
 
         // return data
         const result = {
             modelWeights: weights,
+            yPrediction: trainingPrediction.argMax(1).dataSync(),
             trainingLogs: trainingLogs,
             armModel: JSON.stringify(armcompiled),
         }
