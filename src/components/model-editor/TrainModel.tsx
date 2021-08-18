@@ -32,9 +32,84 @@ import workerProxy from "../blockly/dsl/workers/proxy"
 import MBDataSet, { arraysEqual } from "./MBDataSet"
 import MBModel from "./MBModel"
 
-const LossAccChart = lazy(() => import("./LossAccChart"))
+const ConfusionMatrixHeatMap = lazy(
+    () => import("./components/ConfusionMatrixHeatMap")
+)
+const DataSetPlot = lazy(() => import("./components/DataSetPlot"))
+const LossAccChart = lazy(() => import("./components/LossAccChart"))
+const ModelSummary = lazy(() => import("./components/ModelSummary"))
+
+export function prepareDataSet(set: MBDataSet) {
+    // Assumptions: the sampling rate, sampling duration, and sensors used are constant
+    let sampleLength = -1
+    let sampleChannels = -1
+    const xData = []
+    const yData = []
+
+    for (const label of set.labels) {
+        set.getRecordingsWithLabel(label).forEach(table => {
+            if (sampleLength < table.length) {
+                sampleLength = table.length
+                sampleChannels = table.width
+            } else if (table.width != sampleChannels) {
+                alert(
+                    "All input data must have the same shape: " +
+                        table.name +
+                        "\n Has " +
+                        table.width +
+                        " inputs instead of " +
+                        sampleChannels
+                )
+            } /* else if (table.length != sampleLength) {
+                // decide what to do about different sized data
+            } */
+            // For x data, just add each sample as a new row into x_data
+            xData.push(table.data())
+
+            yData.push(set.labels.indexOf(label))
+        })
+    }
+
+    // save tensors with dataset object
+    set.xs = xData
+    set.ys = yData
+    set.length = sampleLength
+    set.width = sampleChannels
+}
+
+export function prepareModel(mod: MBModel, set: MBDataSet) {
+    // If this is a brand new model, get it setup with a standard CNN architecture
+    if (mod.modelJSON == "") {
+        mod.modelJSON = "default"
+        mod.labels = set.labels
+        mod.inputShape = [set.length, set.width]
+        mod.inputTypes = set.inputTypes
+        mod.inputInterval = set.interval
+        mod.outputShape = set.labels.length
+    }
+
+    /* compile model */
+    const compileMsg = {
+        worker: "tf",
+        type: "compile",
+        data: {
+            modelBlockJSON: mod.blockJSON || "default",
+            model: mod.toJSON(),
+        },
+    } as TFModelCompileRequest
+    compileRequest(compileMsg).then(result => {
+        if (result) {
+            mod.modelJSON = result.data.modelJSON
+            const modelStats = result.data.modelStats
+            mod.modelStats = { total: modelStats.pop(), layers: modelStats }
+            console.log("Randi model stats ", mod.modelStats)
+            mod.trainingParams = result.data.trainingParams
+        }
+    })
+}
 
 export default function TrainModel(props: {
+    chartProps: any
     reactStyle: any
     dataset: MBDataSet
     model: MBModel
@@ -42,105 +117,45 @@ export default function TrainModel(props: {
     onNext: (model) => void
 }) {
     const classes = props.reactStyle
+    const chartProps = props.chartProps
     const { fileStorage } = useContext(ServiceManagerContext)
 
     const { dataset, model, onChange, onNext } = props
 
     useEffect(() => {
         prepareDataSet(dataset)
-        prepareModel(model)
-    }, [])
 
-    /* For managing props */
-    const prepareDataSet = (set: MBDataSet) => {
-        // Assumptions: the sampling rate, sampling duration, and sensors used are constant
-        let sampleLength = -1
-        let sampleChannels = -1
-        const xData = []
-        const yData = []
-
-        for (const label of set.labels) {
-            set.getRecordingsWithLabel(label).forEach(table => {
-                if (sampleLength < table.length) {
-                    sampleLength = table.length
-                    sampleChannels = table.width
-                } else if (table.width != sampleChannels) {
-                    setTrainEnabled(false)
-                    alert(
-                        "All input data must have the same shape: " +
-                            table.name +
-                            "\n Has " +
-                            table.width +
-                            " inputs instead of " +
-                            sampleChannels
-                    )
-                } /* else if (table.length != sampleLength) {
-                    // decide what to do about different sized data
-                } */
-                // For x data, just add each sample as a new row into x_data
-                xData.push(table.data())
-
-                yData.push(set.labels.indexOf(label))
-            })
-        }
-
-        // save tensors with dataset object
-        set.xs = xData
-        set.ys = yData
-        set.length = sampleLength
-        set.width = sampleChannels
-    }
-
-    const prepareModel = (mod: MBModel) => {
-        // If this is a brand new model, get it setup with a standard CNN architecture
-        if (mod.modelJSON == "") {
-            mod.modelJSON = "default"
-            mod.labels = dataset.labels
-            mod.inputShape = [dataset.length, dataset.width]
-            mod.inputTypes = dataset.inputTypes
-            mod.inputInterval = dataset.interval
-            mod.outputShape = dataset.labels.length
-        } else if (
-            !arraysEqual(mod.labels, dataset.labels) ||
-            !arraysEqual(mod.inputTypes, dataset.inputTypes)
+        if (
+            !arraysEqual(model.labels, dataset.labels) ||
+            !arraysEqual(model.inputTypes, dataset.inputTypes)
         ) {
             // If there is already a model, make sure it matches the current dataset
             //   if it does not, reset the model
-            const newModel = new MBModel(mod.name)
-            prepareModel(newModel)
+            const newModel = new MBModel(model.name)
+            prepareModel(newModel, dataset)
+            handleModelUpdate(newModel)
+        } else {
+            prepareModel(model, dataset)
+            handleModelUpdate(model)
         }
 
-        /* compile model */
-        const compileMsg = {
-            worker: "tf",
-            type: "compile",
-            data: {
-                modelBlockJSON: "",
-                model: model.toJSON(),
-            },
-        } as TFModelCompileRequest
-        compileRequest(compileMsg).then(result => {
-            if (result) {
-                mod.modelJSON = result.data.modelJSON
-                mod.modelSummary = result.data.modelSummary
-                mod.trainingParams = result.data.trainingParams
-                handleModelUpdate(mod)
-            }
-        })
-
+        // ready to train
         setTrainEnabled(dataset.labels.length >= 2)
-    }
+    }, [])
 
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(false)
-    const [vegaTrainingLoss, setVegaLoss] = useState([])
-    const [vegaTrainingAcc, setVegaAcc] = useState([])
-    const [logTimestamp, setTrainingLogTimestamp] = useState(0)
+    const [trainingLossLog, setTrainingLossLog] = useState([])
+    const [trainingAccLog, setTrainingAccLog] = useState([])
+    const [logTimestamp, setLogTimestamp] = useState(0)
+    const [trainingPredictionResult, setTrainingPredictionResult] = useState([])
+    const [trainTimestamp, setTrainTimestamp] = useState(0)
 
     const trainTFModel = async () => {
         model.status = "training"
         model.inputTypes = dataset.inputTypes
         handleModelUpdate(model)
+
         setTrainEnabled(false)
 
         // setup worker
@@ -148,28 +163,28 @@ export default function TrainModel(props: {
         const stopWorkerSubscribe = workerProxy("tf").subscribe(
             "message",
             (msg: any) => {
-                const epoch = vegaTrainingLoss.length / 2 + 1
-                vegaTrainingLoss.push({
+                const epoch = trainingLossLog.length / 2 + 1
+                trainingLossLog.push({
                     epoch: epoch,
                     loss: msg.data.loss,
                     dataset: "training",
                 })
-                vegaTrainingLoss.push({
+                trainingLossLog.push({
                     epoch: epoch,
                     loss: msg.data.val_loss,
                     dataset: "validation",
                 })
-                vegaTrainingAcc.push({
+                trainingAccLog.push({
                     epoch: epoch,
                     acc: msg.data.acc,
                     dataset: "training",
                 })
-                vegaTrainingAcc.push({
+                trainingAccLog.push({
                     epoch: epoch,
                     acc: msg.data.val_acc,
                     dataset: "validation",
                 })
-                setTrainingLogTimestamp(Date.now())
+                setLogTimestamp(Date.now())
             }
         )
 
@@ -186,15 +201,16 @@ export default function TrainModel(props: {
         const trainResult = (await trainRequest(
             trainMsg
         )) as TFModelTrainResponse
-
         // stop subscriber after training
         stopWorkerSubscribe()
 
-        if (trainResult) {
+        if (trainResult && trainResult.data) {
             // handle result from training
             const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
             model.armModel = trainResult.data.armModel
+            setTrainingPredictionResult(trainResult.data.yPrediction)
+            setTrainTimestamp(Date.now())
 
             // Update model status
             model.status = "trained"
@@ -205,6 +221,7 @@ export default function TrainModel(props: {
         } else {
             model.status = "untrained"
             handleModelUpdate(model)
+            setTrainEnabled(true)
         }
     }
 
@@ -222,11 +239,12 @@ export default function TrainModel(props: {
     const deleteTFModel = () => {
         if (confirm("Are you sure you want to delete current model?")) {
             const newModel = new MBModel(model.name)
-            prepareModel(newModel)
+            prepareModel(newModel, dataset)
+
             handleModelUpdate(newModel)
 
-            setVegaLoss([])
-            setVegaAcc([])
+            setTrainingLossLog([])
+            setTrainingAccLog([])
         }
     }
 
@@ -274,24 +292,13 @@ export default function TrainModel(props: {
                         </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <div>
-                            {dataset.summary.map((line, lineIdx) => {
-                                return (
-                                    <span key={"dataset-summary-" + lineIdx}>
-                                        {" "}
-                                        {line} <br />
-                                    </span>
-                                )
-                            })}
-                            {model.summary.map((line, lineIdx) => {
-                                return (
-                                    <span key={"model-summary-" + lineIdx}>
-                                        {" "}
-                                        {line} <br />
-                                    </span>
-                                )
-                            })}
-                        </div>
+                        <Suspense>
+                            <ModelSummary
+                                reactStyle={classes}
+                                dataset={dataset}
+                                model={model}
+                            />
+                        </Suspense>
                     </AccordionDetails>
                 </Accordion>
                 <div className={classes.buttons}>
@@ -316,17 +323,51 @@ export default function TrainModel(props: {
                 <br />
             </Grid>
             <Grid item>
+                <h3>Training Progress</h3>
+                {!!trainingLossLog.length && (
+                    <div key="vega-loss-acc-charts">
+                        <Suspense>
+                            <LossAccChart
+                                chartProps={chartProps}
+                                lossData={trainingLossLog}
+                                accData={trainingAccLog}
+                                timestamp={logTimestamp}
+                            />
+                        </Suspense>
+                    </div>
+                )}
+                <p>
+                    Final Training Accuracy:{" "}
+                    {model.status == "untrained"
+                        ? "Model has not been trained"
+                        : (model.trainingAcc || 0).toPrecision(2)}
+                </p>
+            </Grid>
+            <Grid item>
                 <h3>Training Results</h3>
-                <div key="vega-test">
-                    <Suspense>
-                        <LossAccChart
-                            lossData={vegaTrainingLoss}
-                            accData={vegaTrainingAcc}
-                            timestamp={logTimestamp}
-                        />
-                    </Suspense>
-                </div>
-                <p>Final Training Accuracy: {model.trainingAcc}</p>
+                {!!trainingPredictionResult.length && (
+                    <div key="vega-training-set-charts">
+                        <Suspense>
+                            <ConfusionMatrixHeatMap
+                                chartProps={chartProps}
+                                yActual={dataset.ys}
+                                yPredicted={trainingPredictionResult}
+                                labels={model.labels}
+                                timestamp={trainTimestamp}
+                            />
+                        </Suspense>
+                        <br />
+                        <Suspense>
+                            <DataSetPlot
+                                chartProps={chartProps}
+                                reactStyle={classes}
+                                dataset={dataset}
+                                predictedLabels={trainingPredictionResult}
+                                timestamp={trainTimestamp}
+                            />
+                        </Suspense>
+                    </div>
+                )}
                 <br />
             </Grid>
             <Grid item style={{ display: "flex", justifyContent: "flex-end" }}>

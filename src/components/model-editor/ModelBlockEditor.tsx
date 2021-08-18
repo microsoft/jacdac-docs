@@ -26,6 +26,7 @@ import ModelBlockDialogs, {
 } from "../dialogs/mb/ModelBlockDialogs"
 import MBModel from "./MBModel"
 import MBDataSet from "./MBDataSet"
+import { prepareModel, prepareDataSet } from "./TrainModel"
 
 const MB_EDITOR_ID = "mb"
 const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
@@ -52,21 +53,6 @@ function getRecordingsFromLocalStorage() {
     return rBlocks
 }
 
-function getModelsFromLocalStorage() {
-    const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
-    if (dataObj == null || dataObj == undefined) return {}
-    const modelEditorData = JSON.parse(dataObj)
-
-    // construct new models object
-    const allModels = {}
-    for (const name in modelEditorData["models"]) {
-        const data = modelEditorData["models"][name]
-        const model = MBModel.createFromFile(data)
-        allModels[name] = model
-    }
-    return allModels
-}
-
 function ModelBlockEditorWithContext() {
     // block context handles hosting blockly
     const { workspace, workspaceJSON, toolboxConfiguration } =
@@ -79,22 +65,20 @@ function ModelBlockEditorWithContext() {
     const [currentDataSet, setCurrentDataSet] = useState(undefined)
     const [currentModel, setCurrentModel] = useState(undefined)
     // dictionary of model vars and MBModel objs
-    const allModels = useMemo(getModelsFromLocalStorage, [])
+    const allModels = {}
+    const allDataSets = {}
     const allRecordings = useMemo(getRecordingsFromLocalStorage, [])
-    const updateLocalStorage = (newRecordings, newModels) => {
+    const updateLocalStorage = newRecordings => {
         const recordings = newRecordings || allRecordings
-        const models = newModels || allModels
 
         // convert dataset object to JSON string
         const modelBlocksDataJSON = JSON.stringify({
             recordings: recordings,
-            models: models,
         })
         // save JSON string in local storage
         localStorage.setItem(MB_DATA_STORAGE_KEY, modelBlocksDataJSON)
         console.log("Randi updating saved data for blocks: ", {
             recordings,
-            models,
         })
     }
 
@@ -123,27 +107,13 @@ function ModelBlockEditorWithContext() {
                         block.inputs[0].fields[
                             "classifier_name"
                         ].value?.toString()
-                    if (modelName) {
-                        mBlocks[modelName] = block
-                        // associate block with model
-                        const model = allModels[modelName]
-                        if (model.blockJSON) {
-                            // if block JSON already exists on a model, make sure it lines up
-                            // if not, mark the model as untrained
-                            if (
-                                JSON.stringify(block) !=
-                                JSON.stringify(model.blockJSON)
-                            ) {
-                                model.blockJSON = block
-                                model.status = "untrained"
-                            }
-                        } else model.blockJSON = block
-                    }
+                    if (modelName) mBlocks[modelName] = block
                 }
             },
         })
         return mBlocks
     }
+
     /*useEffect(() => {
         visitWorkspace(workspaceJSON, {
             visitBlock: block => {
@@ -154,50 +124,13 @@ function ModelBlockEditorWithContext() {
     const modelBlocks = useMemo(getModelBlocks, [workspaceJSON])
     const dataSetBlocks = useMemo(getDataSetBlocks, [workspaceJSON])
 
-    /* For dialog handling */
-    const [recordDataDialogVisible, setRecordDataDialogVisible] =
-        useState<boolean>(false)
-    const [trainModelDialogVisible, setTrainModelDialogVisible] =
-        useState<boolean>(false)
-    const toggleRecordDataDialog = () => toggleDialog("recording")
-    const toggleTrainModelDialog = () => toggleDialog("model")
-    const toggleDialog = (dialog: string) => {
-        console.log("Randi toggle dialog ", dialog)
-        if (dialog == "recording") {
-            const b = !recordDataDialogVisible
-            setRecordDataDialogVisible(b)
-        } else if (dialog == "model") {
-            const b = !trainModelDialogVisible
-            setTrainModelDialogVisible(b)
-        } // else if edit dataset
-    }
-    const buttonsWithDialogs = {
-        createNewDataSetButton: addNewDataSet,
-        createNewRecordingButton: toggleRecordDataDialog,
-        createNewClassifierButton: addNewClassifier,
-    }
-    const updateRecording = (recording: FieldDataSet[], blockId: string) => {
-        if (recording && blockId) {
-            // Add recording data to list of recordings
-            allRecordings[blockId] = recording
-            updateLocalStorage(allRecordings, null)
-        }
-    }
-    const closeRecordingModal = (
-        recording: FieldDataSet[],
-        blockId: string
-    ) => {
-        // save the new recording
-        updateRecording(recording, blockId)
-
-        // close dialog
-        toggleRecordDataDialog()
-    }
-
     const assembleDataSet = (datasetName: string) => {
-        // setup dataset for training
-        const dataset = new MBDataSet(datasetName)
+        // associate block with dataset
+        const dataset: MBDataSet =
+            allDataSets[datasetName] || new MBDataSet(datasetName)
         const datasetBlock = dataSetBlocks[datasetName]
+
+        // Randi TODO find some way to check if dataset is new / changed from previous save
 
         // grab nested recording blocks and place them in the dataset
         const recordingBlock = datasetBlock?.inputs.filter(
@@ -216,34 +149,136 @@ function ModelBlockEditorWithContext() {
             })
         }
 
+        // store dataset in memory
+        allDataSets[datasetName] = dataset
+
         return dataset
     }
+
+    const assembleModel = (modelName: string) => {
+        // associate block with model
+        const model = allModels[modelName] || new MBModel(modelName)
+        const modelBlock = modelBlocks[modelName]
+
+        // if this model already existed from before
+        if (model.blockJSON) {
+            // make sure its contents line up with what's saved
+            // if not, mark the model as untrained
+            if (JSON.stringify(modelBlock) != JSON.stringify(model.blockJSON)) {
+                model.blockJSON = modelBlock
+                model.status = "untrained"
+            }
+        } else {
+            model.blockJSON = modelBlock
+        }
+
+        // store model in memory
+        allModels[modelName] = model
+
+        return model
+    }
+    useEffect(() => {
+        // compile all datasets
+        for (const datasetName in dataSetBlocks) {
+            const dataset = assembleDataSet(datasetName)
+            prepareDataSet(dataset)
+        }
+
+        // compile all models
+        for (const modelName in modelBlocks) {
+            const model = assembleModel(modelName)
+            const trainingDataSetName =
+                modelBlocks[modelName].inputs[1].fields[
+                    "nn_training"
+                ].value?.toString()
+            const trainingDataSet: MBDataSet = allDataSets[trainingDataSetName]
+            if (trainingDataSet.totalRecordings)
+                prepareModel(model, trainingDataSet)
+        }
+    }, [workspaceJSON])
+
+    /* For dialog handling */
+    const [recordDataDialogVisible, setRecordDataDialogVisible] =
+        useState<boolean>(false)
+    const [trainModelDialogVisible, setTrainModelDialogVisible] =
+        useState<boolean>(false)
+    const toggleRecordDataDialog = () => toggleDialog("recording")
+    const toggleTrainModelDialog = () => toggleDialog("model")
+    const toggleDialog = (dialog: string) => {
+        if (dialog == "recording") {
+            const b = !recordDataDialogVisible
+            setRecordDataDialogVisible(b)
+        } else if (dialog == "model") {
+            const b = !trainModelDialogVisible
+            setTrainModelDialogVisible(b)
+        } // else if edit dataset
+    }
+    const buttonsWithDialogs = {
+        createNewDataSetButton: addNewDataSet,
+        createNewRecordingButton: toggleRecordDataDialog,
+        createNewClassifierButton: addNewClassifier,
+    }
+    const updateRecording = (recording: FieldDataSet[], blockId: string) => {
+        if (recording && blockId) {
+            // Add recording data to list of recordings
+            allRecordings[blockId] = recording
+            updateLocalStorage(allRecordings)
+        }
+    }
+    const closeRecordingModal = (
+        recording: FieldDataSet[],
+        blockId: string
+    ) => {
+        // save the new recording
+        updateRecording(recording, blockId)
+
+        // close dialog
+        toggleRecordDataDialog()
+    }
+
     const openTrainingModal = (clickedBlock: Blockly.Block) => {
         // setup model for training
         const modelName = clickedBlock.getField("CLASSIFIER_NAME").getText()
         let selectedModel: MBModel = allModels[modelName]
         if (!selectedModel) {
-            // if the model does not exist in storage, create new model variable
+            console.error(
+                "Error finding selected model, should never happen ",
+                selectedModel
+            )
+            // if the model does not exist in memory, create new model variable
             selectedModel = new MBModel(modelName)
             selectedModel.blockJSON = modelBlocks[modelName]
         }
 
         // setup dataset for training
         const datasetName = clickedBlock.getField("NN_TRAINING").getText()
-        const trainingDataset = assembleDataSet(datasetName)
+        const selectedDataset = allDataSets[datasetName]
 
-        // update the model and dataset to pass to the modal
-        setCurrentModel(selectedModel)
-        setCurrentDataSet(trainingDataset)
+        if (!selectedDataset.totalRecordings) {
+            Blockly.alert(
+                "This model cannot be trained. The training dataset is empty."
+            )
+        } else if (
+            !modelBlocks[modelName].inputs.filter(
+                input => input.name == "LAYER_INPUTS"
+            )[0].child
+        ) {
+            Blockly.alert(
+                "This model cannot be trained. The model architecture is empty."
+            )
+        } else {
+            // update the model and dataset to pass to the modal
+            setCurrentModel(selectedModel)
+            setCurrentDataSet(selectedDataset)
 
-        // open the training modal
-        toggleTrainModelDialog()
+            // open the training modal
+            toggleTrainModelDialog()
+        }
     }
     const updateModel = (model: MBModel) => {
         if (model) {
             // Add trained model to record of allModels
             allModels[model.name] = model
-            updateLocalStorage(null, allModels)
         }
     }
     const closeTrainingModal = () => {
@@ -316,7 +351,6 @@ function ModelBlockEditorWithContext() {
                     )
                     //openDataSetModal(clickedBlock)
                 } else if (command == "train") {
-                    console.log("Randi got a train command ", clickedBlock)
                     openTrainingModal(clickedBlock)
                 } else {
                     console.error(

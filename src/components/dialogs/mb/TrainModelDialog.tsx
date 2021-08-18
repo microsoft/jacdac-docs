@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState, useMemo } from "react"
+import React, { lazy, useEffect, useContext, useState, useMemo } from "react"
 import {
     Accordion,
     AccordionDetails,
@@ -23,17 +23,15 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DownloadIcon from "@material-ui/icons/GetApp"
 import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
+import Suspense from "../../ui/Suspense"
 
 import ServiceManagerContext from "../../ServiceManagerContext"
 
 import {
-    compileRequest,
     trainRequest,
     predictRequest,
 } from "../../blockly/dsl/workers/tf.proxy"
 import type {
-    TFModelCompileRequest,
-    TFModelCompileResponse,
     TFModelTrainRequest,
     TFModelTrainResponse,
     TFModelPredictRequest,
@@ -55,9 +53,19 @@ import FieldDataSet from "../../FieldDataSet"
 import ReadingFieldGrid from "../../ReadingFieldGrid"
 import useChange from "../../../jacdac/useChange"
 
-const TRAINING_COLOR = "#0f2080"
-const VAL_COLOR = "#f5793a"
-const NUM_EPOCHS = 250
+const ConfusionMatrixHeatMap = lazy(
+    () => import("../../model-editor/components/ConfusionMatrixHeatMap")
+)
+const DataSetPlot = lazy(
+    () => import("../../model-editor/components/DataSetPlot")
+)
+const LossAccChart = lazy(
+    () => import("../../model-editor/components/LossAccChart")
+)
+const ModelSummary = lazy(
+    () => import("../../model-editor/components/ModelSummary")
+)
+
 const LIVE_HORIZON = 100
 
 function createDataSet(
@@ -92,11 +100,18 @@ export default function TrainModelDialog(props: {
         dataset,
         model,
     } = props
+    const chartProps = {
+        CHART_WIDTH: 300,
+        CHART_HEIGHT: 300,
+        MARK_SIZE: 75,
+        TOOLTIP_NUM_FORMAT: "0.2f",
+        PALETTE: chartPalette,
+    }
     const { fileStorage } = useContext(ServiceManagerContext)
 
-    const [dialogType, setDialogType] = useState<"trainModel" | "evalModel">(
-        "trainModel"
-    )
+    const [dialogType, setDialogType] = useState<
+        "trainModel" | "evalModel" | "testModel"
+    >("trainModel")
 
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
@@ -111,129 +126,19 @@ export default function TrainModelDialog(props: {
     )
 
     useEffect(() => {
-        if (dataset && model) {
-            prepareDataSet(dataset)
-            if (model.status !== "trained") prepareModel(model)
-            prepareTestingLogs()
-        }
+        prepareTestingLogs()
     }, [dataset, model])
-
-    /* For preparing props */
-    const prepareDataSet = (set: MBDataSet) => {
-        // Assumptions: the sampling rate, sampling duration, and sensors used are constant
-        let sampleLength = -1
-        let sampleChannels = -1
-        const xData = []
-        const yData = []
-
-        for (const label of set.labels) {
-            set.getRecordingsWithLabel(label).forEach(table => {
-                if (sampleLength < table.length) {
-                    sampleLength = table.length
-                    sampleChannels = table.width
-                } else if (table.width != sampleChannels) {
-                    setTrainEnabled(false)
-                    alert(
-                        "All input data must have the same shape: " +
-                            table.name +
-                            "\n Has " +
-                            table.width +
-                            " inputs instead of " +
-                            sampleChannels
-                    )
-                } /* else if (table.length != sampleLength) {
-                    // decide what to do about different sized data
-                } */
-                // For x data, just add each sample as a new row into x_data
-                xData.push(table.data())
-
-                yData.push(set.labels.indexOf(label))
-            })
-        }
-
-        // save tensors with dataset object
-        set.xs = xData
-        set.ys = yData
-        set.length = sampleLength
-        set.width = sampleChannels
-    }
-    const prepareModel = (mod: MBModel) => {
-        // If this is a brand new model, get it setup with a standard CNN architecture
-        if (mod.modelJSON == "") {
-            mod.modelJSON = "default"
-            mod.labels = dataset.labels
-            mod.inputShape = [dataset.length, dataset.width]
-            mod.inputTypes = dataset.inputTypes
-            mod.inputInterval = dataset.interval
-            mod.outputShape = dataset.labels.length
-        } else if (
-            !arraysEqual(mod.labels, dataset.labels) ||
-            !arraysEqual(mod.inputTypes, dataset.inputTypes)
-        ) {
-            // If there is already a model, make sure it matches the current dataset
-            //   if it does not, reset the model
-            const newModel = new MBModel(model.name)
-            prepareModel(newModel)
-        }
-
-        // setup model from block definition
-        const compileMsg = {
-            worker: "tf",
-            type: "compile",
-            data: {
-                modelBlockJSON: mod.blockJSON,
-                model: model.toJSON(),
-            },
-        } as TFModelCompileRequest
-        compileRequest(compileMsg).then(result => {
-            if (result) {
-                mod.modelJSON = result.data.modelJSON
-                mod.modelSummary = result.data.modelSummary
-                mod.trainingParams = result.data.trainingParams
-            }
-        })
-    }
-    const prepareTrainingLogs = (colors: string[]) => {
-        // Create space to hold training log data
-        const trainingLogDataSet = {
-            name: "training-logs",
-            rows: [],
-            headers: ["training", "val"],
-            units: ["/", "/"],
-            colors: colors,
-        }
-        const set = FieldDataSet.createFromFile(trainingLogDataSet)
-        return set
-    }
-    const trainingAccLog = useMemo(() => {
-        return prepareTrainingLogs([TRAINING_COLOR, VAL_COLOR])
-    }, [])
-    const trainingLossLog = useMemo(() => {
-        return prepareTrainingLogs([TRAINING_COLOR, VAL_COLOR])
-    }, [])
-    useChange(trainingAccLog)
-    useChange(trainingLossLog)
-    const prepareTestingLogs = () => {
-        // Create space to hold prediction data
-        const livePredictionDataSet = {
-            name: "live-predictions",
-            rows: [],
-            headers: model.labels,
-            units: model.labels.map(() => {
-                return "/"
-            }),
-            colors: model.labels.map(
-                (label, idx) => chartPalette[idx % chartPalette.length]
-            ),
-        }
-        setLivePredictions({
-            predictionData: FieldDataSet.createFromFile(livePredictionDataSet),
-            topClass: model.labels[0],
-        })
-    }
 
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
+    // for loss/acc graph
+    const [trainingLossLog, setTrainingLossLog] = useState([])
+    const [trainingAccLog, setTrainingAccLog] = useState([])
+    const [logTimestamp, setLogTimestamp] = useState(0)
+    // for confusion matrix and training dataset performance plot
+    const [trainingPredictionResult, setTrainingPredictionResult] = useState([])
+    const [trainTimestamp, setTrainTimestamp] = useState(0)
+
     const trainTFModel = async () => {
         model.status = "training"
         model.inputTypes = dataset.inputTypes
@@ -244,14 +149,28 @@ export default function TrainModelDialog(props: {
         const stopWorkerSubscribe = workerProxy("tf").subscribe(
             "message",
             (msg: any) => {
-                const lossData = [msg.data.loss, msg.data.val_loss]
-                const accData = [msg.data.acc, msg.data.val_acc]
-                console.log("Randi training data ", {
-                    loss: lossData,
-                    acc: accData,
+                const epoch = trainingLossLog.length / 2 + 1
+                trainingLossLog.push({
+                    epoch: epoch,
+                    loss: msg.data.loss,
+                    dataset: "training",
                 })
-                if (trainingLossLog) trainingLossLog.addData(lossData)
-                if (trainingAccLog) trainingAccLog.addData(accData)
+                trainingLossLog.push({
+                    epoch: epoch,
+                    loss: msg.data.val_loss,
+                    dataset: "validation",
+                })
+                trainingAccLog.push({
+                    epoch: epoch,
+                    acc: msg.data.acc,
+                    dataset: "training",
+                })
+                trainingAccLog.push({
+                    epoch: epoch,
+                    acc: msg.data.val_acc,
+                    dataset: "validation",
+                })
+                setLogTimestamp(Date.now())
             }
         )
 
@@ -272,11 +191,13 @@ export default function TrainModelDialog(props: {
         // stop subscriber after training
         stopWorkerSubscribe()
 
-        if (trainResult) {
+        if (trainResult && trainResult.data) {
             // handle result from training
             const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
             model.armModel = trainResult.data.armModel
+            setTrainingPredictionResult(trainResult.data.yPrediction)
+            setTrainTimestamp(Date.now())
 
             // Update model status
             model.status = "trained"
@@ -284,6 +205,26 @@ export default function TrainModelDialog(props: {
             onModelUpdate(model)
             setTrainEnabled(true)
         } else model.status = "untrained"
+    }
+
+    /* For testing trained model */
+    const prepareTestingLogs = () => {
+        // Create space to hold prediction data
+        const livePredictionDataSet = {
+            name: "live-predictions",
+            rows: [],
+            headers: model.labels,
+            units: model.labels.map(() => {
+                return "/"
+            }),
+            colors: model.labels.map(
+                (label, idx) => chartPalette[idx % chartPalette.length]
+            ),
+        }
+        setLivePredictions({
+            predictionData: FieldDataSet.createFromFile(livePredictionDataSet),
+            topClass: model.labels[0],
+        })
     }
 
     /* For predicting with model */
@@ -420,15 +361,18 @@ export default function TrainModelDialog(props: {
         onDone()
     }
     const handleBack = () => {
-        // turn off predictions
-        setRegisterIdsChecked([])
-
         // go to the previous page
-        setDialogType("trainModel")
+        if (dialogType == "testModel") {
+            // turn off predictions
+            setRegisterIdsChecked([])
+
+            setDialogType("evalModel")
+        } else setDialogType("trainModel")
     }
     const handleNext = () => {
         // go to the next page
-        setDialogType("evalModel")
+        if (dialogType == "trainModel") setDialogType("evalModel")
+        else setDialogType("testModel")
     }
     const handleDownloadModel = () => {
         // Randi TODO also download arm model (as a zip file?)
@@ -481,7 +425,7 @@ export default function TrainModelDialog(props: {
                                 >
                                     <div>
                                         {expanded == "modelSummary" ? (
-                                            <h2> Summary </h2>
+                                            <h4> Summary </h4>
                                         ) : (
                                             <span>
                                                 Classes:{" "}
@@ -495,37 +439,13 @@ export default function TrainModelDialog(props: {
                                     </div>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                    <div>
-                                        {dataset.summary.map(
-                                            (line, lineIdx) => {
-                                                return (
-                                                    <span
-                                                        key={
-                                                            "dataset-summary-" +
-                                                            lineIdx
-                                                        }
-                                                    >
-                                                        {" "}
-                                                        {line} <br />
-                                                    </span>
-                                                )
-                                            }
-                                        )}
-                                        {model.summary.map((line, lineIdx) => {
-                                            return (
-                                                <span
-                                                    key={
-                                                        "model-summary-" +
-                                                        lineIdx
-                                                    }
-                                                >
-                                                    {" "}
-                                                    {line}
-                                                    <br />
-                                                </span>
-                                            )
-                                        })}
-                                    </div>
+                                    <Suspense>
+                                        <ModelSummary
+                                            reactStyle={classes}
+                                            dataset={dataset}
+                                            model={model}
+                                        />
+                                    </Suspense>
                                 </AccordionDetails>
                             </Accordion>
                             <div className={classes.buttons}>
@@ -550,73 +470,25 @@ export default function TrainModelDialog(props: {
                             <br />
                         </Grid>
                         <Grid item>
-                            <h3>Training Results</h3>
+                            <h3>Training Progress</h3>
                             {!!trainingLossLog.length && (
-                                <div key="training-log-loss">
-                                    <div>
-                                        <FiberManualRecordIcon
-                                            className={classes.vmiddle}
-                                            fontSize="small"
-                                            style={{
-                                                color: TRAINING_COLOR,
-                                            }}
+                                <div key="vega-loss-acc-charts">
+                                    <Suspense>
+                                        <LossAccChart
+                                            chartProps={chartProps}
+                                            lossData={trainingLossLog}
+                                            accData={trainingAccLog}
+                                            timestamp={logTimestamp}
                                         />
-                                        Training Loss
-                                        <FiberManualRecordIcon
-                                            className={classes.vmiddle}
-                                            fontSize="small"
-                                            style={{
-                                                color: VAL_COLOR,
-                                            }}
-                                        />
-                                        Validation Loss
-                                        <Trend
-                                            key="training-loss-trends"
-                                            height={12}
-                                            dataSet={trainingLossLog}
-                                            horizon={NUM_EPOCHS}
-                                            dot={true}
-                                            gradient={true}
-                                        />
-                                    </div>
+                                    </Suspense>
                                 </div>
                             )}
-                            {!!trainingAccLog.length && (
-                                <div key="training-log-acc-data">
-                                    <div>
-                                        <FiberManualRecordIcon
-                                            className={classes.vmiddle}
-                                            fontSize="small"
-                                            style={{
-                                                color: TRAINING_COLOR,
-                                            }}
-                                        />
-                                        Training Accuracy
-                                        <FiberManualRecordIcon
-                                            className={classes.vmiddle}
-                                            fontSize="small"
-                                            style={{
-                                                color: VAL_COLOR,
-                                            }}
-                                        />
-                                        Validation Accuracy
-                                        <Trend
-                                            key="training-acc-trends"
-                                            height={12}
-                                            dataSet={trainingAccLog}
-                                            horizon={NUM_EPOCHS}
-                                            dot={true}
-                                            gradient={true}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            {model.status == "trained" && (
-                                <p>
-                                    Final Training Accuracy: {model.trainingAcc}
-                                </p>
-                            )}
-                            <br />
+                            <p>
+                                Final Training Accuracy:{" "}
+                                {model.status == "untrained"
+                                    ? "Model has not been trained"
+                                    : (model.trainingAcc || 0).toPrecision(2)}
+                            </p>
                         </Grid>
                     </Grid>
                 </DialogContent>
@@ -636,7 +508,65 @@ export default function TrainModelDialog(props: {
                 </DialogActions>
             </Dialog>
         )
-    if (dialogType == "evalModel")
+    else if (dialogType == "evalModel")
+        return (
+            <Dialog
+                open={open}
+                onClose={handleCancel}
+                fullWidth={true}
+                maxWidth={"md"}
+            >
+                <DialogContent>
+                    <Grid container direction={"column"}>
+                        <Grid item>
+                            <h3>Training Performance Result</h3>
+                            {!!trainingPredictionResult.length && (
+                                <div key="vega-training-set-charts">
+                                    <Suspense>
+                                        <ConfusionMatrixHeatMap
+                                            chartProps={chartProps}
+                                            yActual={dataset.ys}
+                                            yPredicted={
+                                                trainingPredictionResult
+                                            }
+                                            labels={model.labels}
+                                            timestamp={trainTimestamp}
+                                        />
+                                    </Suspense>
+                                    <br />
+                                    <Suspense>
+                                        <DataSetPlot
+                                            chartProps={chartProps}
+                                            reactStyle={classes}
+                                            dataset={dataset}
+                                            predictedLabels={
+                                                trainingPredictionResult
+                                            }
+                                            timestamp={trainTimestamp}
+                                        />
+                                    </Suspense>
+                                </div>
+                            )}
+                            <br />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={handleBack}>
+                        Back
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<NavigateNextIcon />}
+                        onClick={handleNext}
+                    >
+                        Next
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
+    else if (dialogType == "testModel")
         return (
             <Dialog
                 open={open}
