@@ -38,8 +38,8 @@ export default class MBDataSet extends JDEventSource {
     // save what registers this dataset was created with
     registerIds: string[]
 
-    // maintain data in tensors
-    xs: number[]
+    // maintain data computed as arrays for tensorflow
+    xs: number[][][]
     ys: number[]
     length: number
     width: number
