@@ -25,7 +25,7 @@ import { JDEvent } from "../../../jacdac-ts/src/jdom/event"
 import KeyboardKeyInput from "../../components/ui/KeyboardKeyInput"
 import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
 import DeleteIcon from "@material-ui/icons/Delete"
-import SettingsClient from "../../../jacdac-ts/src/jdom/settingsclient"
+import SettingsClient from "../../../jacdac-ts/src/jdom/clients/settingsclient"
 import useServiceClient from "../../components/useServiceClient"
 import {
     arrayConcatMany,

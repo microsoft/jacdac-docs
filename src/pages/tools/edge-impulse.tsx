@@ -50,10 +50,9 @@ import useDeviceName from "../../components/devices/useDeviceName"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import ReadingFieldGrid from "../../components/ReadingFieldGrid"
 import useChartPalette from "../../components/useChartPalette"
-import {
-    SensorAggregatorClient,
+import SensorAggregatorClient, {
     SensorAggregatorConfig,
-} from "../../../jacdac-ts/src/jdom/sensoraggregatorclient"
+} from "../../../jacdac-ts/src/jdom/clients/sensoraggregatorclient"
 import { AlertTitle } from "@material-ui/lab"
 import { serviceName } from "../../../jacdac-ts/src/jdom/pretty"
 import ConnectAlert from "../../components/alert/ConnectAlert"
