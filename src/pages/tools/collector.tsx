@@ -26,7 +26,7 @@ import Trend from "../../components/Trend"
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "../../components/ui/Alert"
 import SelectEvent from "../../components/select/SelectEvent"
-import { JDEvent } from "../../../jacdac-ts/src/jdom/event"
+import JDEvent from "../../../jacdac-ts/src/jdom/event"
 import {
     EVENT,
     REPORT_UPDATE,
