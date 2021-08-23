@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@material-ui/core"
 import useChange from "../../jacdac/useChange"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import {
     HidKeyboardModifiers,
     SRV_CONTROL,

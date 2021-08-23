@@ -11,7 +11,7 @@ import {
 import useGridBreakpoints from "../../components/useGridBreakpoints"
 import useDevices from "../../components/hooks/useDevices"
 import DeviceCardHeader from "../../components/DeviceCardHeader"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import useChange from "../../jacdac/useChange"
 import ConnectAlert from "../../components/alert/ConnectAlert"

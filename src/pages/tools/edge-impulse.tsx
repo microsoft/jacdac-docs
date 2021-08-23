@@ -47,7 +47,7 @@ import ServiceList from "../../components/ServiceList"
 import { ModelActions, ModelContent } from "./model-uploader"
 import { readBlobToUint8Array } from "../../../jacdac-ts/src/jdom/utils"
 import useDeviceName from "../../components/devices/useDeviceName"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import ReadingFieldGrid from "../../components/ReadingFieldGrid"
 import useChartPalette from "../../components/useChartPalette"
 import SensorAggregatorClient, {

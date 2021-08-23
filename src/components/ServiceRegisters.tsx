@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { JDService } from "../../jacdac-ts/src/jdom/service"
+import JDService from "../../jacdac-ts/src/jdom/service"
 import { isRegister } from "../../jacdac-ts/src/jdom/spec"
 import RegisterInput from "./RegisterInput"
 import useChange from "../jacdac/useChange"

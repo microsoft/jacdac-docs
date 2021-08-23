@@ -5,7 +5,7 @@ import {
     SRV_MODEL_RUNNER,
     ModelRunnerReg,
 } from "../../../jacdac-ts/src/jdom/constants"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import ServiceList from "../../components/ServiceList"
 import ConnectAlert from "../../components/alert/ConnectAlert"
 import { useDbJSON, useDbUint8Array } from "../../components/useDb"

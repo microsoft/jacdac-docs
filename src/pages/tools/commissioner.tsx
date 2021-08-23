@@ -17,7 +17,7 @@ import {
     SRV_LED,
     SRV_ROLE_MANAGER,
 } from "../../../jacdac-ts/src/jdom/constants"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import Packet from "../../../jacdac-ts/src/jdom/packet"
 // tslint:disable-next-line: no-submodule-imports
 import Table from "@material-ui/core/Table"

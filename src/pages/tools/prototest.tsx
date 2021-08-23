@@ -14,7 +14,7 @@ import {
     SRV_PROTO_TEST,
 } from "../../../jacdac-ts/src/jdom/constants"
 import useChange from "../../jacdac/useChange"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
 import ConnectAlert from "../../components/alert/ConnectAlert"
 import { JDField } from "../../../jacdac-ts/src/jdom/field"

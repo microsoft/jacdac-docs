@@ -18,7 +18,7 @@ import ConnectAlert from "../alert/ConnectAlert"
 import ConnectButtons from "../buttons/ConnectButtons"
 import useRoleManagerClient from "../services/useRoleManagerClient"
 import useMediaQueries from "../hooks/useMediaQueries"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import SimulateDeviceAlert from "../alert/SimulateDeviceAlert"
 
 function defaultDeviceSort(l: JDDevice, r: JDDevice): number {

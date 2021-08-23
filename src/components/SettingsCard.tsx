@@ -6,7 +6,7 @@ import {
     TextField,
 } from "@material-ui/core"
 import React, { ChangeEvent, useState } from "react"
-import { JDService } from "../../jacdac-ts/src/jdom/service"
+import JDService from "../../jacdac-ts/src/jdom/service"
 import DeviceCardHeader from "./DeviceCardHeader"
 import useServiceClient from "./useServiceClient"
 import SettingsClient from "../../jacdac-ts/src/jdom/clients/settingsclient"
