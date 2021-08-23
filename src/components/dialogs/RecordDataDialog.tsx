@@ -32,7 +32,7 @@ import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import ServiceManagerContext from "../ServiceManagerContext"
 
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
-import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
+import JDRegister from "../../../jacdac-ts/src/jdom/register"
 import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 import JDBus from "../../../jacdac-ts/src/jdom/bus"
 import { REPORT_UPDATE } from "../../../jacdac-ts/src/jdom/constants"

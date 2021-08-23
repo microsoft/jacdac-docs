@@ -38,7 +38,7 @@ import {
     uniqueMap,
 } from "../../../jacdac-ts/src/jdom/utils"
 import DataSetGrid from "../../components/DataSetGrid"
-import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
+import JDRegister from "../../../jacdac-ts/src/jdom/register"
 import ReadingFieldGrid from "../../components/ReadingFieldGrid"
 import DeviceCardHeader from "../../components/DeviceCardHeader"
 import SensorAggregatorClient from "../../../jacdac-ts/src/jdom/clients/sensoraggregatorclient"

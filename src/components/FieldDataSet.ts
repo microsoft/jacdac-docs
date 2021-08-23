@@ -2,7 +2,7 @@ import JDBus from "../../jacdac-ts/src/jdom/bus"
 import { CHANGE } from "../../jacdac-ts/src/jdom/constants"
 import { JDEventSource } from "../../jacdac-ts/src/jdom/eventsource"
 import { JDField } from "../../jacdac-ts/src/jdom/field"
-import { JDRegister } from "../../jacdac-ts/src/jdom/register"
+import JDRegister from "../../jacdac-ts/src/jdom/register"
 import {
     arrayConcatMany,
     roundWithPrecision,

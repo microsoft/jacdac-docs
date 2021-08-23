@@ -47,7 +47,7 @@ import {
 import JDService from "../../../jacdac-ts/src/jdom/service"
 import { isRegister } from "../../../jacdac-ts/src/jdom/spec"
 import RegisterInput from "../RegisterInput"
-import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
+import JDRegister from "../../../jacdac-ts/src/jdom/register"
 import {
     useRegisterBoolValue,
     useRegisterUnpackedValue,
