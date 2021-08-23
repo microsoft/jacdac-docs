@@ -1,6 +1,6 @@
 import { Grid } from "@material-ui/core"
 import React, { useContext } from "react"
-import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import useSelectedNodes from "../../jacdac/useSelectedNodes"
 import { isReading, isValueOrIntensity } from "../../../jacdac-ts/src/jdom/spec"
 import { splitFilter, strcmp } from "../../../jacdac-ts/src/jdom/utils"

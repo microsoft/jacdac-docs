@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react"
 // tslint:disable-next-line: no-submodule-imports
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import { JDEvent } from "../../../jacdac-ts/src/jdom/event"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { JDRegister } from "../../../jacdac-ts/src/jdom/register"
