@@ -20,7 +20,7 @@ import StopIcon from "@material-ui/icons/Stop"
 import SaveIcon from "@material-ui/icons/Save"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty"
-import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
+import JDBus from "../../../jacdac-ts/src/jdom/bus"
 import FieldDataSet from "../../components/FieldDataSet"
 import Trend from "../../components/Trend"
 // tslint:disable-next-line: no-submodule-imports

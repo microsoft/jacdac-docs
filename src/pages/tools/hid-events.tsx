@@ -35,7 +35,7 @@ import {
 } from "../../../jacdac-ts/src/jdom/utils"
 import { jdpack, jdunpack } from "../../../jacdac-ts/src/jdom/pack"
 import { randomDeviceId } from "../../../jacdac-ts/src/jdom/random"
-import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
+import JDBus from "../../../jacdac-ts/src/jdom/bus"
 import useServices from "../../components/hooks/useServices"
 import { Button } from "gatsby-theme-material-ui"
 import Alert from "../../components/ui/Alert"
