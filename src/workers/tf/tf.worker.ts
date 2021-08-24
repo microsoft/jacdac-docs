@@ -7,10 +7,10 @@ import {
     sequential,
     tensor1d,
     tensor3d,
-    Tensor,
     tensor,
-    Sequential,
 } from "@tensorflow/tfjs"
+
+import type { Tensor, Sequential } from "@tensorflow/tfjs"
 
 import { compileAndTest, compileModel } from "../../../ml4f"
 import type { LayerStats } from "../../../ml4f"
@@ -20,6 +20,7 @@ export interface TFModelObj {
     inputShape: number[]
     inputTypes: string[]
     inputInterval: number
+    convolutionType: string
     labels: string[]
     modelJSON: any
     outputShape: number
@@ -96,9 +97,15 @@ export interface TFModelPredictResponse extends TFModelMessage {
 
 function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
     let layer
-    const params = layerObj.inputs[0].fields.expand_button.value
+
+    // get the block parameters from the right place
+    let params = layerObj.inputs[0].fields.expand_button.value
+    if (layerObj.inputs.length > 1) {
+        params = layerObj.inputs[1].fields.block_params.value
+    }
+
     switch (layerObj.type) {
-        case "model_block_conv_layer":
+        case "model_block_conv1d_layer":
             if (inputShape) {
                 layer = layers.conv1d({
                     inputShape: inputShape,
@@ -106,6 +113,7 @@ function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
                     strides: params.strideSize,
                     filters: params.numFilters,
                     activation: params.activation,
+                    padding: "same",
                 })
             } else {
                 layer = layers.conv1d({
@@ -113,19 +121,86 @@ function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
                     strides: params.strideSize,
                     filters: params.numFilters,
                     activation: params.activation,
+                    padding: "same",
                 })
             }
 
             break
-        case "model_block_max_pool_layer":
-            layer = layers.maxPooling1d({
-                poolSize: [params.poolSize],
-            })
+        case "model_block_maxpool1d_layer":
+            if (inputShape) {
+                layer = layers.maxPooling1d({
+                    inputShape: inputShape,
+                    poolSize: [params.poolSize],
+                    padding: "same",
+                })
+            } else {
+                layer = layers.maxPooling1d({
+                    poolSize: [params.poolSize],
+                    padding: "same",
+                })
+            }
             break
-        case "model_block_avg_pool_layer":
-            layer = layers.avgPooling1d({
-                poolSize: [params.poolSize],
-            })
+        case "model_block_avgpool1d_layer":
+            /*if (inputShape) {
+                layer = layers.avgPooling1d({
+                    inputShape: inputShape,
+                    poolSize: [params.poolSize],
+            padding: "same",
+                })
+            } else {
+                layer = layers.avgPooling1d({
+                    poolSize: [params.poolSize],
+            padding: "same",
+                })
+            }*/
+            break
+        case "model_block_conv2d_layer":
+            if (inputShape) {
+                layer = layers.conv2d({
+                    inputShape: inputShape,
+                    kernelSize: [params.kernelSize, params.kernelSize],
+                    strides: params.strideSize,
+                    filters: params.numFilters,
+                    activation: params.activation,
+                    padding: "same",
+                })
+            } else {
+                layer = layers.conv2d({
+                    kernelSize: [params.kernelSize, params.kernelSize],
+                    strides: params.strideSize,
+                    filters: params.numFilters,
+                    activation: params.activation,
+                    padding: "same",
+                })
+            }
+            break
+        case "model_block_maxpool2d_layer":
+            if (inputShape) {
+                layer = layers.maxPooling2d({
+                    inputShape: inputShape,
+                    poolSize: [params.poolSize, params.poolSize],
+                    padding: "same",
+                })
+            } else {
+                layer = layers.maxPooling2d({
+                    poolSize: [params.poolSize, params.poolSize],
+                    padding: "same",
+                })
+            }
+            break
+        case "model_block_avgpool2d_layer":
+            /*if (inputShape) {
+                    layer = layers.avgPooling2d({
+                        inputShape: inputShape,
+                        poolSize: [params.poolSize],
+                padding: "same",
+                    })
+                } else {
+                    layer = layers.avgPooling2d({
+                        poolSize: [params.poolSize],
+                padding: "same",
+                    })
+                }*/
             break
         case "model_block_dropout_layer":
             layer = layers.dropout({
@@ -133,22 +208,20 @@ function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
             })
             break
         case "model_block_flatten_layer":
-            layer = layers.flatten()
+            if (inputShape) {
+                layer = layers.flatten({
+                    inputShape: inputShape,
+                })
+            } else layer = layers.flatten()
             break
         case "model_block_dense_layer":
-            if (inputShape) {
-                layer = layers.dense({
-                    inputShape: inputShape,
-                    units: outputShape || params.numUnits,
-                    activation: outputShape ? "softmax" : params.activation,
-                })
-            } else {
-                layer = layers.dense({
-                    units: outputShape || params.numUnits,
-                    activation: outputShape ? "softmax" : params.activation,
-                })
-            }
+            layer = layers.dense({
+                units: outputShape || params.numUnits,
+                activation: outputShape ? "softmax" : params.activation,
+            })
             break
+        default:
+            console.error("Received an invalid layer type")
     }
     return layer
 }
@@ -159,17 +232,19 @@ function buildDefaultModel(
     outputShape: number
 ) {
     modelLayers.add(
-        layers.conv1d({
+        layers.conv2d({
             inputShape: inputShape,
-            kernelSize: [4],
+            kernelSize: [4, 4],
             strides: 1,
             filters: 16,
+            padding: "same",
             activation: "relu",
         })
     )
     modelLayers.add(
-        layers.maxPooling1d({
-            poolSize: [2],
+        layers.maxPooling2d({
+            poolSize: [2, 2],
+            padding: "same",
         })
     )
     modelLayers.add(
@@ -178,16 +253,18 @@ function buildDefaultModel(
         })
     )
     modelLayers.add(
-        layers.conv1d({
-            kernelSize: [2],
+        layers.conv2d({
+            kernelSize: [2, 2],
             strides: 1,
             filters: 16,
+            padding: "same",
             activation: "relu",
         })
     )
     modelLayers.add(
-        layers.maxPooling1d({
-            poolSize: [2],
+        layers.maxPooling2d({
+            poolSize: [2, 2],
+            padding: "same",
         })
     )
     modelLayers.add(
@@ -196,10 +273,11 @@ function buildDefaultModel(
         })
     )
     modelLayers.add(
-        layers.conv1d({
-            kernelSize: [2],
+        layers.conv2d({
+            kernelSize: [2, 2],
             strides: 1,
             filters: 16,
+            padding: "same",
             activation: "relu",
         })
     )
@@ -222,19 +300,26 @@ function buildDefaultModel(
 // send an object with model as blockly JSON
 function buildModelFromJSON(model: TFModelObj, block: any) {
     const modelLayers = sequential()
-    let trainingParams = {
-        loss: "categoricalCrossentropy",
-        optimizer: "adam",
-        metrics: ["acc"],
-        epochs: 250,
-    }
+
+    // initialize training params
+    let trainingParams
 
     if (block == "default") {
-        buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
-    } else {
-        // block layers for model architecture
+        // use input shape for 2d CNN
+        model.inputShape.push(1)
 
-        // the first block will be here
+        buildDefaultModel(modelLayers, model.inputShape, model.outputShape)
+        trainingParams = {
+            loss: "categoricalCrossentropy",
+            optimizer: "adam",
+            metrics: ["acc"],
+            epochs: 250,
+        }
+    } else {
+        // use appropriate input shape for 1d/2d CNN
+        if (model.convolutionType == "2d") model.inputShape.push(1)
+
+        // iterate through block layers for model architecture
         const layerBlock = block.inputs.filter(
             input => input.name == "LAYER_INPUTS"
         )[0].child
@@ -273,20 +358,11 @@ const handlers: {
 } = {
     compile: async (props: TFModelCompileRequest) => {
         const { data } = props
-
         // get model
         const { model, params } = buildModelFromJSON(
             data.model,
             data.modelBlockJSON
         )
-
-        // save compiled model stats
-        const compiledModel = await compileModel(model, {
-            verbose: false,
-            float16weights: true,
-            optimize: true,
-        })
-        const stats = [...compiledModel.stats.layers, compiledModel.stats.total]
 
         // save model as model artifacts
         let mod: io.ModelArtifacts
@@ -303,6 +379,23 @@ const handlers: {
             },
         })
         mod.weightData = null
+
+        // save compiled model stats
+        let compiledModel
+        try {
+            compiledModel = await compileModel(model, {
+                verbose: false,
+                float16weights: true,
+                optimize: true,
+            })
+        } catch (e) {
+            console.error(
+                "Error with getting model stats during compiling: ",
+                e
+            )
+            return { ...props, data: undefined }
+        }
+        const stats = [...compiledModel.stats.layers, compiledModel.stats.total]
 
         // return data
         const result = {
@@ -323,47 +416,69 @@ const handlers: {
             return { ...props, data: undefined }
         }
 
-        // get dataset
-        const xs = tensor3d(data.xData, [
-            data.xData.length,
-            data.model.inputShape[0],
-            data.model.inputShape[1],
-        ])
-        const ys = oneHot(
-            tensor1d(data.yData, "int32"),
-            data.model.labels.length
-        )
-
         // get model
+        data.model
         const modelObj = data.model.modelJSON
         const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
 
+        // get dataset
+        let xs = tensor3d(data.xData, [
+            data.xData.length,
+            data.model.inputShape[0],
+            data.model.inputShape[1],
+        ])
+
+        const firstLayer = modelObj.modelTopology.config.layers[0]
+        // expand input shape if working with 2d model arch
+        if (firstLayer["class_name"].indexOf("2D") > -1) xs = xs.expandDims(3)
+
+        const ys = oneHot(
+            tensor1d(data.yData, "int32"),
+            data.model.labels.length
+        )
+
         // compile model
         const params = data.trainingParams
-        model.compile({
-            loss: params.loss,
-            optimizer: params.optimizer,
-            metrics: params.metrics,
-        })
+        try {
+            model.compile({
+                loss: params.loss,
+                optimizer: params.optimizer,
+                metrics: params.metrics,
+            })
+        } catch (e) {
+            console.error("Error with model.compile during training: ", e)
+            return { ...props, data: undefined }
+        }
 
         // model.fit
         let trainingLogs = [] // space to save training loss and accuracy data
-        await model
-            .fit(xs, ys, {
-                epochs: params.epochs,
-                validationSplit: 0.2,
-                callbacks: {
-                    onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
-                },
-            })
-            .then(info => {
-                trainingLogs = info.history.acc
-            })
+        try {
+            await model
+                .fit(xs, ys, {
+                    epochs: params.epochs,
+                    validationSplit: data.xData.length > 40 ? 0.1 : 0,
+                    callbacks: {
+                        onEpochEnd, // onTrainBegin, onTrainEnd, onEpochBegin, onEpochEnd, onBatchBegin
+                    },
+                })
+                .then(info => {
+                    trainingLogs = info.history.acc
+                })
+        } catch (e) {
+            console.error("Error with model.fit during training: ", e)
+            return { ...props, data: undefined }
+        }
 
         // get model's prediction for training dataset
-        const trainingPrediction = (await model.predict(xs)) as Tensor
+        let trainingPrediction
+        try {
+            trainingPrediction = (await model.predict(xs)) as Tensor
+        } catch (e) {
+            console.error("Error evaluating dataset on training data: ", e)
+            return { ...props, data: undefined }
+        }
 
         // save model as model artifacts
         let mod: io.ModelArtifacts
@@ -385,12 +500,17 @@ const handlers: {
         mod.weightData = null
 
         // compile arm model for mcu
-        const armcompiled = await compileAndTest(model, {
-            verbose: false,
-            includeTest: true,
-            float16weights: true,
-            optimize: true,
-        })
+        let armcompiled
+        try {
+            armcompiled = await compileAndTest(model, {
+                verbose: false,
+                includeTest: true,
+                float16weights: true,
+                optimize: true,
+            })
+        } catch (e) {
+            console.error("Error compiling arm model during training: ", e)
+        }
 
         // return data
         const result = {
@@ -404,18 +524,28 @@ const handlers: {
     predict: async (props: TFModelPredictRequest) => {
         const { data } = props
 
-        /// get dataset
-        const zs = tensor(data.zData)
         // get model
-        const modelObj = JSON.parse(data.model.modelJSON)
+        const modelObj = data.model.modelJSON
         // load weight data into model before loading the model
         modelObj.weightData = new Uint32Array(data.model.weights).buffer
         const model = await loadLayersModel({
             load: () => Promise.resolve(modelObj),
         })
 
+        /// get dataset
+        let zs = tensor(data.zData)
+        const firstLayer = modelObj.modelTopology.config.layers[0]
+        // expand input shape if working with 2d model arch
+        if (firstLayer["class_name"].indexOf("2D") > -1) zs = zs.expandDims(3)
+
         // model.predict
-        const predResult = (await model.predict(zs)) as Tensor
+        let predResult
+        try {
+            predResult = (await model.predict(zs)) as Tensor
+        } catch (e) {
+            console.error("Error with model.predict during prediction: ", e)
+            return { ...props, data: undefined }
+        }
         const predictArr = await predResult.dataSync()
 
         const prediction = {}
