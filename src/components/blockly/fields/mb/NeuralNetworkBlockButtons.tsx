@@ -16,11 +16,15 @@ const useStyles = makeStyles((theme: Theme) =>
         numberField: {
             marginBottom: theme.spacing(1),
         },
+        buttonContainer: {
+            display: "inline-flex",
+            width: 300,
+        },
     })
 )
 
-function NNParameterWidget() {
-    const styles = useStyles()
+function NeuralNetworkButtonWidget() {
+    const classes = useStyles()
 
     const { workspace, sourceBlock } = useContext(WorkspaceContext)
 
@@ -35,35 +39,37 @@ function NNParameterWidget() {
     }
 
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item style={{ display: "inline-flex", width: 300 }}>
-                <Tooltip title="Open modal to view and run classifier">
-                    <Button
-                        onClick={handleTrainModel}
-                        startIcon={<AutorenewIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Train
-                    </Button>
-                </Tooltip>
-                &ensp;
-                <Tooltip title="Download model JSON and weights file">
-                    <Button
-                        onClick={handleDownloadModel}
-                        startIcon={<DownloadIcon />}
-                        variant="outlined"
-                        size="small"
-                    >
-                        Download
-                    </Button>
-                </Tooltip>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"row"}>
+                <Grid item className={classes.buttonContainer}>
+                    <Tooltip title="Open modal to view and run classifier">
+                        <Button
+                            onClick={handleTrainModel}
+                            startIcon={<AutorenewIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            Train
+                        </Button>
+                    </Tooltip>
+                    &ensp;
+                    <Tooltip title="Download model JSON and weights file">
+                        <Button
+                            onClick={handleDownloadModel}
+                            startIcon={<DownloadIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            Download
+                        </Button>
+                    </Tooltip>
+                </Grid>
             </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 
-export default class NeuralNetworkBlockField extends ReactInlineField {
+export default class NeuralNetworkBlockButtons extends ReactInlineField {
     static KEY = "nn_block_buttons_key"
 
     constructor(value: string) {
@@ -71,7 +77,7 @@ export default class NeuralNetworkBlockField extends ReactInlineField {
     }
 
     static fromJson(options: ReactFieldJSON) {
-        return new NeuralNetworkBlockField(options?.value)
+        return new NeuralNetworkBlockButtons(options?.value)
     }
 
     getText_() {
@@ -79,6 +85,6 @@ export default class NeuralNetworkBlockField extends ReactInlineField {
     }
 
     renderInlineField(): ReactNode {
-        return <NNParameterWidget />
+        return <NeuralNetworkButtonWidget />
     }
 }
