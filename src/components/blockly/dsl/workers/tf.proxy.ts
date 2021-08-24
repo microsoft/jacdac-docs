@@ -25,7 +25,10 @@ export async function compileRequest(
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<TFModelCompileResponse> {
     if (!message.data.model || !message.data.modelBlockJSON) {
-        console.log("Randi something is missing in compiling ", message.data)
+        console.error(
+            "Missing piece of message data for compiling ",
+            message.data
+        )
         return undefined
     }
 
@@ -47,7 +50,10 @@ export async function trainRequest(
         !message.data.xData ||
         !message.data.yData
     ) {
-        console.log("Randi something is missing in training ", message.data)
+        console.error(
+            "Missing piece of message data for training ",
+            message.data
+        )
         return undefined
     }
 
@@ -64,7 +70,10 @@ export async function predictRequest(
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<TFModelPredictResponse> {
     if (!message.data.model || !message.data.zData) {
-        console.log("Randi something is missing in predicting ", message.data)
+        console.error(
+            "Missing piece of message data for predicting ",
+            message.data
+        )
         return undefined
     }
 
