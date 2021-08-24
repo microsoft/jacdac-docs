@@ -174,6 +174,7 @@ export default function CollectData(props: {
     const stopRecording = () => {
         if (isRecording) {
             // add new data to the dataset
+            liveRecording.interval = samplingIntervalDelayi
             dataset.addRecording(
                 liveRecording,
                 currentClassLabel,
@@ -213,6 +214,7 @@ export default function CollectData(props: {
     }
     const handleDeleteRecording = (recording: FieldDataSet) => {
         dataset.removeRecording(recording)
+        setDataTimestamp(Date.now())
         setDataSet(dataset)
         handleDataSetUpdate(dataset)
     }

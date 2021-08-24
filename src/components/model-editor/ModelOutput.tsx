@@ -198,7 +198,6 @@ export default function ModelOutput(props: {
 
         if (data && data.length >= model.inputShape[0]) {
             const liveOutput = []
-
             // Get probability values from model
             const predictMsg = {
                 worker: "tf",
@@ -222,7 +221,6 @@ export default function ModelOutput(props: {
                     if (liveOutput[label] > liveOutput[topLabel])
                         topLabel = label
                 })
-
                 livePredictions.predictionData.addData(liveOutput)
                 livePredictions.topClass = topLabel
             }
