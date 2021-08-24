@@ -19,10 +19,11 @@ import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
 
 export interface DropoutLayerFieldValue {
-    totalSize: number
-    runTimeInCycles: number
+    percentParams: number
+    percentSize: number
+    runTimeInMs: number
     outputShape: number[]
-    rate: number
+    rate: string
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -44,9 +45,10 @@ function LayerParameterWidget(props: {
     const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const totalSize = initFieldValue.totalSize
+    const percentSize = initFieldValue.percentSize
+    const percentParams = initFieldValue.percentParams
     const outputShape = initFieldValue.outputShape
-    const runTimeInCycles = initFieldValue.runTimeInCycles
+    const runTimeInMs = initFieldValue.runTimeInMs
 
     const [rate, setRate] = useState(initFieldValue.rate)
 
@@ -56,9 +58,12 @@ function LayerParameterWidget(props: {
     }, [rate])
 
     const updateParameters = () => {
+        let rateAsNum
+        if (rate == "0.") rateAsNum = 0
+        else rateAsNum = parseFloat(rate)
         // push changes to field values to the parent
         const updatedValue = {
-            rate: rate,
+            rate: rateAsNum,
         }
 
         // send new value to the parameter holder
@@ -73,9 +78,12 @@ function LayerParameterWidget(props: {
     }
 
     const handleChangedRate = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.valueAsNumber
-        if (newValue && !isNaN(newValue)) {
-            setRate(newValue)
+        const newValue = event.target.value
+        if (newValue) {
+            let valueAsNum
+            if (newValue == "0.") valueAsNum = 0
+            else valueAsNum = parseFloat(newValue)
+            if (valueAsNum >= 0 && valueAsNum < 1) setRate(newValue)
         }
     }
 
@@ -88,7 +96,7 @@ function LayerParameterWidget(props: {
                         <Tooltip title="Update the dropout rate">
                             <TextField
                                 id={useId() + "rate"}
-                                type="number"
+                                type="text"
                                 size="small"
                                 variant="outlined"
                                 value={rate}
@@ -100,10 +108,12 @@ function LayerParameterWidget(props: {
                 </Grid>
                 <Grid item>
                     <Box color="text.secondary">
-                        Total size: {totalSize} bytes
-                        <br />
-                        Run time: {runTimeInCycles} cycles <br />
                         Output shape: [{outputShape.join(", ")}]<br />
+                        Percent of total size: {percentSize.toPrecision(2)}%
+                        <br />
+                        Percent of total params: {percentParams.toPrecision(2)}%
+                        <br />
+                        Run time: {runTimeInMs.toPrecision(2)} ms <br />
                     </Box>
                 </Grid>
             </Grid>
@@ -127,10 +137,11 @@ export default class DropoutLayerBlockField extends ReactInlineField {
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            totalSize: 0,
-            runTimeInCycles: 0,
+            percentParams: 0,
+            percentSize: 0,
+            runTimeInMs: 0,
             outputShape: [0, 0],
-            rate: 0.1,
+            rate: "0.1",
         }
     }
 
