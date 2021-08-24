@@ -1,17 +1,9 @@
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Button,
-    Grid,
-} from "@material-ui/core"
+import { Button, Grid } from "@material-ui/core"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DeleteAllIcon from "@material-ui/icons/DeleteSweep"
@@ -30,7 +22,7 @@ import type {
 import workerProxy from "../blockly/dsl/workers/proxy"
 
 import MBDataSet, { arraysEqual } from "./MBDataSet"
-import MBModel from "./MBModel"
+import MBModel, { DEFAULT_MODEL } from "./MBModel"
 
 const ConfusionMatrixHeatMap = lazy(
     () => import("./components/ConfusionMatrixHeatMap")
@@ -77,34 +69,37 @@ export function prepareDataSet(set: MBDataSet) {
     set.width = sampleChannels
 }
 
-export function prepareModel(mod: MBModel, set: MBDataSet) {
-    // If this is a brand new model, get it setup with a standard CNN architecture
-    if (mod.modelJSON == "") {
-        mod.modelJSON = "default"
-        mod.labels = set.labels
-        mod.inputShape = [set.length, set.width]
-        mod.inputTypes = set.inputTypes
-        mod.inputInterval = set.interval
-        mod.outputShape = set.labels.length
-    }
+export function prepareModel(
+    mod: MBModel,
+    set: MBDataSet,
+    callback: (model: MBModel) => void
+) {
+    // get model set up with dataset features
+    mod.labels = set.labels
+    mod.inputShape = [set.length, set.width]
+    mod.inputTypes = set.inputTypes
+    mod.inputInterval = set.interval
+    mod.outputShape = set.labels.length
 
     /* compile model */
     const compileMsg = {
         worker: "tf",
         type: "compile",
         data: {
-            modelBlockJSON: mod.blockJSON || "default",
+            modelBlockJSON: mod.blockJSON || DEFAULT_MODEL,
             model: mod.toJSON(),
         },
     } as TFModelCompileRequest
     compileRequest(compileMsg).then(result => {
         if (result) {
-            mod.modelJSON = result.data.modelJSON
+            mod.modelJSON = result.data.modelJSON || ""
             const modelStats = result.data.modelStats
-            mod.modelStats = { total: modelStats.pop(), layers: modelStats }
-            console.log("Randi model stats ", mod.modelStats)
+            if (modelStats.length > 2)
+                mod.modelStats = { total: modelStats.pop(), layers: modelStats }
             mod.trainingParams = result.data.trainingParams
+            mod.status = "untrained"
         }
+        if (callback) callback(mod)
     })
 }
 
@@ -132,15 +127,15 @@ export default function TrainModel(props: {
             // If there is already a model, make sure it matches the current dataset
             //   if it does not, reset the model
             const newModel = new MBModel(model.name)
-            prepareModel(newModel, dataset)
+            prepareModel(newModel, dataset, undefined)
             handleModelUpdate(newModel)
         } else {
-            prepareModel(model, dataset)
+            prepareModel(model, dataset, undefined)
             handleModelUpdate(model)
         }
 
         // ready to train
-        setTrainEnabled(dataset.labels.length >= 2)
+        setTrainEnabled(model.modelJSON != "empty")
     }, [])
 
     /* For training model */
@@ -233,13 +228,13 @@ export default function TrainModel(props: {
         onChange(model)
     }
     const handleDownloadModel = () => {
-        // Randi TODO also download arm model (as a zip file?)
+        // TODO also download arm model (as a zip file?)
         fileStorage.saveText(`${model.name}.json`, JSON.stringify(model))
     }
     const deleteTFModel = () => {
         if (confirm("Are you sure you want to delete current model?")) {
             const newModel = new MBModel(model.name)
-            prepareModel(newModel, dataset)
+            prepareModel(newModel, dataset, undefined)
 
             handleModelUpdate(newModel)
 
@@ -247,13 +242,6 @@ export default function TrainModel(props: {
             setTrainingAccLog([])
         }
     }
-
-    const [expanded, setExpanded] = React.useState<string | false>(false)
-    const handleExpandedSummaryChange =
-        (panel: string) =>
-        (event: React.ChangeEvent<unknown>, isExpanded: boolean) => {
-            setExpanded(isExpanded ? panel : false)
-        }
 
     return (
         <Grid container direction={"column"}>
@@ -274,33 +262,13 @@ export default function TrainModel(props: {
                         <DeleteAllIcon />
                     </IconButtonWithTooltip>
                 </h3>
-
-                <Accordion
-                    expanded={expanded === "modelSummary"}
-                    onChange={handleExpandedSummaryChange("modelSummary")}
-                >
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <div>
-                            {expanded == "modelSummary" ? (
-                                <h2> Summary </h2>
-                            ) : (
-                                <span>
-                                    Classes: {model.labels.join(", ")} <br />
-                                    Training Status: {model.status} <br />
-                                </span>
-                            )}
-                        </div>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Suspense>
-                            <ModelSummary
-                                reactStyle={classes}
-                                dataset={dataset}
-                                model={model}
-                            />
-                        </Suspense>
-                    </AccordionDetails>
-                </Accordion>
+                <Suspense>
+                    <ModelSummary
+                        reactStyle={classes}
+                        dataset={dataset}
+                        model={model}
+                    />
+                </Suspense>
                 <div className={classes.buttons}>
                     <Button
                         size="large"
@@ -337,10 +305,10 @@ export default function TrainModel(props: {
                     </div>
                 )}
                 <p>
-                    Final Training Accuracy:{" "}
-                    {model.status == "untrained"
-                        ? "Model has not been trained"
-                        : (model.trainingAcc || 0).toPrecision(2)}
+                    Final training accuracy:{" "}
+                    {model.status == "trained"
+                        ? (model.trainingAcc || 0).toPrecision(2)
+                        : "Model has not been trained"}
                 </p>
             </Grid>
             <Grid item>
