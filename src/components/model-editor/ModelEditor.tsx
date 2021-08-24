@@ -12,8 +12,6 @@ import ModelOutput from "./ModelOutput"
 import MBDataSet from "./MBDataSet"
 import MBModel from "./MBModel"
 
-//Dashboard.tsx
-
 const MODEL_EDITOR = "model_editor" // create prefix for model editor page
 const MODEL_NAME = MODEL_EDITOR + "-model"
 export const DATASET_NAME = MODEL_EDITOR + "-dataset"
@@ -54,33 +52,59 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
+function getDataSetFromLocalStorage() {
+    // check local storage for recording
+    const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+    if (storedDataJSON) {
+        const modelEditorData = JSON.parse(storedDataJSON)
+        if (modelEditorData["dataset"])
+            return MBDataSet.createFromFile(
+                DATASET_NAME,
+                modelEditorData["dataset"]
+            )
+    }
+    return new MBDataSet(DATASET_NAME)
+}
+
+function getModelFromLocalStorage() {
+    // check local storage for saved model
+    const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+    if (storedDataJSON) {
+        const modelEditorData = JSON.parse(storedDataJSON)
+        if (modelEditorData["model"])
+            return MBModel.createFromFile(modelEditorData["model"])
+    }
+
+    const newModel = new MBModel(MODEL_NAME)
+    return newModel
+}
+
+function getTabFromLocalStorage() {
+    // check local storage for saved model
+    const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+    if (storedDataJSON) {
+        const modelEditorData = JSON.parse(storedDataJSON)
+        if (modelEditorData["tab"]) return modelEditorData["tab"]
+    }
+    return 0
+}
+
 export default function ModelPlayground() {
     const classes = useStyles()
     const chartPalette = useChartPalette()
+    const chartProps = {
+        CHART_WIDTH: 300,
+        CHART_HEIGHT: 300,
+        MARK_SIZE: 75,
+        TOOLTIP_NUM_FORMAT: "0.2f",
+        PALETTE: chartPalette,
+    }
 
     const [dataset, setDataSet] = useState<MBDataSet>(
-        new MBDataSet(DATASET_NAME)
+        getDataSetFromLocalStorage
     )
-    const [tfModel, setTFModel] = useState<MBModel>(new MBModel(MODEL_NAME))
-    const [tab, setTab] = useState<number>(0)
-
-    useEffect(() => {
-        const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
-        if (storedDataJSON) {
-            const modelEditorData = JSON.parse(storedDataJSON)
-            if (modelEditorData["dataset"])
-                setDataSet(
-                    MBDataSet.createFromFile(
-                        DATASET_NAME,
-                        modelEditorData["dataset"]
-                    )
-                )
-            if (modelEditorData["tab"]) setTab(modelEditorData["tab"])
-            if (modelEditorData["model"]) {
-                setTFModel(MBModel.createFromFile(modelEditorData["model"]))
-            }
-        }
-    }, [])
+    const [tfModel, setTFModel] = useState<MBModel>(getModelFromLocalStorage)
+    const [tab, setTab] = useState<number>(getTabFromLocalStorage)
 
     /* Data and interface management */
     const handleTabChange = (
@@ -110,14 +134,17 @@ export default function ModelPlayground() {
     }
 
     const handleDataChange = newDataSet => {
-        console.log("Randi updated data from tab 0: ", newDataSet)
-
         const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
+
         let modelEditorData
         if (storedDataJSON) {
             // keep previous model and tab data
             modelEditorData = JSON.parse(storedDataJSON)
             modelEditorData["dataset"] = newDataSet
+
+            // if dataset is changed, model should be reset too
+            modelEditorData["model"] = new MBModel(MODEL_NAME)
+            setTFModel(new MBModel(MODEL_NAME))
         } else {
             modelEditorData = {
                 dataset: newDataSet,
@@ -134,8 +161,6 @@ export default function ModelPlayground() {
     }
 
     const handleModelChange = async newModel => {
-        console.log("Randi updated model from tab 1: ", newModel)
-
         const storedDataJSON = localStorage.getItem(MODEL_EDITOR_STORAGE_KEY)
         let modelEditorData
         if (storedDataJSON) {
@@ -150,7 +175,6 @@ export default function ModelPlayground() {
             }
         }
         // save JSON string in local storage
-        console.log("Randi storing new model JSON: ", newModel)
         localStorage.setItem(
             MODEL_EDITOR_STORAGE_KEY,
             JSON.stringify(modelEditorData)
@@ -195,6 +219,7 @@ export default function ModelPlayground() {
             </Tabs>
             <TabPanel value={tab} index={0}>
                 <CollectData
+                    chartProps={chartProps}
                     reactStyle={classes}
                     chartPalette={chartPalette}
                     dataset={dataset}
@@ -204,6 +229,7 @@ export default function ModelPlayground() {
             </TabPanel>
             <TabPanel value={tab} index={1}>
                 <TrainModel
+                    chartProps={chartProps}
                     reactStyle={classes}
                     dataset={dataset}
                     model={tfModel}
@@ -213,6 +239,7 @@ export default function ModelPlayground() {
             </TabPanel>
             <TabPanel value={tab} index={2}>
                 <ModelOutput
+                    chartProps={chartProps}
                     reactStyle={classes}
                     chartPalette={chartPalette}
                     model={tfModel}
