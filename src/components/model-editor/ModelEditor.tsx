@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { createStyles, Box, Tabs, Tab } from "@material-ui/core"
 import TabPanel from "../ui/TabPanel"
 

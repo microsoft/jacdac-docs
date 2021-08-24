@@ -21,10 +21,10 @@ import {
 } from "@material-ui/core"
 import ConnectAlert from "../../components/alert/ConnectAlert"
 import DeviceCardHeader from "../../components/DeviceCardHeader"
-import { JDService } from "../../../jacdac-ts/src/jdom/service"
+import JDService from "../../../jacdac-ts/src/jdom/service"
 import useBuzzerPlayTone from "../../components/hooks/useBuzzerPlayTone"
 import Dashboard from "../../components/dashboard/Dashboard"
-import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
+import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import { useId } from "react-use-id-hook"
 
 const TONE_DURATION = 50
@@ -147,7 +147,8 @@ export default function LightsensorAccessible() {
                                                 {(lightSensor === lightService
                                                     ? "Streaming from "
                                                     : "") +
-                                                    (lightSensor.device.physical
+                                                    (lightSensor.device
+                                                        .isPhysical
                                                         ? "Physical"
                                                         : "Virtual") +
                                                     `LightSensor ${lightSensor.friendlyName}`}

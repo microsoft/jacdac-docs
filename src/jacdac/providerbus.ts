@@ -1,4 +1,4 @@
-import { JDBus } from "../../jacdac-ts/src/jdom/bus"
+import JDBus from "../../jacdac-ts/src/jdom/bus"
 import { withPrefix } from "gatsby"
 import { isWebUSBSupported } from "../../jacdac-ts/src/jdom/transport/usb"
 import { createUSBWorkerTransport } from "../../jacdac-ts/src/jdom/transport/workertransport"
@@ -10,7 +10,7 @@ import {
     createWebSerialTransport,
     isWebSerialSupported,
 } from "../../jacdac-ts/src/jdom/transport/webserial"
-import IFrameBridgeClient from "../../jacdac-ts/src/jdom/iframebridgeclient"
+import IFrameBridgeClient from "../components/makecode/iframebridgeclient"
 import Flags from "../../jacdac-ts/src/jdom/flags"
 import GamepadServerManager from "../../jacdac-ts/src/servers/gamepadservermanager"
 import jacdacTsPackage from "../../jacdac-ts/package.json"
