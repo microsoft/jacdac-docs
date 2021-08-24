@@ -7,7 +7,6 @@ import IconButtonWithTooltip from "../../../ui/IconButtonWithTooltip"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
-import ReactParameterField from "../ReactParameterField"
 import WorkspaceContext from "../../WorkspaceContext"
 
 import { MODEL_BLOCKS } from "../../../model-editor/modelblockdsl"
@@ -15,13 +14,11 @@ import { MODEL_BLOCKS } from "../../../model-editor/modelblockdsl"
 import DenseLayerBlockField from "./DenseLayerBlockField"
 import DataSetBlockField from "./DataSetBlockField"
 import RecordingBlockField from "./RecordingBlockField"
-import SmoothingBlockField from "./SmoothingBlockField"
 import NeuralNetworkBlockField from "./NeuralNetworkBlockField"
 import ConvLayerBlockField from "./ConvLayerBlockField"
 import PoolingLayerBlockField from "./PoolingLayerBlockField"
 import DropoutLayerBlockField from "./DropoutLayerBlockField"
 import FlattenLayerBlockField from "./FlattenLayerBlockField"
-import KNNBlockField from "./KNNBlockField"
 import { Block } from "blockly"
 
 const REMOVABLE_INPUT = "REMOVABLE_INPUT"
@@ -67,8 +64,6 @@ function ExpandIconWidget() {
                 return new DataSetBlockField("", currentValue)
             case MODEL_BLOCKS + "recording":
                 return new RecordingBlockField("", currentValue)
-            case MODEL_BLOCKS + "smooth":
-                return new SmoothingBlockField("", currentValue)
             case MODEL_BLOCKS + "nn":
                 return new NeuralNetworkBlockField("", currentValue)
             case MODEL_BLOCKS + "conv1d_layer":
@@ -89,8 +84,6 @@ function ExpandIconWidget() {
                 return new PoolingLayerBlockField("", currentValue)
             case MODEL_BLOCKS + "avgpool2d_layer":
                 return new PoolingLayerBlockField("", currentValue)
-            case MODEL_BLOCKS + "knn":
-                return new KNNBlockField("", currentValue)
             default:
                 console.error("Got inappropriate input for expanding block")
                 return null
@@ -110,7 +103,7 @@ function ExpandIconWidget() {
     const handleExpandBlock = () => {
         const parameterField = sourceBlock.getField(
             "BLOCK_PARAMS"
-        ) as ReactParameterField<unknown>
+        ) as ReactInlineField
         if (parameterField) {
             // save the parameters written to that block
             const paramValues = JSON.parse(parameterField.getValue())
@@ -157,7 +150,6 @@ function ExpandIconWidget() {
 }
 
 export default class ExpandModelBlockField extends ReactInlineField {
-    //ReactParameterField<any> {
     static KEY = "model_field_key"
 
     constructor(value: string) {

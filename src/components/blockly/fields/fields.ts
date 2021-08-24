@@ -32,8 +32,6 @@ import ExpandModelBlockField from "./mb/ExpandModelBlockField"
 import DataSetBlockField from "./mb/DataSetBlockField"
 import DataSetBlockButton from "./mb/DataSetBlockButton"
 import RecordingBlockField from "./mb/RecordingBlockField"
-import SmoothingBlockField from "./mb/SmoothingBlockField"
-import KNNBlockField from "./mb/KNNBlockField"
 import NeuralNetworkBlockField from "./mb/NeuralNetworkBlockField"
 import NeuralNetworkBlockButton from "./mb/NeuralNetworkBlockButtons"
 import ConvLayerBlockField from "./mb/ConvLayerBlockField"
@@ -95,8 +93,6 @@ export function registerFields() {
         DataSetBlockField,
         DataSetBlockButton,
         RecordingBlockField,
-        SmoothingBlockField,
-        KNNBlockField,
         NeuralNetworkBlockField,
         NeuralNetworkBlockButton,
         ConvLayerBlockField,
