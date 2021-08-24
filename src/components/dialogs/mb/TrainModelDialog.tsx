@@ -53,6 +53,8 @@ import FieldDataSet from "../../FieldDataSet"
 import ReadingFieldGrid from "../../ReadingFieldGrid"
 import useChange from "../../../jacdac/useChange"
 
+import { PointerBoundary } from "../../blockly/fields/PointerBoundary"
+
 const ConfusionMatrixHeatMap = lazy(
     () => import("../../model-editor/components/ConfusionMatrixHeatMap")
 )
@@ -130,10 +132,14 @@ export default function TrainModelDialog(props: {
     }, [dataset, model])
 
     /* For training model */
-    const [trainEnabled, setTrainEnabled] = useState(dataset.labels.length >= 2)
+    const [trainEnabled, setTrainEnabled] = useState(model.status !== "empty")
     // for loss/acc graph
-    const [trainingLossLog, setTrainingLossLog] = useState([])
-    const [trainingAccLog, setTrainingAccLog] = useState([])
+    const trainingLossLog = useMemo(() => {
+        return []
+    }, [])
+    const trainingAccLog = useMemo(() => {
+        return []
+    }, [])
     const [logTimestamp, setLogTimestamp] = useState(0)
     // for confusion matrix and training dataset performance plot
     const [trainingPredictionResult, setTrainingPredictionResult] = useState([])
@@ -375,15 +381,9 @@ export default function TrainModelDialog(props: {
         else setDialogType("testModel")
     }
     const handleDownloadModel = () => {
-        // Randi TODO also download arm model (as a zip file?)
+        // TODO also download arm model (as a zip file?)
         fileStorage.saveText(`${model.name}.json`, JSON.stringify(model))
     }
-    const [expanded, setExpanded] = React.useState<string | false>(false)
-    const handleExpandedSummaryChange =
-        (panel: string) =>
-        (event: React.ChangeEvent<unknown>, isExpanded: boolean) => {
-            setExpanded(isExpanded ? panel : false)
-        }
     const [sensorsExpanded, setSensorsExpanded] = React.useState<
         string | false
     >(false)
@@ -395,309 +395,296 @@ export default function TrainModelDialog(props: {
 
     if (dialogType == "trainModel")
         return (
-            <Dialog
-                open={open}
-                onClose={handleCancel}
-                fullWidth={true}
-                maxWidth={"md"}
-            >
-                <DialogContent>
-                    <Grid container direction={"column"}>
-                        <Grid item>
-                            <h3>
-                                Current Model
-                                <IconButtonWithTooltip
-                                    onClick={handleDownloadModel}
-                                    title="Download all recording data"
-                                    disabled={dataset.totalRecordings == 0}
-                                >
-                                    <DownloadIcon />
-                                </IconButtonWithTooltip>
-                            </h3>
-                            <Accordion
-                                expanded={expanded === "modelSummary"}
-                                onChange={handleExpandedSummaryChange(
-                                    "modelSummary"
-                                )}
-                            >
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                >
-                                    <div>
-                                        {expanded == "modelSummary" ? (
-                                            <h4> Summary </h4>
-                                        ) : (
-                                            <span>
-                                                Classes:{" "}
-                                                {model.labels.join(", ")} <br />
-                                                Training Status: {
-                                                    model.status
-                                                }{" "}
-                                                <br />
-                                            </span>
-                                        )}
-                                    </div>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Suspense>
-                                        <ModelSummary
-                                            reactStyle={classes}
-                                            dataset={dataset}
-                                            model={model}
-                                        />
-                                    </Suspense>
-                                </AccordionDetails>
-                            </Accordion>
-                            <div className={classes.buttons}>
-                                <Button
-                                    size="large"
-                                    variant="contained"
-                                    color={"primary"}
-                                    aria-label="start training model"
-                                    title={
-                                        trainEnabled
-                                            ? "Press to start training machine learning model"
-                                            : "You must have at least two classes to train a model. Go back to first tab."
-                                    }
-                                    onClick={trainTFModel}
-                                    startIcon={<PlayArrowIcon />}
-                                    disabled={!trainEnabled}
-                                    style={{ marginTop: 16 }}
-                                >
-                                    Train Model
-                                </Button>
-                            </div>
-                            <br />
-                        </Grid>
-                        <Grid item>
-                            <h3>Training Progress</h3>
-                            {!!trainingLossLog.length && (
-                                <div key="vega-loss-acc-charts">
-                                    <Suspense>
-                                        <LossAccChart
-                                            chartProps={chartProps}
-                                            lossData={trainingLossLog}
-                                            accData={trainingAccLog}
-                                            timestamp={logTimestamp}
-                                        />
-                                    </Suspense>
+            <PointerBoundary>
+                <Dialog
+                    open={open}
+                    onClose={handleCancel}
+                    fullWidth={true}
+                    maxWidth={"md"}
+                >
+                    <DialogContent>
+                        <Grid container direction={"column"}>
+                            <Grid item>
+                                <h3>
+                                    Current Model
+                                    <IconButtonWithTooltip
+                                        onClick={handleDownloadModel}
+                                        title="Download all recording data"
+                                        disabled={dataset.totalRecordings == 0}
+                                    >
+                                        <DownloadIcon />
+                                    </IconButtonWithTooltip>
+                                </h3>
+                                <Suspense>
+                                    <ModelSummary
+                                        reactStyle={classes}
+                                        dataset={dataset}
+                                        model={model}
+                                    />
+                                </Suspense>
+                                <div className={classes.buttons}>
+                                    <Button
+                                        size="large"
+                                        variant="contained"
+                                        color={"primary"}
+                                        aria-label="start training model"
+                                        title={
+                                            trainEnabled
+                                                ? "Press to start training machine learning model"
+                                                : "You must have at least two classes to train a model. Go back to first tab."
+                                        }
+                                        onClick={trainTFModel}
+                                        startIcon={<PlayArrowIcon />}
+                                        disabled={!trainEnabled}
+                                        style={{ marginTop: 16 }}
+                                    >
+                                        Train Model
+                                    </Button>
                                 </div>
-                            )}
-                            <p>
-                                Final Training Accuracy:{" "}
-                                {model.status == "untrained"
-                                    ? "Model has not been trained"
-                                    : (model.trainingAcc || 0).toPrecision(2)}
-                            </p>
+                                <br />
+                            </Grid>
+                            <Grid item>
+                                <h3>Training Progress</h3>
+                                {!!trainingLossLog.length && (
+                                    <div key="vega-loss-acc-charts">
+                                        <Suspense>
+                                            <LossAccChart
+                                                chartProps={chartProps}
+                                                lossData={trainingLossLog}
+                                                accData={trainingAccLog}
+                                                timestamp={logTimestamp}
+                                            />
+                                        </Suspense>
+                                    </div>
+                                )}
+                                <p>
+                                    Final Training Accuracy:{" "}
+                                    {model.status == "untrained"
+                                        ? "Model has not been trained"
+                                        : (model.trainingAcc || 0).toPrecision(
+                                              2
+                                          )}
+                                </p>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={handleCancel}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        endIcon={<NavigateNextIcon />}
-                        disabled={model.status !== "trained"}
-                        onClick={handleNext}
-                    >
-                        Next
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="contained" onClick={handleCancel}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<NavigateNextIcon />}
+                            disabled={model.status !== "trained"}
+                            onClick={handleNext}
+                        >
+                            Next
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </PointerBoundary>
         )
     else if (dialogType == "evalModel")
         return (
-            <Dialog
-                open={open}
-                onClose={handleCancel}
-                fullWidth={true}
-                maxWidth={"md"}
-            >
-                <DialogContent>
-                    <Grid container direction={"column"}>
-                        <Grid item>
-                            <h3>Training Performance Result</h3>
-                            {!!trainingPredictionResult.length && (
-                                <div key="vega-training-set-charts">
-                                    <Suspense>
-                                        <ConfusionMatrixHeatMap
-                                            chartProps={chartProps}
-                                            yActual={dataset.ys}
-                                            yPredicted={
-                                                trainingPredictionResult
-                                            }
-                                            labels={model.labels}
-                                            timestamp={trainTimestamp}
-                                        />
-                                    </Suspense>
-                                    <br />
-                                    <Suspense>
-                                        <DataSetPlot
-                                            chartProps={chartProps}
-                                            reactStyle={classes}
-                                            dataset={dataset}
-                                            predictedLabels={
-                                                trainingPredictionResult
-                                            }
-                                            timestamp={trainTimestamp}
-                                        />
-                                    </Suspense>
-                                </div>
-                            )}
-                            <br />
+            <PointerBoundary>
+                <Dialog
+                    open={open}
+                    onClose={handleCancel}
+                    fullWidth={true}
+                    maxWidth={"md"}
+                >
+                    <DialogContent>
+                        <Grid container direction={"column"}>
+                            <Grid item>
+                                <h3>Training Performance Result</h3>
+                                {!!trainingPredictionResult.length && (
+                                    <div key="vega-training-set-charts">
+                                        <Suspense>
+                                            <ConfusionMatrixHeatMap
+                                                chartProps={chartProps}
+                                                yActual={dataset.ys}
+                                                yPredicted={
+                                                    trainingPredictionResult
+                                                }
+                                                labels={model.labels}
+                                                timestamp={trainTimestamp}
+                                            />
+                                        </Suspense>
+                                        <br />
+                                        <Suspense>
+                                            <DataSetPlot
+                                                chartProps={chartProps}
+                                                reactStyle={classes}
+                                                dataset={dataset}
+                                                predictedLabels={
+                                                    trainingPredictionResult
+                                                }
+                                                timestamp={trainTimestamp}
+                                            />
+                                        </Suspense>
+                                    </div>
+                                )}
+                                <br />
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={handleBack}>
-                        Back
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        endIcon={<NavigateNextIcon />}
-                        onClick={handleNext}
-                    >
-                        Next
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="contained" onClick={handleBack}>
+                            Back
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<NavigateNextIcon />}
+                            onClick={handleNext}
+                        >
+                            Next
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </PointerBoundary>
         )
     else if (dialogType == "testModel")
         return (
-            <Dialog
-                open={open}
-                onClose={handleCancel}
-                fullWidth={true}
-                maxWidth={"md"}
-            >
-                <DialogContent>
-                    <Grid container direction={"column"}>
-                        <Grid item>
-                            <h3>Live Testing</h3>
-                            <div key="predict">
-                                <span>
-                                    {" "}
-                                    Top Class:{" "}
-                                    {model.status == "trained"
-                                        ? livePredictions.topClass
-                                        : "--"}{" "}
-                                </span>
-                                <br />
-                            </div>
-                            <div key="liveData">
-                                {liveRecording && (
-                                    <div>
-                                        {model.labels.map(label => {
-                                            return (
-                                                <span
-                                                    key={
-                                                        "prediction-key-" +
-                                                        label
-                                                    }
-                                                >
-                                                    <FiberManualRecordIcon
-                                                        className={
-                                                            classes.vmiddle
+            <PointerBoundary>
+                <Dialog
+                    open={open}
+                    onClose={handleCancel}
+                    fullWidth={true}
+                    maxWidth={"md"}
+                >
+                    <DialogContent>
+                        <Grid container direction={"column"}>
+                            <Grid item>
+                                <h3>Live Testing</h3>
+                                <div key="predict">
+                                    <span>
+                                        {" "}
+                                        Top Class:{" "}
+                                        {model.status == "trained"
+                                            ? livePredictions.topClass
+                                            : "--"}{" "}
+                                    </span>
+                                    <br />
+                                </div>
+                                <div key="liveData">
+                                    {liveRecording && (
+                                        <div>
+                                            {model.labels.map(label => {
+                                                return (
+                                                    <span
+                                                        key={
+                                                            "prediction-key-" +
+                                                            label
                                                         }
-                                                        fontSize="small"
-                                                        style={{
-                                                            color: livePredictions.predictionData.colorOf(
-                                                                undefined,
-                                                                label
-                                                            ),
-                                                        }}
-                                                    />
-                                                    {label}
-                                                </span>
-                                            )
-                                        })}
-                                        <Trend
-                                            key="live-data-predictions"
-                                            height={12}
-                                            dataSet={
-                                                livePredictions.predictionData
-                                            }
-                                            horizon={LIVE_HORIZON}
-                                            dot={true}
-                                            gradient={true}
-                                        />
-                                        <Trend
-                                            key="live-data-trends"
-                                            height={12}
-                                            dataSet={liveRecording}
-                                            horizon={LIVE_HORIZON}
-                                            dot={true}
-                                            gradient={true}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                            <Accordion
-                                expanded={sensorsExpanded === "chooseSensors"}
-                                onChange={handleExpandedSensorsChange(
-                                    "chooseSensors"
-                                )}
-                            >
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                >
-                                    <div>
-                                        <h4>Select input sensors</h4>
-                                        {!predictionEnabled && (
-                                            <p>
-                                                Sensors should match:{" "}
-                                                {model.inputTypes.join(", ")}{" "}
-                                            </p>
-                                        )}
-                                    </div>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <div key="sensors">
-                                        {!readingRegisters.length && (
-                                            <span>Waiting for sensors...</span>
-                                        )}
-                                        {!!readingRegisters.length && (
-                                            <ReadingFieldGrid
-                                                readingRegisters={
-                                                    readingRegisters
+                                                    >
+                                                        <FiberManualRecordIcon
+                                                            className={
+                                                                classes.vmiddle
+                                                            }
+                                                            fontSize="small"
+                                                            style={{
+                                                                color: livePredictions.predictionData.colorOf(
+                                                                    undefined,
+                                                                    label
+                                                                ),
+                                                            }}
+                                                        />
+                                                        {label}
+                                                    </span>
+                                                )
+                                            })}
+                                            <Trend
+                                                key="live-data-predictions"
+                                                height={12}
+                                                dataSet={
+                                                    livePredictions.predictionData
                                                 }
-                                                registerIdsChecked={
-                                                    registerIdsChecked
-                                                }
-                                                recording={false}
-                                                liveDataSet={liveRecording}
-                                                handleRegisterCheck={
-                                                    handleRegisterCheck
-                                                }
+                                                horizon={LIVE_HORIZON}
+                                                dot={true}
+                                                gradient={true}
                                             />
-                                        )}
-                                    </div>
-                                </AccordionDetails>
-                            </Accordion>
+                                            <Trend
+                                                key="live-data-trends"
+                                                height={12}
+                                                dataSet={liveRecording}
+                                                horizon={LIVE_HORIZON}
+                                                dot={true}
+                                                gradient={true}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                <Accordion
+                                    expanded={
+                                        sensorsExpanded === "chooseSensors"
+                                    }
+                                    onChange={handleExpandedSensorsChange(
+                                        "chooseSensors"
+                                    )}
+                                >
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                    >
+                                        <div>
+                                            <h4>Select input sensors</h4>
+                                            {!predictionEnabled && (
+                                                <p>
+                                                    Sensors should match:{" "}
+                                                    {model.inputTypes.join(
+                                                        ", "
+                                                    )}{" "}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <div key="sensors">
+                                            {!readingRegisters.length && (
+                                                <span>
+                                                    Waiting for sensors...
+                                                </span>
+                                            )}
+                                            {!!readingRegisters.length && (
+                                                <ReadingFieldGrid
+                                                    readingRegisters={
+                                                        readingRegisters
+                                                    }
+                                                    registerIdsChecked={
+                                                        registerIdsChecked
+                                                    }
+                                                    recording={false}
+                                                    liveDataSet={liveRecording}
+                                                    handleRegisterCheck={
+                                                        handleRegisterCheck
+                                                    }
+                                                />
+                                            )}
+                                        </div>
+                                    </AccordionDetails>
+                                </Accordion>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        variant="contained"
-                        startIcon={<NavigateBackIcon />}
-                        onClick={handleBack}
-                    >
-                        Back
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={false}
-                        onClick={handleCancel}
-                    >
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            variant="contained"
+                            startIcon={<NavigateBackIcon />}
+                            onClick={handleBack}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={false}
+                            onClick={handleCancel}
+                        >
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </PointerBoundary>
         )
 }

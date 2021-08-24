@@ -99,7 +99,7 @@ export function addNewDataSet(workspace: WorkspaceSvg) {
     })
 }
 
-// Randi TODO is this too redundant with creating a dataset?
+// TODO combine with peceding function to make less redundant
 export function addNewClassifier(workspace: WorkspaceSvg) {
     // prompt user for variable name
     Blockly.prompt(`Enter new classifier name:`, ``, newVariableName => {
@@ -118,7 +118,7 @@ export function addNewClassifier(workspace: WorkspaceSvg) {
                 // create new block with new classifier name
                 workspace.paste(
                     Blockly.Xml.textToDom(
-                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newVariableName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":4,"numParams":0,"modelCycles":0,"classes":[],"optimizer":"adam","batchSize":32,"numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="TRAIN_BUTTON">{}</field></block>`
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":0,"numParams":0,"runTimeInCycles":0,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`
                     )
                 )
             } else {

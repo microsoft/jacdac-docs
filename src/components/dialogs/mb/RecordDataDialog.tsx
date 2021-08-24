@@ -299,8 +299,6 @@ export default function BlocklyDataRecordingDialog(props: {
     const resetInputs = () => {
         setClassName("class1")
         setRecordingName("recording0") // + recordingCount)
-        setSamplingIntervalDelay("100")
-        setSamplingDuration("2")
     }
     const handleDownloadDataSet = () => {
         const recordingCountHeader = `Number of recordings,${currentRecording.recording.length}`
@@ -391,6 +389,40 @@ export default function BlocklyDataRecordingDialog(props: {
                                         }
                                     />
                                 </div>
+                                <div className={classes.row}>
+                                    <TextField
+                                        className={classes.field}
+                                        error={errorSamplingDuration}
+                                        disabled={isRecording}
+                                        label="Sampling duration"
+                                        value={samplingDuration}
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    s
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        onChange={handleSamplingDurationChange}
+                                    />
+                                    <TextField
+                                        className={classes.field}
+                                        error={errorSamplingIntervalDelay}
+                                        disabled={isRecording}
+                                        label="Sampling interval"
+                                        value={samplingIntervalDelay}
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    ms
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        onChange={handleSamplingIntervalChange}
+                                    />
+                                </div>
                                 <h3>Collect data from</h3>
                                 {!readingRegisters.length && (
                                     <span>Waiting for sensors...</span>
@@ -476,40 +508,6 @@ export default function BlocklyDataRecordingDialog(props: {
                             <div key="record">
                                 <div className={classes.row}>
                                     <h4>Add more samples</h4>
-                                    <TextField
-                                        className={classes.field}
-                                        error={errorSamplingDuration}
-                                        disabled={isRecording}
-                                        label="Sampling duration"
-                                        value={samplingDuration}
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    s
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        onChange={handleSamplingDurationChange}
-                                    />
-                                    <TextField
-                                        className={classes.field}
-                                        error={errorSamplingIntervalDelay}
-                                        disabled={isRecording}
-                                        label="Sampling interval"
-                                        value={samplingIntervalDelay}
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    ms
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        onChange={handleSamplingIntervalChange}
-                                    />
-                                </div>
-                                <div className={classes.buttons}>
                                     <Button
                                         size="large"
                                         variant="contained"
