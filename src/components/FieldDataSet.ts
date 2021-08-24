@@ -37,6 +37,7 @@ export default class FielddataSet extends JDEventSource {
     readonly rows: Example[]
     headers: string[]
     units: string[]
+    interval: number
     maxRows = -1
 
     // maintain computed min/max/rms to avoid recomputation
@@ -95,15 +96,6 @@ export default class FielddataSet extends JDEventSource {
     get startTimestamp() {
         const row = this.rows[0]
         return row?.timestamp
-    }
-
-    get interval() {
-        if (this.rows.length >= 2) {
-            const first = this.rows[0]
-            const second = this.rows[1]
-            return second.timestamp - first.timestamp
-        }
-        return 0
     }
 
     get duration() {
