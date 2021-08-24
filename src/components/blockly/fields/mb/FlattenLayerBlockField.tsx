@@ -1,56 +1,63 @@
-import React, { ReactNode, useContext, useState } from "react"
-import { Grid, Box } from "@material-ui/core"
+import React, { ReactNode, useContext, useEffect, useState } from "react"
+import {
+    Box,
+    Grid,
+    MenuItem,
+    Select,
+    TextField,
+    Tooltip,
+    makeStyles,
+    Theme,
+    createStyles,
+} from "@material-ui/core"
 
 import { ReactFieldJSON } from "../ReactField"
-import ReactParameterField from "../ReactParameterField"
-import WorkspaceContext from "../../WorkspaceContext"
-
+import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
+import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+
+import { useId } from "react-use-id-hook"
+import ExpandModelBlockField from "./ExpandModelBlockField"
+
 export interface FlattenLayerFieldValue {
-    numTrainableParams: number
+    totalSize: number
     runTimeInCycles: number
     outputShape: number[]
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        fieldContainer: {
+            lineHeight: "2.5rem",
+            width: "15rem",
+        },
+        field: {
+            width: theme.spacing(10),
+        },
+    })
+)
 
 function LayerParameterWidget(props: {
     initFieldValue: FlattenLayerFieldValue
 }) {
     const { initFieldValue } = props
+    const { sourceBlock } = useContext(WorkspaceContext)
+    const classes = useStyles()
 
-    const { workspace, sourceBlock } = useContext(WorkspaceContext)
-
-    const [numTrainableParams, setNumTrainableParams] = useState(
-        initFieldValue.numTrainableParams
-    )
-    const [runTimeInCycles, setRunTimeInCycles] = useState(
-        initFieldValue.runTimeInCycles
-    )
-    const [outputShape, setOutputShape] = useState<number[]>(
-        initFieldValue.outputShape
-    )
-
-    const updateModelParameters = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<FlattenLayerFieldValue>
-        console.log("Randi update block parameters: ", parameterField)
-
-        // calculate the size of this layer (based on size of previous layer as well as parameters here)
-        // update the number of trainable parameters (based on the size of this layer)
-        // update the number of cycles it will take to run (based on the size of this layer)
-    }
+    const totalSize = initFieldValue.totalSize
+    const outputShape = initFieldValue.outputShape
+    const runTimeInCycles = initFieldValue.runTimeInCycles
 
     return (
         <PointerBoundary>
-            <Grid container spacing={1} direction={"row"}>
+            <Grid container spacing={1} direction={"column"}>
                 <Grid item>
                     <Box color="text.secondary">
-                        No. of Parameters: {numTrainableParams}
-                    </Box>
-                    <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
-                    <Box color="text.secondary">
-                        Shape: [{outputShape.join(", ")}]
+                        Total size: {totalSize} bytes
+                        <br />
+                        Run time: {runTimeInCycles} cycles <br />
+                        Output shape: [{outputShape.join(", ")}]<br />
                     </Box>
                 </Grid>
             </Grid>
@@ -58,7 +65,7 @@ function LayerParameterWidget(props: {
     )
 }
 
-export default class FlattenLayerBlockField extends ReactParameterField<FlattenLayerFieldValue> {
+export default class FlattenLayerBlockField extends ReactInlineField {
     static KEY = "flatten_layer_block_field_key"
 
     constructor(value: string, previousValue?: any) {
@@ -76,7 +83,7 @@ export default class FlattenLayerBlockField extends ReactParameterField<FlattenL
         return {
             numTrainableParams: 0,
             runTimeInCycles: 0,
-            outputShape: [0, 0],
+            outputShape: [0],
         }
     }
 

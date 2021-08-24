@@ -1,14 +1,21 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
-import { Grid, Box, Button, Tooltip } from "@material-ui/core"
-import EditIcon from "@material-ui/icons/Edit"
+import {
+    Box,
+    Grid,
+    Tooltip,
+    makeStyles,
+    Theme,
+    createStyles,
+    Button,
+} from "@material-ui/core"
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
 import { ReactFieldJSON } from "../ReactField"
-import ReactParameterField from "../ReactParameterField"
-import WorkspaceContext from "../../WorkspaceContext"
-
+import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
+
+import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
 
 export interface RecordingBlockFieldValue {
     numSamples: number
@@ -16,54 +23,39 @@ export interface RecordingBlockFieldValue {
     inputTypes: string[]
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        fieldContainer: {
+            lineHeight: "2.5rem",
+            width: "15rem",
+        },
+        field: {
+            width: theme.spacing(10),
+        },
+    })
+)
+
 function RecordingParameterWidget(props: {
     initFieldValue: RecordingBlockFieldValue
-    setFieldValue: (f: RecordingBlockFieldValue) => void
 }) {
-    const { initFieldValue, setFieldValue } = props
+    const { initFieldValue } = props
+    const { sourceBlock } = useContext(WorkspaceContext)
+    const classes = useStyles()
 
-    const { workspace, sourceBlock } = useContext(WorkspaceContext)
+    const numSamples = initFieldValue.numSamples
+    const inputTypes = initFieldValue.inputTypes
 
-    const [numSamples, setNumSamples] = useState(initFieldValue.numSamples)
-    const [timestamp, setTimestamp] = useState(initFieldValue.timestamp)
-    const [inputTypes, setInputTypes] = useState<string[]>(
-        initFieldValue.inputTypes
-    )
-
-    const handleEditRecording = () => {
-        // update parameters based on changes to this recording
-        console.log("Edit recording")
-        sourceBlock.data = "click.record"
-
-        //setNumSamples()
-        //setLatestTimestamp()
-        //setInputTypes()
-    }
     const handleDownloadDataSet = () => {
         console.log("Download dataset")
         sourceBlock.data = "click.download"
     }
 
-    useEffect(() => {
-        // push changes to source block after state values update
-        sendUpdate()
-    }, [numSamples, timestamp, inputTypes])
-
-    const sendUpdate = () => {
-        const updatedFieldValue = {
-            numSamples: numSamples,
-            timestamp: timestamp,
-            inputTypes: inputTypes,
-        }
-        setFieldValue(updatedFieldValue)
-    }
-
     return (
         <PointerBoundary>
-            <Grid container spacing={1}>
+            <Grid container spacing={1} direction={"column"}>
                 <Grid item>
                     <Box color="text.secondary">
-                        No. of Samples: {numSamples} <br />
+                        Total samples: {numSamples} <br />
                         Input type(s):{" "}
                         {inputTypes.length ? inputTypes.join(", ") : "none"}
                     </Box>
@@ -85,15 +77,13 @@ function RecordingParameterWidget(props: {
     )
 }
 
-export default class RecordingBlockField extends ReactParameterField<RecordingBlockFieldValue> {
+export default class RecordingBlockField extends ReactInlineField {
     static KEY = "recording_block_field_key"
-    static EDITABLE = false
 
     constructor(value: string, previousValue?: any) {
         super(value)
         if (previousValue)
             this.value = { ...this.defaultValue, ...previousValue }
-        this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -115,21 +105,7 @@ export default class RecordingBlockField extends ReactParameterField<RecordingBl
         return `${numSamples} sample(s)`
     }
 
-    updateFieldValue(msg: RecordingBlockFieldValue) {
-        this.value = {
-            ...this.value, // don't copy over visibility (will cause loop)
-            numSamples: msg.numSamples,
-            timestamp: msg.timestamp,
-            inputTypes: msg.inputTypes,
-        }
-    }
-
     renderInlineField(): ReactNode {
-        return (
-            <RecordingParameterWidget
-                initFieldValue={this.value}
-                setFieldValue={this.updateFieldValue}
-            />
-        )
+        return <RecordingParameterWidget initFieldValue={this.value} />
     }
 }

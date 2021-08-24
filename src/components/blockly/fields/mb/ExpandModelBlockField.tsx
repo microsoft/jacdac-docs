@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { useContext, useState } from "react"
 
 import { Grid } from "@material-ui/core"
 import AddCircleIcon from "@material-ui/icons/AddCircleOutline"
@@ -22,7 +22,7 @@ import PoolingLayerBlockField from "./PoolingLayerBlockField"
 import DropoutLayerBlockField from "./DropoutLayerBlockField"
 import FlattenLayerBlockField from "./FlattenLayerBlockField"
 import KNNBlockField from "./KNNBlockField"
-import Blockly, { Block } from "blockly"
+import { Block } from "blockly"
 
 const REMOVABLE_INPUT = "REMOVABLE_INPUT"
 const LAYER_INPUT = "LAYER_INPUTS"
@@ -39,14 +39,12 @@ function ExpandIconWidget() {
         return null
     }
 
-    const updateCurrentValue = (paramName: string, newParam: any) => {
+    const updateCurrentValue = (paramName: string, paramValue: any) => {
         const expandField = sourceBlock.getField(
             "EXPAND_BUTTON"
-        ) as ReactParameterField<unknown>
+        ) as ExpandModelBlockField
 
-        const value = JSON.parse(expandField.getValue())
-        value[paramName] = newParam
-        expandField.doValueUpdate_(JSON.stringify(value))
+        expandField.updateFieldValue({ paramName: paramValue })
     }
 
     const appendParamInput = (block: Block) => {
@@ -57,7 +55,7 @@ function ExpandIconWidget() {
         // TODO. This is a hack, no moving blocks that are open
         block.setMovable(false)
 
-        // make sure that the block goes before the input statement field
+        // place the new input before the input statement field
         if (block.getInput(LAYER_INPUT))
             block.moveInputBefore(REMOVABLE_INPUT, LAYER_INPUT)
     }
@@ -73,7 +71,9 @@ function ExpandIconWidget() {
                 return new SmoothingBlockField("", currentValue)
             case MODEL_BLOCKS + "nn":
                 return new NeuralNetworkBlockField("", currentValue)
-            case MODEL_BLOCKS + "conv_layer":
+            case MODEL_BLOCKS + "conv1d_layer":
+                return new ConvLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "conv2d_layer":
                 return new ConvLayerBlockField("", currentValue)
             case MODEL_BLOCKS + "dense_layer":
                 return new DenseLayerBlockField("", currentValue)
@@ -81,9 +81,13 @@ function ExpandIconWidget() {
                 return new DropoutLayerBlockField("", currentValue)
             case MODEL_BLOCKS + "flatten_layer":
                 return new FlattenLayerBlockField("", currentValue)
-            case MODEL_BLOCKS + "max_pool_layer":
+            case MODEL_BLOCKS + "maxpool1d_layer":
                 return new PoolingLayerBlockField("", currentValue)
-            case MODEL_BLOCKS + "avg_pool_layer":
+            case MODEL_BLOCKS + "maxpool2d_layer":
+                return new PoolingLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "avgpool1d_layer":
+                return new PoolingLayerBlockField("", currentValue)
+            case MODEL_BLOCKS + "avgpool2d_layer":
                 return new PoolingLayerBlockField("", currentValue)
             case MODEL_BLOCKS + "knn":
                 return new KNNBlockField("", currentValue)
@@ -117,7 +121,7 @@ function ExpandIconWidget() {
             // identify which input to remove and remove it
             parameterField.getParentInput().name = REMOVABLE_INPUT
             sourceBlock.removeInput(REMOVABLE_INPUT)
-            // Randi TODO. This is a hack, no moving blocks that are open
+            // TODO this is a hack. Need to implement textToDom and domToText for these mutator blocks
             sourceBlock.setMovable(true)
 
             // update the value of the expand button field
@@ -152,7 +156,8 @@ function ExpandIconWidget() {
     )
 }
 
-export default class ExpandModelBlockField extends ReactParameterField<any> {
+export default class ExpandModelBlockField extends ReactInlineField {
+    //ReactParameterField<any> {
     static KEY = "model_field_key"
 
     constructor(value: string) {

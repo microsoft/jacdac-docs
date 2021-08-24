@@ -1,21 +1,27 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
 import {
-    Grid,
     Box,
-    TextField,
-    Tooltip,
-    Checkbox,
+    Grid,
     MenuItem,
     Select,
+    TextField,
+    Tooltip,
+    makeStyles,
+    Theme,
+    createStyles,
 } from "@material-ui/core"
 
 import { ReactFieldJSON } from "../ReactField"
-import ReactParameterField from "../ReactParameterField"
-import WorkspaceContext from "../../WorkspaceContext"
+import ReactInlineField from "../ReactInlineField"
+import { PointerBoundary } from "../PointerBoundary"
+
+import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+
 import { useId } from "react-use-id-hook"
+import ExpandModelBlockField from "./ExpandModelBlockField"
 
 export interface ConvLayerFieldValue {
-    numTrainableParams: number
+    totalSize: number
     runTimeInCycles: number
     outputShape: number[]
     numFilters: number
@@ -24,23 +30,27 @@ export interface ConvLayerFieldValue {
     activation: string
 }
 
-function LayerParameterWidget(props: {
-    initFieldValue: ConvLayerFieldValue
-    setFieldValue: (f: ConvLayerFieldValue) => void
-}) {
-    const { initFieldValue, setFieldValue } = props
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        fieldContainer: {
+            lineHeight: "2.5rem",
+            width: "15rem",
+        },
+        field: {
+            width: theme.spacing(10),
+        },
+    })
+)
 
-    const { workspace, sourceBlock } = useContext(WorkspaceContext)
+function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
+    const { initFieldValue } = props
+    const { sourceBlock } = useContext(WorkspaceContext)
+    const classes = useStyles()
 
-    const [numTrainableParams, setNumTrainableParams] = useState(
-        initFieldValue.numTrainableParams
-    )
-    const [runTimeInCycles, setRunTimeInCycles] = useState(
-        initFieldValue.runTimeInCycles
-    )
-    const [outputShape, setOutputShape] = useState<number[]>(
-        initFieldValue.outputShape
-    )
+    const totalSize = initFieldValue.totalSize
+    const outputShape = initFieldValue.outputShape
+    const runTimeInCycles = initFieldValue.runTimeInCycles
+
     const [numFilters, setNumFilters] = useState(initFieldValue.numFilters)
     const [kernelSize, setKernelSize] = useState(initFieldValue.kernelSize)
     const [strideSize, setStrideSize] = useState(initFieldValue.strideSize)
@@ -48,39 +58,42 @@ function LayerParameterWidget(props: {
 
     useEffect(() => {
         // push changes to source block after state values update
-        sendUpdate()
+        updateParameters()
     }, [numFilters, kernelSize, strideSize, activation])
 
-    const sendUpdate = () => {
+    const updateParameters = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            numTrainableParams: numTrainableParams, // don't actually change this
-            runTimeInCycles: runTimeInCycles, // don't actually change this
-            outputShape: outputShape, // don't actually change this
             numFilters: numFilters,
             kernelSize: kernelSize,
             strideSize: strideSize,
             activation: activation,
         }
-        setFieldValue(updatedValue)
+
+        // send new value to the parameter holder
+        const expandField = sourceBlock.getField(
+            "EXPAND_BUTTON"
+        ) as ExpandModelBlockField
+        expandField.updateFieldValue(updatedValue)
+
+        // update the name of the block
+        const nameField = sourceBlock.inputList[0].fieldRow[0]
+        const name: string = nameField.getValue()
+        const blockName = name.substr(0, 13)
+        nameField.setValue(
+            `${blockName} (${numFilters}, ${kernelSize}, ${strideSize})`
+        )
     }
 
-    const updateModelParameters = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<ConvLayerFieldValue>
-        console.log("Randi update block parameters: ", parameterField)
-
-        // calculate the size of this layer (based on size of previous layer as well as parameters here)
-        // update the number of trainable parameters (based on the size of this layer)
-        // update the number of cycles it will take to run (based on the size of this layer)
+    const setWarning = (warningText: string) => {
+        const services = resolveBlockServices(sourceBlock)
+        services.setWarning(sourceBlock.id, warningText)
     }
 
     const handleChangedFilters = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const newValue = event.target.valueAsNumber
-        // Randi TODO give some sort of error message for vaules less than 1
         if (newValue && !isNaN(newValue)) {
             setNumFilters(newValue)
         }
@@ -90,7 +103,6 @@ function LayerParameterWidget(props: {
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const newValue = event.target.valueAsNumber
-        // Randi TODO give some sort of error message for vaules less than 2
         if (newValue && !isNaN(newValue)) {
             setKernelSize(newValue)
         }
@@ -100,7 +112,6 @@ function LayerParameterWidget(props: {
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const newValue = event.target.valueAsNumber
-        // Randi TODO give some sort of error message for values less than 1
         if (newValue && !isNaN(newValue)) {
             setStrideSize(newValue)
         }
@@ -112,84 +123,86 @@ function LayerParameterWidget(props: {
     }
 
     return (
-        <Grid container spacing={1} direction={"row"}>
-            <Grid item>
-                <Box color="text.secondary">
-                    filters
-                    <Tooltip title="Update the kernel size">
-                        <TextField
-                            id={useId() + "filters"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={numFilters}
-                            onChange={handleChangedFilters}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    kernel size
-                    <Tooltip title="Update the kernel size">
-                        <TextField
-                            id={useId() + "kernelSize"}
-                            type="number"
-                            size="small"
-                            variant="outlined"
-                            value={kernelSize}
-                            onChange={handleChangedKernelSize}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    stride
-                    <Tooltip title="Update the stride">
-                        <TextField
-                            id={useId() + "stride"}
-                            size="small"
-                            variant="outlined"
-                            value={strideSize}
-                            onChange={handleChangedStrides}
-                        />
-                    </Tooltip>
-                </Box>
-                <Box color="text.secondary">
-                    activation
-                    <Tooltip title="Update the activation function">
-                        <Select
-                            id={useId() + "activation"}
-                            variant="outlined"
-                            value={activation}
-                            onChange={handleChangedActivation}
-                        >
-                            <MenuItem value="linear">linear</MenuItem>
-                            <MenuItem value="sigmoid">sigmoid</MenuItem>
-                            <MenuItem value="relu">relu</MenuItem>
-                            <MenuItem value="tanh">tanh</MenuItem>
-                        </Select>
-                    </Tooltip>
-                </Box>
+        <PointerBoundary>
+            <Grid container spacing={1} direction={"column"}>
+                <Grid item className={classes.fieldContainer}>
+                    <Box color="text.secondary">
+                        filters&emsp;
+                        <Tooltip title="Update the kernel size">
+                            <TextField
+                                id={useId() + "filters"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={numFilters}
+                                onChange={handleChangedFilters}
+                                className={classes.field}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        kernel size&emsp;
+                        <Tooltip title="Update the kernel size">
+                            <TextField
+                                id={useId() + "kernelSize"}
+                                type="number"
+                                size="small"
+                                variant="outlined"
+                                value={kernelSize}
+                                onChange={handleChangedKernelSize}
+                                className={classes.field}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        stride&emsp;
+                        <Tooltip title="Update the stride">
+                            <TextField
+                                id={useId() + "stride"}
+                                size="small"
+                                variant="outlined"
+                                value={strideSize}
+                                onChange={handleChangedStrides}
+                                className={classes.field}
+                            />
+                        </Tooltip>
+                    </Box>
+                    <Box color="text.secondary">
+                        activation&emsp;
+                        <Tooltip title="Update the activation function">
+                            <Select
+                                id={useId() + "activation"}
+                                variant="outlined"
+                                value={activation}
+                                onChange={handleChangedActivation}
+                            >
+                                <MenuItem value="softmax">softmax</MenuItem>
+                                <MenuItem value="linear">linear</MenuItem>
+                                <MenuItem value="relu">relu</MenuItem>
+                            </Select>
+                        </Tooltip>
+                    </Box>
+                </Grid>
+                <Grid item>
+                    <Box color="text.secondary">
+                        Total size: {totalSize} bytes
+                        <br />
+                        Run time: {runTimeInCycles} cycles <br />
+                        Output shape: [{outputShape.join(", ")}]<br />
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Box color="text.secondary">
-                    No. of Parameters: {numTrainableParams}
-                </Box>
-                <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
-                <Box color="text.secondary">
-                    Output shape: [{outputShape.join(", ")}]
-                </Box>
-            </Grid>
-        </Grid>
+        </PointerBoundary>
     )
 }
 
-export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFieldValue> {
+export default class ConvLayerBlockField extends ReactInlineField {
     static KEY = "conv_layer_block_field_key"
 
     constructor(value: string, previousValue?: any) {
         super(value)
         if (previousValue)
             this.value = { ...this.defaultValue, ...previousValue }
-        this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -199,13 +212,12 @@ export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFi
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            numTrainableParams: 0,
+            totalSize: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
             numFilters: 16,
             kernelSize: 2,
             strideSize: 1,
-            activation: "relu",
         }
     }
 
@@ -213,22 +225,7 @@ export default class ConvLayerBlockField extends ReactParameterField<ConvLayerFi
         return ``
     }
 
-    updateFieldValue(msg: ConvLayerFieldValue) {
-        this.value = {
-            ...this.value, // don't copy over visibility or params set by model compile (will cause loop)
-            numFilters: msg.numFilters,
-            kernelSize: msg.kernelSize,
-            strideSize: msg.strideSize,
-            activation: msg.activation,
-        }
-    }
-
     renderInlineField(): ReactNode {
-        return (
-            <LayerParameterWidget
-                initFieldValue={this.value}
-                setFieldValue={this.updateFieldValue}
-            />
-        )
+        return <LayerParameterWidget initFieldValue={this.value} />
     }
 }

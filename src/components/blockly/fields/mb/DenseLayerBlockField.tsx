@@ -1,83 +1,85 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
 import {
-    Grid,
     Box,
-    TextField,
-    Tooltip,
+    Grid,
     MenuItem,
     Select,
+    TextField,
+    Tooltip,
+    makeStyles,
+    Theme,
+    createStyles,
 } from "@material-ui/core"
 
 import { ReactFieldJSON } from "../ReactField"
-import ReactParameterField from "../ReactParameterField"
-import WorkspaceContext from "../../WorkspaceContext"
+import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
+
+import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+
 import { useId } from "react-use-id-hook"
+import ExpandModelBlockField from "./ExpandModelBlockField"
 
 export interface DenseLayerFieldValue {
-    numTrainableParams: number
+    totalSize: number
     runTimeInCycles: number
     outputShape: number[]
     numUnits: number
     activation: string
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        fieldContainer: {
+            lineHeight: "2.5rem",
+            width: "15rem",
+        },
+        field: {
+            width: theme.spacing(10),
+        },
+    })
+)
+
 function LayerParameterWidget(props: {
     initFieldValue: DenseLayerFieldValue
     setFieldValue: (f: DenseLayerFieldValue) => void
 }) {
-    const { initFieldValue, setFieldValue } = props
+    const { initFieldValue } = props
+    const { sourceBlock } = useContext(WorkspaceContext)
+    const classes = useStyles()
 
-    const { workspace, sourceBlock } = useContext(WorkspaceContext)
+    const totalSize = initFieldValue.totalSize
+    const outputShape = initFieldValue.outputShape
+    const runTimeInCycles = initFieldValue.runTimeInCycles
 
-    const [numTrainableParams, setNumTrainableParams] = useState(
-        initFieldValue.numTrainableParams
-    )
-    const [runTimeInCycles, setRunTimeInCycles] = useState(
-        initFieldValue.runTimeInCycles
-    )
-    const [outputShape, setOutputShape] = useState<number[]>(
-        initFieldValue.outputShape
-    )
     const [numUnits, setNumUnits] = useState(initFieldValue.numUnits)
     const [activation, setActivation] = useState(initFieldValue.activation)
 
     useEffect(() => {
         // push changes to source block after state values update
-        sendUpdate()
+        updateParameters()
     }, [numUnits, activation])
 
-    const sendUpdate = () => {
+    const updateParameters = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            numTrainableParams: numTrainableParams, // don't actually change this
-            runTimeInCycles: runTimeInCycles, // don't actually change this
-            outputShape: outputShape, // don't actually change this
             numUnits: numUnits,
             activation: activation,
         }
-        setFieldValue(updatedValue)
-    }
 
-    useEffect(() => {
-        // update should happen after model is compiled
-        updateModelParameters()
-    }, [workspace])
+        // send new value to the parameter holder
+        const expandField = sourceBlock.getField(
+            "EXPAND_BUTTON"
+        ) as ExpandModelBlockField
+        expandField.updateFieldValue(updatedValue)
 
-    const updateModelParameters = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<DenseLayerFieldValue>
-        console.log("Randi update block parameters: ", parameterField)
-
-        // calculate the size of this layer (based on size of previous layer as well as parameters here)
-        // update the number of trainable parameters (based on the size of this layer)
-        // update the number of cycles it will take to run (based on the size of this layer)
+        // update the name of the block
+        const nameField = sourceBlock.inputList[0].fieldRow[0]
+        nameField.setValue(`dense (${numUnits}, ${activation})`)
     }
 
     const handleChangedUnits = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.target.valueAsNumber
-        // Randi TODO give some sort of error message for vaules less than 1
         if (newValue && !isNaN(newValue)) {
             setNumUnits(newValue)
         }
@@ -90,10 +92,10 @@ function LayerParameterWidget(props: {
 
     return (
         <PointerBoundary>
-            <Grid container spacing={1} direction={"row"}>
-                <Grid item>
+            <Grid container spacing={1} direction={"column"}>
+                <Grid item className={classes.fieldContainer}>
                     <Box color="text.secondary">
-                        Units
+                        units&emsp;
                         <Tooltip title="Update the number of units">
                             <TextField
                                 id={useId() + "filters"}
@@ -102,11 +104,12 @@ function LayerParameterWidget(props: {
                                 variant="outlined"
                                 value={numUnits}
                                 onChange={handleChangedUnits}
+                                className={classes.field}
                             />
                         </Tooltip>
                     </Box>
                     <Box color="text.secondary">
-                        Activation
+                        activation&emsp;
                         <Tooltip title="Update the activation function">
                             <Select
                                 id={useId() + "activation"}
@@ -121,28 +124,25 @@ function LayerParameterWidget(props: {
                         </Tooltip>
                     </Box>
                 </Grid>
-                {/*<Grid item>
+                <Grid item>
                     <Box color="text.secondary">
-                        No. of Parameters: {numTrainableParams}
+                        Total size: {totalSize} bytes <br />
+                        Run time: {runTimeInCycles} cycles <br />
+                        Output shape: [{outputShape.join(", ")}]<br />
                     </Box>
-                    <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
-                    <Box color="text.secondary">
-                        Shape: [{outputShape.join(", ")}]
-                    </Box>
-                </Grid>*/}
+                </Grid>
             </Grid>
         </PointerBoundary>
     )
 }
 
-export default class DenseLayerBlockField extends ReactParameterField<DenseLayerFieldValue> {
+export default class DenseLayerBlockField extends ReactInlineField {
     static KEY = "dense_layer_block_field_key"
 
     constructor(value: string, previousValue?: any) {
         super(value)
         if (previousValue)
             this.value = { ...this.defaultValue, ...previousValue }
-        this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -152,9 +152,9 @@ export default class DenseLayerBlockField extends ReactParameterField<DenseLayer
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            numTrainableParams: 0,
+            totalSize: 0,
             runTimeInCycles: 0,
-            outputShape: [0, 0],
+            outputShape: [0],
             numUnits: 4,
             activation: "relu",
         }
@@ -164,16 +164,7 @@ export default class DenseLayerBlockField extends ReactParameterField<DenseLayer
         return ``
     }
 
-    updateFieldValue(msg: DenseLayerFieldValue) {
-        this.value = msg
-    }
-
     renderInlineField(): ReactNode {
-        return (
-            <LayerParameterWidget
-                initFieldValue={this.value}
-                setFieldValue={this.updateFieldValue}
-            />
-        )
+        return <LayerParameterWidget initFieldValue={this.value} />
     }
 }

@@ -1,69 +1,79 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
-import { Grid, Box, TextField, Tooltip } from "@material-ui/core"
+import {
+    Box,
+    Grid,
+    TextField,
+    Tooltip,
+    makeStyles,
+    Theme,
+    createStyles,
+} from "@material-ui/core"
 
 import { ReactFieldJSON } from "../ReactField"
-import ReactParameterField from "../ReactParameterField"
-import WorkspaceContext from "../../WorkspaceContext"
-
+import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
+
+import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+
 import { useId } from "react-use-id-hook"
+import ExpandModelBlockField from "./ExpandModelBlockField"
 
 export interface DropoutLayerFieldValue {
-    numTrainableParams: number
+    totalSize: number
     runTimeInCycles: number
     outputShape: number[]
     rate: number
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        fieldContainer: {
+            lineHeight: "2.5rem",
+            width: "15rem",
+        },
+        field: {
+            width: theme.spacing(10),
+        },
+    })
+)
+
 function LayerParameterWidget(props: {
     initFieldValue: DropoutLayerFieldValue
-    setFieldValue: (f: DropoutLayerFieldValue) => void
 }) {
-    const { initFieldValue, setFieldValue } = props
+    const { initFieldValue } = props
+    const { sourceBlock } = useContext(WorkspaceContext)
+    const classes = useStyles()
 
-    const { workspace, sourceBlock } = useContext(WorkspaceContext)
+    const totalSize = initFieldValue.totalSize
+    const outputShape = initFieldValue.outputShape
+    const runTimeInCycles = initFieldValue.runTimeInCycles
 
-    const [numTrainableParams, setNumTrainableParams] = useState(
-        initFieldValue.numTrainableParams
-    )
-    const [runTimeInCycles, setRunTimeInCycles] = useState(
-        initFieldValue.runTimeInCycles
-    )
-    const [outputShape, setOutputShape] = useState<number[]>(
-        initFieldValue.outputShape
-    )
     const [rate, setRate] = useState(initFieldValue.rate)
 
     useEffect(() => {
         // push changes to source block after state values update
-        sendUpdate()
+        updateParameters()
     }, [rate])
 
-    const sendUpdate = () => {
+    const updateParameters = () => {
         // push changes to field values to the parent
         const updatedValue = {
-            numTrainableParams: numTrainableParams, // don't actually change this
-            runTimeInCycles: runTimeInCycles, // don't actually change this
-            outputShape: outputShape, // don't actually change this
             rate: rate,
         }
-        setFieldValue(updatedValue)
-    }
 
-    const updateModelParameters = () => {
-        const parameterField = sourceBlock.getField(
-            "BLOCK_PARAMS"
-        ) as ReactParameterField<DropoutLayerFieldValue>
-        console.log("Randi update block parameters: ", parameterField)
+        // send new value to the parameter holder
+        const expandField = sourceBlock.getField(
+            "EXPAND_BUTTON"
+        ) as ExpandModelBlockField
+        expandField.updateFieldValue(updatedValue)
 
-        // calculate the size of this layer (based on size of previous layer as well as parameters here)
-        // update the number of trainable parameters (based on the size of this layer)
-        // update the number of cycles it will take to run (based on the size of this layer)
+        // update the name of the block
+        const nameField = sourceBlock.inputList[0].fieldRow[0]
+        nameField.setValue(`dropout (${rate})`)
     }
 
     const handleChangedRate = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.target.valueAsNumber
-        // Randi TODO give some sort of error message for vaules less than 1
         if (newValue && !isNaN(newValue)) {
             setRate(newValue)
         }
@@ -71,10 +81,10 @@ function LayerParameterWidget(props: {
 
     return (
         <PointerBoundary>
-            <Grid container spacing={1} direction={"row"}>
-                <Grid item>
+            <Grid container spacing={1} direction={"column"}>
+                <Grid item className={classes.fieldContainer}>
                     <Box color="text.secondary">
-                        Rate
+                        rate&emsp;
                         <Tooltip title="Update the dropout rate">
                             <TextField
                                 id={useId() + "rate"}
@@ -83,17 +93,17 @@ function LayerParameterWidget(props: {
                                 variant="outlined"
                                 value={rate}
                                 onChange={handleChangedRate}
+                                className={classes.field}
                             />
                         </Tooltip>
                     </Box>
                 </Grid>
                 <Grid item>
                     <Box color="text.secondary">
-                        No. of Parameters: {numTrainableParams}
-                    </Box>
-                    <Box color="text.secondary">Cycles: {runTimeInCycles}</Box>
-                    <Box color="text.secondary">
-                        Shape: [{outputShape.join(", ")}]
+                        Total size: {totalSize} bytes
+                        <br />
+                        Run time: {runTimeInCycles} cycles <br />
+                        Output shape: [{outputShape.join(", ")}]<br />
                     </Box>
                 </Grid>
             </Grid>
@@ -101,14 +111,13 @@ function LayerParameterWidget(props: {
     )
 }
 
-export default class DropoutLayerBlockField extends ReactParameterField<DropoutLayerFieldValue> {
+export default class DropoutLayerBlockField extends ReactInlineField {
     static KEY = "dropout_layer_block_field_key"
 
     constructor(value: string, previousValue?: any) {
         super(value)
         if (previousValue)
             this.value = { ...this.defaultValue, ...previousValue }
-        this.updateFieldValue = this.updateFieldValue.bind(this)
     }
 
     static fromJson(options: ReactFieldJSON) {
@@ -118,7 +127,7 @@ export default class DropoutLayerBlockField extends ReactParameterField<DropoutL
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            numTrainableParams: 0,
+            totalSize: 0,
             runTimeInCycles: 0,
             outputShape: [0, 0],
             rate: 0.1,
@@ -129,19 +138,7 @@ export default class DropoutLayerBlockField extends ReactParameterField<DropoutL
         return ``
     }
 
-    updateFieldValue(msg: DropoutLayerFieldValue) {
-        this.value = {
-            ...this.value, // don't copy over visibility or params set by model compile (will cause loop)
-            rate: msg.rate,
-        }
-    }
-
     renderInlineField(): ReactNode {
-        return (
-            <LayerParameterWidget
-                initFieldValue={this.value}
-                setFieldValue={this.updateFieldValue}
-            />
-        )
+        return <LayerParameterWidget initFieldValue={this.value} />
     }
 }
