@@ -11,22 +11,27 @@ import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
 import { visitWorkspace } from "../../../jacdac-ts/src/dsl/workspacevisitor"
 
-import { WorkspaceFile } from "../../../jacdac-ts/src/dsl/workspacejson"
+import {
+    BlockJSON,
+    WorkspaceFile,
+} from "../../../jacdac-ts/src/dsl/workspacejson"
 import { WORKSPACE_FILENAME } from "../blockly/toolbox"
 import FileSystemContext, { FileSystemProvider } from "../FileSystemContext"
 import ServiceManagerContext from "../ServiceManagerContext"
+import { resolveBlockServices } from "../blockly/WorkspaceContext"
 
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import Suspense from "../ui/Suspense"
-import { visitToolbox } from "../blockly/toolbox"
+import { visitToolbox, MB_WARNINGS_CATEGORY } from "../blockly/toolbox"
 import FieldDataSet from "../FieldDataSet"
 import ModelBlockDialogs, {
     addNewDataSet,
     addNewClassifier,
 } from "../dialogs/mb/ModelBlockDialogs"
-import MBModel from "./MBModel"
-import MBDataSet from "./MBDataSet"
+import MBModel, { validModelJSON } from "./MBModel"
+import MBDataSet, { validDataSetJSON } from "./MBDataSet"
 import { prepareModel, prepareDataSet } from "./TrainModel"
+import ExpandModelBlockField from "../blockly/fields/mb/ExpandModelBlockField"
 
 const MB_EDITOR_ID = "mb"
 const MB_SOURCE_STORAGE_KEY = "model-block-blockly-xml"
@@ -77,99 +82,112 @@ function ModelBlockEditorWithContext() {
         })
         // save JSON string in local storage
         localStorage.setItem(MB_DATA_STORAGE_KEY, modelBlocksDataJSON)
-        console.log("Randi updating saved data for blocks: ", {
-            recordings,
-        })
     }
 
     /* For workspace changes */
-    const getDataSetBlocks = () => {
-        const dBlocks = {}
+    const modelBlocks = {}
+    const dataSetBlocks = {}
+    const updateDataSetBlocks = (block: BlockJSON) => {
+        const dataSetName =
+            block.inputs[0].fields["dataset_name"].value?.toString()
+        if (dataSetName) {
+            if (dataSetName in dataSetBlocks) {
+                setWarning(
+                    workspace,
+                    block.id,
+                    "Two dataset blocks cannot have the same name"
+                )
+                setWarning(
+                    workspace,
+                    dataSetBlocks[dataSetName].id,
+                    "Two dataset blocks cannot have the same name"
+                )
+                delete dataSetBlocks[dataSetName]
+            } else dataSetBlocks[dataSetName] = block
+        }
+    }
+    const updateModelBlocks = (block: BlockJSON) => {
+        const modelName =
+            block.inputs[0].fields["classifier_name"].value?.toString()
+        if (modelName) {
+            if (modelName in modelBlocks) {
+                setWarning(
+                    workspace,
+                    block.id,
+                    "Two classifier blocks cannot have the same name"
+                )
+                setWarning(
+                    workspace,
+                    modelBlocks[modelName].id,
+                    "Two model blocks cannot have the same name"
+                )
+                delete modelBlocks[modelName]
+            } else modelBlocks[modelName] = block
+        }
+    }
+    // clear warnings, collect datasets and models
+    useEffect(() => {
         visitWorkspace(workspaceJSON, {
             visitBlock: block => {
-                // Collect dataset blocks
+                // clear warnings on block
+                setWarning(workspace, block.id, undefined)
+
+                // collect dataset blocks
                 if (block.type == MODEL_BLOCKS + "dataset") {
-                    const datasetName =
-                        block.inputs[0].fields["dataset_name"].value?.toString()
-                    if (datasetName) dBlocks[datasetName] = block
+                    updateDataSetBlocks(block)
                 }
-            },
-        })
-        return dBlocks
-    }
-    const getModelBlocks = () => {
-        const mBlocks = {}
-        visitWorkspace(workspaceJSON, {
-            visitBlock: block => {
-                // Collect model blocks
+
+                // collect model blocks
                 if (block.type == MODEL_BLOCKS + "nn") {
-                    const modelName =
-                        block.inputs[0].fields[
-                            "classifier_name"
-                        ].value?.toString()
-                    if (modelName) mBlocks[modelName] = block
+                    updateModelBlocks(block)
                 }
             },
         })
-        return mBlocks
-    }
+    }, [workspace, workspaceJSON, modelBlocks, dataSetBlocks])
 
-    /*useEffect(() => {
-        visitWorkspace(workspaceJSON, {
-            visitBlock: block => {
-                console.log(`block ${block.type}`, { block })
-            },
-        })
-    }, [workspaceJSON])*/
-    const modelBlocks = useMemo(getModelBlocks, [workspaceJSON])
-    const dataSetBlocks = useMemo(getDataSetBlocks, [workspaceJSON])
-
-    const assembleDataSet = (datasetName: string) => {
+    const assembleDataSet = (dataSetName: string) => {
         // associate block with dataset
-        const dataset: MBDataSet =
-            allDataSets[datasetName] || new MBDataSet(datasetName)
-        const datasetBlock = dataSetBlocks[datasetName]
-
-        // Randi TODO find some way to check if dataset is new / changed from previous save
+        const dataSet: MBDataSet =
+            allDataSets[dataSetName] || new MBDataSet(dataSetName)
+        const dataSetBlock = dataSetBlocks[dataSetName]
 
         // grab nested recording blocks and place them in the dataset
-        const recordingBlock = datasetBlock?.inputs.filter(
+        const recordingBlock = dataSetBlock?.inputs.filter(
             input => input.name == "LAYER_INPUTS"
         )[0].child
         if (recordingBlock) {
             let className = recordingBlock?.inputs[0].fields?.class_name?.value
             allRecordings[recordingBlock.id].forEach(recording => {
-                dataset.addRecording(recording, className, null)
+                dataSet.addRecording(recording, className, null)
             })
             recordingBlock.children?.forEach(childBlock => {
                 className = childBlock?.inputs[0].fields?.class_name?.value
                 allRecordings[childBlock.id].forEach(recording => {
-                    dataset.addRecording(recording, className, null)
+                    dataSet.addRecording(recording, className, null)
                 })
             })
         }
 
         // store dataset in memory
-        allDataSets[datasetName] = dataset
+        allDataSets[dataSetName] = dataSet
 
-        return dataset
+        return dataSet
     }
-
     const assembleModel = (modelName: string) => {
         // associate block with model
-        const model = allModels[modelName] || new MBModel(modelName)
+        const model: MBModel = allModels[modelName] || new MBModel(modelName)
         const modelBlock = modelBlocks[modelName]
 
         // if this model already existed from before
         if (model.blockJSON) {
             // make sure its contents line up with what's saved
-            // if not, mark the model as untrained
+            // if not, mark the model as uncompiled / empty
             if (JSON.stringify(modelBlock) != JSON.stringify(model.blockJSON)) {
-                model.blockJSON = modelBlock
-                model.status = "untrained"
+                model.parseBlockJSON = modelBlock
+                model.status = "empty"
             }
         } else {
-            model.blockJSON = modelBlock
+            model.parseBlockJSON = modelBlock
         }
 
         // store model in memory
@@ -177,25 +195,122 @@ function ModelBlockEditorWithContext() {
 
         return model
     }
+    const addParametersToDataSetBlock = (dataSet: MBDataSet) => {
+        const dataSetName = dataSet.name
+        const inputTypes = dataSet.inputTypes
+
+        const dataSetBlock = workspace.getBlockById(
+            dataSetBlocks[dataSetName].id
+        )
+
+        // update the parameters of the dataset
+        const paramField = dataSetBlock.getField(
+            "EXPAND_BUTTON"
+        ) as ExpandModelBlockField
+        paramField.updateFieldValue({
+            numSamples: dataSet.totalRecordings,
+            inputClasses: dataSet.labels,
+            inputTypes: inputTypes,
+        })
+    }
+    const addParametersToModelBlock = (model: MBModel) => {
+        const modelName = model.name
+        const totalStats = model.modelStats.total
+        const layerStats = model.modelStats.layers
+
+        // update field parameters for each block in model
+        const modelBlock = workspace.getBlockById(modelBlocks[modelName].id)
+
+        if (modelBlock) {
+            const paramField = modelBlock.getField(
+                "EXPAND_BUTTON"
+            ) as ExpandModelBlockField
+            paramField.updateFieldValue({
+                numLayers: layerStats.length,
+                inputShape: totalStats.inputShape,
+                totalSize: totalStats.codeBytes + totalStats.weightBytes,
+                runTimeInCycles: totalStats.optimizedCycles,
+            })
+
+            // go through layers
+            model.layerJSON.forEach((layer, idx) => {
+                const layerBlock = workspace.getBlockById(layer.id)
+
+                if (layerBlock) {
+                    const layerParamField = layerBlock.getField(
+                        "EXPAND_BUTTON"
+                    ) as ExpandModelBlockField
+                    layerParamField.updateFieldValue({
+                        outputShape: layerStats[idx].outputShape,
+                        totalSize:
+                            layerStats[idx].codeBytes +
+                            layerStats[idx].weightBytes,
+                        runTimeInCycles: layerStats[idx].optimizedCycles,
+                    })
+                }
+            })
+        } else
+            console.error(
+                "Could not locate block " +
+                    { modelName: modelName, id: modelBlocks[modelName].id }
+            )
+    }
+
     useEffect(() => {
-        // compile all datasets
-        for (const datasetName in dataSetBlocks) {
-            const dataset = assembleDataSet(datasetName)
-            prepareDataSet(dataset)
+        // compile datasets and set warnings if necessary
+        for (const dataSetName in dataSetBlocks) {
+            const dataSet: MBDataSet = assembleDataSet(dataSetName)
+            const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
+            if (Object.keys(dataSetWarnings).length > 0) {
+                Object.keys(dataSetWarnings).forEach(blockId => {
+                    setWarning(workspace, blockId, dataSetWarnings[blockId])
+                })
+            } else {
+                prepareDataSet(dataSet)
+                addParametersToDataSetBlock(dataSet)
+            }
         }
 
-        // compile all models
+        // compile all models and set warnings if necessary
         for (const modelName in modelBlocks) {
-            const model = assembleModel(modelName)
-            const trainingDataSetName =
+            // grab the MBModel associated with a model name
+            const model: MBModel = assembleModel(modelName)
+
+            // grab the dataset that will be used to train the mbmodel
+            const dataSetName =
                 modelBlocks[modelName].inputs[1].fields[
                     "nn_training"
                 ].value?.toString()
-            const trainingDataSet: MBDataSet = allDataSets[trainingDataSetName]
-            if (trainingDataSet.totalRecordings)
-                prepareModel(model, trainingDataSet)
+            const trainingDataSet = allDataSets[dataSetName]
+            const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
+            if (!Object.keys(dataSetWarnings).length) {
+                // make sure the model (defined by the workspaceJSON) is valid
+                const modelWarnings = validModelJSON(model.blockJSON)
+
+                // if there are warnings, assign warnings to each block in the model
+                if (Object.keys(modelWarnings).length > 0) {
+                    Object.keys(modelWarnings).forEach(blockId => {
+                        setWarning(workspace, blockId, modelWarnings[blockId])
+                    })
+                } else {
+                    // there are no warnings, compile the model
+                    prepareModel(
+                        model,
+                        trainingDataSet,
+                        addParametersToModelBlock
+                    )
+                }
+            }
         }
-    }, [workspaceJSON])
+    }, [workspace, workspaceJSON])
+
+    /* For checking model and dataset composition */
+    const setWarning = (workspace, blockId: string, warningText: string) => {
+        const block = workspace.getBlockById(blockId)
+        const blockServices = resolveBlockServices(block)
+        if (blockServices)
+            blockServices.setWarning(MB_WARNINGS_CATEGORY, warningText)
+    }
 
     /* For dialog handling */
     const [recordDataDialogVisible, setRecordDataDialogVisible] =
@@ -239,40 +354,30 @@ function ModelBlockEditorWithContext() {
     const openTrainingModal = (clickedBlock: Blockly.Block) => {
         // setup model for training
         const modelName = clickedBlock.getField("CLASSIFIER_NAME").getText()
-        let selectedModel: MBModel = allModels[modelName]
-        if (!selectedModel) {
-            console.error(
-                "Error finding selected model, should never happen ",
-                selectedModel
-            )
-            // if the model does not exist in memory, create new model variable
-            selectedModel = new MBModel(modelName)
-            selectedModel.blockJSON = modelBlocks[modelName]
-        }
+        const selectedModel: MBModel = allModels[modelName]
 
         // setup dataset for training
-        const datasetName = clickedBlock.getField("NN_TRAINING").getText()
-        const selectedDataset = allDataSets[datasetName]
-
-        if (!selectedDataset.totalRecordings) {
+        const dataSetName = clickedBlock.getField("NN_TRAINING").getText()
+        const selectedDataset = allDataSets[dataSetName]
+        const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
+        if (Object.keys(dataSetWarnings).length) {
             Blockly.alert(
-                "This model cannot be trained. The training dataset is empty."
-            )
-        } else if (
-            !modelBlocks[modelName].inputs.filter(
-                input => input.name == "LAYER_INPUTS"
-            )[0].child
-        ) {
-            Blockly.alert(
-                "This model cannot be trained. The model architecture is empty."
+                "This model cannot be trained. Address the warnings on the dataset definition block."
             )
         } else {
-            // update the model and dataset to pass to the modal
-            setCurrentModel(selectedModel)
-            setCurrentDataSet(selectedDataset)
+            const modelWarnings = validModelJSON(modelBlocks[modelName])
+            if (Object.keys(modelWarnings).length) {
+                Blockly.alert(
+                    "This model cannot be trained. Address the warnings on model architecture block."
+                )
+            } else {
+                // update the model and dataset to pass to the modal
+                setCurrentModel(selectedModel)
+                setCurrentDataSet(selectedDataset)
 
-            // open the training modal
-            toggleTrainModelDialog()
+                // open the training modal
+                toggleTrainModelDialog()
+            }
         }
     }
     const updateModel = (model: MBModel) => {
@@ -327,11 +432,11 @@ function ModelBlockEditorWithContext() {
                     } else {
                         // we have a model or dataset
                         if (clickedBlock.type == MODEL_BLOCKS + "dataset") {
-                            const datasetName = clickedBlock
+                            const dataSetName = clickedBlock
                                 .getField("DATASET_NAME")
                                 .getText()
-                            const dataset = assembleDataSet(datasetName)
-                            downloadFile(dataset.toCSV(), datasetName, "csv")
+                            const dataSet = allDataSets[dataSetName]
+                            downloadFile(dataSet.toCSV(), dataSetName, "csv")
                         } else if (clickedBlock.type == MODEL_BLOCKS + "nn") {
                             const modelName = clickedBlock
                                 .getField("CLASSIFIER_NAME")
@@ -345,10 +450,8 @@ function ModelBlockEditorWithContext() {
                         }
                     }
                 } else if (command == "edit") {
-                    console.log(
-                        "Randi got a edit dataset command ",
-                        clickedBlock
-                    )
+                    // Randi TODO implement this dialog
+                    console.log("Got edit dataset command ", clickedBlock)
                     //openDataSetModal(clickedBlock)
                 } else if (command == "train") {
                     openTrainingModal(clickedBlock)

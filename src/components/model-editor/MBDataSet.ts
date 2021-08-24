@@ -23,6 +23,45 @@ export function arraysEqual(a: string[], b: string[]): boolean {
     return true
 }
 
+export function validDataSetJSON(blockJSON) {
+    const warnings = {}
+    const classNames = []
+
+    // 1. make sure there is at least one recording
+    const firstLayer = blockJSON.inputs.filter(
+        input => input.name == "LAYER_INPUTS"
+    )[0].child
+    if (!firstLayer) {
+        warnings[blockJSON.id] =
+            "Valid datasets should contain recording blocks"
+        return warnings
+    }
+
+    // the first recording block determines the input type
+    const inputTypes =
+        firstLayer.inputs[0].fields.expand_button.value.inputTypes
+    classNames.push(firstLayer.inputs[0].fields.class_name.value)
+    firstLayer.children?.forEach(childBlock => {
+        // 2. make sure subsequent recordings have the same input type as the first recording
+        const recordingInputTypes =
+            childBlock.inputs[0].fields.expand_button.value.inputTypes
+        if (!arraysEqual(recordingInputTypes, inputTypes)) {
+            warnings[childBlock.id] =
+                "Recording does not match dataset input type"
+        }
+
+        const className = childBlock.inputs[0].fields.class_name.value
+        if (classNames.indexOf(className) < 0) classNames.push(className)
+    })
+
+    // 3. make sure there are at least two classes in the dataset
+    if (classNames.length < 2)
+        warnings[blockJSON.id] =
+            "Valid datasets should contain at least two different class labels"
+
+    return warnings
+}
+
 export default class MBDataSet extends JDEventSource {
     static createFromFile(name: string, datasetJSONObj: DataSet): MBDataSet {
         const set = new MBDataSet(name)
@@ -96,8 +135,9 @@ export default class MBDataSet extends JDEventSource {
             this.totalRecordings += 1
             this.emit(CHANGE)
         } else {
-            // Randi TODO decide what error to raise when inputting incorrect data (shouldn't be possible, though)
-            console.log("Randi, did not add data to dataset")
+            console.error(
+                `Cannot add data of type ${recording.headers} to dataset with types ${this.inputTypes}`
+            )
         }
     }
 
@@ -187,5 +227,14 @@ export default class MBDataSet extends JDEventSource {
             recordData,
         ]
         return csv.join("\n")
+    }
+
+    toJSON() {
+        const datasetObj = {
+            recordings: this.recordings,
+            reigsterIds: this.registerIds,
+            name: this.name,
+        }
+        return datasetObj
     }
 }
