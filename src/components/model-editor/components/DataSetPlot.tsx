@@ -23,7 +23,11 @@ export default function DataSetPlot(props: {
         label: string,
         predictedLabel: string
     ) => {
-        const features = { class: label, "predicted class": predictedLabel }
+        const features = {
+            class: label,
+            "predicted class": predictedLabel,
+            correct: label == predictedLabel,
+        }
         const headerNames = []
         for (let idx = 0; idx < recording.width; idx++) {
             // differentiate input types with the same name (e.g. two buttons)
@@ -50,22 +54,17 @@ export default function DataSetPlot(props: {
             for (const label of labels) {
                 dataset.getRecordingsWithLabel(label).forEach(recording => {
                     // add info about whether point was correctly labelled
-                    let legendLabel = label
                     let predictedLabel = ""
                     if (predictedLabels && predictedLabels.length) {
                         // grab the predicted label associated with this data point
                         const prediction = predictedLabels[setPoints.length]
                         predictedLabel = labels[prediction]
-
-                        // change the name of the class depending on whether it was correctly classified
-                        if (predictedLabel == label) legendLabel += " - correct"
-                        else legendLabel += " - incorrect"
                     }
 
                     // add data point to chart
                     const recordingFeatures = calculateRecordingFeatures(
                         recording,
-                        legendLabel,
+                        label,
                         predictedLabel
                     )
                     setPoints.push(recordingFeatures)
@@ -187,6 +186,14 @@ export default function DataSetPlot(props: {
                                     scale: {
                                         range: chartProps.PALETTE,
                                     },
+                                },
+                                shape: {
+                                    field: "correct",
+                                    type: "nominal",
+                                    scale: {
+                                        range: ["circle", "triangle"],
+                                    },
+                                    legend: null,
                                 },
                                 tooltip: tooltipSpec,
                             },
