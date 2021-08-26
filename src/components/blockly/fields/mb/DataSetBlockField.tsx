@@ -15,7 +15,12 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
-import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+import WorkspaceContext, {
+    resolveBlockServices,
+    WorkspaceWithServices,
+    WorkspaceServices,
+} from "../../WorkspaceContext"
+import { CHANGE } from "../../../../../jacdac-ts/src/jdom/constants"
 
 import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
@@ -43,13 +48,24 @@ function DataSetParameterWidget(props: {
     initFieldValue: DataSetBlockFieldValue
 }) {
     const { initFieldValue } = props
-    const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const numRecordings = initFieldValue.numRecordings
-    const numSamples = initFieldValue.numSamples
-    const inputClasses = initFieldValue.inputClasses
-    const inputTypes = initFieldValue.inputTypes
+    const { numRecordings, numSamples, inputClasses, inputTypes } =
+        initFieldValue
+
+    const { sourceBlock } = useContext(WorkspaceContext)
+    const services = resolveBlockServices(sourceBlock)
+
+    // track workspace changes and re-render
+    const [, setBlockData] = useState(services.data)
+    useEffect(
+        () =>
+            services?.subscribe(CHANGE, () => {
+                console.log("Randi got a block change ", services.data)
+                setBlockData(services.data)
+            }),
+        [services]
+    )
 
     return (
         <PointerBoundary>
