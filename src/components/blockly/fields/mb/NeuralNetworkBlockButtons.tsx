@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
+import React, { ReactNode, useContext } from "react"
 import { Button, createStyles, Grid, Tooltip } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import AutorenewIcon from "@material-ui/icons/Autorenew"
@@ -9,7 +9,6 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import WorkspaceContext from "../../WorkspaceContext"
-import { PointerBoundary } from "../PointerBoundary"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -39,33 +38,31 @@ function NeuralNetworkButtonWidget() {
     }
 
     return (
-        <PointerBoundary>
-            <Grid container spacing={1} direction={"row"}>
-                <Grid item className={classes.buttonContainer}>
-                    <Tooltip title="Open modal to view and run classifier">
-                        <Button
-                            onClick={handleTrainModel}
-                            startIcon={<AutorenewIcon />}
-                            variant="outlined"
-                            size="small"
-                        >
-                            Train
-                        </Button>
-                    </Tooltip>
-                    &ensp;
-                    <Tooltip title="Download model JSON and weights file">
-                        <Button
-                            onClick={handleDownloadModel}
-                            startIcon={<DownloadIcon />}
-                            variant="outlined"
-                            size="small"
-                        >
-                            Download
-                        </Button>
-                    </Tooltip>
-                </Grid>
+        <Grid container spacing={1} direction={"row"}>
+            <Grid item className={classes.buttonContainer}>
+                <Tooltip title="Open modal to view and run classifier">
+                    <Button
+                        onClick={handleTrainModel}
+                        startIcon={<AutorenewIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Train
+                    </Button>
+                </Tooltip>
+                &ensp;
+                <Tooltip title="Download model JSON and weights file">
+                    <Button
+                        onClick={handleDownloadModel}
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Download
+                    </Button>
+                </Tooltip>
             </Grid>
-        </PointerBoundary>
+        </Grid>
     )
 }
 

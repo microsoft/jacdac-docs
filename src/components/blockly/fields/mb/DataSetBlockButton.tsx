@@ -1,6 +1,5 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
-import { Button, createStyles, Grid, Tooltip } from "@material-ui/core"
-import { makeStyles, Theme } from "@material-ui/core/styles"
+import React, { ReactNode, useContext } from "react"
+import { Button, Grid, Tooltip } from "@material-ui/core"
 import ViewIcon from "@material-ui/icons/Visibility"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DownloadIcon from "@material-ui/icons/GetApp"
@@ -9,20 +8,9 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import WorkspaceContext from "../../WorkspaceContext"
-import { PointerBoundary } from "../PointerBoundary"
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        numberField: {
-            marginBottom: theme.spacing(1),
-        },
-    })
-)
 
 function DataSetButtonWidget() {
-    const styles = useStyles()
-
-    const { workspace, sourceBlock } = useContext(WorkspaceContext)
+    const { sourceBlock } = useContext(WorkspaceContext)
 
     const handleViewDataSet = () => {
         console.log("View and edit dataset modal")
@@ -34,33 +22,31 @@ function DataSetButtonWidget() {
     }
 
     return (
-        <PointerBoundary>
-            <Grid container spacing={1} direction={"row"}>
-                <Grid item style={{ display: "inline-flex", width: 300 }}>
-                    <Tooltip title="View this data set and perform actions like splitting it">
-                        <Button
-                            onClick={handleViewDataSet}
-                            startIcon={<ViewIcon />}
-                            variant="outlined"
-                            size="small"
-                        >
-                            View
-                        </Button>
-                    </Tooltip>
-                    &ensp;
-                    <Tooltip title="Download dataset as csv file">
-                        <Button
-                            onClick={handleDownloadDataSet}
-                            startIcon={<DownloadIcon />}
-                            variant="outlined"
-                            size="small"
-                        >
-                            Download
-                        </Button>
-                    </Tooltip>
-                </Grid>
+        <Grid container spacing={1} direction={"row"}>
+            <Grid item style={{ display: "inline-flex", width: 300 }}>
+                <Tooltip title="View this data set and perform actions like splitting it">
+                    <Button
+                        onClick={handleViewDataSet}
+                        startIcon={<ViewIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        View
+                    </Button>
+                </Tooltip>
+                &ensp;
+                <Tooltip title="Download dataset as csv file">
+                    <Button
+                        onClick={handleDownloadDataSet}
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        size="small"
+                    >
+                        Download
+                    </Button>
+                </Tooltip>
             </Grid>
-        </PointerBoundary>
+        </Grid>
     )
 }
 
