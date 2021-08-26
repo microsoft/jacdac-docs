@@ -31,6 +31,8 @@ import {
     trainRequest,
     predictRequest,
 } from "../../blockly/dsl/workers/tf.proxy"
+import Blockly, { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
+
 import type {
     TFModelTrainRequest,
     TFModelTrainResponse,
@@ -54,18 +56,15 @@ import ReadingFieldGrid from "../../ReadingFieldGrid"
 import useChange from "../../../jacdac/useChange"
 
 import { PointerBoundary } from "../../blockly/fields/PointerBoundary"
+import { MODEL_BLOCKS } from "../../model-editor/modelblockdsl"
+import { useId } from "react-use-id-hook"
+import { resolveBlockServices } from "../../blockly/WorkspaceContext"
 
-const ConfusionMatrixHeatMap = lazy(
-    () => import("../../model-editor/components/ConfusionMatrixHeatMap")
-)
-const DataSetPlot = lazy(
-    () => import("../../model-editor/components/DataSetPlot")
-)
 const LossAccChart = lazy(
     () => import("../../model-editor/components/LossAccChart")
 )
-const ModelSummary = lazy(
-    () => import("../../model-editor/components/ModelSummary")
+const ModelSummaryDropdown = lazy(
+    () => import("../../model-editor/components/ModelSummaryDropdown")
 )
 
 const LIVE_HORIZON = 100
@@ -88,10 +87,12 @@ export default function TrainModelDialog(props: {
     classes: any
     chartPalette: string[]
     open: boolean
-    onModelUpdate: (model: MBModel) => void
+    onModelUpdate: (model: MBModel, blockId: string) => void
     onDone: () => void
     dataset: MBDataSet
     model: MBModel
+    trainedModelCount: number
+    workspace: WorkspaceSvg
 }) {
     const {
         classes,
@@ -101,7 +102,10 @@ export default function TrainModelDialog(props: {
         onDone,
         dataset,
         model,
+        trainedModelCount,
+        workspace,
     } = props
+
     const chartProps = {
         CHART_WIDTH: 300,
         CHART_HEIGHT: 300,
@@ -111,9 +115,9 @@ export default function TrainModelDialog(props: {
     }
     const { fileStorage } = useContext(ServiceManagerContext)
 
-    const [dialogType, setDialogType] = useState<
-        "trainModel" | "evalModel" | "testModel"
-    >("trainModel")
+    const [dialogType, setDialogType] = useState<"trainModel" | "testModel">(
+        "trainModel"
+    )
 
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const readingRegisters = useChange(bus, bus =>
@@ -141,9 +145,6 @@ export default function TrainModelDialog(props: {
         return []
     }, [])
     const [logTimestamp, setLogTimestamp] = useState(0)
-    // for confusion matrix and training dataset performance plot
-    const [trainingPredictionResult, setTrainingPredictionResult] = useState([])
-    const [trainTimestamp, setTrainTimestamp] = useState(0)
 
     const trainTFModel = async () => {
         model.status = "training"
@@ -202,15 +203,27 @@ export default function TrainModelDialog(props: {
             const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
             model.armModel = trainResult.data.armModel
-            setTrainingPredictionResult(trainResult.data.yPrediction)
-            setTrainTimestamp(Date.now())
 
             // Update model status
             model.status = "trained"
             model.trainingAcc = trainingHistory[trainingHistory.length - 1]
-            onModelUpdate(model)
+            addNewTrainedModelBlock()
             setTrainEnabled(true)
         } else model.status = "untrained"
+    }
+    const addNewTrainedModelBlock = () => {
+        // Create new trained model block
+        const trainedModelName = model.name + ".trained" + trainedModelCount
+        const dataSetName = dataset.name
+
+        const newBlock = Blockly.Xml.domToBlock(
+            Blockly.Xml.textToDom(
+                `<block type="model_block_trained_nn"><field name="TRAINED_MODEL_NAME">${trainedModelName}</field><field name="MODEL_TEST_SET" variabletype="ModelBlockDataSet">${dataSetName}</field><field name="SELECTED_CHART">model summary</field><field name="TRAINED_MODEL_PARAMS">{}</field></block>`
+            ),
+            workspace
+        )
+
+        onModelUpdate(model, newBlock.id)
     }
 
     /* For testing trained model */
@@ -335,7 +348,7 @@ export default function TrainModelDialog(props: {
             )) as TFModelPredictResponse
 
             // Save probability for each class in model object
-            const prediction = predResult.data.prediction
+            const prediction = predResult.data.predictAll[0]
             model.labels.forEach(label => {
                 liveOutput.push(prediction[label])
 
@@ -367,18 +380,15 @@ export default function TrainModelDialog(props: {
         onDone()
     }
     const handleBack = () => {
-        // go to the previous page
-        if (dialogType == "testModel") {
-            // turn off predictions
-            setRegisterIdsChecked([])
+        // turn off predictions
+        setRegisterIdsChecked([])
 
-            setDialogType("evalModel")
-        } else setDialogType("trainModel")
+        // go to the previous page
+        setDialogType("trainModel")
     }
     const handleNext = () => {
         // go to the next page
-        if (dialogType == "trainModel") setDialogType("evalModel")
-        else setDialogType("testModel")
+        setDialogType("testModel")
     }
     const handleDownloadModel = () => {
         // TODO also download arm model (as a zip file?)
@@ -416,7 +426,7 @@ export default function TrainModelDialog(props: {
                                     </IconButtonWithTooltip>
                                 </h3>
                                 <Suspense>
-                                    <ModelSummary
+                                    <ModelSummaryDropdown
                                         reactStyle={classes}
                                         dataset={dataset}
                                         model={model}
@@ -477,66 +487,6 @@ export default function TrainModelDialog(props: {
                             color="primary"
                             endIcon={<NavigateNextIcon />}
                             disabled={model.status !== "trained"}
-                            onClick={handleNext}
-                        >
-                            Next
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </PointerBoundary>
-        )
-    else if (dialogType == "evalModel")
-        return (
-            <PointerBoundary>
-                <Dialog
-                    open={open}
-                    onClose={handleCancel}
-                    fullWidth={true}
-                    maxWidth={"md"}
-                >
-                    <DialogContent>
-                        <Grid container direction={"column"}>
-                            <Grid item>
-                                <h3>Training Performance Result</h3>
-                                {!!trainingPredictionResult.length && (
-                                    <div key="vega-training-set-charts">
-                                        <Suspense>
-                                            <ConfusionMatrixHeatMap
-                                                chartProps={chartProps}
-                                                yActual={dataset.ys}
-                                                yPredicted={
-                                                    trainingPredictionResult
-                                                }
-                                                labels={model.labels}
-                                                timestamp={trainTimestamp}
-                                            />
-                                        </Suspense>
-                                        <br />
-                                        <Suspense>
-                                            <DataSetPlot
-                                                chartProps={chartProps}
-                                                reactStyle={classes}
-                                                dataset={dataset}
-                                                predictedLabels={
-                                                    trainingPredictionResult
-                                                }
-                                                timestamp={trainTimestamp}
-                                            />
-                                        </Suspense>
-                                    </div>
-                                )}
-                                <br />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button variant="contained" onClick={handleBack}>
-                            Back
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<NavigateNextIcon />}
                             onClick={handleNext}
                         >
                             Next
