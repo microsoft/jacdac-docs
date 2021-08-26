@@ -21,8 +21,9 @@ import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
 
 export interface PoolingLayerFieldValue {
-    totalSize: number
-    runTimeInCycles: number
+    percentParams: number
+    percentSize: number
+    runTimeInMs: number
     outputShape: number[]
     poolSize: number
     strideSize: number
@@ -47,10 +48,8 @@ function LayerParameterWidget(props: {
     const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const totalSize = initFieldValue.totalSize
-    const outputShape = initFieldValue.outputShape
-    const runTimeInCycles = initFieldValue.runTimeInCycles
-
+    const { percentSize, percentParams, outputShape, runTimeInMs } =
+        initFieldValue
     const [poolSize, setPoolSize] = useState(initFieldValue.poolSize)
     const [strideSize, setStrideSize] = useState(initFieldValue.strideSize)
 
@@ -131,10 +130,12 @@ function LayerParameterWidget(props: {
                 </Grid>
                 <Grid item>
                     <Box color="text.secondary">
-                        Total size: {totalSize} bytes
-                        <br />
-                        Run time: {runTimeInCycles} cycles <br />
                         Output shape: [{outputShape.join(", ")}]<br />
+                        Percent of total size: {percentSize.toPrecision(2)}%
+                        <br />
+                        Percent of total params: {percentParams.toPrecision(2)}%
+                        <br />
+                        Run time: {runTimeInMs.toPrecision(2)} ms <br />
                     </Box>
                 </Grid>
             </Grid>
@@ -158,8 +159,9 @@ export default class PoolingLayerBlockField extends ReactInlineField {
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            totalSize: 0,
-            runTimeInCycles: 0,
+            percentParams: 0,
+            percentSize: 0,
+            runTimeInMs: 0,
             outputShape: [0, 0],
             poolSize: 2,
             strideSize: 1,

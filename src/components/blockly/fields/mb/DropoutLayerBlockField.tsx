@@ -45,11 +45,7 @@ function LayerParameterWidget(props: {
     const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const percentSize = initFieldValue.percentSize
-    const percentParams = initFieldValue.percentParams
-    const outputShape = initFieldValue.outputShape
-    const runTimeInMs = initFieldValue.runTimeInMs
-
+    const { percentSize, percentParams, outputShape, runTimeInMs } = initFieldValue
     const [rate, setRate] = useState(initFieldValue.rate)
 
     useEffect(() => {

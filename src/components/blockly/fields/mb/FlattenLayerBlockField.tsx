@@ -1,15 +1,5 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
-import {
-    Box,
-    Grid,
-    MenuItem,
-    Select,
-    TextField,
-    Tooltip,
-    makeStyles,
-    Theme,
-    createStyles,
-} from "@material-ui/core"
+import React, { ReactNode, useContext } from "react"
+import { Box, Grid, makeStyles, Theme, createStyles } from "@material-ui/core"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
@@ -17,12 +7,10 @@ import { PointerBoundary } from "../PointerBoundary"
 
 import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
 
-import { useId } from "react-use-id-hook"
-import ExpandModelBlockField from "./ExpandModelBlockField"
-
 export interface FlattenLayerFieldValue {
-    totalSize: number
-    runTimeInCycles: number
+    percentParams: number
+    percentSize: number
+    runTimeInMs: number
     outputShape: number[]
 }
 
@@ -42,22 +30,21 @@ function LayerParameterWidget(props: {
     initFieldValue: FlattenLayerFieldValue
 }) {
     const { initFieldValue } = props
-    const { sourceBlock } = useContext(WorkspaceContext)
-    const classes = useStyles()
 
-    const totalSize = initFieldValue.totalSize
-    const outputShape = initFieldValue.outputShape
-    const runTimeInCycles = initFieldValue.runTimeInCycles
+    const { percentSize, percentParams, outputShape, runTimeInMs } =
+        initFieldValue
 
     return (
         <PointerBoundary>
             <Grid container spacing={1} direction={"column"}>
                 <Grid item>
                     <Box color="text.secondary">
-                        Total size: {totalSize} bytes
-                        <br />
-                        Run time: {runTimeInCycles} cycles <br />
                         Output shape: [{outputShape.join(", ")}]<br />
+                        Percent of total size: {percentSize.toPrecision(2)}%
+                        <br />
+                        Percent of total params: {percentParams.toPrecision(2)}%
+                        <br />
+                        Run time: {runTimeInMs.toPrecision(2)} ms <br />
                     </Box>
                 </Grid>
             </Grid>
@@ -82,7 +69,7 @@ export default class FlattenLayerBlockField extends ReactInlineField {
     get defaultValue() {
         return {
             numTrainableParams: 0,
-            runTimeInCycles: 0,
+            runTimeInMs: 0,
             outputShape: [0],
         }
     }
