@@ -12,6 +12,9 @@ export const DEFAULT_MODEL = "default"
 export function validModelJSON(blockJSON) {
     const warnings = {}
 
+    // don't check empty block JSON
+    if (!blockJSON) return undefined
+
     // don't check default models
     if (blockJSON == DEFAULT_MODEL) return warnings
 
