@@ -41,6 +41,9 @@ const MB_NEW_FILE_CONTENT = JSON.stringify({
     xml: "",
 } as WorkspaceFile)
 
+const MICROBIT_SPEED = 64000 // in 1/ms
+const MICROBIT_BUFFER_LENGTH = 4
+
 function getRecordingsFromLocalStorage() {
     // check local storage for blocks
     const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
@@ -57,6 +60,25 @@ function getRecordingsFromLocalStorage() {
     }
     return rBlocks
 }
+function getTrainedModelsFromLocalStorage() {
+    // check local storage for blocks
+    const dataObj = localStorage.getItem(MB_DATA_STORAGE_KEY)
+    if (dataObj == null || dataObj == undefined) return {}
+    const modelEditorData = JSON.parse(dataObj)
+
+    // add recordings from local storage
+    const mBlocks = {}
+    for (const id in modelEditorData["models"]) {
+        const model = modelEditorData["models"][id]
+        mBlocks[id] = MBModel.createFromFile(model)
+    }
+    console.log("Randi get from local storage ", mBlocks)
+    return mBlocks
+}
+
+function getEmptyMap() {
+    return {}
+}
 
 function ModelBlockEditorWithContext() {
     // block context handles hosting blockly
@@ -70,15 +92,18 @@ function ModelBlockEditorWithContext() {
     const [currentDataSet, setCurrentDataSet] = useState(undefined)
     const [currentModel, setCurrentModel] = useState(undefined)
     // dictionary of model vars and MBModel objs
-    const allModels = {}
-    const allDataSets = {}
+    const allModels = useMemo(getEmptyMap, [])
+    const allDataSets = useMemo(getEmptyMap, [])
     const allRecordings = useMemo(getRecordingsFromLocalStorage, [])
-    const updateLocalStorage = newRecordings => {
+    const trainedModels = useMemo(getTrainedModelsFromLocalStorage, [])
+    const updateLocalStorage = (newRecordings, newTrainedModels) => {
         const recordings = newRecordings || allRecordings
+        const models = newTrainedModels || trainedModels
 
         // convert dataset object to JSON string
         const modelBlocksDataJSON = JSON.stringify({
             recordings: recordings,
+            models: models,
         })
         // save JSON string in local storage
         localStorage.setItem(MB_DATA_STORAGE_KEY, modelBlocksDataJSON)
@@ -147,8 +172,7 @@ function ModelBlockEditorWithContext() {
 
     const assembleDataSet = (dataSetName: string) => {
         // associate block with dataset
-        const dataSet: MBDataSet =
-            allDataSets[dataSetName] || new MBDataSet(dataSetName)
+        const dataSet: MBDataSet = new MBDataSet(dataSetName)
         const dataSetBlock = dataSetBlocks[dataSetName]
 
         // grab nested recording blocks and place them in the dataset
@@ -186,9 +210,7 @@ function ModelBlockEditorWithContext() {
                 model.parseBlockJSON = modelBlock
                 model.status = "empty"
             }
-        } else {
-            model.parseBlockJSON = modelBlock
-        }
+        } else model.parseBlockJSON = modelBlock
 
         // store model in memory
         allModels[modelName] = model
@@ -211,6 +233,7 @@ function ModelBlockEditorWithContext() {
             numSamples: dataSet.totalRecordings,
             inputClasses: dataSet.labels,
             inputTypes: inputTypes,
+            shape: [dataSet.length, dataSet.width],
         })
     }
     const addParametersToModelBlock = (model: MBModel) => {
@@ -225,11 +248,16 @@ function ModelBlockEditorWithContext() {
             const paramField = modelBlock.getField(
                 "EXPAND_BUTTON"
             ) as ExpandModelBlockField
+
+            const totalModelSize = totalStats.codeBytes + totalStats.weightBytes
+            const totalModelParams =
+                totalStats.weightBytes / MICROBIT_BUFFER_LENGTH
             paramField.updateFieldValue({
-                numLayers: layerStats.length,
+                totalLayers: layerStats.length,
                 inputShape: totalStats.inputShape,
-                totalSize: totalStats.codeBytes + totalStats.weightBytes,
-                runTimeInCycles: totalStats.optimizedCycles,
+                runTimeInMs: totalStats.optimizedCycles / MICROBIT_SPEED,
+                totalSize: totalModelSize,
+                totalParams: totalModelParams,
             })
 
             // go through layers
@@ -240,12 +268,18 @@ function ModelBlockEditorWithContext() {
                     const layerParamField = layerBlock.getField(
                         "EXPAND_BUTTON"
                     ) as ExpandModelBlockField
+
+                    const totalLayerSize =
+                        layerStats[idx].codeBytes + layerStats[idx].weightBytes
+                    const totalLayerParams =
+                        layerStats[idx].weightBytes / MICROBIT_BUFFER_LENGTH
                     layerParamField.updateFieldValue({
                         outputShape: layerStats[idx].outputShape,
-                        totalSize:
-                            layerStats[idx].codeBytes +
-                            layerStats[idx].weightBytes,
-                        runTimeInCycles: layerStats[idx].optimizedCycles,
+                        percentSize: (totalLayerSize * 100) / totalModelSize,
+                        percentParams:
+                            (totalLayerParams * 100) / totalModelParams,
+                        runTimeInMs:
+                            layerStats[idx].optimizedCycles / MICROBIT_SPEED,
                     })
                 }
             })
@@ -260,14 +294,17 @@ function ModelBlockEditorWithContext() {
         // compile datasets and set warnings if necessary
         for (const dataSetName in dataSetBlocks) {
             const dataSet: MBDataSet = assembleDataSet(dataSetName)
+
             const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
-            if (Object.keys(dataSetWarnings).length > 0) {
-                Object.keys(dataSetWarnings).forEach(blockId => {
-                    setWarning(workspace, blockId, dataSetWarnings[blockId])
-                })
-            } else {
-                prepareDataSet(dataSet)
-                addParametersToDataSetBlock(dataSet)
+            if (dataSetWarnings) {
+                if (Object.keys(dataSetWarnings).length) {
+                    Object.keys(dataSetWarnings).forEach(blockId => {
+                        setWarning(workspace, blockId, dataSetWarnings[blockId])
+                    })
+                } else {
+                    prepareDataSet(dataSet)
+                    addParametersToDataSetBlock(dataSet)
+                }
             }
         }
 
@@ -282,29 +319,37 @@ function ModelBlockEditorWithContext() {
                     "nn_training"
                 ].value?.toString()
             const trainingDataSet = allDataSets[dataSetName]
+
+            // make sure the dataset does not have warnings on it
             const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
-            if (!Object.keys(dataSetWarnings).length) {
+            if (dataSetWarnings && !Object.keys(dataSetWarnings).length) {
                 // make sure the model (defined by the workspaceJSON) is valid
                 const modelWarnings = validModelJSON(model.blockJSON)
 
                 // if there are warnings, assign warnings to each block in the model
-                if (Object.keys(modelWarnings).length > 0) {
-                    Object.keys(modelWarnings).forEach(blockId => {
-                        setWarning(workspace, blockId, modelWarnings[blockId])
-                    })
-                } else {
-                    // there are no warnings, compile the model
-                    prepareModel(
-                        model,
-                        trainingDataSet,
-                        addParametersToModelBlock
-                    )
+                if (modelWarnings) {
+                    if (Object.keys(modelWarnings).length) {
+                        Object.keys(modelWarnings).forEach(blockId => {
+                            setWarning(
+                                workspace,
+                                blockId,
+                                modelWarnings[blockId]
+                            )
+                        })
+                    } else {
+                        // there are no warnings, compile the model
+                        prepareModel(
+                            model,
+                            trainingDataSet,
+                            addParametersToModelBlock
+                        )
+                    }
                 }
             }
         }
     }, [workspace, workspaceJSON])
 
-    /* For checking model and dataset composition */
+    /* For setting warnings about model and dataset composition */
     const setWarning = (workspace, blockId: string, warningText: string) => {
         const block = workspace.getBlockById(blockId)
         const blockServices = resolveBlockServices(block)
@@ -317,27 +362,57 @@ function ModelBlockEditorWithContext() {
         useState<boolean>(false)
     const [trainModelDialogVisible, setTrainModelDialogVisible] =
         useState<boolean>(false)
+    const [viewDataSetDialogVisible, setViewDataSetDialogVisible] =
+        useState<boolean>(false)
+    const toggleViewDataSetDialog = () => toggleDialog("dataset")
     const toggleRecordDataDialog = () => toggleDialog("recording")
     const toggleTrainModelDialog = () => toggleDialog("model")
     const toggleDialog = (dialog: string) => {
-        if (dialog == "recording") {
+        if (dialog == "dataset") {
+            const b = !viewDataSetDialogVisible
+            setViewDataSetDialogVisible(b)
+        } else if (dialog == "recording") {
             const b = !recordDataDialogVisible
             setRecordDataDialogVisible(b)
         } else if (dialog == "model") {
             const b = !trainModelDialogVisible
             setTrainModelDialogVisible(b)
-        } // else if edit dataset
+        }
     }
     const buttonsWithDialogs = {
         createNewDataSetButton: addNewDataSet,
         createNewRecordingButton: toggleRecordDataDialog,
-        createNewClassifierButton: addNewClassifier,
+        createNewClassifierButton: addNewClassifier, // Randi TODO make a modal for selecting a pre-made classifier
     }
+    const openDataSetModal = (clickedBlock: Blockly.Block) => {
+        const dataSetName = clickedBlock.getField("DATASET_NAME").getText()
+        const selectedDataset = allDataSets[dataSetName]
+
+        const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
+        if (!dataSetWarnings || Object.keys(dataSetWarnings).length) {
+            Blockly.alert(
+                "This dataset cannot be opened. Address the warnings on the dataset definition block."
+            )
+        } else {
+            setCurrentDataSet(selectedDataset)
+
+            // open the view dataset modal
+            toggleViewDataSetDialog()
+        }
+    }
+    const closeDataSetModal = () => {
+        // reset dataset that gets passed to dialogs
+        setCurrentDataSet(undefined)
+
+        // close dialog
+        toggleViewDataSetDialog()
+    }
+
     const updateRecording = (recording: FieldDataSet[], blockId: string) => {
         if (recording && blockId) {
             // Add recording data to list of recordings
             allRecordings[blockId] = recording
-            updateLocalStorage(allRecordings)
+            updateLocalStorage(allRecordings, null)
         }
     }
     const closeRecordingModal = (
@@ -359,14 +434,15 @@ function ModelBlockEditorWithContext() {
         // setup dataset for training
         const dataSetName = clickedBlock.getField("NN_TRAINING").getText()
         const selectedDataset = allDataSets[dataSetName]
+
         const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
-        if (Object.keys(dataSetWarnings).length) {
+        if (!dataSetWarnings || Object.keys(dataSetWarnings).length) {
             Blockly.alert(
                 "This model cannot be trained. Address the warnings on the dataset definition block."
             )
         } else {
             const modelWarnings = validModelJSON(modelBlocks[modelName])
-            if (Object.keys(modelWarnings).length) {
+            if (!modelWarnings || Object.keys(modelWarnings).length) {
                 Blockly.alert(
                     "This model cannot be trained. Address the warnings on model architecture block."
                 )
@@ -380,10 +456,20 @@ function ModelBlockEditorWithContext() {
             }
         }
     }
-    const updateModel = (model: MBModel) => {
-        if (model) {
-            // Add trained model to record of allModels
-            allModels[model.name] = model
+    const updateModel = (model: MBModel, blockId: string) => {
+        // Add trained model to record of allModels
+        if (model) allModels[model.name] = model
+
+        // Model was trained, add model to list of trained models
+        if (blockId) {
+            trainedModels[blockId] = model
+
+            // add dataset and model to new block
+            const newBlock = workspace.getBlockById(blockId)
+            const services = resolveBlockServices(newBlock)
+            services.data = [currentDataSet, model]
+
+            updateLocalStorage(null, trainedModels)
         }
     }
     const closeTrainingModal = () => {
@@ -412,23 +498,23 @@ function ModelBlockEditorWithContext() {
     /* For block button clicks */
     const handleWorkspaceChange = event => {
         if (event.type == Blockly.Events.BLOCK_DELETE) {
+            // Randi TODO remove this and rely on the blocks
             delete allRecordings[event.blockId]
+            delete trainedModels[event.blockId]
+            updateLocalStorage(allRecordings, trainedModels)
         } else if (event.type == Blockly.Events.CLICK && event.blockId) {
             const clickedBlock = workspace.getBlockById(event.blockId)
             if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
                 const command = clickedBlock.data.split(".")[1]
                 if (command == "download") {
+                    const recording = allRecordings[clickedBlock.id]
                     // find the correct recording, dataset, or model to downlaod
-                    if (allRecordings[clickedBlock.id]) {
+                    if (recording) {
                         // get recording, recording name, and class name
-                        const recording = allRecordings[clickedBlock.id]
-                        const recordingName = clickedBlock
-                            .getField("RECORDING_NAME")
-                            .getText()
                         const className = clickedBlock
                             .getField("CLASS_NAME")
                             .getText()
-                        downloadRecordings(recording, recordingName, className)
+                        downloadRecordings(recording, className)
                     } else {
                         // we have a model or dataset
                         if (clickedBlock.type == MODEL_BLOCKS + "dataset") {
@@ -447,12 +533,21 @@ function ModelBlockEditorWithContext() {
                                 modelName,
                                 "json"
                             )
+                        } else if (
+                            clickedBlock.type ==
+                            MODEL_BLOCKS + "trained_nn"
+                        ) {
+                            const model: MBModel =
+                                trainedModels[clickedBlock.id]
+                            downloadFile(
+                                JSON.stringify(model),
+                                model.name,
+                                "json"
+                            )
                         }
                     }
                 } else if (command == "edit") {
-                    // Randi TODO implement this dialog
-                    console.log("Got edit dataset command ", clickedBlock)
-                    //openDataSetModal(clickedBlock)
+                    openDataSetModal(clickedBlock)
                 } else if (command == "train") {
                     openTrainingModal(clickedBlock)
                 } else {
@@ -464,11 +559,43 @@ function ModelBlockEditorWithContext() {
                 // clear the command
                 clickedBlock.data = null
             }
+        } else if (event.type == Blockly.Events.BLOCK_CHANGE && event.blockId) {
+            const clickedBlock = workspace.getBlockById(event.blockId)
+            if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
+                const command = clickedBlock.data.split(".")[1]
+                if (command == "refreshdisplay") {
+                    // setup model for training
+                    const selectedModel: MBModel =
+                        trainedModels[clickedBlock.id]
+
+                    // setup dataset for training
+                    const dataSetName = clickedBlock
+                        .getField("MODEL_TEST_SET")
+                        .getText()
+                    const selectedDataSet = allDataSets[dataSetName]
+
+                    const dataSetWarnings = validDataSetJSON(
+                        dataSetBlocks[dataSetName]
+                    )
+                    if (
+                        !dataSetWarnings ||
+                        Object.keys(dataSetWarnings).length
+                    ) {
+                        Blockly.alert(
+                            "This dataset cannot be tested. Address the warnings on the dataset definition block."
+                        )
+                    } else {
+                        const services = resolveBlockServices(clickedBlock)
+                        services.data = [selectedDataSet, selectedModel]
+                    }
+                }
+                // clear the command
+                clickedBlock.data = null
+            }
         }
     }
     const downloadRecordings = (
         recordings: FieldDataSet[],
-        recordingName: string,
         className: string
     ) => {
         const recordingCountHeader = `Number of recordings,${recordings.length}`
@@ -488,7 +615,7 @@ function ModelBlockEditorWithContext() {
         const recordData = recordingData.join("\n")
 
         const csv: string[] = [recordingCountHeader, recordData]
-        downloadFile(csv.join("\n"), recordingName, "csv")
+        downloadFile(csv.join("\n"), recordings[0].name, "csv")
     }
     const downloadFile = (
         content: string,
@@ -521,14 +648,18 @@ function ModelBlockEditorWithContext() {
                 {Flags.diagnostics && <BlockDiagnostics />}
                 <Suspense>
                     <ModelBlockDialogs
+                        viewDataSetDialogVisible={viewDataSetDialogVisible}
                         recordDataDialogVisible={recordDataDialogVisible}
                         trainModelDialogVisible={trainModelDialogVisible}
+                        onViewDataSetDone={closeDataSetModal}
                         onRecordingDone={closeRecordingModal}
                         onModelUpdate={updateModel}
                         onTrainingDone={closeTrainingModal}
                         workspace={workspace}
                         dataset={currentDataSet}
                         model={currentModel}
+                        recordingCount={Object.keys(allRecordings).length}
+                        trainedModelCount={Object.keys(trainedModels).length}
                     />
                 </Suspense>
             </Grid>

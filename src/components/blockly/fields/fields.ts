@@ -39,6 +39,7 @@ import PoolingLayerBlockField from "./mb/PoolingLayerBlockField"
 import DropoutLayerBlockField from "./mb/DropoutLayerBlockField"
 import FlattenLayerBlockField from "./mb/FlattenLayerBlockField"
 import DenseLayerBlockField from "./mb/DenseLayerBlockField"
+import TrainedModelBlockField from "./mb/TrainedModelBlockField"
 
 import JSONSettingsField from "./JSONSettingsField"
 
@@ -100,6 +101,7 @@ export function registerFields() {
         DropoutLayerBlockField,
         FlattenLayerBlockField,
         DenseLayerBlockField,
+        TrainedModelBlockField,
 
         FileSaveField,
         FileOpenField,

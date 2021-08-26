@@ -9,6 +9,7 @@ import BlockDomainSpecificLanguage from "../blockly/dsl/dsl"
 import ExpandModelBlockField from "../blockly/fields/mb/ExpandModelBlockField"
 import DataSetBlockButton from "../blockly/fields/mb/DataSetBlockButton"
 import NeuralNetworkBlockButton from "../blockly/fields/mb/NeuralNetworkBlockButtons"
+import TrainedModelBlockField from "../blockly/fields/mb/TrainedModelBlockField"
 
 export const MODEL_BLOCKS = "model_block_"
 export const MB_DATASET_VAR_TYPE = "ModelBlockDataSet"
@@ -93,10 +94,10 @@ export class ModelBlockDomainSpecificLanguage
                 nextStatement: MODEL_BLOCK_CLASS_STATEMENT_TYPE,
                 colour: class_color,
                 tooltip:
-                    "Use this block to define your classes. Click on the inspector icon to view and edit a class",
+                    "Use this recording block to define your classes. Click on the plus icon to download this recording",
                 helpUrl: "",
             } as BlockDefinition,
-            /* Learning Blocks */
+            /* Classifier Blocks */
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "nn",
@@ -143,6 +144,49 @@ export class ModelBlockDomainSpecificLanguage
                 colour: learning_color,
                 tooltip:
                     "Use this block to define a neural network classifier; it only takes layer blocks.",
+                helpUrl: "",
+            } as BlockDefinition,
+            {
+                kind: "block",
+                type: MODEL_BLOCKS + "trained_nn",
+                message0: "model %1 testing data %2",
+                args0: [
+                    {
+                        type: "field_input",
+                        name: "TRAINED_MODEL_NAME",
+                        text: "classifier1.trained",
+                    },
+                    {
+                        type: "field_variable",
+                        name: "MODEL_TEST_SET",
+                        variable: "dataset1",
+                        variableTypes: [MB_DATASET_VAR_TYPE],
+                        defaultType: MB_DATASET_VAR_TYPE,
+                    },
+                ],
+                message1: "display %1",
+                args1: [
+                    {
+                        type: "field_dropdown",
+                        options: [
+                            "model summary",
+                            "confusion matrix",
+                            "dataset plot",
+                        ].map(s => [s, s]),
+                        name: "SELECTED_CHART",
+                    },
+                ],
+                message2: "%1",
+                args2: [
+                    {
+                        type: TrainedModelBlockField.KEY,
+                        name: "TRAINED_MODEL_PARAMS",
+                    },
+                ],
+                inputsInline: false,
+                colour: learning_color,
+                tooltip:
+                    "Use this block to test a trained model with different datasets.",
                 helpUrl: "",
             } as BlockDefinition,
             {
@@ -340,49 +384,65 @@ export class ModelBlockDomainSpecificLanguage
                 colour: learning_color,
                 contents: [
                     {
+                        kind: "label",
+                        text: "Classifiers",
+                    },
+                    {
                         kind: "button",
                         text: "Create new classifier variable...",
                         callbackKey: "createNewClassifierButton",
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":0,"numParams":0,"runTimeInCycles":0,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`,
+                        blockxml: `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalParams":0,"totalLayers":0,"totalSize":0,"runTimeInMs":0,"inputShape":[0,0],"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`,
+                    },
+                    {
+                        kind: "label",
+                        text: "Layers",
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_avgpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_avgpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_avgpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_avgpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0,0],"rate":0.1}</field></block>`,
+                        blockxml: `<block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"rate":0.1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0]}</field></block>`,
+                        blockxml: `<block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0]}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalSize":0,"runTimeInCycles":0,"outputShape":[0],"numUnits":4,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0],"numUnits":4,"activation":"relu"}</field></block>`,
+                    },
+                    {
+                        kind: "label",
+                        text: "Visualizations",
+                    },
+                    {
+                        kind: "block",
+                        type: MODEL_BLOCKS + "trained_nn",
                     },
                 ],
             })]
