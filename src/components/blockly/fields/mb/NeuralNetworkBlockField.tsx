@@ -21,9 +21,11 @@ import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
 
 export interface NeuralNetworkBlockFieldValue {
-    numLayers: number
-    numParams: number
-    runTimeInCycles: number
+    totalLayers: number
+    totalParams: number
+    totalSize: number
+    runTimeInMs: number
+    inputShape: number[]
     optimizer: string
     numEpochs: number
     lossFn: string
@@ -49,10 +51,8 @@ function NNParameterWidget(props: {
     const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const numLayers = initFieldValue.numLayers
-    const numParams = initFieldValue.numParams
-    const runTimeInCycles = initFieldValue.runTimeInCycles
-
+    const { totalLayers, totalSize, totalParams, runTimeInMs, inputShape } =
+        initFieldValue
     const [optimizer, setOptimizer] = useState<string>(initFieldValue.optimizer)
     const [numEpochs, setNumEpochs] = useState(initFieldValue.numEpochs)
     const [lossFn, setLossFn] = useState(initFieldValue.lossFn)
@@ -154,9 +154,12 @@ function NNParameterWidget(props: {
                 </Grid>
                 <Grid item>
                     <Box color="text.secondary">
-                        Total layers: {numLayers} <br />
-                        Total params: {numParams} <br />
-                        Run time: {runTimeInCycles} cycles <br />
+                        Input shape: [{inputShape.join(", ")}]<br />
+                        No. of layers: {totalLayers} <br />
+                        No. of parameters: {totalParams} <br />
+                        Total size: {(totalSize / 1000).toPrecision(2)} KB{" "}
+                        <br />
+                        Run time: {runTimeInMs.toPrecision(2)}ms @ 64MHz <br />
                     </Box>
                 </Grid>
             </Grid>
@@ -180,9 +183,11 @@ export default class NeuralNetworkBlockField extends ReactInlineField {
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            numLayers: 0,
-            numParams: 0,
-            runTimeInCycles: 0,
+            totalLayers: 0,
+            totalParams: 0,
+            totalSize: 0,
+            runTimeInMs: 0,
+            inputShape: [0, 0],
             optimizer: "adam",
             numEpochs: 200,
             lossFn: "categoricalCrossentropy",
@@ -191,9 +196,9 @@ export default class NeuralNetworkBlockField extends ReactInlineField {
     }
 
     getText_() {
-        const { numLayers } = this.value
+        const { totalLayers } = this.value
 
-        return `${numLayers} layer(s)`
+        return `${totalLayers} layer(s)`
     }
 
     renderInlineField(): ReactNode {
