@@ -62,9 +62,11 @@ export default function BlocklyDataRecordingDialog(props: {
     chartPalette: string[]
     open: boolean
     onDone: (recording: FieldDataSet[], blockId: string) => void
+    recordingCount: number
     workspace: WorkspaceSvg
 }) {
-    const { classes, chartPalette, open, onDone, workspace } = props
+    const { classes, chartPalette, open, onDone, recordingCount, workspace } =
+        props
     const [dialogType, setDialogType] = useState<
         "chooseSensors" | "recordData"
     >("chooseSensors")
@@ -98,7 +100,7 @@ export default function BlocklyDataRecordingDialog(props: {
     const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
     const [totalSamples, setTotalSamples] = useState(0)
     const [recordingName, setRecordingName] = useState(
-        "recording0" //  + recordingCount
+        "recording" + recordingCount
     )
     const [className, setClassName] = useState("class1")
 
@@ -298,7 +300,7 @@ export default function BlocklyDataRecordingDialog(props: {
     /* For interface controls */
     const resetInputs = () => {
         setClassName("class1")
-        setRecordingName("recording0") // + recordingCount)
+        setRecordingName("recording" + recordingCount)
     }
     const handleDownloadDataSet = () => {
         const recordingCountHeader = `Number of recordings,${currentRecording.recording.length}`
