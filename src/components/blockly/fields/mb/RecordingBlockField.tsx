@@ -42,8 +42,7 @@ function RecordingParameterWidget(props: {
     const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const numSamples = initFieldValue.numSamples
-    const inputTypes = initFieldValue.inputTypes
+    const { numSamples, inputTypes } = initFieldValue
 
     const handleDownloadDataSet = () => {
         console.log("Download dataset")

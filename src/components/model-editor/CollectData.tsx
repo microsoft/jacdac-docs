@@ -1,7 +1,6 @@
 import React, { lazy, useEffect, useContext, useState } from "react"
 
-import { Grid, TextField, InputAdornment } from "@material-ui/core"
-import { Button } from "gatsby-theme-material-ui"
+import { Button, Grid, TextField, InputAdornment } from "@material-ui/core"
 import { Autocomplete } from "@material-ui/lab"
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -280,7 +279,7 @@ export default function CollectData(props: {
         <Grid container direction={"column"}>
             <Grid item>
                 <h2>
-                    Current DataSet
+                    Current Dataset
                     <IconButtonWithTooltip
                         onClick={handleDownloadDataSet}
                         title="Download all recording data"
