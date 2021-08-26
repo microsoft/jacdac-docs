@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState, lazy } from "react"
+import React, { lazy } from "react"
 
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 
@@ -20,6 +20,7 @@ import MBDataSet from "../../model-editor/MBDataSet"
 import Suspense from "../../ui/Suspense"
 import useChartPalette from "../../useChartPalette"
 
+const ViewDataDialog = lazy(() => import("./ViewDataDialog"))
 const RecordDataDialog = lazy(() => import("./RecordDataDialog"))
 const TrainModelDialog = lazy(() => import("./TrainModelDialog"))
 
@@ -118,7 +119,7 @@ export function addNewClassifier(workspace: WorkspaceSvg) {
                 // create new block with new classifier name
                 workspace.paste(
                     Blockly.Xml.textToDom(
-                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">classifier1</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"numLayers":0,"numParams":0,"runTimeInCycles":0,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newVariableName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"totalParams":0,"totalLayers":0,"totalSize":0,"runTimeInMs":0,"inputShape":[0,0],"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`
                     )
                 )
             } else {
@@ -135,30 +136,51 @@ export function addNewClassifier(workspace: WorkspaceSvg) {
 }
 
 export default function ModelBlockDialogs(props: {
+    viewDataSetDialogVisible: boolean
     recordDataDialogVisible: boolean
     trainModelDialogVisible: boolean
+    onViewDataSetDone: () => void
     onRecordingDone: (recording: FieldDataSet[], blockId: string) => void
-    onModelUpdate: (model: MBModel) => void
+    onModelUpdate: (model: MBModel, blockId: string) => void
     onTrainingDone: () => void
     workspace: WorkspaceSvg
     dataset: MBDataSet
     model: MBModel
+    recordingCount: number
+    trainedModelCount: number
 }) {
     const {
+        viewDataSetDialogVisible,
         recordDataDialogVisible,
         trainModelDialogVisible,
+        onViewDataSetDone,
         onRecordingDone,
         onModelUpdate,
         onTrainingDone,
         workspace,
         dataset,
         model,
+        recordingCount,
+        trainedModelCount,
     } = props
 
     const classes = useStyles()
     const chartPalette = useChartPalette()
 
-    if (recordDataDialogVisible) {
+    if (viewDataSetDialogVisible) {
+        return (
+            <Suspense>
+                <ViewDataDialog
+                    classes={classes}
+                    chartPalette={chartPalette}
+                    open={viewDataSetDialogVisible}
+                    onDone={onViewDataSetDone}
+                    dataset={dataset}
+                    workspace={workspace}
+                />
+            </Suspense>
+        )
+    } else if (recordDataDialogVisible) {
         return (
             <Suspense>
                 <RecordDataDialog
@@ -166,6 +188,7 @@ export default function ModelBlockDialogs(props: {
                     chartPalette={chartPalette}
                     open={recordDataDialogVisible}
                     onDone={onRecordingDone}
+                    recordingCount={recordingCount}
                     workspace={workspace}
                 />
             </Suspense>
@@ -181,20 +204,10 @@ export default function ModelBlockDialogs(props: {
                     onDone={onTrainingDone}
                     dataset={dataset}
                     model={model}
-                />
-            </Suspense>
-        )
-    } /* else if (splitDatasetDialogVisible) {
-        return (
-            <Suspense>
-                <SplitDataDialog
-                    classes={classes}
-                    chartPalette={chartPalette}
-                    open={splitDatasetDialogVisible}
-                    onDone={onDatasetEditDone}
+                    trainedModelCount={trainedModelCount}
                     workspace={workspace}
                 />
             </Suspense>
         )
-    } */ else return null
+    } else return null
 }
