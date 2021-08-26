@@ -27,6 +27,9 @@ export function validDataSetJSON(blockJSON) {
     const warnings = {}
     const classNames = []
 
+    // don't check empty block JSON
+    if (!blockJSON) return undefined
+
     // 1. make sure there is at least one recording
     const firstLayer = blockJSON.inputs.filter(
         input => input.name == "LAYER_INPUTS"
