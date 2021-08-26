@@ -213,7 +213,7 @@ export default function ModelOutput(props: {
 
             if (predResult) {
                 // Save probability for each class in model object
-                const prediction = predResult.data.prediction
+                const prediction = predResult.data.predictAll[0]
                 model.labels.forEach(label => {
                     liveOutput.push(prediction[label])
 

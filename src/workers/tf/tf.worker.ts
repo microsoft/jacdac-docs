@@ -74,7 +74,6 @@ export interface TFModelTrainResponse extends TFModelMessage {
     type: "train"
     data: {
         modelWeights: ArrayBuffer
-        yPrediction: number[]
         trainingLogs: number[]
         armModel: string
     }
@@ -84,14 +83,15 @@ export interface TFModelPredictRequest extends TFModelMessage {
     type: "predict"
     data: {
         model: TFModelObj
-        zData: number[][]
+        zData: number[][] | number[][][]
     }
 }
 
 export interface TFModelPredictResponse extends TFModelMessage {
     type: "predict"
     data: {
-        prediction: number[]
+        predictTop: number[]
+        predictAll: any
     }
 }
 
@@ -471,15 +471,6 @@ const handlers: {
             return { ...props, data: undefined }
         }
 
-        // get model's prediction for training dataset
-        let trainingPrediction
-        try {
-            trainingPrediction = (await model.predict(xs)) as Tensor
-        } catch (e) {
-            console.error("Error evaluating dataset on training data: ", e)
-            return { ...props, data: undefined }
-        }
-
         // save model as model artifacts
         let mod: io.ModelArtifacts
         await model.save({
@@ -515,7 +506,6 @@ const handlers: {
         // return data
         const result = {
             modelWeights: weights,
-            yPrediction: trainingPrediction.argMax(1).dataSync(),
             trainingLogs: trainingLogs,
             armModel: JSON.stringify(armcompiled),
         }
@@ -546,15 +536,25 @@ const handlers: {
             console.error("Error with model.predict during prediction: ", e)
             return { ...props, data: undefined }
         }
-        const predictArr = await predResult.dataSync()
+        // make an array with the index of the top class
+        const predictTop = await predResult.argMax(1).dataSync()
 
-        const prediction = {}
-        for (const idx in predictArr) {
-            prediction[data.model.labels[idx]] = predictArr[idx]
+        // make an array with the confidence level for all of the classes
+        const confidenceArr = await predResult.dataSync()
+        const predictAll = []
+        const numExamples = data.zData.length
+        const numLabels = data.model.labels.length
+        for (let i = 0; i < numExamples; i++) {
+            const prediction = {}
+            for (let j = 0; j < numLabels; j++) {
+                prediction[data.model.labels[i * numLabels + j]] =
+                    confidenceArr[i * numLabels + j]
+            }
+            predictAll.push(prediction)
         }
 
         // return prediction
-        const result = { prediction: prediction }
+        const result = { predictAll: predictAll, predictTop: predictTop }
 
         return { ...props, data: result }
     },

@@ -13,11 +13,17 @@ import Suspense from "../ui/Suspense"
 
 import ServiceManagerContext from "../ServiceManagerContext"
 
-import { compileRequest, trainRequest } from "../blockly/dsl/workers/tf.proxy"
+import {
+    compileRequest,
+    trainRequest,
+    predictRequest,
+} from "../blockly/dsl/workers/tf.proxy"
 import type {
     TFModelCompileRequest,
     TFModelTrainRequest,
     TFModelTrainResponse,
+    TFModelPredictRequest,
+    TFModelPredictResponse,
 } from "../../workers/tf/dist/node_modules/tf.worker"
 import workerProxy from "../blockly/dsl/workers/proxy"
 
@@ -29,7 +35,9 @@ const ConfusionMatrixHeatMap = lazy(
 )
 const DataSetPlot = lazy(() => import("./components/DataSetPlot"))
 const LossAccChart = lazy(() => import("./components/LossAccChart"))
-const ModelSummary = lazy(() => import("./components/ModelSummary"))
+const ModelSummaryDropdown = lazy(
+    () => import("./components/ModelSummaryDropdown")
+)
 
 export function prepareDataSet(set: MBDataSet) {
     // Assumptions: the sampling rate, sampling duration, and sensors used are constant
@@ -204,8 +212,25 @@ export default function TrainModel(props: {
             const trainingHistory = trainResult.data.trainingLogs
             model.weightData = trainResult.data.modelWeights
             model.armModel = trainResult.data.armModel
-            setTrainingPredictionResult(trainResult.data.yPrediction)
-            setTrainTimestamp(Date.now())
+
+            // evaluate on training dataset
+            const predictMsg = {
+                worker: "tf",
+                type: "predict",
+                data: {
+                    zData: dataset.xs,
+                    model: model.toJSON(),
+                },
+            } as TFModelPredictRequest
+            const predResult = (await predictRequest(
+                predictMsg
+            )) as TFModelPredictResponse
+
+            if (predResult) {
+                // Save probability for each class in model object
+                setTrainingPredictionResult(predResult.data.predictTop)
+                setTrainTimestamp(Date.now())
+            }
 
             // Update model status
             model.status = "trained"
@@ -263,7 +288,7 @@ export default function TrainModel(props: {
                     </IconButtonWithTooltip>
                 </h3>
                 <Suspense>
-                    <ModelSummary
+                    <ModelSummaryDropdown
                         reactStyle={classes}
                         dataset={dataset}
                         model={model}
