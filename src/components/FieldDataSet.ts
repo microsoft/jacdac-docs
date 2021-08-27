@@ -44,6 +44,7 @@ export default class FielddataSet extends JDEventSource {
     mins: number[]
     maxs: number[]
     rms: number[]
+    roc: number[]
 
     static create(
         bus: JDBus,
@@ -156,6 +157,7 @@ export default class FielddataSet extends JDEventSource {
                     this.mins = row.data.slice(0)
                     this.maxs = row.data.slice(0)
                     this.rms = row.data.slice(0)
+                    this.roc = new Array(row.data.length).fill(0)
                 } else {
                     const n = r
                     for (let i = 0; i < row.data.length; ++i) {
@@ -164,6 +166,11 @@ export default class FielddataSet extends JDEventSource {
                         this.rms[i] = Math.sqrt(
                             (Math.pow(this.rms[i], 2) * (n - 1) +
                                 Math.pow(row.data[i], 2)) /
+                                n
+                        )
+                        this.roc[i] = Math.sqrt(
+                            (Math.pow(this.roc[i], 2) * (n - 1) +
+                                Math.pow(this.rms[i] - row.data[i], 2)) /
                                 n
                         )
                     }
@@ -175,6 +182,7 @@ export default class FielddataSet extends JDEventSource {
                 this.mins = data.slice(0)
                 this.maxs = data.slice(0)
                 this.rms = data.slice(0)
+                this.roc = new Array(data.length).fill(0)
             } else {
                 const n = this.rows.length
                 for (let i = 0; i < data.length; ++i) {
@@ -183,6 +191,11 @@ export default class FielddataSet extends JDEventSource {
                     this.rms[i] = Math.sqrt(
                         (Math.pow(this.rms[i], 2) * (n - 1) +
                             Math.pow(data[i], 2)) /
+                            n
+                    )
+                    this.roc[i] = Math.sqrt(
+                        (Math.pow(this.roc[i], 2) * (n - 1) +
+                            Math.pow(this.rms[i] - data[i], 2)) /
                             n
                     )
                 }

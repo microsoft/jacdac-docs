@@ -1,5 +1,5 @@
 import React, { lazy, useMemo, useState } from "react"
-import { Grid, MenuItem, Select } from "@material-ui/core"
+import { Box, Grid, MenuItem, Select } from "@material-ui/core"
 import FieldDataSet from "../../FieldDataSet"
 import Suspense from "../../ui/Suspense"
 import MBDataSet from "../MBDataSet"
@@ -26,7 +26,7 @@ export default function DataSetPlot(props: {
         const features = {
             class: label,
             "predicted class": predictedLabel,
-            correct: label == predictedLabel,
+            correct: label == predictedLabel || predictedLabel == "",
         }
         const headerNames = []
         for (let idx = 0; idx < recording.width; idx++) {
@@ -40,7 +40,7 @@ export default function DataSetPlot(props: {
 
             // calculate features and add them to the dataset
             features["rms-" + headerName] = recording.rms[idx]
-            features["min-" + headerName] = recording.mins[idx]
+            features["roc-" + headerName] = recording.roc[idx]
             features["max-" + headerName] = recording.maxs[idx]
         }
         return features
@@ -86,7 +86,7 @@ export default function DataSetPlot(props: {
                 if (inputNameCount > 1) inputName += inputNameCount
 
                 feats.push("rms-" + inputName)
-                feats.push("min-" + inputName)
+                feats.push("roc-" + inputName)
                 feats.push("max-" + inputName)
             })
         }
@@ -129,38 +129,41 @@ export default function DataSetPlot(props: {
     return (
         <Grid container direction="column" spacing={1}>
             <Grid item xs={12}>
-                x&ensp;
-                <Select
-                    className={classes.field}
-                    id={useId() + "xAxis"}
-                    variant="outlined"
-                    value={xAxis}
-                    onChange={handleChangedX}
-                >
-                    {features.map(ft => (
-                        <MenuItem key={useId()} value={ft}>
-                            {ft}
-                        </MenuItem>
-                    ))}
-                </Select>
-                &emsp;y&ensp;
-                <Select
-                    className={classes.field}
-                    id={useId() + "yAxis"}
-                    variant="outlined"
-                    value={yAxis}
-                    onChange={handleChangedY}
-                >
-                    {features.map(ft => (
-                        <MenuItem key={useId()} value={ft}>
-                            {ft}
-                        </MenuItem>
-                    ))}
-                </Select>
+                <Box color="text.secondary">
+                    x&ensp;
+                    <Select
+                        className={classes.field}
+                        id={useId() + "xAxis"}
+                        variant="outlined"
+                        value={xAxis}
+                        onChange={handleChangedX}
+                    >
+                        {features.map(ft => (
+                            <MenuItem key={useId()} value={ft}>
+                                {ft}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    &emsp;y&ensp;
+                    <Select
+                        className={classes.field}
+                        id={useId() + "yAxis"}
+                        variant="outlined"
+                        value={yAxis}
+                        onChange={handleChangedY}
+                    >
+                        {features.map(ft => (
+                            <MenuItem key={useId()} value={ft}>
+                                {ft}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </Box>
             </Grid>
             <Grid item xs={12}>
                 <Suspense>
                     <VegaLite
+                        actions={false}
                         spec={{
                             title: { timestamp },
                             width: chartProps.CHART_WIDTH,
@@ -170,6 +173,7 @@ export default function DataSetPlot(props: {
                                 type: "point",
                                 size: chartProps.MARK_SIZE,
                                 filled: true,
+                                angle: 45,
                             },
                             encoding: {
                                 x: {
@@ -191,7 +195,8 @@ export default function DataSetPlot(props: {
                                     field: "correct",
                                     type: "nominal",
                                     scale: {
-                                        range: ["circle", "triangle"],
+                                        domain: ["true", "false"],
+                                        range: ["circle", "cross"],
                                     },
                                     legend: null,
                                 },
