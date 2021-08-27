@@ -58,6 +58,7 @@ export default function ConfusionMatrixHeatMap(props: {
             <Grid item xs={12}>
                 <Suspense>
                     <VegaLite
+                        actions={false}
                         spec={{
                             title: { timestamp },
                             width: chartProps.CHART_WIDTH,
