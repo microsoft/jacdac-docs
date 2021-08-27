@@ -26,7 +26,6 @@ import { visitToolbox, MB_WARNINGS_CATEGORY } from "../blockly/toolbox"
 import FieldDataSet from "../FieldDataSet"
 import ModelBlockDialogs, {
     addNewDataSet,
-    addNewClassifier,
 } from "../dialogs/mb/ModelBlockDialogs"
 import MBModel, { validModelJSON } from "./MBModel"
 import MBDataSet, { validDataSetJSON } from "./MBDataSet"
@@ -72,7 +71,6 @@ function getTrainedModelsFromLocalStorage() {
         const model = modelEditorData["models"][id]
         mBlocks[id] = MBModel.createFromFile(model)
     }
-    console.log("Randi get from local storage ", mBlocks)
     return mBlocks
 }
 
@@ -364,9 +362,12 @@ function ModelBlockEditorWithContext() {
         useState<boolean>(false)
     const [viewDataSetDialogVisible, setViewDataSetDialogVisible] =
         useState<boolean>(false)
+    const [newClassifierDialogVisible, setNewClassifierDialogVisible] =
+        useState<boolean>(false)
     const toggleViewDataSetDialog = () => toggleDialog("dataset")
     const toggleRecordDataDialog = () => toggleDialog("recording")
     const toggleTrainModelDialog = () => toggleDialog("model")
+    const toggleNewClassifierDialog = () => toggleDialog("classifier")
     const toggleDialog = (dialog: string) => {
         if (dialog == "dataset") {
             const b = !viewDataSetDialogVisible
@@ -377,12 +378,34 @@ function ModelBlockEditorWithContext() {
         } else if (dialog == "model") {
             const b = !trainModelDialogVisible
             setTrainModelDialogVisible(b)
+        } else if (dialog == "classifier") {
+            const b = !newClassifierDialogVisible
+            setNewClassifierDialogVisible(b)
+        }
+    }
+    const closeModal = (modal: string) => {
+        if (modal == "dataset") {
+            // reset dataset that gets passed to dialogs
+            setCurrentDataSet(undefined)
+
+            // close dialog
+            toggleViewDataSetDialog()
+        } else if (modal == "model") {
+            // reset dataset and model that gets passed to dialogs
+            setCurrentDataSet(undefined)
+            setCurrentModel(undefined)
+
+            // close dialog
+            toggleTrainModelDialog()
+        } else if (modal == "classifier") {
+            // close diaglog
+            toggleNewClassifierDialog()
         }
     }
     const buttonsWithDialogs = {
         createNewDataSetButton: addNewDataSet,
         createNewRecordingButton: toggleRecordDataDialog,
-        createNewClassifierButton: addNewClassifier, // Randi TODO make a modal for selecting a pre-made classifier
+        createNewClassifierButton: toggleNewClassifierDialog,
     }
     const openDataSetModal = (clickedBlock: Blockly.Block) => {
         const dataSetName = clickedBlock.getField("DATASET_NAME").getText()
@@ -399,13 +422,6 @@ function ModelBlockEditorWithContext() {
             // open the view dataset modal
             toggleViewDataSetDialog()
         }
-    }
-    const closeDataSetModal = () => {
-        // reset dataset that gets passed to dialogs
-        setCurrentDataSet(undefined)
-
-        // close dialog
-        toggleViewDataSetDialog()
     }
 
     const updateRecording = (recording: FieldDataSet[], blockId: string) => {
@@ -468,17 +484,13 @@ function ModelBlockEditorWithContext() {
             const newBlock = workspace.getBlockById(blockId)
             const services = resolveBlockServices(newBlock)
             services.data = [currentDataSet, model]
+            // for duplicating blocks
+            newBlock
+                .getField("TRAINED_MODEL_DISPLAY")
+                .updateFieldValue({ originalBlock: blockId })
 
             updateLocalStorage(null, trainedModels)
         }
-    }
-    const closeTrainingModal = () => {
-        // reset dataset and model that gets passed to dialogs
-        setCurrentDataSet(undefined)
-        setCurrentModel(undefined)
-
-        // close dialog
-        toggleTrainModelDialog()
     }
 
     /* For button callbacks */
@@ -497,10 +509,14 @@ function ModelBlockEditorWithContext() {
 
     /* For block button clicks */
     const handleWorkspaceChange = event => {
+        //console.log("Randi event happened ", event)
         if (event.type == Blockly.Events.BLOCK_DELETE) {
             // Randi TODO remove this and rely on the blocks
-            delete allRecordings[event.blockId]
-            delete trainedModels[event.blockId]
+            event.ids.forEach(blockId => {
+                delete allRecordings[blockId]
+                // Randi TODO figure out what to do about duplicates of trained model blocks
+                delete trainedModels[blockId]
+            })
             updateLocalStorage(allRecordings, trainedModels)
         } else if (event.type == Blockly.Events.CLICK && event.blockId) {
             const clickedBlock = workspace.getBlockById(event.blockId)
@@ -565,8 +581,24 @@ function ModelBlockEditorWithContext() {
                 const command = clickedBlock.data.split(".")[1]
                 if (command == "refreshdisplay") {
                     // setup model for training
-                    const selectedModel: MBModel =
-                        trainedModels[clickedBlock.id]
+                    const services = resolveBlockServices(clickedBlock)
+                    let selectedModel: MBModel = trainedModels[clickedBlock.id]
+                    if (!selectedModel) {
+                        // this block must be a duplicate, get the original block id
+                        const originalBlockId = JSON.parse(
+                            clickedBlock.getFieldValue("TRAINED_MODEL_DISPLAY")
+                        )["originalBlock"]
+                        selectedModel = trainedModels[originalBlockId]
+
+                        // add duplicate block to list of trained models
+                        trainedModels[clickedBlock.id] = selectedModel
+                        updateLocalStorage(null, trainedModels)
+                        clickedBlock
+                            .getField("TRAINED_MODEL_DISPLAY")
+                            .updateFieldValue({
+                                originalBlock: clickedBlock.id,
+                            })
+                    }
 
                     // setup dataset for training
                     const dataSetName = clickedBlock
@@ -581,11 +613,12 @@ function ModelBlockEditorWithContext() {
                         !dataSetWarnings ||
                         Object.keys(dataSetWarnings).length
                     ) {
-                        Blockly.alert(
+                        setWarning(
+                            workspace,
+                            clickedBlock.id,
                             "This dataset cannot be tested. Address the warnings on the dataset definition block."
                         )
                     } else {
-                        const services = resolveBlockServices(clickedBlock)
                         services.data = [selectedDataSet, selectedModel]
                     }
                 }
@@ -651,10 +684,10 @@ function ModelBlockEditorWithContext() {
                         viewDataSetDialogVisible={viewDataSetDialogVisible}
                         recordDataDialogVisible={recordDataDialogVisible}
                         trainModelDialogVisible={trainModelDialogVisible}
-                        onViewDataSetDone={closeDataSetModal}
+                        newClassifierDialogVisible={newClassifierDialogVisible}
                         onRecordingDone={closeRecordingModal}
                         onModelUpdate={updateModel}
-                        onTrainingDone={closeTrainingModal}
+                        closeModal={closeModal}
                         workspace={workspace}
                         dataset={currentDataSet}
                         model={currentModel}

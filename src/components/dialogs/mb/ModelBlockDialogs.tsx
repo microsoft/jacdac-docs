@@ -23,6 +23,7 @@ import useChartPalette from "../../useChartPalette"
 const ViewDataDialog = lazy(() => import("./ViewDataDialog"))
 const RecordDataDialog = lazy(() => import("./RecordDataDialog"))
 const TrainModelDialog = lazy(() => import("./TrainModelDialog"))
+const NewClassifierDialog = lazy(() => import("./NewClassifierDialog"))
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -35,6 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
         field: {
             marginRight: theme.spacing(1),
             marginBottom: theme.spacing(1.5),
+            width: theme.spacing(25),
         },
         segment: {
             marginTop: theme.spacing(2),
@@ -139,10 +141,10 @@ export default function ModelBlockDialogs(props: {
     viewDataSetDialogVisible: boolean
     recordDataDialogVisible: boolean
     trainModelDialogVisible: boolean
-    onViewDataSetDone: () => void
+    newClassifierDialogVisible: boolean
     onRecordingDone: (recording: FieldDataSet[], blockId: string) => void
     onModelUpdate: (model: MBModel, blockId: string) => void
-    onTrainingDone: () => void
+    closeModal: (modal: string) => void
     workspace: WorkspaceSvg
     dataset: MBDataSet
     model: MBModel
@@ -153,10 +155,10 @@ export default function ModelBlockDialogs(props: {
         viewDataSetDialogVisible,
         recordDataDialogVisible,
         trainModelDialogVisible,
-        onViewDataSetDone,
+        newClassifierDialogVisible,
         onRecordingDone,
         onModelUpdate,
-        onTrainingDone,
+        closeModal,
         workspace,
         dataset,
         model,
@@ -174,9 +176,8 @@ export default function ModelBlockDialogs(props: {
                     classes={classes}
                     chartPalette={chartPalette}
                     open={viewDataSetDialogVisible}
-                    onDone={onViewDataSetDone}
+                    onDone={closeModal}
                     dataset={dataset}
-                    workspace={workspace}
                 />
             </Suspense>
         )
@@ -201,10 +202,21 @@ export default function ModelBlockDialogs(props: {
                     chartPalette={chartPalette}
                     open={trainModelDialogVisible}
                     onModelUpdate={onModelUpdate}
-                    onDone={onTrainingDone}
+                    onDone={closeModal}
                     dataset={dataset}
                     model={model}
                     trainedModelCount={trainedModelCount}
+                    workspace={workspace}
+                />
+            </Suspense>
+        )
+    } else if (newClassifierDialogVisible) {
+        return (
+            <Suspense>
+                <NewClassifierDialog
+                    classes={classes}
+                    open={newClassifierDialogVisible}
+                    onDone={closeModal}
                     workspace={workspace}
                 />
             </Suspense>
