@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useContext, useState } from "react"
+import React, { lazy, useContext } from "react"
 
 import {
     Button,
@@ -9,18 +9,13 @@ import {
 } from "@material-ui/core"
 import DownloadIcon from "@material-ui/icons/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import NavigateNextIcon from "@material-ui/icons/NavigateNext"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
 import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
 
 import ClassDataSetGrid from "../../ClassDataSetGrid"
-import ReadingFieldGrid from "../../ReadingFieldGrid"
 
-import { WorkspaceSvg } from "blockly"
 import MBDataSet from "../../model-editor/MBDataSet"
 import Suspense from "../../ui/Suspense"
 
-import AppContext from "../../AppContext"
 import ServiceManagerContext from "../../ServiceManagerContext"
 
 const DataSetPlot = lazy(
@@ -31,11 +26,10 @@ export default function BlocklyViewDataDialog(props: {
     classes: any
     chartPalette: string[]
     open: boolean
-    onDone: () => void
+    onDone: (modal: string) => void
     dataset: MBDataSet
-    workspace: WorkspaceSvg
 }) {
-    const { classes, chartPalette, open, onDone, dataset, workspace } = props
+    const { classes, chartPalette, open, onDone, dataset } = props
     const chartProps = {
         CHART_WIDTH: 300,
         CHART_HEIGHT: 300,
@@ -52,7 +46,7 @@ export default function BlocklyViewDataDialog(props: {
     /* For interface controls */
     const handleDone = () => {
         // close the modal
-        onDone()
+        onDone("dataset")
     }
 
     return (
