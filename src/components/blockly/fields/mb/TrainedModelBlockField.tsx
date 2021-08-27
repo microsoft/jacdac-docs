@@ -91,6 +91,12 @@ function TrainedModelDisplayWidget() {
             services?.subscribe(CHANGE, () => {
                 sourceBlock.data = "click.refreshdisplay"
 
+                if (!services.data) {
+                    setErrorMsg("Please select a valid dataset")
+                    return
+                }
+                setErrorMsg("")
+
                 // grab the model and dataset to test with
                 const updatedDataSet = services.data[0] as MBDataSet
                 const updatedModel = services.data[1] as MBModel
