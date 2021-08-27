@@ -10,6 +10,7 @@ import {
     InputAdornment,
 } from "@material-ui/core"
 import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
+// tslint:disable-next-line: no-submodule-imports match-default-export-name
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import StopIcon from "@material-ui/icons/Stop"
@@ -137,8 +138,8 @@ export default function BlocklyDataRecordingDialog(props: {
         blockId: "",
     })
 
-    const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
-    const [samplingDuration, setSamplingDuration] = useState("2")
+    const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("50")
+    const [samplingDuration, setSamplingDuration] = useState("1")
 
     const samplingIntervalDelayi = parseInt(samplingIntervalDelay)
     const samplingCount = Math.ceil(

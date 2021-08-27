@@ -122,7 +122,7 @@ export default function CollectData(props: {
 
     /* For recording data*/
     const [currentClassLabel, setCurrentClassLabel] = useState("class1")
-    const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("100")
+    const [samplingIntervalDelay, setSamplingIntervalDelay] = useState("50")
     const [samplingDuration, setSamplingDuration] = useState("2")
     const [datasetMatch, setDataSetMatch] = useState(false)
     const recordingRegisters = readingRegisters.filter(
@@ -167,7 +167,7 @@ export default function CollectData(props: {
     const resetDataCollection = () => {
         setCurrentClassLabel("class1")
         setTotalRecordings(0)
-        setSamplingIntervalDelay("100")
+        setSamplingIntervalDelay("50")
         setSamplingDuration("2")
     }
     const stopRecording = () => {
