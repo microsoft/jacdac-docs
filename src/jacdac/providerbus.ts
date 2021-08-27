@@ -40,7 +40,10 @@ function sniffQueryArguments() {
             isWebSerialSupported() &&
             params.get(`webserial`) !== "0" &&
             !toolsMakecode,
-        webSocket: params.get(`ws`),
+        webSocket:
+            params.get(`ws`) === "1"
+                ? "ws://127.0.0.1:8080/"
+                : params.get("ws"),
         peers: params.get(`peers`) === "1",
         parentOrigin: params.get("parentOrigin"),
         frameId: window.location.hash?.slice(1),
