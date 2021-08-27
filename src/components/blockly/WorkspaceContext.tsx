@@ -236,7 +236,7 @@ export function WorkspaceProvider(props: {
         return undefined
     }
     const resolveRoleService = () => {
-        const newRoleService = role && roleManager?.getService(role)
+        const newRoleService = role && roleManager?.service(role)
         return newRoleService
     }
 
@@ -246,7 +246,7 @@ export function WorkspaceProvider(props: {
     )
     const roleServiceClass = useChange(
         roleManager,
-        _ => _?.roles.find(r => r.role === role)?.serviceClass
+        _ => _?.roles().find(r => r.role === role)?.serviceClass
     )
     const [flyout, setFlyout] = useState(!!sourceBlock?.isInFlyout)
 
