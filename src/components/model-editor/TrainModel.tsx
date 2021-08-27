@@ -1,4 +1,4 @@
-import { Button, Grid } from "@material-ui/core"
+import { Button, Grid, LinearProgress } from "@material-ui/core"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
@@ -148,9 +148,9 @@ export default function TrainModel(props: {
 
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(false)
+    const [trainingProgress, setTrainingProgress] = useState(0)
     const [trainingLossLog, setTrainingLossLog] = useState([])
     const [trainingAccLog, setTrainingAccLog] = useState([])
-    const [logTimestamp, setLogTimestamp] = useState(0)
     const [trainingPredictionResult, setTrainingPredictionResult] = useState([])
     const [trainTimestamp, setTrainTimestamp] = useState(0)
 
@@ -158,6 +158,11 @@ export default function TrainModel(props: {
         model.status = "training"
         model.inputTypes = dataset.inputTypes
         handleModelUpdate(model)
+
+        // reset logs and progress
+        trainingLossLog.splice(0, trainingLossLog.length)
+        trainingAccLog.splice(0, trainingAccLog.length)
+        setTrainingProgress(0)
 
         setTrainEnabled(false)
 
@@ -187,7 +192,7 @@ export default function TrainModel(props: {
                     acc: msg.data.val_acc,
                     dataset: "validation",
                 })
-                setLogTimestamp(Date.now())
+                setTrainingProgress((epoch * 100) / model.trainingParams.epochs)
             }
         )
 
@@ -317,6 +322,12 @@ export default function TrainModel(props: {
             </Grid>
             <Grid item>
                 <h3>Training Progress</h3>
+                <LinearProgress
+                    variant="determinate"
+                    value={trainingProgress}
+                />
+                <span style={{ float: "right" }}>{trainingProgress} / 100</span>
+                <br />
                 {!!trainingLossLog.length && (
                     <div key="vega-loss-acc-charts">
                         <Suspense>
@@ -324,7 +335,7 @@ export default function TrainModel(props: {
                                 chartProps={chartProps}
                                 lossData={trainingLossLog}
                                 accData={trainingAccLog}
-                                timestamp={logTimestamp}
+                                timestamp={trainingProgress}
                             />
                         </Suspense>
                     </div>

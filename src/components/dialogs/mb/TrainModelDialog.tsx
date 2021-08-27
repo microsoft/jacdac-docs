@@ -8,6 +8,7 @@ import {
     DialogActions,
     DialogContent,
     Grid,
+    LinearProgress,
 } from "@material-ui/core"
 import Trend from "../../Trend"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
@@ -144,11 +145,18 @@ export default function TrainModelDialog(props: {
     const trainingAccLog = useMemo(() => {
         return []
     }, [])
-    const [logTimestamp, setLogTimestamp] = useState(0)
+    const [trainingProgress, setTrainingProgress] = useState(0)
 
     const trainTFModel = async () => {
         model.status = "training"
         model.inputTypes = dataset.inputTypes
+
+        // reset logs and progress
+        trainingLossLog.splice(0, trainingLossLog.length)
+        trainingAccLog.splice(0, trainingAccLog.length)
+        setTrainingProgress(0)
+
+        // disable train model button
         setTrainEnabled(false)
 
         // setup worker
@@ -177,7 +185,7 @@ export default function TrainModelDialog(props: {
                     acc: msg.data.val_acc,
                     dataset: "validation",
                 })
-                setLogTimestamp(Date.now())
+                setTrainingProgress((epoch * 100) / model.trainingParams.epochs)
             }
         )
 
@@ -455,6 +463,14 @@ export default function TrainModelDialog(props: {
                             </Grid>
                             <Grid item>
                                 <h3>Training Progress</h3>
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={trainingProgress}
+                                />
+                                <span style={{ float: "right" }}>
+                                    {trainingProgress} / 100
+                                </span>
+                                <br />
                                 {!!trainingLossLog.length && (
                                     <div key="vega-loss-acc-charts">
                                         <Suspense>
@@ -462,7 +478,7 @@ export default function TrainModelDialog(props: {
                                                 chartProps={chartProps}
                                                 lossData={trainingLossLog}
                                                 accData={trainingAccLog}
-                                                timestamp={logTimestamp}
+                                                timestamp={trainingProgress}
                                             />
                                         </Suspense>
                                     </div>
