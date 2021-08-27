@@ -3,15 +3,12 @@ import {
     Box,
     Button,
     Grid,
-    MenuItem,
-    Select,
     Tooltip,
     makeStyles,
     Theme,
     createStyles,
 } from "@material-ui/core"
 import Suspense from "../../../ui/Suspense"
-import useChartPalette from "../../../useChartPalette"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
@@ -48,25 +45,37 @@ const useStyles = makeStyles((theme: Theme) =>
         field: {
             width: theme.spacing(10),
         },
+        inlineItem: {
+            height: theme.spacing(30),
+            overflowY: "scroll",
+        },
     })
 )
 
 function TrainedModelDisplayWidget() {
     const classes = useStyles()
-    const chartPalette = useChartPalette()
     const chartProps = {
         CHART_WIDTH: 150,
         CHART_HEIGHT: 150,
         MARK_SIZE: 75,
         TOOLTIP_NUM_FORMAT: "0.2f",
-        PALETTE: chartPalette,
+        PALETTE: [
+            "#003f5c",
+            "#ffa600",
+            "#665191",
+            "#a05195",
+            "#ff7c43",
+            "#d45087",
+            "#f95d6a",
+            "#2f4b7c",
+        ],
     }
 
     const [chartType, setChartType] = useState<
         "model summary" | "confusion matrix" | "dataset plot"
     >("model summary")
 
-    const { sourceBlock, workspace } = useContext(WorkspaceContext)
+    const { sourceBlock } = useContext(WorkspaceContext)
     const services = resolveBlockServices(sourceBlock)
 
     const [dataSet, setDataSet] = useState(undefined)
@@ -74,6 +83,7 @@ function TrainedModelDisplayWidget() {
     const [trainingPredictionResult, setTrainingPredictionResult] =
         useState(undefined)
     const [trainTimestamp, setTrainTimestamp] = useState(Date.now())
+    const [errorMsg, setErrorMsg] = useState("")
 
     // track workspace changes and re-render
     useEffect(
@@ -81,29 +91,28 @@ function TrainedModelDisplayWidget() {
             services?.subscribe(CHANGE, () => {
                 sourceBlock.data = "click.refreshdisplay"
 
-                // make sure this dataset is compatible with this model
+                // grab the model and dataset to test with
                 const updatedDataSet = services.data[0] as MBDataSet
-                if (!model)
-                    console.log("Randi replace this model it's empty ", model)
-                const updatedModel = model || services.data[1]
-
-                console.log("Randi model and dataset ", {
-                    dataset: updatedDataSet,
-                    model: updatedModel,
-                })
+                const updatedModel = services.data[1] as MBModel
 
                 if (!updatedModel || !updatedDataSet) return
 
-                // make sure dataset and model are compatible
+                // make sure dataset and model are compatible (same input and output data)
                 if (
                     !arraysEqual(
                         updatedDataSet.inputTypes,
                         updatedModel.inputTypes
                     ) ||
                     updatedDataSet.length != updatedModel.inputShape[0] ||
-                    updatedDataSet.width != updatedModel.inputShape[1]
-                )
+                    updatedDataSet.width != updatedModel.inputShape[1] ||
+                    !arraysEqual(updatedDataSet.labels, updatedModel.labels)
+                ) {
+                    setErrorMsg(
+                        "The selected dataset does not have the same input/output type as the trained model"
+                    )
                     return
+                }
+                setErrorMsg("")
 
                 // get selected chart
                 const selectedChart = sourceBlock
@@ -140,24 +149,65 @@ function TrainedModelDisplayWidget() {
     )
 
     const handleDownloadDataSet = () => {
-        console.log("Download model JSON")
+        // set the model name to what the user typed into the box
+        const trainedModelName = sourceBlock
+            .getField("TRAINED_MODEL_NAME")
+            .getText()
+        if (model) model.name = trainedModelName
+
         sourceBlock.data = "click.download"
     }
 
-    if (chartType == "model summary")
+    if (errorMsg.length)
+        return (
+            <Grid container spacing={1} direction={"column"}>
+                <Grid item>
+                    <Box color="text.secondary">
+                        Error: {errorMsg}
+                        <br />
+                    </Box>
+                    {!!model && (
+                        <Box color="text.secondary">
+                            Input Types: {model.inputTypes.join(", ")}
+                            <br />
+                            Input Shape: [{model.inputShape.join(", ")}]<br />
+                            Classes: {model.labels.join(", ")}
+                        </Box>
+                    )}
+                </Grid>
+                <Grid item style={{ display: "inline-flex" }}>
+                    <Tooltip title="Download trained model file">
+                        <Button
+                            onClick={handleDownloadDataSet}
+                            startIcon={<DownloadIcon />}
+                            variant="outlined"
+                            size="small"
+                        >
+                            Download
+                        </Button>
+                    </Tooltip>
+                </Grid>
+            </Grid>
+        )
+    else if (chartType == "model summary")
         return (
             <Grid container spacing={1} direction={"column"}>
                 {!!model && !!dataSet && (
                     <Grid item>
-                        <PointerBoundary>
-                            <Suspense>
-                                <ModelSummary
-                                    reactStyle={classes}
-                                    dataset={dataSet}
-                                    model={model}
-                                />
-                            </Suspense>
-                        </PointerBoundary>
+                        <Box
+                            color="text.secondary"
+                            className={classes.inlineItem}
+                        >
+                            <PointerBoundary>
+                                <Suspense>
+                                    <ModelSummary
+                                        reactStyle={classes}
+                                        dataset={dataSet}
+                                        model={model}
+                                    />
+                                </Suspense>
+                            </PointerBoundary>
+                        </Box>
                     </Grid>
                 )}
                 <Grid item style={{ display: "inline-flex" }}>
@@ -257,5 +307,12 @@ export default class TrainedModelBlockField extends ReactInlineField {
 
     renderInlineField(): ReactNode {
         return <TrainedModelDisplayWidget />
+    }
+
+    updateFieldValue(msg: any) {
+        this.value = {
+            ...this.value,
+            ...msg,
+        }
     }
 }
