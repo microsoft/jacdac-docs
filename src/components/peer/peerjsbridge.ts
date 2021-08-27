@@ -2,10 +2,12 @@
 import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import JDBridge from "../../../jacdac-ts/src/jdom/bridge"
 import Peer, { DataConnection } from "peerjs"
+import Flags from "../../../jacdac-ts/src/jdom/flags"
 
 export interface PeerConnection {
-    label: string;
-    close: () => void;
+    label: string
+    open: boolean
+    close: () => void
 }
 
 export default class PeerJSBridge extends JDBridge {
@@ -15,17 +17,22 @@ export default class PeerJSBridge extends JDBridge {
     constructor() {
         super()
 
-        this._peer = new Peer()
+        const { diagnostics } = Flags
+        this._peer = new Peer({ secure: true, debug: diagnostics ? 4 : 0 })
         this._peer.on("open", () => {
-            this.log(`open`)
+            this.log(`peer: connected`)
             this.emit(CHANGE)
         })
         this._peer.on("connection", this.addConnection.bind(this))
         this._peer.on("disconnected", () => {
-            this.log(`disconnected`)
-            this.bus = undefined;
+            this.log(`peer: disconnected`)
+            this.bus = undefined
         })
-        this._peer.on("error", console.error)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this._peer.on("error", (e: any) => {
+            console.error(e)
+            this.bus = undefined
+        })
 
         this.mount(() => {
             if (!this._peer.destroyed) {
@@ -36,10 +43,10 @@ export default class PeerJSBridge extends JDBridge {
     }
 
     private addConnection(conn: DataConnection) {
-        this.log(`connection`)
+        this.log(`peer: connection`)
         this._connections.push(conn)
         conn.on("open", () => {
-            this.log("open")
+            this.log("peer: opened")
             this.emit(CHANGE)
         })
         conn.on("data", buf => {
@@ -58,7 +65,7 @@ export default class PeerJSBridge extends JDBridge {
     }
 
     get connections(): PeerConnection[] {
-        return this._connections;
+        return this._connections
     }
 
     protected sendPacket(data: Uint8Array) {
@@ -72,7 +79,7 @@ export default class PeerJSBridge extends JDBridge {
     }
 
     connect(id: string) {
-        const conn = this._peer.connect(id)
+        const conn = this._peer.connect(id, { reliable: false })
         this.addConnection(conn)
     }
 }

@@ -1,8 +1,8 @@
 import React, { useMemo } from "react"
 import {
     createStyles,
-    GridList,
-    GridListTile,
+    ImageList,
+    ImageListItem,
     ImageListItemBar,
     makeStyles,
     Theme,
@@ -49,7 +49,9 @@ export default function DeviceSpecificationList(props: {
     const { mobile, medium } = useMediaQueries()
     const cols = mobile ? 1 : medium ? 3 : 4
     const specs = useMemo(() => {
-        let r = deviceSpecifications()
+        let r = deviceSpecifications().filter(
+            spec => spec.status !== "deprecated"
+        )
         if (company) r = r.filter(spec => spec.company === company)
         if (requiredServiceClasses)
             r = r.filter(
@@ -70,11 +72,11 @@ export default function DeviceSpecificationList(props: {
         )
 
     return (
-        <GridList className={classes.root} cols={cols}>
+        <ImageList className={classes.root} cols={cols}>
             {specs.map(spec => {
                 const imageUrl = useDeviceImage(spec)
                 return (
-                    <GridListTile key={spec.id}>
+                    <ImageListItem key={spec.id}>
                         <img src={imageUrl} alt={spec.name} loading="lazy" />
                         <ImageListItemBar
                             title={spec.name}
@@ -98,9 +100,9 @@ export default function DeviceSpecificationList(props: {
                                 </>
                             }
                         />
-                    </GridListTile>
+                    </ImageListItem>
                 )
             })}
-        </GridList>
+        </ImageList>
     )
 }

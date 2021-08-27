@@ -45,7 +45,6 @@
     "gatsby-plugin-manifest": "^3.12.0",
     "gatsby-plugin-mdx": "^2.12.0",
     "gatsby-plugin-meta-redirect": "^1.1.1",
-    "gatsby-plugin-no-sourcemaps": "^3.12.0",
     "gatsby-plugin-nprogress": "^3.12.0",
     "gatsby-plugin-offline": "^4.12.0",
     "gatsby-plugin-react-helmet": "^4.12.0",
@@ -152,5 +151,6 @@
   },
   "bugs": {
     "url": "https://github.com/microsoft/jacdac-docs/issues"
-  }
+  },
+  "browserslist": ["supports es6-module", "Edge > 80", "Chrome > 80", "Firefox > 80"]
 }

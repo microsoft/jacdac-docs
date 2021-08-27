@@ -43,6 +43,7 @@ function sniffQueryArguments() {
         parentOrigin: params.get("parentOrigin"),
         frameId: window.location.hash?.slice(1),
         widget: params.get("widget") === "1",
+        trace: params.get("trace") === "1",
     }
 }
 
@@ -51,6 +52,7 @@ Flags.diagnostics = args.diagnostics
 Flags.webUSB = args.webUSB
 Flags.webBluetooth = args.webBluetooth
 Flags.webSerial = args.webSerial
+Flags.trace = args.trace
 
 export class UIFlags {
     static widget = args.widget

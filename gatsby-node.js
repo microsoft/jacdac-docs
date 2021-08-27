@@ -7,10 +7,13 @@ const Papa = require("papaparse")
 const {
     serviceSpecifications,
     identifierToUrlPath,
+    deviceSpecificationFromProductIdentifier,
+    isInfrastructure,
+} = require(`./jacdac-ts/dist/jacdac.cjs`)
+const {
     serviceSpecificationToDTDL,
     DTMIToRoute,
-    deviceSpecificationFromProductIdentifier,
-} = require(`./jacdac-ts/dist/jacdac.cjs`)
+} = require(`./jacdac-ts/dist/jacdac-azure-iot.cjs`)
 const { IgnorePlugin } = require("webpack")
 const AVATAR_SIZE = 64
 const LAZY_SIZE = 96
@@ -139,12 +142,8 @@ async function createDevicePages(graphql, actions, reporter) {
     // Create image post pages.
     const deviceTemplate = path.resolve(`src/templates/device.tsx`)
     const companyTemplate = path.resolve(`src/templates/device-company.tsx`)
-    // We want to create a detailed page for each
-    // Instagram post. Since the scraped Instagram data
-    // already includes an ID field, we just use that for
-    // each page's path.
     for (const node of result.data.allDevicesJson.nodes) {
-        const p = `/devices/${node.id.replace(/-/g, "/")}/`
+        const p = `/devices/${identifierToUrlPath(node.id)}/`
         createPage({
             path: p,
             component: slash(deviceTemplate),
@@ -162,27 +161,21 @@ async function createDevicePages(graphql, actions, reporter) {
                 })
             })
         // copy device image to static
-        const imgpath = identifierToUrlPath(node.id) + ".jpg"
+        const nodePath = identifierToUrlPath(node.id)
+        const imgpath = nodePath + ".jpg"
         const imgsrc = `./jacdac-ts/jacdac-spec/devices/${imgpath}`
+        console.log(`image ${nodePath} -> ${imgpath}`)
         await fs.copy(imgsrc, `./public/images/devices/${imgpath}`)
         await sharp(imgsrc)
             .resize(null, LAZY_SIZE, {
                 fit: sharp.fit.cover,
             })
             .toFormat("jpeg")
-            .toFile(
-                `./public/images/devices/${
-                    identifierToUrlPath(node.id) + ".lazy.jpg"
-                }`
-            )
+            .toFile(`./public/images/devices/${nodePath}.lazy.jpg`)
         await sharp(imgsrc)
             .resize(AVATAR_SIZE, AVATAR_SIZE, { fit: sharp.fit.cover })
             .toFormat("jpeg")
-            .toFile(
-                `./public/images/devices/${
-                    identifierToUrlPath(node.id) + ".avatar.jpg"
-                }`
-            )
+            .toFile(`./public/images/devices/${nodePath}.avatar.jpg`)
     }
 
     const snakify = name => {
@@ -267,7 +260,9 @@ async function createSpecPages(graphql, actions, reporter) {
 
 async function generateServicesJSON() {
     const dir = "./public"
-    const services = serviceSpecifications()
+    const services = serviceSpecifications().filter(
+        srv => !isInfrastructure(srv)
+    )
 
     // JSON
     for (const srv of services) {
@@ -349,7 +344,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
     ]
     const fallback = {
         util: require.resolve("util/"),
-        assert: require.resolve("assert/")
+        assert: require.resolve("assert/"),
     }
     if (stage.startsWith("develop")) {
         setWebpackConfig({
