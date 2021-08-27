@@ -149,13 +149,16 @@ export class ModelBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: MODEL_BLOCKS + "trained_nn",
-                message0: "model %1 testing data %2",
+                message0: "trained model %1",
                 args0: [
                     {
                         type: "field_input",
                         name: "TRAINED_MODEL_NAME",
-                        text: "classifier1.trained",
+                        text: "classifier1.t",
                     },
+                ],
+                message1: "testing data %1",
+                args1: [
                     {
                         type: "field_variable",
                         name: "MODEL_TEST_SET",
@@ -164,8 +167,8 @@ export class ModelBlockDomainSpecificLanguage
                         defaultType: MB_DATASET_VAR_TYPE,
                     },
                 ],
-                message1: "display %1",
-                args1: [
+                message2: "display %1",
+                args2: [
                     {
                         type: "field_dropdown",
                         options: [
@@ -176,11 +179,11 @@ export class ModelBlockDomainSpecificLanguage
                         name: "SELECTED_CHART",
                     },
                 ],
-                message2: "%1",
-                args2: [
+                message3: "%1",
+                args3: [
                     {
                         type: TrainedModelBlockField.KEY,
-                        name: "TRAINED_MODEL_PARAMS",
+                        name: "TRAINED_MODEL_DISPLAY",
                     },
                 ],
                 inputsInline: false,
@@ -402,39 +405,39 @@ export class ModelBlockDomainSpecificLanguage
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_avgpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_avgpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0,0],"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_avgpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
+                        blockxml: `<block type="model_block_avgpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0,0],"poolSize":2,"strideSize":1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0,0],"rate":0.1}</field></block>`,
+                        blockxml: `<block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0,0],"rate":0.1}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0]}</field></block>`,
+                        blockxml: `<block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0]}</field></block>`,
                     },
                     {
                         kind: "block",
-                        blockxml: `<block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0"runTimeInMs":0,"outputShape":[0],"numUnits":4,"activation":"relu"}</field></block>`,
+                        blockxml: `<block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"percentSize":0,"percentParams":0,"runTimeInMs":0,"outputShape":[0],"numUnits":4,"activation":"relu"}</field></block>`,
                     },
                     {
                         kind: "label",
