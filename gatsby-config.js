@@ -15,9 +15,9 @@ module.exports = {
     pathPrefix: pathPrefix,
     flags: {
         PRESERVE_FILE_DOWNLOAD_CACHE: true,
-        PRESERVE_WEBPACK_CACHE: true,
         DEV_WEBPACK_CACHE: true,
         FAST_DEV: true,
+        PARALLEL_QUERY_RUNNING: false,
     },
     plugins: [
         `gatsby-transformer-plaintext`,
@@ -119,7 +119,6 @@ module.exports = {
                         },
                     },
                     "gatsby-remark-static-images",
-                    "gatsby-remark-check-links",
                 ],
             },
         },
@@ -141,7 +140,6 @@ module.exports = {
                         },
                     },
                     "gatsby-remark-static-images",
-                    "gatsby-remark-check-links",
                 ],
             },
         },
