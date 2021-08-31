@@ -29,16 +29,6 @@ export default function ServiceMarkdown(props: {
                         Playground
                     </Button>
                 </Grid>
-                {test && (
-                    <Grid item>
-                        <Button
-                            variant="contained"
-                            to={`/services/${shortId}/test/`}
-                        >
-                            Test
-                        </Button>
-                    </Grid>
-                )}
             </Grid>
 
             <h2>Registered Devices</h2>

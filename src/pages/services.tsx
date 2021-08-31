@@ -113,10 +113,6 @@ export default function ServiceCatalog() {
                     !!deviceSpecificationsForService(srv.classIdentifier)
                         ?.length
             )
-        if (test)
-            r = r.filter(
-                srv => !!serviceTestFromServiceClass(srv.classIdentifier)
-            )
         if (sensors) r = r.filter(srv => isSensor(srv))
         return r
     }, [deboundedFilter])
