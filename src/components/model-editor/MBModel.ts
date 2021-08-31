@@ -1,9 +1,9 @@
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
-import type { TFModelTrainingParams, LayerStats } from "../../workers/tf/dist/node_modules/tf.worker"
+import type { TFModelTrainingParams, TFLayerStats } from "../../workers/tf/dist/node_modules/tf.worker"
 
 export interface ModelStats {
-    total: LayerStats
-    layers: LayerStats[]
+    total: TFLayerStats
+    layers: TFLayerStats[]
 }
 
 export const DEFAULT_MODEL = "default"
