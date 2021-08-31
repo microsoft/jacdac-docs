@@ -193,7 +193,7 @@ export default function ModelPlayground() {
 
     return (
         <Box mb={2}>
-            <h1>ML Model Creator</h1>
+            <h1>ML Model Editor</h1>
             <p>
                 This page allows you to collect data from Jacdac sensors and use
                 them to train a neural network model that does classification.

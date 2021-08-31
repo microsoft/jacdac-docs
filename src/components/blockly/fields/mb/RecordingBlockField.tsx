@@ -16,6 +16,8 @@ import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
 import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+import ServiceManagerContext from "../../../ServiceManagerContext"
+import FieldDataSet from "../../../FieldDataSet"
 
 export interface RecordingBlockFieldValue {
     numSamples: number
@@ -23,30 +25,18 @@ export interface RecordingBlockFieldValue {
     inputTypes: string[]
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        fieldContainer: {
-            lineHeight: "2.5rem",
-            width: "15rem",
-        },
-        field: {
-            width: theme.spacing(10),
-        },
-    })
-)
-
 function RecordingParameterWidget(props: {
     initFieldValue: RecordingBlockFieldValue
 }) {
     const { initFieldValue } = props
     const { sourceBlock } = useContext(WorkspaceContext)
-    const classes = useStyles()
 
     const { numSamples, inputTypes } = initFieldValue
 
     const handleDownloadDataSet = () => {
-        console.log("Download dataset")
+        console.log("Download recording")
         sourceBlock.data = "click.download"
+        console.log("Randi file storage ")
     }
 
     return (
