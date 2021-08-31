@@ -14,6 +14,7 @@ import type { Tensor, Sequential } from "@tensorflow/tfjs"
 
 import { compileAndTest, compileModel } from "../../../ml4f"
 
+// TODO: don't inline this interface anymore
 export interface TFLayerStats {
     name: string;
     hasPadding?: boolean;
