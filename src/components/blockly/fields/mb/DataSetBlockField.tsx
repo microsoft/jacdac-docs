@@ -32,26 +32,12 @@ export interface DataSetBlockFieldValue {
     inputTypes: string[]
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        fieldContainer: {
-            lineHeight: "2.5rem",
-            width: "15rem",
-        },
-        field: {
-            width: theme.spacing(10),
-        },
-    })
-)
-
 function DataSetParameterWidget(props: {
     initFieldValue: DataSetBlockFieldValue
 }) {
     const { initFieldValue } = props
-    const classes = useStyles()
 
-    const { numRecordings, numSamples, inputClasses, inputTypes } =
-        initFieldValue
+    const { inputClasses, inputTypes } = initFieldValue
 
     const { sourceBlock } = useContext(WorkspaceContext)
     const services = resolveBlockServices(sourceBlock)
@@ -61,7 +47,6 @@ function DataSetParameterWidget(props: {
     useEffect(
         () =>
             services?.subscribe(CHANGE, () => {
-                console.log("Randi got a block change ", services.data)
                 setBlockData(services.data)
             }),
         [services]

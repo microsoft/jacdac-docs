@@ -1,9 +1,4 @@
-import React, {
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-} from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Grid, NoSsr } from "@material-ui/core"
 import FileTabs from "../fs/FileTabs"
 
@@ -595,7 +590,6 @@ function ModelBlockEditorWithContext(props: {
             ])
     }
     const handleWorkspaceChange = event => {
-        //console.log("Randi event happened ", event)
         if (event.type == Blockly.Events.BLOCK_DELETE) {
             event.ids.forEach(blockId => {
                 delete allRecordings[blockId]
