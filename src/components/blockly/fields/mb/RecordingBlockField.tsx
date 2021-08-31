@@ -36,7 +36,6 @@ function RecordingParameterWidget(props: {
     const handleDownloadDataSet = () => {
         console.log("Download recording")
         sourceBlock.data = "click.download"
-        console.log("Randi file storage ")
     }
 
     return (
