@@ -108,20 +108,21 @@ export default function ModelSummary(props: {
                                     model.modelStats.total.codeBytes}
                                 <br />(
                                 {(
-                                    model.modelStats.total.weightBytes +
-                                    model.modelStats.total.codeBytes -
-                                    model.modelStats.layers
-                                        .map(layer => {
-                                            return (
-                                                layer.weightBytes +
-                                                layer.codeBytes
-                                            )
-                                        })
-                                        .reduce((total, current) => {
-                                            return total + current
-                                        })
-                                ).toPrecision(2)}
-                                overhead)
+                                    (model.modelStats.total.weightBytes +
+                                        model.modelStats.total.codeBytes -
+                                        model.modelStats.layers
+                                            .map(layer => {
+                                                return (
+                                                    layer.weightBytes +
+                                                    layer.codeBytes
+                                                )
+                                            })
+                                            .reduce((total, current) => {
+                                                return total + current
+                                            })) /
+                                    1000
+                                ).toPrecision(2)}{" "}
+                                KB overhead)
                             </TableCell>
                             <TableCell align="right">
                                 {model.modelStats.total.optimizedCycles} <br />(
