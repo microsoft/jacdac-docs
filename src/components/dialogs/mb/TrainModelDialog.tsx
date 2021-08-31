@@ -32,7 +32,7 @@ import {
     trainRequest,
     predictRequest,
 } from "../../blockly/dsl/workers/tf.proxy"
-import Blockly, { BlockSvg, FieldVariable, WorkspaceSvg } from "blockly"
+import Blockly, { WorkspaceSvg } from "blockly"
 
 import type {
     TFModelTrainRequest,
