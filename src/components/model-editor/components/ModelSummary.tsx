@@ -7,7 +7,7 @@ import {
     TableRow,
 } from "@material-ui/core"
 
-import MBModel from "../MBModel"
+import MBModel, { MCU_FLOAT_SIZE, MCU_SPEED } from "../MBModel"
 import MBDataSet from "../MBDataSet"
 
 export default function ModelSummary(props: {
@@ -70,7 +70,7 @@ export default function ModelSummary(props: {
                                     [{layer.outputShape.join(", ")}]
                                 </TableCell>
                                 <TableCell align="right">
-                                    {layer.weightBytes / 4}
+                                    {layer.weightBytes / 2}
                                 </TableCell>
                                 <TableCell align="right">
                                     {layer.weightBytes + layer.codeBytes} (
@@ -101,34 +101,33 @@ export default function ModelSummary(props: {
                                     })
                                     .reduce((total, current) => {
                                         return total + current
-                                    }) / 4}
+                                    }) / MCU_FLOAT_SIZE}
                             </TableCell>
                             <TableCell align="right">
                                 {model.modelStats.total.weightBytes +
                                     model.modelStats.total.codeBytes}
                                 <br />(
                                 {(
-                                    (model.modelStats.total.weightBytes +
-                                        model.modelStats.total.codeBytes -
-                                        model.modelStats.layers
-                                            .map(layer => {
-                                                return (
-                                                    layer.weightBytes +
-                                                    layer.codeBytes
-                                                )
-                                            })
-                                            .reduce((total, current) => {
-                                                return total + current
-                                            })) /
-                                    1000
+                                    model.modelStats.total.weightBytes +
+                                    model.modelStats.total.codeBytes -
+                                    model.modelStats.layers
+                                        .map(layer => {
+                                            return (
+                                                layer.weightBytes +
+                                                layer.codeBytes
+                                            )
+                                        })
+                                        .reduce((total, current) => {
+                                            return total + current
+                                        })
                                 ).toPrecision(2)}
-                                KB overhead)
+                                overhead)
                             </TableCell>
                             <TableCell align="right">
                                 {model.modelStats.total.optimizedCycles} <br />(
                                 {(
                                     model.modelStats.total.optimizedCycles /
-                                    64000
+                                    MCU_SPEED
                                 ).toPrecision(2)}
                                 ms @ 64MHz)
                             </TableCell>
