@@ -8,6 +8,8 @@ export interface ModelStats {
 }
 
 export const DEFAULT_MODEL = "default"
+export const MCU_SPEED = 64000 // for microbit in 1/ms
+export const MCU_FLOAT_SIZE = 2
 
 export function validModelJSON(blockJSON) {
     const warnings = {}
@@ -88,9 +90,7 @@ export function validModelJSON(blockJSON) {
                     "Last layer in model must be a dense layer"
             } else {
                 // dense layer must have units equal to output shape & a softmax activation
-                let params = childBlock.inputs[0].fields.expand_button.value
-                if (childBlock.inputs.length > 1)
-                    params = childBlock.inputs[1].fields.block_params.value
+                const params = childBlock.inputs[0].fields.expand_button.value
 
                 // 9. final dense layer must have a softmax activation
                 if (params.activation != "softmax")
@@ -205,7 +205,7 @@ export default class MBModel extends JDEventSource {
         const totalBytes =
             this.modelStats.total.weightBytes + this.modelStats.total.codeBytes
         const totalCycles = this.modelStats.total.optimizedCycles
-        const executionTimeMs = totalCycles / 64000 // for microbit at 64MHz
+        const executionTimeMs = totalCycles / MCU_SPEED
         return `${this.modelStats.layers.length} layers, ${(
             totalBytes / 1000
         ).toPrecision(2)} KB, ${executionTimeMs.toPrecision(2)}ms`
