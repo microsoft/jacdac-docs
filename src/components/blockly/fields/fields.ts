@@ -27,6 +27,7 @@ import VegaChartField from "./chart/VegaChartField"
 
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
+import UseModelField from "./UseModelField"
 
 import ExpandModelBlockField from "./mb/ExpandModelBlockField"
 import DataSetBlockField from "./mb/DataSetBlockField"
@@ -105,6 +106,7 @@ export function registerFields() {
 
         FileSaveField,
         FileOpenField,
+        UseModelField,
 
         JSONSettingsField,
     ]
