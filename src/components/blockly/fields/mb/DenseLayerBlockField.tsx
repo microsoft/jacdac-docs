@@ -51,13 +51,7 @@ function LayerParameterWidget(props: {
 
     const { percentSize, percentParams, outputShape, runTimeInMs } =
         initFieldValue
-    const [numUnits, setNumUnits] = useState(initFieldValue.numUnits)
-    const [activation, setActivation] = useState(initFieldValue.activation)
-
-    useEffect(() => {
-        // push changes to source block after state values update
-        updateParameters()
-    }, [numUnits, activation])
+    let { numUnits, activation } = initFieldValue
 
     const updateParameters = () => {
         // push changes to field values to the parent
@@ -71,22 +65,22 @@ function LayerParameterWidget(props: {
             "EXPAND_BUTTON"
         ) as ExpandModelBlockField
         expandField.updateFieldValue(updatedValue)
-
-        // update the name of the block
-        const nameField = sourceBlock.inputList[0].fieldRow[0]
-        nameField.setValue(`dense (${numUnits}, ${activation})`)
     }
 
     const handleChangedUnits = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.target.valueAsNumber
         if (newValue && !isNaN(newValue)) {
-            setNumUnits(newValue)
+            numUnits = newValue
+            updateParameters()
         }
     }
 
     const handleChangedActivation = event => {
         const newValue = event.target.value
-        if (newValue) setActivation(newValue)
+        if (newValue) {
+            activation = newValue
+            updateParameters()
+        }
     }
 
     return (
@@ -101,7 +95,7 @@ function LayerParameterWidget(props: {
                                 type="number"
                                 size="small"
                                 variant="outlined"
-                                value={numUnits}
+                                defaultValue={numUnits}
                                 onChange={handleChangedUnits}
                                 className={classes.field}
                             />
@@ -113,7 +107,7 @@ function LayerParameterWidget(props: {
                             <Select
                                 id={useId() + "activation"}
                                 variant="outlined"
-                                value={activation}
+                                defaultValue={activation}
                                 onChange={handleChangedActivation}
                             >
                                 <MenuItem value="softmax">softmax</MenuItem>

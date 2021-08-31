@@ -13,7 +13,7 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
-import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+import WorkspaceContext from "../../WorkspaceContext"
 
 import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
@@ -45,13 +45,9 @@ function LayerParameterWidget(props: {
     const { sourceBlock } = useContext(WorkspaceContext)
     const classes = useStyles()
 
-    const { percentSize, percentParams, outputShape, runTimeInMs } = initFieldValue
-    const [rate, setRate] = useState(initFieldValue.rate)
-
-    useEffect(() => {
-        // push changes to source block after state values update
-        updateParameters()
-    }, [rate])
+    const { percentSize, percentParams, outputShape, runTimeInMs } =
+        initFieldValue
+    let rate = initFieldValue.rate
 
     const updateParameters = () => {
         let rateAsNum
@@ -67,19 +63,22 @@ function LayerParameterWidget(props: {
             "EXPAND_BUTTON"
         ) as ExpandModelBlockField
         expandField.updateFieldValue(updatedValue)
-
-        // update the name of the block
-        const nameField = sourceBlock.inputList[0].fieldRow[0]
-        nameField.setValue(`dropout (${rate})`)
+        console.log("Randi updated value ", rateAsNum)
     }
 
     const handleChangedRate = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.target.value
         if (newValue) {
             let valueAsNum
+
+            // catch edge case?
             if (newValue == "0.") valueAsNum = 0
             else valueAsNum = parseFloat(newValue)
-            if (valueAsNum >= 0 && valueAsNum < 1) setRate(newValue)
+
+            if (valueAsNum >= 0 && valueAsNum < 1) {
+                rate = newValue
+                updateParameters()
+            }
         }
     }
 
@@ -95,7 +94,7 @@ function LayerParameterWidget(props: {
                                 type="text"
                                 size="small"
                                 variant="outlined"
-                                value={rate}
+                                defaultValue={rate}
                                 onChange={handleChangedRate}
                                 className={classes.field}
                             />

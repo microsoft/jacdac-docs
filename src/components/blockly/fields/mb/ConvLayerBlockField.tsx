@@ -15,7 +15,7 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
-import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+import WorkspaceContext from "../../WorkspaceContext"
 
 import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
@@ -50,15 +50,7 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
 
     const { percentSize, percentParams, outputShape, runTimeInMs } =
         initFieldValue
-    const [numFilters, setNumFilters] = useState(initFieldValue.numFilters)
-    const [kernelSize, setKernelSize] = useState(initFieldValue.kernelSize)
-    const [strideSize, setStrideSize] = useState(initFieldValue.strideSize)
-    const [activation, setActivation] = useState(initFieldValue.activation)
-
-    useEffect(() => {
-        // push changes to source block after state values update
-        updateParameters()
-    }, [numFilters, kernelSize, strideSize, activation])
+    let { numFilters, kernelSize, strideSize, activation } = initFieldValue
 
     const updateParameters = () => {
         // push changes to field values to the parent
@@ -74,19 +66,6 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
             "EXPAND_BUTTON"
         ) as ExpandModelBlockField
         expandField.updateFieldValue(updatedValue)
-
-        // update the name of the block
-        const nameField = sourceBlock.inputList[0].fieldRow[0]
-        const name: string = nameField.getValue()
-        const blockName = name.substr(0, 13)
-        nameField.setValue(
-            `${blockName} (${numFilters}, ${kernelSize}, ${strideSize})`
-        )
-    }
-
-    const setWarning = (warningText: string) => {
-        const services = resolveBlockServices(sourceBlock)
-        services.setWarning(sourceBlock.id, warningText)
     }
 
     const handleChangedFilters = (
@@ -94,7 +73,8 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
     ) => {
         const newValue = event.target.valueAsNumber
         if (newValue && !isNaN(newValue)) {
-            setNumFilters(newValue)
+            numFilters = newValue
+            updateParameters()
         }
     }
 
@@ -103,7 +83,8 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
     ) => {
         const newValue = event.target.valueAsNumber
         if (newValue && !isNaN(newValue)) {
-            setKernelSize(newValue)
+            kernelSize = newValue
+            updateParameters()
         }
     }
 
@@ -112,13 +93,17 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
     ) => {
         const newValue = event.target.valueAsNumber
         if (newValue && !isNaN(newValue)) {
-            setStrideSize(newValue)
+            strideSize = newValue
+            updateParameters()
         }
     }
 
     const handleChangedActivation = event => {
         const newValue = event.target.value
-        if (newValue) setActivation(newValue)
+        if (newValue) {
+            activation = newValue
+            updateParameters()
+        }
     }
 
     return (
@@ -133,7 +118,7 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
                                 type="number"
                                 size="small"
                                 variant="outlined"
-                                value={numFilters}
+                                defaultValue={numFilters}
                                 onChange={handleChangedFilters}
                                 className={classes.field}
                             />
@@ -147,7 +132,7 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
                                 type="number"
                                 size="small"
                                 variant="outlined"
-                                value={kernelSize}
+                                defaultValue={kernelSize}
                                 onChange={handleChangedKernelSize}
                                 className={classes.field}
                             />
@@ -158,9 +143,10 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
                         <Tooltip title="Update the stride">
                             <TextField
                                 id={useId() + "stride"}
+                                type="number"
                                 size="small"
                                 variant="outlined"
-                                value={strideSize}
+                                defaultValue={strideSize}
                                 onChange={handleChangedStrides}
                                 className={classes.field}
                             />
@@ -172,7 +158,7 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
                             <Select
                                 id={useId() + "activation"}
                                 variant="outlined"
-                                value={activation}
+                                defaultValue={activation}
                                 onChange={handleChangedActivation}
                             >
                                 <MenuItem value="softmax">softmax</MenuItem>

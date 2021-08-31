@@ -173,6 +173,41 @@ export default class ExpandModelBlockField extends ReactInlineField {
         return new ExpandModelBlockField(options?.value)
     }
 
+    fromXml(fieldElement: Element) {
+        this.setValue(fieldElement.textContent)
+        this.updateBlockName()
+    }
+
+    updateBlockName() {
+        const sourceBlock = this.getSourceBlock()
+
+        const nameField = sourceBlock.inputList[0].fieldRow[0]
+        const name: string = nameField.getValue()
+        const blockName = name.substr(0, name.indexOf("(") - 1)
+
+        if (sourceBlock.type.indexOf("conv") > 0) {
+            // display filters, kernel size, and stride size for convolutional blocks
+            nameField.setValue(
+                `${blockName} (${this.value.numFilters}, ${this.value.kernelSize}, ${this.value.strideSize})`
+            )
+        } else if (sourceBlock.type.indexOf("pool") > 0) {
+            // display kernel size and stride for pooling blocks
+            // update the name of the block
+            nameField.setValue(
+                `${blockName} (${this.value.poolSize}, ${this.value.strideSize})`
+            )
+        } else if (sourceBlock.type.indexOf("dense") > 0) {
+            // display number of units and activation functions for dense blocks
+            nameField.setValue(
+                `${blockName} (${this.value.numUnits}, ${this.value.activation})`
+            )
+        } else if (sourceBlock.type.indexOf("drop") > 0) {
+            // display the dropout rate for dropout layers
+            nameField.setValue(`${blockName} (${this.value.rate})`)
+        }
+        // don't list parameters of other blocks
+    }
+
     getText_() {
         return ","
     }
@@ -186,5 +221,6 @@ export default class ExpandModelBlockField extends ReactInlineField {
             ...this.value,
             ...msg,
         }
+        this.updateBlockName()
     }
 }

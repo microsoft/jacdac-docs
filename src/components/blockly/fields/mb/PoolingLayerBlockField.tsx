@@ -1,9 +1,7 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
+import React, { ReactNode, useContext } from "react"
 import {
     Box,
     Grid,
-    MenuItem,
-    Select,
     TextField,
     Tooltip,
     makeStyles,
@@ -15,7 +13,7 @@ import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
-import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+import WorkspaceContext from "../../WorkspaceContext"
 
 import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
@@ -50,13 +48,7 @@ function LayerParameterWidget(props: {
 
     const { percentSize, percentParams, outputShape, runTimeInMs } =
         initFieldValue
-    const [poolSize, setPoolSize] = useState(initFieldValue.poolSize)
-    const [strideSize, setStrideSize] = useState(initFieldValue.strideSize)
-
-    useEffect(() => {
-        // push changes to source block after state values update
-        updateParameters()
-    }, [poolSize, strideSize])
+    let { poolSize, strideSize } = initFieldValue
 
     const updateParameters = () => {
         // push changes to field values to the parent
@@ -70,12 +62,6 @@ function LayerParameterWidget(props: {
             "EXPAND_BUTTON"
         ) as ExpandModelBlockField
         expandField.updateFieldValue(updatedValue)
-
-        // update the name of the block
-        const nameField = sourceBlock.inputList[0].fieldRow[0]
-        const name: string = nameField.getValue()
-        const blockName = name.substr(0, 10)
-        nameField.setValue(`${blockName} (${poolSize}, ${strideSize})`)
     }
 
     const handleChangedPoolSize = (
@@ -83,7 +69,8 @@ function LayerParameterWidget(props: {
     ) => {
         const newValue = event.target.valueAsNumber
         if (newValue && !isNaN(newValue)) {
-            setPoolSize(newValue)
+            poolSize = newValue
+            updateParameters()
         }
     }
 
@@ -92,7 +79,8 @@ function LayerParameterWidget(props: {
     ) => {
         const newValue = event.target.valueAsNumber
         if (newValue && !isNaN(newValue)) {
-            setStrideSize(newValue)
+            strideSize = newValue
+            updateParameters()
         }
     }
 
@@ -108,7 +96,7 @@ function LayerParameterWidget(props: {
                                 type="number"
                                 size="small"
                                 variant="outlined"
-                                value={poolSize}
+                                defaultValue={poolSize}
                                 onChange={handleChangedPoolSize}
                                 className={classes.field}
                             />
@@ -119,9 +107,10 @@ function LayerParameterWidget(props: {
                         <Tooltip title="Update the stride">
                             <TextField
                                 id={useId() + "stride"}
+                                type="number"
                                 size="small"
                                 variant="outlined"
-                                value={strideSize}
+                                defaultValue={strideSize}
                                 onChange={handleChangedStrides}
                                 className={classes.field}
                             />
