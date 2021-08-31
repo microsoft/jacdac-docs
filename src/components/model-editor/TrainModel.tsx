@@ -280,8 +280,8 @@ export default function TrainModel(props: {
                     Current Model
                     <IconButtonWithTooltip
                         onClick={handleDownloadModel}
-                        title="Download all recording data"
-                        disabled={dataset.totalRecordings == 0}
+                        title="Download the trained model"
+                        disabled={model.status != "trained"}
                     >
                         <DownloadIcon />
                     </IconButtonWithTooltip>
