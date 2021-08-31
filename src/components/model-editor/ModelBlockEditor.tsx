@@ -1,4 +1,9 @@
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, {
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react"
 import { Grid, NoSsr } from "@material-ui/core"
 import FileTabs from "../fs/FileTabs"
 
@@ -27,7 +32,7 @@ import FieldDataSet from "../FieldDataSet"
 import ModelBlockDialogs, {
     addNewDataSet,
 } from "../dialogs/mb/ModelBlockDialogs"
-import MBModel, { validModelJSON } from "./MBModel"
+import MBModel, { MCU_FLOAT_SIZE, MCU_SPEED, validModelJSON } from "./MBModel"
 import MBDataSet, { validDataSetJSON } from "./MBDataSet"
 import { prepareModel, prepareDataSet } from "./TrainModel"
 import ExpandModelBlockField from "../blockly/fields/mb/ExpandModelBlockField"
@@ -39,9 +44,6 @@ const MB_NEW_FILE_CONTENT = JSON.stringify({
     editor: MB_EDITOR_ID,
     xml: "",
 } as WorkspaceFile)
-
-const MICROBIT_SPEED = 64000 // in 1/ms
-const MICROBIT_BUFFER_LENGTH = 4
 
 function getRecordingsFromLocalStorage() {
     // check local storage for blocks
@@ -78,7 +80,10 @@ function getEmptyMap() {
     return {}
 }
 
-function ModelBlockEditorWithContext() {
+function ModelBlockEditorWithContext(props: {
+    allRecordings: Record<string, FieldDataSet[]>
+    trainedModels: Record<string, MBModel>
+}) {
     // block context handles hosting blockly
     const { workspace, workspaceJSON, toolboxConfiguration } =
         useContext(BlockContext)
@@ -87,13 +92,12 @@ function ModelBlockEditorWithContext() {
     const { fileStorage } = useContext(ServiceManagerContext)
 
     /* For data storage */
+    const { allRecordings, trainedModels } = props
     const [currentDataSet, setCurrentDataSet] = useState(undefined)
     const [currentModel, setCurrentModel] = useState(undefined)
     // dictionary of model vars and MBModel objs
     const allModels = useMemo(getEmptyMap, [])
     const allDataSets = useMemo(getEmptyMap, [])
-    const allRecordings = useMemo(getRecordingsFromLocalStorage, [])
-    const trainedModels = useMemo(getTrainedModelsFromLocalStorage, [])
     const updateLocalStorage = (newRecordings, newTrainedModels) => {
         const recordings = newRecordings || allRecordings
         const models = newTrainedModels || trainedModels
@@ -248,12 +252,11 @@ function ModelBlockEditorWithContext() {
             ) as ExpandModelBlockField
 
             const totalModelSize = totalStats.codeBytes + totalStats.weightBytes
-            const totalModelParams =
-                totalStats.weightBytes / MICROBIT_BUFFER_LENGTH
+            const totalModelParams = totalStats.weightBytes / MCU_FLOAT_SIZE
             paramField.updateFieldValue({
                 totalLayers: layerStats.length,
                 inputShape: totalStats.inputShape,
-                runTimeInMs: totalStats.optimizedCycles / MICROBIT_SPEED,
+                runTimeInMs: totalStats.optimizedCycles / MCU_SPEED,
                 totalSize: totalModelSize,
                 totalParams: totalModelParams,
             })
@@ -270,14 +273,14 @@ function ModelBlockEditorWithContext() {
                     const totalLayerSize =
                         layerStats[idx].codeBytes + layerStats[idx].weightBytes
                     const totalLayerParams =
-                        layerStats[idx].weightBytes / MICROBIT_BUFFER_LENGTH
+                        layerStats[idx].weightBytes / MCU_FLOAT_SIZE
                     layerParamField.updateFieldValue({
                         outputShape: layerStats[idx].outputShape,
                         percentSize: (totalLayerSize * 100) / totalModelSize,
                         percentParams:
                             (totalLayerParams * 100) / totalModelParams,
                         runTimeInMs:
-                            layerStats[idx].optimizedCycles / MICROBIT_SPEED,
+                            layerStats[idx].optimizedCycles / MCU_SPEED,
                     })
                 }
             })
@@ -347,12 +350,17 @@ function ModelBlockEditorWithContext() {
         }
     }, [workspace, workspaceJSON])
 
-    /* For setting warnings about model and dataset composition */
+    /* block services (warnings and data) */
     const setWarning = (workspace, blockId: string, warningText: string) => {
         const block = workspace.getBlockById(blockId)
         const blockServices = resolveBlockServices(block)
         if (blockServices)
             blockServices.setWarning(MB_WARNINGS_CATEGORY, warningText)
+    }
+    const setData = (workspace, blockId: string, dataArray: any[]) => {
+        const block = workspace.getBlockById(blockId)
+        const blockServices = resolveBlockServices(block)
+        if (blockServices) blockServices.data = dataArray
     }
 
     /* For dialog handling */
@@ -424,19 +432,24 @@ function ModelBlockEditorWithContext() {
         }
     }
 
-    const updateRecording = (recording: FieldDataSet[], blockId: string) => {
-        if (recording && blockId) {
-            // Add recording data to list of recordings
-            allRecordings[blockId] = recording
-            updateLocalStorage(allRecordings, null)
-        }
-    }
     const closeRecordingModal = (
         recording: FieldDataSet[],
         blockId: string
     ) => {
         // save the new recording
-        updateRecording(recording, blockId)
+        if (recording && blockId) {
+            // Add recording data to list of recordings
+            allRecordings[blockId] = recording
+
+            updateLocalStorage(allRecordings, null)
+
+            // keep this info so this block can be duplicated
+            const newBlock = workspace.getBlockById(blockId)
+            const expandField = newBlock.getField(
+                "EXPAND_BUTTON"
+            ) as ExpandModelBlockField
+            expandField.updateFieldValue({ originalBlock: blockId })
+        }
 
         // close dialog
         toggleRecordDataDialog()
@@ -484,10 +497,12 @@ function ModelBlockEditorWithContext() {
             const newBlock = workspace.getBlockById(blockId)
             const services = resolveBlockServices(newBlock)
             services.data = [currentDataSet, model]
-            // for duplicating blocks
-            newBlock
-                .getField("TRAINED_MODEL_DISPLAY")
-                .updateFieldValue({ originalBlock: blockId })
+
+            // keep this info so this block can be duplicated
+            const expandField = newBlock.getField(
+                "TRAINED_MODEL_DISPLAY"
+            ) as ExpandModelBlockField
+            expandField.updateFieldValue({ originalBlock: blockId })
 
             updateLocalStorage(null, trainedModels)
         }
@@ -508,23 +523,101 @@ function ModelBlockEditorWithContext() {
     }, [toolboxConfiguration])
 
     /* For block button clicks */
+    const resolveRecordingBlockInfo = (recordingBlock: Blockly.Block) => {
+        // get recording
+        let recording: FieldDataSet[] = allRecordings[recordingBlock.id]
+        if (!recording) {
+            // this block must be a duplicate, get the original block id
+            const originalBlockId = JSON.parse(
+                recordingBlock.getFieldValue("EXPAND_BUTTON")
+            )["originalBlock"]
+            recording = allRecordings[originalBlockId]
+
+            // add duplicate block to list of trained models
+            allRecordings[recordingBlock.id] = recording
+            updateLocalStorage(allRecordings, null)
+
+            const expandField = recordingBlock.getField(
+                "EXPAND_BUTTON"
+            ) as ExpandModelBlockField
+            expandField.updateFieldValue({
+                originalBlock: recordingBlock.id,
+            })
+        }
+        // add recording data to block
+        setData(workspace, recordingBlock.id, recording)
+    }
+    const resolveTrainedModelBlockInfo = (trainedModelBlock: Blockly.Block) => {
+        // get model
+        let model: MBModel = trainedModels[trainedModelBlock.id]
+        if (!model) {
+            // this block must be a duplicate, get the original block id
+            const originalBlockId = JSON.parse(
+                trainedModelBlock.getFieldValue("TRAINED_MODEL_DISPLAY")
+            )["originalBlock"]
+            model = trainedModels[originalBlockId]
+
+            // add duplicate block to list of trained models
+            trainedModels[trainedModelBlock.id] = model
+            updateLocalStorage(null, trainedModels)
+
+            const expandField = trainedModelBlock.getField(
+                "TRAINED_MODEL_DISPLAY"
+            ) as ExpandModelBlockField
+            expandField.updateFieldValue({
+                originalBlock: trainedModelBlock.id,
+            })
+        }
+
+        // get dataset
+        const dataSetName = trainedModelBlock
+            .getField("MODEL_TEST_SET")
+            .getText()
+        let dataset = allDataSets[dataSetName]
+
+        if (dataset) {
+            const dataSetWarnings = validDataSetJSON(dataSetBlocks[dataSetName])
+            if (!dataSetWarnings || Object.keys(dataSetWarnings).length) {
+                setWarning(
+                    workspace,
+                    trainedModelBlock.id,
+                    "This dataset cannot be tested. Address the warnings on the dataset definition block."
+                )
+                dataset = undefined
+            }
+        }
+
+        if (dataset && model)
+            setData(workspace, trainedModelBlock.id, [
+                dataset,
+                model,
+                fileStorage,
+            ])
+    }
     const handleWorkspaceChange = event => {
         //console.log("Randi event happened ", event)
         if (event.type == Blockly.Events.BLOCK_DELETE) {
-            // Randi TODO remove this and rely on the blocks
             event.ids.forEach(blockId => {
                 delete allRecordings[blockId]
-                // Randi TODO figure out what to do about duplicates of trained model blocks
                 delete trainedModels[blockId]
             })
             updateLocalStorage(allRecordings, trainedModels)
+        } else if (event.type == Blockly.Events.BLOCK_CREATE && event.ids) {
+            // add info to newly created recording and trained model blocks
+            event.ids.forEach(blockId => {
+                const createdBlock = workspace.getBlockById(blockId)
+                if (createdBlock.type == "model_block_trained_nn")
+                    resolveTrainedModelBlockInfo(createdBlock)
+                else if (createdBlock.type == "model_block_recording")
+                    resolveRecordingBlockInfo(createdBlock)
+            })
         } else if (event.type == Blockly.Events.CLICK && event.blockId) {
             const clickedBlock = workspace.getBlockById(event.blockId)
             if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
                 const command = clickedBlock.data.split(".")[1]
                 if (command == "download") {
                     const recording = allRecordings[clickedBlock.id]
-                    // find the correct recording, dataset, or model to downlaod
+                    // find the correct recording, dataset, or model to download
                     if (recording) {
                         // get recording, recording name, and class name
                         const className = clickedBlock
@@ -566,64 +659,20 @@ function ModelBlockEditorWithContext() {
                     openDataSetModal(clickedBlock)
                 } else if (command == "train") {
                     openTrainingModal(clickedBlock)
-                } else {
-                    console.error(
-                        "Received unknown block click command ",
-                        command
-                    )
                 }
                 // clear the command
                 clickedBlock.data = null
             }
         } else if (event.type == Blockly.Events.BLOCK_CHANGE && event.blockId) {
-            const clickedBlock = workspace.getBlockById(event.blockId)
-            if (clickedBlock.data && clickedBlock.data.startsWith("click")) {
-                const command = clickedBlock.data.split(".")[1]
+            // update trained model blocks on dropdown changes
+            const changedBlock = workspace.getBlockById(event.blockId)
+            if (changedBlock.data && changedBlock.data.startsWith("click")) {
+                const command = changedBlock.data.split(".")[1]
                 if (command == "refreshdisplay") {
-                    // setup model for training
-                    const services = resolveBlockServices(clickedBlock)
-                    let selectedModel: MBModel = trainedModels[clickedBlock.id]
-                    if (!selectedModel) {
-                        // this block must be a duplicate, get the original block id
-                        const originalBlockId = JSON.parse(
-                            clickedBlock.getFieldValue("TRAINED_MODEL_DISPLAY")
-                        )["originalBlock"]
-                        selectedModel = trainedModels[originalBlockId]
-
-                        // add duplicate block to list of trained models
-                        trainedModels[clickedBlock.id] = selectedModel
-                        updateLocalStorage(null, trainedModels)
-                        clickedBlock
-                            .getField("TRAINED_MODEL_DISPLAY")
-                            .updateFieldValue({
-                                originalBlock: clickedBlock.id,
-                            })
-                    }
-
-                    // setup dataset for training
-                    const dataSetName = clickedBlock
-                        .getField("MODEL_TEST_SET")
-                        .getText()
-                    const selectedDataSet = allDataSets[dataSetName]
-
-                    const dataSetWarnings = validDataSetJSON(
-                        dataSetBlocks[dataSetName]
-                    )
-                    if (
-                        !dataSetWarnings ||
-                        Object.keys(dataSetWarnings).length
-                    ) {
-                        setWarning(
-                            workspace,
-                            clickedBlock.id,
-                            "This dataset cannot be tested. Address the warnings on the dataset definition block."
-                        )
-                    } else {
-                        services.data = [selectedDataSet, selectedModel]
-                    }
+                    resolveTrainedModelBlockInfo(changedBlock)
                 }
                 // clear the command
-                clickedBlock.data = null
+                changedBlock.data = null
             }
         }
     }
@@ -705,11 +754,18 @@ export default function ModelBlockEditor() {
     const dsls = useMemo(() => {
         return [modelBlockDsl, shadowDsl, fieldsDsl]
     }, [])
+
+    const recordings = getRecordingsFromLocalStorage()
+    const models = getTrainedModelsFromLocalStorage()
+
     return (
         <NoSsr>
             <FileSystemProvider>
                 <BlockProvider storageKey={MB_SOURCE_STORAGE_KEY} dsls={dsls}>
-                    <ModelBlockEditorWithContext />
+                    <ModelBlockEditorWithContext
+                        allRecordings={recordings}
+                        trainedModels={models}
+                    />
                 </BlockProvider>
             </FileSystemProvider>
         </NoSsr>
