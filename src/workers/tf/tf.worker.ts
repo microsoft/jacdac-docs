@@ -14,6 +14,7 @@ import type { Tensor, Sequential } from "@tensorflow/tfjs"
 
 import { compileAndTest, compileModel } from "../../../ml4f"
 import type { LayerStats } from "../../../ml4f"
+export type { LayerStats } from "../../../ml4f"
 
 export interface TFModelObj {
     name: string

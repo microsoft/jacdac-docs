@@ -1,6 +1,5 @@
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
-import { LayerStats } from "../../../ml4f/built/ml4f"
-import type { TFModelTrainingParams } from "../../workers/tf/dist/node_modules/tf.worker"
+import type { TFModelTrainingParams, LayerStats } from "../../workers/tf/dist/node_modules/tf.worker"
 
 export interface ModelStats {
     total: LayerStats
