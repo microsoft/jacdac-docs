@@ -40,7 +40,7 @@ export default function DataSetPlot(props: {
 
             // calculate features and add them to the dataset
             features["rms-" + headerName] = recording.rms[idx]
-            features["roc-" + headerName] = recording.roc[idx]
+            features["sd-" + headerName] = recording.sd[idx]
             features["max-" + headerName] = recording.maxs[idx]
         }
         return features
@@ -86,7 +86,7 @@ export default function DataSetPlot(props: {
                 if (inputNameCount > 1) inputName += inputNameCount
 
                 feats.push("rms-" + inputName)
-                feats.push("roc-" + inputName)
+                feats.push("sd-" + inputName)
                 feats.push("max-" + inputName)
             })
         }

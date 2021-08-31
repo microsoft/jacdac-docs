@@ -40,11 +40,11 @@ export default class FielddataSet extends JDEventSource {
     interval: number
     maxRows = -1
 
-    // maintain computed min/max/rms to avoid recomputation
+    // maintain computed min/max/rms/sd to avoid recomputation
     mins: number[]
     maxs: number[]
-    rms: number[]
-    roc: number[]
+    rms: number[] // rms is the root mean squared, or average value of the sample
+    sd: number[] // sd is the standard deviation of the sample, a measure of volatility
 
     static create(
         bus: JDBus,
@@ -157,7 +157,7 @@ export default class FielddataSet extends JDEventSource {
                     this.mins = row.data.slice(0)
                     this.maxs = row.data.slice(0)
                     this.rms = row.data.slice(0)
-                    this.roc = new Array(row.data.length).fill(0)
+                    this.sd = new Array(row.data.length).fill(0)
                 } else {
                     const n = r
                     for (let i = 0; i < row.data.length; ++i) {
@@ -168,8 +168,8 @@ export default class FielddataSet extends JDEventSource {
                                 Math.pow(row.data[i], 2)) /
                                 n
                         )
-                        this.roc[i] = Math.sqrt(
-                            (Math.pow(this.roc[i], 2) * (n - 1) +
+                        this.sd[i] = Math.sqrt(
+                            (Math.pow(this.sd[i], 2) * (n - 1) +
                                 Math.pow(this.rms[i] - row.data[i], 2)) /
                                 n
                         )
@@ -182,7 +182,7 @@ export default class FielddataSet extends JDEventSource {
                 this.mins = data.slice(0)
                 this.maxs = data.slice(0)
                 this.rms = data.slice(0)
-                this.roc = new Array(data.length).fill(0)
+                this.sd = new Array(data.length).fill(0)
             } else {
                 const n = this.rows.length
                 for (let i = 0; i < data.length; ++i) {
@@ -193,8 +193,8 @@ export default class FielddataSet extends JDEventSource {
                             Math.pow(data[i], 2)) /
                             n
                     )
-                    this.roc[i] = Math.sqrt(
-                        (Math.pow(this.roc[i], 2) * (n - 1) +
+                    this.sd[i] = Math.sqrt(
+                        (Math.pow(this.sd[i], 2) * (n - 1) +
                             Math.pow(this.rms[i] - data[i], 2)) /
                             n
                     )
