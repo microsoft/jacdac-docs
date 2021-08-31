@@ -13,8 +13,19 @@ import {
 import type { Tensor, Sequential } from "@tensorflow/tfjs"
 
 import { compileAndTest, compileModel } from "../../../ml4f"
-import type { LayerStats } from "../../../ml4f"
-export type { LayerStats } from "../../../ml4f"
+
+// TODO: don't inline this interface anymore
+export interface TFLayerStats {
+    name: string;
+    hasPadding?: boolean;
+    inputShape: number[];
+    outputShape: number[];
+    unoptimizedCycles: number;
+    optimizedCycles: number;
+    weightBytes: number;
+    codeBytes: number;
+    arenaBytes: number;
+}
 
 export interface TFModelObj {
     name: string
@@ -56,7 +67,7 @@ export interface TFModelCompileResponse extends TFModelMessage {
     type: "compile"
     data: {
         modelJSON: any
-        modelStats: LayerStats[]
+        modelStats: TFLayerStats[]
         trainingParams: TFModelTrainingParams
     }
 }
