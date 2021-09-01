@@ -91,7 +91,7 @@ const logicDsl: BlockDomainSpecificLanguage = {
                         type: "UnaryExpression",
                         operator: "!",
                         argument,
-                        prefix: false, // TODO:?
+                        prefix: false, // TODO: handle logic_negate
                     },
                     errors: [],
                 }

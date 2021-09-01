@@ -12,7 +12,6 @@ import DeleteIcon from "@material-ui/icons/Delete"
 import { serviceSpecifications } from "../../../jacdac-ts/src/jdom/spec"
 import AddServiceIconButton from "../AddServiceIconButton"
 import ServiceSpecificationSelect from "../ServiceSpecificationSelect"
-import { escapeName } from "../../../jacdac-ts/src/azure-iot/dtdl"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import useMakeCodeEditorExtensionClient, {
     READ,
@@ -143,7 +142,7 @@ function ClientRoleRow(props: {
 function validateClientRole(config: Configuration, role: ClientRole) {
     const serviceError: string = undefined
     const nameError: string = undefined
-    // TODO
+    // TODO: properly validate client role
     return { serviceError, nameError }
 }
 

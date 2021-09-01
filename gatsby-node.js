@@ -11,8 +11,6 @@ const {
     isInfrastructure,
 } = require(`./jacdac-ts/dist/jacdac.cjs`)
 const {
-    serviceSpecificationToDTDL,
-    DTMIToRoute,
     serviceSpecificationsWithServiceTwinSpecification,
     serviceSpecificationToServiceTwinSpecification,
 } = require(`./jacdac-ts/dist/jacdac-azure-iot.cjs`)
@@ -280,23 +278,6 @@ async function generateServicesJSON() {
         const devicetwin = serviceSpecificationToServiceTwinSpecification(srv)
         await fs.outputFile(f, JSON.stringify(devicetwin, null, 2))
     }
-
-    // DTMI
-    {
-        const models = services
-            .filter(srv => srv.shortId !== "_system")
-            .map(serviceSpecificationToDTDL)
-        for (const model of models) {
-            const route = DTMIToRoute(model["@id"])
-            const f = path.join(dir, route)
-            //console.log(`dtml ${model["@id"]} => ${f}`)
-            await fs.outputFile(f, JSON.stringify(model, null, 2))
-        }
-        await fs.outputFile(
-            "./public/dtmi/jacdac/services.json",
-            JSON.stringify(models, null, 2)
-        )
-    }
 }
 
 async function createWorkers() {
@@ -318,7 +299,6 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
     await createSpecPages(graphql, actions, reporter)
     await createDevicePages(graphql, actions, reporter)
     await createDeviceQRPages(actions, reporter)
-    // generate JSON for Services/DTMI models
     await generateServicesJSON()
     await createWorkers()
 }

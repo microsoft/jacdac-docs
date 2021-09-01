@@ -203,7 +203,7 @@ const mathDsl: BlockDomainSpecificLanguage = {
                         type: "UnaryExpression",
                         operator: ops[op] || op,
                         argument,
-                        prefix: false, // TODO:?
+                        prefix: false, // TODO: handle math-negate
                     },
                     errors: [],
                 }
