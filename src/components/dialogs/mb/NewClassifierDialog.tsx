@@ -36,57 +36,61 @@ export default function NewClassifierDialog(props: {
     const [classifierType, setClassifierType] = useState("5-cnn2d")
 
     const addNewClassifierBlock = () => {
+        const newClassifierName = classifierName || "classifier1"
         // check if name is already used
-        if (classifierName && classifierName.length && classifierType) {
-            if (!Variables.nameUsedWithAnyType(classifierName, workspace)) {
+        if (classifierType) {
+            if (!Variables.nameUsedWithAnyType(newClassifierName, workspace)) {
                 // get or create new classifier typed variable
-                workspace.createVariable(classifierName, MB_CLASSIFIER_VAR_TYPE)
+                workspace.createVariable(
+                    newClassifierName,
+                    MB_CLASSIFIER_VAR_TYPE
+                )
+            }
 
-                // create new block with new classifier name
-                if (classifierType == FIVE_CNN_1D) {
-                    Blockly.Xml.domToBlock(
-                        Blockly.Xml.textToDom(
-                            `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${classifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></statement></block>`
-                        ),
-                        workspace
-                    )
-                } else if (classifierType == FIVE_CNN_2D) {
-                    Blockly.Xml.domToBlock(
-                        Blockly.Xml.textToDom(
-                            `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${classifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></statement></block>`
-                        ),
-                        workspace
-                    )
-                } else if (classifierType == TEN_CNN_1D) {
-                    Blockly.Xml.domToBlock(
-                        Blockly.Xml.textToDom(
-                            `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${classifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></statement></block>`
-                        ),
-                        workspace
-                    )
-                } else if (classifierType == TEN_CNN_2D) {
-                    Blockly.Xml.domToBlock(
-                        Blockly.Xml.textToDom(
-                            `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${classifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></statement></block>`
-                        ),
-                        workspace
-                    )
-                } else if (classifierType == FC_ANN) {
-                    Blockly.Xml.domToBlock(
-                        Blockly.Xml.textToDom(
-                            `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${classifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":16,"activation":"relu"}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":16,"activation":"relu"}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":16,"activation":"relu"}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></statement></block>`
-                        ),
-                        workspace
-                    )
-                } else if (classifierType == EMPTY) {
-                    Blockly.Xml.domToBlock(
-                        Blockly.Xml.textToDom(
-                            `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${classifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`
-                        ),
-                        workspace
-                    )
-                }
-            } else Blockly.alert("Variable name is invalid or already exists")
+            // create new block with new classifier name
+            if (classifierType == FIVE_CNN_1D) {
+                Blockly.Xml.domToBlock(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newClassifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></statement></block>`
+                    ),
+                    workspace
+                )
+            } else if (classifierType == FIVE_CNN_2D) {
+                Blockly.Xml.domToBlock(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newClassifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></statement></block>`
+                    ),
+                    workspace
+                )
+            } else if (classifierType == TEN_CNN_1D) {
+                Blockly.Xml.domToBlock(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newClassifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv1d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></statement></block>`
+                    ),
+                    workspace
+                )
+            } else if (classifierType == TEN_CNN_2D) {
+                Blockly.Xml.domToBlock(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newClassifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":4,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_maxpool2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"poolSize":2,"strideSize":1}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_conv2d_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numFilters":16,"kernelSize":2,"strideSize":1,"activation":"relu"}</field><next><block type="model_block_dropout_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"rate":0.1}</field><next><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></statement></block>`
+                    ),
+                    workspace
+                )
+            } else if (classifierType == FC_ANN) {
+                Blockly.Xml.domToBlock(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newClassifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field><statement name="LAYER_INPUTS"><block type="model_block_flatten_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":16,"activation":"relu"}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":16,"activation":"relu"}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":16,"activation":"relu"}</field><next><block type="model_block_dense_layer"><field name="EXPAND_BUTTON">{"parametersVisible":false,"numUnits":4,"activation":"softmax"}</field></block></next></block></next></block></next></block></next></block></statement></block>`
+                    ),
+                    workspace
+                )
+            } else if (classifierType == EMPTY) {
+                Blockly.Xml.domToBlock(
+                    Blockly.Xml.textToDom(
+                        `<block type="model_block_nn"><field name="CLASSIFIER_NAME" variabletype="ModelBlockClassifier">${newClassifierName}</field><field name="NN_TRAINING" variabletype="ModelBlockDataSet">dataset1</field><field name="EXPAND_BUTTON">{"parametersVisible":false,"optimizer":"adam","numEpochs":200,"lossFn":"categoricalCrossentropy","metrics":"acc"}</field><field name="NN_BUTTONS">{}</field></block>`
+                    ),
+                    workspace
+                )
+            }
         }
     }
 
@@ -125,7 +129,7 @@ export default function NewClassifierDialog(props: {
                         <TextField
                             className={classes.field}
                             label="Classifier name"
-                            value={classifierName}
+                            defaultValue="classifier1"
                             variant="outlined"
                             onChange={handleClassifierNameChange}
                         />
@@ -169,7 +173,6 @@ export default function NewClassifierDialog(props: {
                     variant="contained"
                     color="primary"
                     endIcon={<NavigateNextIcon />}
-                    disabled={!classifierName.length}
                     onClick={handleDone}
                 >
                     Done
