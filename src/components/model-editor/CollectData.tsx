@@ -329,7 +329,7 @@ export default function CollectData(props: {
             </Grid>
             <Grid item>
                 <h2>Collect More Data</h2>
-                {/* RANDI TODO Toggle button to get data from sensors vs upload from file */}
+                {/* TODO Toggle button to get data from sensors vs upload from file */}
                 <div key="sensors">
                     <h3>
                         Select input sensors&nbsp;

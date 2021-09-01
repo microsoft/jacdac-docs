@@ -98,6 +98,8 @@ export function prepareModel(
             model: mod.toJSON(),
         },
     } as TFModelCompileRequest
+
+    // TODO throw an error if this never returns, page needs refresh
     compileRequest(compileMsg).then(result => {
         if (result) {
             mod.modelJSON = result.data.modelJSON || ""
