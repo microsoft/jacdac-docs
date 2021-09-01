@@ -1,8 +1,5 @@
-import React, { lazy, useEffect, useContext, useState, useMemo } from "react"
+import React, { lazy, useContext, useState, useMemo } from "react"
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Button,
     Dialog,
     DialogActions,
@@ -10,7 +7,6 @@ import {
     Grid,
     LinearProgress,
 } from "@material-ui/core"
-import Trend from "../../Trend"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import PlayArrowIcon from "@material-ui/icons/PlayArrow"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
@@ -18,48 +14,25 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import NavigateBackIcon from "@material-ui/icons/NavigateBefore"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
-// tslint:disable-next-line: match-default-export-name no-submodule-imports
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DownloadIcon from "@material-ui/icons/GetApp"
 import IconButtonWithTooltip from "../../ui/IconButtonWithTooltip"
 import Suspense from "../../ui/Suspense"
 
 import ServiceManagerContext from "../../ServiceManagerContext"
 
-import {
-    trainRequest,
-    predictRequest,
-} from "../../blockly/dsl/workers/tf.proxy"
+import { trainRequest } from "../../blockly/dsl/workers/tf.proxy"
 import Blockly, { WorkspaceSvg } from "blockly"
 
 import type {
     TFModelTrainRequest,
     TFModelTrainResponse,
-    TFModelPredictRequest,
-    TFModelPredictResponse,
 } from "../../../workers/tf/dist/node_modules/tf.worker"
 import workerProxy from "../../blockly/dsl/workers/proxy"
 
-import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
-import { arrayConcatMany } from "../../../../jacdac-ts/src/jdom/utils"
-import { JDRegister } from "../../../../jacdac-ts/src/jdom/register"
-import { isSensor } from "../../../../jacdac-ts/src/jdom/spec"
-import { JDBus } from "../../../../jacdac-ts/src/jdom/bus"
-import { REPORT_UPDATE } from "../../../../jacdac-ts/src/jdom/constants"
-import { throttle } from "../../../../jacdac-ts/src/jdom/utils"
-
 import MBModel from "../../model-editor/MBModel"
-import MBDataSet, { arraysEqual } from "../../model-editor/MBDataSet"
-import FieldDataSet from "../../FieldDataSet"
-import ReadingFieldGrid from "../../ReadingFieldGrid"
-import useChange from "../../../jacdac/useChange"
+import MBDataSet from "../../model-editor/MBDataSet"
 
 import { PointerBoundary } from "../../blockly/fields/PointerBoundary"
-import { MODEL_BLOCKS } from "../../model-editor/modelblockdsl"
-import { useId } from "react-use-id-hook"
-import { resolveBlockServices } from "../../blockly/WorkspaceContext"
 
 const LossAccChart = lazy(
     () => import("../../model-editor/components/LossAccChart")
@@ -67,22 +40,7 @@ const LossAccChart = lazy(
 const ModelSummaryDropdown = lazy(
     () => import("../../model-editor/components/ModelSummaryDropdown")
 )
-
-const LIVE_HORIZON = 100
-
-function createDataSet(
-    bus: JDBus,
-    registers: JDRegister[],
-    name: string,
-    palette: string[]
-) {
-    const fields = arrayConcatMany(registers.map(reg => reg.fields))
-    const colors = fields.map((f, i) => palette[i % palette.length])
-    const set = new FieldDataSet(bus, name, fields, colors)
-    set.maxRows = LIVE_HORIZON + 4
-
-    return set
-}
+const ModelOutput = lazy(() => import("../../model-editor/ModelOutput"))
 
 export default function TrainModelDialog(props: {
     classes: any
@@ -120,24 +78,12 @@ export default function TrainModelDialog(props: {
         "trainModel"
     )
 
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const readingRegisters = useChange(bus, bus =>
-        arrayConcatMany(
-            bus.devices().map(device =>
-                device
-                    .services()
-                    .filter(srv => isSensor(srv.specification))
-                    .map(srv => srv.readingRegister)
-            )
-        )
-    )
-
-    useEffect(() => {
-        prepareTestingLogs()
-    }, [dataset, model])
-
     /* For training model */
     const [trainEnabled, setTrainEnabled] = useState(model.status !== "empty")
+    const [predictEnabled, setPredictEnabled] = useState(
+        model.status == "trained"
+    )
+
     // for loss/acc graph
     const trainingLossLog = useMemo(() => {
         return []
@@ -217,6 +163,7 @@ export default function TrainModelDialog(props: {
             model.trainingAcc = trainingHistory[trainingHistory.length - 1]
             addNewTrainedModelBlock()
             setTrainEnabled(true)
+            setPredictEnabled(true)
         } else model.status = "untrained"
     }
     const addNewTrainedModelBlock = () => {
@@ -226,158 +173,13 @@ export default function TrainModelDialog(props: {
 
         const newBlock = Blockly.Xml.domToBlock(
             Blockly.Xml.textToDom(
-                `<block type="model_block_trained_nn"><field name="TRAINED_MODEL_NAME">${trainedModelName}</field><field name="MODEL_TEST_SET" variabletype="ModelBlockDataSet">${dataSetName}</field><field name="SELECTED_CHART">model summary</field><field name="TRAINED_MODEL_PARAMS">{}</field></block>`
+                `<block type="model_block_trained_nn"><field name="TRAINED_MODEL_NAME">${trainedModelName}</field><field name="MODEL_TEST_SET" variabletype="ModelBlockDataSet">${dataSetName}</field><field name="SELECTED_CHART">model summary</field></block>`
             ),
             workspace
         )
 
         onModelUpdate(model, newBlock.id)
     }
-
-    /* For testing trained model */
-    const prepareTestingLogs = () => {
-        // Create space to hold prediction data
-        const livePredictionDataSet = {
-            name: "live-predictions",
-            rows: [],
-            headers: model.labels,
-            units: model.labels.map(() => {
-                return "/"
-            }),
-            colors: model.labels.map(
-                (label, idx) => chartPalette[idx % chartPalette.length]
-            ),
-        }
-        setLivePredictions({
-            predictionData: FieldDataSet.createFromFile(livePredictionDataSet),
-            topClass: model.labels[0],
-        })
-    }
-
-    /* For predicting with model */
-    const [liveRecording, setLiveRecording] = useState<FieldDataSet>(undefined)
-    const [, setLiveDataTimestamp] = useState(0)
-
-    const [registerIdsChecked, setRegisterIdsChecked] = useState<string[]>([])
-    const [livePredictions, setLivePredictions] = useState({
-        predictionData: undefined,
-        topClass: "",
-    })
-
-    const recordingRegisters = readingRegisters.filter(
-        reg => registerIdsChecked.indexOf(reg.id) > -1
-    )
-    const liveRecordingMatchesModel = () => {
-        if (liveRecording) {
-            let matchingInputs = true
-            if (model.inputTypes) {
-                if (!arraysEqual(model.inputTypes, liveRecording.headers)) {
-                    matchingInputs = false
-                }
-            }
-            return matchingInputs
-        }
-        return false
-    }
-    const predictionEnabled =
-        !!recordingRegisters?.length &&
-        liveRecordingMatchesModel() &&
-        model.status == "trained"
-
-    const handleRegisterCheck = (reg: JDRegister) => {
-        const i = registerIdsChecked.indexOf(reg.id)
-        if (i > -1) registerIdsChecked.splice(i, 1)
-        else registerIdsChecked.push(reg.id)
-
-        registerIdsChecked.sort()
-        setRegisterIdsChecked([...registerIdsChecked])
-        setLiveRecording(newRecording(registerIdsChecked))
-    }
-
-    const newRecording = (registerIds: string[]) =>
-        registerIds.length
-            ? createDataSet(
-                  bus,
-                  readingRegisters.filter(
-                      reg => registerIds.indexOf(reg.id) > -1
-                  ),
-                  `liveData`,
-                  chartPalette
-              )
-            : undefined
-
-    const updateLiveData = () => {
-        setLiveRecording(liveRecording)
-        setLiveDataTimestamp(bus.timestamp)
-        if (model.status == "trained") updatePrediction()
-    }
-    const throttleUpdate = throttle(() => updateLiveData(), 30)
-    // interval add data entry
-    const addRow = (values?: number[]) => {
-        if (liveRecording) {
-            liveRecording.addRow(values)
-            throttleUpdate()
-        }
-    }
-    const startStreamingRegisters = () => {
-        console.log(`start streaming`)
-        const streamers = recordingRegisters?.map(reg =>
-            reg.subscribe(REPORT_UPDATE, () => {})
-        )
-        return () => {
-            console.log(`stop streaming`)
-            streamers.map(streamer => streamer())
-        }
-    }
-    const updatePrediction = async () => {
-        // Use the model to do inference on a data point the model hasn't seen before:
-        if (!predictionEnabled) return
-
-        let data = liveRecording.data()
-        data = data.slice(data.length - model.inputShape[0])
-        const liveInput = [data]
-
-        let topLabel = model.labels[0]
-
-        if (data && data.length >= model.inputShape[0]) {
-            const liveOutput = []
-
-            // Get probability values from model
-            const predictMsg = {
-                worker: "tf",
-                type: "predict",
-                data: {
-                    zData: liveInput,
-                    model: model.toJSON(),
-                },
-            } as TFModelPredictRequest
-            const predResult = (await predictRequest(
-                predictMsg
-            )) as TFModelPredictResponse
-
-            // Save probability for each class in model object
-            const prediction = predResult.data.predictAll[0]
-            model.labels.forEach(label => {
-                liveOutput.push(prediction[label])
-
-                // update which class has highest confidence
-                if (liveOutput[label] > liveOutput[topLabel]) topLabel = label
-            })
-
-            livePredictions.predictionData.addData(liveOutput)
-            livePredictions.topClass = topLabel
-        }
-    }
-
-    useEffect(() => {
-        const interval = setInterval(() => addRow(), model.inputInterval)
-        const stopStreaming = startStreamingRegisters()
-
-        return () => {
-            clearInterval(interval)
-            stopStreaming()
-        }
-    }, [registerIdsChecked])
 
     /* For interface controls */
     const resetInputs = () => {}
@@ -388,9 +190,6 @@ export default function TrainModelDialog(props: {
         onDone("model")
     }
     const handleBack = () => {
-        // turn off predictions
-        setRegisterIdsChecked([])
-
         // go to the previous page
         setDialogType("trainModel")
     }
@@ -402,14 +201,6 @@ export default function TrainModelDialog(props: {
         // TODO also download arm model (as a zip file?)
         fileStorage.saveText(`${model.name}.json`, JSON.stringify(model))
     }
-    const [sensorsExpanded, setSensorsExpanded] = React.useState<
-        string | false
-    >(false)
-    const handleExpandedSensorsChange =
-        (panel: string) =>
-        (event: React.ChangeEvent<unknown>, isExpanded: boolean) => {
-            setSensorsExpanded(isExpanded ? panel : false)
-        }
 
     if (dialogType == "trainModel")
         return (
@@ -496,13 +287,13 @@ export default function TrainModelDialog(props: {
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" onClick={handleCancel}>
-                            Cancel
+                            Close
                         </Button>
                         <Button
                             variant="contained"
                             color="primary"
                             endIcon={<NavigateNextIcon />}
-                            disabled={model.status !== "trained"}
+                            disabled={!predictEnabled}
                             onClick={handleNext}
                         >
                             Next
@@ -521,117 +312,12 @@ export default function TrainModelDialog(props: {
                     maxWidth={"md"}
                 >
                     <DialogContent>
-                        <Grid container direction={"column"}>
-                            <Grid item>
-                                <h3>Live Testing</h3>
-                                <div key="predict">
-                                    <span>
-                                        {" "}
-                                        Top Class:{" "}
-                                        {model.status == "trained"
-                                            ? livePredictions.topClass
-                                            : "--"}{" "}
-                                    </span>
-                                    <br />
-                                </div>
-                                <div key="liveData">
-                                    {liveRecording && (
-                                        <div>
-                                            {model.labels.map(label => {
-                                                return (
-                                                    <span
-                                                        key={
-                                                            "prediction-key-" +
-                                                            label
-                                                        }
-                                                    >
-                                                        <FiberManualRecordIcon
-                                                            className={
-                                                                classes.vmiddle
-                                                            }
-                                                            fontSize="small"
-                                                            style={{
-                                                                color: livePredictions.predictionData.colorOf(
-                                                                    undefined,
-                                                                    label
-                                                                ),
-                                                            }}
-                                                        />
-                                                        {label}
-                                                    </span>
-                                                )
-                                            })}
-                                            <Trend
-                                                key="live-data-predictions"
-                                                height={12}
-                                                dataSet={
-                                                    livePredictions.predictionData
-                                                }
-                                                horizon={LIVE_HORIZON}
-                                                dot={true}
-                                                gradient={true}
-                                            />
-                                            <Trend
-                                                key="live-data-trends"
-                                                height={12}
-                                                dataSet={liveRecording}
-                                                horizon={LIVE_HORIZON}
-                                                dot={true}
-                                                gradient={true}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                                <Accordion
-                                    expanded={
-                                        sensorsExpanded === "chooseSensors"
-                                    }
-                                    onChange={handleExpandedSensorsChange(
-                                        "chooseSensors"
-                                    )}
-                                >
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                    >
-                                        <div>
-                                            <h4>Select input sensors</h4>
-                                            {!predictionEnabled && (
-                                                <p>
-                                                    Sensors should match:{" "}
-                                                    {model.inputTypes.join(
-                                                        ", "
-                                                    )}{" "}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <div key="sensors">
-                                            {!readingRegisters.length && (
-                                                <span>
-                                                    Waiting for sensors...
-                                                </span>
-                                            )}
-                                            {!!readingRegisters.length && (
-                                                <ReadingFieldGrid
-                                                    readingRegisters={
-                                                        readingRegisters
-                                                    }
-                                                    registerIdsChecked={
-                                                        registerIdsChecked
-                                                    }
-                                                    recording={false}
-                                                    liveDataSet={liveRecording}
-                                                    handleRegisterCheck={
-                                                        handleRegisterCheck
-                                                    }
-                                                />
-                                            )}
-                                        </div>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-                        </Grid>
+                        <ModelOutput
+                            chartProps={chartProps}
+                            reactStyle={classes}
+                            chartPalette={chartPalette}
+                            model={model}
+                        />
                     </DialogContent>
                     <DialogActions>
                         <Button
