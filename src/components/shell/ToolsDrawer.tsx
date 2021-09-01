@@ -30,8 +30,7 @@ import WifiIcon from "@material-ui/icons/Wifi"
 import SettingsIcon from "@material-ui/icons/Settings"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
-// tslint:disable-next-line: no-submodule-imports match-default-export-name
-import CloudIcon from "@material-ui/icons/Cloud"
+import MakeCodeIcon from "../icons/MakeCodeIcon"
 
 import DarkModeContext from "../ui/DarkModeContext"
 import KindIcon from "../KindIcon"
@@ -42,6 +41,7 @@ import {
 } from "../../../jacdac-ts/src/jdom/constants"
 import { UIFlags } from "../../jacdac/providerbus"
 import { resolveUnit } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
+import { withPrefix } from "gatsby"
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -71,15 +71,15 @@ const useStyles = makeStyles(theme =>
 
 function ToolsListItem(props: {
     text?: string
-    url?: string
+    to?: string
+    href?: string
     icon?: JSX.Element
     onClick?: () => void
     onClose: () => void
 }) {
-    const { text, url, icon, onClick, onClose } = props
-
-    return url ? (
-        <Link to={url} aria-label="Toggle Dark Mode" onClick={onClose}>
+    const { text, to, href, icon, onClick, onClose } = props
+    return to || href ? (
+        <Link to={to} href={href} onClick={to ? onClose : undefined}>
             <ListItem button={true}>
                 <ListItemIcon>{icon}</ListItemIcon>
                 <ListItemText
@@ -87,7 +87,7 @@ function ToolsListItem(props: {
                     primary={
                         <>
                             <span>{text}</span>
-                            {/^https:\/\//.test(url) && (
+                            {/^https:\/\//.test(href) && (
                                 <OpenInNew fontSize="small" color="action" />
                             )}
                         </>
@@ -142,47 +142,42 @@ export default function ToolsDrawer() {
         },
         {
             text: "Data Collector",
-            url: "/tools/collector/",
+            to: "/tools/collector/",
             icon: <FiberManualRecordIcon />,
         },
         UIFlags.peers && {
             text: "Peers",
-            url: "/tools/peers/",
+            to: "/tools/peers/",
             icon: <WifiIcon />,
         },
         {},
         {
             text: "Device Settings",
-            url: "/tools/settings/",
+            to: "/tools/settings/",
             icon: <SettingsIcon />,
         },
         {
             text: "Firmware Update",
-            url: "/tools/updater/",
+            to: "/tools/updater/",
             icon: <SystemUpdateAltIcon />,
         },
         {
             // separator
         },
         {
-            text: "Azure Device Templates",
-            url: "/tools/azure-device-templates",
-            icon: <CloudIcon />,
+            text: "MakeCode",
+            href: "https://microsoft.github.com/jacdac-docs/editors/makecode",
+            icon: <MakeCodeIcon />,
         },
         /*
         {
-            text: "MakeCode",
-            url: "/tools/makecode",
-            icon: <MakeCodeIcon />,
-        },
-        {
             text: "Jupyter Lab",
-            url: "/tools/jupyterlab",
+            to: "/tools/jupyterlab",
             icon: <JupyterIcon />,
         },
             {
                 text: "Edge Impulse",
-                url: "/tools/edge-impulse",
+                to: "/tools/edge-impulse",
                 icon: <EdgeImpulseIcon />
             },
         */
@@ -191,12 +186,12 @@ export default function ToolsDrawer() {
         },
         {
             text: "Service Editor",
-            url: "/tools/service-editor/",
+            to: "/tools/service-editor/",
             icon: <KindIcon kind={SERVICE_NODE_NAME} />,
         },
         {
             text: "Device registration",
-            url: "/tools/device-registration/",
+            to: "/tools/device-registration/",
             icon: <KindIcon kind={DEVICE_NODE_NAME} />,
         },
         {
