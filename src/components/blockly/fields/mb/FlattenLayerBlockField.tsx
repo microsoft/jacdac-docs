@@ -68,9 +68,12 @@ export default class FlattenLayerBlockField extends ReactInlineField {
     /* This default value is specified here and in modelblockdsl.ts */
     get defaultValue() {
         return {
-            numTrainableParams: 0,
             runTimeInMs: 0,
             outputShape: [0],
+            percentParams: 0,
+            percentSize: 0,
+            numUnits: 4,
+            activation: "relu",
         }
     }
 
