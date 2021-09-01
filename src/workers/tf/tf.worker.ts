@@ -85,7 +85,7 @@ export interface TFModelPredictRequest extends TFModelMessage {
     type: "predict"
     data: {
         model: TFModelObj
-        zData: number[][] | number[][][]
+        zData: number[][][]
     }
 }
 
