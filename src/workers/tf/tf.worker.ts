@@ -109,12 +109,7 @@ export interface TFModelPredictResponse extends TFModelMessage {
 
 function addLayer(layerObj: any, inputShape: number[], outputShape: number) {
     let layer
-
-    // get the block parameters from the right place
-    let params = layerObj.inputs[0].fields.expand_button.value
-    if (layerObj.inputs.length > 1) {
-        params = layerObj.inputs[1].fields.block_params.value
-    }
+    const params = layerObj.inputs[0].fields.expand_button.value
 
     switch (layerObj.type) {
         case "model_block_conv1d_layer":

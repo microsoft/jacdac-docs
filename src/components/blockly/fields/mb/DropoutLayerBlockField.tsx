@@ -63,7 +63,6 @@ function LayerParameterWidget(props: {
             "EXPAND_BUTTON"
         ) as ExpandModelBlockField
         expandField.updateFieldValue(updatedValue)
-        console.log("Randi updated value ", rateAsNum)
     }
 
     const handleChangedRate = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -33,7 +33,7 @@ export default function NewClassifierDialog(props: {
     const { classes, open, onDone, workspace } = props
 
     const [classifierName, setClassifierName] = useState("")
-    const [classifierType, setClassifierType] = useState("10-cnn1d")
+    const [classifierType, setClassifierType] = useState("5-cnn2d")
 
     const addNewClassifierBlock = () => {
         // check if name is already used
@@ -41,8 +41,6 @@ export default function NewClassifierDialog(props: {
             if (!Variables.nameUsedWithAnyType(classifierName, workspace)) {
                 // get or create new classifier typed variable
                 workspace.createVariable(classifierName, MB_CLASSIFIER_VAR_TYPE)
-
-                // Randi TODO select the right model architecture
 
                 // create new block with new classifier name
                 if (classifierType == FIVE_CNN_1D) {
