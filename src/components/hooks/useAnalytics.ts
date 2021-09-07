@@ -1,7 +1,22 @@
 import { Component, ErrorInfo, ReactNode } from "react"
 import { ApplicationInsights } from "@microsoft/applicationinsights-web-basic"
 
-export type EventProperties = Record<string, unknown>
+export type EventProperties = Record<string, string | number>
+
+function splitProperties(props: EventProperties) {
+    if (!props) return {}
+    const keys = Object.keys(props)
+    if (!keys.length) return {}
+
+    const measurements: Record<string, number> = {}
+    const properties: Record<string, string> = {}
+    for (const key of keys) {
+        const value = props[key]
+        if (typeof value === "number") measurements[key] = value
+        else properties[key] = value
+    }
+    return { measurements, properties }
+}
 
 const INSTRUMENTATION_KEY = "81ad7468-8585-4970-b027-4f9e7c3eb191"
 const appInsights =
@@ -41,27 +56,25 @@ const trackEvent: (name: string, properties?: EventProperties) => void =
                   baseType: "EventData",
                   baseData: {
                       name,
-                      properties,
+                      ...splitProperties(properties),
                   },
               })
         : () => {}
 
-const trackError: (
-    error: unknown,
-    properties?: EventProperties
-) => void = appInsights
-    ? (error, properties) =>
-          appInsights.track({
-              name: "",
-              time: new Date().toUTCString(),
-              data: {},
-              baseType: "ExceptionData",
-              baseData: {
-                  error,
-                  properties,
-              },
-          })
-    : () => {}
+const trackError: (error: unknown, properties?: EventProperties) => void =
+    appInsights
+        ? (error, properties) =>
+              appInsights.track({
+                  name: "",
+                  time: new Date().toUTCString(),
+                  data: {},
+                  baseType: "ExceptionData",
+                  baseData: {
+                      error,
+                      ...splitProperties(properties),
+                  },
+              })
+        : () => {}
 
 export const analytics = {
     page,
