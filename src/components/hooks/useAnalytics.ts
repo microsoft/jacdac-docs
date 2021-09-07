@@ -17,7 +17,12 @@ const page: () => void = appInsights
           appInsights.track({
               name: window.location.href,
               time: new Date().toUTCString(),
-              baseType: "PageData",
+              tags: [],
+              baseType: "PageviewData",
+              baseData: {
+                  name: window.location.href,
+                  uri: window.location.href,
+              },
           })
     : () => {}
 const track: (name: string, properties?: { [key: string]: unknown }) => void =
@@ -29,6 +34,7 @@ const track: (name: string, properties?: { [key: string]: unknown }) => void =
                   time: new Date().toUTCString(),
                   data: properties,
                   baseType: "EventData",
+                  baseData: {},
               })
         : () => {}
 
