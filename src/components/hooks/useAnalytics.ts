@@ -1,3 +1,4 @@
+import { Component, ErrorInfo, ReactNode } from "react"
 import { ApplicationInsights } from "@microsoft/applicationinsights-web-basic"
 
 export type EventProperties = Record<string, unknown>
@@ -73,5 +74,33 @@ export default function useAnalytics() {
         page,
         trackEvent,
         trackError,
+    }
+}
+
+export interface Props {
+    children: ReactNode
+}
+
+export interface State {
+    hasError: boolean
+}
+
+export class AppInsightsErrorBoundary extends Component<Props, State> {
+    public state: State = {
+        hasError: false,
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public static getDerivedStateFromError(_: Error): State {
+        return { hasError: true }
+    }
+
+    public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        trackError?.(error, errorInfo as unknown as EventProperties)
+        console.error("Uncaught error:", error, errorInfo)
+    }
+
+    public render() {
+        return this.props.children
     }
 }
