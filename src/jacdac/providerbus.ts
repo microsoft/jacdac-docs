@@ -28,7 +28,6 @@ function sniffQueryArguments() {
     const toolsMakecode =
         /\/tools\/makecode-/.test(window.location.href) ||
         params.get(`nestededitorsim`) === "1"
-    console.log({ toolsMakecode, href: window.location.href })
     return {
         diagnostics: params.get(`dbg`) === "1",
         webUSB:

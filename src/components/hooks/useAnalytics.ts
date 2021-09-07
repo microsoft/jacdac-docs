@@ -7,6 +7,8 @@ const INSTRUMENTATION_KEY = "81ad7468-8585-4970-b027-4f9e7c3eb191"
 const appInsights =
     typeof window !== "undefined" &&
     INSTRUMENTATION_KEY &&
+    // TODO enable for all
+    /http:\/\/localhost/.test(window.location.href) &&
     new ApplicationInsights({
         instrumentationKey: INSTRUMENTATION_KEY,
         isStorageUseDisabled: true,
