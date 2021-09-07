@@ -16,7 +16,10 @@ import Flags from "../../jacdac-ts/src/jdom/flags"
 import GamepadServerManager from "../../jacdac-ts/src/servers/gamepadservermanager"
 import jacdacTsPackage from "../../jacdac-ts/package.json"
 import { analytics } from "../components/hooks/useAnalytics"
-import { CONNECTION_STATE } from "../../jacdac-ts/src/jdom/constants"
+import {
+    CONNECTION_STATE,
+    DEVICE_CLEAN,
+} from "../../jacdac-ts/src/jdom/constants"
 import Transport, {
     ConnectionState,
 } from "../../jacdac-ts/src/jdom/transport/transport"
@@ -112,6 +115,10 @@ function createBus(): JDBus {
                         connectionState: transport.connectionState,
                     }))
         )
+        b.on(DEVICE_CLEAN, () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            trackEvent(`jd.stats`, b.stats.current as any)
+        })
     }
 
     return b
