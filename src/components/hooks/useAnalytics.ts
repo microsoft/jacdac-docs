@@ -1,5 +1,7 @@
 import { ApplicationInsights } from "@microsoft/applicationinsights-web-basic"
 
+export type EventProperties = Record<string, unknown>
+
 const INSTRUMENTATION_KEY = "81ad7468-8585-4970-b027-4f9e7c3eb191"
 const appInsights =
     typeof window !== "undefined" &&
@@ -15,7 +17,7 @@ const appInsights =
 const page: () => void = appInsights
     ? () =>
           appInsights.track({
-              name: window.location.href,
+              name: "",
               time: new Date().toUTCString(),
               tags: [],
               baseType: "PageviewData",
@@ -25,16 +27,34 @@ const page: () => void = appInsights
               },
           })
     : () => {}
-const track: (name: string, properties?: { [key: string]: unknown }) => void =
+
+const trackEvent: (name: string, properties?: EventProperties) => void =
     appInsights
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (name: string, properties?: { [key: string]: any }) =>
-              appInsights?.track({
-                  name,
+        ? (name, properties) =>
+              appInsights.track({
+                  name: "",
                   time: new Date().toUTCString(),
-                  data: properties,
+                  data: {},
                   baseType: "EventData",
-                  baseData: {},
+                  baseData: {
+                      name,
+                      properties,
+                  },
+              })
+        : () => {}
+
+const trackException: (error: unknown, properties?: EventProperties) => void =
+    appInsights
+        ? (error, properties) =>
+              appInsights.track({
+                  name: "",
+                  time: new Date().toUTCString(),
+                  data: {},
+                  baseType: "ExceptionData",
+                  baseData: {
+                      error,
+                      properties,
+                  },
               })
         : () => {}
 
@@ -43,13 +63,15 @@ if (typeof window !== "undefined") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window["analytics"] = {
         page,
-        track,
+        trackEvent,
+        trackException,
     }
 }
 
 export default function useAnalytics() {
     return {
         page,
-        track,
+        trackEvent,
+        trackException,
     }
 }

@@ -1,5 +1,5 @@
 import React from "react"
-import { Button } from "gatsby-theme-material-ui"
+import Button from "../ui/Button"
 import Transport, {
     ConnectionState,
 } from "../../../jacdac-ts/src/jdom/transport/transport"
@@ -41,6 +41,7 @@ export default function ConnectButton(props: {
         ? `disconnect from ${type}`
         : `connect to a Jacdac device with ${type}`
     const title = showDisconnect ? `disconnect ${type}` : `connect ${type}`
+    const eventId = `transport.connect.${type}`
 
     if (small)
         return (
@@ -61,6 +62,7 @@ export default function ConnectButton(props: {
     else
         return (
             <Button
+                eventId={eventId}
                 aria-label={label}
                 title={title}
                 size="small"
