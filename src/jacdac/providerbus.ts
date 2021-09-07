@@ -15,6 +15,11 @@ import IFrameBridgeClient from "../components/makecode/iframebridgeclient"
 import Flags from "../../jacdac-ts/src/jdom/flags"
 import GamepadServerManager from "../../jacdac-ts/src/servers/gamepadservermanager"
 import jacdacTsPackage from "../../jacdac-ts/package.json"
+import { analytics } from "../components/hooks/useAnalytics"
+import { CONNECTION_STATE } from "../../jacdac-ts/src/jdom/constants"
+import Transport, {
+    ConnectionState,
+} from "../../jacdac-ts/src/jdom/transport/transport"
 
 function sniffQueryArguments() {
     if (typeof window === "undefined" || typeof URLSearchParams === "undefined")
@@ -92,6 +97,21 @@ function createBus(): JDBus {
         new IFrameBridgeClient(b, args.frameId)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(<any>window).__jacdacBus = b
+    }
+
+    const { trackEvent } = analytics
+    if (trackEvent) {
+        // track connections
+        b.on(
+            CONNECTION_STATE,
+            (transport: Transport) =>
+                transport.connectionState === ConnectionState.Connected ||
+                (transport.connectionState === ConnectionState.Disconnected &&
+                    trackEvent(`jd.transport.${transport.connectionState}`, {
+                        type: transport.type,
+                        connectionState: transport.connectionState,
+                    }))
+        )
     }
 
     return b

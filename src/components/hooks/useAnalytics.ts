@@ -17,7 +17,7 @@ const appInsights =
         disableAjaxTracking: true,
         enableSessionStorageBuffer: false,
     })
-export const page: () => void = appInsights
+const page: () => void = appInsights
     ? () =>
           appInsights.track({
               name: "",
@@ -31,7 +31,7 @@ export const page: () => void = appInsights
           })
     : () => {}
 
-export const trackEvent: (name: string, properties?: EventProperties) => void =
+const trackEvent: (name: string, properties?: EventProperties) => void =
     appInsights
         ? (name, properties) =>
               appInsights.track({
@@ -46,7 +46,7 @@ export const trackEvent: (name: string, properties?: EventProperties) => void =
               })
         : () => {}
 
-export const trackError: (
+const trackError: (
     error: unknown,
     properties?: EventProperties
 ) => void = appInsights

@@ -78,7 +78,7 @@ export default function CopyButton(props: {
         </Button>
     ) : (
         <IconButtonWithTooltip
-            trackName={"ui.copy"}
+            trackName="ui.copy"
             title={text}
             {...rest}
             onClick={disabled ? undefined : handleClick}
