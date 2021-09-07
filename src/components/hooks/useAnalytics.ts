@@ -43,7 +43,7 @@ const trackEvent: (name: string, properties?: EventProperties) => void =
               })
         : () => {}
 
-const trackException: (error: unknown, properties?: EventProperties) => void =
+const trackError: (error: unknown, properties?: EventProperties) => void =
     appInsights
         ? (error, properties) =>
               appInsights.track({
@@ -64,7 +64,7 @@ if (typeof window !== "undefined") {
     window["analytics"] = {
         page,
         trackEvent,
-        trackException,
+        trackError,
     }
 }
 
@@ -72,6 +72,6 @@ export default function useAnalytics() {
     return {
         page,
         trackEvent,
-        trackException,
+        trackError,
     }
 }
