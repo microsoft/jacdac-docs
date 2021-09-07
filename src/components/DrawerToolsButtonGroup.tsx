@@ -52,6 +52,7 @@ export default function DrawerToolsButtonGroup(props: {
                     key={drawer.label}
                     title={drawer.label}
                     className={className}
+                    trackName={`drawer.${drawer.drawer}`}
                     color="inherit"
                     onClick={handleDrawer(drawer.drawer)}
                     edge="start"

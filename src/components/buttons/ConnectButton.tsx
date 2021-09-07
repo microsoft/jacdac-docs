@@ -41,7 +41,10 @@ export default function ConnectButton(props: {
         ? `disconnect from ${type}`
         : `connect to a Jacdac device with ${type}`
     const title = showDisconnect ? `disconnect ${type}` : `connect ${type}`
-    const eventId = `transport.connect.${type}`
+    const trackName = `transport.connect.${type}`
+    const trackProperties = {
+        transport: type,
+    }
 
     if (small)
         return (
@@ -62,7 +65,8 @@ export default function ConnectButton(props: {
     else
         return (
             <Button
-                eventId={eventId}
+                trackName={trackName}
+                trackProperties={trackProperties}
                 aria-label={label}
                 title={title}
                 size="small"

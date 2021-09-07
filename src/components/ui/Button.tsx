@@ -4,15 +4,18 @@ import { Button as GatsbyButton } from "gatsby-theme-material-ui"
 import useAnalytics, { EventProperties } from "../hooks/useAnalytics"
 
 export default function Button(
-    props: { eventId: string; eventProperties?: EventProperties } & ButtonProps
+    props: {
+        trackName?: string
+        trackProperties?: EventProperties
+    } & ButtonProps
 ) {
-    const { eventId, eventProperties, onClick, ...rest } = props
+    const { trackName, trackProperties, onClick, ...rest } = props
     const { trackEvent } = useAnalytics()
     const handleClick =
-        !eventId || !trackEvent
+        !trackName || !trackEvent
             ? onClick
             : ev => {
-                  trackEvent(eventId, eventProperties)
+                  trackEvent(trackName, trackProperties)
                   onClick(ev)
               }
     return <GatsbyButton onClick={handleClick} {...rest} />

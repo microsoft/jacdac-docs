@@ -17,7 +17,7 @@ const appInsights =
         disableAjaxTracking: true,
         enableSessionStorageBuffer: false,
     })
-const page: () => void = appInsights
+export const page: () => void = appInsights
     ? () =>
           appInsights.track({
               name: "",
@@ -31,7 +31,7 @@ const page: () => void = appInsights
           })
     : () => {}
 
-const trackEvent: (name: string, properties?: EventProperties) => void =
+export const trackEvent: (name: string, properties?: EventProperties) => void =
     appInsights
         ? (name, properties) =>
               appInsights.track({
@@ -46,37 +46,37 @@ const trackEvent: (name: string, properties?: EventProperties) => void =
               })
         : () => {}
 
-const trackError: (error: unknown, properties?: EventProperties) => void =
-    appInsights
-        ? (error, properties) =>
-              appInsights.track({
-                  name: "",
-                  time: new Date().toUTCString(),
-                  data: {},
-                  baseType: "ExceptionData",
-                  baseData: {
-                      error,
-                      properties,
-                  },
-              })
-        : () => {}
+export const trackError: (
+    error: unknown,
+    properties?: EventProperties
+) => void = appInsights
+    ? (error, properties) =>
+          appInsights.track({
+              name: "",
+              time: new Date().toUTCString(),
+              data: {},
+              baseType: "ExceptionData",
+              baseData: {
+                  error,
+                  properties,
+              },
+          })
+    : () => {}
+
+export const analytics = {
+    page,
+    trackEvent,
+    trackError,
+}
 
 // store instance
 if (typeof window !== "undefined") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window["analytics"] = {
-        page,
-        trackEvent,
-        trackError,
-    }
+    window["analytics"] = analytics
 }
 
 export default function useAnalytics() {
-    return {
-        page,
-        trackEvent,
-        trackError,
-    }
+    return analytics
 }
 
 export interface Props {
