@@ -25,7 +25,7 @@ export default function IconButtonWithTooltip(
     const { trackEvent } = useAnalytics()
 
     const handleClick =
-        !trackName || !trackEvent
+        !trackName || !trackEvent || !onClick
             ? onClick
             : ev => {
                   trackEvent(trackName, trackProperties)

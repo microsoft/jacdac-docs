@@ -12,7 +12,7 @@ export default function Button(
     const { trackName, trackProperties, onClick, ...rest } = props
     const { trackEvent } = useAnalytics()
     const handleClick =
-        !trackName || !trackEvent
+        !trackName || !trackEvent || !onClick
             ? onClick
             : ev => {
                   trackEvent(trackName, trackProperties)
