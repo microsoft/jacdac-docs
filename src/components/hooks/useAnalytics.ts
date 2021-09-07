@@ -1,27 +1,27 @@
-/*
-requires "@microsoft/applicationinsights-web-basic": "^2.6.1",
 import { ApplicationInsights } from "@microsoft/applicationinsights-web-basic"
 
-// YOUR_INSTRUMENTATION_KEY_GOES_HERE
-const instrumentationKey: string = undefined
+const INSTRUMENTATION_KEY = "81ad7468-8585-4970-b027-4f9e7c3eb191"
 const appInsights =
-    instrumentationKey &&
+    typeof window !== "undefined" &&
+    INSTRUMENTATION_KEY &&
     new ApplicationInsights({
-        instrumentationKey,
+        instrumentationKey: INSTRUMENTATION_KEY,
         isStorageUseDisabled: true,
         isCookieUseDisabled: true,
+        disableCookiesUsage: true,
+        disableAjaxTracking: true,
+        enableSessionStorageBuffer: false,
     })
-const page =
-    typeof window !== "undefined"
-        ? () =>
-              appInsights?.track({
-                  name: window.location.href,
-                  time: new Date().toUTCString(),
-                  baseType: "PageData",
-              })
-        : () => {}
-const track =
-    typeof window !== "undefined"
+const page: () => void = appInsights
+    ? () =>
+          appInsights.track({
+              name: window.location.href,
+              time: new Date().toUTCString(),
+              baseType: "PageData",
+          })
+    : () => {}
+const track: (name: string, properties?: { [key: string]: unknown }) => void =
+    appInsights
         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (name: string, properties?: { [key: string]: any }) =>
               appInsights?.track({
@@ -30,23 +30,18 @@ const track =
                   data: properties,
                   baseType: "EventData",
               })
-        : // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          (name, properties) => {}
+        : () => {}
+
+// store instance
 if (typeof window !== "undefined") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(window as any).analytics = {
+    window["analytics"] = {
         page,
         track,
     }
 }
-*/
 
-export default function useAnalytics(): {
-    page: () => void
-    track: (name: string, properties?: { [key: string]: string | number }) => void
-} {
-    const page = () => {}
-    const track = () => {}
+export default function useAnalytics() {
     return {
         page,
         track,
