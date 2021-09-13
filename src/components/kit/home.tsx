@@ -1,4 +1,10 @@
-import { Grid } from "@material-ui/core"
+import {
+    Card,
+    CardActions,
+    CardContent,
+    CardMedia,
+    Grid,
+} from "@material-ui/core"
 import { StaticImage } from "gatsby-plugin-image"
 import React from "react"
 import CarouselGrid from "../home/CarouselGrid"
@@ -7,6 +13,7 @@ import FeatureItem from "../home/FeatureItem"
 import DirectionsBusIcon from "@material-ui/icons/DirectionsBus"
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck"
 import FindReplaceIcon from "@material-ui/icons/FindReplace"
+import { Button } from "gatsby-theme-material-ui"
 
 export default function Home() {
     return (
@@ -24,23 +31,23 @@ export default function Home() {
             <CarouselGrid>
                 <Grid item xs={12} sm={4}>
                     <FeatureItem
-                        startImage={<DirectionsBusIcon fontSize="large" />}
-                        description="Bus topology"
-                        caption="Jacdac packets are sent serially among physical devices on the Jacdac bus and may also be sent over WebUSB/WebBLE, providing connectivity to web-based tooling and services running in the web browser."
+                        description="Build projects with minimal effort of both wiring
+                    and coding. This kit acts as a bridge to the web
+                    browser, providing a flexible way to prototype."
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <FeatureItem
-                        startImage={<PlaylistAddCheckIcon fontSize="large" />}
-                        description="Device discovery and service advertisement"
-                        caption="Any device that hosts a service must also run the control service. The control service is responsible for advertising any services a device is running every 500 milliseconds."
+                        description="Build projects with minimal effort of both wiring
+                    and coding. This kit acts as a bridge to the web
+                    browser, providing a flexible way to prototype."
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                     <FeatureItem
-                        startImage={<FindReplaceIcon fontSize="large" />}
-                        description="Standardized service abstraction"
-                        caption="This abstraction brings plug-and-play dynamism to Jacdac so that devices with different hardware, but the same overall functionality, can replace one another without having to recompile user applications."
+                        description="Build projects with minimal effort of both wiring
+                    and coding. This kit acts as a bridge to the web
+                    browser, providing a flexible way to prototype."
                     />
                 </Grid>
             </CarouselGrid>
