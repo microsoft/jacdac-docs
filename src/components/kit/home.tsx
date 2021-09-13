@@ -1,20 +1,16 @@
 import { Grid } from "@material-ui/core"
 import { StaticImage } from "gatsby-plugin-image"
-import React, { lazy, Suspense } from "react"
-import CarouselGrid from "./CarouselGrid"
-import CenterGrid from "./CenterGrid"
-import FeatureItem from "./FeatureItem"
-import SplitGrid from "./SplitGrid"
+import React from "react"
+import CarouselGrid from "../home/CarouselGrid"
+import CenterGrid from "../home/CenterGrid"
+import FeatureItem from "../home/FeatureItem"
+import SplitGrid from "../home/SplitGrid"
 import DirectionsBusIcon from "@material-ui/icons/DirectionsBus"
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck"
 import FindReplaceIcon from "@material-ui/icons/FindReplace"
 import SubscriptionsIcon from "@material-ui/icons/Subscriptions"
-import useMediaQueries from "../hooks/useMediaQueries"
-const DeviceSpecificationList = lazy(() => import("../specification/DeviceSpecificationList"))
 
 export default function Home() {
-    const { mobile, medium } = useMediaQueries()
-    const cols = mobile ? 1 : medium ? 3 : 4
     return (
         <Grid
             container
@@ -23,97 +19,10 @@ export default function Home() {
             alignContent="center"
             alignItems="center"
         >
-            <SplitGrid
-                title="Jacdac"
-                subtitle="plug-and-play for microcontrollers"
-                imageColumns={6}
-                image={
-                    <StaticImage
-                        src="./manymodulestogether.png"
-                        alt="Many Modules Together"
-                    />
-                }
-            />
             <CenterGrid
-                subtitle3="A protocol designed for easier physical connectivity. It is an entire stack that bridges the world of the low cost microcontroller to the web browser and beyond."
-                description="Cheap, flexible and extensible."
+                title="Jacdac Kit"
+                subtitle3="All you need to start making amazing things in a single box."
             />
-            <Grid item xs={12}>
-                <Suspense fallback={null}>
-                    <DeviceSpecificationList count={cols} shuffle={true} />
-                </Suspense>
-            </Grid>
-            <SplitGrid
-                right={false}
-                subtitle="Hardware."
-                description="Jacdac relies on a 3-wire bus for power delivery and data transfer. A purpose-built connector is used to interface with the Jacdac PCB edge connector."
-                image={
-                    <StaticImage
-                        src="./rotarycable.png"
-                        alt="A rotary encoder module with a Jacdac cable attached."
-                    />
-                }
-                buttonText="Physical interconnect"
-                buttonVariant="link"
-                buttonUrl="/hardware/"
-            />
-            <SplitGrid
-                right={true}
-                subtitle="Protocol."
-                description="Bus topology, dynamic discovery, services designed for micro-controllers."
-                buttonText="Learn more"
-                buttonVariant="link"
-                buttonUrl="/protocol/"
-                image={
-                    <StaticImage
-                        src="./bustopology.png"
-                        alt="Four cables joining into a hub"
-                    />
-                }
-            />
-            <SplitGrid
-                right={false}
-                subtitle="'Nano' Services."
-                description="Jacdac services are specified to abstract the hardware device from the software implementation. The services are comprised of registers, commands and events, along with precise data layout information for each packet."
-                buttonText="Explore services"
-                buttonVariant="link"
-                buttonUrl="/services/"
-                image={
-                    <StaticImage
-                        src="./dashboard.png"
-                        alt="Dashboard of devices"
-                    />
-                }
-            />
-
-            <SplitGrid
-                right={true}
-                subtitle="Client Software."
-                description="Integrate Jacdac in the Web or Node.JS using our Javascript/TypeScript library."
-                buttonText="Add Jacdac to your apps"
-                buttonVariant="link"
-                buttonUrl="/software/"
-                image={<StaticImage src="./html5.png" alt="HTML5 logo" />}
-            />
-
-            <SplitGrid
-                right={false}
-                subtitle="Tools."
-                description="Visualize, debug, sniff, track, record, replay, update... from your browser."
-                buttonText="Get productive with Jacdac"
-                buttonVariant="link"
-                buttonUrl="/tools/"
-                image={<StaticImage src="./devicetree.png" alt="Device tree" />}
-            />
-
-            <CenterGrid
-                subtitle="Discover the benefits of Jacdac protocol."
-                description="Jacdac devices communicate using packets over a bus, where each device can advertise itself and the set of services it provides. A service provides registers, events and commands to communicate with other devices."
-                buttonText="Protocol specification"
-                buttonVariant="link"
-                buttonUrl="/protocol/"
-            />
-
             <CarouselGrid>
                 <Grid item xs={12} sm={6}>
                     <FeatureItem
