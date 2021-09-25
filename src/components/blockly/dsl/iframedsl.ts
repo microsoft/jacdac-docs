@@ -77,13 +77,12 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
                 setTimeout(() => {
                     if (this.pendings[id]) {
                         delete this.pendings[id]
-                        console.debug(`iframedsl: transform timeouted`)
+                        console.warn(`iframedsl: transform timeouted`)
                         resolve(undefined)
                     }
                 }, 10000)
                 this.pendings[id] = data => {
                     const { dataset } = data
-                    console.debug(`iframedsl: transform`, { dataset })
                     resolve(dataset)
                 }
             })
@@ -97,12 +96,12 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
             setTimeout(() => {
                 if (this.pendings[id]) {
                     delete this.pendings[id]
-                    console.debug(`iframedsl: no blocks returned, giving up`)
+                    console.warn(`iframedsl: no blocks returned, giving up`)
                     resolve(this.blocks)
                 }
             }, 1000)
             this.pendings[id] = data => {
-                console.debug(`iframedsl: received blocks`, { data })
+                //console.debug(`iframedsl: received blocks`, { data })
                 this.blocks = data.blocks
                 this.category = data.category
                 const transformData = this.createTransformData()

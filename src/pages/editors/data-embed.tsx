@@ -96,8 +96,9 @@ export default function Page() {
         },
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
-    const post = (payload: object) =>
+    const post = (payload: object) => {
         frame.current.contentWindow.postMessage(payload, "*")
+    }
 
     const handleBlocks = async (data: DslMessage) => {
         console.debug(`hostdsl: sending blocks`)
@@ -109,7 +110,6 @@ export default function Page() {
         const block = workspace.blocks.find(b => b.id === blockId)
         const transformer = transforms[block.type]
         const res = await transformer?.(block, dataset)
-        console.log("res", { res })
         post({ ...rest, dataset: res })
     }
 
@@ -118,7 +118,6 @@ export default function Page() {
         (msg: MessageEvent<DslMessage>) => {
             const { data } = msg
             if (data.type !== "dsl") return
-            console.debug("hostdsl: msg", { data })
             const { action } = data
             switch (action) {
                 case "mount":
