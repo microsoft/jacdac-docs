@@ -138,17 +138,23 @@ export default function Page() {
     )
 
     return (
-        <iframe
-            ref={frame}
-            title="data editor"
-            src="./data?embed=1"
-            style={{
-                border: "none",
-                left: 0,
-                top: 0,
-                width: "100vh",
-                height: "80vh",
-            }}
-        ></iframe>
+        <>
+            <h1>Data Editor + hosted blocks</h1>
+            <p>
+                The data editor below is an example of hosted editor with additional blocks injected by host (Custom category).
+            </p>
+            <iframe
+                ref={frame}
+                title="data editor"
+                src="./data?embed=1"
+                style={{
+                    border: "none",
+                    left: 0,
+                    top: 0,
+                    width: "100vh",
+                    height: "80vh",
+                }}
+            ></iframe>
+        </>
     )
 }
