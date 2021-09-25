@@ -1,4 +1,3 @@
-import { Block, Workspace } from "blockly"
 import { inIFrame } from "../../../../jacdac-ts/src/jdom/iframeclient"
 import { randomDeviceId } from "../../../../jacdac-ts/src/jdom/random"
 import { workspaceToJSON } from "../jsongenerator"

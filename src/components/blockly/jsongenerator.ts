@@ -46,7 +46,9 @@ export function workspaceToJSON(
         const j = {}
         if (Flags.diagnostics) j["xml"] = xml.outerHTML
         // dump attributes
-        for (const name of xml.getAttributeNames()) {
+        for (const name of xml
+            .getAttributeNames()
+            .filter(n => n !== "preview")) {
             const v = xml.getAttribute(name)
             j[name.toLowerCase()] = v
         }

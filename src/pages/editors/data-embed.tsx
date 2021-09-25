@@ -1,6 +1,8 @@
 import React, { useRef } from "react"
 import {
     BlockJSON,
+    getFieldValue,
+    resolveFieldColumn,
     WorkspaceJSON,
 } from "../../components/blockly/dsl/workspacejson"
 import DataColumnChooserField from "../../components/blockly/fields/DataColumnChooserField"
@@ -14,6 +16,7 @@ import {
     OptionsInputDefinition,
 } from "../../components/blockly/toolbox"
 import useWindowEvent from "../../components/hooks/useWindowEvent"
+import { tidy, arrange, desc } from "@tidyjs/tidy"
 
 export interface DslMessage {
     type?: "dsl"
@@ -31,7 +34,7 @@ export default function Page() {
         {
             kind: "block",
             type: "iframe_sort",
-            message0: "arrange %1 %2",
+            message0: "iframe arrange %1 %2",
             colour,
             args0: [
                 {
@@ -72,8 +75,24 @@ export default function Page() {
             return dataset
         },
         iframe_sort: async (b, dataset) => {
-            console.debug(`hostdsl: sort`)
-            return dataset
+            const { column, warning } = resolveFieldColumn(dataset, b, "column")
+            const order = getFieldValue(b, "order")
+            const descending = order === "descending"
+
+            console.debug(`hostdsl: sort`, {
+                b,
+                dataset,
+                column,
+                order,
+                descending,
+            })
+
+            if (!column) return Promise.resolve(dataset)
+            const res = tidy(
+                dataset,
+                arrange(descending ? desc(column) : column)
+            )
+            return res
         },
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -90,6 +109,7 @@ export default function Page() {
         const block = workspace.blocks.find(b => b.id === blockId)
         const transformer = transforms[block.type]
         const res = await transformer?.(block, dataset)
+        console.log("res", { res })
         post({ ...rest, dataset: res })
     }
 
