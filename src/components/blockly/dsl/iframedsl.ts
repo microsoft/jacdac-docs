@@ -77,7 +77,7 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
             const { id } = data
             const pending = this.pendings[id]
             delete this.pendings[id]
-            pending?.(data)
+            if (pending) pending(data)
         }
     }
 
