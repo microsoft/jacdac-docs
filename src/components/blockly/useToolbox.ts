@@ -46,8 +46,11 @@ async function loadBlocks(
             for (const b of dslBlocks) {
                 addDataPreviewField(b)
                 b.dsl = dsl.id // ensure DSL is set
+                blocks.push(b)
             }
     }
+
+    console.log({ blocks })
 
     // register field editors
     registerFields()
@@ -106,7 +109,7 @@ export default function useToolbox(
     const liveServices = useServices({ specification: true })
     const theme = useTheme()
 
-    useAsyncMemo(() => loadBlocks(dsls, theme), [theme, dsls])
+    const blocks = useAsyncMemo(() => loadBlocks(dsls, theme), [theme, dsls])
     const toolboxConfiguration = useMemo(() => {
         const dslsCategories = arrayConcatMany(
             dsls.map(dsl =>
@@ -128,7 +131,13 @@ export default function useToolbox(
             kind: "categoryToolbox",
             contents,
         }
-    }, [theme, dsls, source, (liveServices || []).map(srv => srv.id).join(",")])
+    }, [
+        blocks,
+        theme,
+        dsls,
+        source,
+        (liveServices || []).map(srv => srv.id).join(","),
+    ])
     return toolboxConfiguration
 }
 
