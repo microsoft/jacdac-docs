@@ -15,7 +15,7 @@ export default function Page() {
         ) => {
             const { data } = msg
             if (data.type !== "dsl") return
-            console.debug(msg)
+            console.debug("iframedsl msg", { data })
         },
         false,
         []

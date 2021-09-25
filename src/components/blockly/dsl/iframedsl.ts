@@ -11,6 +11,7 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
     private dslid = randomDeviceId()
     private blocks: BlockDefinition[] = []
     private category: ContentDefinition[] = []
+    private pendings: Record<string, (data: any) => void> = {}
 
     constructor(readonly targetOrigin: string) {
         this.handleMessage = this.handleMessage.bind(this)
@@ -25,8 +26,8 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
             action,
             ...(extras || {}),
         }
-        console.debug(payload)
-        window.postMessage(payload, this.targetOrigin)
+        window.parent.postMessage(payload, this.targetOrigin)
+        return payload
     }
 
     mount() {
@@ -42,28 +43,41 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
         msg: MessageEvent<{
             type: "dsl" | unknown
             dslid?: string
-            blocks?: BlockDefinition[]
-            category?: ContentDefinition[]
+            id: string
         }>
     ) {
         const { data } = msg
         if (data.type === "dsl" && data.dslid === this.dslid) {
-            this.blocks = data.blocks || []
-            this.category = data.category || []
+            const { id } = data
+            const pending = this.pendings[id]
+            delete this.pendings[id]
+            pending?.(data)
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     createBlocks(options: CreateBlocksOptions): Promise<BlockDefinition[]> {
-        return new Promise(resolve => {
-            this.post("blocks", {})
-            resolve(this.blocks)
+        console.debug(`iframedsl: query blocks`)
+        return new Promise<BlockDefinition[]>(resolve => {
+            const { id } = this.post("blocks", {})
+            setTimeout(() => {
+                if (this.pendings[id]) {
+                    delete this.pendings[id]
+                    console.debug(`iframedsl: no blocks returned, giving up`)
+                    resolve(this.blocks)
+                }
+            }, 1000)
+            this.pendings[id] = data => {
+                console.debug(`iframedsl: received blocks`, { data })
+                this.blocks = data.blocks
+                this.category = data.category
+                resolve(this.blocks)
+            }
         })
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     createCategory(options: CreateCategoryOptions): ContentDefinition[] {
-        this.post("category", {})
         return this.category
     }
 }
