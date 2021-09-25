@@ -50,7 +50,7 @@ async function loadBlocks(
             }
     }
 
-    console.log({ blocks })
+    //console.log({ blocks })
 
     // register field editors
     registerFields()
