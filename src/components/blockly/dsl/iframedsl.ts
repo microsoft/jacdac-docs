@@ -76,8 +76,10 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
         if (data.type === "dsl" && data.dslid === this.dslid) {
             const { id } = data
             const pending = this.pendings[id]
-            delete this.pendings[id]
-            if (pending) pending(data)
+            if (pending) {
+                delete this.pendings[id]
+                pending(data)
+            }
         }
     }
 
