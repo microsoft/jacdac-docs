@@ -3,7 +3,6 @@ import {
     BlockJSON,
     getFieldValue,
     resolveFieldColumn,
-    WorkspaceJSON,
 } from "../../components/blockly/dsl/workspacejson"
 import DataColumnChooserField from "../../components/blockly/fields/DataColumnChooserField"
 import {
@@ -17,15 +16,11 @@ import {
 } from "../../components/blockly/toolbox"
 import useWindowEvent from "../../components/hooks/useWindowEvent"
 import { tidy, arrange, desc } from "@tidyjs/tidy"
-
-export interface DslMessage {
-    type?: "dsl"
-    dslid: string
-    blockId?: string
-    workspace?: WorkspaceJSON
-    dataset?: BlockDataSet
-    action: "mount" | "unmount" | "blocks" | "transform"
-}
+import {
+    DslBlocksResponse,
+    DslMessage,
+    DslTransformMessage,
+} from "../../components/blockly/dsl/iframedsl"
 
 export default function Page() {
     const frame = useRef<HTMLIFrameElement>()
@@ -68,11 +63,14 @@ export default function Page() {
     ]
     const transforms: Record<
         string,
-        (b: BlockJSON, dataset: BlockDataSet) => Promise<BlockDataSet>
+        (
+            b: BlockJSON,
+            dataset: BlockDataSet
+        ) => Promise<{ dataset: BlockDataSet; warning?: string }>
     > = {
         iframe_identity: async (b, dataset) => {
             console.debug(`hostdsl: identity`)
-            return dataset
+            return { dataset }
         },
         iframe_sort: async (b, dataset) => {
             const { column, warning } = resolveFieldColumn(dataset, b, "column")
@@ -85,14 +83,15 @@ export default function Page() {
                 column,
                 order,
                 descending,
+                warning,
             })
 
-            if (!column) return Promise.resolve(dataset)
+            if (!column) return Promise.resolve({ dataset, warning })
             const res = tidy(
                 dataset,
                 arrange(descending ? desc(column) : column)
             )
-            return res
+            return { dataset: res, warning }
         },
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -102,15 +101,15 @@ export default function Page() {
 
     const handleBlocks = async (data: DslMessage) => {
         console.debug(`hostdsl: sending blocks`)
-        post({ ...data, blocks, category })
+        post({ ...data, blocks, category } as DslBlocksResponse)
     }
 
-    const handleTransform = async (data: DslMessage) => {
+    const handleTransform = async (data: DslTransformMessage) => {
         const { blockId, workspace, dataset, ...rest } = data
         const block = workspace.blocks.find(b => b.id === blockId)
         const transformer = transforms[block.type]
         const res = await transformer?.(block, dataset)
-        post({ ...rest, dataset: res })
+        post({ ...rest, ...(res || {}) })
     }
 
     useWindowEvent(
@@ -129,7 +128,7 @@ export default function Page() {
                     break
                 }
                 case "transform": {
-                    handleTransform(data)
+                    handleTransform(data as DslTransformMessage)
                     break
                 }
             }

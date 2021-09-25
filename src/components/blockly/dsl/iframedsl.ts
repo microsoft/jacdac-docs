@@ -7,17 +7,43 @@ import {
     BlockDefinition,
     ContentDefinition,
 } from "../toolbox"
+import { setBlockDataWarning } from "../WorkspaceContext"
 import BlockDomainSpecificLanguage, {
     CreateBlocksOptions,
     CreateCategoryOptions,
 } from "./dsl"
+import { WorkspaceJSON } from "./workspacejson"
+
+export interface DslMessage {
+    type?: "dsl"
+    id: string
+    dslid: string
+    action: "mount" | "unmount" | "blocks" | "transform"
+}
+
+export interface DslBlocksResponse extends DslMessage {
+    action: "blocks"
+    blocks: BlockDefinition[]
+    category: ContentDefinition[]
+}
+
+export interface DslTransformMessage extends DslMessage {
+    action: "transform"
+    blockId?: string
+    workspace?: WorkspaceJSON
+    dataset?: BlockDataSet
+}
+
+export interface DslTransformResponse extends DslTransformMessage {
+    warning?: string
+}
 
 class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
     readonly id = "iframe"
     private dslid = randomDeviceId()
     private blocks: BlockDefinition[] = []
     private category: ContentDefinition[] = []
-    private pendings: Record<string, (data: any) => void> = {}
+    private pendings: Record<string, (data: DslMessage) => void> = {}
 
     constructor(readonly targetOrigin: string) {
         this.handleMessage = this.handleMessage.bind(this)
@@ -31,7 +57,7 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
             dslid: this.dslid,
             action,
             ...(extras || {}),
-        }
+        } as DslMessage
         window.parent.postMessage(payload, this.targetOrigin)
         return payload
     }
@@ -45,13 +71,7 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
         }
     }
 
-    private handleMessage(
-        msg: MessageEvent<{
-            type: "dsl" | unknown
-            dslid?: string
-            id: string
-        }>
-    ) {
+    private handleMessage(msg: MessageEvent<DslMessage>) {
         const { data } = msg
         if (data.type === "dsl" && data.dslid === this.dslid) {
             const { id } = data
@@ -82,7 +102,8 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
                     }
                 }, 10000)
                 this.pendings[id] = data => {
-                    const { dataset } = data
+                    const { dataset, warning } = data as DslTransformResponse
+                    if (warning) setBlockDataWarning(blockWithServices, warning)
                     resolve(dataset)
                 }
             })
@@ -92,7 +113,7 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
     createBlocks(options: CreateBlocksOptions): Promise<BlockDefinition[]> {
         console.debug(`iframedsl: query blocks`)
         return new Promise<BlockDefinition[]>(resolve => {
-            const { id } = this.post("blocks", {})
+            const { id } = this.post("blocks")
             setTimeout(() => {
                 if (this.pendings[id]) {
                     delete this.pendings[id]
@@ -101,9 +122,9 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
                 }
             }, 1000)
             this.pendings[id] = data => {
-                //console.debug(`iframedsl: received blocks`, { data })
-                this.blocks = data.blocks
-                this.category = data.category
+                const bdata = data as DslBlocksResponse
+                this.blocks = bdata.blocks
+                this.category = bdata.category
                 const transformData = this.createTransformData()
                 this.blocks.forEach(
                     block => (block.transformData = transformData)
