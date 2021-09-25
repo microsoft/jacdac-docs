@@ -1,6 +1,13 @@
+import { Block, Workspace } from "blockly"
 import { inIFrame } from "../../../../jacdac-ts/src/jdom/iframeclient"
 import { randomDeviceId } from "../../../../jacdac-ts/src/jdom/random"
-import { BlockDefinition, ContentDefinition } from "../toolbox"
+import { workspaceToJSON } from "../jsongenerator"
+import {
+    BlockDataSet,
+    BlockDataSetTransform,
+    BlockDefinition,
+    ContentDefinition,
+} from "../toolbox"
 import BlockDomainSpecificLanguage, {
     CreateBlocksOptions,
     CreateCategoryOptions,
@@ -55,6 +62,34 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
         }
     }
 
+    private createTransformData(): BlockDataSetTransform {
+        return (blockWithServices, dataset) =>
+            new Promise<BlockDataSet>(resolve => {
+                const workspace = workspaceToJSON(
+                    blockWithServices.workspace,
+                    [], // TODO pass dsls
+                    [blockWithServices]
+                )
+                const { id } = this.post("transform", {
+                    blockId: blockWithServices.id,
+                    workspace,
+                    dataset,
+                })
+                setTimeout(() => {
+                    if (this.pendings[id]) {
+                        delete this.pendings[id]
+                        console.debug(`iframedsl: transform timeouted`)
+                        resolve(undefined)
+                    }
+                }, 10000)
+                this.pendings[id] = data => {
+                    const { dataset } = data
+                    console.debug(`iframedsl: transform`, { dataset })
+                    resolve(dataset)
+                }
+            })
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     createBlocks(options: CreateBlocksOptions): Promise<BlockDefinition[]> {
         console.debug(`iframedsl: query blocks`)
@@ -71,6 +106,10 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
                 console.debug(`iframedsl: received blocks`, { data })
                 this.blocks = data.blocks
                 this.category = data.category
+                const transformData = this.createTransformData()
+                this.blocks.forEach(
+                    block => (block.transformData = transformData)
+                )
                 resolve(this.blocks)
             }
         })
