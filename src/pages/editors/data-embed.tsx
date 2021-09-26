@@ -21,9 +21,11 @@ import {
     DslMessage,
     DslTransformMessage,
 } from "../../components/blockly/dsl/iframedsl"
+import { Button } from "gatsby-material-ui-components"
 
 export default function Page() {
     const frame = useRef<HTMLIFrameElement>()
+    const dslidRef = useRef<string>(undefined)
     const colour = "#f01010"
     const blocks: BlockDefinition[] = [
         {
@@ -105,6 +107,7 @@ export default function Page() {
     }
 
     const handleTransform = async (data: DslTransformMessage) => {
+        console.log(`hostdsl: transform`)
         const { blockId, workspace, dataset, ...rest } = data
         const block = workspace.blocks.find(b => b.id === blockId)
         const transformer = transforms[block.type]
@@ -117,11 +120,13 @@ export default function Page() {
         (msg: MessageEvent<DslMessage>) => {
             const { data } = msg
             if (data.type !== "dsl") return
-            const { action } = data
+            const { action, dslid } = data
             switch (action) {
                 case "mount":
+                    dslidRef.current = dslid
                     break
                 case "unmount":
+                    dslidRef.current = dslid
                     break
                 case "blocks": {
                     handleBlocks(data)
@@ -137,11 +142,24 @@ export default function Page() {
         []
     )
 
+    const handleRefresh = () => {
+        post({ type: "dsl", action: "change", dslid: dslidRef.current })
+    }
+
     return (
         <>
             <h1>Data Editor + hosted blocks</h1>
             <p>
-                The data editor below is an example of hosted editor with additional blocks injected by host (Custom category).
+                The data editor below is an example of hosted editor with
+                additional blocks injected by host (Custom category).
+            </p>
+            <p>
+                <Button
+                    title="Click this button to trigger a refresh"
+                    onClick={handleRefresh}
+                >
+                    Refresh
+                </Button>
             </p>
             <iframe
                 ref={frame}
