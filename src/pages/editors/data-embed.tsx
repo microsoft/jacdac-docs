@@ -30,6 +30,16 @@ export default function Page() {
     const blocks: BlockDefinition[] = [
         {
             kind: "block",
+            type: "iframe_random",
+            message0: "iframe random",
+            colour,
+            args0: [],
+            nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+            dataPreviewField: true,
+            template: "meta",
+        },
+        {
+            kind: "block",
             type: "iframe_sort",
             message0: "iframe arrange %1 %2",
             colour,
@@ -70,11 +80,15 @@ export default function Page() {
             dataset: BlockDataSet
         ) => Promise<{ dataset: BlockDataSet; warning?: string }>
     > = {
-        iframe_identity: async (b, dataset) => {
-            console.debug(`hostdsl: identity`)
+        iframe_random: async b => {
+            console.debug(`hostdsl: random`)
+            const dataset = Array(10)
+                .fill(0)
+                .map((_, i) => ({ x: i, y: Math.random() }))
             return { dataset }
         },
         iframe_sort: async (b, dataset) => {
+            console.debug(`hostdsl: sort`)
             const { column, warning } = resolveFieldColumn(dataset, b, "column")
             const order = getFieldValue(b, "order")
             const descending = order === "descending"
