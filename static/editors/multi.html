@@ -70,7 +70,7 @@
         />
         <iframe
             id="left"
-            allow="usb;serial;bluetooth;camera;"
+            allow="usb;serial;camera;"
             sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms"
         ></iframe>
         <div id="divider"></div>
@@ -172,7 +172,6 @@
                     }
                 }
                 window.onresize = setWidths
-                window.onhashchange = handleHash
 
                 divider.onmouseover = function () {
                     document.body.style.cursor = "w-resize"
@@ -184,6 +183,9 @@
                 }
 
                 setWidths()
+
+                updateSrc(left, selectLeft)
+                updateSrc(right, urlinput)
             })()
         </script>
         <!-- @include tracking.html -->
