@@ -80,7 +80,7 @@ export default function Dashboard(props: DashboardProps) {
     } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { toggleShowDeviceHostsDialog } = useContext(AppContext)
-    const devices = useDevices({ announced: true, ignoreSelf: true })
+    const devices = useDevices({ announced: true, ignoreInfrastructure: true })
         .filter(deviceFilter)
         .sort(deviceSort)
     const [simulators, physicals] = splitFilter(
