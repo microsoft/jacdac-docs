@@ -191,7 +191,7 @@ async function createDevicePages(graphql, actions, reporter) {
             })
             .toFormat("jpeg")
             .toFile(`./public/images/devices/${nodePath}.catalog.jpg`)
-            await sharp(imgsrc)
+        await sharp(imgsrc)
             .resize(PREVIEW_WIDTH, null, {
                 fit: sharp.fit.cover,
             })
@@ -281,7 +281,29 @@ async function createSpecPages(graphql, actions, reporter) {
             // (or `node.frontmatter.slug`)
             path: node.fields.slug,
             // This component will wrap our MDX content
-            component: path.resolve(`./src/components/spec.tsx`),
+            component: path.resolve(`./src/components/templates/spec.tsx`),
+            context: {
+                id: node.id,
+            },
+        })
+    })
+
+    // Create pages.
+    const ddks = result.data.allMdx.edges
+        .map(edge => edge.node)
+        .filter(
+            node =>
+                node.parent.sourceInstanceName == "ddkPages" &&
+                /\/README\/$/.test(node.fields.slug)
+        )
+    // you'll call `createPage` for each result
+    ddks.forEach(node => {
+        createPage({
+            // This is the slug you created before
+            // (or `node.frontmatter.slug`)
+            path: `/hardware/${node.fields.slug.replace(/\/README\/$/, "")}`,
+            // This component will wrap our MDX content
+            component: path.resolve(`./src/components/templates/spec.tsx`),
             context: {
                 id: node.id,
             },

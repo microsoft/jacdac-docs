@@ -51,6 +51,13 @@ module.exports = {
         {
             resolve: `gatsby-source-filesystem`,
             options: {
+                name: `ddkPages`,
+                path: `${__dirname}/jacdac-ddk`,
+            },
+        },
+        {
+            resolve: `gatsby-source-filesystem`,
+            options: {
                 name: `services`,
                 path: `${__dirname}/jacdac-ts/jacdac-spec/dist/services.json`,
             },
@@ -99,8 +106,8 @@ module.exports = {
         {
             resolve: `gatsby-plugin-mdx`,
             options: {
+                extensions: [`.mdx`, `.md`],
                 defaultLayouts: {
-                    extensions: [`.mdx`, `.md`],
                     default: require.resolve("./src/components/Page.tsx"),
                 },
                 gatsbyRemarkPlugins: [
