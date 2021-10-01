@@ -31,17 +31,11 @@ interface HostedSimulator {
 }
 
 export interface HostedSimulatorsContextProps {
-    simulators: HostedSimulator[]
-    addHostedSimulator: (definition: HostedSimulatorDefinition) => void
-    removeHostedSimulator: (id: string) => void
-    clearHostedSimulators: () => void
+    hostedSimulators: HostedSimulatorManager
 }
 
 const HostedSimulatorsContext = createContext<HostedSimulatorsContextProps>({
-    simulators: [],
-    addHostedSimulator: () => {},
-    removeHostedSimulator: () => {},
-    clearHostedSimulators: () => {},
+    hostedSimulators: undefined,
 })
 
 HostedSimulatorsContext.displayName = "hostedSims"
@@ -59,6 +53,7 @@ export function hostedSimulatorDefinitions(): HostedSimulatorDefinition[] {
     ]
 }
 
+const CLASS_NAME = "jacdachostedsimulator"
 const useStyles = makeStyles(() =>
     createStyles({
         hostedSimulators: {
@@ -75,7 +70,8 @@ const useStyles = makeStyles(() =>
     })
 )
 
-class HostedSimulatorManager extends JDClient {
+const ID_PREFIX = "hostedsimulator"
+export class HostedSimulatorManager extends JDClient {
     private _simulators: Record<string, HostedSimulator> = {}
     private _container: HTMLDivElement
 
@@ -109,6 +105,7 @@ class HostedSimulatorManager extends JDClient {
     addSimulator(definition: HostedSimulatorDefinition) {
         // must be a device identifier since we're passing this down to the iframe
         const id = randomDeviceId()
+        console.debug(`hostedsims: add ${id} -> ${definition.name}`)
         this._simulators[id] = { id, definition }
         this.syncDOM()
     }
@@ -116,9 +113,26 @@ class HostedSimulatorManager extends JDClient {
     removeSimulator(id: string) {
         const sim = this._simulators[id]
         if (sim) {
+            console.debug(`hostedsims: remove ${id}`)
             sim.unsub?.()
             delete this._simulators[id]
             this.syncDOM()
+        }
+    }
+
+    resolveSimulator(id: string): HTMLIFrameElement {
+        return (
+            this._simulators[id] &&
+            (document.getElementById(ID_PREFIX + id) as HTMLIFrameElement)
+        )
+    }
+
+    unmountSimulator(id: string) {
+        const iframe = this.resolveSimulator(id)
+        if (iframe && iframe.parentElement !== this._container) {
+            console.debug(`hostedsims: unmount ${id}`)
+            iframe.remove()
+            this._container?.append(iframe)
         }
     }
 
@@ -149,53 +163,51 @@ class HostedSimulatorManager extends JDClient {
     }
 
     private syncDOM() {
-        if (this._container) {
-            // go through iframe and pop out the one that are not longer needed
-            const iframes = this._container.getElementsByTagName("iframe")
-            const iframeids: Record<string, boolean> = {}
-            for (const iframe of iframes) {
-                iframeids[iframe.id] = true
-                if (this._simulators[iframe.id]) continue
-
-                console.debug(`hosted sim: removing iframe ${iframe.id}`)
-                iframe.remove()
-            }
-
-            // go through simulator and ensure they are all started
-            Object.values(this._simulators).forEach(sim => {
-                const { id, definition } = sim
-                if (iframeids[id]) return
-
-                console.debug(
-                    `hosted sim: starting iframe ${id} ${definition.url}`
-                )
-                const iframe = document.createElement("iframe")
-                iframe.id = id
-                iframe.src = definition.url + "#" + id
-                iframe.title = definition.name
-                const origin = new URL(definition.url).origin
-                this._container.append(iframe)
-
-                // route packets
-                const unsub = this.bus.subscribe(
-                    [PACKET_SEND, PACKET_PROCESS],
-                    (pkt: Packet) => {
-                        if (pkt.sender === id) return
-
-                        const msg: PacketMessage = {
-                            type: "messagepacket",
-                            channel: "jacdac",
-                            broadcast: false,
-                            data: pkt.toBuffer(),
-                            sender: pkt.sender,
-                        }
-                        iframe.contentWindow?.postMessage(msg, origin)
-                    }
-                )
-
-                sim.unsub = unsub
-            })
+        // go through iframe and pop out the one that are not longer needed
+        // iframe might have been relocated somewhere else in the tree
+        const iframes = document.getElementsByClassName(CLASS_NAME)
+        for (const iframe of iframes) {
+            const id = iframe.id.slice(ID_PREFIX.length)
+            if (this._simulators[id]) continue
+            console.debug(`hosted sim: removing ${id}`)
+            iframe.remove()
         }
+
+        // go through simulator and ensure they are all started
+        Object.values(this._simulators).forEach(sim => {
+            const { id, definition } = sim
+            const domid = ID_PREFIX + id
+
+            if (document.getElementById(domid)) return
+
+            console.debug(`hosted sim: starting iframe ${id} ${definition.url}`)
+            const iframe = document.createElement("iframe")
+            iframe.classList.add(CLASS_NAME)
+            iframe.id = domid
+            iframe.src = definition.url + "#" + id
+            iframe.title = definition.name
+            const origin = new URL(definition.url).origin
+            this._container.append(iframe)
+
+            // route packets
+            const unsub = this.bus.subscribe(
+                [PACKET_SEND, PACKET_PROCESS],
+                (pkt: Packet) => {
+                    if (pkt.sender === id) return
+
+                    const msg: PacketMessage = {
+                        type: "messagepacket",
+                        channel: "jacdac",
+                        broadcast: false,
+                        data: pkt.toBuffer(),
+                        sender: pkt.sender,
+                    }
+                    iframe.contentWindow?.postMessage(msg, origin)
+                }
+            )
+
+            sim.unsub = unsub
+        })
         this.emit(CHANGE)
     }
 }
@@ -205,31 +217,19 @@ export const HostedSimulatorsProvider = ({ children }) => {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const containerRef = useRef<HTMLDivElement>()
     const containerId = useId()
-    const manager = useClient(() => new HostedSimulatorManager(bus))
+    const hostedSimulators = useClient(() => new HostedSimulatorManager(bus))
     const classes = useStyles()
-
-    const simulators = useChange(manager, _ => _.simulators)
-    const addHostedSimulator = (definition: HostedSimulatorDefinition) =>
-        manager.addSimulator(definition)
-    const removeHostedSimulator = (id: string) => manager.removeSimulator(id)
-    const clearHostedSimulators = () => manager.clear()
 
     // new container
     useEffect(() => {
-        manager.container = containerRef.current
-        return () => (manager.container = undefined)
+        hostedSimulators.container = containerRef.current
+        return () => (hostedSimulators.container = undefined)
     }, [])
-
-    // final cleanup
-    useEffect(() => () => manager.clear(), [])
 
     return (
         <HostedSimulatorsContext.Provider
             value={{
-                simulators,
-                addHostedSimulator,
-                removeHostedSimulator,
-                clearHostedSimulators,
+                hostedSimulators,
             }}
         >
             {children}
