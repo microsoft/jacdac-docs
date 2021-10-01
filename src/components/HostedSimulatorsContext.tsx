@@ -140,7 +140,7 @@ class HostedSimulatorManager extends JDEventSource {
                 )
                 const iframe = document.createElement("iframe")
                 iframe.id = id
-                iframe.src = definition.url
+                iframe.src = definition.url + "#" + id
                 iframe.title = definition.name
                 const origin = new URL(definition.url).origin
                 this._container.append(iframe)
