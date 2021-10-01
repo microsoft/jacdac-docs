@@ -51,6 +51,7 @@ export default function DeviceActions(props: {
     const handleStop = async () => {
         hostedSimulators.removeSimulator(deviceId)
         bus.removeServiceProvider(provider)
+        bus.removeDevice(deviceId)
     }
     const handleSettings = async () => {
         navigate("/tools/settings")
