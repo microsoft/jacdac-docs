@@ -1,35 +1,36 @@
+import { createStyles, makeStyles, Theme } from "@material-ui/core"
 import React, { createContext, useState } from "react"
 import { randomDeviceId } from "../../jacdac-ts/src/jdom/random"
 
-export interface HostedSimulatorSpec {
+export interface HostedSimulatorDefinition {
     name: string
     url: string
 }
 
 export interface HostedSimulator {
     id: string
-    spec: HostedSimulatorSpec
+    definition: HostedSimulatorDefinition
 }
 
 export interface HostedSimulatorsContextProps {
     simulators: HostedSimulator[]
-    startSimulator: (spec: HostedSimulatorSpec) => void
-    stopSimulator: (id: string) => void
-    clear: () => void
+    addHostedSimulator: (definition: HostedSimulatorDefinition) => void
+    removeHostedSimulator: (id: string) => void
+    clearHostedSimulators: () => void
 }
 
 const HostedSimulatorsContext = createContext<HostedSimulatorsContextProps>({
     simulators: [],
-    startSimulator: () => {},
-    stopSimulator: () => {},
-    clear: () => {},
+    addHostedSimulator: () => {},
+    removeHostedSimulator: () => {},
+    clearHostedSimulators: () => {},
 })
 
 HostedSimulatorsContext.displayName = "hostedSims"
 
 export default HostedSimulatorsContext
 
-export function simulatorSpecifications(): HostedSimulatorSpec[] {
+export function hostedSimulatorDefinitions(): HostedSimulatorDefinition[] {
     return [
         {
             name: "Azure IoT Uploader",
@@ -38,27 +39,51 @@ export function simulatorSpecifications(): HostedSimulatorSpec[] {
     ]
 }
 
+const useStyles = makeStyles(() =>
+    createStyles({
+        hostedSimulator: {
+            position: "absolute",
+            right: 0,
+            bottom: 0,
+            width: "1px",
+            height: "1px",
+            border: "none",
+        },
+    })
+)
+
 // eslint-disable-next-line react/prop-types
 export const HostedSimulatorsProvider = ({ children }) => {
     const [simulators, setSimulators] = useState<HostedSimulator[]>([])
+    const classes = useStyles()
 
-    const startSimulator = (spec: HostedSimulatorSpec) =>
-        setSimulators([...simulators, { id: randomDeviceId(), spec }])
-    const stopSimulator = (id: string) =>
+    const addHostedSimulator = (definition: HostedSimulatorDefinition) =>
+        definition &&
+        setSimulators([
+            ...simulators,
+            { id: randomDeviceId(), definition: definition },
+        ])
+    const removeHostedSimulator = (id: string) =>
         setSimulators(simulators.filter(sim => sim.id !== id))
-    const clear = () => setSimulators([])
+    const clearHostedSimulators = () => setSimulators([])
 
     return (
         <HostedSimulatorsContext.Provider
             value={{
                 simulators,
-                startSimulator,
-                stopSimulator,
-                clear,
+                addHostedSimulator,
+                removeHostedSimulator,
+                clearHostedSimulators,
             }}
         >
-            {simulators.map(({ id, spec }) => (
-                <iframe key={id} id={id} src={spec.url} title={spec.name} />
+            {simulators.map(({ id, definition }) => (
+                <iframe
+                    className={classes.hostedSimulator}
+                    key={id}
+                    id={id}
+                    src={definition.url}
+                    title={definition.name}
+                />
             ))}
             {children}
         </HostedSimulatorsContext.Provider>
