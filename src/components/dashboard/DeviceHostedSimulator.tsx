@@ -9,12 +9,22 @@ export default function DeviceHostedSimulator(props: { device: JDDevice }) {
     const { deviceId } = device
     const { hostedSimulators } = useContext(HostedSimulatorsContext)
     const containerRef = useRef<HTMLDivElement>()
-    const iframe = useChange(hostedSimulators, _ =>
-        _?.resolveSimulator(deviceId)
+    const iframe = useChange(
+        hostedSimulators,
+        _ => {
+            const r = _?.resolveSimulator(deviceId)
+            console.debug(`resolved iframe`, { deviceId, iframe })
+            return r
+        },
+        [deviceId]
     )
 
     useEffect(() => {
-        if (containerRef.current && iframe) {
+        if (
+            containerRef.current &&
+            iframe &&
+            iframe.parentElement !== containerRef.current
+        ) {
             console.debug(`hostedsims: mounting ${deviceId}`)
             containerRef.current.append(iframe)
         }
