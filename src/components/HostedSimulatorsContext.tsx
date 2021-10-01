@@ -95,7 +95,7 @@ export class HostedSimulatorManager extends JDClient {
 
     set container(value: HTMLDivElement) {
         this._container = value
-        console.debug(`hosted sim: container ${this._container?.id}`)
+        console.debug(`hostedsims: container ${this._container?.id}`)
         this.syncDOM()
     }
 
@@ -179,7 +179,7 @@ export class HostedSimulatorManager extends JDClient {
         for (const iframe of iframes) {
             const id = iframe.id.slice(ID_PREFIX.length)
             if (this._simulators[id]) continue
-            console.debug(`hosted sim: removing ${id}`)
+            console.debug(`hostedsims: removing ${id}`)
             iframe.remove()
         }
 
@@ -190,7 +190,7 @@ export class HostedSimulatorManager extends JDClient {
 
             if (document.getElementById(domid)) return
 
-            console.debug(`hosted sim: starting iframe ${id} ${definition.url}`)
+            console.debug(`hostedsims: starting iframe ${id} ${definition.url}`)
             const iframe = document.createElement("iframe")
             iframe.classList.add(CLASS_NAME)
             iframe.id = domid
