@@ -1,7 +1,7 @@
 import { Grid } from "@material-ui/core"
-import React, { useContext, useEffect, useRef } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"
-import useChange from "../../jacdac/useChange"
 import HostedSimulatorsContext from "../HostedSimulatorsContext"
 
 export default function DeviceHostedSimulator(props: { device: JDDevice }) {
@@ -9,29 +9,29 @@ export default function DeviceHostedSimulator(props: { device: JDDevice }) {
     const { deviceId } = device
     const { hostedSimulators } = useContext(HostedSimulatorsContext)
     const containerRef = useRef<HTMLDivElement>()
-    const iframe = useChange(
-        hostedSimulators,
-        _ => {
-            const r = _?.resolveSimulator(deviceId)
-            console.debug(`resolved iframe`, { deviceId, iframe })
-            return r
-        },
-        [deviceId]
+    const [iframe, setIFrame] = useState<HTMLIFrameElement>()
+
+    useEffect(
+        () =>
+            hostedSimulators?.subscribe(CHANGE, () => {
+                const r = hostedSimulators.resolveSimulator(deviceId)
+                if (r !== iframe) setIFrame(r)
+            }),
+        [hostedSimulators, deviceId]
     )
-
     useEffect(() => {
-        if (
-            containerRef.current &&
-            iframe &&
-            iframe.parentElement !== containerRef.current
-        ) {
+        const container = containerRef.current
+        console.debug(`resolved iframe`, {
+            deviceId,
+            iframe,
+            container,
+        })
+        if (container && iframe && iframe.parentElement !== container) {
             console.debug(`hostedsims: mounting ${deviceId}`)
-            containerRef.current.append(iframe)
+            container.append(iframe)
         }
-        return () => hostedSimulators.unmountSimulator(deviceId)
     }, [iframe])
-
-    console.debug("hosted sim", { iframe })
+    useEffect(() => () => hostedSimulators.unmountSimulator(deviceId), [])
 
     // nothing to see here
     if (!iframe) return null
