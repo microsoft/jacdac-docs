@@ -33,6 +33,8 @@ const Draggable = lazy(() => import("react-draggable"))
 export interface HostedSimulatorDefinition {
     name: string
     url: string
+    width: string
+    height: string
 }
 
 interface HostedSimulator {
@@ -66,6 +68,8 @@ export function hostedSimulatorDefinitions(): HostedSimulatorDefinition[] {
         {
             name: "Azure IoT Uploader",
             url: "https://microsoft.github.io/pxt-jacdac/",
+            width: "20rem",
+            height: "14rem",
         },
     ]
 }
@@ -82,7 +86,6 @@ const useStyles = makeStyles(() =>
             "& .hostedcontainer": {
                 position: "relative",
                 width: "20rem",
-                height: "16rem",
             },
             "& iframe": {
                 border: "none",
@@ -99,7 +102,7 @@ function HostedSimulatorCard(props: { sim: HostedSimulator }) {
     const { sim } = props
     const { removeHostedSimulator } = useContext(HostedSimulatorsContext)
     const { definition, id } = sim
-    const { url, name } = definition
+    const { url, name, width, height } = definition
     const origin = useMemo(() => new URL(url).origin, [url])
     const classes = useStyles()
     const nodeRef = useRef<HTMLSpanElement>()
@@ -151,6 +154,7 @@ function HostedSimulatorCard(props: { sim: HostedSimulator }) {
                                     ref={iframeRef}
                                     title={name}
                                     src={`${url}#${id}`}
+                                    style={{ width, height }}
                                 />
                             </div>
                         </CardContent>
