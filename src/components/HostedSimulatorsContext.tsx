@@ -111,21 +111,25 @@ export class HostedSimulatorManager extends JDClient {
         this.syncDOM()
     }
 
-    removeSimulator(id: string) {
-        const sim = this._simulators[id]
+    removeSimulator(deviceId: string) {
+        const sim = this.resolveSimulator(deviceId)
         if (sim) {
-            console.debug(`hostedsims: remove ${id}`)
+            console.debug(`hostedsims: remove ${deviceId}`)
             sim.unsub?.()
-            delete this._simulators[id]
+            delete this._simulators[sim.id]
             this.syncDOM()
         }
     }
 
-    isSimulator(deviceId: string) {
+    private resolveSimulator(deviceId: string) {
         const sim = Object.values(this._simulators).find(
             sim => sim.devideId === deviceId
         )
-        return !!sim
+        return sim
+    }
+
+    isSimulator(deviceId: string) {
+        return !!this.resolveSimulator(deviceId)
     }
 
     clear() {
