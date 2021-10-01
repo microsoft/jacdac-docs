@@ -161,7 +161,7 @@ class HostedSimulatorManager extends JDEventSource {
                             data: pkt.toBuffer(),
                             sender: pkt.sender,
                         }
-                        iframe?.contentWindow?.postMessage(msg, domain)
+                        iframe.contentWindow?.postMessage(msg, domain)
                     }
                 )
 
