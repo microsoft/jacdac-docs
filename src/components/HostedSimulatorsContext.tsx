@@ -27,6 +27,7 @@ export interface HostedSimulatorDefinition {
 interface HostedSimulator {
     id: string
     definition: HostedSimulatorDefinition
+    devideId?: string
     unsub?: () => void
 }
 
@@ -120,10 +121,13 @@ export class HostedSimulatorManager extends JDClient {
         }
     }
 
-    resolveSimulator(id: string): HTMLIFrameElement {
+    resolveSimulator(deviceId: string): HTMLIFrameElement {
+        const sim = Object.values(this._simulators).find(
+            sim => sim.devideId === deviceId
+        )
         return (
-            this._simulators[id] &&
-            (document.getElementById(ID_PREFIX + id) as HTMLIFrameElement)
+            sim &&
+            (document.getElementById(ID_PREFIX + sim.id) as HTMLIFrameElement)
         )
     }
 
@@ -146,19 +150,33 @@ export class HostedSimulatorManager extends JDClient {
         const { data } = event
         const msg = data as PacketMessage
         const { channel, type, sender } = msg
+        let sim: HostedSimulator
         if (
             channel === "jacdac" &&
             type === "messagepacket" &&
-            this._simulators[sender]
+            (sim = this._simulators[sender])
         ) {
             const pkts = decodePacketMessage(this.bus, msg)
             if (!pkts) return
+
+            let changed = false
             for (const pkt of pkts) {
+                // sniff the device id from annouce packets
+                if (pkt.isAnnounce && sim.devideId !== pkt.deviceIdentifier) {
+                    if (sim.devideId)
+                        console.warn(
+                            `hostedsim: device id changed from ${sim.devideId} to ${pkt.deviceIdentifier}`
+                        )
+                    sim.devideId = pkt.deviceIdentifier
+                    changed = true
+                }
+
                 // send to native bus
                 this.bus.sendPacketAsync(pkt)
                 // send to javascript bus
                 this.bus.processPacket(pkt)
             }
+            if (changed) this.emit(CHANGE)
         }
     }
 
