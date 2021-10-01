@@ -142,26 +142,26 @@ class HostedSimulatorManager extends JDEventSource {
                 iframe.id = id
                 iframe.src = definition.url
                 iframe.title = definition.name
-                const domain = new URL(definition.url).host
+                const origin = new URL(definition.url).origin
                 this._container.append(iframe)
 
                 // route packets
                 const unsub = this.bus.subscribe(
                     [PACKET_SEND, PACKET_PROCESS],
                     (pkt: Packet) => {
-                        console.debug(`hosted sim: sending ${pkt} to ${id}`, {
+                        /*                        console.debug(`hosted sim: sending ${pkt} to ${id}`, {
                             iframe,
                             domain,
                             sender: pkt.sender,
-                        })
+                        })*/
                         const msg: PacketMessage = {
                             type: "messagepacket",
                             channel: "jacdac",
-                            broadcast: true,
+                            broadcast: false,
                             data: pkt.toBuffer(),
                             sender: pkt.sender,
                         }
-                        iframe.contentWindow?.postMessage(msg, domain)
+                        iframe.contentWindow?.postMessage(msg, origin)
                     }
                 )
 
