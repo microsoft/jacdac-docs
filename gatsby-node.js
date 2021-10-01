@@ -279,7 +279,7 @@ async function createSpecPages(graphql, actions, reporter) {
         createPage({
             // This is the slug you created before
             // (or `node.frontmatter.slug`)
-            path: node.fields.slug,
+            path: slash(node.fields.slug),
             // This component will wrap our MDX content
             component: path.resolve(`./src/components/templates/spec.tsx`),
             context: {
@@ -298,13 +298,16 @@ async function createSpecPages(graphql, actions, reporter) {
         )
     // you'll call `createPage` for each result
     ddks.forEach(node => {
+        const p = slash(
+            `/hardware/ddk/${node.fields.slug
+                .replace(/\/README\/$/, "")
+                .replace(/^\//, "")}`
+        )
+        console.log(`ddk ${node.fields.slug} -> ${p}`)
         createPage({
             // This is the slug you created before
             // (or `node.frontmatter.slug`)
-            path: `/hardware/ddk/${node.fields.slug.replace(
-                /\/README\/$/,
-                ""
-            )}`,
+            path: p,
             // This component will wrap our MDX content
             component: path.resolve(`./src/components/templates/spec.tsx`),
             context: {
