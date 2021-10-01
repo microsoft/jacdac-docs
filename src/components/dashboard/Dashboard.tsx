@@ -91,7 +91,9 @@ export default function Dashboard(props: DashboardProps) {
         .sort(deviceSort)
     const [simulators, physicals] = splitFilter(
         devices,
-        d => !!bus.findServiceProvider(d.deviceId)
+        d =>
+            !!bus.findServiceProvider(d.deviceId) ||
+            hostedSimulators.isSimulator(d.deviceId)
     )
     const roleManager = useRoleManagerClient()
     const handleClearSimulators = () => {

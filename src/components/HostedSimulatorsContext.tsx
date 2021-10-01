@@ -121,23 +121,11 @@ export class HostedSimulatorManager extends JDClient {
         }
     }
 
-    resolveSimulator(deviceId: string): HTMLIFrameElement {
+    isSimulator(deviceId: string) {
         const sim = Object.values(this._simulators).find(
             sim => sim.devideId === deviceId
         )
-        return (
-            sim &&
-            (document.getElementById(ID_PREFIX + sim.id) as HTMLIFrameElement)
-        )
-    }
-
-    unmountSimulator(id: string) {
-        const iframe = this.resolveSimulator(id)
-        if (iframe && iframe.parentElement !== this._container) {
-            console.debug(`hostedsims: unmount ${id}`)
-            iframe.remove()
-            this._container?.append(iframe)
-        }
+        return !!sim
     }
 
     clear() {

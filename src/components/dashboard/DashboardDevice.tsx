@@ -28,7 +28,6 @@ import useIntersectionObserver from "../hooks/useIntersectionObserver"
 import { dependencyId } from "../../../jacdac-ts/src/jdom/eventsource"
 import useMediaQueries from "../hooks/useMediaQueries"
 import { DeviceLostAlert } from "../alert/DeviceLostAlert"
-import DeviceHostedSimulator from "./DeviceHostedSimulator"
 
 const ignoredServices = [SRV_CONTROL, SRV_LOGGER, SRV_SETTINGS, SRV_PROTO_TEST]
 
@@ -65,7 +64,6 @@ export default function DashboardDevice(
                 alignItems="flex-end"
                 alignContent="space-between"
             >
-                <DeviceHostedSimulator device={device} />
                 {services
                     ?.filter(srv => !srv.isMixin)
                     ?.filter(srv => !serviceFilter || serviceFilter(srv))
