@@ -1,4 +1,5 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react"
+import { inIFrame } from "../../../jacdac-ts/src/jdom/iframeclient"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import useChange from "../../jacdac/useChange"
 
@@ -14,7 +15,7 @@ export default function DelayedOnDevices(props: {
     )
     const hasDevices = !!devices?.length
     useEffect(() => {
-        if (hasDevices) {
+        if (hasDevices && !inIFrame()) {
             const id = setTimeout(() => setShow(true), timeout)
             return () => clearTimeout(id)
         }

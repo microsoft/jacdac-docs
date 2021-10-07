@@ -8,7 +8,7 @@ const FirmwareLoader = lazy(
 export default function Page() {
     return (
         <>
-            <DelayedOnDevices timeout={60000}>
+            <DelayedOnDevices timeout={120000}>
                 <Suspense fallback={null}>
                     <FirmwareLoader />
                 </Suspense>

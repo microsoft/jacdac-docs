@@ -60,7 +60,7 @@ export default function useFirmwareBlobs() {
             await bus.delay(5000)
         }
     }, [db, firmwares, throttled])
-    useIdleCallback(loadFirmwares, 60000, [db, firmwares])
+    useIdleCallback(loadFirmwares, 5000, [db, firmwares])
     useChangeAsync(
         firmwares,
         async fw => {
