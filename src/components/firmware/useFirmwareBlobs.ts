@@ -11,10 +11,12 @@ import { unique } from "../../../jacdac-ts/src/jdom/utils"
 import { fetchLatestRelease, fetchReleaseBinary } from "../github"
 import useIdleCallback from "../hooks/useIdleCallback"
 import useMounted from "../hooks/useMounted"
+import useAnalytics from "../hooks/useAnalytics"
 
 export default function useFirmwareBlobs() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { db } = useContext<DbContextProps>(DbContext)
+    const { trackEvent } = useAnalytics()
     const [throttled, setThrottled] = useState(false)
     const mounted = useMounted()
     const firmwares = db?.firmwares
@@ -37,6 +39,7 @@ export default function useFirmwareBlobs() {
             const { status, release } = await fetchLatestRelease(slug, {
                 ignoreThrottled: true,
             })
+            trackEvent("github.fetch", { status, slug })
             if (status === 403) {
                 if (mounted()) setThrottled(true)
             }
