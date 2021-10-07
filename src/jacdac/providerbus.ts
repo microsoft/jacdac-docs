@@ -86,6 +86,7 @@ export class UIFlags {
     static peers = args.peers
     static localhost = args.localhost
     static passive = args.passive
+    static storage = true
 }
 
 // defeat react fast-refresh
