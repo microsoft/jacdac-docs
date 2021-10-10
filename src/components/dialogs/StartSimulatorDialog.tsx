@@ -27,7 +27,10 @@ import useAnalytics from "../hooks/useAnalytics"
 import { useMiniSearch } from "react-minisearch"
 import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
 
-const miniSearchOptions = { fields: ["name", "description"] }
+const miniSearchOptions = {
+    fields: ["name", "description"],
+    searchOptions: { fuzzy: true },
+}
 export default function StartSimulatorDialog(props: {
     open: boolean
     onClose: () => void
@@ -128,19 +131,21 @@ export default function StartSimulatorDialog(props: {
                     onChange={handleSearchChange}
                 />
                 <List>
-                    {searchResults?.map(({ id, name, server, simulator }) => (
-                        <ListItem
-                            button
-                            key={id}
-                            onClick={
-                                server
-                                    ? handleProviderDefinition(server)
-                                    : handleHostedSimulator(simulator)
-                            }
-                        >
-                            {name}
-                        </ListItem>
-                    ))}
+                    {(searchResults || documents).map(
+                        ({ id, name, server, simulator }) => (
+                            <ListItem
+                                button
+                                key={id}
+                                onClick={
+                                    server
+                                        ? handleProviderDefinition(server)
+                                        : handleHostedSimulator(simulator)
+                                }
+                            >
+                                {name}
+                            </ListItem>
+                        )
+                    )}
                 </List>
             </DialogContent>
             <DialogActions>
