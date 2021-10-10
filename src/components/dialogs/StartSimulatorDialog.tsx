@@ -9,7 +9,7 @@ import {
     TextField,
 } from "@material-ui/core"
 import AppContext from "../AppContext"
-import React, { ChangeEvent, useContext, useMemo, useState } from "react"
+import React, { useContext, useMemo } from "react"
 import { useId } from "react-use-id-hook"
 import servers, {
     addServiceProvider,
@@ -24,43 +24,60 @@ import HostedSimulatorsContext, {
     hostedSimulatorDefinitions,
 } from "../HostedSimulatorsContext"
 import useAnalytics from "../hooks/useAnalytics"
-import { useDebounce } from "use-debounce"
-import {
-    serviceSpecificationFromClassIdentifier,
-    serviceSpecifications,
-} from "../../../jacdac-ts/src/jdom/spec"
+import { useMiniSearch } from "react-minisearch"
+import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
 
+const miniSearchOptions = { fields: ["name", "description"] }
 export default function StartSimulatorDialog(props: {
     open: boolean
     onClose: () => void
 }) {
     const { open, onClose } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const [query, setQuery] = useState("")
     const { enqueueSnackbar } = useContext(AppContext)
     const { addHostedSimulator } = useContext(HostedSimulatorsContext)
     const { trackEvent } = useAnalytics()
+    const { mobile } = useMediaQueries()
     const searchId = useId()
     const deviceHostDialogId = useId()
     const deviceHostLabelId = useId()
 
-    const [dquery] = useDebounce(query.toLowerCase(), 500)
-    const providerDefinitions = useMemo(
-        () =>
-            servers().filter(
-                server =>
-                    !dquery || server.name.toLowerCase().indexOf(dquery) > -1
-            ),
-        [dquery]
+    const documents: {
+        id: string
+        name: string
+        description: string
+        server?: ServiceProviderDefinition
+        simulator?: HostedSimulatorDefinition
+    }[] = useMemo(
+        () => [
+            ...servers().map(server => ({
+                id: `server:${server.name}`,
+                name: server.name,
+                description: server.serviceClasses
+                    .map(serviceSpecificationFromClassIdentifier)
+                    .map(
+                        spec =>
+                            `${spec.name} ${spec.shortName} ${spec.notes["short"]}`
+                    )
+                    .join(", "),
+                server,
+            })),
+            ...hostedSimulatorDefinitions().map(simulator => ({
+                id: `sim:${simulator.name}`,
+                name: simulator.name,
+                description: simulator.url,
+                simulator,
+            })),
+        ],
+        []
     )
-    const simulatorDefinitions = useMemo(
-        () =>
-            hostedSimulatorDefinitions().filter(
-                sim => !dquery || sim.name.toLowerCase().indexOf(dquery) > -1
-            ),
-        [dquery]
+    const { search, searchResults } = useMiniSearch(
+        documents,
+        miniSearchOptions
     )
-    const { mobile } = useMediaQueries()
+    const handleSearchChange = event => {
+        search(event.target.value)
+    }
 
     const handleProviderDefinition =
         (provider: ServiceProviderDefinition) => () => {
@@ -74,14 +91,10 @@ export default function StartSimulatorDialog(props: {
             addHostedSimulator(simulator)
             onClose()
         }
-    const handleQuery = (ev: ChangeEvent<HTMLInputElement>) =>
-        setQuery(ev.target.value)
-    const handleCancel = () => {
-        onClose()
-    }
+    const handleCancel = () => onClose()
     const handleAddAll = async () => {
         const allProviderDefinitions = uniqueMap(
-            providerDefinitions.filter(hd => hd.serviceClasses.length === 1),
+            servers().filter(hd => hd.serviceClasses.length === 1),
             hd => hd.serviceClasses[0].toString(),
             h => h
         )
@@ -112,26 +125,20 @@ export default function StartSimulatorDialog(props: {
                     label="Filter"
                     type="search"
                     fullWidth={true}
-                    value={query}
-                    onChange={handleQuery}
+                    onChange={handleSearchChange}
                 />
                 <List>
-                    {providerDefinitions.map(host => (
+                    {searchResults?.map(({ id, name, server, simulator }) => (
                         <ListItem
                             button
-                            key={host.name}
-                            onClick={handleProviderDefinition(host)}
+                            key={id}
+                            onClick={
+                                server
+                                    ? handleProviderDefinition(server)
+                                    : handleHostedSimulator(simulator)
+                            }
                         >
-                            {host.name}
-                        </ListItem>
-                    ))}
-                    {simulatorDefinitions.map(host => (
-                        <ListItem
-                            button
-                            key={host.name}
-                            onClick={handleHostedSimulator(host)}
-                        >
-                            {host.name}
+                            {name}
                         </ListItem>
                     ))}
                 </List>
