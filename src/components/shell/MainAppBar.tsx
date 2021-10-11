@@ -17,7 +17,6 @@ import { Link } from "gatsby-theme-material-ui"
 import ForumIcon from "@material-ui/icons/Forum"
 import { UIFlags } from "../../jacdac/providerbus"
 import { HideOnScroll } from "../ui/HideOnScroll"
-import OpenVMEditorButton from "../buttons/OpenVMEditorButton"
 import {
     DRAWER_WIDTH,
     MOBILE_BREAKPOINT,
@@ -115,9 +114,6 @@ function MainToolbar() {
             {Flags.diagnostics && <PacketStats />}
             <BridgeButtons className={clsx(classes.menuButton)} />
             <OpenDashboardButton className={clsx(classes.menuButton)} />
-            {false && (
-                <OpenVMEditorButton className={clsx(classes.menuButton)} />
-            )}
             <IconButtonWithTooltip
                 className={clsx(
                     classes.menuButton,

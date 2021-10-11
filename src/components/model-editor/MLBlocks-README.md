@@ -12,7 +12,7 @@ Last updated September 2021
 ## <a name="ml-blocks"></a> ML Blocks Editor Page
 
 [https://microsoft.github.io/jacdac-docs/editors/ml]()
-**Description**: This page contains a block-based interface for collecting data, training models, and testing models. It is a space for model developers to create new machine learning models on one graphical workspace. Models trained in the block editor can be imported into the [Makecode extension](https://github.com/microsoft/pxt-ml) or [VM blocks](microsoft.github.io/jacdac-docs/editors/vm/).
+**Description**: This page contains a block-based interface for collecting data, training models, and testing models. It is a space for model developers to create new machine learning models on one graphical workspace. Models trained in the block editor can be imported into the [Makecode extension](https://github.com/microsoft/pxt-ml) or [VM blocks](https://microsoft.github.io/jacdac-docs/editors/vm/).
 
 **Code outline**: The page is deploted from src/pages/editors/ml.tsx
 _Workspace management_
