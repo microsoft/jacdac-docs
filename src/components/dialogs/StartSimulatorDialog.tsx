@@ -29,7 +29,11 @@ import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/
 
 const miniSearchOptions = {
     fields: ["name", "description"],
-    searchOptions: { fuzzy: true },
+    searchOptions: {
+        fuzzy: true,
+        prefix: true,
+        boost: { name: 5, description: 1 },
+    },
 }
 export default function StartSimulatorDialog(props: {
     open: boolean
