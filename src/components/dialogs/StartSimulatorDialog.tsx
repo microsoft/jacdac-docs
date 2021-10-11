@@ -9,7 +9,7 @@ import {
     TextField,
 } from "@material-ui/core"
 import AppContext from "../AppContext"
-import React, { useContext, useMemo } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { useId } from "react-use-id-hook"
 import servers, {
     addServiceProvider,
@@ -26,6 +26,8 @@ import HostedSimulatorsContext, {
 import useAnalytics from "../hooks/useAnalytics"
 import { useMiniSearch } from "react-minisearch"
 import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import FilterListIcon from "@material-ui/icons/FilterList"
 
 const miniSearchOptions = {
     fields: ["name", "description"],
@@ -48,6 +50,7 @@ export default function StartSimulatorDialog(props: {
     const searchId = useId()
     const deviceHostDialogId = useId()
     const deviceHostLabelId = useId()
+    const [showFilters, setShowFilters] = useState(false)
 
     const documents: {
         id: string
@@ -78,7 +81,7 @@ export default function StartSimulatorDialog(props: {
         ],
         []
     )
-    const { search, searchResults } = useMiniSearch(
+    const { search, clearSearch, searchResults } = useMiniSearch(
         documents,
         miniSearchOptions
     )
@@ -115,6 +118,13 @@ export default function StartSimulatorDialog(props: {
             addServiceProvider(bus, provider)
         }
     }
+    const handleShowFilters = () => {
+        if (showFilters) {
+            clearSearch()
+            setShowFilters(false)
+        }
+        setShowFilters(!showFilters)
+    }
 
     return (
         <Dialog
@@ -125,15 +135,25 @@ export default function StartSimulatorDialog(props: {
             fullWidth={true}
             fullScreen={mobile}
         >
-            <DialogTitle id={deviceHostLabelId}>Start a simulator</DialogTitle>
+            <DialogTitle id={deviceHostLabelId}>
+                Start a simulator
+                <IconButtonWithTooltip
+                    title={showFilters ? "show filters" : "hide filters"}
+                    onClick={handleShowFilters}
+                >
+                    <FilterListIcon />
+                </IconButtonWithTooltip>
+            </DialogTitle>
             <DialogContent>
-                <TextField
-                    id={searchId}
-                    label="Filter"
-                    type="search"
-                    fullWidth={true}
-                    onChange={handleSearchChange}
-                />
+                {showFilters && (
+                    <TextField
+                        id={searchId}
+                        label="Filter"
+                        type="search"
+                        fullWidth={true}
+                        onChange={handleSearchChange}
+                    />
+                )}
                 <List>
                     {(searchResults || documents).map(
                         ({ id, name, server, simulator }) => (
