@@ -1,5 +1,4 @@
 import React, {
-    lazy,
     useCallback,
     useContext,
     useEffect,
@@ -7,40 +6,15 @@ import React, {
     useState,
 } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import {
-    Card,
-    CardActions,
-    CardContent,
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    TextField,
-    Typography,
-} from "@material-ui/core"
+import { Card, CardActions, Grid, TextField } from "@material-ui/core"
 import useChange from "../../jacdac/useChange"
 import JDService from "../../../jacdac-ts/src/jdom/service"
-import {
-    HidKeyboardModifiers,
-    SRV_CONTROL,
-    SRV_LOGGER,
-    SRV_PROTO_TEST,
-    SRV_ROLE_MANAGER,
-    SRV_SETTINGS,
-    SystemEvent,
-} from "../../../jacdac-ts/src/jdom/constants"
-import JDEvent from "../../../jacdac-ts/src/jdom/event"
-import KeyboardKeyInput from "../../components/ui/KeyboardKeyInput"
+import { SRV_SETTINGS } from "../../../jacdac-ts/src/jdom/constants"
 import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
 import DeleteIcon from "@material-ui/icons/Delete"
 import SettingsClient from "../../../jacdac-ts/src/jdom/clients/settingsclient"
 import useServiceClient from "../../components/useServiceClient"
-import {
-    arrayConcatMany,
-    clone,
-    fromHex,
-    toHex,
-} from "../../../jacdac-ts/src/jdom/utils"
+import { clone } from "../../../jacdac-ts/src/jdom/utils"
 import { jdpack, jdunpack } from "../../../jacdac-ts/src/jdom/pack"
 import { randomDeviceId } from "../../../jacdac-ts/src/jdom/random"
 import JDBus from "../../../jacdac-ts/src/jdom/bus"
@@ -48,16 +22,12 @@ import useServices from "../../components/hooks/useServices"
 import { Button } from "gatsby-theme-material-ui"
 import Alert from "../../components/ui/Alert"
 import GridHeader from "../../components/ui/GridHeader"
-import { humanify } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import ConnectAlert from "../../components/alert/ConnectAlert"
 import DeviceCardHeader from "../../components/devices/DeviceCardHeader"
 import useGridBreakpoints from "../../components/useGridBreakpoints"
 import Suspense from "../../components/ui/Suspense"
 import useServiceProviderFromServiceClass from "../../components/hooks/useServiceProviderFromServiceClass"
 import AppContext from "../../components/AppContext"
-import { AlertTitle } from "@material-ui/lab"
-import { renderKeyboardKey } from "../../../jacdac-ts/src/servers/hidkeyboardserver"
-const ImportButton = lazy(() => import("../../components/ImportButton"))
 
 // all settings keys are prefixed with this string
 const PREFIX = "@ph_"
@@ -114,18 +84,17 @@ export default function HIDEvents() {
         if (JSON.stringify(phrs) !== JSON.stringify(phrases)) setPhrases(phrs)
     })
 
-    const handlePhraseChange = (event: React.ChangeEvent<HTMLInputElement>) =>{
-        const index = Number.parseInt(event.target.id);
+    const handlePhraseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const index = Number.parseInt(event.target.id)
         const phrase = phrases[index]
-        phrase.phrase = event.target.value.trim();
-        if (!phrase.key) 
-            phrase.key = PREFIX + randomDeviceId();
+        phrase.phrase = event.target.value.trim()
+        if (!phrase.key) phrase.key = PREFIX + randomDeviceId()
         settings.setValue(phrase.key, phraseToBuffer(phrase))
     }
 
     const handleAddPhrase = () => {
-        const newPhrases = phrases.slice();
-        newPhrases.push({phrase:""})
+        const newPhrases = phrases.slice()
+        newPhrases.push({ phrase: "" })
         setPhrases(newPhrases)
     }
 
@@ -158,10 +127,7 @@ export default function HIDEvents() {
                 if (Array.isArray(json)) {
                     for (const phrase of json as Phrase[]) {
                         const payload = phraseToBuffer(phrase)
-                        settings.setValue(
-                            PREFIX + randomDeviceId(),
-                            payload
-                        )
+                        settings.setValue(PREFIX + randomDeviceId(), payload)
                     }
                 }
             } catch (e) {
