@@ -28,6 +28,7 @@ import useGridBreakpoints from "../../components/useGridBreakpoints"
 import Suspense from "../../components/ui/Suspense"
 import useServiceProviderFromServiceClass from "../../components/hooks/useServiceProviderFromServiceClass"
 import AppContext from "../../components/AppContext"
+const ImportButton = lazy(() => import("../../components/ImportButton"))
 
 // all settings keys are prefixed with this string
 const PREFIX = "@ph_"
