@@ -12,6 +12,8 @@ import fieldsDsl from "../blockly/dsl/fieldsdsl"
 import { WORKSPACE_FILENAME } from "../blockly/toolbox"
 import FileSystemContext from "../FileSystemContext"
 import { createIFrameDSL } from "../blockly/dsl/iframedsl"
+import { useLocationSearchParamBoolean } from "../hooks/useLocationSearchParam"
+import dataSetDsl from "../blockly/dsl/datasetdsl"
 
 const DS_EDITOR_ID = "ds"
 const DS_SOURCE_STORAGE_KEY = "tools:dseditor"
@@ -43,10 +45,15 @@ function DSEditorWithContext() {
 }
 
 export default function DSBlockEditor() {
+    const noDataSet = useLocationSearchParamBoolean("nodataset", false)
     const dsls = useMemo(() => {
-        return [dataDsl, chartDsl, fieldsDsl, createIFrameDSL("host", "*")].filter(
-            dsl => !!dsl
-        )
+        return [
+            !noDataSet && dataSetDsl,
+            dataDsl,
+            chartDsl,
+            fieldsDsl,
+            createIFrameDSL("host", "*"),
+        ].filter(dsl => !!dsl)
     }, [])
 
     return (
