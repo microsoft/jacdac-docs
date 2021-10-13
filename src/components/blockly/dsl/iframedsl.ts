@@ -21,7 +21,13 @@ export interface DslMessage {
     type?: "dsl"
     id?: string
     dslid: string
-    action: "mount" | "unmount" | "blocks" | "transform" | "change"
+    action:
+        | "mount"
+        | "unmount"
+        | "blocks"
+        | "transform"
+        | "change"
+        | "workspace"
 }
 
 export interface DslBlocksResponse extends DslMessage {
@@ -88,18 +94,24 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
                 pending(data)
             }
             // trigger recomputation
-            if (action === "change") {
-                //console.log(`iframedsl: change requested`)
-                this._workspace
-                    .getTopBlocks(false)
-                    .filter(
-                        b => resolveBlockDefinition(b.type)?.dsl === this.id
-                    )
-                    .forEach((b: Block) => {
-                        //console.log(`change ${b.id}`)
-                        const { jacdacServices } = b as BlockWithServices
-                        jacdacServices.emit(CHANGE)
-                    })
+            switch (action) {
+                case "change": {
+                    //console.log(`iframedsl: change requested`)
+                    this._workspace
+                        .getTopBlocks(false)
+                        .filter(
+                            b => resolveBlockDefinition(b.type)?.dsl === this.id
+                        )
+                        .forEach((b: Block) => {
+                            //console.log(`change ${b.id}`)
+                            const { jacdacServices } = b as BlockWithServices
+                            jacdacServices.emit(CHANGE)
+                        })
+                    break
+                }
+                case "workspace": {
+                    break
+                }
             }
         }
     }
@@ -165,6 +177,7 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
         workspaceXml: string,
         workspaceJSON: WorkspaceJSON
     ) {
+        // TODO store editor id
         this.post("workspace", {
             source: workspaceXml,
             workspace: workspaceJSON,
