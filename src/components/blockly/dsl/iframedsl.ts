@@ -107,14 +107,8 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
     private createTransformData(): BlockDataSetTransform {
         return (blockWithServices, dataset) =>
             new Promise<BlockDataSet>(resolve => {
-                const workspace = workspaceToJSON(
-                    blockWithServices.workspace,
-                    [], // TODO pass dsls
-                    [blockWithServices]
-                )
                 const { id } = this.post("transform", {
                     blockId: blockWithServices.id,
-                    workspace,
                     dataset,
                 })
                 setTimeout(() => {
@@ -166,8 +160,15 @@ class IFrameDomainSpecificLanguage implements BlockDomainSpecificLanguage {
         return this.category
     }
 
-    visitWorkspaceJSON(workspace: Workspace, workspaceJSON: WorkspaceJSON) {
-        this.post("workspace", { workspace: workspaceJSON })
+    visitWorkspaceJSON(
+        workspace: Workspace,
+        workspaceXml: string,
+        workspaceJSON: WorkspaceJSON
+    ) {
+        this.post("workspace", {
+            source: workspaceXml,
+            workspace: workspaceJSON,
+        })
     }
 }
 
