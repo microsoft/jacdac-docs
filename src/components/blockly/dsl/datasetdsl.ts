@@ -24,7 +24,7 @@ const DATA_SAVE_FILE_BLOCK = "data_save_file"
 
 const [datasetColour] = palette()
 const dataSetDsl: BlockDomainSpecificLanguage = {
-    id: "dataScience",
+    id: "dataSets",
     createBlocks: () => [
         <BlockDefinition>{
             kind: "block",
