@@ -95,7 +95,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column = tidyResolveFieldColumn(data, b, "column")
                 const order = b.getFieldValue("order")
                 const descending = order === "descending"
-                if (!column) return undefined
+                if (!column) return data
                 return <DataArrangeRequest>{
                     type: "arrange",
                     column,
@@ -133,7 +133,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                         tidyResolveFieldColumn(data, b, `column${column}`)
                     )
                     .filter(c => !!c)
-                if (!columns?.length) return undefined
+                if (!columns?.length) return data
                 return <DataDropRequest>{
                     type: "drop",
                     columns,
@@ -174,7 +174,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                         tidyResolveFieldColumn(data, b, `column${column}`)
                     )
                     .filter(c => !!c)
-                if (!columns?.length) return undefined
+                if (!columns?.length) return data
                 return <DataSelectRequest>{
                     type: "select",
                     columns,
@@ -220,7 +220,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     )
                     .filter(c => !!c)
                 const logic = b.getFieldValue("logic")
-                if (columns.length !== 2) return undefined
+                if (columns.length !== 2) return data
                 return <DataFilterColumnsRequest>{
                     type: "filter_columns",
                     columns,
@@ -266,7 +266,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column = tidyResolveFieldColumn(data, b, "column")
                 const logic = b.getFieldValue("logic")
                 const rhs = b.getFieldValue("rhs")
-                if (!column) return undefined
+                if (!column) return data
                 return <DataFilterStringRequest>{
                     type: "filter_string",
                     column,
@@ -327,7 +327,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "number",
                 })
                 const logic = b.getFieldValue("logic")
-                if (!newcolumn || !lhs || !rhs) return undefined
+                if (!newcolumn || !lhs || !rhs) return data
                 return <DataMutateColumnsRequest>{
                     type: "mutate_columns",
                     newcolumn,
@@ -387,7 +387,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 })
                 const rhs = b.getFieldValue("rhs")
                 const logic = b.getFieldValue("logic")
-                if (!newcolumn || !lhs) return undefined
+                if (!newcolumn || !lhs) return data
                 return <DataMutateNumberRequest>{
                     type: "mutate_number",
                     newcolumn,
@@ -465,7 +465,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column = tidyResolveFieldColumn(data, b, "column")
                 const by = tidyResolveFieldColumn(data, b, "by")
                 const calc = b.getFieldValue("calc")
-                if (!by) return undefined
+                if (!by) return []
                 return <DataSummarizeByGroupRequest>{
                     type: "summarize_by_group",
                     column,
