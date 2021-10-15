@@ -2,6 +2,7 @@ import { SMap } from "../../../jacdac-ts/src/jdom/utils"
 import Blockly, { Block, Workspace } from "blockly"
 import { BlockWithServices } from "./WorkspaceContext"
 import { paletteColorByIndex } from "./dsl/palette"
+import { DataMessage } from "../../workers/data/data.worker"
 
 export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -96,7 +97,7 @@ export type BlockDataSetTransform = (
     block: BlockWithServices,
     data: BlockDataSet,
     previousData: BlockDataSet
-) => Promise<BlockDataSet>
+) => Promise<DataMessage | BlockDataSet>
 
 export interface BlockDefinition extends BlockReference {
     message0?: string
@@ -128,8 +129,7 @@ export interface BlockDefinition extends BlockReference {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const identityTransformData = async (block: Block, data: object[]) =>
-    data
+export const identityTransformData = async (block: Block, data: object[]) => data
 
 export interface ServiceBlockDefinition extends BlockDefinition {
     template: BlockTemplate

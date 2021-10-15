@@ -15,6 +15,7 @@ import CopyButton from "../../../ui/CopyButton"
 import FullscreenIcon from "@material-ui/icons/Fullscreen"
 import IconButtonWithTooltip from "../../../ui/IconButtonWithTooltip"
 import { UIFlags } from "../../../../jacdac/providerbus"
+import postTransformData from "../../dsl/workers/data.proxy"
 const VegaLite = lazy(() => import("./VegaLite"))
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,7 +97,7 @@ export default function VegaLiteWidget(props: {
             if (!slice) {
                 setVegaData({ values: data })
             } else {
-                const sliced = await tidySlice(data, slice)
+                const sliced = await postTransformData(tidySlice(data, slice))
                 if (mounted()) setVegaData({ values: sliced })
             }
         },

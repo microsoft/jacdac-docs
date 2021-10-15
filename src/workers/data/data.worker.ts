@@ -440,7 +440,7 @@ async function handleMessage(event: MessageEvent) {
 
     try {
         //console.debug("Jacdac data in:", { message })
-        const newData = await transformData(message)
+        const newData = transformData(message)
         //console.debug("Jacdac data out:", { message })
         const resp = { id, worker, ...rest, data: newData }
         self.postMessage(resp)

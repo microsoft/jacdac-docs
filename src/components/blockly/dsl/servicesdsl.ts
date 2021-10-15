@@ -475,12 +475,12 @@ export class ServicesBlockDomainSpecificLanguage
                     previousData: { time: number }[]
                 ) => {
                     const horizon = block.getFieldValue("horizon") || 10
-                    return postTransformData(<DataRecordWindowRequest>{
+                    return <DataRecordWindowRequest>{
                         type: "record_window",
                         data,
                         previousData,
                         horizon,
-                    })
+                    }
                 },
             },
         ]

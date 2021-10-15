@@ -38,10 +38,10 @@ const dataVarDsl: BlockDomainSpecificLanguage = {
             colour: dataVariablesColour,
             template: "meta",
             dataPreviewField: "after",
-            transformData: (b: Block) => {
+            transformData: async (b: Block) => {
                 const services = resolveBlockServices(b)
                 const data = services?.data
-                return Promise.resolve(data)
+                return data
             },
         },
         <BlockDefinition>{
@@ -63,10 +63,10 @@ const dataVarDsl: BlockDomainSpecificLanguage = {
             colour: dataVariablesColour,
             template: "meta",
             dataPreviewField: "after",
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 // grab the variable from the block
                 const variable = b.getFieldValue("data")
-                if (!variable) return Promise.resolve(undefined)
+                if (!variable) return undefined
                 const readBlocks = b.workspace.getBlocksByType(
                     DATA_DATAVARIABLE_READ_BLOCK,
                     false
@@ -77,7 +77,7 @@ const dataVarDsl: BlockDomainSpecificLanguage = {
                     .map(b => (b as BlockWithServices).jacdacServices)
                     .filter(services => !!services)
                 readServices.forEach(services => (services.data = data))
-                return Promise.resolve(data)
+                return data
             },
         },
     ],

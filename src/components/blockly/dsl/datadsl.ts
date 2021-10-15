@@ -14,7 +14,6 @@ import {
     DummyInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage from "./dsl"
-import postTransformData from "./workers/data.proxy"
 import type {
     DataSelectRequest,
     DataDropRequest,
@@ -92,17 +91,17 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            transformData: (b: Block, data: any[]) => {
+            transformData: async (b: Block, data: any[]) => {
                 const column = tidyResolveFieldColumn(data, b, "column")
                 const order = b.getFieldValue("order")
                 const descending = order === "descending"
-                if (!column) return Promise.resolve(data)
-                return postTransformData(<DataArrangeRequest>{
+                if (!column) return undefined
+                return <DataArrangeRequest>{
                     type: "arrange",
                     column,
                     descending,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -128,18 +127,18 @@ const dataDsl: BlockDomainSpecificLanguage = {
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 const columns = [1, 2, 3]
                     .map(column =>
                         tidyResolveFieldColumn(data, b, `column${column}`)
                     )
                     .filter(c => !!c)
-                if (!columns?.length) return Promise.resolve(data)
-                return postTransformData(<DataDropRequest>{
+                if (!columns?.length) return undefined
+                return <DataDropRequest>{
                     type: "drop",
                     columns,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -169,18 +168,18 @@ const dataDsl: BlockDomainSpecificLanguage = {
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 const columns = [1, 2, 3, 4]
                     .map(column =>
                         tidyResolveFieldColumn(data, b, `column${column}`)
                     )
                     .filter(c => !!c)
-                if (!columns?.length) return Promise.resolve(data)
-                return postTransformData(<DataSelectRequest>{
+                if (!columns?.length) return undefined
+                return <DataSelectRequest>{
                     type: "select",
                     columns,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -214,20 +213,20 @@ const dataDsl: BlockDomainSpecificLanguage = {
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 const columns = [1, 2]
                     .map(column =>
                         tidyResolveFieldColumn(data, b, `column${column}`)
                     )
                     .filter(c => !!c)
                 const logic = b.getFieldValue("logic")
-                if (columns.length !== 2) return Promise.resolve(data)
-                return postTransformData(<DataFilterColumnsRequest>{
+                if (columns.length !== 2) return undefined
+                return <DataFilterColumnsRequest>{
                     type: "filter_columns",
                     columns,
                     logic,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -263,18 +262,18 @@ const dataDsl: BlockDomainSpecificLanguage = {
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 const column = tidyResolveFieldColumn(data, b, "column")
                 const logic = b.getFieldValue("logic")
                 const rhs = b.getFieldValue("rhs")
-                if (!column) return Promise.resolve(data)
-                return postTransformData(<DataFilterStringRequest>{
+                if (!column) return undefined
+                return <DataFilterStringRequest>{
                     type: "filter_string",
                     column,
                     logic,
                     rhs,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -319,7 +318,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 const newcolumn = b.getFieldValue("newcolumn")
                 const lhs = tidyResolveFieldColumn(data, b, "lhs", {
                     type: "number",
@@ -328,15 +327,15 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     type: "number",
                 })
                 const logic = b.getFieldValue("logic")
-                if (!newcolumn || !lhs || !rhs) return Promise.resolve(data)
-                return postTransformData(<DataMutateColumnsRequest>{
+                if (!newcolumn || !lhs || !rhs) return undefined
+                return <DataMutateColumnsRequest>{
                     type: "mutate_columns",
                     newcolumn,
                     lhs,
                     rhs,
                     logic,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -381,22 +380,22 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            transformData: (b: Block, data: object[]) => {
+            transformData: async (b: Block, data: object[]) => {
                 const newcolumn = b.getFieldValue("newcolumn")
                 const lhs = tidyResolveFieldColumn(data, b, "lhs", {
                     type: "number",
                 })
                 const rhs = b.getFieldValue("rhs")
                 const logic = b.getFieldValue("logic")
-                if (!newcolumn || !lhs) return Promise.resolve(data)
-                return postTransformData(<DataMutateNumberRequest>{
+                if (!newcolumn || !lhs) return undefined
+                return <DataMutateNumberRequest>{
                     type: "mutate_number",
                     newcolumn,
                     lhs,
                     rhs,
                     logic,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -421,7 +420,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            transformData: (b: Block, data: any[]) => {
+            transformData: async (b: Block, data: any[]) => {
                 const columns = tidyResolveFieldColumns(
                     data,
                     b,
@@ -429,12 +428,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
                     "number"
                 )
                 const calc = b.getFieldValue("calc")
-                return postTransformData(<DataSummarizeRequest>{
+                return <DataSummarizeRequest>{
                     type: "summarize",
                     columns,
                     calc,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -462,18 +461,18 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            transformData: (b: Block, data: any[]) => {
+            transformData: async (b: Block, data: any[]) => {
                 const column = tidyResolveFieldColumn(data, b, "column")
                 const by = tidyResolveFieldColumn(data, b, "by")
                 const calc = b.getFieldValue("calc")
-                if (!by) return Promise.resolve([])
-                return postTransformData(<DataSummarizeByGroupRequest>{
+                if (!by) return undefined
+                return <DataSummarizeByGroupRequest>{
                     type: "summarize_by_group",
                     column,
                     by,
                     calc,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -504,7 +503,7 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            transformData: (b: Block, data: any[]) => {
+            transformData: async (b: Block, data: any[]) => {
                 const count = b.getFieldValue("count")
                 const operator = b.getFieldValue("operator")
                 return tidySlice(data, {
@@ -530,14 +529,14 @@ const dataDsl: BlockDomainSpecificLanguage = {
             nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
             dataPreviewField: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            transformData: (b: Block, data: any[]) => {
+            transformData: async (b: Block, data: any[]) => {
                 const column = tidyResolveFieldColumn(data, b, "column")
-                if (!column) return Promise.resolve([])
-                return postTransformData(<DataCountRequest>{
+                if (!column) return []
+                return <DataCountRequest>{
                     type: "count",
                     column,
                     data,
-                })
+                }
             },
             template: "meta",
         },
@@ -562,12 +561,12 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column = tidyResolveFieldColumn(data, b, "column", {
                     type: "number",
                 })
-                if (!column) return Promise.resolve([])
-                return postTransformData(<DataBinRequest>{
+                if (!column) return []
+                return <DataBinRequest>{
                     type: "bin",
                     column,
                     data,
-                })
+                }
             },
         },
         <BlockDefinition>{
@@ -614,13 +613,13 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column2 = tidyResolveFieldColumn(data, b, "y", {
                     type: "number",
                 })
-                if (!column1 || !column2) return Promise.resolve([])
-                return postTransformData(<DataCorrelationRequest>{
+                if (!column1 || !column2) return []
+                return <DataCorrelationRequest>{
                     type: "correlation",
                     column1,
                     column2,
                     data,
-                })
+                }
             },
         },
         <BlockDefinition>{
@@ -666,13 +665,13 @@ const dataDsl: BlockDomainSpecificLanguage = {
                 const column2 = tidyResolveFieldColumn(data, b, "y", {
                     type: "number",
                 })
-                if (!column1 || !column2) return Promise.resolve([])
-                return postTransformData(<DataLinearRegressionRequest>{
+                if (!column1 || !column2) return []
+                return <DataLinearRegressionRequest>{
                     type: "linear_regression",
                     column1,
                     column2,
                     data,
-                })
+                }
             },
         },
         {

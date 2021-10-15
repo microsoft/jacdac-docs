@@ -3,7 +3,6 @@ import type {
     DataSliceOptions,
     DataSliceRequest,
 } from "../../../workers/data/dist/node_modules/data.worker"
-import postTransformData from "../dsl/workers/data.proxy"
 import { setBlockDataWarning } from "../WorkspaceContext"
 
 /* eslint-disable @typescript-eslint/ban-types */
@@ -71,8 +70,8 @@ export function tidyResolveFieldColumns(
 export function tidySlice(
     data: object[],
     options: DataSliceOptions
-): Promise<object[]> {
-    if (!options || !data?.length) return Promise.resolve(data)
+): DataSliceRequest | object[] {
+    if (!options || !data?.length) return undefined
 
     const { length } = data
     const {
@@ -91,13 +90,13 @@ export function tidySlice(
         length < sliceTail &&
         length < sliceSample
     )
-        return Promise.resolve(data)
+        return data
 
     // crunch in webworker
     console.debug(`slice data`, { data, options })
-    return postTransformData(<DataSliceRequest>{
+    return <DataSliceRequest>{
         type: "slice",
         data,
         ...options,
-    })
+    }
 }

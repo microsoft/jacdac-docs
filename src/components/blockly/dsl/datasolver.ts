@@ -1,6 +1,7 @@
 import { CHANGE } from "../../../../jacdac-ts/src/jdom/constants"
 import { identityTransformData, resolveBlockDefinition } from "../toolbox"
 import { BlockWithServices, resolveBlockServices } from "../WorkspaceContext"
+import postTransformData from "./workers/data.proxy"
 
 export function registerDataSolver(block: BlockWithServices) {
     const { jacdacServices: services } = block
@@ -22,10 +23,12 @@ export function registerDataSolver(block: BlockWithServices) {
             if (transformData === identityTransformData) newData = services.data
             else {
                 //const start = performance.now()
-                newData = await transformData(
-                    block,
-                    services.data,
-                    nextServices?.data
+                newData = await postTransformData(
+                    await transformData(
+                        block,
+                        services.data,
+                        nextServices?.data
+                    )
                 )
                 //const end = performance.now()
                 //console.debug(
