@@ -112,7 +112,18 @@ function ConnectDialog(props: {
     const handleClose = () => setOpen(false)
     const handleForgetAll = async () =>
         service.sendCmdAsync(WifiCmd.ForgetAllNetworks)
+
     const scan = () => service.sendCmdAsync(WifiCmd.Scan)
+    const knownNetworksChangedEvent = useEvent(
+        service,
+        WifiEvent.NetworksChanged
+    )
+    const knownNetworks = useCommandPipeResults<NetworkResult>(
+        service,
+        WifiCmd.ListKnownNetworks,
+        "i16 i16 s",
+        knownNetworksChangedEvent
+    )
 
     // grad scan results
     const scanCompleteEvent = useEvent(service, WifiEvent.ScanComplete)
@@ -175,16 +186,6 @@ export default function DashboardWifi(props: DashboardServiceProps) {
     const [mac] = useRegisterUnpackedValue<[Uint8Array]>(macRegister)
     const lostIpEvent = useEvent(service, WifiEvent.LostIp)
     const gotIpEvent = useEvent(service, WifiEvent.GotIp)
-    const knownNetworksChangedEvent = useEvent(
-        service,
-        WifiEvent.NetworksChanged
-    )
-    const knownNetworks = useCommandPipeResults<NetworkResult>(
-        service,
-        WifiCmd.ListKnownNetworks,
-        "i16 i16 s",
-        knownNetworksChangedEvent
-    )
 
     const handleConnect = async () => {
         if (connected) await enabledRegister.sendSetBoolAsync(false)
@@ -236,11 +237,6 @@ export default function DashboardWifi(props: DashboardServiceProps) {
                     )}
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography variant="caption">
-                        Known networks ({knownNetworks?.length || 0})
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
                     <Grid container spacing={1} direction="row">
                         <Grid item>
                             <CmdButton
@@ -265,7 +261,13 @@ export default function DashboardWifi(props: DashboardServiceProps) {
                     </Grid>
                 </Grid>
             </Grid>
-            <ConnectDialog open={open} setOpen={setOpen} service={service} />
+            {open && (
+                <ConnectDialog
+                    open={open}
+                    setOpen={setOpen}
+                    service={service}
+                />
+            )}
         </>
     )
 }
