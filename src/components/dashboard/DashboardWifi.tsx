@@ -11,10 +11,6 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    List,
-    ListItem,
-    ListItemSecondaryAction,
-    ListItemText,
     TextField,
     Typography,
 } from "@material-ui/core"
@@ -33,8 +29,7 @@ import {
     WifiEvent,
 } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import JDService from "../../../jacdac-ts/src/jdom/service"
-import { toHex } from "../../../jacdac-ts/src/jdom/utils"
-import RefreshIcon from "@material-ui/icons/Refresh"
+import { toHex, unique } from "../../../jacdac-ts/src/jdom/utils"
 import useInterval from "../hooks/useInterval"
 import useEvent from "../hooks/useEvent"
 import useCommandPipeResults from "../hooks/useCommandPipeResults"
@@ -52,21 +47,31 @@ type ScanResult = [WifiAPFlags, number, number, Uint8Array, string]
 // priority, flags, ssid
 type NetworkResult = [number, number, string]
 
-function ConnectAp(props: { service: JDService; info: ScanResult }) {
-    const { service, info } = props
-    const [flags, rssi, channel, bssid, ssid] = info
+function ConnectAp(props: {
+    service: JDService
+    ssid: string
+    network?: NetworkResult
+    info?: ScanResult
+}) {
+    const { service, info, network, ssid } = props
+    const [flags, rssi, channel] = info || {}
     const [password, setPassword] = useState("")
+    const known = !!network
+    const scanned = !!info
     const passwordId = useId()
     const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value)
     }
-    const handleAddNetwork = async () => {
+    const handleAddNetwork = async () =>
         await service.sendCmdPackedAsync<[string, string]>(
             WifiCmd.AddNetwork,
             [ssid, password || ""],
             true
         )
-    }
+    const handleForgetNetwork = async () =>
+        await service.sendCmdPackedAsync<[string]>(WifiCmd.ForgetNetwork, [
+            ssid,
+        ])
     // hasPassword == requires password
     const hasPassword = !!(flags & WifiAPFlags.HasPassword)
     const connectError =
@@ -74,7 +79,15 @@ function ConnectAp(props: { service: JDService; info: ScanResult }) {
 
     return (
         <Card>
-            <CardHeader title={ssid} />
+            <CardHeader
+                title={ssid}
+                subheader={[
+                    known && "known",
+                    scanned && `RSSI ${rssi}, channel ${channel}`,
+                ]
+                    .filter(s => !!s)
+                    .join(", ")}
+            />
             <CardContent>
                 {hasPassword && (
                     <TextField
@@ -98,6 +111,15 @@ function ConnectAp(props: { service: JDService; info: ScanResult }) {
                 >
                     Connect
                 </CmdButton>
+                {known && (
+                    <CmdButton
+                        variant="contained"
+                        disabled={!!connectError}
+                        onClick={handleForgetNetwork}
+                    >
+                        Forget
+                    </CmdButton>
+                )}
             </CardActions>
         </Card>
     )
@@ -137,6 +159,11 @@ function ConnectDialog(props: {
     // keep scanning
     useInterval(open, scan, 30000, [service])
 
+    const ssids = unique([
+        ...(knownNetworks || []).map(kn => kn[2]),
+        ...(aps || []).map(ap => ap[4]),
+    ])
+
     return (
         <Dialog
             open={open}
@@ -147,9 +174,16 @@ function ConnectDialog(props: {
             <DialogContent>
                 <DialogTitle>Connect to Wifi</DialogTitle>
                 <Grid container spacing={1}>
-                    {aps.map(ap => (
-                        <Grid item xs={12} key={ap[4]}>
-                            <ConnectAp service={service} info={ap} />
+                    {ssids.map(ssid => (
+                        <Grid item xs={12} key={ssid}>
+                            <ConnectAp
+                                service={service}
+                                ssid={ssid}
+                                network={knownNetworks?.find(
+                                    kn => kn[2] === ssid
+                                )}
+                                info={aps?.find(ap => ap[4] === ssid)}
+                            />
                         </Grid>
                     ))}
                 </Grid>
