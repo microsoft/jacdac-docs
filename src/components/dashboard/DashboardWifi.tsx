@@ -50,6 +50,18 @@ type ScanResult = [WifiAPFlags, number, number, Uint8Array, string]
 // priority, flags, ssid
 type NetworkResult = [number, number, string]
 
+function toMAC(buffer: Uint8Array) {
+    const hex = toHex(buffer, ":")
+    return hex
+}
+
+function toIP(buffer: Uint8Array): string {
+    if (!buffer) return undefined
+    if (buffer.length === 4)
+        return `${buffer[0]}.${buffer[1]}.${buffer[2]}.${buffer[3]}`
+    else return toHex(buffer, ".")
+}
+
 function Network(props: {
     service: JDService
     ssid: string
@@ -274,8 +286,8 @@ export default function DashboardWifi(props: DashboardServiceProps) {
                     {(ssid || ip || mac) && (
                         <ChipList>
                             {!!ssid && <Chip label={ssid} />}
-                            {!!ip && <Chip label={`IP: ${toHex(ip)}`} />}
-                            {!!mac && <Chip label={`MAC: ${toHex(mac)}`} />}
+                            {!!ip && <Chip label={`IP: ${toIP(ip)}`} />}
+                            {!!mac && <Chip label={`MAC: ${toMAC(mac)}`} />}
                         </ChipList>
                     )}
                 </Grid>
