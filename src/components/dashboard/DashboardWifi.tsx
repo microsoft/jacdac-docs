@@ -35,14 +35,12 @@ import {
 import JDService from "../../../jacdac-ts/src/jdom/service"
 import { toHex } from "../../../jacdac-ts/src/jdom/utils"
 import RefreshIcon from "@material-ui/icons/Refresh"
-import SwitchWithLabel from "../ui/SwitchWithLabel"
 import useInterval from "../hooks/useInterval"
 import useEvent from "../hooks/useEvent"
 import useCommandPipeResults from "../hooks/useCommandPipeResults"
 import DeleteIcon from "@material-ui/icons/Delete"
 import { Button } from "gatsby-theme-material-ui"
 import ChipList from "../ui/ChipList"
-import useServiceProvider from "../hooks/useServiceProvider"
 import useServiceServer from "../hooks/useServiceServer"
 import WifiServer from "../../../jacdac-ts/src/servers/wifiserver"
 import { Alert, AlertTitle } from "@material-ui/lab"
@@ -71,7 +69,8 @@ function ConnectAp(props: { service: JDService; info: ScanResult }) {
     }
     // hasPassword == requires password
     const hasPassword = !!(flags & WifiAPFlags.HasPassword)
-    const connectError = hasPassword && !password ? "password required" : undefined
+    const connectError =
+        hasPassword && !password ? "password required" : undefined
 
     return (
         <Card>
@@ -157,30 +156,6 @@ function ConnectDialog(props: {
     )
 }
 
-function NetworkItem(props: {
-    currentSsid: string
-    service: JDService
-    priority: number
-    flags: WifiAPFlags
-    ssid: string
-}) {
-    const { currentSsid, service, priority, flags, ssid } = props
-    const handleDelete = async () =>
-        await service.sendCmdPackedAsync(WifiCmd.ForgetNetwork, [ssid])
-    return (
-        <ListItem selected={currentSsid === ssid}>
-            <ListItemText primary={ssid} secondary={priority} />
-            <ListItemSecondaryAction>
-                <CmdButton
-                    onClick={handleDelete}
-                    icon={<DeleteIcon />}
-                    title="delete"
-                />
-            </ListItemSecondaryAction>
-        </ListItem>
-    )
-}
-
 export default function DashboardWifi(props: DashboardServiceProps) {
     const { service } = props
     const [open, setOpen] = useState(false)
@@ -215,8 +190,6 @@ export default function DashboardWifi(props: DashboardServiceProps) {
         else await service.sendCmdAsync(WifiCmd.Reconnect, undefined, true)
     }
     const handleConfigure = () => setOpen(true)
-    const handleForgetAll = async () =>
-        await service.sendCmdAsync(WifiCmd.ForgetAllNetworks, undefined, true)
 
     // force register refreshs on various events
     const refreshRegisters = () => {
@@ -267,20 +240,6 @@ export default function DashboardWifi(props: DashboardServiceProps) {
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    <List dense={true}>
-                        {knownNetworks?.map(([priority, flags, nssid]) => (
-                            <NetworkItem
-                                currentSsid={ssid}
-                                service={service}
-                                key={nssid}
-                                priority={priority}
-                                flags={flags}
-                                ssid={nssid}
-                            />
-                        ))}
-                    </List>
-                </Grid>
-                <Grid item xs={12}>
                     <Grid container spacing={1} direction="row">
                         <Grid item>
                             <CmdButton
@@ -301,17 +260,6 @@ export default function DashboardWifi(props: DashboardServiceProps) {
                             >
                                 Configure
                             </Button>
-                        </Grid>
-                        <Grid item>
-                            <CmdButton
-                                variant="outlined"
-                                trackName="dashboard.wifi.forgetall"
-                                title="forget all networks"
-                                icon={<DeleteIcon />}
-                                onClick={handleForgetAll}
-                            >
-                                Forget all
-                            </CmdButton>
                         </Grid>
                     </Grid>
                 </Grid>
