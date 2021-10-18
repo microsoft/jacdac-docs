@@ -110,6 +110,8 @@ function ConnectDialog(props: {
 }) {
     const { open, setOpen, service } = props
     const handleClose = () => setOpen(false)
+    const handleForgetAll = async () =>
+        service.sendCmdAsync(WifiCmd.ForgetAllNetworks)
     const scan = () => service.sendCmdAsync(WifiCmd.Scan)
 
     // grad scan results
@@ -143,13 +145,12 @@ function ConnectDialog(props: {
             </DialogContent>
             <DialogActions>
                 <CmdButton
-                    trackName="dashboard.wifi.scan"
-                    onClick={scan}
-                    title="scan"
-                    autoRun={true}
-                    icon={<RefreshIcon />}
+                    trackName="dashboard.wifi.forgetall"
+                    onClick={handleForgetAll}
+                    title="forget all"
+                    icon={<DeleteIcon />}
                 >
-                    Scan
+                    Forget all
                 </CmdButton>
             </DialogActions>
         </Dialog>
