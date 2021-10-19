@@ -9,7 +9,6 @@ export default function WebSerialConsoleButton() {
     const { setError } = useContext(AppContext)
     const [port, setPort] = useState<SerialPort>()
     const connected = !!port
-    const { usbProductId } = port?.getInfo() || {}
 
     // clean up always
     useEffect(
@@ -72,7 +71,7 @@ export default function WebSerialConsoleButton() {
         <IconButtonWithTooltip
             onClick={handleRequestPort}
             color={connected ? "primary" : "default"}
-            title={connected ? `connected to ${usbProductId}` : "disconnected"}
+            title={connected ? `connected to serial` : "disconnected"}
         >
             <TransportIcon type="serial" />
         </IconButtonWithTooltip>
