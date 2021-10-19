@@ -2,9 +2,9 @@ import React, { lazy } from "react"
 import Suspense from "../../components/ui/Suspense"
 
 const WebSerialConsoleButton = lazy(
-    () => import("../../components/ui/WebSerialConsoleButton")
+    () => import("../../components/console/WebSerialConsoleButton")
 )
-const ConsoleLog = lazy(() => import("../../components/ui/ConsoleLog"))
+const ConsoleLog = lazy(() => import("../../components/console/ConsoleLog"))
 
 export default function Console() {
     return (

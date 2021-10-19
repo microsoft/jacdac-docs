@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react"
 import { Console, Hook, Unhook } from "console-feed"
-import DarkModeContext from "../../components/ui/DarkModeContext"
+import DarkModeContext from "../ui/DarkModeContext"
 import { createStyles, makeStyles } from "@material-ui/core"
 
 export type Methods =
