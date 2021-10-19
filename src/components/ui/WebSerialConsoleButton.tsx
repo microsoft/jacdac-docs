@@ -44,14 +44,12 @@ export default function WebSerialConsoleButton() {
             let lastChunk = ""
             const appendStream = new WritableStream<string>({
                 write(newChunk) {
-                    const chunk = lastChunk + newChunk
-                    const i = chunk.lastIndexOf("\n")
-                    if (i > -1) {
-                        lastChunk = chunk.slice(0, i)
-                        console.log(chunk.slice(i + 1))
-                    } else {
-                        lastChunk = chunk
-                    }
+                    const chunk =
+                        // eslint-disable-next-line no-control-regex
+                        (lastChunk + newChunk).replace(/\x1b\[\d+(;\d+)?m/g, "")
+                    const lines = chunk.split("\n")
+                    lastChunk = lines.pop()
+                    lines.filter(l => !!l).forEach(line => console.log(line))
                 },
             })
             port.readable
