@@ -1,10 +1,8 @@
 import React, { useEffect, useContext } from "react"
 import { Console, Hook, Unhook } from "console-feed"
-import DarkModeContext from "../ui/DarkModeContext"
 import ConsoleContext from "./ConsoleContext"
 
 export default function ConsoleLog() {
-    const { darkMode } = useContext(DarkModeContext)
     const { logs, appendLog } = useContext(ConsoleContext)
 
     useEffect(() => {
@@ -21,7 +19,7 @@ export default function ConsoleLog() {
             <Console
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 logs={logs as any[]}
-                variant={darkMode}
+                variant="dark"
                 logGrouping={true}
             />
         </div>

@@ -4,7 +4,8 @@ import ImportButton from "../ImportButton"
 import ConsoleContext from "./ConsoleContext"
 
 export default function ConsoleImportSourceMapButton() {
-    const { sourceMap, setSourceMap } = useContext(ConsoleContext)
+    const { setSourceMap } = useContext(ConsoleContext)
+    const { enqueueSnackbar } = useContext(AppContext)
     const { setError } = useContext(AppContext)
 
     const handleFilesUploaded = async (files: File[]) => {
@@ -12,6 +13,7 @@ export default function ConsoleImportSourceMapButton() {
         const text = await file.text()
         try {
             setSourceMap(JSON.parse(text))
+            enqueueSnackbar("source map loaded", "success")
         } catch (e) {
             setError(e)
         }
@@ -22,8 +24,8 @@ export default function ConsoleImportSourceMapButton() {
             text="source map"
             onFilesUploaded={handleFilesUploaded}
             filesLimit={1}
-            icon={!sourceMap}
             acceptedFiles={[".srcmap"]}
+            icon={true}
         />
     )
 }

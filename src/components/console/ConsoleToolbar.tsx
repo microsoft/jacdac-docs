@@ -15,11 +15,13 @@ function ClearButton() {
 }
 
 export default function ConsoleToolbar() {
+    const { sourceMap } = useContext(ConsoleContext)
     return (
         <>
             <ConsoleSerialButton />
             <ConsoleImportSourceMapButton />
             <ClearButton />
+            {!!sourceMap && "source map loaded"}
         </>
     )
 }
