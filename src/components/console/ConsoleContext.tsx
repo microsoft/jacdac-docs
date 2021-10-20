@@ -1,4 +1,5 @@
 import React, { createContext, useState } from "react"
+import useConsoleSerial from "./useConsoleSerial"
 
 export type Methods =
     | "log"
@@ -29,6 +30,10 @@ export interface ConsoleProps {
     setFilter: (filter: Methods[]) => void
     searchKeywords?: string
     setSearchKeywords: (kw: string) => void
+
+    connected?: boolean
+    connect: () => Promise<void>
+    disconnect: () => Promise<void>
 }
 
 const ConsoleContext = createContext<ConsoleProps>({
@@ -38,19 +43,30 @@ const ConsoleContext = createContext<ConsoleProps>({
     setSourceMap: () => {},
     setFilter: () => {},
     setSearchKeywords: () => {},
+    connect: async () => {},
+    disconnect: async () => {},
 })
 ConsoleContext.displayName = "console"
 
 export default ConsoleContext
+const MAX_MESSAGES = 5000
+const MAX_MESSAGES_SPILL = 500
 
 // eslint-disable-next-line react/prop-types
 export const ConsoleProvider = ({ children }) => {
     const [filter, setFilter] = useState<Methods[]>()
     const [searchKeywords, setSearchKeywords] = useState<string>()
     const [logs, setLogs] = useState([])
-    const [sourceMap, setSourceMap] = useState<Record<string, number[]>>()
+    const [sourceMap, setSourceMap] = useState<SourceMap>()
+    const { connected, connect, disconnect } = useConsoleSerial(sourceMap)
 
-    const appendLog = log => setLogs(currLogs => [...currLogs, log])
+    const appendLog = log =>
+        setLogs(currLogs => [
+            ...(currLogs.length > MAX_MESSAGES
+                ? currLogs.slice(-MAX_MESSAGES_SPILL)
+                : currLogs),
+            log,
+        ])
     const clear = () => setLogs([])
 
     return (
@@ -65,6 +81,9 @@ export const ConsoleProvider = ({ children }) => {
                 setFilter,
                 searchKeywords,
                 setSearchKeywords,
+                connected,
+                connect,
+                disconnect,
             }}
         >
             {children}

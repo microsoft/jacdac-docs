@@ -17,6 +17,6 @@ export default function ConsoleLog() {
     }, [])
 
     return (
-        <Console logs={logs as any[]} variant={darkMode} logGrouping={true} />
+        <Console logs={logs as any[]} variant={darkMode == "dark" ? "light" : "dark"} logGrouping={true} />
     )
 }

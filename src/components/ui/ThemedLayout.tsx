@@ -35,8 +35,8 @@ export default function ThemedLayout(props: {
                                             <HostedSimulatorsProvider>
                                                 <ServiceManagerProvider>
                                                     <PacketsProvider>
-                                                        <ConsoleProvider>
-                                                            <AppProvider>
+                                                        <AppProvider>
+                                                            <ConsoleProvider>
                                                                 <MakeCodeSnippetProvider>
                                                                     <CssBaseline />
                                                                     <Helmet>
@@ -57,8 +57,8 @@ export default function ThemedLayout(props: {
                                                                     </Helmet>
                                                                     {children}
                                                                 </MakeCodeSnippetProvider>
-                                                            </AppProvider>
-                                                        </ConsoleProvider>
+                                                            </ConsoleProvider>
+                                                        </AppProvider>
                                                     </PacketsProvider>
                                                 </ServiceManagerProvider>
                                             </HostedSimulatorsProvider>
