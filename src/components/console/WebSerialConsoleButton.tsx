@@ -133,7 +133,7 @@ export default function WebSerialConsoleButton() {
                 text="source map"
                 onFilesUploaded={handleFilesUploaded}
                 filesLimit={1}
-                acceptedFiles={["application/json"]}
+                acceptedFiles={[".srcmap"]}
             />
         </>
     )
