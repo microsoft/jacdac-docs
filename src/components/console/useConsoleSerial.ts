@@ -79,13 +79,27 @@ export default function useConsoleSerial(sourceMap: SourceMap) {
                     lastChunk = lines.pop()
                     lines
                         .filter(l => !!l)
-                        .forEach(line =>
-                            console.log(
-                                sourceMap
-                                    ? expandStackTrace(sourceMap, line)
-                                    : line
-                            )
+                        .map(line =>
+                            sourceMap ? expandStackTrace(sourceMap, line) : line
                         )
+                        .forEach(line => {
+                            const m = /^\s*(W|I)\s+\(\d+\)\s*/.exec(line)
+                            const level = m?.[1]
+                            switch (level) {
+                                case "W":
+                                    console.warn(line.slice(m[0].length))
+                                    break
+                                case "I":
+                                    console.info(line.slice(m[0].length))
+                                    break
+                                case "E":
+                                    console.error(line.slice(m[0].length))
+                                    break
+                                default:
+                                    console.log(line)
+                                    break
+                            }
+                        })
                 },
             })
             port.readable
