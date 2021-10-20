@@ -1256,6 +1256,13 @@
   resolved "https://registry.yarnpkg.com/@blockly/theme-modern/-/theme-modern-2.1.24.tgz#bb2b2a9b8fc9cc7f71a70e9c68d08897467ecdb5"
   integrity sha512-glTi5qhHr+S87S1skWG8Sre+DYeSIBG3j+YBbwwRX9k3zYtGO+W7sOdJ9DsBJj8NVukPpV1RhQhu5rt93Pp2rw==
 
+"@brianmcallister/react-auto-scroll@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@brianmcallister/react-auto-scroll/-/react-auto-scroll-1.1.0.tgz#4b306c5d9e90c2cae575956dac0546beccab3ffc"
+  integrity sha512-2oMdyFbm73nPHwalHNTUEOr/KmuXPxqWhgOGQG7vgIkldExK2ibw7QycjNoNpA+XYD7wDI/BsGXO71A720jCFg==
+  dependencies:
+    classnames "^2"
+
 "@chevrotain/types@^9.0.2":
   version "9.0.2"
   resolved "https://registry.yarnpkg.com/@chevrotain/types/-/types-9.0.2.tgz#477bb3b973b91ff47377399d1e9f4410be6c0141"
@@ -4753,7 +4760,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.6:
+classnames@^2, classnames@^2.2.6:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.1.tgz#dfcfa3891e306ec1dad105d0e88f4417b8535e8e"
   integrity sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==

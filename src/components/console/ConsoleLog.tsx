@@ -1,9 +1,21 @@
 import React, { useEffect, useContext } from "react"
 import { Console, Hook, Unhook } from "console-feed"
 import ConsoleContext from "./ConsoleContext"
+import AutoScroll from "@brianmcallister/react-auto-scroll"
+import { createStyles, makeStyles } from "@material-ui/core"
+
+const useStyles = makeStyles(() =>
+    createStyles({
+        root: {
+            backgroundColor: "#242424",
+            height: "calc(100vh - 7.05rem)",
+        },
+    })
+)
 
 export default function ConsoleLog() {
     const { logs, appendLog } = useContext(ConsoleContext)
+    const classes = useStyles()
 
     useEffect(() => {
         const hooked =
@@ -15,13 +27,17 @@ export default function ConsoleLog() {
     }, [])
 
     return (
-        <div style={{ backgroundColor: "#242424" }}>
+        <AutoScroll
+            className={classes.root}
+            showOption={false}
+            height={"calc(100vh - 7.05rem)" as any as number}
+        >
             <Console
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 logs={logs as any[]}
                 variant="dark"
                 logGrouping={true}
             />
-        </div>
+        </AutoScroll>
     )
 }
