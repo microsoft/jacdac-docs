@@ -17,6 +17,13 @@ export default function ConsoleLog() {
     }, [])
 
     return (
-        <Console logs={logs as any[]} variant={darkMode == "dark" ? "light" : "dark"} logGrouping={true} />
+        <div style={{ backgroundColor: "#242424" }}>
+            <Console
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                logs={logs as any[]}
+                variant={darkMode}
+                logGrouping={true}
+            />
+        </div>
     )
 }
