@@ -1,8 +1,8 @@
 import React, { useEffect, useContext } from "react"
 import { Console, Hook, Unhook } from "console-feed"
 import ConsoleContext from "./ConsoleContext"
-import AutoScroll from "@brianmcallister/react-auto-scroll"
 import { createStyles, makeStyles } from "@material-ui/core"
+import AutoScroll from "../ui/AutoScroll"
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -27,11 +27,7 @@ export default function ConsoleLog() {
     }, [])
 
     return (
-        <AutoScroll
-            className={classes.root}
-            showOption={false}
-            height={"calc(100vh - 7.05rem)" as any as number}
-        >
+        <AutoScroll className={classes.root} height="calc(100vh - 7.05rem)">
             <Console
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 logs={logs as any[]}
