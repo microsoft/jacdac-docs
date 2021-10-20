@@ -1,8 +1,8 @@
 import React, { lazy } from "react"
 import Suspense from "../../components/ui/Suspense"
 
-const WebSerialConsoleButton = lazy(
-    () => import("../../components/console/WebSerialConsoleButton")
+const ConsoleToolbar = lazy(
+    () => import("../../components/console/ConsoleToolbar")
 )
 const ConsoleLog = lazy(() => import("../../components/console/ConsoleLog"))
 
@@ -12,7 +12,7 @@ export default function Console() {
             <h1>
                 Console
                 <Suspense>
-                    <WebSerialConsoleButton />
+                    <ConsoleToolbar />
                 </Suspense>
             </h1>
             <Suspense>

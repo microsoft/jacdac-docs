@@ -1,68 +1,22 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useEffect, useContext } from "react"
 import { Console, Hook, Unhook } from "console-feed"
 import DarkModeContext from "../ui/DarkModeContext"
-import { createStyles, makeStyles } from "@material-ui/core"
+import ConsoleContext from "./ConsoleContext"
 
-export type Methods =
-    | "log"
-    | "debug"
-    | "info"
-    | "warn"
-    | "error"
-    | "table"
-    | "clear"
-    | "time"
-    | "timeEnd"
-    | "count"
-    | "assert"
-    | "command"
-    | "result"
-
-const useStyles = makeStyles(() =>
-    createStyles({
-        root: {
-            backgroundColor: "#000",
-            overflowY: "auto",
-            maxHeight: "100vh",
-        },
-    })
-)
-
-/**
- * SSR only log view, delay load!
- * @param props
- * @returns
- */
-export default function ConsoleLog(props: {
-    filter?: Methods[]
-    searchKeywords?: string
-}) {
-    const { ...rest } = props
+export default function ConsoleLog() {
     const { darkMode } = useContext(DarkModeContext)
-    const classes = useStyles()
-    const [logs, setLogs] = useState([])
+    const { logs, appendLog } = useContext(ConsoleContext)
 
     useEffect(() => {
         const hooked =
             typeof window !== "undefined" &&
-            Hook(
-                window.console,
-                log => setLogs(currLogs => [...currLogs, log]),
-                false
-            )
+            Hook(window.console, appendLog, false)
         return () => {
             hooked && Unhook(hooked)
         }
     }, [])
 
     return (
-        <div className={classes.root}>
-            <Console
-                logs={logs}
-                variant={darkMode}
-                logGrouping={true}
-                {...rest}
-            />
-        </div>
+        <Console logs={logs as any[]} variant={darkMode} logGrouping={true} />
     )
 }

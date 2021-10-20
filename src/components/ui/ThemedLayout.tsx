@@ -14,6 +14,7 @@ import { WebAudioProvider } from "./WebAudioContext"
 import { FileSystemProvider } from "../FileSystemContext"
 import { AppInsightsErrorBoundary } from "../hooks/useAnalytics"
 import { HostedSimulatorsProvider } from "../HostedSimulatorsContext"
+import { ConsoleProvider } from "../console/ConsoleContext"
 
 export default function ThemedLayout(props: {
     theme: Theme
@@ -34,28 +35,30 @@ export default function ThemedLayout(props: {
                                             <HostedSimulatorsProvider>
                                                 <ServiceManagerProvider>
                                                     <PacketsProvider>
-                                                        <AppProvider>
-                                                            <MakeCodeSnippetProvider>
-                                                                <CssBaseline />
-                                                                <Helmet>
-                                                                    <link
-                                                                        rel="preconnect"
-                                                                        href="https://fonts.googleapis.com"
-                                                                        crossOrigin="anonymous"
-                                                                    />
-                                                                    <link
-                                                                        rel="preconnect"
-                                                                        href="https://raw.githubusercontent.com"
-                                                                        crossOrigin="anonymous"
-                                                                    />
-                                                                    <meta
-                                                                        name="viewport"
-                                                                        content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
-                                                                    />
-                                                                </Helmet>
-                                                                {children}
-                                                            </MakeCodeSnippetProvider>
-                                                        </AppProvider>
+                                                        <ConsoleProvider>
+                                                            <AppProvider>
+                                                                <MakeCodeSnippetProvider>
+                                                                    <CssBaseline />
+                                                                    <Helmet>
+                                                                        <link
+                                                                            rel="preconnect"
+                                                                            href="https://fonts.googleapis.com"
+                                                                            crossOrigin="anonymous"
+                                                                        />
+                                                                        <link
+                                                                            rel="preconnect"
+                                                                            href="https://raw.githubusercontent.com"
+                                                                            crossOrigin="anonymous"
+                                                                        />
+                                                                        <meta
+                                                                            name="viewport"
+                                                                            content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
+                                                                        />
+                                                                    </Helmet>
+                                                                    {children}
+                                                                </MakeCodeSnippetProvider>
+                                                            </AppProvider>
+                                                        </ConsoleProvider>
                                                     </PacketsProvider>
                                                 </ServiceManagerProvider>
                                             </HostedSimulatorsProvider>

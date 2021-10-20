@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import AppContext from "../AppContext"
 import { isWebSerialSupported } from "../../../jacdac-ts/src/jdom/transport/webserial"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import TransportIcon from "../icons/TransportIcon"
-import ImportButton from "../ImportButton"
-import { Grid } from "@material-ui/core"
-import CheckIcon from "@material-ui/icons/Check"
+import ConsoleContext from "./ConsoleContext"
+import { IconButtonProps } from "@material-ui/core"
 
 function resolveAddr(sourceMap: Record<string, number[]>, addr: number) {
     const offsets = [-2, -4, 0]
@@ -46,11 +45,12 @@ function expandStackTrace(
     })
 }
 
-export default function WebSerialConsoleButton() {
+export default function ConsoleSerialButton(props: IconButtonProps) {
+    const { ...rest } = props
     const supported = isWebSerialSupported()
+    const { sourceMap } = useContext(ConsoleContext)
     const { setError } = useContext(AppContext)
     const [port, setPort] = useState<SerialPort>()
-    const [sourceMap, setSourceMap] = useState<Record<string, number[]>>()
     const connected = !!port
 
     // clean up always
@@ -115,33 +115,15 @@ export default function WebSerialConsoleButton() {
         }
     }
 
-    const handleFilesUploaded = async (files: File[]) => {
-        const file = files[0]
-        const text = await file.text()
-        setSourceMap(JSON.parse(text))
-    }
-
     if (!supported) return null
     return (
-        <Grid container spacing={1}>
-            <Grid item>
-                <IconButtonWithTooltip
-                    onClick={handleRequestPort}
-                    color={connected ? "primary" : "default"}
-                    title={connected ? `connected to serial` : "disconnected"}
-                >
-                    <TransportIcon type="serial" />
-                </IconButtonWithTooltip>
-            </Grid>
-            <Grid item>
-                <ImportButton
-                    text="source map"
-                    onFilesUploaded={handleFilesUploaded}
-                    filesLimit={1}
-                    icon={true}
-                    acceptedFiles={[".srcmap"]}
-                />
-            </Grid>
-        </Grid>
+        <IconButtonWithTooltip
+            onClick={handleRequestPort}
+            color={connected ? "primary" : "default"}
+            title={connected ? `connected to serial` : "disconnected"}
+            {...rest}
+        >
+            <TransportIcon type="serial" />
+        </IconButtonWithTooltip>
     )
 }
