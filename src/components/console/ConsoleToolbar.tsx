@@ -34,29 +34,6 @@ function SearchKeywordField() {
     )
 }
 
-function FilterSelect() {
-    const { filter = [], setFilter } = useContext(ConsoleContext)
-    const handleChange = (
-        ev: ChangeEvent<{ name?: string; value: unknown }>
-    ) => {
-        const value = ev.target.value as Methods
-        const newFilter = filter.slice(0)
-        const i = newFilter.indexOf(value)
-        if (i > -1) newFilter.splice(i, 1)
-        else newFilter.push(value)
-        setFilter(newFilter)
-    }
-    const value = "Level"
-    return (
-        <Select onChange={handleChange} value={value}>
-            <MenuItem value="debug">Verbose</MenuItem>
-            <MenuItem value="info">Info</MenuItem>
-            <MenuItem value="warning">Warnings</MenuItem>
-            <MenuItem value="error">Errors</MenuItem>
-        </Select>
-    )
-}
-
 export default function ConsoleToolbar() {
     const { sourceMap } = useContext(ConsoleContext)
     return (
@@ -64,7 +41,6 @@ export default function ConsoleToolbar() {
             <ConsoleSerialButton />
             <ClearButton />
             <SearchKeywordField />
-            <FilterSelect />
             <ConsoleImportSourceMapButton />
             {!!sourceMap && "source map loaded"}
         </>
