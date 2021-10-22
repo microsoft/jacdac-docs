@@ -1,4 +1,3 @@
-import { Button } from "gatsby-material-ui-components"
 import { useSnackbar } from "notistack"
 import React, {
     createContext,
@@ -52,6 +51,8 @@ export interface AppProps {
     toggleShowConnectTransportDialog: () => void
     selectedPacket: Packet
     setSelectedPacket: (pkt: Packet) => void
+    showWebCam: boolean
+    setShowWebCam: (newValue: boolean) => void
 }
 
 const AppContext = createContext<AppProps>({
@@ -68,6 +69,8 @@ const AppContext = createContext<AppProps>({
     toggleShowConnectTransportDialog: () => {},
     selectedPacket: undefined,
     setSelectedPacket: () => {},
+    showWebCam: false,
+    setShowWebCam: () => {},
 })
 AppContext.displayName = "app"
 
@@ -87,6 +90,7 @@ export const AppProvider = ({ children }) => {
         useState<JDService>(undefined)
     const { trackError } = useAnalytics()
     const [selectedPacket, setSelectedPacket] = useState<Packet>(undefined)
+    const [showWebCam, setShowWebCam] = useState(false)
 
     const { enqueueSnackbar: _enqueueSnackbar } = useSnackbar()
 
@@ -166,6 +170,8 @@ export const AppProvider = ({ children }) => {
                 toggleShowConnectTransportDialog,
                 selectedPacket,
                 setSelectedPacket,
+                showWebCam,
+                setShowWebCam,
             }}
         >
             {children}
