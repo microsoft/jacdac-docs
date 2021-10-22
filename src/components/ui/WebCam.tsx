@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import {
     Card,
-    CardContent,
     CardHeader,
+    CardMedia,
     createStyles,
     FormControl,
     makeStyles,
@@ -192,7 +192,7 @@ export default function WebCam() {
                                 </>
                             }
                         />
-                        <CardContent>
+                        <CardMedia>
                             <div className="hostedcontainer">
                                 <video
                                     autoPlay
@@ -201,7 +201,7 @@ export default function WebCam() {
                                     title="webcam"
                                 />
                             </div>
-                        </CardContent>
+                        </CardMedia>
                     </Card>
                 </span>
             </Draggable>
