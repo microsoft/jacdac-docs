@@ -27,15 +27,6 @@ import CloseIcon from "@material-ui/icons/Close"
 import AppContext from "../AppContext"
 const Draggable = lazy(() => import("react-draggable"))
 
-export function isMediaDevicesSupported(): boolean {
-    return (
-        typeof navigator !== undefined &&
-        !!navigator.mediaDevices &&
-        !!navigator.mediaDevices.enumerateDevices &&
-        !!navigator.mediaDevices.getUserMedia
-    )
-}
-
 const useStyles = makeStyles(() =>
     createStyles({
         cardContainer: {

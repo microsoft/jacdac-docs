@@ -154,7 +154,7 @@ export default function ToolsDrawer() {
             to: "/tools/collector/",
             icon: <FiberManualRecordIcon />,
         },
-        {
+        UIFlags.webcam && {
             text: showWebCam ? "Stop WebCam" : "Start WebCam",
             icon: <VideoCallIcon />,
             action: () => setShowWebCam(!showWebCam),
