@@ -39,7 +39,7 @@ export function isMediaDevicesSupported(): boolean {
 const useStyles = makeStyles(() =>
     createStyles({
         cardContainer: {
-            zIndex: 1100,
+            zIndex: 1101,
             position: "absolute",
             left: "5rem",
             top: "5rem",
@@ -47,9 +47,9 @@ const useStyles = makeStyles(() =>
         card: {
             "& .hostedcontainer": {
                 position: "relative",
-                width: "20rem",
+                width: "30vw",
             },
-            "& iframe": {
+            "& video": {
                 border: "none",
                 position: "relative",
                 width: "100%",
@@ -58,6 +58,15 @@ const useStyles = makeStyles(() =>
         },
     })
 )
+
+export async function requestVideoStream() {
+    // first ask for permission from ther user so that
+    // labels are populated in enumerateDevices
+    return await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: true,
+    })
+}
 
 export default function WebCam() {
     const { setShowWebCam } = useContext(AppContext)
@@ -126,10 +135,6 @@ export default function WebCam() {
     useEffectAsync(async () => {
         // first ask for permission from ther user so that
         // labels are populated in enumerateDevices
-        await navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: true,
-        })
 
         // enumerate devices
         const devices = await navigator.mediaDevices.enumerateDevices()
@@ -180,12 +185,14 @@ export default function WebCam() {
                             action={
                                 <>
                                     <IconButtonWithTooltip
+                                        size="small"
                                         onClick={handleSettings}
                                         title="Settings"
                                     >
                                         <SettingsIcon />
                                     </IconButtonWithTooltip>
                                     <IconButtonWithTooltip
+                                        size="small"
                                         onClick={handleClose}
                                         title="Close"
                                     >
@@ -195,12 +202,14 @@ export default function WebCam() {
                             }
                         />
                         <CardContent>
-                            <video
-                                autoPlay
-                                playsInline
-                                ref={videoRef}
-                                title="webcam"
-                            />
+                            <div className="hostedcontainer">
+                                <video
+                                    autoPlay
+                                    playsInline
+                                    ref={videoRef}
+                                    title="webcam"
+                                />
+                            </div>
                         </CardContent>
                     </Card>
                 </span>
