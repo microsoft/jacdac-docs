@@ -4,7 +4,6 @@ import {
     Button,
     Card,
     CardActions,
-    CardContent,
     CardHeader,
     CardMedia,
     Grid,
@@ -14,27 +13,35 @@ import { convertToSTL } from "../blockly/dsl/workers/cad.proxy"
 import type {
     EnclosureModel,
     EnclosureOptions,
-    EnclosureFile,
 } from "../../workers/cad/dist/node_modules/enclosurecad"
 import useGridBreakpoints from "../useGridBreakpoints"
+import useMounted from "../hooks/useMounted"
 
 const ModelViewer = lazy(() => import("../home/models/ModelViewer"))
 const STLModel = lazy(() => import("../home/models/STLModel"))
 
 function STLModelCard(props: { name: string; url: string; color: string }) {
     const { name, url, color } = props
+    const fn = `${name}.stl`
     return (
         <Card>
-            <CardHeader title={name} />
+            <CardHeader title={fn} />
             <CardMedia>
                 <Suspense>
-                    <ModelViewer responsive={true}>
+                    <ModelViewer
+                        responsive={true}
+                        style={{
+                            position: "relative",
+                            height: "20rem",
+                            width: "100%",
+                        }}
+                    >
                         <STLModel url={url} color={color} />
                     </ModelViewer>
                 </Suspense>
             </CardMedia>
             <CardActions>
-                <Button href={url} variant="outlined" download={`${name}.stl`}>
+                <Button href={url} variant="outlined" download={fn}>
                     Download STL
                 </Button>
             </CardActions>
@@ -51,6 +58,7 @@ export default function EnclosureGenerator(props: {
     const [working, setWorking] = useState(false)
     const [files, setFiles] = useState<{ name: string; url: string }[]>()
     const gridBreakpoints = useGridBreakpoints(files?.length)
+    const mounted = useMounted()
 
     const updateUrl = async () => {
         try {
@@ -60,9 +68,10 @@ export default function EnclosureGenerator(props: {
                 name,
                 url: URL.createObjectURL(blob),
             }))
+            if (!mounted()) return
             setFiles(newFiles)
         } finally {
-            setWorking(false)
+            if (mounted()) setWorking(false)
         }
     }
     useEffect(
@@ -80,7 +89,7 @@ export default function EnclosureGenerator(props: {
                     color="primary"
                     disabled={working}
                 >
-                    Refresh STL
+                    Generate STL
                 </Button>
             </Grid>
             {files?.map(file => (
