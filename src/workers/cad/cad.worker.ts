@@ -11,7 +11,7 @@ export interface CadRequest extends CadMessage {
     type: string
 }
 
-export interface CadConvertRequest extends CadMessage {
+export interface CadConvertRequest extends CadRequest {
     type: "convert"
     model: EnclosureModel
     options: EnclosureOptions

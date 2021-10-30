@@ -13,7 +13,7 @@ export async function convertToSTL(
     model: EnclosureModel,
     options?: EnclosureOptions
 ): Promise<Blob> {
-    const worker = workerProxy("csv")
+    const worker = workerProxy("data")
     const res = await worker.postMessage<CadConvertRequest, CadConvertResponse>(
         {
             worker: "cad",
