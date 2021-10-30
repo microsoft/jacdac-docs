@@ -7,7 +7,10 @@ export default function STLModel(props: { url: string }) {
     const obj = useLoader(STLLoader, url)
     return (
         <Suspense fallback={null}>
-            <primitive object={obj.scene} />
+            <mesh>
+                <primitive object={obj} attach="geometry" />
+                <meshStandardMaterial color={"green"} />
+            </mesh>
         </Suspense>
     )
 }

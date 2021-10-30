@@ -356,21 +356,22 @@ export default function EnclosureGenerator() {
     const module = useMemo(() => modules[0], [])
     const [url, setUrl] = useState<string>("")
     const geometry = useMemo(() => {
+        console.log(`compute stl`)
         const geometry = convert(module)
         return geometry
     }, [module])
 
     useEffect(() => {
-        const geometry = convert(module)
+        console.log(`render stl`)
         const rawData = stlSerializer.serialize(
-            { binary: true } as any,
+            { binary: false } as any,
             geometry
         )
         const blob = new Blob(rawData)
         const newUrl = URL.createObjectURL(blob)
         setUrl(newUrl)
         return () => URL.revokeObjectURL(newUrl)
-    })
+    }, [geometry])
     return (
         <Grid container spacing={1}>
             {url && (
