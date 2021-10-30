@@ -1,7 +1,5 @@
 import React, { lazy, useEffect, useMemo, useState } from "react"
 
-import stlSerializer from "@jscad/stl-serializer"
-
 import { Button, Grid } from "@material-ui/core"
 import Suspense from "../ui/Suspense"
 import { convert, EnclosureModel, EnclosureOptions } from "./enclosurecad"
