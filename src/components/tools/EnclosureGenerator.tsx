@@ -42,7 +42,7 @@ export default function EnclosureGenerator(props: {
                             onClick={handleClick}
                             variant="contained"
                             color="primary"
-                            disabled={!working}
+                            disabled={working}
                         >
                             Refresh STL
                         </Button>
