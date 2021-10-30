@@ -14,7 +14,7 @@ export interface CadRequest extends CadMessage {
 export interface CadConvertRequest extends CadRequest {
     type: "convert"
     model: EnclosureModel
-    options: EnclosureOptions
+    options?: EnclosureOptions
 }
 
 export interface CadConvertResponse extends CadMessage {
