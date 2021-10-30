@@ -1,11 +1,13 @@
-import React, { useMemo } from "react"
-import { Button } from "gatsby-theme-material-ui"
+import React, { lazy, useEffect, useMemo, useState } from "react"
 
 import { primitives, transforms, booleans } from "@jscad/modeling"
 const { cuboid, cylinder, roundedCuboid } = primitives
 const { translate, rotateZ } = transforms
 const { union, subtract } = booleans
 import stlSerializer from "@jscad/stl-serializer"
+
+import { Grid } from "@material-ui/core"
+import Suspense from "../ui/Suspense"
 
 const connectorSpecs = {
     jacdac: {
@@ -340,24 +342,49 @@ const convert = m => {
     return model
 }
 
+/*
 const main = () => {
     let x = -modules.reduce((prev, m) => prev + m.box.width, 0) / 2
     return modules.map(m => translate([(x += m.box.width), 0, 0], convert(m)))
 }
+*/
+
+const ModelViewer = lazy(() => import("../home/models/ModelViewer"))
+const STLModel = lazy(() => import("../home/models/STLModel"))
 
 export default function EnclosureGenerator() {
     const module = useMemo(() => modules[0], [])
-    const { url, geometry } = useMemo(() => {
+    const [url, setUrl] = useState<string>("")
+    const geometry = useMemo(() => {
         const geometry = convert(module)
-        const rawData = stlSerializer.serialize({ binary: true }, module)
-        const blob = new Blob(rawData)
-        const url = URL.createObjectURL(blob)
-        return { url, geometry }
+        return geometry
     }, [module])
+
+    useEffect(() => {
+        const geometry = convert(module)
+        const rawData = stlSerializer.serialize(
+            { binary: true } as any,
+            geometry
+        )
+        const blob = new Blob(rawData)
+        const newUrl = URL.createObjectURL(blob)
+        setUrl(newUrl)
+        return () => URL.revokeObjectURL(newUrl)
+    })
     return (
-        <>
-            <Button href={url}>download</Button>
-            <pre>{JSON.stringify(geometry, null, 2)}</pre>
-        </>
+        <Grid container spacing={1}>
+            {url && (
+                <Grid item xs={12}>
+                    <Suspense>
+                        <ModelViewer responsive={true}>
+                            <STLModel url={url} />
+                        </ModelViewer>
+                    </Suspense>
+                </Grid>
+            )}
+            <Grid item>
+                <pre>{JSON.stringify(geometry, null, 2)}</pre>
+            </Grid>
+        </Grid>
     )
 }
