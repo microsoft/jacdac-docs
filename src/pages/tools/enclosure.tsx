@@ -1,6 +1,6 @@
 import React from "react"
-import EnclosureGenerator from "../../components/tools/EnclosureGenerator"
+import EnclosureEditor from "../../components/tools/EnclosureEditor"
 
 export default function Page() {
-    return <EnclosureGenerator />
+    return <EnclosureEditor />
 }
