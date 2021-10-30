@@ -16,6 +16,7 @@ import type {
 } from "../../workers/cad/dist/node_modules/enclosurecad"
 import useGridBreakpoints from "../useGridBreakpoints"
 import useMounted from "../hooks/useMounted"
+import { CircularProgress } from "@material-ui/core"
 
 const ModelViewer = lazy(() => import("../home/models/ModelViewer"))
 const STLModel = lazy(() => import("../home/models/STLModel"))
@@ -42,7 +43,7 @@ function STLModelCard(props: { name: string; url: string; color: string }) {
             </CardMedia>
             <CardActions>
                 <Button href={url} variant="outlined" download={fn}>
-                    Download STL
+                    Download
                 </Button>
             </CardActions>
         </Card>
@@ -88,6 +89,15 @@ export default function EnclosureGenerator(props: {
                     variant="contained"
                     color="primary"
                     disabled={working}
+                    startIcon={
+                        working && (
+                            <CircularProgress
+                                size="1rem"
+                                title="generating STL files"
+                                variant="indeterminate"
+                            />
+                        )
+                    }
                 >
                     Generate STL
                 </Button>
