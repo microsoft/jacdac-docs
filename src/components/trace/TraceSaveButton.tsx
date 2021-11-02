@@ -57,6 +57,7 @@ user-agent: ${typeof window !== undefined && window.navigator.userAgent}
             title="save trace and environment information in a file"
             component="button"
             onClick={saveTrace}
+            underline="hover"
         >
             Save trace
         </Link>

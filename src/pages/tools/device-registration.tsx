@@ -291,7 +291,10 @@ export default function DeviceRegistration() {
             <h1>Device Registration</h1>
             <p>
                 Compose a device from various services, prepare the metadata and
-                register it to the <Link href="/devices/">Devices catalog</Link>
+                register it to the{" "}
+                <Link href="/devices/" underline="hover">
+                    Devices catalog
+                </Link>
                 .
             </p>
             <Grid container direction="row" spacing={2}>
