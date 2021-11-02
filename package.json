@@ -72,7 +72,7 @@
     "gatsby-remark-prismjs": "^5.11.0",
     "gatsby-remark-static-images": "^1.2.1",
     "gatsby-source-filesystem": "^3.14.0",
-    "gatsby-theme-material-ui": "^2.0.1",
+    "gatsby-theme-material-ui": "^5.0.0",
     "gatsby-transformer-csv": "^3.14.0",
     "gatsby-transformer-json": "^3.14.0",
     "gatsby-transformer-plaintext": "^2.0.0",
