@@ -1,7 +1,10 @@
 import React, { ChangeEvent, useEffect, useState } from "react"
 import { BrailleDisplayReg } from "../../../jacdac-ts/src/jdom/constants"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
-import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
+import {
+    useRegisterBoolValue,
+    useRegisterUnpackedValue,
+} from "../../jacdac/useRegisterValue"
 import { Grid, TextField } from "@material-ui/core"
 import LoadingProgress from "../ui/LoadingProgress"
 import useRegister from "../hooks/useRegister"
@@ -11,6 +14,7 @@ import EditIcon from "@material-ui/icons/Edit"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import CharacterScreenWidget from "../widgets/CharacterScreenWidget"
 import { useId } from "react-use-id-hook"
+import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew"
 
 // https://en.wikipedia.org/wiki/Braille_ASCII
 const BRAILE_CHARACTERS = {
@@ -97,10 +101,12 @@ export default function DashboardBrailleDisplay(props: DashboardServiceProps) {
 
     const patternsRegister = useRegister(service, BrailleDisplayReg.Patterns)
     const lengthRegister = useRegister(service, BrailleDisplayReg.Length)
+    const enabledRegister = useRegister(service, BrailleDisplayReg.Enabled)
     const [patterns] = useRegisterUnpackedValue<[string]>(
         patternsRegister,
         props
     )
+    const enabled = useRegisterBoolValue(enabledRegister, props)
     const [length] = useRegisterUnpackedValue<[number]>(lengthRegister, props)
 
     const [edit, setEdit] = useState(false)
@@ -119,6 +125,8 @@ export default function DashboardBrailleDisplay(props: DashboardServiceProps) {
         setFieldMessage("")
         await patternsRegister.sendSetStringAsync("", true)
     }
+    const handleEnabled = async () =>
+        enabledRegister.sendSetBoolAsync(!enabled, true)
     // set first value of message
     useEffect(() => {
         if (!fieldMessage && patterns) setFieldMessage(patterns)
@@ -141,6 +149,7 @@ export default function DashboardBrailleDisplay(props: DashboardServiceProps) {
                                 onChange={handleFieldMessageChange}
                                 multiline={false}
                                 fullWidth={true}
+                                disabled={!enabled}
                             />
                         </Grid>
                         <Grid item>
@@ -158,6 +167,15 @@ export default function DashboardBrailleDisplay(props: DashboardServiceProps) {
                     rows={1}
                     columns={length}
                     message={patterns}
+                    disabled={!enabled}
+                />
+            </Grid>
+            <Grid item>
+                <CmdButton
+                    title={enabled ? "disable display" : "enable display"}
+                    onClick={handleEnabled}
+                    color={enabled ? "primary" : undefined}
+                    icon={<PowerSettingsNewIcon />}
                 />
             </Grid>
             <Grid item>

@@ -1,4 +1,4 @@
-import React, {  } from "react"
+import React from "react"
 import SvgWidget from "../widgets/SvgWidget"
 import { createStyles, makeStyles } from "@material-ui/core"
 import useWidgetTheme from "../widgets/useWidgetTheme"
@@ -18,8 +18,9 @@ export default function CharacterScreenWidget(props: {
     columns: number
     message: string
     rtl?: boolean
+    disabled?: boolean
 }) {
-    const { rows, columns, message, rtl } = props
+    const { rows, columns, message, rtl, disabled } = props
     const classes = useStyles()
     const { textPrimary, background, controlBackground } =
         useWidgetTheme("primary")
@@ -58,7 +59,7 @@ export default function CharacterScreenWidget(props: {
                             textAnchor="middle"
                             fontSize={fs}
                             className={classes.text}
-                            fill={textPrimary}
+                            fill={disabled ? background : textPrimary}
                             aria-label={char}
                         >
                             {char}

@@ -95,6 +95,7 @@ function brailify(s: string) {
 
 export default function DashboardCharacterScreen(props: DashboardServiceProps) {
     const { service } = props
+
     const messageRegister = useRegister(service, CharacterScreenReg.Message)
     const rowsRegister = useRegister(service, CharacterScreenReg.Rows)
     const columnsRegister = useRegister(service, CharacterScreenReg.Columns)
@@ -103,6 +104,11 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
         CharacterScreenReg.TextDirection
     )
     const variantRegister = useRegister(service, CharacterScreenReg.Variant)
+    const brightnessRegister = useRegister(
+        service,
+        CharacterScreenReg.Brightness
+    )
+
     const [edit, setEdit] = useState(false)
     const [message] = useRegisterUnpackedValue<[string]>(messageRegister, props)
     const [rows] = useRegisterUnpackedValue<[number]>(rowsRegister, props)
@@ -115,6 +121,8 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
         variantRegister,
         props
     )
+    const [brightness] = useRegisterUnpackedValue<[number]>(brightnessRegister)
+
     const [fieldMessage, setFieldMessage] = useState(message)
 
     const handleClear = async () => {
@@ -172,6 +180,7 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
                     columns={columns}
                     rtl={rtl}
                     message={cmessage}
+                    disabled={brightness === 0}
                 />
             </Grid>
             <Grid item>
