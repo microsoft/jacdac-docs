@@ -1,11 +1,12 @@
-import React, { ReactNode, useContext } from "react"
-import { Box, Grid, makeStyles, Theme, createStyles } from "@material-ui/core"
+import React, { ReactNode } from "react"
+import { Box, Grid, Theme } from "@mui/material"
+
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
-
-import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
 
 export interface FlattenLayerFieldValue {
     percentParams: number
@@ -82,6 +83,10 @@ export default class FlattenLayerBlockField extends ReactInlineField {
     }
 
     renderInlineField(): ReactNode {
-        return <LayerParameterWidget initFieldValue={this.value} />
+        return (
+            <LayerParameterWidget
+                initFieldValue={this.value as FlattenLayerFieldValue}
+            />
+        )
     }
 }

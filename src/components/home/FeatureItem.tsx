@@ -1,11 +1,6 @@
-import {
-    createStyles,
-    Grid,
-    makeStyles,
-    Typography,
-    Theme,
-    Box,
-} from "@material-ui/core"
+import { Grid, Typography, Theme, Box } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import { Button, Link } from "gatsby-theme-material-ui"
 import React, { ReactNode } from "react"
 import clsx from "clsx"
@@ -21,7 +16,7 @@ export interface FeatureItemProps {
     caption?: string
     buttonText?: string
     centered?: boolean
-    buttonColor?: "primary" | "secondary" | "default"
+    buttonColor?: "primary" | "secondary" | "inherit"
     buttonUrl?: string
     buttonVariant?: "outlined" | "contained" | "link"
     onButtonClick?: () => void
@@ -62,7 +57,7 @@ export default function FeatureItem(props: FeatureItemProps) {
         image,
         centered,
         onButtonClick,
-        hideJacdacIcon
+        hideJacdacIcon,
     } = props
     const classes = useStyles()
     const centeredCls = centered && classes.centered

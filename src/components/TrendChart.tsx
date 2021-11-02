@@ -1,5 +1,7 @@
 import React, { useCallback, useContext, useState } from "react"
-import { makeStyles, createStyles, useTheme } from "@material-ui/core"
+import { useTheme } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
 
 const useStyles = makeStyles(() =>

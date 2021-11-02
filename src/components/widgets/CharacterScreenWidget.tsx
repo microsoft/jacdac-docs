@@ -1,6 +1,7 @@
 import React from "react"
 import SvgWidget from "../widgets/SvgWidget"
-import { createStyles, makeStyles } from "@material-ui/core"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import useWidgetTheme from "../widgets/useWidgetTheme"
 
 const useStyles = makeStyles(() =>

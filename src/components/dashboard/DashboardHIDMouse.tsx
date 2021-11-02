@@ -1,7 +1,9 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { KeyboardEvent, MouseEvent, useRef, useState } from "react"
-import { createStyles, Grid, makeStyles, Typography } from "@material-ui/core"
+import { Grid, Typography } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import {
     HidMouseButton,
     HidMouseButtonEvent,
@@ -14,7 +16,7 @@ import HIDMouseServer, {
     renderHidMouseButtons,
 } from "../../../jacdac-ts/src/servers/hidmouseserver"
 import useChange from "../../jacdac/useChange"
-import MouseIcon from "@material-ui/icons/MouseOutlined"
+import MouseIcon from "@mui/icons-material/MouseOutlined"
 
 const useStyles = makeStyles(theme =>
     createStyles({

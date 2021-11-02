@@ -5,19 +5,19 @@ import {
 } from "../../jacdac-ts/src/jdom/spec"
 import {
     Card,
-    makeStyles,
     CardContent,
     CardActions,
     Typography,
-    createStyles,
     Input,
-} from "@material-ui/core"
+} from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import CheckIcon from "@material-ui/icons/Check"
+import CheckIcon from "@mui/icons-material/Check"
 // tslint:disable-next-line: no-submodule-imports
 import Alert from "./ui/Alert"
 import { Button } from "gatsby-theme-material-ui"
-import { NoSsr } from "@material-ui/core"
+import { NoSsr } from "@mui/material"
 import { useId } from "react-use-id-hook"
 import { cryptoRandomUint32 } from "../../jacdac-ts/src/jdom/random"
 import { toFullHex } from "../../jacdac-ts/src/jdom/utils"

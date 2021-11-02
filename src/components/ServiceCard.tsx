@@ -1,18 +1,17 @@
 import React, { useState } from "react"
 import JDService from "../../jacdac-ts/src/jdom/service"
+import makeStyles from "@mui/styles/makeStyles"
 // tslint:disable-next-line: no-submodule-imports
-import { makeStyles } from "@material-ui/core/styles"
+import Card from "@mui/material/Card"
 // tslint:disable-next-line: no-submodule-imports
-import Card from "@material-ui/core/Card"
+import CardContent from "@mui/material/CardContent"
 // tslint:disable-next-line: no-submodule-imports
-import CardContent from "@material-ui/core/CardContent"
-// tslint:disable-next-line: no-submodule-imports
-import Typography from "@material-ui/core/Typography"
+import Typography from "@mui/material/Typography"
 import { Link } from "gatsby-theme-material-ui"
 import ServiceRegisters from "./ServiceRegisters"
 import ServiceEvents from "./ServiceEvents"
 import { isCommand } from "../../jacdac-ts/src/jdom/spec"
-import { CardActions, List, ListItem } from "@material-ui/core"
+import { CardActions, List, ListItem } from "@mui/material"
 import DeviceCardHeader from "./devices/DeviceCardHeader"
 import { DeviceLostAlert } from "./alert/DeviceLostAlert"
 import CommandInput from "./CommandInput"

@@ -1,12 +1,7 @@
 import React, { useContext } from "react"
-import {
-    ListItem,
-    ListItemIcon,
-    makeStyles,
-    createStyles,
-    ListItemText,
-    Box,
-} from "@material-ui/core"
+import { ListItem, ListItemIcon, ListItemText, Box } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import Packet from "../../jacdac-ts/src/jdom/packet"
 import PacketBadge from "./PacketBadge"
 import AppContext, { DrawerType } from "./AppContext"

@@ -1,4 +1,6 @@
-import { Avatar, createStyles, makeStyles, Theme } from "@material-ui/core"
+import { Avatar, Theme } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import React from "react"
 import { VIRTUAL_DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"

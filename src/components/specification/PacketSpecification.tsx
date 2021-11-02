@@ -7,9 +7,10 @@ import {
 import Alert from "../ui/Alert"
 import React from "react"
 // tslint:disable-next-line: no-submodule-imports
-import Chip from "@material-ui/core/Chip"
+import Chip from "@mui/material/Chip"
 import DeviceList from "../devices/DeviceList"
-import { makeStyles, createStyles } from "@material-ui/core"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import IDChip from "../IDChip"
 import KindChip from "../KindChip"
 import PacketMembersChip from "../PacketMembersChip"

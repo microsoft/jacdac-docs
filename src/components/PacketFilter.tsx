@@ -1,23 +1,13 @@
-import {
-    makeStyles,
-    Theme,
-    createStyles,
-    Paper,
-    InputBase,
-} from "@material-ui/core"
+import { Theme, Paper, InputBase } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import FilterListIcon from "@material-ui/icons/FilterList"
+import FilterListIcon from "@mui/icons-material/FilterList"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import QueryBuilderIcon from "@material-ui/icons/QueryBuilder"
+import QueryBuilderIcon from "@mui/icons-material/QueryBuilder"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import ClearIcon from "@material-ui/icons/Clear"
-import {
-    Box,
-    ListItemIcon,
-    Menu,
-    MenuItem,
-    Typography,
-} from "@material-ui/core"
+import ClearIcon from "@mui/icons-material/Clear"
+import { Box, ListItemIcon, Menu, MenuItem, Typography } from "@mui/material"
 import React, { useContext, useEffect, useState } from "react"
 import KindIcon, { allKinds, kindName } from "./KindIcon"
 import PacketsContext from "./PacketsContext"
@@ -29,7 +19,7 @@ import { arrayConcatMany, uniqueMap } from "../../jacdac-ts/src/jdom/utils"
 import TraceTimeFilterRangeSlider from "./trace/TraceTimeFilterRangeSlider"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import GroupWorkIcon from "@material-ui/icons/GroupWork"
+import GroupWorkIcon from "@mui/icons-material/GroupWork"
 import {
     isCommand,
     isEvent,

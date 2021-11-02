@@ -6,16 +6,17 @@ import {
     Select,
     TextField,
     Tooltip,
-    makeStyles,
     Theme,
-    createStyles,
-} from "@material-ui/core"
+} from "@mui/material"
+
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
-import WorkspaceContext, { resolveBlockServices } from "../../WorkspaceContext"
+import WorkspaceContext from "../../WorkspaceContext"
 
 import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"

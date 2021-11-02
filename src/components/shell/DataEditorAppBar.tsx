@@ -1,14 +1,17 @@
 import React, { useContext } from "react"
-import { Hidden, Box, makeStyles, createStyles } from "@material-ui/core"
-import AppBar from "@material-ui/core/AppBar"
-import Toolbar from "@material-ui/core/Toolbar"
-import Typography from "@material-ui/core/Typography"
+import { Hidden, Box } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
+import AppBar from "@mui/material/AppBar"
+import Toolbar from "@mui/material/Toolbar"
+import Typography from "@mui/material/Typography"
 // tslint:disable-next-line: no-submodule-imports
 import DarkModeContext from "../ui/DarkModeContext"
 import { HideOnScroll } from "../ui/HideOnScroll"
 import { Link } from "gatsby-theme-material-ui"
 
-export const FEEDBACK_URL = "https://github.com/microsoft/jacdac/discussions/categories/data-editor"
+export const FEEDBACK_URL =
+    "https://github.com/microsoft/jacdac/discussions/categories/data-editor"
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -41,7 +44,7 @@ export default function DataEditorAppBar() {
                     className={classes.appBar}
                 >
                     <Toolbar>
-                        <Hidden implementation="css" xsDown={true}>
+                        <Hidden implementation="css" smDown={true}>
                             <Typography component="h1" variant="h6">
                                 <Link
                                     style={{

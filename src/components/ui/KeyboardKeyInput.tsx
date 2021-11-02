@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
-import { createStyles, makeStyles } from "@material-ui/core"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import { HidKeyboardModifiers } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import Keyboard from "react-simple-keyboard"
 import "react-simple-keyboard/build/css/index.css"

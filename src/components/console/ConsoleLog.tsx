@@ -1,7 +1,8 @@
 import React, { useEffect, useContext } from "react"
 import { Console, Hook, Unhook } from "console-feed"
 import ConsoleContext from "./ConsoleContext"
-import { createStyles, makeStyles } from "@material-ui/core"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import AutoScroll from "../ui/AutoScroll"
 
 const useStyles = makeStyles(() =>

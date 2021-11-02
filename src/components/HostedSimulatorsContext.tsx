@@ -1,10 +1,6 @@
-import {
-    Card,
-    CardHeader,
-    CardMedia,
-    createStyles,
-    makeStyles,
-} from "@material-ui/core"
+import { Card, CardHeader, CardMedia } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import React, {
     createContext,
     lazy,
@@ -20,7 +16,7 @@ import Packet from "../../jacdac-ts/src/jdom/packet"
 import { randomDeviceId } from "../../jacdac-ts/src/jdom/random"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
 import useWindowEvent from "./hooks/useWindowEvent"
-import CloseIcon from "@material-ui/icons/Close"
+import CloseIcon from "@mui/icons-material/Close"
 import {
     decodePacketMessage,
     PacketMessage,

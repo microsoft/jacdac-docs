@@ -1,17 +1,10 @@
 import React, { useContext, useMemo } from "react"
-import {
-    makeStyles,
-    createStyles,
-    Theme,
-    List,
-    ListItem,
-    Typography,
-    useTheme,
-    Box,
-} from "@material-ui/core"
+import { Theme, List, ListItem, Typography, useTheme, Box } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import { Link } from "gatsby-theme-material-ui"
 // tslint:disable-next-line: no-submodule-imports
-import ListItemText from "@material-ui/core/ListItemText"
+import ListItemText from "@mui/material/ListItemText"
 import AppContext, { DrawerType } from "./AppContext"
 import { graphql, useStaticQuery } from "gatsby"
 import useMediaQueries from "./hooks/useMediaQueries"

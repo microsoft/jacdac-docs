@@ -73,21 +73,25 @@ export default function HIDEvents() {
     const settings = useServiceClient(settingsService, factory)
 
     useServiceProviderFromServiceClass(SRV_SETTINGS)
-    useChange(settings, debounce(async () => {
-        const phrs: Phrase[] = []
-        if (settings) {
-            const all = await settings.list()
-            for (const kv of all.filter(entry =>
-                entry.key?.startsWith(PREFIX)
-            )) {
-                const { key, value } = kv
-                const he = bufferToPhrase(key, value)
-                if (he) phrs.push(he)
+    useChange(
+        settings,
+        debounce(async () => {
+            const phrs: Phrase[] = []
+            if (settings) {
+                const all = await settings.list()
+                for (const kv of all.filter(entry =>
+                    entry.key?.startsWith(PREFIX)
+                )) {
+                    const { key, value } = kv
+                    const he = bufferToPhrase(key, value)
+                    if (he) phrs.push(he)
+                }
             }
-        }
-        // different? set the variable
-        if (JSON.stringify(phrs) !== JSON.stringify(phrases)) setPhrases(phrs)
-    }, 500))
+            // different? set the variable
+            if (JSON.stringify(phrs) !== JSON.stringify(phrases))
+                setPhrases(phrs)
+        }, 500)
+    )
 
     const handlePhraseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const index = Number.parseInt(event.target.id)
@@ -103,14 +107,18 @@ export default function HIDEvents() {
     const handleRemovePhrase = (index: number) => async () => {
         const { key } = phrases[index]
         if (key) await settings.deleteValue(key)
-        setPhrases([...phrases.slice(0, index), ... phrases.slice(index)])
+        setPhrases([...phrases.slice(0, index), ...phrases.slice(index)])
     }
     const handleSelectSettingsService = (service: JDService) => () =>
         setSettingsService(settingsService === service ? undefined : service)
 
     const handleClearPhrases = async () => {
-        await Promise.all(phrases.filter(({key})=>!!key).map((phrase) => settings.deleteValue(phrase.key)))
-        setPhrases([]);
+        await Promise.all(
+            phrases
+                .filter(({ key }) => !!key)
+                .map(phrase => settings.deleteValue(phrase.key))
+        )
+        setPhrases([])
     }
 
     const handleSavePhrases = () => {
@@ -121,12 +129,15 @@ export default function HIDEvents() {
     }
 
     const handleExport = () => {
-        fileStorage.saveText(`phrases.json`, JSON.stringify(
-            clone(phrases).map(h => {
-                delete h.key
-                return h
-            })
-        ))
+        fileStorage.saveText(
+            `phrases.json`,
+            JSON.stringify(
+                clone(phrases).map(h => {
+                    delete h.key
+                    return h
+                })
+            )
+        )
     }
 
     const exportUri =
@@ -260,7 +271,7 @@ export default function HIDEvents() {
                                     <Button
                                         variant="outlined"
                                         onClick={handleExport}
-                                        startIcon={<ShareIcon/>}
+                                        startIcon={<ShareIcon />}
                                     >
                                         Export
                                     </Button>

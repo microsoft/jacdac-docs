@@ -1,7 +1,7 @@
 import React, { lazy, useState } from "react"
-import { Box, Button } from "@material-ui/core"
+import { Box, Button } from "@mui/material"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import OpenInBrowserIcon from "@material-ui/icons/OpenInBrowser"
+import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 import Suspense from "./ui/Suspense"
 const DropzoneDialog = lazy(() => import("./ui/DropzoneDialog"))

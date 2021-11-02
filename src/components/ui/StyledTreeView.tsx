@@ -1,13 +1,15 @@
 import React from "react"
-import { makeStyles, Theme, createStyles } from "@material-ui/core/styles"
-import TreeItem, { TreeItemProps } from "@material-ui/lab/TreeItem"
-import Typography from "@material-ui/core/Typography"
+import { Theme } from "@mui/material/styles"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
+import TreeItem, { TreeItemProps } from "@mui/lab/TreeItem"
+import Typography from "@mui/material/Typography"
 import KindIcon from "../KindIcon"
-import WarningIcon from "@material-ui/icons/Warning"
+import WarningIcon from "@mui/icons-material/Warning"
 
 import { useId } from "react-use-id-hook"
 import { Link } from "gatsby-material-ui-components"
-import { Tooltip } from "@material-ui/core"
+import { Tooltip } from "@mui/material"
 import { ellipse } from "../../../jacdac-ts/src/jdom/utils"
 
 declare module "csstype" {

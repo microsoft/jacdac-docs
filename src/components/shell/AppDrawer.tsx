@@ -1,11 +1,13 @@
 import React, { lazy, useContext } from "react"
-import { Drawer, Divider, makeStyles, createStyles } from "@material-ui/core"
+import { Drawer, Divider } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import Suspense from "../ui/Suspense"
 import { IconButton } from "gatsby-theme-material-ui"
 // tslint:disable-next-line: no-submodule-imports
 import { DRAWER_WIDTH, MOBILE_BREAKPOINT, TOC_DRAWER_WIDTH } from "../layout"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft"
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import AppContext, { DrawerType } from "../AppContext"
 import PacketRecorder from "../PacketRecorder"
 import DrawerToolsButtonGroup from "./DrawerToolsButtonGroup"
@@ -99,7 +101,11 @@ export default function AppDrawer(props: { pagePath: string }) {
                         <DrawerToolsButtonGroup />
                     </>
                 )}
-                <IconButton aria-label="Collapse" onClick={handleDrawerClose}>
+                <IconButton
+                    aria-label="Collapse"
+                    onClick={handleDrawerClose}
+                    size="large"
+                >
                     <ChevronLeftIcon />
                 </IconButton>
             </div>

@@ -6,7 +6,9 @@ import DarkTheme from "@blockly/theme-dark"
 import BlocklyModalDialogs from "./BlocklyModalDialogs"
 import DarkModeContext from "../ui/DarkModeContext"
 import AppContext from "../AppContext"
-import { createStyles, makeStyles } from "@material-ui/core"
+import { Theme as MaterialTheme } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import clsx from "clsx"
 import { withPrefix } from "gatsby"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
@@ -15,7 +17,7 @@ import { useBlockMinimap } from "./BlockMinimap"
 import BrowserCompatibilityAlert from "../ui/BrowserCompatibilityAlert"
 import { UIFlags } from "../../jacdac/providerbus"
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles((theme: MaterialTheme) =>
     createStyles({
         editor: {
             height: `calc(100vh - ${

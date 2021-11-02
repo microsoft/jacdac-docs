@@ -1,10 +1,6 @@
-import {
-    createStyles,
-    darken,
-    lighten,
-    makeStyles,
-    Theme,
-} from "@material-ui/core"
+import { darken, lighten, Theme } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import { Button } from "gatsby-theme-material-ui"
 import React, {
     CSSProperties,
@@ -15,7 +11,7 @@ import React, {
 } from "react"
 import AppContext from "./AppContext"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import ErrorIcon from "@material-ui/icons/Error"
+import ErrorIcon from "@mui/icons-material/Error"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 import useAnalytics, { EventProperties } from "./hooks/useAnalytics"
 import useMounted from "./hooks/useMounted"
@@ -26,7 +22,7 @@ const ACK_RESET_DELAY = 500
 const ERROR_RESET_DELAY = 2000
 
 const useStyles = makeStyles((theme: Theme) => {
-    const getBackgroundColor = theme.palette.type === "light" ? lighten : darken
+    const getBackgroundColor = theme.palette.mode === "light" ? lighten : darken
     return createStyles({
         ack: {
             color: "#fff",

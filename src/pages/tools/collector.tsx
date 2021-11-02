@@ -243,8 +243,7 @@ export default function Collector() {
                 const name = `data-${now.getFullYear()}-${
                     now.getMonth() + 1
                 }-${now.getDate()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}.csv`
-                root.fileAsync(name, { create: true })
-                    .then(f => f.write(csv))
+                root.fileAsync(name, { create: true }).then(f => f.write(csv))
             }
             setTables([liveDataSet, ...tables])
             setLiveDataSet(newDataSet(registerIdsChecked, true))

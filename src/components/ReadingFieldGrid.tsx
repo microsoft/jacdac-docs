@@ -1,17 +1,11 @@
-import {
-    Card,
-    CardActions,
-    CardContent,
-    CardHeader,
-    createStyles,
-    Grid,
-    makeStyles,
-} from "@material-ui/core"
+import { Card, CardActions, CardContent, CardHeader, Grid } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import React from "react"
 import JDRegister from "../../jacdac-ts/src/jdom/register"
 import useGridBreakpoints from "./useGridBreakpoints"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import FieldDataSet from "./FieldDataSet"
 import useDeviceName from "./devices/useDeviceName"
 import SwitchWithLabel from "./ui/SwitchWithLabel"

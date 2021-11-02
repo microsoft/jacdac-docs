@@ -12,7 +12,7 @@ import IFrameBridgeClient from "../../components/makecode/iframebridgeclient"
 
 /**
  * To debug locally:
- * 
+ *
  * - launch yarn develop
  * - launch pxt serve + ?localhostmessagesims=1
  * - launch jacdac project

@@ -1,8 +1,10 @@
 import React, { useState } from "react"
-import { createStyles, Box, Tabs, Tab } from "@material-ui/core"
+import { Box, Tabs, Tab } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
 import TabPanel from "../ui/TabPanel"
 
-import { makeStyles, Theme } from "@material-ui/core/styles"
+import { Theme } from "@mui/material/styles"
+import makeStyles from "@mui/styles/makeStyles"
 import useChartPalette from "../useChartPalette"
 
 import CollectData from "./CollectData"

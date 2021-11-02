@@ -1,11 +1,5 @@
-import {
-    makeStyles,
-    Slider,
-    SliderProps,
-    Theme,
-    Tooltip,
-    Typography,
-} from "@material-ui/core"
+import { Slider, SliderProps, Theme, Tooltip, Typography } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
 import React from "react"
 import { useId } from "react-use-id-hook"
 

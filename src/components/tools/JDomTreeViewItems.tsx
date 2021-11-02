@@ -245,7 +245,7 @@ export function RegisterTreeItem(
         `${specification?.name || id}${optional ? "?" : ""}`
     )
     const humanValue = useRegisterHumanValue(register, {
-        visible: true
+        visible: true,
     })
     const handleClick = useCallback(() => register.sendGetAsync(), [register])
 

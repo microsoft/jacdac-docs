@@ -1,19 +1,19 @@
 import React from "react"
-import { makeStyles } from "@material-ui/core/styles"
+import makeStyles from "@mui/styles/makeStyles"
 // tslint:disable-next-line: no-submodule-imports
-import Table from "@material-ui/core/Table"
+import Table from "@mui/material/Table"
 // tslint:disable-next-line: no-submodule-imports
-import TableBody from "@material-ui/core/TableBody"
+import TableBody from "@mui/material/TableBody"
 // tslint:disable-next-line: no-submodule-imports
-import TableCell from "@material-ui/core/TableCell"
+import TableCell from "@mui/material/TableCell"
 // tslint:disable-next-line: no-submodule-imports
-import TableContainer from "@material-ui/core/TableContainer"
+import TableContainer from "@mui/material/TableContainer"
 // tslint:disable-next-line: no-submodule-imports
-import TableHead from "@material-ui/core/TableHead"
+import TableHead from "@mui/material/TableHead"
 // tslint:disable-next-line: no-submodule-imports
-import TableRow from "@material-ui/core/TableRow"
+import TableRow from "@mui/material/TableRow"
 // tslint:disable-next-line: no-submodule-imports
-import Paper from "@material-ui/core/Paper"
+import Paper from "@mui/material/Paper"
 import { DataSet } from "./DataSet"
 import { prettyDuration } from "../../jacdac-ts/src/jdom/pretty"
 

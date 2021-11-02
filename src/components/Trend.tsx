@@ -1,7 +1,10 @@
 import React from "react"
 import FieldDataSet, { Example } from "./FieldDataSet"
 import { unique } from "../../jacdac-ts/src/jdom/utils"
-import { Paper, makeStyles, createStyles } from "@material-ui/core"
+import { Paper } from "@mui/material"
+
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 
 const useStyles = makeStyles(theme =>
     createStyles({

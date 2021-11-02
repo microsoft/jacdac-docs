@@ -1,9 +1,11 @@
 import React, { ReactNode, useContext } from "react"
-import { Button, createStyles, Grid, Tooltip } from "@material-ui/core"
-import { makeStyles, Theme } from "@material-ui/core/styles"
-import AutorenewIcon from "@material-ui/icons/Autorenew"
+import { Button, Grid, Tooltip } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import { Theme } from "@mui/material/styles"
+import makeStyles from "@mui/styles/makeStyles"
+import AutorenewIcon from "@mui/icons-material/Autorenew"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import DownloadIcon from "@material-ui/icons/GetApp"
+import DownloadIcon from "@mui/icons-material/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
 import { ReactFieldJSON } from "../ReactField"

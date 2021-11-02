@@ -1,15 +1,16 @@
 import React, { lazy, useContext } from "react"
 import clsx from "clsx"
-import { makeStyles, Container } from "@material-ui/core"
-import Typography from "@material-ui/core/Typography"
+import { Container, adaptV4Theme } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import Typography from "@mui/material/Typography"
 import "./layout.css"
 import SEO from "./shell/SEO"
 import {
     createTheme,
     responsiveFontSizes,
-    createStyles,
-    ThemeOptions,
-} from "@material-ui/core/styles"
+    DeprecatedThemeOptions,
+} from "@mui/material/styles"
+import createStyles from "@mui/styles/createStyles"
 import AppContext, { DrawerType } from "./AppContext"
 import DarkModeProvider from "./ui/DarkModeProvider"
 import DarkModeContext from "./ui/DarkModeContext"
@@ -23,7 +24,7 @@ import Breadcrumbs from "./ui/Breadcrumbs"
 import useMediaQueries from "./hooks/useMediaQueries"
 import MainAppBar from "./shell/MainAppBar"
 import DataEditorAppBar from "./shell/DataEditorAppBar"
-import { AlertTitle } from "@material-ui/lab"
+import { AlertTitle } from "@mui/material"
 import { UIFlags } from "../jacdac/providerbus"
 
 const TraceAlert = lazy(() => import("./shell/TraceAlert"))
@@ -47,7 +48,7 @@ const useStyles = makeStyles(theme =>
             flexGrow: 1,
         },
         hideMobile: {
-            [theme.breakpoints.down("md")]: {
+            [theme.breakpoints.down("lg")]: {
                 display: "none",
             },
         },
@@ -137,7 +138,7 @@ function LayoutWithDarkMode(props: LayoutProps) {
 function LayoutWithMdx(props: LayoutProps) {
     const { darkMode } = useContext(DarkModeContext)
     const isDark = darkMode === "dark"
-    const themeDef: ThemeOptions = {
+    const themeDef: DeprecatedThemeOptions = {
         palette: {
             primary: {
                 main: isDark ? "#56d364" : "#2e7d32",
@@ -149,7 +150,7 @@ function LayoutWithMdx(props: LayoutProps) {
             type: darkMode,
         },
     }
-    const rawTheme = createTheme(themeDef)
+    const rawTheme = createTheme(adaptV4Theme(themeDef))
     const theme = responsiveFontSizes(rawTheme)
 
     return (

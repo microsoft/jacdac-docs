@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
+import React, { ReactNode, useContext } from "react"
 import {
     Box,
     Grid,
@@ -6,10 +6,11 @@ import {
     Select,
     TextField,
     Tooltip,
-    makeStyles,
     Theme,
-    createStyles,
-} from "@material-ui/core"
+} from "@mui/material"
+
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
@@ -214,6 +215,10 @@ export default class ConvLayerBlockField extends ReactInlineField {
     }
 
     renderInlineField(): ReactNode {
-        return <LayerParameterWidget initFieldValue={this.value} />
+        return (
+            <LayerParameterWidget
+                initFieldValue={this.value as ConvLayerFieldValue}
+            />
+        )
     }
 }

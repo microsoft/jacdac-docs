@@ -4,12 +4,12 @@ import {
     CardContent,
     CardHeader,
     CardMedia,
-    createStyles,
     FormControl,
-    makeStyles,
     MenuItem,
     Select,
-} from "@material-ui/core"
+} from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import React, {
     ChangeEvent,
     lazy,
@@ -20,16 +20,16 @@ import React, {
 } from "react"
 import useLocalStorage from "../hooks/useLocalStorage"
 import useEffectAsync from "../useEffectAsync"
-import SettingsIcon from "@material-ui/icons/Settings"
+import SettingsIcon from "@mui/icons-material/Settings"
 import IconButtonWithTooltip from "./IconButtonWithTooltip"
 import useMounted from "../hooks/useMounted"
 import Suspense from "./Suspense"
-import CloseIcon from "@material-ui/icons/Close"
+import CloseIcon from "@mui/icons-material/Close"
 import AppContext from "../AppContext"
-import { Alert } from "@material-ui/lab"
-import FullscreenIcon from "@material-ui/icons/Fullscreen"
-import MinimizeIcon from "@material-ui/icons/Minimize"
-import MaximizeIcon from "@material-ui/icons/Maximize"
+import { Alert } from "@mui/material"
+import FullscreenIcon from "@mui/icons-material/Fullscreen"
+import MinimizeIcon from "@mui/icons-material/Minimize"
+import MaximizeIcon from "@mui/icons-material/Maximize"
 const Draggable = lazy(() => import("react-draggable"))
 
 const useStyles = makeStyles(() =>

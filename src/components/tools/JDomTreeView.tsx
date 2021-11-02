@@ -1,13 +1,13 @@
 import React, { useState } from "react"
 import clsx from "clsx"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 // tslint:disable-next-line: no-submodule-imports
-import { makeStyles, createStyles } from "@material-ui/core/styles"
-// tslint:disable-next-line: no-submodule-imports
-import TreeView from "@material-ui/lab/TreeView"
+import TreeView from "@mui/lab/TreeView"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown"
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import ArrowRightIcon from "@material-ui/icons/ArrowRight"
+import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import useDevices from "../hooks/useDevices"

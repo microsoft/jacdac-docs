@@ -1,19 +1,19 @@
 import React, { useMemo } from "react"
 import {
-    createStyles,
     ImageList,
     ImageListItem,
     ImageListItemBar,
-    makeStyles,
     Theme,
     Typography,
-} from "@material-ui/core"
+} from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import {
     deviceSpecifications,
     identifierToUrlPath,
 } from "../../../jacdac-ts/src/jdom/spec"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import InfoIcon from "@material-ui/icons/Info"
+import InfoIcon from "@mui/icons-material/Info"
 import { IconButton } from "gatsby-theme-material-ui"
 import { arrayShuffle } from "../../../jacdac-ts/src/jdom/utils"
 import useDeviceImage from "../devices/useDeviceImage"
@@ -100,6 +100,7 @@ export default function DeviceSpecificationList(props: {
                                         )}`}
                                         aria-label={`info about ${spec.name}`}
                                         className={classes.icon}
+                                        size="large"
                                     >
                                         <InfoIcon style={{ color: "white" }} />
                                     </IconButton>

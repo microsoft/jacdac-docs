@@ -1,9 +1,6 @@
-import {
-    createStyles,
-    makeStyles,
-    MenuItem,
-    TextField,
-} from "@material-ui/core"
+import { MenuItem, TextField } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 import React, { ChangeEvent, useMemo, useState } from "react"
 import {
     deviceSpecificationsForService,

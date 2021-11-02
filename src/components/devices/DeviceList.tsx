@@ -1,5 +1,7 @@
 import React, { useContext } from "react"
-import { Grid, makeStyles, Theme, createStyles } from "@material-ui/core"
+import { Grid, Theme } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import DeviceCard from "./DeviceCard"
 import ServiceCard from "../ServiceCard"
 import useChange from "../../jacdac/useChange"

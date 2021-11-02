@@ -1,20 +1,14 @@
 import React from "react"
-import {
-    ListItem,
-    Typography,
-    ListItemIcon,
-    Theme,
-    makeStyles,
-    createStyles,
-    Chip,
-} from "@material-ui/core"
+import { ListItem, Typography, ListItemIcon, Theme, Chip } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import Packet from "../../jacdac-ts/src/jdom/packet"
 import { decodePacketData } from "../../jacdac-ts/src/jdom/pretty"
 import clsx from "clsx"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import WarningIcon from "@material-ui/icons/Warning"
+import WarningIcon from "@mui/icons-material/Warning"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import ErrorIcon from "@material-ui/icons/Error"
+import ErrorIcon from "@mui/icons-material/Error"
 import { JSONTryParse } from "../../jacdac-ts/src/jdom/utils"
 
 const useStyles = makeStyles((theme: Theme) =>

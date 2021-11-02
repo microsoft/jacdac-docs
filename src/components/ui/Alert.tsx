@@ -1,9 +1,8 @@
-import { Collapse, createStyles, makeStyles } from "@material-ui/core"
-import {
-    Alert as MaterialAlert,
-    AlertProps,
-    AlertTitle,
-} from "@material-ui/lab"
+import { Collapse } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
+import { Alert as MaterialAlert, AlertTitle } from "@mui/material"
+import { AlertProps } from "@mui/lab"
 import React, { ReactNode, useState } from "react"
 
 const useStyles = makeStyles(theme =>

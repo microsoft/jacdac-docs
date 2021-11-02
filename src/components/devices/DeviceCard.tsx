@@ -1,17 +1,17 @@
 import React, { ReactNode } from "react"
+import makeStyles from "@mui/styles/makeStyles"
 // tslint:disable-next-line: no-submodule-imports
-import { makeStyles } from "@material-ui/core/styles"
+import Card from "@mui/material/Card"
 // tslint:disable-next-line: no-submodule-imports
-import Card from "@material-ui/core/Card"
-// tslint:disable-next-line: no-submodule-imports
-import CardContent from "@material-ui/core/CardContent"
+import CardContent from "@mui/material/CardContent"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import { ControlReg } from "../../../jacdac-ts/src/jdom/constants"
 import ServiceButton from "../ServiceButton"
 import useChange from "../../jacdac/useChange"
 import { navigate } from "gatsby"
 import JDService from "../../../jacdac-ts/src/jdom/service"
-import { CardActions, createStyles } from "@material-ui/core"
+import { CardActions } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
 import DeviceCardHeader from "./DeviceCardHeader"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import { DeviceLostAlert } from "../alert/DeviceLostAlert"

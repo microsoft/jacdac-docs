@@ -3,7 +3,8 @@ import WorkspaceContext from "../../WorkspaceContext"
 import useBlockData from "../../useBlockData"
 import { PointerBoundary } from "../PointerBoundary"
 import Suspense from "../../../ui/Suspense"
-import { Grid, makeStyles, NoSsr } from "@material-ui/core"
+import { Grid, NoSsr } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
 import { CHART_HEIGHT, CHART_SVG_MAX_ITEMS, CHART_WIDTH } from "../../toolbox"
 import type { View, VisualizationSpec } from "react-vega"
 import type { DataSliceOptions } from "../../../../workers/data/dist/node_modules/data.worker"
@@ -14,7 +15,7 @@ import { humanify } from "../../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import CopyButton from "../../../ui/CopyButton"
 import IconButtonWithTooltip from "../../../ui/IconButtonWithTooltip"
 import { UIFlags } from "../../../../jacdac/providerbus"
-import SaveAltIcon from "@material-ui/icons/SaveAlt"
+import SaveAltIcon from "@mui/icons-material/SaveAlt"
 const VegaLite = lazy(() => import("./VegaLite"))
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

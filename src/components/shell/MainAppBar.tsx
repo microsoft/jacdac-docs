@@ -1,10 +1,12 @@
 import React, { useContext } from "react"
 import clsx from "clsx"
-import { Hidden, Box, makeStyles, createStyles } from "@material-ui/core"
-import AppBar from "@material-ui/core/AppBar"
-import Toolbar from "@material-ui/core/Toolbar"
-import Typography from "@material-ui/core/Typography"
-import MoreIcon from "@material-ui/icons/MoreVert"
+import { Hidden, Box } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
+import AppBar from "@mui/material/AppBar"
+import Toolbar from "@mui/material/Toolbar"
+import Typography from "@mui/material/Typography"
+import MoreIcon from "@mui/icons-material/MoreVert"
 // tslint:disable-next-line: no-submodule-imports
 import AppContext, { DrawerType } from "../AppContext"
 import DarkModeContext from "../ui/DarkModeContext"
@@ -13,7 +15,7 @@ import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import OpenDashboardButton from "../buttons/OpenDashboardButton"
 import PacketStats from "./PacketStats"
 import { Link } from "gatsby-theme-material-ui"
-import ForumIcon from "@material-ui/icons/Forum"
+import ForumIcon from "@mui/icons-material/Forum"
 import { UIFlags } from "../../jacdac/providerbus"
 import { HideOnScroll } from "../ui/HideOnScroll"
 import OpenVMEditorButton from "../buttons/OpenVMEditorButton"
@@ -76,7 +78,7 @@ const useStyles = makeStyles(theme =>
             marginRight: theme.spacing(1),
         },
         hideMobile: {
-            [theme.breakpoints.down("md")]: {
+            [theme.breakpoints.down("lg")]: {
                 display: "none",
             },
         },
@@ -99,7 +101,7 @@ function MainToolbar() {
                     )}
                 />
             )}
-            <Hidden implementation="css" xsDown={true}>
+            <Hidden implementation="css" smDown={true}>
                 <Typography component="h1" variant="h6">
                     <Link
                         style={{

@@ -1,6 +1,9 @@
 import React, { lazy } from "react"
 
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
+import { Theme } from "@mui/material/styles"
+
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
 
 import Blockly, {
     BlockSvg,

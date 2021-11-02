@@ -1,22 +1,16 @@
 import React, { lazy, ReactNode, useContext, useEffect, useState } from "react"
-import {
-    Box,
-    Button,
-    Grid,
-    Tooltip,
-    makeStyles,
-    Theme,
-    createStyles,
-} from "@material-ui/core"
+import { Box, Button, Grid, Tooltip, Theme } from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import Suspense from "../../../ui/Suspense"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
 import { PointerBoundary } from "../PointerBoundary"
 
-import ViewIcon from "@material-ui/icons/Visibility"
+import ViewIcon from "@mui/icons-material/Visibility"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import DownloadIcon from "@material-ui/icons/GetApp"
+import DownloadIcon from "@mui/icons-material/GetApp"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 
 import { predictRequest } from "../../dsl/workers/tf.proxy"

@@ -12,8 +12,9 @@ import LIGHT_THEME from "prism-react-renderer/themes/github"
 import DARK_THEME from "prism-react-renderer/themes/vsDark"
 import DarkModeContext from "./DarkModeContext"
 import { useEditable } from "use-editable"
-import { Alert } from "@material-ui/lab"
-import { Grid, Tooltip, withStyles } from "@material-ui/core"
+import { Alert } from "@mui/material"
+import { Grid, Tooltip } from "@mui/material"
+import withStyles from "@mui/styles/withStyles"
 import Suspense from "../ui/Suspense"
 const GithubPullRequestButton = lazy(
     () => import("../buttons/GithubPullRequestButton")

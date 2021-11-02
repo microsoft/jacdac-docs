@@ -1,6 +1,8 @@
 import React, { lazy, useEffect, useMemo, useState } from "react"
-import { Box, createStyles, makeStyles } from "@material-ui/core"
-import { Skeleton } from "@material-ui/lab"
+import { Box } from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
+import makeStyles from "@mui/styles/makeStyles"
+import { Skeleton } from "@mui/material"
 import useBlobCanvas from "../useBlobCanvas"
 
 import Suspense from "./Suspense"
@@ -48,7 +50,11 @@ export default function ImportImageCanvas(props: {
         <div className={classes.root}>
             <div className={classes.img}>
                 {!canvasUrl && (
-                    <Skeleton variant="rect" width={"100%"} height={"18rem"} />
+                    <Skeleton
+                        variant="rectangular"
+                        width={"100%"}
+                        height={"18rem"}
+                    />
                 )}
                 {canvasUrl && (
                     <img

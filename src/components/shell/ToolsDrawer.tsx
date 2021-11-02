@@ -1,14 +1,14 @@
 import React, { useContext } from "react"
 import {
     Drawer,
-    makeStyles,
-    createStyles,
     List,
     ListItemIcon,
     ListItemText,
     ListItem,
     Divider,
-} from "@material-ui/core"
+} from "@mui/material"
+import makeStyles from "@mui/styles/makeStyles"
+import createStyles from "@mui/styles/createStyles"
 import { IconButton, Link } from "gatsby-theme-material-ui"
 import {
     MOBILE_BREAKPOINT,
@@ -18,18 +18,18 @@ import {
 import AppContext from "../AppContext"
 import { useUnitConverters } from "../ui/useUnitConverter"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import ChevronRightIcon from "@material-ui/icons/ChevronRight"
+import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import SettingsBrightnessIcon from "@material-ui/icons/SettingsBrightness"
+import SettingsBrightnessIcon from "@mui/icons-material/SettingsBrightness"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import SystemUpdateAltIcon from "@material-ui/icons/SystemUpdateAlt"
+import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import WifiIcon from "@material-ui/icons/Wifi"
+import WifiIcon from "@mui/icons-material/Wifi"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import SettingsIcon from "@material-ui/icons/Settings"
+import SettingsIcon from "@mui/icons-material/Settings"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
-import VideoCallIcon from "@material-ui/icons/VideoCall"
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
+import VideoCallIcon from "@mui/icons-material/VideoCall"
 import MakeCodeIcon from "../icons/MakeCodeIcon"
 
 import DarkModeContext from "../ui/DarkModeContext"
@@ -227,7 +227,11 @@ export default function ToolsDrawer() {
             }}
         >
             <div className={classes.drawerHeader}>
-                <IconButton aria-label="Collapse" onClick={handleDrawerClose}>
+                <IconButton
+                    aria-label="Collapse"
+                    onClick={handleDrawerClose}
+                    size="large"
+                >
                     <ChevronRightIcon />
                 </IconButton>
             </div>
