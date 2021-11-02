@@ -1,7 +1,6 @@
 import React, { useState } from "react"
+import { styled } from "@mui/material/styles"
 import clsx from "clsx"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
 // tslint:disable-next-line: no-submodule-imports
 import TreeView from "@mui/lab/TreeView"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -13,23 +12,29 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import { JDomTreeViewProps, ServiceTreeItem } from "./JDomTreeViewItems"
 import JDService from "../../../jacdac-ts/src/jdom/service"
 
-const useStyles = makeStyles(theme =>
-    createStyles({
-        root: {
-            flexGrow: 1,
-        },
-        margins: {
-            marginLeft: theme.spacing(0.5),
-            marginRight: theme.spacing(0.5),
-        },
-    })
-)
+const PREFIX = "JDomServiceTreeView"
+
+const classes = {
+    root: `${PREFIX}-root`,
+    margins: `${PREFIX}-margins`,
+}
+
+const StyledTreeView = styled(TreeView)(({ theme }) => ({
+    [`&.${classes.root}`]: {
+        flexGrow: 1,
+    },
+
+    [`&.${classes.margins}`]: {
+        marginLeft: theme.spacing(0.5),
+        marginRight: theme.spacing(0.5),
+    },
+}))
 
 export default function JDomServiceTreeView(
     props: { service: JDService } & JDomTreeViewProps
 ) {
     const { service, defaultExpanded, defaultSelected, ...other } = props
-    const classes = useStyles()
+
     const [expanded, setExpanded] = useState<string[]>(defaultExpanded || [])
     const [selected, setSelected] = useState<string[]>(defaultSelected || [])
     const handleToggle = (
@@ -46,7 +51,7 @@ export default function JDomServiceTreeView(
     }
 
     return (
-        <TreeView
+        <StyledTreeView
             className={clsx(classes.root, classes.margins)}
             defaultCollapseIcon={<ArrowDropDownIcon />}
             defaultExpandIcon={<ArrowRightIcon />}
@@ -63,6 +68,6 @@ export default function JDomServiceTreeView(
                 selected={selected}
                 {...other}
             />
-        </TreeView>
+        </StyledTreeView>
     )
 }

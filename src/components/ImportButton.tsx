@@ -1,18 +1,25 @@
-import React, { lazy, useState } from "react"
+import React, { useRef, useState } from "react"
 import { Box, Button } from "@mui/material"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
-import Suspense from "./ui/Suspense"
-const DropzoneDialog = lazy(() => import("./ui/DropzoneDialog"))
+import {
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+} from "@mui/material"
+import { useId } from "react-use-id-hook"
+import { toArray } from "../../jacdac-ts/src/jdom/utils"
 
+const MAX_SIZE = 5000000
 export default function ImportButton(props: {
     icon?: boolean
     text: string
     onFilesUploaded: (files: File[]) => void
     disabled?: boolean
     acceptedFiles?: string[]
-    filesLimit?: number
+    multiple?: boolean
     className?: string
 }) {
     const {
@@ -21,15 +28,20 @@ export default function ImportButton(props: {
         disabled,
         acceptedFiles,
         icon,
-        filesLimit,
+        multiple,
         className,
     } = props
+    const fileId = useId()
+    const fileRef = useRef<HTMLInputElement>()
     const [open, setOpen] = useState(false)
 
     const handleOpen = () => {
         setOpen(true)
     }
-    const handleSave = (files: File[]) => {
+    const handleSave = () => {
+        const files = toArray(fileRef.current.files)?.filter(
+            f => f.size < MAX_SIZE
+        )
         if (files?.length) onFilesUploaded(files)
         setOpen(false)
     }
@@ -53,18 +65,22 @@ export default function ImportButton(props: {
                 </Button>
             )}
             {open && (
-                <Suspense>
-                    <DropzoneDialog
-                        open={open}
-                        onSave={handleSave}
-                        maxFileSize={5000000}
-                        onClose={handleClose}
-                        acceptedFiles={acceptedFiles}
-                        clearOnUnmount={true}
-                        filesLimit={filesLimit || 1}
-                        submitButtonText={"import"}
-                    />
-                </Suspense>
+                <Dialog open={open} onClose={handleClose}>
+                    <DialogTitle>Import file</DialogTitle>
+                    <DialogContent>
+                        <input
+                            ref={fileRef}
+                            id={fileId}
+                            type="file"
+                            accept={acceptedFiles?.join(",")}
+                            multiple={multiple}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose}>cancel</Button>
+                        <Button onClick={handleSave}>import</Button>
+                    </DialogActions>
+                </Dialog>
             )}
         </Box>
     )
