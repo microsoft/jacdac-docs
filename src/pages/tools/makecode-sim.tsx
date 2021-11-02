@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react"
-import { createTheme, responsiveFontSizes, adaptV4Theme } from "@mui/material"
+import { createTheme, responsiveFontSizes } from "@mui/material"
 import ThemedLayout from "../../components/ui/ThemedLayout"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import { isReading, isValueOrIntensity } from "../../../jacdac-ts/src/jdom/spec"
@@ -67,23 +67,21 @@ function Carousel() {
 
 export default function Page() {
     const { toggleDarkMode, darkModeMounted } = useContext(DarkModeContext)
-    const rawTheme = createTheme(
-        adaptV4Theme({
-            palette: {
-                primary: {
-                    main: "#63c",
-                },
-                secondary: {
-                    main: "#ffc400",
-                },
-                background: {
-                    default: "#fff",
-                },
-                type: "light",
-                contrastThreshold: 3.1,
+    const rawTheme = createTheme({
+        palette: {
+            primary: {
+                main: "#63c",
             },
-        })
-    )
+            secondary: {
+                main: "#ffc400",
+            },
+            background: {
+                default: "#fff",
+            },
+            mode: "light",
+            contrastThreshold: 3.1,
+        },
+    })
     const theme = responsiveFontSizes(rawTheme)
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 import React, { lazy, useContext } from "react"
 import clsx from "clsx"
-import { Container, adaptV4Theme } from "@mui/material"
+import { Container } from "@mui/material"
 import makeStyles from "@mui/styles/makeStyles"
 import Typography from "@mui/material/Typography"
 import "./layout.css"
@@ -150,7 +150,7 @@ function LayoutWithMdx(props: LayoutProps) {
             mode: darkMode,
         },
     }
-    const rawTheme = createTheme(adaptV4Theme(themeDef))
+    const rawTheme = createTheme(themeDef)
     const theme = responsiveFontSizes(rawTheme)
 
     return (

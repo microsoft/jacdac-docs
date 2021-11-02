@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react"
-import { createTheme, responsiveFontSizes, adaptV4Theme } from "@mui/material"
+import { createTheme, responsiveFontSizes } from "@mui/material"
 import createStyles from "@mui/styles/createStyles"
 import ThemedLayout from "../../components/ui/ThemedLayout"
 import MakeCodeEditorExtension from "../../components/makecode/MakeCodeEditorExtension"
@@ -26,23 +26,21 @@ const useStyles = makeStyles(theme =>
 
 export default function MakeCodeEditorExtensionPage() {
     const { toggleDarkMode, darkModeMounted } = useContext(DarkModeContext)
-    const rawTheme = createTheme(
-        adaptV4Theme({
-            palette: {
-                primary: {
-                    main: "#2e7d32",
-                },
-                secondary: {
-                    main: "#ffc400",
-                },
-                background: {
-                    default: "#fff",
-                },
-                contrastThreshold: 5.1,
-                type: "light",
+    const rawTheme = createTheme({
+        palette: {
+            primary: {
+                main: "#2e7d32",
             },
-        })
-    )
+            secondary: {
+                main: "#ffc400",
+            },
+            background: {
+                default: "#fff",
+            },
+            contrastThreshold: 5.1,
+            mode: "light",
+        },
+    })
     const classes = useStyles()
     const theme = responsiveFontSizes(rawTheme)
     useEffect(() => {

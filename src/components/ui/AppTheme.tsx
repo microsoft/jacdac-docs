@@ -5,7 +5,6 @@ import {
     ThemeProvider,
     Theme,
     StyledEngineProvider,
-    adaptV4Theme,
 } from "@mui/material"
 import React, { useContext } from "react"
 import DarkModeContext from "./DarkModeContext"
@@ -28,10 +27,10 @@ export default function AppTheme(props: any) {
                 main: "#ffc400",
             },
             contrastThreshold: isDark ? 5.1 : 3.1,
-            type: darkMode,
+            mode: darkMode,
         },
     }
-    const rawTheme = createTheme(adaptV4Theme(themeDef))
+    const rawTheme = createTheme(themeDef)
     const theme = responsiveFontSizes(rawTheme)
     return (
         <StyledEngineProvider injectFirst>
