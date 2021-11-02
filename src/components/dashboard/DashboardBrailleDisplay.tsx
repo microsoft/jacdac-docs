@@ -1,10 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from "react"
-import {
-    CharacterScreenCmd,
-    CharacterScreenReg,
-    CharacterScreenTextDirection,
-    CharacterScreenVariant,
-} from "../../../jacdac-ts/src/jdom/constants"
+import { BrailleDisplayReg } from "../../../jacdac-ts/src/jdom/constants"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import { Grid, TextField } from "@material-ui/core"
@@ -15,6 +10,7 @@ import ClearIcon from "@material-ui/icons/Clear"
 import EditIcon from "@material-ui/icons/Edit"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import CharacterScreenWidget from "../widgets/CharacterScreenWidget"
+import { useId } from "react-use-id-hook"
 
 // https://en.wikipedia.org/wiki/Braille_ASCII
 const BRAILE_CHARACTERS = {
@@ -88,58 +84,47 @@ function brailify(s: string) {
     let r = ""
     const su = s.toLocaleUpperCase()
     for (let i = 0; i < su.length; ++i) {
-        r += BRAILE_CHARACTERS[su.charAt(i)] || "?"
+        const c = su.charCodeAt(i)
+        if (c >= 0x2800 && c <= 0x28ff) r += String.fromCharCode(c)
+        else r += BRAILE_CHARACTERS[su.charAt(i)] || ""
     }
     return r
 }
 
-export default function DashboardCharacterScreen(props: DashboardServiceProps) {
+export default function DashboardBrailleDisplay(props: DashboardServiceProps) {
     const { service } = props
-    const messageRegister = useRegister(service, CharacterScreenReg.Message)
-    const rowsRegister = useRegister(service, CharacterScreenReg.Rows)
-    const columnsRegister = useRegister(service, CharacterScreenReg.Columns)
-    const textDirectionRegister = useRegister(
-        service,
-        CharacterScreenReg.TextDirection
-    )
-    const variantRegister = useRegister(service, CharacterScreenReg.Variant)
-    const [edit, setEdit] = useState(false)
-    const [message] = useRegisterUnpackedValue<[string]>(messageRegister, props)
-    const [rows] = useRegisterUnpackedValue<[number]>(rowsRegister, props)
-    const [columns] = useRegisterUnpackedValue<[number]>(columnsRegister, props)
-    const [textDirection] = useRegisterUnpackedValue<[number]>(
-        textDirectionRegister,
-        props
-    )
-    const [variant] = useRegisterUnpackedValue<[CharacterScreenVariant]>(
-        variantRegister,
-        props
-    )
-    const [fieldMessage, setFieldMessage] = useState(message)
+    const textId = useId()
 
-    const handleClear = async () => {
-        setFieldMessage("")
-        await service.sendCmdAsync(CharacterScreenCmd.Clear, undefined, true)
-    }
+    const patternsRegister = useRegister(service, BrailleDisplayReg.Patterns)
+    const lengthRegister = useRegister(service, BrailleDisplayReg.Length)
+    const [patterns] = useRegisterUnpackedValue<[string]>(
+        patternsRegister,
+        props
+    )
+    const [length] = useRegisterUnpackedValue<[number]>(lengthRegister, props)
+
+    const [edit, setEdit] = useState(false)
+    const [fieldMessage, setFieldMessage] = useState(patterns)
     const handleFieldMessageChange = async (
         ev: ChangeEvent<HTMLTextAreaElement>
     ) => {
-        setFieldMessage(ev.target.value)
-        await messageRegister.sendSetStringAsync(ev.target.value, true)
+        const text = ev.target.value
+        const brailled = brailify(text)
+        console.log({ text, brailled })
+        setFieldMessage(brailled)
+        await patternsRegister.sendSetStringAsync(brailled, true)
     }
     const handleEdit = () => setEdit(e => !e)
-
+    const handleClear = async () => {
+        setFieldMessage("")
+        await patternsRegister.sendSetStringAsync("", true)
+    }
     // set first value of message
     useEffect(() => {
-        if (!fieldMessage && message) setFieldMessage(message)
-    }, [message])
+        if (!fieldMessage && patterns) setFieldMessage(patterns)
+    }, [patterns])
 
-    if (rows === undefined || columns === undefined) return <LoadingProgress /> // size unknown
-
-    const converter: (s: string) => string =
-        variant === CharacterScreenVariant.Braille ? brailify : s => s
-    const cmessage = message.split("").map(converter).join("")
-    const rtl = textDirection === CharacterScreenTextDirection.RightToLeft
+    if (length === undefined) return <LoadingProgress /> // size unknown
 
     return (
         <Grid container spacing={1}>
@@ -148,11 +133,13 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
                     <Grid container spacing={1}>
                         <Grid item xs>
                             <TextField
+                                id={textId}
                                 label="text"
+                                helperText="Unicode Braille patterns or Braille ASCII"
+                                aria-label="text field to enter Braille unicode pattersn or Braille ASCII"
                                 value={fieldMessage}
                                 onChange={handleFieldMessageChange}
-                                multiline={true}
-                                rows={rows || 2}
+                                multiline={false}
                                 fullWidth={true}
                             />
                         </Grid>
@@ -168,10 +155,9 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
             )}
             <Grid item xs>
                 <CharacterScreenWidget
-                    rows={rows}
-                    columns={columns}
-                    rtl={rtl}
-                    message={cmessage}
+                    rows={1}
+                    columns={length}
+                    message={patterns}
                 />
             </Grid>
             <Grid item>
