@@ -147,7 +147,7 @@ function LayoutWithMdx(props: LayoutProps) {
                 main: "#ffc400",
             },
             contrastThreshold: isDark ? 5.1 : 3.1,
-            type: darkMode,
+            mode: darkMode,
         },
     }
     const rawTheme = createTheme(adaptV4Theme(themeDef))
