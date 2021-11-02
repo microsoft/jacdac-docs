@@ -7,25 +7,14 @@ import {
 } from "../../../jacdac-ts/src/jdom/constants"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
-import SvgWidget from "../widgets/SvgWidget"
-import { createStyles, Grid, makeStyles, TextField } from "@material-ui/core"
-import useWidgetTheme from "../widgets/useWidgetTheme"
+import { Grid, TextField } from "@material-ui/core"
 import LoadingProgress from "../ui/LoadingProgress"
 import useRegister from "../hooks/useRegister"
 import CmdButton from "../CmdButton"
 import ClearIcon from "@material-ui/icons/Clear"
 import EditIcon from "@material-ui/icons/Edit"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
-
-const useStyles = makeStyles(() =>
-    createStyles({
-        text: {
-            fontFamily: "monospace",
-            fontWeight: 100,
-        },
-        box: {},
-    })
-)
+import CharacterScreenWidget from "../widgets/CharacterScreenWidget"
 
 // https://en.wikipedia.org/wiki/Braille_ASCII
 const BRAILE_CHARACTERS = {
@@ -106,7 +95,6 @@ function brailify(s: string) {
 
 export default function DashboardCharacterScreen(props: DashboardServiceProps) {
     const { service } = props
-    const classes = useStyles()
     const messageRegister = useRegister(service, CharacterScreenReg.Message)
     const rowsRegister = useRegister(service, CharacterScreenReg.Rows)
     const columnsRegister = useRegister(service, CharacterScreenReg.Columns)
@@ -128,8 +116,6 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
         props
     )
     const [fieldMessage, setFieldMessage] = useState(message)
-    const { textPrimary, background, controlBackground } =
-        useWidgetTheme("primary")
 
     const handleClear = async mounted => {
         await service.sendCmdAsync(CharacterScreenCmd.Clear, undefined, true)
@@ -151,58 +137,11 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
 
     if (rows === undefined || columns === undefined) return <LoadingProgress /> // size unknown
 
-    const cw = 8
-    const ch = 10
-    const m = 1
-    const mo = 2
-    const fs = 8
-
-    const rtl = textDirection === CharacterScreenTextDirection.RightToLeft
-    const w = columns * (cw + m) - m + 2 * mo
-    const h = rows * (ch + m) - m + 2 * mo
-
-    const lines = (message || "").split(/\n/g)
     const converter: (s: string) => string =
         variant === CharacterScreenVariant.Braille ? brailify : s => s
-    const els: JSX.Element[] = []
+    const cmessage = message.split("").map(converter).join("")
+    const rtl = textDirection === CharacterScreenTextDirection.RightToLeft
 
-    let y = mo
-    for (let row = 0; row < rows; ++row) {
-        let x = mo
-        const line = lines[row]
-        for (let column = 0; column < columns; ++column) {
-            const char = line?.[rtl ? columns - 1 - column : column]
-            const dchar = converter(char)
-            els.push(
-                <g key={`${row}-${column}`}>
-                    <rect
-                        x={x}
-                        y={y}
-                        width={cw}
-                        height={ch}
-                        className={classes.box}
-                        fill={controlBackground}
-                    />
-                    {char && (
-                        <text
-                            x={x + cw / 2}
-                            y={y + ch - fs / 3}
-                            textAnchor="middle"
-                            fontSize={fs}
-                            className={classes.text}
-                            fill={textPrimary}
-                            aria-label={char}
-                        >
-                            {dchar}
-                        </text>
-                    )}
-                </g>
-            )
-            x += cw + m
-        }
-
-        y += ch + m
-    }
     return (
         <Grid container spacing={1}>
             {edit && (
@@ -229,24 +168,12 @@ export default function DashboardCharacterScreen(props: DashboardServiceProps) {
                 </Grid>
             )}
             <Grid item xs>
-                <SvgWidget
-                    tabIndex={0}
-                    title={`character screen displaying "${message}"`}
-                    width={w}
-                    height={h}
-                >
-                    <>
-                        <rect
-                            x={0}
-                            y={0}
-                            width={w}
-                            height={h}
-                            r={m / 2}
-                            fill={background}
-                        />
-                        {els}
-                    </>
-                </SvgWidget>
+                <CharacterScreenWidget
+                    rows={rows}
+                    columns={columns}
+                    rtl={rtl}
+                    message={cmessage}
+                />
             </Grid>
             <Grid item>
                 <IconButtonWithTooltip
