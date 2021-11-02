@@ -16,7 +16,7 @@ import {
     DialogTitle,
     Grid,
     Typography,
-} from "@material-ui/core"
+} from "@mui/material"
 import useChange from "../../jacdac/useChange"
 import JDService from "../../../jacdac-ts/src/jdom/service"
 import {
@@ -31,7 +31,7 @@ import {
 import JDEvent from "../../../jacdac-ts/src/jdom/event"
 import KeyboardKeyInput from "../../components/ui/KeyboardKeyInput"
 import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
-import DeleteIcon from "@material-ui/icons/Delete"
+import DeleteIcon from "@mui/icons-material/Delete"
 import SettingsClient from "../../../jacdac-ts/src/jdom/clients/settingsclient"
 import useServiceClient from "../../components/useServiceClient"
 import {
@@ -54,7 +54,7 @@ import useGridBreakpoints from "../../components/useGridBreakpoints"
 import Suspense from "../../components/ui/Suspense"
 import useServiceProviderFromServiceClass from "../../components/hooks/useServiceProviderFromServiceClass"
 import AppContext from "../../components/AppContext"
-import { AlertTitle } from "@material-ui/lab"
+import { AlertTitle } from "@mui/material"
 import { renderKeyboardKey } from "../../../jacdac-ts/src/servers/hidkeyboardserver"
 const ImportButton = lazy(() => import("../../components/ImportButton"))
 

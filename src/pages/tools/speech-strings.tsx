@@ -7,12 +7,12 @@ import React, {
     useState,
 } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
-import { Card, CardActions, Grid, TextField } from "@material-ui/core"
+import { Card, CardActions, Grid, TextField } from "@mui/material"
 import useChange from "../../jacdac/useChange"
 import JDService from "../../../jacdac-ts/src/jdom/service"
 import { SRV_SETTINGS } from "../../../jacdac-ts/src/jdom/constants"
 import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
-import DeleteIcon from "@material-ui/icons/Delete"
+import DeleteIcon from "@mui/icons-material/Delete"
 import SettingsClient from "../../../jacdac-ts/src/jdom/clients/settingsclient"
 import useServiceClient from "../../components/useServiceClient"
 import { clone, debounce } from "../../../jacdac-ts/src/jdom/utils"
@@ -31,7 +31,7 @@ import useServiceProviderFromServiceClass from "../../components/hooks/useServic
 import AppContext from "../../components/AppContext"
 const ImportButton = lazy(() => import("../../components/ImportButton"))
 import ServiceManagerContext from "../../components/ServiceManagerContext"
-import ShareIcon from "@material-ui/icons/Share"
+import ShareIcon from "@mui/icons-material/Share"
 
 // all settings keys are prefixed with this string
 const PREFIX = "@ph_"

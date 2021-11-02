@@ -1,25 +1,26 @@
 import React, { useState, useContext, useEffect } from "react"
 // tslint:disable-next-line: no-submodule-imports
-import { makeStyles, Theme } from "@material-ui/core/styles"
+import { Theme } from "@mui/material/styles"
+import makeStyles from "@mui/styles/makeStyles"
 import {
     Grid,
     Button,
     TextField,
     InputAdornment,
-    createStyles,
     Switch,
     Card,
     CardActions,
-} from "@material-ui/core"
+} from "@mui/material"
+import createStyles from "@mui/styles/createStyles"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import PlayArrowIcon from "@material-ui/icons/PlayArrow"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import StopIcon from "@material-ui/icons/Stop"
+import StopIcon from "@mui/icons-material/Stop"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import SaveIcon from "@material-ui/icons/Save"
+import SaveIcon from "@mui/icons-material/Save"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty"
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"
 import JDBus from "../../../jacdac-ts/src/jdom/bus"
 import FieldDataSet from "../../components/FieldDataSet"
 import Trend from "../../components/Trend"
@@ -53,7 +54,7 @@ import { useId } from "react-use-id-hook"
 import DashboardDeviceItem from "../../components/dashboard/DashboardDeviceItem"
 import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
 import AppContext from "../../components/AppContext"
-import AddIcon from "@material-ui/icons/Add"
+import AddIcon from "@mui/icons-material/Add"
 import useServices from "../../components/hooks/useServices"
 import { delay } from "../../../jacdac-ts/src/jdom/utils"
 import useLocalStorage from "../../components/hooks/useLocalStorage"

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { lazy, useMemo, useState } from "react"
-import { Grid, Link } from "@material-ui/core"
+import { Grid, Link } from "@mui/material"
 import useLocalStorage from "../../components/hooks/useLocalStorage"
 import { clone, unique } from "../../../jacdac-ts/src/jdom/utils"
 import {
@@ -13,7 +13,7 @@ import {
     Card,
     CardActions,
     Button,
-} from "@material-ui/core"
+} from "@mui/material"
 import { ChangeEvent } from "react"
 import {
     deviceSpecifications,
@@ -23,9 +23,9 @@ import {
 import PaperBox from "../../components/ui/PaperBox"
 import { uniqueFirmwareId } from "../../components/RandomGenerator"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import AddIcon from "@material-ui/icons/Add"
+import AddIcon from "@mui/icons-material/Add"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
-import CreateIcon from "@material-ui/icons/Create"
+import CreateIcon from "@mui/icons-material/Create"
 import IconButtonWithTooltip from "../../components/ui/IconButtonWithTooltip"
 import { parseRepoUrl } from "../../components/github"
 import {
@@ -36,7 +36,7 @@ import {
 } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import ImportImageCanvas from "../../components/ui/ImageImportCanvas"
 // tslint:disable-next-line: no-submodule-imports
-import { Autocomplete } from "@material-ui/lab/"
+import { Autocomplete } from "@mui/lab/"
 import { useFirmwareBlob } from "../../components/firmware/useFirmwareBlobs"
 import { FirmwareBlob } from "../../../jacdac-ts/src/jdom/flashing"
 import { useId } from "react-use-id-hook"
