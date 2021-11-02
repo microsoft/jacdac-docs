@@ -28,7 +28,8 @@ export default function ConsoleLog() {
     useEffect(() => {
         const hooked =
             typeof window !== "undefined" &&
-            Hook(window.console, appendLog, false)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            Hook(window.console, appendLog as any, false)
         return () => {
             hooked && Unhook(hooked)
         }

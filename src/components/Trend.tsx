@@ -1,23 +1,27 @@
 import React from "react"
+import { styled } from "@mui/material/styles"
 import FieldDataSet, { Example } from "./FieldDataSet"
 import { unique } from "../../jacdac-ts/src/jdom/utils"
 import { Paper } from "@mui/material"
 
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
+const PREFIX = "Trend"
 
-const useStyles = makeStyles(theme =>
-    createStyles({
-        graph: {
-            marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
-        },
-        mini: {
-            display: "inline-block",
-            width: "10rem",
-        },
-    })
-)
+const classes = {
+    graph: `${PREFIX}-graph`,
+    mini: `${PREFIX}-mini`,
+}
+
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.graph}`]: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+    },
+
+    [`& .${classes.mini}`]: {
+        display: "inline-block",
+        width: "10rem",
+    },
+}))
 
 export interface TrendProps {
     dataSet: FieldDataSet
@@ -236,7 +240,7 @@ function UnitTrend(
 ) {
     const { dataSet, horizon, width, height, mini, gradient } = props
     const { rows } = dataSet
-    const classes = useStyles()
+
     const vpw = width || 80
     const vph = height || 15
     const data = rows.slice(-horizon)
@@ -270,14 +274,13 @@ export default function Trend(
     } & TrendProps
 ) {
     const { dataSet, mini } = props
-    const classes = useStyles()
 
     const units = unique(dataSet.units.map(unit => unit || "/"))
     return (
-        <div className={mini ? classes.mini : undefined}>
+        <Root className={mini ? classes.mini : undefined}>
             {units.map(unit => (
                 <UnitTrend key={`graph${unit}`} unit={unit} {...props} />
             ))}
-        </div>
+        </Root>
     )
 }

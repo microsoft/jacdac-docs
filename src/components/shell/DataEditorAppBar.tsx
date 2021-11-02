@@ -1,7 +1,6 @@
 import React, { useContext } from "react"
+import { styled } from "@mui/material/styles"
 import { Hidden, Box } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
 import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
 import Typography from "@mui/material/Typography"
@@ -10,33 +9,40 @@ import DarkModeContext from "../ui/DarkModeContext"
 import { HideOnScroll } from "../ui/HideOnScroll"
 import { Link } from "gatsby-theme-material-ui"
 
+const PREFIX = "FEEDBACK_URL"
+
+const classes = {
+    grow: `${PREFIX}-grow`,
+    appBar: `${PREFIX}-appBar`,
+    menuButton: `${PREFIX}-menuButton`,
+}
+
+const StyledBox = styled(Box)(({ theme }) => ({
+    [`& .${classes.grow}`]: {
+        flexGrow: 1,
+    },
+
+    [`& .${classes.appBar}`]: {
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+
+    [`& .${classes.menuButton}`]: {
+        marginRight: theme.spacing(1),
+    },
+}))
+
 export const FEEDBACK_URL =
     "https://github.com/microsoft/jacdac/discussions/categories/data-editor"
 
-const useStyles = makeStyles(theme =>
-    createStyles({
-        grow: {
-            flexGrow: 1,
-        },
-        appBar: {
-            transition: theme.transitions.create(["margin", "width"], {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-            }),
-        },
-        menuButton: {
-            marginRight: theme.spacing(1),
-        },
-    })
-)
-
 export default function DataEditorAppBar() {
-    const classes = useStyles()
     const { darkMode } = useContext(DarkModeContext)
     const appBarColor = darkMode === "dark" ? "inherit" : undefined
 
     return (
-        <Box displayPrint="none">
+        <StyledBox displayPrint="none">
             <HideOnScroll>
                 <AppBar
                     position="fixed"
@@ -78,6 +84,6 @@ export default function DataEditorAppBar() {
                     </Toolbar>
                 </AppBar>
             </HideOnScroll>
-        </Box>
+        </StyledBox>
     )
 }

@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { styled } from "@mui/material/styles"
 import {
     deviceSpecificationFromProductIdentifier,
     serviceSpecificationFromClassIdentifier,
@@ -10,8 +11,6 @@ import {
     Typography,
     Input,
 } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import CheckIcon from "@mui/icons-material/Check"
 // tslint:disable-next-line: no-submodule-imports
@@ -21,6 +20,23 @@ import { NoSsr } from "@mui/material"
 import { useId } from "react-use-id-hook"
 import { cryptoRandomUint32 } from "../../jacdac-ts/src/jdom/random"
 import { toFullHex } from "../../jacdac-ts/src/jdom/utils"
+
+const PREFIX = "RandomGenerator"
+
+const classes = {
+    root: `${PREFIX}-root`,
+    title: `${PREFIX}-title`,
+}
+
+const StyledNoSsr = styled(NoSsr)({
+    [`& .${classes.root}`]: {
+        minWidth: 275,
+        marginBottom: "1rem",
+    },
+    [`& .${classes.title}`]: {
+        fontSize: 14,
+    },
+})
 
 function looksRandom(n: number) {
     const s = n.toString(16)
@@ -72,18 +88,6 @@ export function uniqueFirmwareId() {
     return id !== undefined && toFullHex([id])
 }
 
-const useStyles = makeStyles(
-    createStyles({
-        root: {
-            minWidth: 275,
-            marginBottom: "1rem",
-        },
-        title: {
-            fontSize: 14,
-        },
-    })
-)
-
 export default function RandomGenerator(props: {
     device?: boolean
     firmware?: boolean
@@ -91,7 +95,7 @@ export default function RandomGenerator(props: {
     const { device, firmware } = props
     const labelId = useId()
     const fieldId = useId()
-    const classes = useStyles()
+
     const [value, setValue] = useState(
         device ? uniqueDeviceId() : uniqueServiceId()
     )
@@ -120,7 +124,7 @@ export default function RandomGenerator(props: {
         ? "Random Product Identifier"
         : "Random Service Identifier"
     return (
-        <NoSsr>
+        <StyledNoSsr>
             <Card className={classes.root}>
                 <CardContent>
                     <Typography
@@ -170,6 +174,6 @@ export default function RandomGenerator(props: {
                     </Button>
                 </CardActions>
             </Card>
-        </NoSsr>
+        </StyledNoSsr>
     )
 }

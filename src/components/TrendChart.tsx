@@ -1,17 +1,20 @@
 import React, { useCallback, useContext, useState } from "react"
+import { styled } from "@mui/material/styles"
 import { useTheme } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
 
-const useStyles = makeStyles(() =>
-    createStyles({
-        mini: {
-            display: "inline-block",
-            width: "10rem",
-        },
-    })
-)
+const PREFIX = "TrendChart"
+
+const classes = {
+    mini: `${PREFIX}-mini`,
+}
+
+const Root = styled("div")(() => ({
+    [`& .${classes.mini}`]: {
+        display: "inline-block",
+        width: "10rem",
+    },
+}))
 
 export function useTrendChartData(maxLength = 25) {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
@@ -51,7 +54,6 @@ export default function TrendChart(props: {
     } = props
 
     const theme = useTheme()
-    const classes = useStyles()
 
     // nothing to show for
     if (data?.length < 2) return null
@@ -117,7 +119,7 @@ export default function TrendChart(props: {
                   )
                   .join(" ")
     return (
-        <div className={mini ? classes.mini : undefined}>
+        <Root className={mini ? classes.mini : undefined}>
             <svg
                 viewBox={`0 0 ${vpw} ${vph}`}
                 style={{ maxHeight: mini ? "5vh" : "10vh", maxWidth: "100%" }}
@@ -217,6 +219,6 @@ export default function TrendChart(props: {
                     </g>
                 </g>
             </svg>
-        </div>
+        </Root>
     )
 }

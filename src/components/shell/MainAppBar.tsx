@@ -1,8 +1,7 @@
 import React, { useContext } from "react"
+import { styled } from "@mui/material/styles"
 import clsx from "clsx"
 import { Hidden, Box } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
 import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
 import Typography from "@mui/material/Typography"
@@ -31,62 +30,78 @@ import BridgeButtons from "../ui/BridgeButtons"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
 import DrawerToolsButton from "./DrawerToolsButton"
 
-const useStyles = makeStyles(theme =>
-    createStyles({
-        grow: {
-            flexGrow: 1,
+const PREFIX = "MainAppBar"
+
+const classes = {
+    grow: `${PREFIX}-grow`,
+    appBar: `${PREFIX}-appBar`,
+    appBarShift: `${PREFIX}-appBarShift`,
+    tocBarShift: `${PREFIX}-tocBarShift`,
+    toolBarShift: `${PREFIX}-toolBarShift`,
+    menuButton: `${PREFIX}-menuButton`,
+    hideMobile: `${PREFIX}-hideMobile`,
+}
+
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.grow}`]: {
+        flexGrow: 1,
+    },
+
+    [`& .${classes.appBar}`]: {
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+
+    [`& .${classes.appBarShift}`]: {
+        width: `calc(100% - ${DRAWER_WIDTH}rem)`,
+        marginLeft: `${DRAWER_WIDTH}rem`,
+        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+            width: `calc(100% - ${MOBILE_DRAWER_WIDTH}rem)`,
+            marginLeft: `${MOBILE_DRAWER_WIDTH}rem`,
         },
-        appBar: {
-            transition: theme.transitions.create(["margin", "width"], {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-            }),
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.tocBarShift}`]: {
+        width: `calc(100% - ${TOC_DRAWER_WIDTH}rem)`,
+        marginLeft: `${TOC_DRAWER_WIDTH}rem`,
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.toolBarShift}`]: {
+        width: `calc(100% - ${TOOLS_DRAWER_WIDTH}rem)`,
+        marginRight: `${TOOLS_DRAWER_WIDTH}rem`,
+        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+            width: `calc(100% - ${MOBILE_TOOLS_DRAWER_WIDTH}rem)`,
+            marginRight: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
         },
-        appBarShift: {
-            width: `calc(100% - ${DRAWER_WIDTH}rem)`,
-            marginLeft: `${DRAWER_WIDTH}rem`,
-            [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
-                width: `calc(100% - ${MOBILE_DRAWER_WIDTH}rem)`,
-                marginLeft: `${MOBILE_DRAWER_WIDTH}rem`,
-            },
-            transition: theme.transitions.create(["margin", "width"], {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen,
-            }),
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.menuButton}`]: {
+        marginRight: theme.spacing(1),
+    },
+
+    [`& .${classes.hideMobile}`]: {
+        [theme.breakpoints.down("lg")]: {
+            display: "none",
         },
-        tocBarShift: {
-            width: `calc(100% - ${TOC_DRAWER_WIDTH}rem)`,
-            marginLeft: `${TOC_DRAWER_WIDTH}rem`,
-            transition: theme.transitions.create(["margin", "width"], {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen,
-            }),
-        },
-        toolBarShift: {
-            width: `calc(100% - ${TOOLS_DRAWER_WIDTH}rem)`,
-            marginRight: `${TOOLS_DRAWER_WIDTH}rem`,
-            [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
-                width: `calc(100% - ${MOBILE_TOOLS_DRAWER_WIDTH}rem)`,
-                marginRight: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
-            },
-            transition: theme.transitions.create(["margin", "width"], {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen,
-            }),
-        },
-        menuButton: {
-            marginRight: theme.spacing(1),
-        },
-        hideMobile: {
-            [theme.breakpoints.down("lg")]: {
-                display: "none",
-            },
-        },
-    })
-)
+    },
+}))
 
 function MainToolbar() {
-    const classes = useStyles()
     const { drawerType, toolsMenu, setToolsMenu } = useContext(AppContext)
     const drawerOpen = drawerType !== DrawerType.None
     const toggleToolsMenu = () => setToolsMenu(!toolsMenu)
@@ -158,14 +173,13 @@ function MainToolbar() {
 }
 
 export default function MainAppBar() {
-    const classes = useStyles()
     const { drawerType, toolsMenu } = useContext(AppContext)
     const { darkMode } = useContext(DarkModeContext)
     const drawerOpen = drawerType !== DrawerType.None
     const appBarColor =
         darkMode === "dark" ? "inherit" : UIFlags.widget ? "default" : undefined
     return (
-        <>
+        <Root>
             <Box displayPrint="none">
                 <HideOnScroll>
                     <AppBar
@@ -183,6 +197,6 @@ export default function MainAppBar() {
                     </AppBar>
                 </HideOnScroll>
             </Box>
-        </>
+        </Root>
     )
 }

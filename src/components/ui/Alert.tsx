@@ -1,22 +1,27 @@
 import { Collapse } from "@mui/material"
-import createStyles from "@mui/styles/createStyles"
-import makeStyles from "@mui/styles/makeStyles"
+import { styled } from "@mui/material/styles"
 import { Alert as MaterialAlert, AlertTitle } from "@mui/material"
 import { AlertProps } from "@mui/lab"
 import React, { ReactNode, useState } from "react"
 
-const useStyles = makeStyles(theme =>
-    createStyles({
-        root: {
-            marginTop: theme.spacing(1),
-            marginBottom: theme.spacing(2),
-        },
-        icon: {
-            flexDirection: "column",
-            justifyContent: "center",
-        },
-    })
-)
+const PREFIX = "Alert"
+
+const classes = {
+    root: `${PREFIX}-root`,
+    icon: `${PREFIX}-icon`,
+}
+
+const StyledCollapse = styled(Collapse)(({ theme }) => ({
+    [`& .${classes.root}`]: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(2),
+    },
+
+    [`& .${classes.icon}`]: {
+        flexDirection: "column",
+        justifyContent: "center",
+    },
+}))
 
 export default function Alert(
     props: {
@@ -26,11 +31,11 @@ export default function Alert(
     } & AlertProps
 ) {
     const { closeable, title, children, ...others } = props
-    const classes = useStyles()
+
     const [open, setOpen] = useState(true)
     const handleClose = () => setOpen(false)
     return (
-        <Collapse in={open}>
+        <StyledCollapse in={open}>
             <MaterialAlert
                 className={classes.root}
                 classes={{
@@ -42,6 +47,6 @@ export default function Alert(
                 {title && <AlertTitle>{title}</AlertTitle>}
                 {children}
             </MaterialAlert>
-        </Collapse>
+        </StyledCollapse>
     )
 }

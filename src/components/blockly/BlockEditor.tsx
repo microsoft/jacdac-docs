@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef } from "react"
+import { styled } from "@mui/material/styles"
 import { useBlocklyWorkspace } from "react-blockly"
 import { WorkspaceSvg } from "blockly"
 import Theme from "@blockly/theme-modern"
@@ -6,9 +7,6 @@ import DarkTheme from "@blockly/theme-dark"
 import BlocklyModalDialogs from "./BlocklyModalDialogs"
 import DarkModeContext from "../ui/DarkModeContext"
 import AppContext from "../AppContext"
-import { Theme as MaterialTheme } from "@mui/material"
-import createStyles from "@mui/styles/createStyles"
-import makeStyles from "@mui/styles/makeStyles"
 import clsx from "clsx"
 import { withPrefix } from "gatsby"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
@@ -17,9 +15,15 @@ import { useBlockMinimap } from "./BlockMinimap"
 import BrowserCompatibilityAlert from "../ui/BrowserCompatibilityAlert"
 import { UIFlags } from "../../jacdac/providerbus"
 
-const useStyles = makeStyles((theme: MaterialTheme) =>
-    createStyles({
-        editor: {
+const PREFIX = "BlockEditor"
+
+const classes = {
+    editor: `${PREFIX}-editor`,
+}
+
+const StyledSuspendedBlockEditor = styled(SuspendedBlockEditor)(
+    ({ theme }) => ({
+        [`& .${classes.editor}`]: {
             height: `calc(100vh - ${
                 UIFlags.hosted ? 3.5 : Flags.diagnostics ? 15 : 10
             }rem)`,
@@ -55,7 +59,7 @@ function SuspendedBlockEditor(props: { editorId: string; className?: string }) {
         setWorkspaceXml,
         setEditorId,
     } = useContext(BlockContext)
-    const classes = useStyles()
+
     const { darkMode } = useContext(DarkModeContext)
     const { setError } = useContext(AppContext)
     const theme = darkMode === "dark" ? DarkTheme : Theme
@@ -144,5 +148,5 @@ export default function BlockEditor(props: {
     const { toolboxConfiguration } = useContext(BlockContext)
 
     if (!toolboxConfiguration) return null
-    return <SuspendedBlockEditor {...props} />
+    return <StyledSuspendedBlockEditor {...props} />
 }

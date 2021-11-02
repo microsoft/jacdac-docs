@@ -1,4 +1,5 @@
 import React, { useContext } from "react"
+import { styled } from "@mui/material/styles"
 import {
     Drawer,
     List,
@@ -7,8 +8,6 @@ import {
     ListItem,
     Divider,
 } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
 import { IconButton, Link } from "gatsby-theme-material-ui"
 import {
     MOBILE_BREAKPOINT,
@@ -43,31 +42,39 @@ import { UIFlags } from "../../jacdac/providerbus"
 import { resolveUnit } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import JacdacIcon from "../icons/JacdacIcon"
 
-const useStyles = makeStyles(theme =>
-    createStyles({
-        drawer: {
-            width: `${TOOLS_DRAWER_WIDTH}rem`,
-            flexShrink: 0,
-            [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
-                width: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
-            },
+const PREFIX = "ToolsDrawer"
+
+const classes = {
+    drawer: `${PREFIX}-drawer`,
+    drawerPaper: `${PREFIX}-drawerPaper`,
+    drawerHeader: `${PREFIX}-drawerHeader`,
+}
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+    [`&.${classes.drawer}`]: {
+        width: `${TOOLS_DRAWER_WIDTH}rem`,
+        flexShrink: 0,
+        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+            width: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
         },
-        drawerPaper: {
-            width: `${TOOLS_DRAWER_WIDTH}rem`,
-            [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
-                width: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
-            },
+    },
+
+    [`& .${classes.drawerPaper}`]: {
+        width: `${TOOLS_DRAWER_WIDTH}rem`,
+        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+            width: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
         },
-        drawerHeader: {
-            display: "flex",
-            alignItems: "center",
-            padding: theme.spacing(0, 1),
-            // necessary for content to be below app bar
-            ...theme.mixins.toolbar,
-            justifyContent: "flex-start",
-        },
-    })
-)
+    },
+
+    [`& .${classes.drawerHeader}`]: {
+        display: "flex",
+        alignItems: "center",
+        padding: theme.spacing(0, 1),
+        // necessary for content to be below app bar
+        ...theme.mixins.toolbar,
+        justifyContent: "flex-start",
+    },
+}))
 
 function ToolsListItem(props: {
     text?: string
@@ -84,6 +91,7 @@ function ToolsListItem(props: {
             href={href}
             target={href ? "_blank" : undefined}
             onClick={to ? onClose : undefined}
+            underline="none"
         >
             <ListItem button={true}>
                 <ListItemIcon>{icon}</ListItemIcon>
@@ -105,7 +113,6 @@ function ToolsListItem(props: {
 }
 
 export default function ToolsDrawer() {
-    const classes = useStyles()
     const {
         toolsMenu,
         setToolsMenu,
@@ -217,7 +224,7 @@ export default function ToolsDrawer() {
     if (!toolsMenu) return null
 
     return (
-        <Drawer
+        <StyledDrawer
             className={classes.drawer}
             variant="persistent"
             anchor="right"
@@ -262,6 +269,6 @@ export default function ToolsDrawer() {
                     </ListItemText>
                 </ListItem>
             </List>
-        </Drawer>
+        </StyledDrawer>
     )
 }

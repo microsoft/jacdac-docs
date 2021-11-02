@@ -1,18 +1,14 @@
-import React, { useRef, useState } from "react"
-import { Box, Button } from "@mui/material"
+import React, { ChangeEvent } from "react"
+import { Button } from "@mui/material"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser"
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
-import {
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-} from "@mui/material"
-import { useId } from "react-use-id-hook"
 import { toArray } from "../../jacdac-ts/src/jdom/utils"
+import { useId } from "react-use-id-hook"
+import { IconButton } from "gatsby-material-ui-components"
 
 const MAX_SIZE = 5000000
+
 export default function ImportButton(props: {
     icon?: boolean
     text: string
@@ -31,57 +27,44 @@ export default function ImportButton(props: {
         multiple,
         className,
     } = props
-    const fileId = useId()
-    const fileRef = useRef<HTMLInputElement>()
-    const [open, setOpen] = useState(false)
-
-    const handleOpen = () => {
-        setOpen(true)
-    }
-    const handleSave = () => {
-        const files = toArray(fileRef.current.files)?.filter(
-            f => f.size < MAX_SIZE
-        )
+    const inputId = useId()
+    const handleSave = (ev: ChangeEvent<HTMLInputElement>) => {
+        const { target } = ev
+        const files = toArray(target.files)?.filter(f => f.size < MAX_SIZE)
         if (files?.length) onFilesUploaded(files)
-        setOpen(false)
     }
-    const handleClose = () => setOpen(false)
+    const ip = (
+        <input
+            id={inputId}
+            type="file"
+            hidden
+            accept={acceptedFiles?.join(",")}
+            multiple={multiple}
+            onChange={handleSave}
+        />
+    )
 
-    return (
-        <Box className={className}>
-            {icon && (
-                <IconButtonWithTooltip title={text} onClick={handleOpen}>
-                    <OpenInBrowserIcon />
-                </IconButtonWithTooltip>
-            )}
-            {!icon && (
-                <Button
-                    disabled={disabled}
-                    variant="outlined"
-                    onClick={handleOpen}
-                    startIcon={<OpenInBrowserIcon />}
-                >
-                    {text}
-                </Button>
-            )}
-            {open && (
-                <Dialog open={open} onClose={handleClose}>
-                    <DialogTitle>Import file</DialogTitle>
-                    <DialogContent>
-                        <input
-                            ref={fileRef}
-                            id={fileId}
-                            type="file"
-                            accept={acceptedFiles?.join(",")}
-                            multiple={multiple}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleClose}>cancel</Button>
-                        <Button onClick={handleSave}>import</Button>
-                    </DialogActions>
-                </Dialog>
-            )}
-        </Box>
+    return icon ? (
+        <label htmlFor={inputId}>
+            <IconButtonWithTooltip
+                title={text || "import"}
+                className={className}
+                disabled={disabled}
+            >
+                <OpenInBrowserIcon />
+                {ip}
+            </IconButtonWithTooltip>
+        </label>
+    ) : (
+        <Button
+            className={className}
+            variant="contained"
+            component="label"
+            disabled={disabled}
+            startIcon={icon || <OpenInBrowserIcon />}
+        >
+            {text || "import"}
+            {ip}
+        </Button>
     )
 }

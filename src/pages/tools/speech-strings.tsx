@@ -6,7 +6,6 @@ import React, {
     useRef,
     useState,
 } from "react"
-import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import { Card, CardActions, Grid, TextField } from "@mui/material"
 import useChange from "../../jacdac/useChange"
 import JDService from "../../../jacdac-ts/src/jdom/service"
@@ -59,7 +58,6 @@ function bufferToPhrase(key: string, data: Uint8Array): Phrase {
 }
 
 export default function HIDEvents() {
-    const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { setError } = useContext(AppContext)
     const settingsServices = useServices({ serviceClass: SRV_SETTINGS })
     const [settingsService, setSettingsService] = useState<JDService>()
@@ -139,16 +137,6 @@ export default function HIDEvents() {
         )
     }
 
-    const exportUri =
-        phrases &&
-        `data:application/json;charset=UTF-8,${encodeURIComponent(
-            JSON.stringify(
-                clone(phrases).map(h => {
-                    delete h.key
-                    return h
-                })
-            )
-        )}`
     useEffect(() => {
         if (exportRef.current)
             (exportRef.current as HTMLAnchorElement).download = "phrases.json"

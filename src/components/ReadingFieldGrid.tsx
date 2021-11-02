@@ -55,7 +55,7 @@ function ReadingFieldGridItem(props: {
                                 style={{
                                     color:
                                         (registerChecked &&
-                                            liveDataSet?.colorOf(field)) ||
+                                            liveDataSet?.colorOf(field)?.[0]) ||
                                         "#ccc",
                                 }}
                             />

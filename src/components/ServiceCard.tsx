@@ -1,6 +1,6 @@
 import React, { useState } from "react"
+import { styled } from "@mui/material/styles"
 import JDService from "../../jacdac-ts/src/jdom/service"
-import makeStyles from "@mui/styles/makeStyles"
 // tslint:disable-next-line: no-submodule-imports
 import Card from "@mui/material/Card"
 // tslint:disable-next-line: no-submodule-imports
@@ -20,19 +20,28 @@ import DecodedPacketItem from "./DecodedPacketItem"
 import ServiceSpecificationStatusAlert from "./specification/ServiceSpecificationStatusAlert"
 import MembersInput from "./fields/MembersInput"
 
-const useStyles = makeStyles({
-    root: {
+const PREFIX = "ServiceCard"
+
+const classes = {
+    root: `${PREFIX}-root`,
+    bullet: `${PREFIX}-bullet`,
+    title: `${PREFIX}-title`,
+    pos: `${PREFIX}-pos`,
+}
+
+const StyledCard = styled(Card)({
+    [`&.${classes.root}`]: {
         minWidth: 275,
     },
-    bullet: {
+    [`& .${classes.bullet}`]: {
         display: "inline-block",
         margin: "0 2px",
         transform: "scale(0.8)",
     },
-    title: {
+    [`& .${classes.title}`]: {
         fontSize: 14,
     },
-    pos: {
+    [`& .${classes.pos}`]: {
         marginBottom: 12,
     },
 })
@@ -59,7 +68,7 @@ export default function ServiceCard(props: {
     const [reports, setReports] = useState<DecodedPacket[]>(undefined)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [commandArgs, setCommandArgs] = useState<any[]>([])
-    const classes = useStyles()
+
     const hasCommandIdentifier = commandIdentifier !== undefined
     const hasRegisterIdentifiers = !!registerIdentifiers?.length
     const hasEventIdentifiers = !!eventIdentifiers?.length
@@ -70,7 +79,7 @@ export default function ServiceCard(props: {
         )
 
     return (
-        <Card className={classes.root}>
+        <StyledCard className={classes.root}>
             <DeviceCardHeader device={service.device} showAvatar={true} />
             <CardContent>
                 {showServiceName && (
@@ -146,6 +155,6 @@ export default function ServiceCard(props: {
                     />
                 )}
             </CardActions>
-        </Card>
+        </StyledCard>
     )
 }

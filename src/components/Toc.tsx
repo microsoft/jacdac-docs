@@ -1,7 +1,6 @@
 import React, { useContext, useMemo } from "react"
-import { Theme, List, ListItem, Typography, useTheme, Box } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
+import { styled } from "@mui/material/styles"
+import { List, ListItem, Typography, useTheme, Box } from "@mui/material"
 import { Link } from "gatsby-theme-material-ui"
 // tslint:disable-next-line: no-submodule-imports
 import ListItemText from "@mui/material/ListItemText"
@@ -9,21 +8,25 @@ import AppContext, { DrawerType } from "./AppContext"
 import { graphql, useStaticQuery } from "gatsby"
 import useMediaQueries from "./hooks/useMediaQueries"
 
+const PREFIX = "Toc"
+
+const classes = {
+    root: `${PREFIX}-root`,
+}
+
+const StyledList = styled(List)(({ theme }) => ({
+    [`&.${classes.root}`]: {
+        width: "100%",
+        backgroundColor: theme.palette.background.paper,
+    },
+}))
+
 interface TocNode {
     name: string
     path: string
     order: number
     children?: TocNode[]
 }
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            width: "100%",
-            backgroundColor: theme.palette.background.paper,
-        },
-    })
-)
 
 function treeifyToc(toc: TocNode[]) {
     let tree = toc.slice(0)
@@ -71,7 +74,6 @@ export default function Toc(props: { pagePath: string }) {
     const { setDrawerType } = useContext(AppContext)
     const { mobile } = useMediaQueries()
     const theme = useTheme()
-    const classes = useStyles()
 
     const data = useStaticQuery(graphql`
         query {
@@ -213,6 +215,7 @@ export default function Toc(props: { pagePath: string }) {
                         style={{ color: theme.palette.text.primary }}
                         onClick={handleClick}
                         to={path}
+                        underline="none"
                     >
                         <ListItemText
                             primary={
@@ -241,11 +244,11 @@ export default function Toc(props: { pagePath: string }) {
     }
 
     return (
-        <List dense className={classes.root}>
+        <StyledList dense className={classes.root}>
             {tree.map(entry => (
                 // eslint-disable-next-line react/prop-types
                 <TocListItem key={entry.path} entry={entry} level={0} />
             ))}
-        </List>
+        </StyledList>
     )
 }
