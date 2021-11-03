@@ -2,10 +2,9 @@ import React, { ChangeEvent } from "react"
 import { Button } from "@mui/material"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser"
-import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
+import IconButton from "@mui/material/IconButton"
 import { toArray } from "../../jacdac-ts/src/jdom/utils"
 import { useId } from "react-use-id-hook"
-import { IconButton } from "gatsby-material-ui-components"
 
 const MAX_SIZE = 5000000
 
@@ -46,14 +45,15 @@ export default function ImportButton(props: {
 
     return icon ? (
         <label htmlFor={inputId}>
-            <IconButtonWithTooltip
+            <IconButton
                 title={text || "import"}
                 className={className}
                 disabled={disabled}
+                component="span"
             >
                 <OpenInBrowserIcon />
                 {ip}
-            </IconButtonWithTooltip>
+            </IconButton>
         </label>
     ) : (
         <Button
