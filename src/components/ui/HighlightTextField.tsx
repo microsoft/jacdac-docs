@@ -14,23 +14,23 @@ import DarkModeContext from "./DarkModeContext"
 import { useEditable } from "use-editable"
 import { Alert } from "@mui/material"
 import { Grid, Tooltip } from "@mui/material"
-import withStyles from "@mui/styles/withStyles"
+import { styled } from "@mui/material/styles"
 import Suspense from "../ui/Suspense"
 const GithubPullRequestButton = lazy(
     () => import("../buttons/GithubPullRequestButton")
 )
 
-const AnnotationTooltip = withStyles(theme => ({
-    arrow: {
+const AnnotationTooltip = styled(Tooltip)(({ theme }) => ({
+    [`& .arrow`]: {
         color: theme.palette.error.main,
     },
-    tooltip: {
+    [`& .tooltip`]: {
         backgroundColor: theme.palette.error.main,
         color: theme.palette.common.white,
         boxShadow: theme.shadows[1],
         fontSize: theme.typography.body2.fontSize,
     },
-}))(Tooltip)
+}))
 
 export default function HighlightTextField(props: {
     language: string
