@@ -22,7 +22,7 @@ const classes = {
     button: `${PREFIX}-button`,
 }
 
-const StyledNoSsr = styled(NoSsr)(() => ({
+const Root = styled("div")(() => ({
     [`& .${classes.button}`]: {
         color: "grey",
     },
@@ -142,9 +142,9 @@ export default function VegaLiteWidget(props: {
     const showToolbar = !!handleCopy || !!handleExport
 
     return (
-        <StyledNoSsr>
+        <NoSsr>
             <PointerBoundary>
-                <div style={{ background: "#fff", borderRadius: "0.25rem" }}>
+                <Root style={{ background: "#fff", borderRadius: "0.25rem" }}>
                     <Grid container direction="column" spacing={1}>
                         {showToolbar && (
                             <Grid item xs={12}>
@@ -194,8 +194,8 @@ export default function VegaLiteWidget(props: {
                             </Suspense>
                         </Grid>
                     </Grid>
-                </div>
+                </Root>
             </PointerBoundary>
-        </StyledNoSsr>
+        </NoSsr>
     )
 }

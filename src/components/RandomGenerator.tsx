@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { styled } from "@mui/material/styles"
 import {
     deviceSpecificationFromProductIdentifier,
     serviceSpecificationFromClassIdentifier,
@@ -8,6 +7,7 @@ import {
     Card,
     CardContent,
     CardActions,
+    CardHeader,
     Typography,
     Input,
 } from "@mui/material"
@@ -20,23 +20,6 @@ import { NoSsr } from "@mui/material"
 import { useId } from "react-use-id-hook"
 import { cryptoRandomUint32 } from "../../jacdac-ts/src/jdom/random"
 import { toFullHex } from "../../jacdac-ts/src/jdom/utils"
-
-const PREFIX = "RandomGenerator"
-
-const classes = {
-    root: `${PREFIX}-root`,
-    title: `${PREFIX}-title`,
-}
-
-const StyledNoSsr = styled(NoSsr)({
-    [`& .${classes.root}`]: {
-        minWidth: 275,
-        marginBottom: "1rem",
-    },
-    [`& .${classes.title}`]: {
-        fontSize: 14,
-    },
-})
 
 function looksRandom(n: number) {
     const s = n.toString(16)
@@ -124,17 +107,10 @@ export default function RandomGenerator(props: {
         ? "Random Product Identifier"
         : "Random Service Identifier"
     return (
-        <StyledNoSsr>
-            <Card className={classes.root}>
+        <NoSsr>
+            <Card>
+                <CardHeader title={title} />
                 <CardContent>
-                    <Typography
-                        id={labelId}
-                        className={classes.title}
-                        color="textSecondary"
-                        gutterBottom
-                    >
-                        {title}
-                    </Typography>
                     {value !== undefined && (
                         <Typography variant="h5" component="h2">
                             <Input
@@ -174,6 +150,6 @@ export default function RandomGenerator(props: {
                     </Button>
                 </CardActions>
             </Card>
-        </StyledNoSsr>
+        </NoSsr>
     )
 }
