@@ -1,16 +1,6 @@
 import React, { ReactNode, useContext } from "react"
-import {
-    Box,
-    Grid,
-    MenuItem,
-    Select,
-    TextField,
-    Tooltip,
-    Theme,
-} from "@mui/material"
-
-import makeStyles from "@mui/styles/makeStyles"
-import createStyles from "@mui/styles/createStyles"
+import { styled } from "@mui/material/styles"
+import { Box, Grid, MenuItem, Select, TextField, Tooltip } from "@mui/material"
 
 import { ReactFieldJSON } from "../ReactField"
 import ReactInlineField from "../ReactInlineField"
@@ -20,6 +10,24 @@ import WorkspaceContext from "../../WorkspaceContext"
 
 import { useId } from "react-use-id-hook"
 import ExpandModelBlockField from "./ExpandModelBlockField"
+
+const PREFIX = "ConvLayerBlockField"
+
+const classes = {
+    fieldContainer: `${PREFIX}-fieldContainer`,
+    field: `${PREFIX}-field`,
+}
+
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.fieldContainer}`]: {
+        lineHeight: "2.5rem",
+        width: "15rem",
+    },
+
+    [`& .${classes.field}`]: {
+        width: theme.spacing(10),
+    },
+}))
 
 export interface ConvLayerFieldValue {
     percentParams: number
@@ -32,22 +40,9 @@ export interface ConvLayerFieldValue {
     activation: string
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        fieldContainer: {
-            lineHeight: "2.5rem",
-            width: "15rem",
-        },
-        field: {
-            width: theme.spacing(10),
-        },
-    })
-)
-
 function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
     const { initFieldValue } = props
     const { sourceBlock } = useContext(WorkspaceContext)
-    const classes = useStyles()
 
     const { percentSize, percentParams, outputShape, runTimeInMs } =
         initFieldValue
@@ -108,79 +103,82 @@ function LayerParameterWidget(props: { initFieldValue: ConvLayerFieldValue }) {
     }
 
     return (
-        <PointerBoundary>
-            <Grid container spacing={1} direction={"column"}>
-                <Grid item className={classes.fieldContainer}>
-                    <Box color="text.secondary">
-                        filters&emsp;
-                        <Tooltip title="Update the kernel size">
-                            <TextField
-                                id={useId() + "filters"}
-                                type="number"
-                                size="small"
-                                variant="outlined"
-                                defaultValue={numFilters}
-                                onChange={handleChangedFilters}
-                                className={classes.field}
-                            />
-                        </Tooltip>
-                    </Box>
-                    <Box color="text.secondary">
-                        kernel size&emsp;
-                        <Tooltip title="Update the kernel size">
-                            <TextField
-                                id={useId() + "kernelSize"}
-                                type="number"
-                                size="small"
-                                variant="outlined"
-                                defaultValue={kernelSize}
-                                onChange={handleChangedKernelSize}
-                                className={classes.field}
-                            />
-                        </Tooltip>
-                    </Box>
-                    <Box color="text.secondary">
-                        stride&emsp;
-                        <Tooltip title="Update the stride">
-                            <TextField
-                                id={useId() + "stride"}
-                                type="number"
-                                size="small"
-                                variant="outlined"
-                                defaultValue={strideSize}
-                                onChange={handleChangedStrides}
-                                className={classes.field}
-                            />
-                        </Tooltip>
-                    </Box>
-                    <Box color="text.secondary">
-                        activation&emsp;
-                        <Tooltip title="Update the activation function">
-                            <Select
-                                id={useId() + "activation"}
-                                variant="outlined"
-                                defaultValue={activation}
-                                onChange={handleChangedActivation}
-                            >
-                                <MenuItem value="softmax">softmax</MenuItem>
-                                <MenuItem value="linear">linear</MenuItem>
-                                <MenuItem value="relu">relu</MenuItem>
-                            </Select>
-                        </Tooltip>
-                    </Box>
+        <Root>
+            <PointerBoundary>
+                <Grid container spacing={1} direction={"column"}>
+                    <Grid item className={classes.fieldContainer}>
+                        <Box color="text.secondary">
+                            filters&emsp;
+                            <Tooltip title="Update the kernel size">
+                                <TextField
+                                    id={useId() + "filters"}
+                                    type="number"
+                                    size="small"
+                                    variant="outlined"
+                                    defaultValue={numFilters}
+                                    onChange={handleChangedFilters}
+                                    className={classes.field}
+                                />
+                            </Tooltip>
+                        </Box>
+                        <Box color="text.secondary">
+                            kernel size&emsp;
+                            <Tooltip title="Update the kernel size">
+                                <TextField
+                                    id={useId() + "kernelSize"}
+                                    type="number"
+                                    size="small"
+                                    variant="outlined"
+                                    defaultValue={kernelSize}
+                                    onChange={handleChangedKernelSize}
+                                    className={classes.field}
+                                />
+                            </Tooltip>
+                        </Box>
+                        <Box color="text.secondary">
+                            stride&emsp;
+                            <Tooltip title="Update the stride">
+                                <TextField
+                                    id={useId() + "stride"}
+                                    type="number"
+                                    size="small"
+                                    variant="outlined"
+                                    defaultValue={strideSize}
+                                    onChange={handleChangedStrides}
+                                    className={classes.field}
+                                />
+                            </Tooltip>
+                        </Box>
+                        <Box color="text.secondary">
+                            activation&emsp;
+                            <Tooltip title="Update the activation function">
+                                <Select
+                                    id={useId() + "activation"}
+                                    variant="outlined"
+                                    defaultValue={activation}
+                                    onChange={handleChangedActivation}
+                                >
+                                    <MenuItem value="softmax">softmax</MenuItem>
+                                    <MenuItem value="linear">linear</MenuItem>
+                                    <MenuItem value="relu">relu</MenuItem>
+                                </Select>
+                            </Tooltip>
+                        </Box>
+                    </Grid>
+                    <Grid item>
+                        <Box color="text.secondary">
+                            Output shape: [{outputShape.join(", ")}]<br />
+                            Percent of total size: {percentSize.toPrecision(2)}%
+                            <br />
+                            Percent of total params:{" "}
+                            {percentParams.toPrecision(2)}%
+                            <br />
+                            Run time: {runTimeInMs.toPrecision(2)} ms <br />
+                        </Box>
+                    </Grid>
                 </Grid>
-                <Grid item>
-                    <Box color="text.secondary">
-                        Output shape: [{outputShape.join(", ")}]<br />
-                        Percent of total size: {percentSize.toPrecision(2)}%
-                        <br />
-                        Percent of total params: {percentParams.toPrecision(2)}%
-                        <br />
-                        Run time: {runTimeInMs.toPrecision(2)} ms <br />
-                    </Box>
-                </Grid>
-            </Grid>
-        </PointerBoundary>
+            </PointerBoundary>
+        </Root>
     )
 }
 
