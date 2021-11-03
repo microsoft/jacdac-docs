@@ -1,4 +1,5 @@
 import { darken, lighten, Theme } from "@mui/material"
+import { styled } from "@mui/material/styles"
 import createStyles from "@mui/styles/createStyles"
 import makeStyles from "@mui/styles/makeStyles"
 import { Button } from "gatsby-theme-material-ui"
@@ -18,23 +19,31 @@ import useMounted from "./hooks/useMounted"
 import clsx from "clsx"
 import JacdacContext, { JacdacContextProps } from "../jacdac/Context"
 
+const PREFIX = "CmdButton"
+
+const classes = {
+    ack: `${PREFIX}-ack`,
+    error: `${PREFIX}-error`,
+}
+
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.ack}`]: {
+        color: "#fff",
+        fontWeight: theme.typography.fontWeightMedium,
+        backgroundColor: theme.palette.success.main,
+    },
+
+    [`& .${classes.error}`]: {
+        color: "#fff",
+        backgroundColor: (theme.palette.mode === "light" ? lighten : darken)(
+            theme.palette.error.main,
+            0.6
+        ),
+    },
+}))
+
 const ACK_RESET_DELAY = 500
 const ERROR_RESET_DELAY = 2000
-
-const useStyles = makeStyles((theme: Theme) => {
-    const getBackgroundColor = theme.palette.mode === "light" ? lighten : darken
-    return createStyles({
-        ack: {
-            color: "#fff",
-            fontWeight: theme.typography.fontWeightMedium,
-            backgroundColor: theme.palette.success.main,
-        },
-        error: {
-            color: "#fff",
-            backgroundColor: getBackgroundColor(theme.palette.error.main, 0.6),
-        },
-    })
-})
 
 export default function CmdButton(props: {
     onClick: (mounted: () => boolean) => Promise<void>
@@ -71,7 +80,7 @@ export default function CmdButton(props: {
     } = props
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { setError: setAppError } = useContext(AppContext)
-    const classes = useStyles()
+
     const [working, setWorking] = useState(false)
     const [ack, setAck] = useState(false)
     const [error, setError] = useState(undefined)
@@ -125,36 +134,37 @@ export default function CmdButton(props: {
         if (autoRun && mounted()) run()
     }, [autoRun])
 
-    if (!children && icon)
-        return (
-            <IconButtonWithTooltip
-                className={elClassName}
-                style={style}
-                onClick={handleClick}
-                aria-label={title}
-                title={title}
-                disabled={_disabled}
-                color={color}
-                {...others}
-            >
-                {statusIcon || icon}
-            </IconButtonWithTooltip>
-        )
-    else
-        return (
-            <Button
-                className={elClassName}
-                style={style}
-                startIcon={icon}
-                endIcon={statusIcon}
-                onClick={handleClick}
-                aria-label={title}
-                title={title}
-                disabled={_disabled}
-                color={color}
-                {...others}
-            >
-                {children}
-            </Button>
-        )
+    return (
+        <Root>
+            {!children && icon ? (
+                <IconButtonWithTooltip
+                    className={elClassName}
+                    style={style}
+                    onClick={handleClick}
+                    aria-label={title}
+                    title={title}
+                    disabled={_disabled}
+                    color={color}
+                    {...others}
+                >
+                    {statusIcon || icon}
+                </IconButtonWithTooltip>
+            ) : (
+                <Button
+                    className={elClassName}
+                    style={style}
+                    startIcon={icon}
+                    endIcon={statusIcon}
+                    onClick={handleClick}
+                    aria-label={title}
+                    title={title}
+                    disabled={_disabled}
+                    color={color}
+                    {...others}
+                >
+                    {children}
+                </Button>
+            )}
+        </Root>
+    )
 }
