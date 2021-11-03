@@ -12,7 +12,7 @@ const classes = {
     table: `${PREFIX}-table`,
 }
 
-const StyledVariablesWidget = styled(VariablesWidget)(({ theme }) => ({
+const Root = styled("div")(({ theme }) => ({
     [`& .${classes.table}`]: {
         padding: 0,
         margin: 0,
@@ -72,6 +72,10 @@ export default class VariablesField extends ReactInlineField {
     }
 
     renderInlineField() {
-        return <StyledVariablesWidget />
+        return (
+            <Root>
+                <VariablesWidget />
+            </Root>
+        )
     }
 }
