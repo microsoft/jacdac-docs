@@ -42,8 +42,6 @@ import { dependencyId } from "../../../jacdac-ts/src/jdom/eventsource"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import { lightEncode } from "../../../jacdac-ts/src/jdom/light"
 import { LedPixelCmd, LedCmd } from "../../../jacdac-ts/src/jdom/constants"
-import createStyles from "@mui/styles/createStyles"
-import makeStyles from "@mui/styles/makeStyles"
 import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 import FileSystemContext from "../../components/FileSystemContext"
 import FileTabs from "../../components/fs/FileTabs"
@@ -51,19 +49,6 @@ import useChange from "../../jacdac/useChange"
 import AppContext from "../../components/AppContext"
 import { ControlReg } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import { LedPixelReg } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
-
-const useStyles = makeStyles(() =>
-    createStyles({
-        buttonFail: {
-            color: "white",
-            backgroundColor: "red",
-        },
-        buttonSuccess: {
-            color: "white",
-            backgroundColor: "green",
-        },
-    })
-)
 
 interface ServiceDescriptor {
     name: string
@@ -115,7 +100,6 @@ function DataSetTable(props: {
     updateDescriptor: (DeviceDescriptor) => void
     className?: string
 }) {
-    const classes = useStyles()
     const { dataSet, updateDescriptor } = props
     const { descriptors, headers } = dataSet
 
@@ -185,7 +169,7 @@ function DataSetTable(props: {
                                     <Button
                                         aria-label="Toggle pass state"
                                         variant="contained"
-                                        className={classes.buttonSuccess}
+                                        color="success"
                                         onClick={setPass(descriptor, false)}
                                         startIcon={
                                             <CheckCircle fontSize="small" />
@@ -198,7 +182,7 @@ function DataSetTable(props: {
                                     <Button
                                         aria-label="Toggle pass state"
                                         variant="contained"
-                                        className={classes.buttonFail}
+                                        color="error"
                                         onClick={setPass(descriptor, true)}
                                         startIcon={
                                             <CancelIcon fontSize="small" />
