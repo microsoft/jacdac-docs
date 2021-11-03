@@ -1,7 +1,5 @@
-import { darken, lighten, Theme } from "@mui/material"
+import { darken, lighten } from "@mui/material"
 import { styled } from "@mui/material/styles"
-import createStyles from "@mui/styles/createStyles"
-import makeStyles from "@mui/styles/makeStyles"
 import { Button } from "gatsby-theme-material-ui"
 import React, {
     CSSProperties,
