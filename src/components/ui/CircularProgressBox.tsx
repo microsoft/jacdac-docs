@@ -1,5 +1,5 @@
 import { Box, CircularProgress, useTheme } from "@mui/material"
-import React, { AriaAttributes } from "react"
+import React, { AriaAttributes, ReactNode } from "react"
 import { useId } from "react-use-id-hook"
 
 export interface CircularProgressBoxProps {
@@ -11,7 +11,7 @@ export interface CircularProgressBoxProps {
 
 export default function CircularProgressBox(
     props: {
-        children: JSX.Element | JSX.Element[]
+        children?: ReactNode
     } & CircularProgressBoxProps &
         AriaAttributes
 ) {
