@@ -1,7 +1,7 @@
 import React, { lazy, useContext } from "react"
+import { styled } from "@mui/material/styles"
 import clsx from "clsx"
 import { Container } from "@mui/material"
-import makeStyles from "@mui/styles/makeStyles"
 import Typography from "@mui/material/Typography"
 import "./layout.css"
 import SEO from "./shell/SEO"
@@ -10,7 +10,6 @@ import {
     responsiveFontSizes,
     DeprecatedThemeOptions,
 } from "@mui/material/styles"
-import createStyles from "@mui/styles/createStyles"
 import AppContext, { DrawerType } from "./AppContext"
 import DarkModeProvider from "./ui/DarkModeProvider"
 import DarkModeContext from "./ui/DarkModeContext"
@@ -27,6 +26,103 @@ import DataEditorAppBar from "./shell/DataEditorAppBar"
 import { AlertTitle } from "@mui/material"
 import { UIFlags } from "../jacdac/providerbus"
 
+const PREFIX = "Layout"
+
+const classes = {
+    root: `${PREFIX}-root`,
+    hideMobile: `${PREFIX}-hideMobile`,
+    drawerHeader: `${PREFIX}-drawerHeader`,
+    content: `${PREFIX}-content`,
+    contentPadding: `${PREFIX}-contentPadding`,
+    container: `${PREFIX}-container`,
+    mainContent: `${PREFIX}-mainContent`,
+    appBarShift: `${PREFIX}-appBarShift`,
+    tocBarShift: `${PREFIX}-tocBarShift`,
+    toolBarShift: `${PREFIX}-toolBarShift`,
+}
+
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.root}`]: {
+        display: "flex",
+        flexGrow: 1,
+    },
+
+    [`& .${classes.hideMobile}`]: {
+        [theme.breakpoints.down("lg")]: {
+            display: "none",
+        },
+    },
+
+    [`& .${classes.drawerHeader}`]: {
+        display: "flex",
+        alignItems: "center",
+        padding: theme.spacing(0, 1),
+        // necessary for content to be below app bar
+        ...theme.mixins.toolbar,
+        justifyContent: "flex-end",
+    },
+
+    [`& .${classes.content}`]: {
+        display: "flex",
+        minHeight: "100vh",
+        minWidth: "10rem",
+        flexDirection: "column",
+        transition: theme.transitions.create("margin", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        flexGrow: 1,
+        padding: theme.spacing(0.5),
+    },
+
+    [`& .${classes.contentPadding}`]: {
+        padding: theme.spacing(3),
+    },
+
+    [`& .${classes.container}`]: {
+        padding: theme.spacing(3),
+    },
+
+    [`& .${classes.mainContent}`]: {
+        flexGrow: 1,
+    },
+
+    [`& .${classes.appBarShift}`]: {
+        width: `calc(100% - ${DRAWER_WIDTH}rem)`,
+        marginLeft: `${DRAWER_WIDTH}rem`,
+        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+            width: `calc(100% - ${MOBILE_DRAWER_WIDTH}rem)`,
+            marginLeft: `${MOBILE_DRAWER_WIDTH}rem`,
+        },
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.tocBarShift}`]: {
+        width: `calc(100% - ${TOC_DRAWER_WIDTH}rem)`,
+        marginLeft: `${TOC_DRAWER_WIDTH}rem`,
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+
+    [`& .${classes.toolBarShift}`]: {
+        width: `calc(100% - ${TOOLS_DRAWER_WIDTH}rem)`,
+        marginRight: `${TOOLS_DRAWER_WIDTH}rem`,
+        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+            width: `calc(100% - ${MOBILE_TOOLS_DRAWER_WIDTH}rem)`,
+            marginRight: `${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
+        },
+        transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+}))
+
 const TraceAlert = lazy(() => import("./shell/TraceAlert"))
 const WebDiagnostics = lazy(() => import("./shell/WebDiagnostics"))
 const AppDrawer = lazy(() => import("./shell/AppDrawer"))
@@ -40,66 +136,6 @@ export const MOBILE_DRAWER_WIDTH = 20
 export const MOBILE_TOOLS_DRAWER_WIDTH = 18
 export const MOBILE_BREAKPOINT = "sm"
 export const MEDIUM_BREAKPOINT = "md"
-
-const useStyles = makeStyles(theme =>
-    createStyles({
-        root: {
-            display: "flex",
-            flexGrow: 1,
-        },
-        hideMobile: {
-            [theme.breakpoints.down("lg")]: {
-                display: "none",
-            },
-        },
-        drawerHeader: {
-            display: "flex",
-            alignItems: "center",
-            padding: theme.spacing(0, 1),
-            // necessary for content to be below app bar
-            ...theme.mixins.toolbar,
-            justifyContent: "flex-end",
-        },
-        content: {
-            display: "flex",
-            minHeight: "100vh",
-            minWidth: "10rem",
-            flexDirection: "column",
-            transition: theme.transitions.create("margin", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-            }),
-            flexGrow: 1,
-            padding: theme.spacing(0.5),
-        },
-        contentPadding: {
-            padding: theme.spacing(3),
-        },
-        container: {
-            padding: theme.spacing(3),
-        },
-        mainContent: {
-            flexGrow: 1,
-        },
-        contentShift: {
-            transition: theme.transitions.create("margin", {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen,
-            }),
-        },
-        toolsContentShift: {
-            width: `calc(100% - 0.5rem)`,
-            transition: theme.transitions.create("margin", {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen,
-            }),
-            marginLeft: `-${TOOLS_DRAWER_WIDTH}rem`,
-            [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
-                marginLeft: `-${MOBILE_TOOLS_DRAWER_WIDTH}rem`,
-            },
-        },
-    })
-)
 
 export interface LayoutProps {
     element?: JSX.Element
@@ -194,7 +230,6 @@ function LayoutWithContext(props: LayoutProps) {
     const title = isDataEditor
         ? "Data Science Editor (Experimental)"
         : pageContext?.title || frontmatter?.title || undefined
-    const classes = useStyles()
 
     const { darkMode } = useContext(DarkModeContext)
     const { drawerType, toolsMenu, showWebCam } = useContext(AppContext)
@@ -205,8 +240,9 @@ function LayoutWithContext(props: LayoutProps) {
     const mainClasses = clsx(classes.content, {
         [classes.container]: container,
         [classes.contentPadding]: !fullWidthTools,
-        [classes.contentShift]: drawerOpen,
-        [classes.toolsContentShift]: toolsMenu,
+        [classes.tocBarShift]: drawerType === DrawerType.Toc,
+        [classes.appBarShift]: drawerOpen && drawerType !== DrawerType.Toc,
+        [classes.toolBarShift]: toolsMenu,
     })
 
     const InnerMainSection = () => (
@@ -255,43 +291,45 @@ function LayoutWithContext(props: LayoutProps) {
     )
 
     return (
-        <div className={clsx(darkMode, classes.root)}>
-            <header>
-                <SEO lang="en" title={title} />
-            </header>
-            {!hideMainMenu && (
-                <nav>
-                    {appBar}
-                    {drawerType !== DrawerType.None && (
-                        <Suspense>
-                            <AppDrawer pagePath={path} />
-                        </Suspense>
-                    )}
-                    {toolsMenu && (
-                        <Suspense>
-                            <ToolsDrawer />
-                        </Suspense>
-                    )}
-                </nav>
-            )}
-            {container ? (
-                <Container
-                    maxWidth={"xl"}
-                    disableGutters={true}
-                    className={mainClasses}
-                >
-                    <MainSection />
-                </Container>
-            ) : (
-                <div className={mainClasses}>
-                    <MainSection />
-                </div>
-            )}
-            {showWebCam && (
-                <Suspense>
-                    <WebCam />
-                </Suspense>
-            )}
-        </div>
+        <Root>
+            <div className={clsx(darkMode, classes.root)}>
+                <header>
+                    <SEO lang="en" title={title} />
+                </header>
+                {!hideMainMenu && (
+                    <nav>
+                        {appBar}
+                        {drawerType !== DrawerType.None && (
+                            <Suspense>
+                                <AppDrawer pagePath={path} />
+                            </Suspense>
+                        )}
+                        {toolsMenu && (
+                            <Suspense>
+                                <ToolsDrawer />
+                            </Suspense>
+                        )}
+                    </nav>
+                )}
+                {container ? (
+                    <Container
+                        maxWidth={"xl"}
+                        disableGutters={true}
+                        className={mainClasses}
+                    >
+                        <MainSection />
+                    </Container>
+                ) : (
+                    <div className={mainClasses}>
+                        <MainSection />
+                    </div>
+                )}
+                {showWebCam && (
+                    <Suspense>
+                        <WebCam />
+                    </Suspense>
+                )}
+            </div>
+        </Root>
     )
 }
