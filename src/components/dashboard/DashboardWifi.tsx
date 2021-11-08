@@ -12,6 +12,7 @@ import {
     ListItemIcon,
     ListItemText,
     TextField,
+    Tooltip,
     Typography,
 } from "@mui/material"
 import useWidgetTheme from "../widgets/useWidgetTheme"
@@ -184,11 +185,17 @@ function NetworkListItem(props: {
             >
                 <ListItemIcon>
                     {connected ? (
-                        <WifiIcon />
+                        <Tooltip title="connected">
+                            <WifiIcon />
+                        </Tooltip>
                     ) : connectionFailed ? (
-                        <SignalWifiBadIcon color="error" />
+                        <Tooltip title="connection failed">
+                            <SignalWifiBadIcon color="error" />
+                        </Tooltip>
                     ) : known && !scanned ? (
-                        <SignalWifiStatusbarNullIcon />
+                        <Tooltip title="not found">
+                            <SignalWifiStatusbarNullIcon />
+                        </Tooltip>
                     ) : null}
                 </ListItemIcon>
                 <ListItemText
