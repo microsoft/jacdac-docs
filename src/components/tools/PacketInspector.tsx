@@ -10,6 +10,7 @@ import PacketHeaderLayout from "../PacketHeaderLayout"
 import {
     META_ACK,
     META_GET,
+    META_NOT_IMPLEMENTED,
     META_PIPE,
     META_TRACE,
 } from "../../../jacdac-ts/src/jdom/constants"
@@ -57,6 +58,7 @@ export default function PacketInspector() {
     const pipePackets = packet.meta[META_PIPE] as Packet[]
     const get = packet.meta[META_GET] as Packet
     const sentTrace = packet.meta[META_TRACE] as string
+    const notImplemented = packet.meta[META_NOT_IMPLEMENTED] as Packet
 
     return (
         <>
@@ -112,6 +114,12 @@ export default function PacketInspector() {
                 <>
                     <h3>Ack received</h3>
                     <PacketList packets={[ack]} />
+                </>
+            )}
+            {notImplemented && (
+                <>
+                    <h3>Not implemented report</h3>
+                    <PacketList packets={[notImplemented]} />
                 </>
             )}
             {get && (
