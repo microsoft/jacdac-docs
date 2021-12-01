@@ -82,23 +82,6 @@ export default function DashboardDevice(
     const intersection = useIntersectionObserver(serviceGridRef)
     const visible = !!intersection?.isIntersecting
 
-    const SensorCharts = useCallback(
-        () => (
-            <Grid component="div" container spacing={2}>
-                {sensors?.map(service => (
-                    <DashboardServiceWidgetItem
-                        key={service.id}
-                        service={service}
-                        services={services}
-                        variant={variant}
-                        visible={visible}
-                    />
-                ))}
-            </Grid>
-        ),
-        [dependencyId(services), variant, visible, charts]
-    )
-
     const ServiceWidgets = useCallback(
         () => (
             <Grid
@@ -117,6 +100,7 @@ export default function DashboardDevice(
                         services={services}
                         variant={variant}
                         visible={visible}
+                        charts={charts}
                     />
                 ))}
             </Grid>
@@ -169,7 +153,6 @@ export default function DashboardDevice(
                 <DeviceLostAlert device={device} />
                 <DeviceProxyAlert device={device} />
                 <ServiceWidgets />
-                {charts && <SensorCharts />}
             </CardContent>
         </Card>
     )
