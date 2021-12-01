@@ -47,7 +47,7 @@ function jsonMergeFrom(trg: object, src: object) {
     })
 }
 
-export type VegaLiteChart = unknown
+type VegaLiteChart = unknown
 
 export default function VegaLiteWidget(props: {
     spec: VisualizationSpec
