@@ -37,7 +37,7 @@ export default function DashboardServiceWidgetItem(
             <DashboardServiceWidget {...props} />
             {charts && reading && (
                 <Grid item xs={12}>
-                    <RegisterTrend register={reading} mini={false} />
+                    <RegisterTrend register={reading} mini={false} height={18} />
                 </Grid>
             )}
         </Grid>

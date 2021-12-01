@@ -34,7 +34,7 @@ export default function DashboardDeviceItem(
                 })
                 .reduce((c: number, v) => c + v, 0)
 
-            if (breakpointWeight > 3 || drawerType !== DrawerType.None || charts)
+            if (breakpointWeight > 3 || drawerType !== DrawerType.None)
                 return { xs: 12, sm: 12, md: 12, lg: 6, xl: 6 }
             else if (breakpointWeight == 3)
                 return { xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }
