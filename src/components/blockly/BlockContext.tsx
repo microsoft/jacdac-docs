@@ -54,6 +54,7 @@ import {
     dashify,
     humanify,
 } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
+import { isSensor } from "../../../jacdac-ts/src/jdom/spec"
 
 export interface BlockProps {
     editorId: string
@@ -323,36 +324,33 @@ export function BlockProvider(props: {
         () =>
             bus.subscribe([DEVICE_ANNOUNCE, DEVICE_DISCONNECT], () => {
                 if (!workspace) return
-                const sensors = bus.services({ sensor: true })
-                sensors
-                    .filter(sensor => !workspace.getVariableById(sensor.id))
-                    .forEach(sensor => {
-                        let name = ""
-                        const instanceName = sensor.instanceName
-                        if (instanceName)
-                            name += humanify(dashify(instanceName))
-                        else {
-                            name += humanify(
-                                dashify(sensor.specification.shortName)
-                            )
-                            if (
-                                sensor.device.services({
-                                    serviceClass: sensor.serviceClass,
-                                }).length > 1
-                            )
-                                name += `[${sensor.serviceIndex.toString(16)}]`
-                        }
-                        name += ` (${sensor.device.shortId})`
-                        const sensorVar = workspace.createVariable(
-                            name,
-                            "sensor",
-                            sensor.id
+                const services = bus.services({ ignoreInfrastructure: true })
+                services.forEach(service => {
+                    let name = ""
+                    const instanceName = service.instanceName
+                    if (instanceName) name += humanify(dashify(instanceName))
+                    else {
+                        name += humanify(
+                            dashify(service.specification.shortName)
                         )
-                        console.log("added sensor variable", {
-                            sensor,
-                            sensorVar,
-                        })
+                        if (
+                            service.device.services({
+                                serviceClass: service.serviceClass,
+                            }).length > 1
+                        )
+                            name += `[${service.serviceIndex.toString(16)}]`
+                    }
+                    name += ` (${service.device.shortId})`
+                    const sensorVar = workspace.createVariable(
+                        name,
+                        isSensor(service.specification) ? "sensor" : "service",
+                        service.id
+                    )
+                    console.log("added service variable", {
+                        service,
+                        variable: sensorVar,
                     })
+                })
             }),
         [bus, workspace]
     )

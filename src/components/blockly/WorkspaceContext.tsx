@@ -237,11 +237,11 @@ export function WorkspaceProvider(props: {
         }
         return undefined
     }
-    const resolveSensor = () => {
+    const resolveServiceId = () => {
         const newSourceBlock = field.getSourceBlock()
         const roleInput = newSourceBlock?.inputList[0]
         const roleField = roleInput?.fieldRow.find(
-            f => f.name === "sensor" && f instanceof FieldVariable
+            f => f.name === "service" && f instanceof FieldVariable
         ) as FieldVariable
         if (roleField) {
             const xml = document.createElement("xml")
@@ -254,12 +254,12 @@ export function WorkspaceProvider(props: {
     const resolveTwinService = () => {
         const newRoleService = role && roleManager?.service(role)
         if (newRoleService) return newRoleService
-        const newSensorService = sensor && (bus.node(sensor) as JDService)
+        const newSensorService = serviceId && (bus.node(serviceId) as JDService)
         return newSensorService
     }
 
     const [role, setRole] = useState<string>(resolveRole())
-    const [sensor, setSensor] = useState<string>(resolveSensor())
+    const [serviceId, setServiceId] = useState<string>(resolveServiceId())
     const [twinService, setTwinService] = useState<JDService>(
         resolveTwinService()
     )
@@ -275,7 +275,7 @@ export function WorkspaceProvider(props: {
             const newSourceBlock = field.getSourceBlock()
             setSourceBlock(newSourceBlock)
             setRole(resolveRole())
-            setSensor(resolveSensor())
+            setServiceId(resolveServiceId())
             setFlyout(!!newSourceBlock?.isInFlyout)
         })
     }, [field, workspace, runner])
