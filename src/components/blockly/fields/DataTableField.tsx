@@ -2,7 +2,6 @@ import React from "react"
 import { ReactFieldJSON } from "./ReactField"
 import ReactInlineField from "./ReactInlineField"
 import DataTableWidget from "./DataTableWidget"
-import { SMALL_TABLE_HEIGHT } from "../toolbox"
 
 export interface DataPreviewOptions extends ReactFieldJSON {
     transformed?: boolean
@@ -40,11 +39,9 @@ export default class DataTableField extends ReactInlineField {
     }
 
     renderInlineField() {
-        const tableHeight = this.small ? SMALL_TABLE_HEIGHT : undefined
         return (
             <DataTableWidget
                 maxItems={MAX_ITEMS}
-                tableHeight={tableHeight}
                 transformed={this.transformed}
                 selectColumns={this.selectColumns}
             />
