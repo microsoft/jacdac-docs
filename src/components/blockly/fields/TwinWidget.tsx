@@ -10,18 +10,13 @@ import { REPORT_UPDATE } from "../../../../jacdac-ts/src/jdom/constants"
 import useBlockData from "../useBlockData"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import { toMap } from "../../../../jacdac-ts/src/jdom/utils"
-import JDService from "../../../../jacdac-ts/src/jdom/service"
 
 const DEFAULT_HORIZON = 25
-export default function TwinWidget(props: {
-    service?: JDService
-    horizon?: number
-}) {
-    const { service, horizon = DEFAULT_HORIZON } = props
+export default function TwinWidget() {
+    const horizon = DEFAULT_HORIZON
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const { roleService, flyout, sourceId, sourceBlock } =
+    const { twinService, flyout, sourceId, sourceBlock } =
         useContext(WorkspaceContext)
-    const twinService = service || roleService
     const { data, setData } = useBlockData(sourceBlock, [])
 
     // data collection

@@ -17,6 +17,7 @@ import useChange from "../../jacdac/useChange"
 import { FileSystemDirectory } from "../fs/fsdom"
 import ReactField from "./fields/ReactField"
 import useWorkspaceEvent from "./useWorkspaceEvent"
+import bus from "../../jacdac/providerbus"
 
 export class WorkspaceServices extends JDEventSource {
     static readonly WORKSPACE_CHANGE = "workspaceChange"
@@ -186,7 +187,7 @@ export interface WorkspaceContextProps {
     flyout?: boolean
     role?: string
     roleServiceClass?: number
-    roleService?: JDService
+    twinService?: JDService
     runner?: VMProgramRunner
 }
 
@@ -199,7 +200,7 @@ export const WorkspaceContext = createContext<WorkspaceContextProps>({
     services: undefined,
     role: undefined,
     roleServiceClass: undefined,
-    roleService: undefined,
+    twinService: undefined,
     runner: undefined,
 })
 WorkspaceContext.displayName = "Workspace"
@@ -236,14 +237,31 @@ export function WorkspaceProvider(props: {
         }
         return undefined
     }
-    const resolveRoleService = () => {
+    const resolveSensor = () => {
+        const newSourceBlock = field.getSourceBlock()
+        const roleInput = newSourceBlock?.inputList[0]
+        const roleField = roleInput?.fieldRow.find(
+            f => f.name === "sensor" && f instanceof FieldVariable
+        ) as FieldVariable
+        if (roleField) {
+            const xml = document.createElement("xml")
+            roleField?.toXml(xml)
+            const newSensor = roleField?.getVariable()?.name
+            return newSensor
+        }
+        return undefined
+    }
+    const resolveTwinService = () => {
         const newRoleService = role && roleManager?.service(role)
-        return newRoleService
+        if (newRoleService) return newRoleService
+        const newSensorService = sensor && bus.node(sensor) as JDService
+        return newSensorService
     }
 
     const [role, setRole] = useState<string>(resolveRole())
-    const [roleService, setRoleService] = useState<JDService>(
-        resolveRoleService()
+    const [sensor, setSensor] = useState<string>(resolveSensor())
+    const [twinService, setTwinService] = useState<JDService>(
+        resolveTwinService()
     )
     const roleServiceClass = useChange(
         roleManager,
@@ -257,15 +275,16 @@ export function WorkspaceProvider(props: {
             const newSourceBlock = field.getSourceBlock()
             setSourceBlock(newSourceBlock)
             setRole(resolveRole())
+            setSensor(resolveSensor())
             setFlyout(!!newSourceBlock?.isInFlyout)
         })
     }, [field, workspace, runner])
 
     // resolve current role service
     useEffect(() => {
-        setRoleService(resolveRoleService())
+        setTwinService(resolveTwinService())
         return roleManager?.subscribe(CHANGE, () =>
-            setRoleService(resolveRoleService())
+            setTwinService(resolveTwinService())
         )
     }, [role, runner])
 
@@ -293,7 +312,7 @@ export function WorkspaceProvider(props: {
                 services,
                 role,
                 roleServiceClass,
-                roleService,
+                twinService,
                 runner,
                 flyout,
             }}
