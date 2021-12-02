@@ -341,15 +341,12 @@ export function BlockProvider(props: {
                             name += `[${service.serviceIndex.toString(16)}]`
                     }
                     name += ` (${service.device.shortId})`
-                    const sensorVar = workspace.createVariable(
+                    workspace.createVariable(
                         name,
                         isSensor(service.specification) ? "sensor" : "service",
                         service.id
                     )
-                    console.log("added service variable", {
-                        service,
-                        variable: sensorVar,
-                    })
+                    // TODO: remove unused variables?
                 })
             }),
         [bus, workspace]

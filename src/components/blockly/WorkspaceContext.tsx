@@ -8,7 +8,11 @@ import React, {
     useState,
 } from "react"
 import { WorkspaceJSON } from "./dsl/workspacejson"
-import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
+import {
+    CHANGE,
+    DEVICE_ANNOUNCE,
+    DEVICE_DISCONNECT,
+} from "../../../jacdac-ts/src/jdom/constants"
 import JDEventSource from "../../../jacdac-ts/src/jdom/eventsource"
 import JDService from "../../../jacdac-ts/src/jdom/service"
 import RoleManager from "../../../jacdac-ts/src/jdom/rolemanager"
@@ -283,10 +287,16 @@ export function WorkspaceProvider(props: {
     // resolve current role service
     useEffect(() => {
         setTwinService(resolveTwinService())
-        return roleManager?.subscribe(CHANGE, () =>
-            setTwinService(resolveTwinService())
-        )
-    }, [role, runner])
+        const unsubs = [
+            roleManager?.subscribe(CHANGE, () =>
+                setTwinService(resolveTwinService())
+            ),
+            bus.subscribe([DEVICE_ANNOUNCE, DEVICE_DISCONNECT], () =>
+                setTwinService(resolveTwinService())
+            ),
+        ]
+        return () => unsubs.forEach(unsub => unsub?.())
+    }, [role, serviceId, roleManager, runner])
 
     const handleWorkspaceEvent = useCallback(
         (event: Events.Abstract & { type: string }) => {
