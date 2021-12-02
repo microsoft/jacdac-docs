@@ -6,7 +6,11 @@ import React, {
     useEffect,
     useState,
 } from "react"
-import { CHANGE } from "../../../jacdac-ts/src/jdom/constants"
+import {
+    CHANGE,
+    DEVICE_ANNOUNCE,
+    DEVICE_DISCONNECT,
+} from "../../../jacdac-ts/src/jdom/constants"
 import { arrayConcatMany, toMap } from "../../../jacdac-ts/src/jdom/utils"
 import RoleManager from "../../../jacdac-ts/src/jdom/rolemanager"
 import bus from "../../jacdac/providerbus"
@@ -46,6 +50,10 @@ import {
     DslWorkspaceFileMessage,
 } from "./dsl/iframedsl"
 import { AllOptions } from "./fields/IFrameDataChooserField"
+import {
+    dashify,
+    humanify,
+} from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 
 export interface BlockProps {
     editorId: string
@@ -309,6 +317,45 @@ export function BlockProvider(props: {
     useEffect(() => {
         bus.backgroundRefreshRegisters = !dragging
     }, [dragging])
+
+    // handle services
+    useEffect(
+        () =>
+            bus.subscribe([DEVICE_ANNOUNCE, DEVICE_DISCONNECT], () => {
+                if (!workspace) return
+                const sensors = bus.services({ sensor: true })
+                sensors
+                    .filter(sensor => !workspace.getVariableById(sensor.id))
+                    .forEach(sensor => {
+                        let name = ""
+                        const instanceName = sensor.instanceName
+                        if (instanceName)
+                            name += humanify(dashify(instanceName))
+                        else {
+                            name += humanify(
+                                dashify(sensor.specification.shortName)
+                            )
+                            if (
+                                sensor.device.services({
+                                    serviceClass: sensor.serviceClass,
+                                }).length > 1
+                            )
+                                name += `[${sensor.serviceIndex.toString(16)}]`
+                        }
+                        name += ` (${sensor.device.shortId})`
+                        const sensorVar = workspace.createVariable(
+                            name,
+                            "sensor",
+                            sensor.id
+                        )
+                        console.log("added sensor variable", {
+                            sensor,
+                            sensorVar,
+                        })
+                    })
+            }),
+        [bus, workspace]
+    )
 
     // load message from parent
     useWindowEvent(

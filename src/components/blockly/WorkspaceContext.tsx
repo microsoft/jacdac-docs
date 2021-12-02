@@ -246,7 +246,7 @@ export function WorkspaceProvider(props: {
         if (roleField) {
             const xml = document.createElement("xml")
             roleField?.toXml(xml)
-            const newSensor = roleField?.getVariable()?.name
+            const newSensor = roleField?.getVariable()?.getId()
             return newSensor
         }
         return undefined
@@ -254,7 +254,7 @@ export function WorkspaceProvider(props: {
     const resolveTwinService = () => {
         const newRoleService = role && roleManager?.service(role)
         if (newRoleService) return newRoleService
-        const newSensorService = sensor && bus.node(sensor) as JDService
+        const newSensorService = sensor && (bus.node(sensor) as JDService)
         return newSensorService
     }
 
