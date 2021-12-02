@@ -40,10 +40,10 @@ export default function TwinWidget() {
             setData(newData)
         }
     }
-    useEffect(() => {
-        setRegisterData()
-        return register?.subscribe(REPORT_UPDATE, setRegisterData)
-    }, [register, sourceId, data])
+    useEffect(
+        () => register?.subscribe(REPORT_UPDATE, setRegisterData),
+        [register, data]
+    )
 
     if (flyout) return null
     if (!twinService) return <NoServiceAlert />

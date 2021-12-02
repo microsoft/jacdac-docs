@@ -7,7 +7,8 @@ import useDragDebounce from "./useDragDebounce"
 // eslint-disable-next-line @typescript-eslint/ban-types
 export default function useBlockData<T extends object>(
     block: Block,
-    initialValue?: T[]
+    initialValue?: T[],
+    throttleTime?: number
 ) {
     const services = (block as unknown as BlockWithServices)?.jacdacServices
     // data on the current node
@@ -17,7 +18,7 @@ export default function useBlockData<T extends object>(
     >(services, _ => ({
         data: _?.data as T[],
         transformedData: _?.transformedData as T[],
-    }))
+    }), throttleTime)
     const setData = useCallback(
         (value: T[]) => {
             if (services) services.data = value
