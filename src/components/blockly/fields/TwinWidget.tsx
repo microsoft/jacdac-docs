@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useRef } from "react"
 import { Grid } from "@mui/material"
 import DashboardServiceWidget from "../../dashboard/DashboardServiceWidget"
 import WorkspaceContext from "../WorkspaceContext"
@@ -14,9 +14,9 @@ import { toMap } from "../../../../jacdac-ts/src/jdom/utils"
 const DEFAULT_HORIZON = 30 // 10 seconds
 export default function TwinWidget() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
-    const { twinService, flyout, sourceId, sourceBlock } =
-        useContext(WorkspaceContext)
-    const { data, setData } = useBlockData(sourceBlock, [])
+    const { twinService, flyout, sourceBlock } = useContext(WorkspaceContext)
+    const { data, setData } = useBlockData(sourceBlock, [], 50)
+    const currentDataRef = useRef<{ time: number }[]>([])
 
     // data collection
     const register = useBestRegister(twinService)
@@ -29,21 +29,27 @@ export default function TwinWidget() {
                 (f, i) => newValue[i]
             )
             const now = bus.timestamp / 1000
+            const rowTime = register.lastDataTimestamp / 1000
             const outdated = now - DEFAULT_HORIZON
+            const currentData = currentDataRef.current
             const newData = [
-                ...(data || []).filter(d => d.time >= outdated),
+                ...(currentData || []).filter(d => d.time >= outdated),
                 {
-                    time: now,
+                    time: rowTime,
                     ...newRow,
                 },
             ]
+            currentDataRef.current = newData
             setData(newData)
         }
     }
     useEffect(
         () => register?.subscribe(REPORT_UPDATE, setRegisterData),
-        [register, data]
+        [register]
     )
+    useEffect(() => {
+        currentDataRef.current = data
+    }, [sourceBlock])
 
     if (flyout) return null
     if (!twinService) return <NoServiceAlert />

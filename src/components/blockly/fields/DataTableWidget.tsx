@@ -22,10 +22,11 @@ const classes = {
 
 // TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
 const Root = styled("div")(() => ({
+    background: "#fff",
+
     [`& .${classes.empty}`]: {
         paddingLeft: "0.5rem",
         paddingRight: "0.5rem",
-        background: "#fff",
         color: "#000",
         borderRadius: "0.25rem",
     },
@@ -58,7 +59,6 @@ const Root = styled("div")(() => ({
         "& th": {
             position: "sticky",
             top: 0,
-            background: "white",
         },
         "& td": {
             borderColor: "#ccc",
