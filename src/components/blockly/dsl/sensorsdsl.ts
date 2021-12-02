@@ -68,7 +68,7 @@ export class SensorsBlockDomainSpecificLanguage
                 contents: [
                     <BlockReference>{
                         kind: "block",
-                        type: TWIN_BLOCK,
+                        type: SENSOR_BLOCK,
                     },
                 ],
             },
