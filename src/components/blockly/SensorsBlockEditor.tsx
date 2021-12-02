@@ -15,6 +15,7 @@ import { createIFrameDSL } from "./dsl/iframedsl"
 import { useLocationSearchParamBoolean } from "../hooks/useLocationSearchParam"
 import dataVarDsl from "./dsl/datavardsl"
 import sensorsDSL from "./dsl/sensorsdsl"
+import dataSetDsl from "./dsl/datasetdsl"
 
 const SENSORS_EDITOR_ID = "sensors"
 const SENSORS_SOURCE_STORAGE_KEY = "tools:sensoreditor"
@@ -47,11 +48,13 @@ function SensorsEditorWithContext() {
 
 export default function DSBlockEditor() {
     const sensors = useLocationSearchParamBoolean("sensors", true)
+    const dataSet = useLocationSearchParamBoolean("dataset", true)
     const dataVar = useLocationSearchParamBoolean("datavar", true)
     const chart = useLocationSearchParamBoolean("chart", true)
 
     const dsls = useMemo(() => {
         return [
+            dataSet && dataSetDsl,
             sensors && sensorsDSL,
             dataDsl,
             dataVar && dataVarDsl,

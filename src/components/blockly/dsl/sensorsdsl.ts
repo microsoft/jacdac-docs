@@ -8,6 +8,8 @@ import {
     VariableInputDefinition,
     sensorsColour,
     SENSOR_BLOCK,
+    SeparatorDefinition,
+    NumberInputDefinition,
 } from "../toolbox"
 import BlockDomainSpecificLanguage, {
     CreateBlocksOptions,
@@ -15,6 +17,11 @@ import BlockDomainSpecificLanguage, {
 } from "./dsl"
 import TwinField from "../fields/TwinField"
 import { ServicesBaseDSL } from "./servicesbase"
+import type { DataRecordWindowRequest } from "../../../workers/data/dist/node_modules/data.worker"
+import { Block } from "blockly"
+import postTransformData from "./workers/data.proxy"
+
+const RECORD_WINDOW_BLOCK = "jacdac_record_window"
 
 export class SensorsBlockDomainSpecificLanguage
     extends ServicesBaseDSL
@@ -22,8 +29,9 @@ export class SensorsBlockDomainSpecificLanguage
 {
     id = "jacdacSensors"
 
-    createBlocks(options: CreateBlocksOptions) {
-        const toolsBlocks: BlockDefinition[] = [
+    createBlocks(options: CreateBlocksOptions): BlockDefinition[] {
+        const colour = sensorsColour
+        return [
             {
                 kind: "block",
                 type: SENSOR_BLOCK,
@@ -44,7 +52,7 @@ export class SensorsBlockDomainSpecificLanguage
                         name: "twin",
                     },
                 ],
-                colour: sensorsColour,
+                colour,
                 inputsInline: false,
                 tooltip: `Twin of the selected servioce`,
                 nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
@@ -52,9 +60,38 @@ export class SensorsBlockDomainSpecificLanguage
                 template: "meta",
                 transformData: identityTransformData,
             },
+            <BlockDefinition>{
+                kind: "block",
+                type: RECORD_WINDOW_BLOCK,
+                message0: "record last %1 s",
+                args0: [
+                    <NumberInputDefinition>{
+                        type: "field_number",
+                        name: "horizon",
+                        value: 10,
+                    },
+                ],
+                inputsInline: false,
+                previousStatement: DATA_SCIENCE_STATEMENT_TYPE,
+                nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
+                colour,
+                template: "meta",
+                dataPreviewField: true,
+                transformData: async (
+                    block: Block,
+                    data: { time: number }[],
+                    previousData: { time: number }[]
+                ) => {
+                    const horizon = block.getFieldValue("horizon") || 10
+                    return postTransformData(<DataRecordWindowRequest>{
+                        type: "record_window",
+                        data,
+                        previousData,
+                        horizon,
+                    })
+                },
+            },
         ]
-
-        return [...toolsBlocks]
     }
 
     createCategory(options: CreateCategoryOptions): CategoryDefinition[] {
@@ -68,10 +105,17 @@ export class SensorsBlockDomainSpecificLanguage
                         kind: "block",
                         type: SENSOR_BLOCK,
                     },
+                    <SeparatorDefinition>{
+                        kind: "sep",
+                    },
+                    <BlockDefinition>{
+                        kind: "block",
+                        type: RECORD_WINDOW_BLOCK,
+                    },
                 ],
             },
         ]
     }
 }
-const sensorsDSL = new SensorsBlockDomainSpecificLanguage()
-export default sensorsDSL
+const sensorsDsl = new SensorsBlockDomainSpecificLanguage()
+export default sensorsDsl

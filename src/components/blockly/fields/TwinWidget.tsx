@@ -11,9 +11,8 @@ import useBlockData from "../useBlockData"
 import JacdacContext, { JacdacContextProps } from "../../../jacdac/Context"
 import { toMap } from "../../../../jacdac-ts/src/jdom/utils"
 
-const DEFAULT_HORIZON = 25
+const DEFAULT_HORIZON = 30 // 10 seconds
 export default function TwinWidget() {
-    const horizon = DEFAULT_HORIZON
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const { twinService, flyout, sourceId, sourceBlock } =
         useContext(WorkspaceContext)
@@ -29,13 +28,15 @@ export default function TwinWidget() {
                 f => f.name,
                 (f, i) => newValue[i]
             )
+            const now = bus.timestamp / 1000
+            const outdated = now - DEFAULT_HORIZON
             const newData = [
-                ...(data || []),
+                ...(data || []).filter(d => d.time >= outdated),
                 {
-                    ...{ time: bus.timestamp / 1000 },
+                    time: now,
                     ...newRow,
                 },
-            ].slice(-horizon)
+            ]
             setData(newData)
         }
     }
