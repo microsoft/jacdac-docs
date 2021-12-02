@@ -15,10 +15,14 @@ export default function useBlockData<T extends object>(
     const { data, transformedData } = useChangeThrottled<
         BlockServices,
         { data: T[]; transformedData: T[] }
-    >(services, _ => ({
-        data: _?.data as T[],
-        transformedData: _?.transformedData as T[],
-    }), throttleTime)
+    >(
+        services,
+        _ => ({
+            data: _?.data as T[],
+            transformedData: _?.transformedData as T[],
+        }),
+        throttleTime
+    )
     const setData = useCallback(
         (value: T[]) => {
             if (services) services.data = value
