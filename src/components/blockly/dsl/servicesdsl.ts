@@ -417,7 +417,7 @@ export class ServicesBlockDomainSpecificLanguage
                 ],
                 colour: toolsColour,
                 inputsInline: false,
-                tooltip: `Twin of the selected service`,
+                tooltip: `Twin of the selected role`,
                 nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
                 helpUrl: "",
                 template: "meta",

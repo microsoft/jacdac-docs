@@ -15,6 +15,7 @@ import { createIFrameDSL } from "../blockly/dsl/iframedsl"
 import { useLocationSearchParamBoolean } from "../hooks/useLocationSearchParam"
 import dataSetDsl from "../blockly/dsl/datasetdsl"
 import dataVarDsl from "../blockly/dsl/datavardsl"
+import sensorsDSL from "../blockly/dsl/sensorsdsl"
 
 const DS_EDITOR_ID = "ds"
 const DS_SOURCE_STORAGE_KEY = "tools:dseditor"
@@ -46,6 +47,7 @@ function DSEditorWithContext() {
 }
 
 export default function DSBlockEditor() {
+    const sensors = useLocationSearchParamBoolean("sensors", true)
     const dataSet = useLocationSearchParamBoolean("dataset", true)
     const dataVar = useLocationSearchParamBoolean("datavar", true)
     const chart = useLocationSearchParamBoolean("chart", true)
@@ -53,6 +55,7 @@ export default function DSBlockEditor() {
     const dsls = useMemo(() => {
         return [
             dataSet && dataSetDsl,
+            sensors && sensorsDSL,
             dataDsl,
             dataVar && dataVarDsl,
             chart && chartDsl,
