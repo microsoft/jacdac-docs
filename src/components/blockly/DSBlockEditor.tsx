@@ -1,21 +1,20 @@
 import { Grid, NoSsr } from "@mui/material"
 import React, { useContext, useMemo } from "react"
 import Flags from "../../../jacdac-ts/src/jdom/flags"
-import { BlockProvider } from "../blockly/BlockContext"
-import BlockDiagnostics from "../blockly/BlockDiagnostics"
-import BlockEditor from "../blockly/BlockEditor"
+import { BlockProvider } from "./BlockContext"
+import BlockDiagnostics from "./BlockDiagnostics"
+import BlockEditor from "./BlockEditor"
 import FileTabs from "../fs/FileTabs"
-import { WorkspaceFile } from "../blockly/dsl/workspacejson"
-import dataDsl from "../blockly/dsl/datadsl"
-import chartDsl from "../blockly/dsl/chartdsl"
-import fieldsDsl from "../blockly/dsl/fieldsdsl"
-import { WORKSPACE_FILENAME } from "../blockly/toolbox"
+import { WorkspaceFile } from "./dsl/workspacejson"
+import dataDsl from "./dsl/datadsl"
+import chartDsl from "./dsl/chartdsl"
+import fieldsDsl from "./dsl/fieldsdsl"
+import { WORKSPACE_FILENAME } from "./toolbox"
 import FileSystemContext from "../FileSystemContext"
-import { createIFrameDSL } from "../blockly/dsl/iframedsl"
+import { createIFrameDSL } from "./dsl/iframedsl"
 import { useLocationSearchParamBoolean } from "../hooks/useLocationSearchParam"
-import dataSetDsl from "../blockly/dsl/datasetdsl"
-import dataVarDsl from "../blockly/dsl/datavardsl"
-import sensorsDSL from "../blockly/dsl/sensorsdsl"
+import dataSetDsl from "./dsl/datasetdsl"
+import dataVarDsl from "./dsl/datavardsl"
 
 const DS_EDITOR_ID = "ds"
 const DS_SOURCE_STORAGE_KEY = "tools:dseditor"
@@ -47,7 +46,6 @@ function DSEditorWithContext() {
 }
 
 export default function DSBlockEditor() {
-    const sensors = useLocationSearchParamBoolean("sensors", true)
     const dataSet = useLocationSearchParamBoolean("dataset", true)
     const dataVar = useLocationSearchParamBoolean("datavar", true)
     const chart = useLocationSearchParamBoolean("chart", true)
@@ -55,7 +53,6 @@ export default function DSBlockEditor() {
     const dsls = useMemo(() => {
         return [
             dataSet && dataSetDsl,
-            sensors && sensorsDSL,
             dataDsl,
             dataVar && dataVarDsl,
             chart && chartDsl,
