@@ -216,7 +216,7 @@ export class IFrameBridgeClient extends JDClient {
         const single = fields.length === 1
         fields.forEach(field => {
             this._serialMessages.push({
-                time: reg.lastDataTimestamp,
+                time: Date.now(),
                 data: `${reg.service.role}${single ? "" : `.${field.name}`}: ${
                     field.value
                 }\n`,
