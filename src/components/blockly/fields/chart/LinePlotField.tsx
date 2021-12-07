@@ -12,19 +12,25 @@ function LinePlotWidget() {
     const { sourceBlock } = useContext(WorkspaceContext)
     const { data } = useBlockData(sourceBlock)
     const x = tidyResolveHeader(data, sourceBlock?.getFieldValue("x"), "number")
-    const y = tidyResolveHeader(data, sourceBlock?.getFieldValue("y"), "number")
-    if (!x || !y) return null
+    const ys = ["y", "y2", "y3"]
+        .map(n =>
+            tidyResolveHeader(data, sourceBlock?.getFieldValue(n), "number")
+        )
+        .filter(y => !!y)
+    if (!x || !ys.length) return null
 
     const sliceOptions = {
         sliceHead: LINE_MAX_ITEMS,
     }
     const spec: VisualizationSpec = {
-        mark: { type: "line", tooltip: true },
-        encoding: {
-            x: { field: x, type: "quantitative", scale: { zero: false } },
-            y: { field: y, type: "quantitative", scale: { zero: false } },
-        },
-        data: { name: "values" },
+        layer: ys.map(y => ({
+            mark: { type: "line", tooltip: true },
+            encoding: {
+                x: { field: x, type: "quantitative", scale: { zero: false } },
+                y: { field: y, type: "quantitative", scale: { zero: false } },
+            },
+            data: { name: y },
+        })),
     }
     return <VegaLiteWidget spec={spec} slice={sliceOptions} />
 }
