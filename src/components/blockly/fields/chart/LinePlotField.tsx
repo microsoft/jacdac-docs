@@ -19,12 +19,18 @@ function LinePlotWidget() {
         .filter(y => !!y)
     if (!x || !ys.length) return null
 
+    const timeSeries = x === "time"
+
     const sliceOptions = {
         sliceHead: LINE_MAX_ITEMS,
     }
     const spec: VisualizationSpec = {
         layer: ys.map(y => ({
-            mark: { type: "line", tooltip: true },
+            mark: {
+                type: "line",
+                tooltip: true,
+                point: { filled: timeSeries },
+            },
             encoding: {
                 x: { field: x, type: "quantitative", scale: { zero: false } },
                 y: { field: y, type: "quantitative", scale: { zero: false } },
