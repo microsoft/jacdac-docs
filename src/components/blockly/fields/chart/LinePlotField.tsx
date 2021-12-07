@@ -35,7 +35,7 @@ function LinePlotWidget() {
                 x: { field: x, type: "quantitative", scale: { zero: false } },
                 y: { field: y, type: "quantitative", scale: { zero: false } },
             },
-            data: { name: y },
+            data: { name: "values" },
         })),
     }
     return <VegaLiteWidget spec={spec} slice={sliceOptions} />
