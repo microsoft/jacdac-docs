@@ -5,9 +5,11 @@ import Markdown from "../../components/ui/Markdown"
 
 export default function Page() {
     const text = `
-### Collecting traces
-
 Record traces in your logic analyser and replay them to test your services.
+
+### Import traces
+
+Paste your trace from the clipboard, or
 
 * open the packet console
 * click on the import button to load a trace
@@ -36,11 +38,7 @@ Use [Saleae LOGIC](https://www.saleae.com/) analyser to record trace on the Jacd
 
     return (
         <>
-            <Grid container spacing={1}>
-                <Grid item xs={12}>
-                    <TraceAnalyzer />
-                </Grid>
-            </Grid>
+            <TraceAnalyzer />
             <Container>
                 <Markdown source={text} />
             </Container>

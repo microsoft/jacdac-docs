@@ -14,6 +14,7 @@ import { ellipseJoin } from "../../jacdac-ts/src/jdom/utils"
 import { jdunpack } from "../../jacdac-ts/src/jdom/pack"
 import { navigate } from "gatsby"
 import useMediaQueries from "./hooks/useMediaQueries"
+import { serializeToTrace } from "../../jacdac-ts/src/jdom/trace/trace"
 
 const PREFIX = "PacketListItem"
 
@@ -32,8 +33,9 @@ export default function PacketListItem(props: {
     packet: Packet
     showTime?: boolean
     count?: number
+    showRaw?: boolean
 }) {
-    const { packet, count, showTime } = props
+    const { packet, count, showTime, showRaw } = props
     const { selectedPacket, setSelectedPacket } = useContext(AppContext)
     const { setDrawerType } = useContext(AppContext)
 
@@ -87,6 +89,7 @@ export default function PacketListItem(props: {
                 primary={<Box textOverflow="ellipsis">{primary}</Box>}
                 secondary={secondary}
             />
+            {showRaw && <pre>{serializeToTrace(packet)}</pre>}
         </StyledListItem>
     )
 }
