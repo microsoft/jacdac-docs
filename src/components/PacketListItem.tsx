@@ -89,7 +89,7 @@ export default function PacketListItem(props: {
                 secondary={
                     <>
                         {secondary}
-                        {showRaw && (", " + toHex(packet.toBuffer()))}
+                        {showRaw && ", " + toHex(packet.toBuffer())}
                     </>
                 }
             />
