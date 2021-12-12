@@ -6,8 +6,9 @@ import PacketListItem from "./PacketListItem"
 export default function PacketList(props: {
     packets: Packet[]
     showRaw?: boolean
+    showTime?: boolean
 }) {
-    const { packets, showRaw } = props
+    const { packets, showRaw, showTime } = props
     return (
         <List>
             {packets
@@ -16,6 +17,7 @@ export default function PacketList(props: {
                     <PacketListItem
                         key={pkt.key}
                         packet={pkt}
+                        showTime={showTime}
                         showRaw={showRaw}
                     />
                 ))}

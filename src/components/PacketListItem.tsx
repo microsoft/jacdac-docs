@@ -10,11 +10,10 @@ import {
     SRV_LOGGER,
 } from "../../jacdac-ts/src/jdom/constants"
 import { prettyDuration } from "../../jacdac-ts/src/jdom/pretty"
-import { ellipseJoin } from "../../jacdac-ts/src/jdom/utils"
+import { ellipseJoin, toHex } from "../../jacdac-ts/src/jdom/utils"
 import { jdunpack } from "../../jacdac-ts/src/jdom/pack"
 import { navigate } from "gatsby"
 import useMediaQueries from "./hooks/useMediaQueries"
-import { serializeToTrace } from "../../jacdac-ts/src/jdom/trace/trace"
 
 const PREFIX = "PacketListItem"
 
@@ -87,9 +86,13 @@ export default function PacketListItem(props: {
             </ListItemIcon>
             <ListItemText
                 primary={<Box textOverflow="ellipsis">{primary}</Box>}
-                secondary={secondary}
+                secondary={
+                    <>
+                        {secondary}
+                        {showRaw && (", " + toHex(packet.toBuffer()))}
+                    </>
+                }
             />
-            {showRaw && <pre>{serializeToTrace(packet)}</pre>}
         </StyledListItem>
     )
 }

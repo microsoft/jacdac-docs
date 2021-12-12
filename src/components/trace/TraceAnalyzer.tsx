@@ -19,7 +19,7 @@ export default function TraceAnalyzer() {
 
     return (
         <>
-            <PacketList packets={replayTrace.packets} showRaw={true} />
+            <PacketList packets={replayTrace.packets} showTime={true} showRaw={true} />
             <pre>{replayTrace.serializeToText()}</pre>
         </>
     )
