@@ -9,11 +9,7 @@ Record traces in your logic analyser and replay them to test your services.
 
 ### Import traces
 
-Paste your trace from the clipboard, or
-
-* open the packet console
-* click on the import button to load a trace
-* click on the replay button to start running the trace
+Paste your trace from the clipboard or import file from the packet console
 
 ### Trace Format
 
@@ -38,10 +34,11 @@ Use [Saleae LOGIC](https://www.saleae.com/) analyser to record trace on the Jacd
 
     return (
         <>
-            <TraceAnalyzer />
             <Container>
+                <h1>Trace Analyzer</h1>
                 <Markdown source={text} />
             </Container>
+            <TraceAnalyzer />
         </>
     )
 }
