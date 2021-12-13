@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, Grid } from "@mui/material"
-import React, { useState } from "react"
+import React, { useCallback, useState } from "react"
 import { ControlAnnounceFlags } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import JDDevice from "../../../jacdac-ts/src/jdom/device"
 import useDeviceSpecification from "../../jacdac/useDeviceSpecification"
 import DeviceName from "../devices/DeviceName"
 import useDeviceImage from "../devices/useDeviceImage"
 import useInterval from "../hooks/useInterval"
-import Alert from "../ui/Alert"
+import Alert from "../ui/AlÏert"
 import DialogTitleWithClose from "../ui/DialogTitleWithClose"
 
 function LazyDeviceImage(props: { device: JDDevice }) {
@@ -52,7 +52,7 @@ export default function IdentifyDialog(props: {
     onClose: () => void
 }) {
     const { device, open, onClose } = props
-    const handleSendIdentify = async () => await device.identify()
+    const handleSendIdentify = useCallback(async () => await device.identify(), [device])
     const handleCloseIdentify = () => onClose()
     const { statusLightFlags } = device
     const blue =
