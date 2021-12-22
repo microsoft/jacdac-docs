@@ -1,4 +1,3 @@
-import { isArray } from "vega"
 import type {
     DataRequest,
     DataMessage,
@@ -12,7 +11,7 @@ export default async function postTransformData(
 ): Promise<object[]> {
     if (!message)
         return undefined
-    if (isArray(message))
+    if (Array.isArray(message))
         return message
     // check for missing data
     if (!message.data) return undefined
