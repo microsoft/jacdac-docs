@@ -130,7 +130,6 @@ module.exports = {
                     },
                     "gatsby-remark-static-images",
                     "gatsby-remark-embed-snippet",
-                    "gatsby-remark-prismjs"
 
                 ].filter(plugin => !!plugin),
             },
@@ -153,8 +152,7 @@ module.exports = {
                         },
                     },
                     "gatsby-remark-static-images",
-                    "gatsby-remark-embed-snippet",
-                    "gatsby-remark-prismjs"
+                    "gatsby-remark-embed-snippet"
                 ].filter(plugin => !!plugin),
             },
         },

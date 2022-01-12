@@ -67,7 +67,6 @@
     "gatsby-remark-external-links": "0.0.4",
     "gatsby-remark-images": "^6.4.0",
     "gatsby-remark-makecode": "^1.0.22",
-    "gatsby-remark-prismjs": "^6.5.0",
     "gatsby-remark-static-images": "^1.2.1",
     "gatsby-source-filesystem": "^4.4.0",
     "gatsby-theme-material-ui": "^5.1.0",
