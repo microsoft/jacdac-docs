@@ -404,6 +404,8 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
         util: require.resolve("util/"),
         assert: require.resolve("assert/"),
         fs: false,
+        net: false,
+        webusb: false
     }
     if (stage.startsWith("develop")) {
         setWebpackConfig({
@@ -421,6 +423,8 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
         setWebpackConfig({
             node: {
                 fs: "empty",
+                net: "empty",
+                webusb: "empty"
             },
             resolve: {
                 fallback,
