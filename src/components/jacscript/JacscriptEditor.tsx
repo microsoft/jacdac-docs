@@ -45,7 +45,8 @@ function JacScriptEditorWithContext() {
             const newProgram = workspaceJSONToVMProgram(workspaceJSON, dsls)
             if (JSON.stringify(newProgram) !== JSON.stringify(program)) {
                 setProgram(newProgram)
-                setJscProgram(toJacScript(program));
+                const jsc = toJacScript(newProgram);
+                setJscProgram(jsc);
             }
         } catch (e) {
             console.error(e)
@@ -101,9 +102,8 @@ export default function JacscriptEditor() {
     const handleOnBeforeSaveWorkspaceFile = useCallback(
         (file: WorkspaceFile) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const f = file as any
             const program = workspaceJSONToVMProgram(file.json, dsls)
-            f.jsc = toJacScript(program)
+            file.jsc = toJacScript(program)
         },
         []
     )
