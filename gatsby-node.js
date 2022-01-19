@@ -423,8 +423,6 @@ exports.onCreateWebpackConfig = ({ stage, actions, getConfig }) => {
         setWebpackConfig({
             node: {
                 fs: "empty",
-                net: "empty",
-                webusb: "empty"
             },
             resolve: {
                 fallback,
