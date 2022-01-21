@@ -1,4 +1,6 @@
-import { compile, JacError, Host } from "jacscript"
+import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
+
+let runner: Runner;
 
 class WorkerHost implements Host {
     files: Record<string, Uint8Array | string> = {};
@@ -16,12 +18,9 @@ class WorkerHost implements Host {
     }
 }
 
-export interface VMError {
-    line: number
-    column: number
-    message: string
-    codeFragment: string
-}
+export type VMState = RunnerState
+
+export type VMError = JacError
 
 export interface VMMessage {
     worker: "vm"
@@ -43,18 +42,31 @@ export interface VMCompileResponse extends VMMessage {
     errors: VMError[]
 }
 
+export interface VMStateRequest extends VMMessage {
+    type: "state"
+}
+
+export interface VMStateResponse extends VMMessage {
+    state?: VMState
+}
+
 const handlers: { [index: string]: (props: any) => object } = {
     compile: (props: VMCompileRequest) => {
         const { source } = props
         const host = new WorkerHost();
         const res = compile(host, source);
-        return {
+        return <Partial<VMCompileResponse>>{
             ...res,
             files: host.files,
             logs: host.logs,
             errors: host.errors
         }
     },
+    state: () => {
+        return <Partial<VMStateResponse>>{
+            status: runner?.state
+        }
+    }
 }
 
 function processMessage(message: VMRequest): object {
