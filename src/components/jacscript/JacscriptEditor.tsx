@@ -32,11 +32,13 @@ import useEffectAsync from "../useEffectAsync"
 import {
     jscCompile,
     jscCommand,
+    jscBridge,
 } from "../blockly/dsl/workers/vm.proxy"
 import type { VMCompileResponse } from "../../workers/vm/vm.worker"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import StopIcon from "@mui/icons-material/Stop"
+import useChange from "../../jacdac/useChange"
 
 const JACSCRIPT_EDITOR_ID = "jcs"
 const JACSCRIPT_SOURCE_STORAGE_KEY = "tools:jacscripteditor"
@@ -47,7 +49,9 @@ const JACSCRIPT_NEW_FILE_CONTENT = JSON.stringify({
 
 function JacScriptExecutor(props: { jscCompiled: VMCompileResponse }) {
     const { jscCompiled } = props
-    const stopped = true
+    const bridge = useMemo(() => jscBridge(), [])
+    const state = useChange(bridge, _ => _?.state)
+    const stopped = state === undefined
     const disabled = !jscCompiled
 
     const handleRun = () => jscCommand("start")

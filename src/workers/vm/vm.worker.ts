@@ -1,49 +1,6 @@
 import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
 import { JDBus, Packet, PACKET_SEND, toHex } from "jacdac-ts"
 
-const bus = new JDBus()
-bus.stop()
-let runner: Runner
-
-bus.on(PACKET_SEND, (pkt: Packet) => {
-    const data = pkt.toBuffer()
-    console.log("vm.worker: send packet to proxy", toHex(data))
-    self.postMessage({
-        worker: "vm",
-        type: "packet",
-        data,
-    })
-})
-
-class WorkerHost implements Host {
-    files: Record<string, Uint8Array | string> = {}
-    logs = ""
-    errors: JacError[] = []
-
-    write(filename: string, contents: Uint8Array | string) {
-        this.files[filename] = contents
-    }
-    log(msg: string): void {
-        this.logs += msg + "\n"
-    }
-    error(err: JacError) {
-        this.errors.push(err)
-    }
-}
-
-async function start() {
-    if (!runner) return
-
-    bus.start()
-    //runner.run();
-}
-
-async function stop() {
-    bus.stop()
-    if (!runner) return
-
-    // TODO: michal need to stop runner
-}
 
 export type VMState = RunnerState
 
@@ -91,13 +48,67 @@ export interface VMPacketRequest extends VMMessage {
     data: Uint8Array
 }
 
+
+const bus = new JDBus()
+bus.stop()
+let runner: Runner
+
+bus.on(PACKET_SEND, (pkt: Packet) => {
+    const data = pkt.toBuffer()
+    //console.log("vm.worker: send packet to proxy", toHex(data))
+    self.postMessage(<VMPacketRequest>{
+        worker: "vm",
+        type: "packet",
+        data,
+    })
+})
+
+class WorkerHost implements Host {
+    files: Record<string, Uint8Array | string> = {}
+    logs = ""
+    errors: JacError[] = []
+
+    write(filename: string, contents: Uint8Array | string) {
+        this.files[filename] = contents
+    }
+    log(msg: string): void {
+        this.logs += msg + "\n"
+    }
+    error(err: JacError) {
+        this.errors.push(err)
+    }
+}
+
+function postState() {
+    const state = bus.running ? RunnerState.Running : undefined;
+    //console.log("vm.worker: state", state)
+    self.postMessage(<VMStateResponse>{
+        type: "state",
+        worker: "vm",
+        state
+    })
+}
+
+async function start() {
+    if (!runner) return
+
+    bus.start()
+    //runner.run();
+    postState()
+}
+
+async function stop() {
+    await bus.stop()
+    postState()
+}
+
 const handlers: { [index: string]: (props: any) => object | Promise<object> } =
     {
         packet: (props: VMPacketRequest) => {
             const { data } = props
             const pkt = Packet.fromBinary(data, bus?.timestamp)
             bus.processPacket(pkt)
-            console.log("vm.worker: received packet from proxy", toHex(data))
+            //console.log("vm.worker: received packet from proxy", toHex(data))
             return undefined
         },
         compile: async (props: VMCompileRequest) => {
@@ -119,8 +130,9 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
             }
         },
         state: () => {
+            const state = bus.running ? RunnerState.Running : undefined;
             return <Partial<VMStateResponse>>{
-                status: runner?.state,
+                state,
             }
         },
         command: async (props: VMCommandRequest) => {
