@@ -29,7 +29,10 @@ import {
     toJacScript,
 } from "../../../jacdac-ts/src/vm/ir2jacscript"
 import useEffectAsync from "../useEffectAsync"
-import { jscCompile, jscCommand, jscState, JscState } from "../blockly/dsl/workers/vm.proxy"
+import {
+    jscCompile,
+    jscCommand,
+} from "../blockly/dsl/workers/vm.proxy"
 import type { VMCompileResponse } from "../../workers/vm/vm.worker"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
@@ -44,7 +47,7 @@ const JACSCRIPT_NEW_FILE_CONTENT = JSON.stringify({
 
 function JacScriptExecutor(props: { jscCompiled: VMCompileResponse }) {
     const { jscCompiled } = props
-    const stopped = false
+    const stopped = true
     const disabled = !jscCompiled
 
     const handleRun = () => jscCommand("start")
@@ -112,7 +115,6 @@ function JacScriptEditorWithContext() {
         <Grid container spacing={1}>
             <Grid item xs={12} sm={8}>
                 <Grid container direction="column" spacing={1}>
-                    <JacScriptExecutor jscCompiled={jscCompiled} />
                     {!!fileSystem && (
                         <Grid item xs={12}>
                             <FileTabs
@@ -123,7 +125,9 @@ function JacScriptEditorWithContext() {
                         </Grid>
                     )}
                     <Grid item xs={12}>
-                        <BlockRolesToolbar />
+                        <BlockRolesToolbar>
+                            <JacScriptExecutor jscCompiled={jscCompiled} />
+                        </BlockRolesToolbar>
                     </Grid>
                     <Grid item xs={12}>
                         <BlockEditor editorId={JACSCRIPT_EDITOR_ID} />

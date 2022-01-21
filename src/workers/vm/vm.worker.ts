@@ -1,12 +1,13 @@
 import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
-import { JDBus, Packet, PACKET_SEND } from "jacdac-ts"
+import { JDBus, Packet, PACKET_SEND, toHex } from "jacdac-ts"
 
 const bus = new JDBus()
+bus.stop()
 let runner: Runner
 
 bus.on(PACKET_SEND, (pkt: Packet) => {
     const data = pkt.toBuffer()
-    console.log("vm: reply packet", data)
+    console.log("vm.worker: send packet to proxy", toHex(data))
     self.postMessage({
         worker: "vm",
         type: "packet",
@@ -31,11 +32,14 @@ class WorkerHost implements Host {
 }
 
 async function start() {
-    // TODO: michal need to start runner
+    if (!runner) return
+
+    bus.start()
     //runner.run();
 }
 
 async function stop() {
+    bus.stop()
     if (!runner) return
 
     // TODO: michal need to stop runner
@@ -93,7 +97,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
             const { data } = props
             const pkt = Packet.fromBinary(data, bus?.timestamp)
             bus.processPacket(pkt)
-            console.log("vm: send packet", data)
+            console.log("vm.worker: received packet from proxy", toHex(data))
             return undefined
         },
         compile: async (props: VMCompileRequest) => {

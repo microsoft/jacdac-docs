@@ -12,6 +12,7 @@ import workerProxy, { WorkerProxy } from "./proxy"
 import bus from "../../../../jacdac/providerbus"
 import { MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
+import { toHex } from "../../../../../jacdac-ts/src/jdom/utils"
 
 export type JscState = VMState
 
@@ -22,15 +23,16 @@ class VMBridge extends JDBridge {
             const { type } = msg
             if (type === "packet") {
                 const { data } = msg as VMPacketRequest
-                console.log("vmbridge: received data", data)
+                console.log("vm.proxy: received packet from worker", toHex(data))
                 bridge.receivePacket(data)
             } else if (type === "state") {
                 const { state } = msg as VMStateResponse
-                console.log("vmbridge: new state", { state })
+                console.log("vm.proxy: received state", { state })
             }
         })
     }
     protected sendPacket(data: Uint8Array): void {
+        console.log("vm.proxy: send packet to worker", toHex(data))
         this.worker.postMessage({
             worker: this.worker.workerid,
             type: "packet",
