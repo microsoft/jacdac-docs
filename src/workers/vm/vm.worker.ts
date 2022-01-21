@@ -1,21 +1,34 @@
 import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
+import { JDBus } from "jacdac-ts"
 
-let runner: Runner;
+const bus = new JDBus()
+let runner: Runner
 
 class WorkerHost implements Host {
-    files: Record<string, Uint8Array | string> = {};
-    logs = ''
+    files: Record<string, Uint8Array | string> = {}
+    logs = ""
     errors: JacError[] = []
 
     write(filename: string, contents: Uint8Array | string) {
-        this.files[filename] = contents;
+        this.files[filename] = contents
     }
     log(msg: string): void {
-        this.logs += msg + '\n';
+        this.logs += msg + "\n"
     }
     error(err: JacError) {
-        this.errors.push(err);
+        this.errors.push(err)
     }
+}
+
+async function start() {
+    // TODO: michal need to start runner
+    //runner.run();
+}
+
+async function stop() {
+    if (!runner) return
+
+    // TODO: michal need to stop runner
 }
 
 export type VMState = RunnerState
@@ -50,26 +63,59 @@ export interface VMStateResponse extends VMMessage {
     state?: VMState
 }
 
-const handlers: { [index: string]: (props: any) => object } = {
-    compile: (props: VMCompileRequest) => {
-        const { source } = props
-        const host = new WorkerHost();
-        const res = compile(host, source);
-        return <Partial<VMCompileResponse>>{
-            ...res,
-            files: host.files,
-            logs: host.logs,
-            errors: host.errors
-        }
-    },
-    state: () => {
-        return <Partial<VMStateResponse>>{
-            status: runner?.state
-        }
-    }
+export interface VMCommandRequest extends VMMessage {
+    type: "command"
+    action: "start" | "stop"
 }
 
-function processMessage(message: VMRequest): object {
+export interface VMRunResponse extends VMCompileResponse {
+    state: VMState
+}
+
+const handlers: { [index: string]: (props: any) => object | Promise<object> } =
+    {
+        compile: async (props: VMCompileRequest) => {
+            const { source } = props
+            const host = new WorkerHost()
+            const res = compile(host, source)
+
+            if (res.success) {
+                await stop()
+                const { binary, dbg } = res
+                runner = new Runner(bus, binary, dbg)
+            }
+
+            return <Partial<VMCompileResponse>>{
+                ...res,
+                files: host.files,
+                logs: host.logs,
+                errors: host.errors,
+            }
+        },
+        state: () => {
+            return <Partial<VMStateResponse>>{
+                status: runner?.state,
+            }
+        },
+        command: async (props: VMCommandRequest) => {
+            const { action } = props
+            switch (action) {
+                case "stop":
+                    await stop()
+                    break
+                case "start":
+                    await stop()
+                    await start()
+                    break
+            }
+
+            return <Partial<VMRunResponse>>{
+                state: runner?.state,
+            }
+        },
+    }
+
+function processMessage(message: VMRequest): any {
     try {
         const handler = handlers[message.type]
         return handler?.(message)

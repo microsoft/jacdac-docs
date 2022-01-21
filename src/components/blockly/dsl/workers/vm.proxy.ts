@@ -1,10 +1,17 @@
-import type { VMCompileRequest, VMCompileResponse, VMStateRequest, VMStateResponse, VMState } from "../../../../workers/vm/dist/node_modules/vm.worker"
+import type {
+    VMCompileRequest,
+    VMCompileResponse,
+    VMStateRequest,
+    VMStateResponse,
+    VMState,
+    VMCommandRequest,
+} from "../../../../workers/vm/dist/node_modules/vm.worker"
 import workerProxy from "./proxy"
 
 /**
- * Compiles the sources, no running. Can be done while running another program.
- * @param source 
- * @returns 
+ * Compiles the sources and keeps the compiled program ready to run. Can be done while running another program.
+ * @param source
+ * @returns
  */
 export async function jscCompile(
     source: string
@@ -21,9 +28,9 @@ export async function jscCompile(
 
 /**
  * Queries the execution state of the runner
- * @returns 
+ * @returns
  */
-export async function jscState() : Promise<VMState> {
+export async function jscState(): Promise<VMState> {
     const worker = workerProxy("vm")
     const res = await worker.postMessage<VMStateRequest, VMStateResponse>({
         worker: "vm",
@@ -31,3 +38,21 @@ export async function jscState() : Promise<VMState> {
     })
     return res?.state
 }
+
+/**
+ * Updates the run state
+ * @param source
+ * @returns
+ */
+export async function jscCommand(
+    action: "start" | "stop"
+): Promise<VMStateResponse> {
+    const worker = workerProxy("vm")
+    const res = await worker.postMessage<VMCommandRequest, VMStateResponse>({
+        worker: "vm",
+        type: "command",
+        action
+    })
+    return res
+}
+
