@@ -1,4 +1,3 @@
-import { JDBridge } from "jacdac-ts/src/jdom/bridge"
 import type {
     VMCompileRequest,
     VMCompileResponse,
@@ -11,7 +10,8 @@ import type {
 } from "../../../../workers/vm/dist/node_modules/vm.worker"
 import workerProxy, { WorkerProxy } from "./proxy"
 import bus from "../../../../jacdac/providerbus"
-import { MESSAGE } from "jacdac-ts/src/jdom/constants"
+import { MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
+import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
 
 export type JscState = VMState
 
