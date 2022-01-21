@@ -93,11 +93,14 @@ async function start() {
     if (!runner) return
 
     bus.start()
-    //runner.run();
+    runner.run();
     postState()
 }
 
 async function stop() {
+    if (runner) {
+        // TODO Stop!
+    }
     await bus.stop()
     postState()
 }

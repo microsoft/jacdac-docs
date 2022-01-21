@@ -24,11 +24,11 @@ class VMBridge extends JDBridge {
             const { type } = msg
             if (type === "packet") {
                 const { data } = msg as VMPacketRequest
-                console.debug("vm.proxy: received packet from worker", toHex(data))
+                //console.debug("vm.proxy: received packet from worker", toHex(data))
                 bridge.receivePacket(data)
             } else if (type === "state") {
                 const { state } = msg as VMStateResponse
-                console.debug("vm.proxy: received state", { state })
+                //console.debug("vm.proxy: received state", { state })
                 this.state = state;
                 this.emit(CHANGE);
             }
@@ -36,9 +36,9 @@ class VMBridge extends JDBridge {
     }
 
     protected sendPacket(data: Uint8Array): void {
-        console.debug("vm.proxy: send packet to worker", toHex(data))
+        //console.debug("vm.proxy: send packet to worker", toHex(data))
         this.worker.postMessage({
-            worker: this.worker.workerid,
+            worker: "vm",
             type: "packet",
             data,
         })
