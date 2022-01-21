@@ -6,13 +6,29 @@ import type {
     VMStateResponse,
     VMState,
     VMCommandRequest,
+    VMRequest,
+    VMPacketRequest,
 } from "../../../../workers/vm/dist/node_modules/vm.worker"
 import workerProxy, { WorkerProxy } from "./proxy"
 import bus from "../../../../jacdac/providerbus"
+import { MESSAGE } from "jacdac-ts/src/jdom/constants"
+
+export type JscState = VMState
 
 class VMBridge extends JDBridge {
     constructor(readonly worker: WorkerProxy) {
         super()
+        worker.on(MESSAGE, (msg: VMRequest) => {
+            const { type } = msg
+            if (type === "packet") {
+                const { data } = msg as VMPacketRequest
+                console.log("vmbridge: received data", data)
+                bridge.receivePacket(data)
+            } else if (type === "state") {
+                const { state } = msg as VMStateResponse
+                console.log("vmbridge: new state", { state })
+            }
+        })
     }
     protected sendPacket(data: Uint8Array): void {
         this.worker.postMessage({

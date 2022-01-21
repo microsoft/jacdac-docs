@@ -1,8 +1,18 @@
 import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
-import { JDBus } from "jacdac-ts"
+import { JDBus, Packet, PACKET_SEND } from "jacdac-ts"
 
 const bus = new JDBus()
 let runner: Runner
+
+bus.on(PACKET_SEND, (pkt: Packet) => {
+    const data = pkt.toBuffer()
+    console.log("vm: reply packet", data)
+    self.postMessage({
+        worker: "vm",
+        type: "packet",
+        data,
+    })
+})
 
 class WorkerHost implements Host {
     files: Record<string, Uint8Array | string> = {}
@@ -72,8 +82,20 @@ export interface VMRunResponse extends VMCompileResponse {
     state: VMState
 }
 
+export interface VMPacketRequest extends VMMessage {
+    type: "packet"
+    data: Uint8Array
+}
+
 const handlers: { [index: string]: (props: any) => object | Promise<object> } =
     {
+        packet: (props: VMPacketRequest) => {
+            const { data } = props
+            const pkt = Packet.fromBinary(data, bus?.timestamp)
+            bus.processPacket(pkt)
+            console.log("vm: send packet", data)
+            return undefined
+        },
         compile: async (props: VMCompileRequest) => {
             const { source } = props
             const host = new WorkerHost()
@@ -133,8 +155,10 @@ async function handleMessage(event: MessageEvent) {
 
     try {
         const result = await processMessage(message)
-        const resp = { id, worker, ...rest, ...result }
-        self.postMessage(resp)
+        if (result) {
+            const resp = { id, worker, ...rest, ...result }
+            self.postMessage(resp)
+        }
     } catch (e) {
         self.postMessage({
             id,
