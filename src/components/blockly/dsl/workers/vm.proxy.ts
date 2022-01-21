@@ -1,3 +1,4 @@
+import { JDBridge } from "jacdac-ts/src/jdom/bridge"
 import type {
     VMCompileRequest,
     VMCompileResponse,
@@ -6,7 +7,30 @@ import type {
     VMState,
     VMCommandRequest,
 } from "../../../../workers/vm/dist/node_modules/vm.worker"
-import workerProxy from "./proxy"
+import workerProxy, { WorkerProxy } from "./proxy"
+import bus from "../../../../jacdac/providerbus"
+
+class VMBridge extends JDBridge {
+    constructor(readonly worker: WorkerProxy) {
+        super()
+    }
+    protected sendPacket(data: Uint8Array): void {
+        this.worker.postMessage({
+            worker: this.worker.workerid,
+            type: "packet",
+            data,
+        })
+    }
+}
+
+let bridge: VMBridge
+function workerBridge() {
+    if (!bridge) {
+        const worker = workerProxy("vm")
+        bridge = new VMBridge(worker)
+    }
+    return bridge
+}
 
 /**
  * Compiles the sources and keeps the compiled program ready to run. Can be done while running another program.
@@ -47,12 +71,16 @@ export async function jscState(): Promise<VMState> {
 export async function jscCommand(
     action: "start" | "stop"
 ): Promise<VMStateResponse> {
-    const worker = workerProxy("vm")
-    const res = await worker.postMessage<VMCommandRequest, VMStateResponse>({
+    const bridge = workerBridge()
+    if (action === "start") bridge.bus = bus
+    else bridge.bus = undefined
+    const res = await bridge.worker.postMessage<
+        VMCommandRequest,
+        VMStateResponse
+    >({
         worker: "vm",
         type: "command",
-        action
+        action,
     })
     return res
 }
-
