@@ -97,6 +97,7 @@ export async function jscCommand(
     const bridge = jscBridge()
     if (action === "start") bridge.bus = bus
     else bridge.bus = undefined
+    console.log(`jsc: command ${action}`)
     const res = await bridge.worker.postMessage<
         VMCommandRequest,
         VMStateResponse

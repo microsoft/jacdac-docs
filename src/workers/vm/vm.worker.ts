@@ -95,26 +95,25 @@ const states: Record<RunnerState, VMState> = {
 }
 
 function postState() {
+    const state = states[runner?.state] || RunnerState.Stopped
+    console.log(`jscw: state ${state}`)
     self.postMessage(<VMStateResponse>{
         type: "state",
         worker: "vm",
-        state: states[runner?.state] || RunnerState.Stopped,
+        state,
     })
 }
 
 async function start() {
-    if (!runner) return
-
+    console.log(`jscw: start`)
     bus.start()
-    runner.run()
+    runner?.run()
     postState()
 }
 
 async function stop() {
-    if (runner) {
-        runner.stop()
-        runner = undefined
-    }
+    console.log(`jscw: stop`)
+    runner?.stop()
     await bus.stop()
     postState()
 }
