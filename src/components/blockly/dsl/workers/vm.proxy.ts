@@ -12,7 +12,6 @@ import workerProxy, { WorkerProxy } from "./proxy"
 import bus from "../../../../jacdac/providerbus"
 import { CHANGE, MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
-import { toHex } from "../../../../../jacdac-ts/src/jdom/utils"
 
 export type JscState = VMState
 
@@ -60,7 +59,8 @@ export function jscBridge() {
  * @returns
  */
 export async function jscCompile(
-    source: string
+    source: string,
+    restart?: boolean
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<VMCompileResponse> {
     const worker = workerProxy("vm")
@@ -68,6 +68,7 @@ export async function jscCompile(
         worker: "vm",
         type: "compile",
         source,
+        restart
     })
     return res
 }

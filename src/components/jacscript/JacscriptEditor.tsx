@@ -107,9 +107,8 @@ function JacScriptEditorWithContext() {
     )
     useEffectAsync(
         async mounted => {
-            const res =
-                jscProgram && (await jscCompile(jscProgram.program.join("\n")))
-            console.log({ res, mounted: mounted() })
+            const src = jscProgram?.program.join("\n")
+            const res = src && (await jscCompile(src, true))
             if (mounted()) setJscCompiled(res)
         },
         [jscProgram]

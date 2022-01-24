@@ -1,6 +1,10 @@
 import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
-import { JDBus, localStorageSetting, Packet, PACKET_SEND, toHex } from "jacdac-ts"
-
+import {
+    JDBus,
+    localStorageSetting,
+    Packet,
+    PACKET_SEND,
+} from "jacdac-ts"
 
 export type VMState = RunnerState
 
@@ -18,6 +22,7 @@ export interface VMRequest extends VMMessage {
 export interface VMCompileRequest extends VMMessage {
     type: "compile"
     source: string
+    restart?: boolean
 }
 
 export interface VMCompileResponse extends VMMessage {
@@ -48,14 +53,10 @@ export interface VMPacketRequest extends VMMessage {
     data: Uint8Array
 }
 
-
-const bus = new JDBus(
-    null,
-    {
-        client: false,
-        disableRoleManager: true,
-    }
-)
+const bus = new JDBus(null, {
+    client: false,
+    disableRoleManager: true,
+})
 bus.stop()
 let runner: Runner
 
@@ -86,12 +87,12 @@ class WorkerHost implements Host {
 }
 
 function postState() {
-    const state = bus.running ? RunnerState.Running : undefined;
+    const state = bus.running ? RunnerState.Running : undefined
     //console.log("vm.worker: state", state)
     self.postMessage(<VMStateResponse>{
         type: "state",
         worker: "vm",
-        state
+        state,
     })
 }
 
@@ -99,13 +100,14 @@ async function start() {
     if (!runner) return
 
     bus.start()
-    runner.run();
+    runner.run()
     postState()
 }
 
 async function stop() {
     if (runner) {
-        // TODO Stop!
+        runner.stop()
+        runner = undefined
     }
     await bus.stop()
     postState()
@@ -121,7 +123,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
             return undefined
         },
         compile: async (props: VMCompileRequest) => {
-            const { source } = props
+            const { source, restart } = props
             const host = new WorkerHost()
             const res = compile(host, source)
 
@@ -130,6 +132,8 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
                 const { binary, dbg } = res
                 runner = new Runner(bus, binary, dbg)
                 runner.options.setting = localStorageSetting
+
+                if (restart) await start() // background start
             }
 
             return <Partial<VMCompileResponse>>{
@@ -140,7 +144,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
             }
         },
         state: () => {
-            const state = bus.running ? RunnerState.Running : undefined;
+            const state = runner?.state || RunnerState.Stopped
             return <Partial<VMStateResponse>>{
                 state,
             }
