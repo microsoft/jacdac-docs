@@ -52,8 +52,9 @@ function JacScriptExecutor(props: { jscCompiled: VMCompileResponse }) {
     const bridge = useMemo(() => jscBridge(), [])
     const state = useChange(bridge, _ => _?.state)
     const running = state === "running"
+    const initializing = state === "initializing"
     const stopped = !running
-    const disabled =  !jscCompiled
+    const disabled =  !jscCompiled || initializing
 
     const handleRun = () => jscCommand("start")
     const handleStop = () => jscCommand("stop")
