@@ -51,8 +51,9 @@ function JacScriptExecutor(props: { jscCompiled: VMCompileResponse }) {
     const { jscCompiled } = props
     const bridge = useMemo(() => jscBridge(), [])
     const state = useChange(bridge, _ => _?.state)
-    const stopped = state === undefined
-    const disabled = !jscCompiled
+    const running = state === "running"
+    const stopped = !running
+    const disabled =  !jscCompiled
 
     const handleRun = () => jscCommand("start")
     const handleStop = () => jscCommand("stop")
@@ -60,7 +61,7 @@ function JacScriptExecutor(props: { jscCompiled: VMCompileResponse }) {
     return (
         <Grid item>
             <IconButtonWithTooltip
-                title={stopped ? "start" : "stop"}
+                title={running ? "stop" : "start"}
                 disabled={disabled}
                 color={stopped ? "primary" : "default"}
                 onClick={stopped ? handleRun : handleStop}

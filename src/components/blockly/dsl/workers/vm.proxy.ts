@@ -13,10 +13,8 @@ import bus from "../../../../jacdac/providerbus"
 import { CHANGE, MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
 
-export type JscState = VMState
-
 class VMBridge extends JDBridge {
-    state: VMState;
+    state: VMState = "stopped"
     constructor(readonly worker: WorkerProxy) {
         super()
         worker.on(MESSAGE, (msg: VMRequest) => {
@@ -28,8 +26,10 @@ class VMBridge extends JDBridge {
             } else if (type === "state") {
                 const { state } = msg as VMStateResponse
                 //console.debug("vm.proxy: received state", { state })
-                this.state = state;
-                this.emit(CHANGE);
+                if (state !== this.state) {
+                    this.state = state;
+                    this.emit(CHANGE);    
+                }
             }
         })
     }

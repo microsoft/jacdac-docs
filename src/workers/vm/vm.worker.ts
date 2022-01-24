@@ -1,12 +1,13 @@
 import { compile, JacError, Host, RunnerState, Runner } from "jacscript"
 import {
+    CHANGE,
     JDBus,
     localStorageSetting,
     Packet,
     PACKET_SEND,
 } from "jacdac-ts"
 
-export type VMState = RunnerState
+export type VMState = "stopped" | "initializing" | "running" | "error"
 
 export type VMError = JacError
 
@@ -86,13 +87,18 @@ class WorkerHost implements Host {
     }
 }
 
+const states: Record<RunnerState, VMState> = {
+    [RunnerState.Stopped]: "stopped",
+    [RunnerState.Error]: "error",
+    [RunnerState.Initializing]: "initializing",
+    [RunnerState.Running]: "running",
+}
+
 function postState() {
-    const state = bus.running ? RunnerState.Running : undefined
-    //console.log("vm.worker: state", state)
     self.postMessage(<VMStateResponse>{
         type: "state",
         worker: "vm",
-        state,
+        state: states[runner?.state] || RunnerState.Stopped,
     })
 }
 
@@ -132,6 +138,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
                 const { binary, dbg } = res
                 runner = new Runner(bus, binary, dbg)
                 runner.options.setting = localStorageSetting
+                runner.on(CHANGE, postState)
 
                 if (restart) await start() // background start
             }
@@ -143,12 +150,10 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
                 errors: host.errors,
             }
         },
-        state: () => {
-            const state = runner?.state || RunnerState.Stopped
-            return <Partial<VMStateResponse>>{
-                state,
-            }
-        },
+        state: () =>
+            <Partial<VMStateResponse>>{
+                state: states[runner?.state] || RunnerState.Stopped,
+            },
         command: async (props: VMCommandRequest) => {
             const { action } = props
             switch (action) {
@@ -160,9 +165,8 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
                     await start()
                     break
             }
-
             return <Partial<VMRunResponse>>{
-                state: runner?.state,
+                state: states[runner?.state] || RunnerState.Stopped,
             }
         },
     }
