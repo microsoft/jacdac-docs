@@ -81,16 +81,15 @@ With the slider connected, check it has appeared in the MakeCode editor and clic
 
 ### Step 3
 
-Grab the "plot bar graph" block from the "Led" category and place it in a forever loop.
+Grab the `on slider position changed by 5` from the modules block category. Then, take a `plot bar graph` block from the "Led" category and place it inside the `on slider position changed by 5` block.
 
 ```blocks
-basic.forever(function () {
+modules.potentiometer1.onPositionChangedBy(5, function () {
     led.plotBarGraph(
     0,
     0
     )
 })
-
 ```
 
 ### Step 4
@@ -98,27 +97,25 @@ basic.forever(function () {
 From the modules drawer, grab the "potentiometer1 position" and place it on the first "0" of the "plot bar graph" block:
 
 ```blocks
-basic.forever(function () {
+modules.potentiometer1.onPositionChangedBy(5, function () {
     led.plotBarGraph(
     modules.potentiometer1.position(),
     0
     )
 })
-
 ```
 
 ### Step 5
 
-Slider values range from 0-100. So, lets change the "up to" portion of the plot bar graph block to 100:
+Slider values range from 0-100. So, lets change the `up to` portion of the plot bar graph block to 100:
 
 ```blocks
-basic.forever(function () {
+modules.potentiometer1.onPositionChangedBy(5, function () {
     led.plotBarGraph(
     modules.potentiometer1.position(),
     100
     )
 })
-
 ```
 
 ### Step 6
@@ -130,6 +127,22 @@ That's it! Now, when you move the slider position, you will see a poportional ch
 ### (optional) Step 7
 
 Just like any MakeCode program, you can click the download button to see the same program running on your physical micro:bit!
+
+## Task 2
+
+This next task will be less structured and will require the slider module and the 10-RGB LED bar module. Please connect these two modules to the micro:bit Jacdapter.
+
+Now, with those modules connected, create a program that: when the slider value changes, the colour of the RGB LED bar module changes.
+
+### Hints
+
+-   You can use sensor values in the setall command, not just colours:
+
+```blocks
+modules.ledPixel1.setAll(input.acceleration(Dimension.X))
+```
+
+-   You might want to transform the slider value somehow to get more interesting colours. Look in the "math" category for the map block!
 
 ## Troubleshooting
 
