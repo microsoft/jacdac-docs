@@ -116,19 +116,6 @@ function MainToolbar() {
                     )}
                 />
             )}
-            <Hidden implementation="css" smDown={true}>
-                <Typography component="h1" variant="h6">
-                    <Link
-                        style={{
-                            color: UIFlags.widget ? "black" : "white",
-                        }}
-                        to="/"
-                        underline="hover"
-                    >
-                        Jacdac
-                    </Link>
-                </Typography>
-            </Hidden>
             <div className={classes.grow} />
             {Flags.diagnostics && <PacketStats />}
             <Suspense fallback={null}>
