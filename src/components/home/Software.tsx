@@ -124,7 +124,7 @@ export default function Software() {
                         caption="Inspect devices, services, registers and events in the device tree."
                         buttonText="Open Device Tree"
                         buttonVariant="link"
-                        buttonUrl="/software/device-tree"
+                        buttonUrl="/tools/device-tree"
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -134,7 +134,7 @@ export default function Software() {
                         caption="Inspect every packet moving on the bus, save and reload traces from the web or your logic analyzer."
                         buttonText="Show packets"
                         buttonVariant="link"
-                        buttonUrl="/software/packet-console"
+                        buttonUrl="/tools/packet-console"
                     />
                 </Grid>
             </CarouselGrid>
