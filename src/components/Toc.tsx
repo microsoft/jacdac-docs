@@ -130,29 +130,34 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0,
             },
             {
-                name: "Dashboard",
+                name: "Device Dashboard",
                 path: "/dashboard/",
                 order: 0.1,
             },
             {
-                name: "Devices",
+                name: "Device Catalog",
                 path: "/devices/",
                 order: 0.4,
             },
             {
-                name: "Programming",
+                name: "Application Programming",
                 path: "/clients/",
                 order: 0.5,
             },
             {
-                name: "Tools",
+                name: "Web Tools",
                 path: "/tools/",
                 order: 0.6,
             },
             {
-                name: "Services",
+                name: "Service Catalog",
                 path: "/services/",
                 order: 0.7,
+            },
+            {
+                name: "For Manufacturers",
+                path: "/manufacturers/",
+                order: 0.8,
             },
             {
                 name: "Reference",

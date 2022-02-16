@@ -90,7 +90,7 @@ export default function Home() {
                 }
             />
 
-
+{/* 
             <CenterGrid
                 subtitle="Discover the benefits of Jacdac protocol"
                 description="Jacdac devices communicate using packets over a bus, where each device advertises itself and its set of services."
@@ -98,7 +98,7 @@ export default function Home() {
                 buttonVariant="link"
                 buttonUrl="/protocol/"
             />
-{/* 
+
             <SplitGrid
                 right={true}
                 subtitle="Protocol"
@@ -115,7 +115,7 @@ export default function Home() {
                 }
             /> */}
 
-            <CarouselGrid>
+            {/* <CarouselGrid>
                 <Grid item xs={12} sm={6}>
                     <FeatureItem
                         startImage={<DirectionsBusIcon fontSize="large" />}
@@ -247,6 +247,7 @@ export default function Home() {
                 buttonVariant="link"
                 buttonUrl="/clients/"
             />
+             */}
         </Grid>
     )
 }
