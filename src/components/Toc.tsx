@@ -155,8 +155,8 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.7,
             },
             {
-                name: "For Manufacturers",
-                path: "/manufacturers/",
+                name: "Device Development Kit",
+                path: "/ddk/",
                 order: 0.8,
             },
             {
