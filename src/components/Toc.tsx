@@ -137,12 +137,12 @@ export default function Toc(props: { pagePath: string }) {
             {
                 name: "Device Catalog",
                 path: "/devices/",
-                order: 0.4,
+                order: 0.2,
             },
             {
-                name: "Hardware",
+                name: "Connector and Cable",
                 path: "/hardware/",
-                order: 0.45,
+                order: 0.3,
             },
             {
                 name: "Application Programming",

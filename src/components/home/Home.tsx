@@ -126,22 +126,6 @@ export default function Home() {
                 </Grid>
             </CarouselGrid>
 
-            <CenterGrid
-                subtitle="Enabling a cheaper ecosystem."
-                description="A PCB edge connector was chosen for Jacdac as it adds no cost to a product. 
-                A module is a small PCB that includes an MCU connected to an on-board sensor or actuator."
-                image={
-                    <StaticImage
-                        src="./beautifysimple.png"
-                        alt="An array of Jacdac modules"
-                        imgStyle={imgStyle}
-                    />
-                }
-                buttonText="Devices"
-                buttonVariant="link"
-                buttonUrl="/devices/"
-            />
-
             <SplitGrid
                 right={true}
                 subtitle="For Manufacturers"
