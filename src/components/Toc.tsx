@@ -140,6 +140,11 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.4,
             },
             {
+                name: "Hardware",
+                path: "/hardware/",
+                order: 0.45,
+            },
+            {
                 name: "Application Programming",
                 path: "/clients/",
                 order: 0.5,
