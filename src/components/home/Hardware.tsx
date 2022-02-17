@@ -15,18 +15,6 @@ const DeviceSpecificationList = lazy(
     () => import("../specification/DeviceSpecificationList")
 )
 
-/*
-const ModelViewer = lazy(() => import("./models/ModelViewer"))
-const GLBModel = lazy(() => import("./models/GLBModel"))
-<Grid item xs={12}>
-<Suspense>
-    <ModelViewer responsive={true}>
-        <GLBModel name={"jmhidserversf441v03"} />
-    </ModelViewer>
-</Suspense>
-</Grid>
-*/
-
 export default function Hardware() {
     const { imgStyle } = useContext(DarkModeContext)
     const { mobile, medium } = useMediaQueries()
@@ -39,19 +27,6 @@ export default function Hardware() {
             alignContent="center"
             alignItems="center"
         >
-            <SplitGrid
-                title="Hardware"
-                subtitle3="Integrate Jacdac into your devices."
-                imageColumns={6}
-                buttonText="Hardware Specification"
-                buttonUrl="/reference/hardware-specification/"
-                image={
-                    <StaticImage
-                        src="./pcbfootprint.png"
-                        alt="PCB connector footprint"
-                    />
-                }
-            />
 
             <CenterGrid
                 subtitle="Plug-and-play"
@@ -81,22 +56,6 @@ export default function Hardware() {
                 buttonUrl="/protocol/"
             />
 
-            <SplitGrid
-                right={true}
-                subtitle="8-bit and up"
-                description="Firmware fits on 8-bit micro-controllers to minimize costs"
-                imageColumns={8}
-                image={
-                    <StaticImage
-                        src="./jacdacsinglergbledmodule.png"
-                        alt="A LED module"
-                        imgStyle={imgStyle}
-                    />
-                }
-                buttonText="Device Development Kit"
-                buttonVariant="link"
-                buttonUrl="https://github.com/microsoft/jacdac-ddk"
-            />
 
             <SplitGrid
                 right={false}
@@ -140,9 +99,6 @@ export default function Hardware() {
                         alt="A device with firmware up-to-date"
                     />
                 }
-                buttonText={"Register device"}
-                buttonVariant="link"
-                buttonUrl="/tools/device-registration/"
             />
 
             <Grid item xs={12}>
@@ -180,8 +136,8 @@ export default function Hardware() {
                 subtitle="For Manufacturers"
                 description="Create Jacdac devices."
                 imageColumns={8}
-                buttonText="Hardware Specification"
-                buttonUrl="/reference/hardware-specification/"
+                buttonText="Device Development Kit"
+                buttonUrl="/ddk/"
                 buttonVariant="link"
                 image={
                     <StaticImage
@@ -190,14 +146,6 @@ export default function Hardware() {
                         imgStyle={imgStyle}
                     />
                 }
-            />
-
-            <CenterGrid
-                subtitle="Can I add Jacdac to my PCB?"
-                description="Absolutely. We would be thrilled if you used a Jacdac PCB connector on your board or product! You can use the name Jacdac without royalties or attribution."
-                buttonText="Integrate Jacdac into your hardware"
-                buttonVariant="link"
-                buttonUrl="/hardware/connector"
             />
 
             <SplitGrid
