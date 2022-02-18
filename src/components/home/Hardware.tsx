@@ -39,9 +39,9 @@ export default function Hardware() {
 
             <SplitGrid
                 right={false}
-                subtitle="PCB Connector"
-                description="A PCB edge connector is robust and adds no cost to a product."
-                buttonText="Physical connector"
+                subtitle="Edge Connector"
+                description="Jacdac's PCB edge connector is robust, double-sided, low cost."
+                buttonText="Edge connector"
                 buttonVariant="link"
                 buttonUrl="/hardware/connector/"
                 imageColumns={6}
@@ -54,22 +54,20 @@ export default function Hardware() {
                 }
             />
 
-
-            <CenterGrid
-                subtitle="Discover the benefits of Jacdac custom connector and cable."
-                description="There are plenty of prototyping connectors/cables on the market. The issue is that there are also plenty of compromises that come with using them. They are fiddly, require high dexterity, and are easy to damage."
+            <SplitGrid
+                right={false}
+                subtitle="Cable"
+                description="Cables make plug-and-play simple and error-free."
+                buttonText="Cable"
+                buttonVariant="link"
+                buttonUrl="/hardware/cable/"
+                imageColumns={6}
+                image={<StaticImage src="./ucable.png" alt="Short cable" />}
             />
 
-            <Grid item xs={12}>
-                <StaticImage
-                    src="./competitors.png"
-                    alt="Comparing existing cables to Jacdac"
-                />
-            </Grid>
-
             <SplitGrid
-                right={true}
-                subtitle="3-wire serial"
+                right={false}
+                subtitle="3-wire Bus"
                 description="Jacdac packets are sent serially among physical devices over a single data line along with a regulated power line."
                 image={
                     <StaticImage
@@ -82,6 +80,18 @@ export default function Hardware() {
                 buttonVariant="link"
                 buttonUrl="/reference/protocol/"
             />
+
+            <CenterGrid
+                subtitle="Discover the benefits of Jacdac custom connector and cable."
+                description="There are plenty of prototyping connectors/cables on the market. The issue is that there are also plenty of compromises that come with using them. They are fiddly, require high dexterity, and are easy to damage."
+            />
+
+            <Grid item xs={12}>
+                <StaticImage
+                    src="./competitors.png"
+                    alt="Comparing existing cables to Jacdac"
+                />
+            </Grid>
 
             {/* <SplitGrid
                 right={false}

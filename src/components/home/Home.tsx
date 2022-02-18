@@ -58,7 +58,7 @@ export default function Home() {
             <SplitGrid
                 right={false}
                 subtitle="Hardware Bus"
-                description="Jacdac devices have one or more PCB edge connectors, to join together in a bus via cables."
+                description="Jacdac devices have one or more PCB edge connectors. Cables connect devices to form a bus."
                 image={
                     <StaticImage
                         src="./mechanicalclickconnector.png"
