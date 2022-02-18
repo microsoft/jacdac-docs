@@ -140,7 +140,7 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.2,
             },
             {
-                name: "Connector and Cable",
+                name: "Hardware",
                 path: "/hardware/",
                 order: 0.3,
             },

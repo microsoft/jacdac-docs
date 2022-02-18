@@ -29,16 +29,12 @@ export default function Hardware() {
         >
 
             <SplitGrid
-                right={true}
-                subtitle="Plug-and-play"
-                description="Every Jacdac device has a tiny micro-controller that runs the Jacdac protocol and communicates over the bus."
-                image={
-                    <StaticImage
-                        src="./rhtempvertical.png"
-                        alt="A Jacdac humidity module plugging into a Jacdac cable"
-                        imgStyle={imgStyle}
-                    />
-                }
+                title="Hardware"
+                description="Every Jacdac device has one or more PCB-based edge connectors, which allows it to be connected to the Jacdac bus via a cable."
+                image={<StaticImage
+                    src="./buttoncable.png"
+                    alt="A cable plugin into a humidity sensor."
+                />}
             />
 
             <SplitGrid
@@ -57,6 +53,19 @@ export default function Hardware() {
                     />
                 }
             />
+
+
+            <CenterGrid
+                subtitle="Discover the benefits of Jacdac custom connector and cable."
+                description="There are plenty of prototyping connectors/cables on the market. The issue is that there are also plenty of compromises that come with using them. They are fiddly, require high dexterity, and are easy to damage."
+            />
+
+            <Grid item xs={12}>
+                <StaticImage
+                    src="./competitors.png"
+                    alt="Comparing existing cables to Jacdac"
+                />
+            </Grid>
 
             <SplitGrid
                 right={true}

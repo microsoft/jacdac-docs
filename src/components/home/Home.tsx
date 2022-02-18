@@ -42,7 +42,7 @@ export default function Home() {
             <SplitGrid
                 right={false}
                 subtitle="Devices"
-                description="Jacdac devices have a PCB edge connector, to connect via robust cables. Jacdac uses a 3-wire bus for power delivery and data transfer."
+                description="Jacdac devices communicate over a 3-wire bus."
                 image={
                     <StaticImage
                         src="./rotarycable.png"
@@ -57,8 +57,23 @@ export default function Home() {
 
             <SplitGrid
                 right={false}
+                subtitle="Connector and Cable"
+                description="Jacdac devices have a PCB edge connector, to connect via robust cables."
+                image={
+                    <StaticImage
+                        src="./mechanicalclickconnector.png"
+                        alt="A split view of the cable going into the PCB"
+                    />
+                }
+                buttonText="Connector and Cable"
+                buttonVariant="link"
+                buttonUrl="/hardware/"
+            />
+
+            <SplitGrid
+                right={false}
                 subtitle="Programming"
-                description="Program Jacdac with JavaScript, .NET, Python, MakeCode, ..."
+                description="Program with JavaScript, .NET, Python, MakeCode, ..."
                 buttonText="Program Jacdac"
                 buttonVariant="link"
                 buttonUrl="/clients/"
