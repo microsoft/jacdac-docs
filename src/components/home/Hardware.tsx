@@ -29,7 +29,7 @@ export default function Hardware() {
         >
 
             <SplitGrid
-                title="Hardware"
+                title="Hardware Bus"
                 description="Every Jacdac device has one or more PCB-based edge connectors, which allows it to be connected to the Jacdac bus via a cable."
                 image={<StaticImage
                     src="./buttoncable.png"

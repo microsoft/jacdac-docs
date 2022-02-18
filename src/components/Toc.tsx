@@ -125,8 +125,8 @@ export default function Toc(props: { pagePath: string }) {
         // convert pages into tree
         const toc: TocNode[] = [
             {
-                name: "Home",
-                path: "/",
+                name: "Overview",
+                path: "/overview/",
                 order: 0,
             },
             {
@@ -140,8 +140,8 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.2,
             },
             {
-                name: "Hardware",
-                path: "/hardware/",
+                name: "Service Catalog",
+                path: "/services/",
                 order: 0.3,
             },
             {
@@ -155,12 +155,7 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.6,
             },
             {
-                name: "Service Catalog",
-                path: "/services/",
-                order: 0.7,
-            },
-            {
-                name: "Device Development Kit",
+                name: "Device Development",
                 path: "/ddk/",
                 order: 0.8,
             },

@@ -1,11 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import { Grid } from "@mui/material"
-import { withPrefix } from "gatsby-link"
 import { StaticImage } from "gatsby-plugin-image"
 import React from "react"
-import CarouselGrid from "./CarouselGrid"
-import CenterGrid from "./CenterGrid"
-import FeatureItem from "./FeatureItem"
 import SplitGrid from "./SplitGrid"
 
 export default function Cable() {

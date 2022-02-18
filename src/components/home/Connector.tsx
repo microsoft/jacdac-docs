@@ -1,11 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import { Grid } from "@mui/material"
-import { withPrefix } from "gatsby-link"
 import { StaticImage } from "gatsby-plugin-image"
 import React from "react"
-import CarouselGrid from "./CarouselGrid"
-import CenterGrid from "./CenterGrid"
-import FeatureItem from "./FeatureItem"
 import SplitGrid from "./SplitGrid"
 
 export default function Connector() {
@@ -37,7 +33,7 @@ export default function Connector() {
             <SplitGrid
                 right={true}
                 subtitle="Reversible."
-                description="There's no need to worry about accidentally swapping the Power and Data wires. The PCB connector is engineered to be completely reversible, so you won't even have to think about the right orientation as you plug the cable."
+                description="There's no need to worry about accidentally swapping the Power and Data wires. The PCB connector is engineered to be completely reversible, so you won't even have to think about the right orientation as you plug in the cable."
                 imageColumns={6}
                 image={
                     <StaticImage
