@@ -170,9 +170,8 @@ export default function Toc(props: { pagePath: string }) {
             .map(node => node.node)
             .filter(
                 node =>
-                    !!node.frontmatter?.title ||
-                    (!!node.headings.length &&
-                        !/404/.test(node.headings[0].value))
+                    !!node.frontmatter?.title && 
+                    node.fields.slug !== "/"
             )
             .filter(node => !node.frontmatter || !node.frontmatter?.hideToc)
             .map(node => {
@@ -194,7 +193,7 @@ export default function Toc(props: { pagePath: string }) {
     const TocListItem = (props: { entry: TocNode; level: number }) => {
         const { entry, level } = props
         const { path, children, name } = entry
-        const selected = pagePath === path
+        const selected = pagePath === path || (pagePath === "/" && path === "/overview/")
         const sub = level === 1 || !!children?.length
         const showSub = sub && !!children?.length && pagePath.startsWith(path)
 
@@ -239,7 +238,7 @@ export default function Toc(props: { pagePath: string }) {
         <StyledList dense className={classes.root}>
             {tree.map(entry => (
                 // eslint-disable-next-line react/prop-types
-                <TocListItem key={entry.path} entry={entry} level={0} />
+                <TocListItem key={entry.path} entry={entry} level={1} />
             ))}
         </StyledList>
     )
