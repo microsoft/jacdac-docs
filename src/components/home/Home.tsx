@@ -58,7 +58,7 @@ export default function Home() {
             <SplitGrid
                 right={false}
                 subtitle="Edge Connector"
-                description="Jacdac's PCB edge connector is robust, double-sided, low cost."
+                description="Jacdac's PCB edge connector is robust, double-sided, and low cost."
                 buttonText="Edge connector"
                 buttonVariant="link"
                 buttonUrl="/overview/connector/"

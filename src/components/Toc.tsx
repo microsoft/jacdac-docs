@@ -160,9 +160,14 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.8,
             },
             {
-                name: "Reference",
+                name: "Specifications",
                 path: "/reference/",
                 order: 0.81,
+            },
+            {
+                name: "FAQ",
+                path: "/faq/",
+                order: 0.85,
             },
         ]
 
