@@ -57,18 +57,32 @@ export default function Home() {
 
             <SplitGrid
                 right={false}
-                subtitle="Hardware Bus"
-                description="Jacdac devices have one or more PCB edge connectors. Cables connect devices to form a bus."
+                subtitle="Edge Connector"
+                description="Jacdac's PCB edge connector is robust, double-sided, low cost."
+                buttonText="Edge connector"
+                buttonVariant="link"
+                buttonUrl="/overview/connector/"
+                imageColumns={6}
                 image={
                     <StaticImage
                         src="./mechanicalclickconnector.png"
-                        alt="A split view of the cable going into the PCB"
+                        alt="Cable and connector"
+                        imgStyle={imgStyle}
                     />
                 }
-                buttonText="Connector and Cable"
-                buttonVariant="link"
-                buttonUrl="/hardware/"
             />
+
+            <SplitGrid
+                right={false}
+                subtitle="Cable"
+                description="Cables make plug-and-play simple and error-free."
+                buttonText="Cable"
+                buttonVariant="link"
+                buttonUrl="/overview/cable/"
+                imageColumns={6}
+                image={<StaticImage src="./ucable.png" alt="Short cable" />}
+            />
+
 
             <SplitGrid
                 right={false}

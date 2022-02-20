@@ -3,6 +3,7 @@ import { Grid } from "@mui/material"
 import { StaticImage } from "gatsby-plugin-image"
 import React from "react"
 import SplitGrid from "./SplitGrid"
+import CenterGrid from "./CenterGrid"
 
 export default function Connector() {
     return (
@@ -55,6 +56,18 @@ export default function Connector() {
                     />
                 }
             />
+
+            <CenterGrid
+                subtitle="Discover the benefits of Jacdac custom connector and cable."
+                description="There are plenty of prototyping connectors/cables on the market. The issue is that there are also plenty of compromises that come with using them. They are fiddly, require high dexterity, and are easy to damage."
+            />
+
+            <Grid item xs={12}>
+                <StaticImage
+                    src="./competitors.png"
+                    alt="Comparing existing cables to Jacdac"
+                />
+            </Grid>
         </Grid>
     )
 }
