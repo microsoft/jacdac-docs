@@ -18,7 +18,7 @@ export default function Connector() {
             <SplitGrid
                 style={{ paddingTop: 0 }}
                 title="Connector"
-                description="Jacdac uses 3-pin custom-designed connector to quickly interface development boards with sensors, relays and more."
+                description="Jacdac devices feature 3-pin PCB-based double-sided edge connectors."
                 // buttonText="Device Development Kit"
                 // buttonUrl="/ddk/"
                 imageColumns={6}
