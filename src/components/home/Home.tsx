@@ -74,7 +74,22 @@ export default function Home() {
 
             <SplitGrid
                 right={false}
-                subtitle="Programming"
+                subtitle="Services"
+                description="Jacdac services provide software an abstract view of a device's features. Services are defined in terms of registers, commands and events."
+                buttonText="Explore services"
+                buttonVariant="link"
+                buttonUrl="/services/"
+                image={
+                    <StaticImage
+                        src="./dashboard.png"
+                        alt="Dashboard of devices"
+                    />
+                }
+            />
+
+            <SplitGrid
+                right={false}
+                subtitle="Client Programming"
                 description="Program with JavaScript, .NET, Python, MakeCode, ..."
                 buttonText="Program Jacdac"
                 buttonVariant="link"
@@ -90,21 +105,6 @@ export default function Home() {
                 buttonVariant="link"
                 buttonUrl="/tools/"
                 image={<StaticImage src="./devicetree.png" alt="Device tree" />}
-            />
-
-            <SplitGrid
-                right={false}
-                subtitle="Services"
-                description="Jacdac services provide software an abstract view of a device's features. Services are defined in terms of registers, commands and events."
-                buttonText="Explore services"
-                buttonVariant="link"
-                buttonUrl="/services/"
-                image={
-                    <StaticImage
-                        src="./dashboard.png"
-                        alt="Dashboard of devices"
-                    />
-                }
             />
 
             <CenterGrid

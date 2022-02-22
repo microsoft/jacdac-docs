@@ -145,7 +145,7 @@ export default function Toc(props: { pagePath: string }) {
                 order: 0.3,
             },
             {
-                name: "Application Programming",
+                name: "Client Programming",
                 path: "/clients/",
                 order: 0.5,
             },
