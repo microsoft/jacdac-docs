@@ -56,12 +56,12 @@ export default function Home() {
             />
 
             <SplitGrid
-                right={false}
-                subtitle="Edge Connector"
-                description="Jacdac's PCB edge connector is robust, double-sided, and low cost."
-                buttonText="Edge connector"
+                right={true}
+                subtitle="Connector and Cable"
+                description="Jacdac's PCB edge connector is robust, double-sided, and low cost. Cables make plug-and-play simple and error-free."
+                buttonText="Connector and cable"
                 buttonVariant="link"
-                buttonUrl="/overview/connector/"
+                buttonUrl="/overview/connectorcable/"
                 imageColumns={6}
                 image={
                     <StaticImage
@@ -71,18 +71,6 @@ export default function Home() {
                     />
                 }
             />
-
-            <SplitGrid
-                right={false}
-                subtitle="Cable"
-                description="Cables make plug-and-play simple and error-free."
-                buttonText="Cable"
-                buttonVariant="link"
-                buttonUrl="/overview/cable/"
-                imageColumns={6}
-                image={<StaticImage src="./ucable.png" alt="Short cable" />}
-            />
-
 
             <SplitGrid
                 right={false}

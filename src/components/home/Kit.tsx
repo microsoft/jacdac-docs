@@ -30,7 +30,7 @@ export default function Kit() {
                         subtitle2="Unbox"
                         description="Power up the micro:bit and plug the cables and modules!"
                         buttonText="Unbox your kit"
-                        buttonUrl="/hardware/kit/unbox"
+                        buttonUrl="/overview/kit/unbox"
                     />
                 </Grid>
                 <Grid item xs={12} sm={4}>
