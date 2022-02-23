@@ -76,7 +76,7 @@ export default function Home() {
             <SplitGrid
                 right={false}
                 subtitle="Clients and Servers"
-                description="A Jacdac device can be a client and/or server."
+                description="A Jacdac device can be a client and/or server. Jacdaptors allow Jacdac to integrate with other ecosystems."
                 buttonText="Clients and Servers"
                 buttonVariant="link"
                 buttonUrl="/overview/clientserver/"
@@ -94,7 +94,7 @@ export default function Home() {
             <SplitGrid
                 right={true}
                 subtitle="Services"
-                description="Jacdac services provide software an abstract view of a device's features. Services are defined in terms of registers, commands and events."
+                description="Jacdac services provide a fine-grained but abstract view of a device's features."
                 buttonText="Explore services"
                 buttonVariant="link"
                 buttonUrl="/services/"
