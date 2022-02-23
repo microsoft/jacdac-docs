@@ -1,23 +1,22 @@
 ---
-title: Device taxonomy
-order: 0
+title: Client/Server Architecture
+order: 1
 ---
 
-## Jacdac Device Taxonomy
+## Client/Server Architecture
 
-Architecturally, a key idea behind Jacdac is a separation of concerns between the worlds of _client_ code (applications) and _server_ firmware that interfaces with sensors/actuators. The Jacdac protocol and services are abstractions that achieve this separation, creating a client/server architecture
+Architecturally, a key idea behind Jacdac is a separation of concerns between the worlds of _client_ code (applications) and _server_ firmware that interfaces with sensors/actuators. Jacdac [services](/services) are abstractions that achieve this separation, creating a client/server architecture, supported by the Jacdac [protocol](/reference)
 
 ![Jacdac client/server architecture](./clientServer.png)
 
-This architecture naturally results in the following categories of Jacdac devices.
+This architecture naturally results in the following categories of Jacdac [devices](/devices).
 
 ### Brains (Clients)
 
-A Jacdac _brain_ is a Jacdac device that runs application/client code that makes use of services that are available on the Jacdac bus to achieve some end-user scenario.
-A _dedicated_ Jacdac brain contains a re-programmable MCU and little else; it leverages Jacdac services for all its input and output.
-An _integrated_ Jacdac brain combines an MCU with on-board input and output and can typically operate stand-alone;
-in this case the Jacdac bus provides a way to add additional capabilities to the device.
-An example integrated Jacdac brain would be a programmable robot base with built-in motors and
+A Jacdac _brain_ is a Jacdac device that runs application/client code that makes use of services that are available on the Jacdac bus to achieve some end-user scenario:
+
+* A _dedicated_ Jacdac brain contains a re-programmable MCU and little else; it leverages Jacdac [services](/services) for all its input and output.
+* An _integrated_ Jacdac brain combines an MCU with on-board input and output and can typically operate stand-alone; in this case the Jacdac bus provides a way to add additional capabilities to the device. An example integrated Jacdac brain would be a programmable robot base with built-in motors and
 collision sensors that uses the Jacdac interface and protocol to support the connection of Jacdac modules
 that provide new capabilities such as light and sound detection, a line following sensor, etc.
 
