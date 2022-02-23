@@ -107,6 +107,23 @@ export default function Home() {
                 image={<StaticImage src="./devicetree.png" alt="Device tree" />}
             />
 
+        <SplitGrid
+                right={true}
+                subtitle="For Manufacturers"
+                description="Add Jacdac to your devices. Schematics, footprints, libraries, open source hardware designs."
+                imageColumns={6}
+                centered={true}
+                buttonText="Device Development Kit"
+                buttonUrl="/ddk/"
+                buttonVariant="link"
+                image={
+                    <StaticImage
+                        src="./pcbfootprint.png"
+                        alt="PCB connector footprint"
+                    />
+                }
+            />
+
             <CenterGrid
                 subtitle="Discover the benefits of Jacdac"
                 description="Jacdac devices send packets over a bus--each device advertises itself and its set of services."
@@ -142,23 +159,6 @@ export default function Home() {
                     />
                 </Grid>
             </CarouselGrid>
-
-            <SplitGrid
-                right={true}
-                subtitle="For Manufacturers"
-                description="Add Jacdac to your devices. Schematics, footprints, libraries, open source hardware designs."
-                imageColumns={6}
-                centered={true}
-                buttonText="Device Development Kit"
-                buttonUrl="/ddk/"
-                buttonVariant="link"
-                image={
-                    <StaticImage
-                        src="./pcbfootprint.png"
-                        alt="PCB connector footprint"
-                    />
-                }
-            />
         </Grid>
     )
 }

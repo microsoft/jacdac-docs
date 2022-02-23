@@ -14,7 +14,7 @@ export default function Kit() {
             alignContent="center"
             alignItems="center"
         >
-            <FeatureItem
+            <CenterGrid
                 title="Hardware Kit"
                 subtitle3="Start experimenting with Jacdac and the Hardware module kit."
             />

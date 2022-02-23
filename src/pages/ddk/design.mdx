@@ -29,7 +29,7 @@ of the [Jacdac protocol specification](/reference/protocol/).
 The native Jacdac SWS signal uses 3.3V logic where a logial one is nominally 3.3V and a logical zero is nominally 0V.
 
 To interface a microcontroller to the Jacdac bus data signal (JD_DATA) use the following circuit:
-![Jacdac bus interface](Jacdac_electrical_interface.png)
+![Jacdac bus interface](./Jacdac_electrical_interface.png)
 
 In the above schematic, the ESD diodes protect against potential static discharges directly onto the Jacdac PCB edge connector. Many alternative ESD didoes are suitable but we require ultra-low capacitance. The low-pass filter formed by FB1, C1 and R1 reduces unwanted electromagnetic emissions. R1 also limits JD_DATA current, and D1 products the microcontroller in case of unexpected voltages on the bus.
 
@@ -97,7 +97,7 @@ The mechanical mating and umating process relies on two small, unplated slots in
 
 Please refer to the [technical drawing of the Jacdac PCB edge connector](https://github.com/microsoft/jacdac-ddk/blob/main/connector/JACDAC_PCB_Edge_Connector_Drawing_JD-PEC-02_rev_05.pdf) for full details. Note how the Jacdac electrical contacts are shorter on the bottom side of the PCB because they must not connect electrically to the adjacent plated through-holes.
 
-[![Jacdac PCB edge connector technical drawing](../images/JACDAC_PCB_Edge_Connector_Drawing_JD-PEC-02_rev_05.png)](https://github.com/microsoft/jacdac-ddk/blob/main/connector/JACDAC_PCB_Edge_Connector_Drawing_JD-PEC-02_rev_05.pdf)
+[![Jacdac PCB edge connector technical drawing](./JACDAC_PCB_Edge_Connector_Drawing_JD-PEC-02_rev_05.png)](https://github.com/microsoft/jacdac-ddk/blob/main/connector/JACDAC_PCB_Edge_Connector_Drawing_JD-PEC-02_rev_05.pdf)
 
 We provide Jacdac PCB edge connector libraries for some electronics CAD tools including Altium, Eagle and KiCAD [here](https://github.com/microsoft/jacdac-ddk/tree/main/connector).
 
