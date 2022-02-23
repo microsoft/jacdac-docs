@@ -4,29 +4,31 @@ order: 2
 ---
 # Hardware Design
 
+This section describes the hardware design guidelines for Jacdac, organized as follows
+- [Electrical](#electrical)
+- [Electro-mechanical](#electro-mechanical)
+- [Mechanical](#mechanical)
+- [Manufacturing](#manufacturing)
+
+---
+
 # Electrical
 
-## User feedback
+## User feedback: status LED
 
-### Status LED
-
-All Jacdac modules should have a status LED indicates [module and bus status](https://microsoft.github.io/jacdac-docs/reference/led-status/) to the user. 
-This can be a single colour orange LED or a three-colour RGB LED.
-
-The status LED may be disabled by the user to reduce current consumption. 
+All Jacdac modules should have a status LED indicates [module and bus status](/reference/led-status/) to the user. 
+This can be a single colour orange LED or a three-colour RGB LED. The status LED may be disabled by the user to reduce current consumption. 
 RGB LEDs may also put into a mode where the colour is controlled by the user.
 
 ## Signalling
 
-Data transmission occurs on JD_DATA using a single-wire half duplex asynchronous serial protocol we call Jacdac single wire serial (SWS). 
-Data bytes are 10 bits long and are composed of 1 start bit, 8 data bits, and 1 stop bit. Jacdac devices must only communicate at 1 Mbaud and when no data is being transmitted, the bus must read as a logical one.
+Data transmission occurs on JD_DATA using a single-wire half duplex asynchronous serial protocol called single wire serial (SWS). 
+Data bytes are 10 bits long and are composed of 1 start bit, 8 data bits, and 1 stop bit. Jacdac devices must only communicate at 1 Mbaud and when no data is being transmitted, the bus must read as a logical one. Many MCU UARTs support single-wire half duplex communications, but if necessesary the UART transmit and receive pins can be connected together externally.
 
-Many MCU UARTs support single-wire half duplex communications, but if necessesary the UART transmit and receive pins can be connected together externally.
-
-For more details please refer to the [Single wire protocol section](/reference/protocol/single-wire-serial/) 
+For more details please refer to the [single wire protocol section](/reference/protocol/single-wire-serial/) 
 of the [Jacdac protocol specification](/reference/protocol/).
 
-The native Jacdac SWS signal uses 3.3V logic where a logial one is nominally 3.3V and a logical zero is nominally 0V.
+The native Jacdac SWS signal uses 3.3V logic where a logical one is nominally 3.3V and a logical zero is nominally 0V.
 
 To interface a microcontroller to the Jacdac bus data signal (JD_DATA) use the following circuit:
 ![Jacdac bus interface](./Jacdac_electrical_interface.png)
@@ -83,9 +85,9 @@ To accomodate voltage drops, Jacdac devices must be capable of operating when th
 
 ---
 
-# Electro-mech
+# Electro-mechanical
 
-## Jacdac PCB edge connector
+## PCB edge connector
 
 ### PCB edge connector in detail
 
@@ -103,7 +105,7 @@ We provide Jacdac PCB edge connector libraries for some electronics CAD tools in
 
 There are two optional improvements which provide a better connection. Electroplated 'hard gold' may be used instead of ENIG for the Jacdac contact, and this provides better durability. Also, the end of the Jacdac PCB edge connector can have a bevelled or chamfered edge of between 30° and 60°. This reduces the initial mating force required to attach the mating connector. The PCB manufacturers may require that this is specified manually as an annotation in the gerber files or as a note in a README file. Note that both of these features (hard gold and bevelled edges) are optional.
 
-### Jacdac cable connectors and cable assemblies
+###  Cable connectors and assemblies
 
 A purpose-built cable connector is used to interface with the Jacdac PCB edge connector desribed above. The cable connector is reversible (i.e. it is 180° rotationally symmetric) but internally it only needs to have contacts on one side due to the double-sided design of the mating Jacdac PCB edge connector.
 
@@ -151,6 +153,8 @@ Use holes with a finished diameter of 2.1mm, annular copper ring of 3.0mm diamet
 
 The mounting holes must be on 2.5mm pitch. This allows the modules to be mounted on a pre-drilled/perforated plate that has holes every 2.5mm in each direction.
 
+---
+
 # Mechanical
 
 ## Module labelling
@@ -176,6 +180,8 @@ To keep module size as small as possible, the cute form factor uses four 2.1mm h
 ### Enclosure-compatible form factor
 
 We are also working on the specifications for an 'enclosure-compatible' module form factor. This is designed to make it easier to build cheap enclosures for individual modules, or for groups of modules that constitute a working device. This will use four 3.2mm holes, will have straight board edges, and will require a component keepout/clearance band around the board outline. Full details will be published in due course.
+
+---
 
 # Manufacturing
 
