@@ -3,35 +3,24 @@ title: Protocol Specification
 order: 1
 ---
 
+# Protocol Specification
+
+The Jacdac protocol consists of three layers:
+- [service layer](#service-layer)
+- [transport layer](#transport-layer)
+- [network layer](#network-interface-layer)
 
 ## Service Layer
 
-Unlike many other embedded systems communications protocols, Jacdac inherently supports a distrbiuted systems architecture made up of one or more clients and one or more servers.
-
-A Jacdac server is simply a device that presents a service on the bus - for example a push button or a temperature sensor. So servers are often relatively impoverished devices - we have a reference implementation of a button module based on a ~$0.03 MCU. A server might provide multiple different services, for example a combined temperature and humidity sensor could provide two separate services, one for temperature and another for humidity. Multiple similar servers - for example multiple buttons - may be connected to the same bus.
-
-A Jacdac client is a device that consumes one or more services. Often a client can be reconfigured or re-programmed to alter its behavior to suit a particular application. There may be mutliple clients on the same Jacdac bus, in which case they may consume exactly the same set of services or different combinations of services. Sometimes a client will also provide services itself. This architecture is naturally composable and scalable, following the same principles used in established client/server solutions.
-
-So with Jacdac there is no notion of a bus 'controller', 'host', 'primary' or 'leader'. There is no need to assign roles when building a system with Jacdac, sensors and actuators will naturally provide services which are consumed by one or more clients.
-
-### Services
-
-The way Jacdac devices share resources with other devices on the bus are through __services__. 
-Services provide abstract, standardized interfaces that can be used to interact with 
-physical hardware resources (e.g. an accelerometer) or pure virtual resources 
-(e.g. the state of a video game). This abstraction brings plug-and-play dynamism to 
-Jacdac so that devices with different hardware, but the same overall functionality, 
-can replace one another without having to recompile user applications. 
-For example, two different models of accelerometer hardware can replace each other 
-because they share the same software interface.
+A service is globally and uniquely identified by its service class, which should be found in the [service catalog](/services). For example, the service class of the [button service](/services/button) is `0x1473a263`, as specified in the button's [service specification](https://github.com/microsoft/jacdac/blob/main/services/button.md) in the GitHub repository that contains the registered services.
 
 Services act on __commands__ and optionally respond with __reports__. 
 Reports can also be emitted separately from a service without prompting from another device. 
 This interface is specified in a [custom markdown language](./service-specification/) 
 that lists the possible commands and reports that a service can consume and emit. 
-Specifications can also inherit from other specifications. An example of this can be seen in the [sensor specification](/services/_sensor). Jacdac sensors inherit commands and reports from this specification, creating a set of base functionality for _all_ sensors.
 
-A service is globally and uniquely identified by its service class, which should be found in the [service catalog](/services). For example, the service class of the [button service](/services/button) is `0x1473a263`, as specified in the button's [service specification](https://github.com/microsoft/jacdac/blob/main/services/button.md) in the GitHub repository that contains the registered services. (In contrast, the `service_index` field in the Jacdac packet is an index into the list of services advertised by a device. The control service has both service class 0 and service number 0.)
+Specifications can also inherit from other specifications. An example of this can be seen in the [sensor specification](/services/_sensor). 
+Jacdac sensors inherit commands and reports from this specification, creating a set of base functionality for _all_ sensors.
 
 ### Commands
 
@@ -88,7 +77,7 @@ However, services __must not__ allocate any of the common or reserved register c
 | `0x100-0x17f` | Read-only registers common to all services	|
 | `0xf00-0xfff` | Reserved for future use.	|
 
-Common register command codes are allocated in the [system specification](/services/_system).
+Common register command codes are defined in the [system specification](/services/_system).
 
 #### Reports
 
