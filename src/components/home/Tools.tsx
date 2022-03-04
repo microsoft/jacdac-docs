@@ -56,7 +56,7 @@ export default function Tools() {
             alignItems="center"
         >
             <SplitGrid
-                title="Tools"
+                title="Web Tools"
                 subtitle3="Visualize, debug, sniff, track, record, replay, update... from your browser."
                 imageColumns={6}
                 image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
@@ -64,8 +64,8 @@ export default function Tools() {
 
             <SplitGrid
                 right={true}
-                subtitle="Dashboard"
-                description="Visualize and interact with physical or simulated devices in the dashboard."
+                subtitle="Digital Twins and Simulators."
+                description="Visualize and interact with digital twins of physical devices, or simulated devices. Interact with the simulators on the left. To see more details, open the device tree."
                 image={
                     <Grid container spacing={1}>
                         {dashboards.map(device => (
@@ -76,35 +76,6 @@ export default function Tools() {
                             </Grid>
                         ))}
                     </Grid>
-                }
-                buttonText="Try the dashboard"
-                buttonVariant="link"
-                buttonUrl="/dashboard/"
-            />
-
-            <SplitGrid
-                right={false}
-                subtitle="Simulators."
-                description="Spin up virtual device and services to test your client software. Both physical and simulated devices can interact together."
-                image={
-                    <>
-                        {simulator && (
-                            <Suspense>
-                                <DashboardDevice device={simulator} />
-                            </Suspense>
-                        )}
-                    </>
-                }
-            />
-
-            <SplitGrid
-                right={true}
-                subtitle="Device Tree"
-                description="Inspect devices, services, registers and events in the device tree."
-                image={
-                    <Suspense>
-                        <JDomTreeView />
-                    </Suspense>
                 }
                 buttonText="Open Device Tree"
                 buttonVariant="link"
@@ -127,11 +98,6 @@ export default function Tools() {
                 onButtonClick={handleShowPacketConsole}
             />
 
-            <CenterGrid
-                subtitle2="Data Science tools."
-                description="Collect data, train and push models."
-            />
-
             <SplitGrid
                 right={false}
                 subtitle="Data collector."
@@ -147,24 +113,9 @@ export default function Tools() {
                 }
             />
 
-            <SplitGrid
-                right={true}
-                subtitle="JupyterLab 2.0."
-                description="Collect data from your JupyterLab notebooks."
-                buttonText="Collect data"
-                buttonVariant="link"
-                buttonUrl="/tools/jupyterlab/"
-                image={
-                    <StaticImage
-                        src="./jupyterlab.png"
-                        alt="Screenshot of Jupyter lab"
-                    />
-                }
-            />
-
             <CenterGrid
                 subtitle2="Can I build my own tools?"
-                description="Absolutely! You can our JavaScript package to build your own Jacdac tooling."
+                description="Absolutely! You can use the JavaScript package to build your own Jacdac tooling."
                 buttonText="Integrate Jacdac into your web app"
                 buttonVariant="link"
                 buttonUrl="/clients/javascript/"

@@ -38,10 +38,11 @@ export default function Home() {
                 subtitle3="A hardware/software stack that bridges the world of low-cost microcontrollers to the web browser and beyond."
                 description="Cheap, flexible and extensible."
             />
+
             <SplitGrid
                 right={false}
-                subtitle="Hardware"
-                description="Jacdac uses a 3-wire bus for power delivery and data transfer. A purpose-built connector is used to interface with the Jacdac PCB edge connector."
+                subtitle="Devices"
+                description="Jacdac devices communicate over a 3-wire bus."
                 image={
                     <StaticImage
                         src="./rotarycable.png"
@@ -49,29 +50,68 @@ export default function Home() {
                         imgStyle={imgStyle}
                     />
                 }
-                buttonText="Physical interconnect"
+                buttonText="Device Catalog"
                 buttonVariant="link"
-                buttonUrl="/hardware/"
+                buttonUrl="/devices/"
             />
+
             <SplitGrid
                 right={true}
-                subtitle="Protocol"
-                description="Bus topology, dynamic discovery, services designed for micro-controllers."
-                buttonText="Learn more"
+                subtitle="Connector and Cable"
+                description="Jacdac's PCB edge connector is robust, double-sided, and low cost. Cables make plug-and-play simple and error-free."
+                buttonText="Connector and cable"
                 buttonVariant="link"
-                buttonUrl="/protocol/"
+                buttonUrl="/overview/connectorcable/"
+                imageColumns={6}
                 image={
                     <StaticImage
-                        src="./bustopology.png"
-                        alt="Four cables joining into a hub"
+                        src="./mechanicalclickconnector.png"
+                        alt="Cable and connector"
                         imgStyle={imgStyle}
                     />
                 }
             />
+
+            
             <SplitGrid
                 right={false}
-                subtitle="'Nano' Services"
-                description="Jacdac services provide software an abstract view of the hardware. Services are defined in terms of registers, commands and events."
+                subtitle="Clients and Servers"
+                description="A Jacdac device can be a client and/or server"
+                buttonText="Clients and Servers"
+                buttonVariant="link"
+                buttonUrl="/overview/clientserver/"
+                imageColumns={6}
+                image={
+                    <StaticImage
+                        src="./clientServer.png"
+                        alt="Clients and Servers"
+                        imgStyle={imgStyle}
+                    />
+                }
+            />
+
+                        
+            <SplitGrid
+                right={true}
+                subtitle="Plays well with others"
+                description="Jacdaptors allow Jacdac to integrate with other ecosystems"
+                buttonText="Jacdaptors"
+                buttonVariant="link"
+                buttonUrl="/overview/jacdaptors"
+                imageColumns={6}
+                image={
+                    <StaticImage
+                        src="./playswell.png"
+                        alt="Jacdaptors for USB, Raspberry Pi and micro:bit"
+                        imgStyle={imgStyle}
+                    />
+                }
+            />
+
+            <SplitGrid
+                right={false}
+                subtitle="Services"
+                description="Jacdac services provide a fine-grained but abstract view of a device's features"
                 buttonText="Explore services"
                 buttonVariant="link"
                 buttonUrl="/services/"
@@ -85,30 +125,44 @@ export default function Home() {
 
             <SplitGrid
                 right={true}
-                subtitle="Client SDKs"
-                description="Integrate Jacdac into JavaScript, .NET, Python, MakeCode, ..."
-                buttonText="Use Jacdac"
+                subtitle="Client Programming"
+                description="Program with JavaScript, .NET, Python, MakeCode, ..."
+                buttonText="Program Jacdac"
                 buttonVariant="link"
-                buttonUrl="/software/"
+                buttonUrl="/clients/"
                 image={<HTML5Image />}
             />
 
             <SplitGrid
                 right={false}
-                subtitle="Tools"
-                description="Visualize, debug, sniff, track, record, replay, update... from your browser."
+                subtitle="Web Tools"
+                description="Visualize, debug, sniff, track, record, replay, update... from your browser"
                 buttonText="Get productive with Jacdac"
                 buttonVariant="link"
                 buttonUrl="/tools/"
                 image={<StaticImage src="./devicetree.png" alt="Device tree" />}
             />
 
-            <CenterGrid
-                subtitle="Discover the benefits of Jacdac protocol"
-                description="Jacdac devices communicate using packets over a bus, where each device advertises itself and its set of services."
-                buttonText="Protocol specification"
+        <SplitGrid
+                right={true}
+                subtitle="For Manufacturers"
+                description="Add Jacdac to your devices. Schematics, footprints, libraries, firmware, hardware designs - all open source."
+                imageColumns={6}
+                centered={true}
+                buttonText="Device Development Kit"
+                buttonUrl="/ddk/"
                 buttonVariant="link"
-                buttonUrl="/protocol/"
+                image={
+                    <StaticImage
+                        src="./pcbfootprint.png"
+                        alt="PCB connector footprint"
+                    />
+                }
+            />
+
+            <CenterGrid
+                subtitle="Discover the benefits of Jacdac"
+                description="Jacdac devices send packets over a bus--each device advertises itself and its set of services."
             />
 
             <CarouselGrid>
@@ -141,108 +195,6 @@ export default function Home() {
                     />
                 </Grid>
             </CarouselGrid>
-
-            <CenterGrid
-                subtitle="Enabling a cheaper ecosystem."
-                description="A PCB edge connector was chosen for Jacdac as it adds no cost to a product. 
-                A module is a small PCB that includes an MCU connected to an on-board sensor or actuator."
-                image={
-                    <StaticImage
-                        src="./beautifysimple.png"
-                        alt="An array of Jacdac modules"
-                        imgStyle={imgStyle}
-                    />
-                }
-                buttonText="Devices"
-                buttonVariant="link"
-                buttonUrl="/devices/"
-            />
-
-            <SplitGrid
-                right={true}
-                subtitle="For Manufacturers"
-                description="Add Jacdac to your devices. Schematics, footprints, libraries, open source hardware designs."
-                imageColumns={6}
-                centered={true}
-                buttonText="Hardware Specification"
-                buttonUrl="/reference/hardware-specification/"
-                buttonVariant="link"
-                image={
-                    <StaticImage
-                        src="./pcbfootprint.png"
-                        alt="PCB connector footprint"
-                    />
-                }
-            />
-
-            <SplitGrid
-                right={false}
-                subtitle="How does it work?"
-                description="Jacdac packets are sent serially among physical devices on the Jacdac bus and may also be sent over WebUSB/WebBLE, providing connectivity to web-based tooling and services running in the web browser."
-                imageColumns={8}
-                image={
-                    <StaticImage
-                        src="./buttoncable.png"
-                        alt="A Jacdac humidity module plugging into a Jacdac cable"
-                        imgStyle={imgStyle}
-                    />
-                }
-            />
-
-            <CarouselGrid>
-                <Grid item xs={12} sm={4}>
-                    <FeatureItem
-                        startImage={
-                            <StaticImage
-                                width={64}
-                                src="./hotplugicon.svg"
-                                alt="Icon of two plugs connecting"
-                            />
-                        }
-                        description="Hot plug discovery"
-                        caption="The device catalog lists the registered Jacdac devices that can be automatically detected on the bus, and their services. The catalog information also provides vendor information."
-                    />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                    <FeatureItem
-                        startImage={
-                            <StaticImage
-                                width={64}
-                                src="./firmwareupdateicon.svg"
-                                alt="Firmware icon"
-                            />
-                        }
-                        description="Firmware updates"
-                        caption="The device catalog enables the automatic detection, download and flashing of firmware onto devices."
-                    />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                    <FeatureItem
-                        startImage={<HTML5Image icon={true} />}
-                        description="JavaScript package"
-                        caption="Integrate Jacdac into your web site or node.js application using our TypeScript/JavaScript npm package."
-                        buttonText="Learn more"
-                        buttonUrl="/software/"
-                        buttonVariant="link"
-                    />
-                </Grid>
-            </CarouselGrid>
-
-            <CenterGrid
-                subtitle="Can I add Jacdac to my PCB?"
-                description="Absolutely. We would be thrilled if you used a Jacdac PCB connector on your board or product! You can use the name Jacdac without royalties or attribution."
-                buttonText="Integrate Jacdac into your hardware"
-                buttonVariant="link"
-                buttonUrl="/hardware/"
-            />
-
-            <CenterGrid
-                subtitle="Can I add Jacdac to my app?"
-                description="Absolutely! Use our client software to integrate into your apps."
-                buttonText="Integrate Jacdac into your apps"
-                buttonVariant="link"
-                buttonUrl="/clients/"
-            />
         </Grid>
     )
 }

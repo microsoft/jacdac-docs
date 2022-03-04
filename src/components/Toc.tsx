@@ -125,54 +125,49 @@ export default function Toc(props: { pagePath: string }) {
         // convert pages into tree
         const toc: TocNode[] = [
             {
-                name: "Home",
-                path: "/",
+                name: "Overview",
+                path: "/overview/",
                 order: 0,
             },
             {
-                name: "Dashboard",
+                name: "Device Dashboard",
                 path: "/dashboard/",
                 order: 0.1,
             },
             {
-                name: "Hardware",
-                path: "/hardware/",
+                name: "Device Catalog",
+                path: "/devices/",
                 order: 0.2,
             },
             {
-                name: "Software",
-                path: "/software/",
+                name: "Service Catalog",
+                path: "/services/",
                 order: 0.3,
             },
             {
-                name: "Devices",
-                path: "/devices/",
-                order: 0.4,
-            },
-            {
-                name: "Client SDKs",
+                name: "Client Programming",
                 path: "/clients/",
                 order: 0.5,
             },
             {
-                name: "Services",
-                path: "/services/",
+                name: "Web Tools",
+                path: "/tools/",
                 order: 0.6,
             },
             {
-                name: "Tools",
-                path: "/tools/",
-                order: 0.7,
-            },
-            {
-                name: "Protocol",
-                path: "/protocol/",
+                name: "Device Development",
+                path: "/ddk/",
                 order: 0.8,
             },
             {
-                name: "Reference",
+                name: "Specifications",
                 path: "/reference/",
                 order: 0.81,
+            },
+            {
+                name: "FAQ",
+                path: "/faq/",
+                order: 0.85,
             },
         ]
 
@@ -180,9 +175,8 @@ export default function Toc(props: { pagePath: string }) {
             .map(node => node.node)
             .filter(
                 node =>
-                    !!node.frontmatter?.title ||
-                    (!!node.headings.length &&
-                        !/404/.test(node.headings[0].value))
+                    !!node.frontmatter?.title && 
+                    node.fields.slug !== "/"
             )
             .filter(node => !node.frontmatter || !node.frontmatter?.hideToc)
             .map(node => {
@@ -204,7 +198,7 @@ export default function Toc(props: { pagePath: string }) {
     const TocListItem = (props: { entry: TocNode; level: number }) => {
         const { entry, level } = props
         const { path, children, name } = entry
-        const selected = pagePath === path
+        const selected = pagePath === path || (pagePath === "/" && path === "/overview/")
         const sub = level === 1 || !!children?.length
         const showSub = sub && !!children?.length && pagePath.startsWith(path)
 
@@ -249,7 +243,7 @@ export default function Toc(props: { pagePath: string }) {
         <StyledList dense className={classes.root}>
             {tree.map(entry => (
                 // eslint-disable-next-line react/prop-types
-                <TocListItem key={entry.path} entry={entry} level={0} />
+                <TocListItem key={entry.path} entry={entry} level={1} />
             ))}
         </StyledList>
     )

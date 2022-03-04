@@ -14,11 +14,11 @@ export default function Clients() {
             alignContent="center"
             alignItems="center"
         >
-            <SplitGrid
-                title="Client SDKs"
-                subtitle3="Integrate Jacdac with JavaScript, Python, .NET, MakeCode..."
-                imageColumns={6}
-                image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
+            <CenterGrid
+                title="Client Programming"
+                subtitle3="via JavaScript, Python, .NET, MakeCode, ..."
+                // imageColumns={6}
+                // image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
             />
 
             <SplitGrid
@@ -80,22 +80,6 @@ export default function Clients() {
             />
 
             <SplitGrid
-                right={true}
-                imageColumns={8}
-                subtitle="Node-RED"
-                description="Add Jacdac to your Node-RED flows."
-                buttonText="Jacdac node"
-                buttonVariant="link"
-                buttonUrl="https://flows.nodered.org/node/node-red-contrib-jacdac"
-                image={
-                    <StaticImage
-                        src="./nodered.png"
-                        alt="Jacdac nodes for Node-RED"
-                    />
-                }
-            />
-
-            <SplitGrid
                 right={false}
                 subtitle="p5*js"
                 imageColumns={8}
@@ -113,37 +97,18 @@ export default function Clients() {
 
             <SplitGrid
                 right={true}
-                subtitle="React"
-                imageColumns={7}
-                description="Context and Hooks for your React apps."
-                buttonText="react-jacdac documentation"
+                imageColumns={8}
+                subtitle="Node-RED"
+                description="Add Jacdac to your Node-RED flows."
+                buttonText="Jacdac node"
                 buttonVariant="link"
-                buttonUrl="/clients/react"
-                image={<StaticImage src="./react.png" alt="React logo." />}
-            />
-
-            <SplitGrid
-                right={false}
-                subtitle="A-Frame"
-                imageColumns={7}
-                description="Put Reality back into Virtual Reality."
-                buttonText="A-Frame demo"
-                buttonVariant="link"
-                buttonUrl="/clients/a-frame"
+                buttonUrl="https://flows.nodered.org/node/node-red-contrib-jacdac"
                 image={
                     <StaticImage
-                        src="./a-frame.jpg"
-                        alt="Control the radius of a sphere using a slider using our Javascript SDK."
+                        src="./nodered.png"
+                        alt="Jacdac nodes for Node-RED"
                     />
                 }
-            />
-
-            <CenterGrid
-                subtitle2="Can I embed the dashboard in my web pages?"
-                description="Absolutely! With a few lines of HTML, you'll get a dashboard in your web pages."
-                buttonText="Copy HTML code to add Jacdac to your web site."
-                buttonVariant="link"
-                buttonUrl="/clients/embed/"
             />
         </Grid>
     )
