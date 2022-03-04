@@ -16809,7 +16809,7 @@ react-aria-live@^2.0.5:
   dependencies:
     uuid "^3.2.1"
 
-react-blockly@^7.0.0-alpha.2:
+react-blockly@^7.0.0-alpha.1:
   version "7.0.0-alpha.2"
   resolved "https://registry.yarnpkg.com/react-blockly/-/react-blockly-7.0.0-alpha.2.tgz#3715f5392079127680c2a707947fe89d430d2095"
   integrity sha512-4nR1pEjDSCeTYO/RFWsohFjQNsBHMA1Cu7Z19Uxbh7lTbMpAqY8JRFWPUezO0QfBBW8v98o8xaRI7bpJ30fWWw==
