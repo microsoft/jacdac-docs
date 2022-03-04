@@ -216,7 +216,7 @@ function LayoutWithContext(props: LayoutProps) {
     const isDataEditor = /^\/editors\/data/.test(path)
     const {
         hideMainMenu = false,
-        hideUnderConstruction = true,
+        hideUnderConstruction = false,
         hideBreadcrumbs = false,
     } = frontmatter || {
         hideMainMenu: isHosted || makeCodeTool,
