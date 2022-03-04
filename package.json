@@ -90,7 +90,7 @@
     "postcss": "^8.4.5",
     "prettier": "2.5.1",
     "prism-react-renderer": "^1.2.1",
-    "prismjs": "^1.26.0",
+    "prismjs": "^1.27.0",
     "prop-types": "^15.8.1",
     "puppeteer": "^13.0.1",
     "qrcode": "^1.5.0",
