@@ -82,11 +82,7 @@ export default function Home() {
                 buttonUrl="/overview/clientserver/"
                 imageColumns={6}
                 image={
-                    <StaticImage
-                        src="./jdBus.PNG"
-                        alt="Clients and Servers"
-                        imgStyle={imgStyle}
-                    />
+                    <img alt="jacdac bus" src ="./jdbus.drawio.svg"/>
                 }
             />
 
