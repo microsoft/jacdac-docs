@@ -1,25 +1,35 @@
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
-import React, { createContext, useContext } from "react"
+import React, { createContext, useContext, useState } from "react"
 import useSnackbar from "../hooks/useSnackbar"
 import useWindowEvent from "../hooks/useWindowEvent"
 import useBus from "../../jacdac/useBus"
+import { inIFrame } from "../../../jacdac-ts/src/jdom/iframeclient"
 
 export const MESSAGE_TYPE = "jacdac-command"
 
 export interface CommandOptions {
     id: string
     description: string
+    help?: () => string // markdown
     handler: (bus: JDBus, args: unknown) => Promise<void>
 }
 
+export interface Command {
+    type: "jacdac-command"
+    // message id
+    id?: string
+    command: unknown
+    args?: unknown
+}
+
 export interface CommandPaletteContextProps {
-    listCommands: () => CommandOptions[]
+    commands: CommandOptions[]
     addCommands(commands: CommandOptions[]): () => void
     runCommand(id: string, args?: unknown): Promise<void>
 }
 
 export const CommandPaletteContext = createContext<CommandPaletteContextProps>({
-    listCommands: () => [],
+    commands: [],
     addCommands: () => undefined,
     runCommand: () => undefined,
 })
@@ -31,30 +41,37 @@ export function useCommandPalette(): CommandPaletteContextProps {
     return ctx
 }
 
-const commands: Record<string, CommandOptions> = {}
-
 // eslint-disable-next-line react/prop-types
 export const CommandPaletteProvider = ({ children }) => {
     const bus = useBus()
     const { setError } = useSnackbar()
-    const listCommands = () => Object.values(commands)
+    const [commands, setCommands] = useState<CommandOptions[]>([])
+
     const addCommands = (options: CommandOptions[]) => {
         if (!options) return undefined
 
+        const ids = options.map(c => c.id)
         options.forEach(option => {
             const { id } = option
-            if (commands[id]) throw Error(`command ${id} already registered`)
-            commands[id] = option
-            console.debug(`command: added ${id}`)
+            if (commands.find(c => c.id === id))
+                throw Error(`command ${id} already registered`)
         })
+        setCommands([...commands, ...options])
+        console.debug(`command: added ${ids.join(", ")}`)
         return () => {
-            options.forEach(option => delete commands[option.id])
+            setCommands(commands.filter(c => ids.indexOf(c.id) < 0))
+            console.debug(`command: removed ${ids.join(", ")}`)
         }
     }
+    const runCommandUnsafe = async (id: string, args: unknown) => {
+        console.debug(`command: running ${id}`)
+        const cmd = commands.find(c => c.id === id)
+        if (!cmd) throw Error(`command ${id} not found`)
+        return cmd.handler(bus, args)
+    }
     const runCommand = async (id: string, args: unknown) => {
-        const cmd = commands[id]
         try {
-            return cmd.handler(bus, args)
+            return await runCommandUnsafe(id, args)
         } catch (e) {
             setError(e)
             throw e
@@ -65,17 +82,29 @@ export const CommandPaletteProvider = ({ children }) => {
         const { type } = data
         if (type !== MESSAGE_TYPE) return
 
-        const { command } = data
-        const cmd = commands[command]
-        if (!cmd) return
+        const { id, command, args } = data
 
-        const { args } = data
-        runCommand(command, args)
+        const p = runCommandUnsafe(command, args)
+        if (p && id && inIFrame()) {
+            p.then(() => {
+                window.parent.postMessage({
+                    ...data,
+                    result: "success",
+                })
+            }).catch(e => {
+                console.debug(e)
+                window.parent.postMessage({
+                    ...data,
+                    result: "error",
+                    error: e.message,
+                })
+            })
+        }
     })
 
     return (
         <CommandPaletteContext.Provider
-            value={{ listCommands, addCommands, runCommand }}
+            value={{ commands, addCommands, runCommand }}
         >
             {children}
         </CommandPaletteContext.Provider>
