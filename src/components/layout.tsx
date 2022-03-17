@@ -25,6 +25,7 @@ import MainAppBar from "./shell/MainAppBar"
 import { AlertTitle } from "@mui/material"
 import { UIFlags } from "../jacdac/providerbus"
 import DevToolsAlert from "./alert/DevToolsAlert"
+import useSimulatorCommands from "./commands/useSimulatorCommands"
 const TraceAlert = lazy(() => import("./shell/TraceAlert"))
 const WebDiagnostics = lazy(() => import("./shell/WebDiagnostics"))
 const AppDrawer = lazy(() => import("./shell/AppDrawer"))
@@ -248,6 +249,8 @@ function LayoutWithContext(props: LayoutProps) {
         [classes.appBarShift]: drawerOpen && drawerType !== DrawerType.Toc,
         [classes.toolBarShift]: toolsMenu,
     })
+
+    useSimulatorCommands()
 
     const InnerMainSection = () => (
         <>
