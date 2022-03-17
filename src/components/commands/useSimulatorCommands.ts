@@ -5,9 +5,10 @@ import {
 } from "../../../jacdac-ts/src/servers/servers"
 import { useEffect } from "react"
 import { useCommandPalette } from "./CommandPaletteContext"
+import { parseIdentifier } from "../../../jacdac-ts/src/jdom/utils"
+import { serviceSpecificationFromName } from "../../../jacdac-ts/src/jdom/spec"
 
-export const COMMAND_SIMULATOR_START_TEMPLATE = "simulator.startTemplate"
-export const COMMAND_SIMULATOR_START_SERVICE_CLASS = "simulator.startService"
+export const COMMAND_SIMULATOR_START = "simulator.start"
 
 export default function useSimulatorCommands() {
     const { addCommands } = useCommandPalette()
@@ -15,22 +16,31 @@ export default function useSimulatorCommands() {
         () =>
             addCommands([
                 {
-                    id: COMMAND_SIMULATOR_START_TEMPLATE,
-                    description: "Starts a simulator from a named template",
+                    id: COMMAND_SIMULATOR_START,
+                    description:
+                        "Starts a simulator from a named template, service name or service class",
                     handler: async (bus, args: { name: string }) => {
                         const { name } = args
                         const def = serviceProviderDefinitions().find(
                             d => d.name === name
                         )
                         if (def) addServiceProvider(bus, def)
-                    },
-                },
-                {
-                    id: COMMAND_SIMULATOR_START_SERVICE_CLASS,
-                    description: "Starts a simulator with the given service",
-                    handler: async (bus, args: { serviceClass: number }) => {
-                        const { serviceClass } = args
-                        startServiceProviderFromServiceClass(bus, serviceClass)
+                        else {
+                            const srv = serviceSpecificationFromName(name)
+                            if (srv)
+                                startServiceProviderFromServiceClass(
+                                    bus,
+                                    srv.classIdentifier
+                                )
+                            else {
+                                const id = parseIdentifier(name)
+                                if (id)
+                                    startServiceProviderFromServiceClass(
+                                        bus,
+                                        id
+                                    )
+                            }
+                        }
                     },
                 },
             ]),
