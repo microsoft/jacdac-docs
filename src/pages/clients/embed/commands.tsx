@@ -99,6 +99,10 @@ export default function Page() {
                 <CommandHelp key={command.id} command={command} />
             ))}
             <h2>Command Tester</h2>
+            <p>
+                Test commands by posting a message to the current window. Open
+                the JavaScript console for debugging messages.
+            </p>
             <CommandTester />
         </>
     )
