@@ -6,13 +6,16 @@ import {
 import { useEffect } from "react"
 import { useCommandPalette } from "./CommandPaletteContext"
 
+export const COMMAND_SIMULATOR_START_TEMPLATE = "simulator.startTemplate"
+export const COMMAND_SIMULATOR_START_SERVICE_CLASS = "simulator.startService"
+
 export default function useSimulatorCommands() {
     const { addCommands } = useCommandPalette()
     useEffect(
         () =>
             addCommands([
                 {
-                    id: "simulator.startTemplate",
+                    id: COMMAND_SIMULATOR_START_TEMPLATE,
                     description: "Starts a simulator from a named template",
                     handler: async (bus, args: { name: string }) => {
                         const { name } = args
@@ -23,7 +26,7 @@ export default function useSimulatorCommands() {
                     },
                 },
                 {
-                    id: "simulator.startService",
+                    id: COMMAND_SIMULATOR_START_SERVICE_CLASS,
                     description: "Starts a simulator with the given service",
                     handler: async (bus, args: { serviceClass: number }) => {
                         const { serviceClass } = args
