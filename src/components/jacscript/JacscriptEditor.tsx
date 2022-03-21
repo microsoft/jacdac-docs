@@ -31,8 +31,6 @@ import {
 import useEffectAsync from "../useEffectAsync"
 import { jacscriptCompile } from "../blockly/dsl/workers/jacscript.proxy"
 import type { JacscriptCompileResponse } from "../../workers/jacscript/jacscript.worker"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
-import StopIcon from "@mui/icons-material/Stop"
 import useRegister from "../hooks/useRegister"
 import {
     JacscriptManagerCmd,
@@ -40,7 +38,10 @@ import {
     SRV_JACSCRIPT_MANAGER,
 } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
-import { useRegisterBoolValue } from "../../jacdac/useRegisterValue"
+import {
+    useRegisterBoolValue,
+    useRegisterUnpackedValue,
+} from "../../jacdac/useRegisterValue"
 import DeviceAvatar from "../devices/DeviceAvatar"
 import useBus from "../../jacdac/useBus"
 import useServices from "../hooks/useServices"
@@ -57,27 +58,29 @@ const JACSCRIPT_NEW_FILE_CONTENT = JSON.stringify({
     xml: "",
 } as WorkspaceFile)
 
-function JacscriptExecutor(props: {
-    service: JDService
-    jscCompiled: JacscriptCompileResponse
-}) {
-    const { service, jscCompiled } = props
+function JacscriptExecutor(props: { service: JDService }) {
+    const { service } = props
 
     //const bus = useBus()
     //const serviceServer = useServiceServer<JacscriptManagerServer>(service)
     const runningRegister = useRegister(service, JacscriptManagerReg.Running)
+    const programSizeRegister = useRegister(
+        service,
+        JacscriptManagerReg.ProgramSize
+    )
+
     const running = useRegisterBoolValue(runningRegister)
+    const [programSize] =
+        useRegisterUnpackedValue<[number]>(programSizeRegister)
 
     const stopped = !running
-    const disabled = !jscCompiled || !service
+    const disabled = !service || !programSize
 
     const handleRun = () => runningRegister?.sendSetBoolAsync(true, true)
     const handleStop = () => runningRegister?.sendSetBoolAsync(false, true)
-    //const handleDelete = () => bus.removeServiceProvider(device)
 
     const label = running ? "stop" : "start"
     const title = running ? "stop running code" : "start running code"
-    const onClick = stopped ? handleRun : handleStop
 
     return (
         <Chip
@@ -85,7 +88,7 @@ function JacscriptExecutor(props: {
             title={title}
             variant={service ? undefined : "outlined"}
             avatar={service && <DeviceAvatar device={service.device} />}
-            onClick={onClick}
+            onClick={stopped ? handleRun : handleStop}
             disabled={disabled}
         />
     )

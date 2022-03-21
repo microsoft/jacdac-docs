@@ -33,7 +33,7 @@ function VariablesWidget() {
     return (
         <table className={classes.table}>
             <tbody>
-                {Object.entries(variables).map(([ name, value ]) => (
+                {Object.entries(variables).map(([name, value]) => (
                     <tr key={name}>
                         <td>{name}</td>
                         <td>{value}</td>

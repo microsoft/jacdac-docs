@@ -99,7 +99,7 @@ class VMJacscriptManagerServer extends JacscriptManagerServer {
 
         this.bridge = jacscriptBridge()
         this.bridge.on(CHANGE, this.handleBridgeChange.bind(this))
-        this.running.on(REPORT_UPDATE, this.handleRunningChange.bind(this))
+        this.running.on(CHANGE, this.handleRunningChange.bind(this))
 
         this.on(
             JacscriptManagerServer.PROGRAM_CHANGE,
@@ -122,12 +122,13 @@ class VMJacscriptManagerServer extends JacscriptManagerServer {
     private handleRunningChange() {
         const running = this.running.values()[0]
         const action = running ? "start" : "stop"
+        console.log(`jsvm server: ${action}`)
         jacscriptCommand(action)
     }
 }
 
 let bridge: JacscriptBridge
-function jacscriptBridge() {
+export function jacscriptBridge() {
     if (!bridge) {
         const worker = workerProxy("vm")
         bridge = new JacscriptBridge(worker)
