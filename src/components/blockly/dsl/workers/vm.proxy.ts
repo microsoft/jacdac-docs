@@ -1,6 +1,4 @@
 import type {
-    VMCompileRequest,
-    VMCompileResponse,
     VMStateResponse,
     VMState,
     VMCommandRequest,
@@ -56,26 +54,6 @@ export function jacScriptBridge() {
         bridge = new JacScriptBridge(worker)
     }
     return bridge
-}
-
-/**
- * Compiles the sources and keeps the compiled program ready to run. Can be done while running another program.
- * @param source
- * @returns
- */
-export async function jacScriptCompile(
-    source: string,
-    restart?: boolean
-    // eslint-disable-next-line @typescript-eslint/ban-types
-): Promise<VMCompileResponse> {
-    const worker = workerProxy("vm")
-    const res = await worker.postMessage<VMCompileRequest, VMCompileResponse>({
-        worker: "vm",
-        type: "compile",
-        source,
-        restart,
-    })
-    return res
 }
 
 /**
