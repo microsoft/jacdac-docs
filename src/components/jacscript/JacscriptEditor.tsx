@@ -46,10 +46,7 @@ import DeviceAvatar from "../devices/DeviceAvatar"
 import useBus from "../../jacdac/useBus"
 import useServices from "../hooks/useServices"
 import { addServiceProvider } from "../../../jacdac-ts/src/servers/servers"
-import {
-    createVMJacscriptManagerServer,
-    jacscriptCommand,
-} from "../blockly/dsl/workers/vm.proxy"
+import { createVMJacscriptManagerServer } from "../blockly/dsl/workers/vm.proxy"
 import useServiceServer from "../hooks/useServiceServer"
 import { JacscriptManagerServer } from "../../../jacdac-ts/src/servers/jacscriptmanagerserver"
 import { OutPipe } from "../../../jacdac-ts/src/jdom/pipes"
@@ -64,8 +61,6 @@ const JACSCRIPT_NEW_FILE_CONTENT = JSON.stringify({
 function JacscriptExecutor(props: { service: JDService }) {
     const { service } = props
 
-    //const bus = useBus()
-    const serviceServer = useServiceServer<JacscriptManagerServer>(service)
     const runningRegister = useRegister(service, JacscriptManagerReg.Running)
     const programSizeRegister = useRegister(
         service,
@@ -79,14 +74,8 @@ function JacscriptExecutor(props: { service: JDService }) {
     const stopped = !running
     const disabled = !service || !programSize
 
-    const handleRun = () => {
-        if (serviceServer) jacscriptCommand("start")
-        else runningRegister?.sendSetBoolAsync(true, true)
-    }
-    const handleStop = () => {
-        if (serviceServer) jacscriptCommand("stop")
-        else runningRegister?.sendSetBoolAsync(false, true)
-    }
+    const handleRun = () => runningRegister?.sendSetBoolAsync(true, true)
+    const handleStop = () => runningRegister?.sendSetBoolAsync(false, true)
 
     const label = running ? "stop" : "start"
     const title = running ? "stop running code" : "start running code"
