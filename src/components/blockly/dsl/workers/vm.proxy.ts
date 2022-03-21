@@ -8,8 +8,13 @@ import type {
 } from "../../../../workers/vm/dist/node_modules/vm.worker"
 import workerProxy, { WorkerProxy } from "./proxy"
 import bus from "../../../../jacdac/providerbus"
-import { CHANGE, MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
+import {
+    CHANGE,
+    MESSAGE,
+    REPORT_UPDATE,
+} from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
+import { JacscriptManagerServer } from "../../../../../jacdac-ts/src/servers/jacscriptmanagerserver"
 
 class JacscriptBridge extends JDBridge {
     state: VMState = "stopped"
@@ -48,16 +53,7 @@ class JacscriptBridge extends JDBridge {
     }
 }
 
-let bridge: JacscriptBridge
-export function jacscriptBridge() {
-    if (!bridge) {
-        const worker = workerProxy("vm")
-        bridge = new JacscriptBridge(worker)
-    }
-    return bridge
-}
-
-export async function jacscriptDeploy(
+async function jacscriptDeploy(
     binary: Uint8Array,
     debugInfo: unknown,
     restart?: boolean
@@ -77,12 +73,7 @@ export async function jacscriptDeploy(
     return res
 }
 
-/**
- * Updates the run state
- * @param source
- * @returns
- */
-export async function jacscriptCommand(
+async function jacscriptCommand(
     action: "start" | "stop"
 ): Promise<VMStateResponse> {
     const bridge = jacscriptBridge()
@@ -98,4 +89,52 @@ export async function jacscriptCommand(
         action,
     })
     return res
+}
+
+class VMJacscriptManagerServer extends JacscriptManagerServer {
+    bridge: JacscriptBridge
+
+    constructor() {
+        super()
+
+        this.bridge = jacscriptBridge()
+        this.bridge.on(CHANGE, this.handleBridgeChange.bind(this))
+        this.running.on(REPORT_UPDATE, this.handleRunningChange.bind(this))
+
+        this.on(
+            JacscriptManagerServer.PROGRAM_CHANGE,
+            this.handleProgramChange.bind(this)
+        )
+    }
+
+    private handleProgramChange() {
+        console.debug("jsvm: program change")
+        const autoStart = this.autoStart.values()[0]
+        jacscriptDeploy(this.binary, this.debugInfo, !!autoStart)
+    }
+
+    private handleBridgeChange() {
+        const state = this.bridge.state
+        const running = state === "running" || state === "initializing"
+        this.running.setValues([running])
+    }
+
+    private handleRunningChange() {
+        const running = this.running.values()[0]
+        const action = running ? "start" : "stop"
+        jacscriptCommand(action)
+    }
+}
+
+let bridge: JacscriptBridge
+function jacscriptBridge() {
+    if (!bridge) {
+        const worker = workerProxy("vm")
+        bridge = new JacscriptBridge(worker)
+    }
+    return bridge
+}
+
+export function createVMJavscriptManagerServer(): JacscriptManagerServer {
+    return new VMJacscriptManagerServer()
 }
