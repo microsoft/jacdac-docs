@@ -11,7 +11,7 @@ import VMDiagnostics from "./VMDiagnostics"
 import BlockRolesToolbar from "../blockly/BlockRolesToolbar"
 import BlockContext, { BlockProvider } from "../blockly/BlockContext"
 import BlockDiagnostics from "../blockly/BlockDiagnostics"
-import workspaceJSONToJacScriptProgram from "./JacscriptGenerator"
+import workspaceJSONToJacscriptProgram from "./JacscriptGenerator"
 import BlockEditor from "../blockly/BlockEditor"
 import { arrayConcatMany } from "../../../jacdac-ts/src/jdom/utils"
 import {
@@ -25,15 +25,15 @@ import jacscriptDsls from "./jacscriptdsls"
 import { VMProgram } from "../../../jacdac-ts/src/vm/ir"
 import JacscriptDiagnostics from "./JacscriptDiagnostics"
 import {
-    JacScriptProgram,
-    toJacScript,
+    JacscriptProgram,
+    toJacscript,
 } from "../../../jacdac-ts/src/vm/ir2jacscript"
 import useEffectAsync from "../useEffectAsync"
-import { jacScriptCompile } from "../blockly/dsl/workers/jacscript.proxy"
+import { jacscriptCompile } from "../blockly/dsl/workers/jacscript.proxy"
 import type { JacscriptCompileResponse } from "../../workers/jacscript/jacscript.worker"
 import {
-    jacScriptCommand,
-    jacScriptBridge,
+    jacscriptCommand,
+    jacscriptBridge,
 } from "../blockly/dsl/workers/vm.proxy"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
@@ -48,20 +48,20 @@ const JACSCRIPT_NEW_FILE_CONTENT = JSON.stringify({
     xml: "",
 } as WorkspaceFile)
 
-function JacScriptExecutor(props: {
+function JacscriptExecutor(props: {
     jscCompiled: JacscriptCompileResponse
     useChip?: boolean
 }) {
     const { jscCompiled, useChip } = props
-    const bridge = useMemo(() => jacScriptBridge(), [])
+    const bridge = useMemo(() => jacscriptBridge(), [])
     const state = useChange(bridge, _ => _?.state)
     const running = state === "running"
     const initializing = state === "initializing"
     const stopped = !running
     const disabled = !jscCompiled || initializing
 
-    const handleRun = () => jacScriptCommand("start")
-    const handleStop = () => jacScriptCommand("stop")
+    const handleRun = () => jacscriptCommand("start")
+    const handleStop = () => jacscriptCommand("stop")
 
     const title = initializing ? "starting" : running ? "stop" : "start"
     const color = stopped ? "primary" : "default"
@@ -98,23 +98,23 @@ function JacScriptExecutor(props: {
     )
 }
 
-function JacScriptEditorWithContext() {
+function JacscriptEditorWithContext() {
     const { dsls, workspaceJSON, roleManager, setWarnings } =
         useContext(BlockContext)
     const [program, setProgram] = useState<VMProgram>()
-    const [jscProgram, setJscProgram] = useState<JacScriptProgram>()
+    const [jscProgram, setJscProgram] = useState<JacscriptProgram>()
     const [jscCompiled, setJscCompiled] = useState<JacscriptCompileResponse>()
     const { fileSystem } = useContext(FileSystemContext)
 
     useEffect(() => {
         try {
-            const newProgram = workspaceJSONToJacScriptProgram(
+            const newProgram = workspaceJSONToJacscriptProgram(
                 workspaceJSON,
                 dsls
             )
             if (JSON.stringify(newProgram) !== JSON.stringify(program)) {
                 setProgram(newProgram)
-                const jsc = toJacScript(newProgram)
+                const jsc = toJacscript(newProgram)
                 setJscProgram(jsc)
             }
         } catch (e) {
@@ -138,20 +138,20 @@ function JacScriptEditorWithContext() {
     useEffectAsync(
         async mounted => {
             const src = jscProgram?.program.join("\n")
-            const res = src && (await jacScriptCompile(src))
+            const res = src && (await jacscriptCompile(src))
             if (mounted()) setJscCompiled(res)
         },
         [jscProgram]
     )
     useEffect(() => {
-        //if (jscCompiled) jacScriptCommand("start")
-        //else jacScriptCommand("stop")
+        //if (jscCompiled) jacscriptCommand("start")
+        //else jacscriptCommand("stop")
     }, [jscCompiled])
 
     // final cleanup on exit
     useEffect(
         () => () => {
-            jacScriptCommand("stop")
+            jacscriptCommand("stop")
         },
         []
     )
@@ -171,7 +171,7 @@ function JacScriptEditorWithContext() {
                     )}
                     <Grid item xs={12}>
                         <BlockRolesToolbar>
-                            <JacScriptExecutor
+                            <JacscriptExecutor
                                 jscCompiled={jscCompiled}
                                 useChip={true}
                             />
@@ -200,8 +200,8 @@ export default function JacscriptEditor() {
     const handleOnBeforeSaveWorkspaceFile = useCallback(
         (file: WorkspaceFile) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const program = workspaceJSONToJacScriptProgram(file.json, dsls)
-            file.jsc = toJacScript(program)
+            const program = workspaceJSONToJacscriptProgram(file.json, dsls)
+            file.jsc = toJacscript(program)
         },
         []
     )
@@ -218,7 +218,7 @@ export default function JacscriptEditor() {
                         : undefined
                 }
             >
-                <JacScriptEditorWithContext />
+                <JacscriptEditorWithContext />
             </BlockProvider>
         </NoSsr>
     )

@@ -11,7 +11,7 @@ import bus from "../../../../jacdac/providerbus"
 import { CHANGE, MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
 
-class JacScriptBridge extends JDBridge {
+class JacscriptBridge extends JDBridge {
     state: VMState = "stopped"
     variables: Record<string, number>
 
@@ -48,21 +48,21 @@ class JacScriptBridge extends JDBridge {
     }
 }
 
-let bridge: JacScriptBridge
-export function jacScriptBridge() {
+let bridge: JacscriptBridge
+export function jacscriptBridge() {
     if (!bridge) {
         const worker = workerProxy("vm")
-        bridge = new JacScriptBridge(worker)
+        bridge = new JacscriptBridge(worker)
     }
     return bridge
 }
 
-export async function jacScriptDeploy(
+export async function jacscriptDeploy(
     binary: Uint8Array,
     debugInfo: unknown,
     restart?: boolean
 ): Promise<VMStateResponse> {
-    const bridge = jacScriptBridge()
+    const bridge = jacscriptBridge()
     console.log(`jsvm: deploy ${binary.length} bytes`)
     const res = await bridge.worker.postMessage<
         VMDeployRequest,
@@ -82,10 +82,10 @@ export async function jacScriptDeploy(
  * @param source
  * @returns
  */
-export async function jacScriptCommand(
+export async function jacscriptCommand(
     action: "start" | "stop"
 ): Promise<VMStateResponse> {
-    const bridge = jacScriptBridge()
+    const bridge = jacscriptBridge()
     if (action === "start") bridge.bus = bus
     else bridge.bus = undefined
     console.log(`jsvm: command ${action}`)

@@ -9,7 +9,7 @@ import workerProxy from "./proxy"
  * @param source
  * @returns
  */
-export async function jacScriptCompile(
+export async function jacscriptCompile(
     source: string
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): Promise<JacscriptCompileResponse> {
