@@ -29,17 +29,17 @@ import {
     toJacScript,
 } from "../../../jacdac-ts/src/vm/ir2jacscript"
 import useEffectAsync from "../useEffectAsync"
+import { jacScriptCompile } from "../blockly/dsl/workers/jacscript.proxy"
+import type { JacscriptCompileResponse } from "../../workers/jacscript/jacscript.worker"
 import {
-    jacScriptCompile,
     jacScriptCommand,
     jacScriptBridge,
 } from "../blockly/dsl/workers/vm.proxy"
-import type { VMCompileResponse } from "../../workers/vm/vm.worker"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import StopIcon from "@mui/icons-material/Stop"
 import useChange from "../../jacdac/useChange"
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"
 
 const JACSCRIPT_EDITOR_ID = "jcs"
 const JACSCRIPT_SOURCE_STORAGE_KEY = "tools:jacscripteditor"
@@ -49,7 +49,7 @@ const JACSCRIPT_NEW_FILE_CONTENT = JSON.stringify({
 } as WorkspaceFile)
 
 function JacScriptExecutor(props: {
-    jscCompiled: VMCompileResponse
+    jscCompiled: JacscriptCompileResponse
     useChip?: boolean
 }) {
     const { jscCompiled, useChip } = props
@@ -66,7 +66,13 @@ function JacScriptExecutor(props: {
     const title = initializing ? "starting" : running ? "stop" : "start"
     const color = stopped ? "primary" : "default"
     const onClick = stopped ? handleRun : handleStop
-    const icon = initializing ? <HourglassEmptyIcon /> : stopped ? <PlayArrowIcon /> : <StopIcon />
+    const icon = initializing ? (
+        <HourglassEmptyIcon />
+    ) : stopped ? (
+        <PlayArrowIcon />
+    ) : (
+        <StopIcon />
+    )
 
     return (
         <Grid item>
@@ -97,7 +103,7 @@ function JacScriptEditorWithContext() {
         useContext(BlockContext)
     const [program, setProgram] = useState<VMProgram>()
     const [jscProgram, setJscProgram] = useState<JacScriptProgram>()
-    const [jscCompiled, setJscCompiled] = useState<VMCompileResponse>()
+    const [jscCompiled, setJscCompiled] = useState<JacscriptCompileResponse>()
     const { fileSystem } = useContext(FileSystemContext)
 
     useEffect(() => {
@@ -143,7 +149,12 @@ function JacScriptEditorWithContext() {
     }, [jscCompiled])
 
     // final cleanup on exit
-    useEffect(() => () => { jacScriptCommand("stop") }, [])
+    useEffect(
+        () => () => {
+            jacScriptCommand("stop")
+        },
+        []
+    )
 
     return (
         <Grid container spacing={1}>
@@ -160,7 +171,10 @@ function JacScriptEditorWithContext() {
                     )}
                     <Grid item xs={12}>
                         <BlockRolesToolbar>
-                            <JacScriptExecutor jscCompiled={jscCompiled} useChip={true} />
+                            <JacScriptExecutor
+                                jscCompiled={jscCompiled}
+                                useChip={true}
+                            />
                         </BlockRolesToolbar>
                     </Grid>
                     <Grid item xs={12}>
