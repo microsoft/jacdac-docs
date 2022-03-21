@@ -77,8 +77,12 @@ function JacscriptExecutor(props: { service: JDService }) {
     const handleRun = () => runningRegister?.sendSetBoolAsync(true, true)
     const handleStop = () => runningRegister?.sendSetBoolAsync(false, true)
 
-    const label = running ? "stop" : "start"
-    const title = running ? "stop running code" : "start running code"
+    const label = disabled ? "..." : running ? "stop" : "start"
+    const title = disabled
+        ? "loading..."
+        : running
+        ? "stop running code"
+        : "start running code"
 
     return (
         <Chip
