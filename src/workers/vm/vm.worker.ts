@@ -78,7 +78,7 @@ const states: Record<RunnerState, VMState> = {
 function postState() {
     const state = states[runner?.state ?? RunnerState.Stopped]
     const variables = runner?.globals()
-    console.log(`jscw: state ${state}`)
+    console.log(`jdvm worker: state ${state}`)
     self.postMessage(<VMStateResponse>{
         type: "state",
         worker: "vm",
@@ -88,14 +88,14 @@ function postState() {
 }
 
 async function start() {
-    console.log(`jscw: start`)
+    console.log(`jdvm worker: start`)
     bus.start()
     runner?.run()
     postState()
 }
 
 async function stop() {
-    console.log(`jscw: stop`)
+    console.log(`jdvm worker: stop`)
     runner?.stop()
     await bus.stop()
     postState()
@@ -119,7 +119,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
             runner.on(GLOBALS_UPDATED, postState)
 
             if (restart) {
-                console.debug("jsvm: restart")
+                console.debug("jdvm worker: restart")
                 await start() // background start
             }
             return <Partial<VMStateResponse>>{
@@ -171,7 +171,7 @@ async function handleMessage(event: MessageEvent) {
             self.postMessage(resp)
         }
     } catch (e) {
-        console.debug(`jsvm: error ${e + ""}`, e)
+        console.debug(`jdvm worker: error ${e + ""}`, e)
         self.postMessage({
             id,
             type,

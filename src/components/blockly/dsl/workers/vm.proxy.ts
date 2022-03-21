@@ -59,7 +59,7 @@ async function jacscriptDeploy(
     restart?: boolean
 ): Promise<VMStateResponse> {
     const bridge = jacscriptBridge()
-    console.log(`jsvm: deploy ${binary.length} bytes`)
+    console.log(`jdvm proxy: deploy ${binary.length} bytes`)
     const res = await bridge.worker.postMessage<
         VMDeployRequest,
         VMStateResponse
@@ -79,7 +79,7 @@ async function jacscriptCommand(
     const bridge = jacscriptBridge()
     if (action === "start") bridge.bus = bus
     else bridge.bus = undefined
-    console.log(`jsvm: command ${action}`)
+    console.log(`jdvm: command ${action}`)
     const res = await bridge.worker.postMessage<
         VMCommandRequest,
         VMStateResponse
@@ -108,7 +108,7 @@ class VMJacscriptManagerServer extends JacscriptManagerServer {
     }
 
     private handleProgramChange() {
-        console.debug("jsvm: program change")
+        console.debug("jdvm proxy: program change")
         const autoStart = this.autoStart.values()[0]
         jacscriptDeploy(this.binary, this.debugInfo, !!autoStart)
     }
@@ -122,7 +122,7 @@ class VMJacscriptManagerServer extends JacscriptManagerServer {
     private handleRunningChange() {
         const running = this.running.values()[0]
         const action = running ? "start" : "stop"
-        console.log(`jsvm server: ${action}`)
+        console.log(`jdvm server: ${action}`)
         jacscriptCommand(action)
     }
 }
@@ -135,7 +135,8 @@ export function jacscriptBridge() {
     }
     return bridge
 }
-
-export function createVMJavscriptManagerServer(): JacscriptManagerServer {
-    return new VMJacscriptManagerServer()
+let server: JacscriptManagerServer
+export function createVMJacscriptManagerServer(): JacscriptManagerServer {
+    if (!server) server = new VMJacscriptManagerServer()
+    return server
 }

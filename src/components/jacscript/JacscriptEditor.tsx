@@ -46,7 +46,7 @@ import DeviceAvatar from "../devices/DeviceAvatar"
 import useBus from "../../jacdac/useBus"
 import useServices from "../hooks/useServices"
 import { addServiceProvider } from "../../../jacdac-ts/src/servers/servers"
-import { createVMJavscriptManagerServer } from "../blockly/dsl/workers/vm.proxy"
+import { createVMJacscriptManagerServer } from "../blockly/dsl/workers/vm.proxy"
 import useServiceServer from "../hooks/useServiceServer"
 import { JacscriptManagerServer } from "../../../jacdac-ts/src/servers/jacscriptmanagerserver"
 import { OutPipe } from "../../../jacdac-ts/src/jdom/pipes"
@@ -115,7 +115,7 @@ function JacscriptEditorWithContext() {
         const provider = addServiceProvider(bus, {
             name: "vm jacscript manager",
             serviceClasses: [SRV_JACSCRIPT_MANAGER],
-            services: () => [createVMJavscriptManagerServer()],
+            services: () => [createVMJacscriptManagerServer()],
         })
         return () => bus.removeServiceProvider(provider)
     }, [])
