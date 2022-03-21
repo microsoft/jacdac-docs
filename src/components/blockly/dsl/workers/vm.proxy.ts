@@ -4,6 +4,7 @@ import type {
     VMCommandRequest,
     VMRequest,
     VMPacketRequest,
+    VMDeployRequest,
 } from "../../../../workers/vm/dist/node_modules/vm.worker"
 import workerProxy, { WorkerProxy } from "./proxy"
 import bus from "../../../../jacdac/providerbus"
@@ -56,6 +57,26 @@ export function jacScriptBridge() {
     return bridge
 }
 
+export async function jacScriptDeploy(
+    binary: Uint8Array,
+    debugInfo: unknown,
+    restart?: boolean
+): Promise<VMStateResponse> {
+    const bridge = jacScriptBridge()
+    console.log(`jsvm: deploy ${binary.length} bytes`)
+    const res = await bridge.worker.postMessage<
+        VMDeployRequest,
+        VMStateResponse
+    >({
+        worker: "vm",
+        type: "deploy",
+        binary,
+        debugInfo,
+        restart,
+    })
+    return res
+}
+
 /**
  * Updates the run state
  * @param source
@@ -67,7 +88,7 @@ export async function jacScriptCommand(
     const bridge = jacScriptBridge()
     if (action === "start") bridge.bus = bus
     else bridge.bus = undefined
-    console.log(`jsc: command ${action}`)
+    console.log(`jsvm: command ${action}`)
     const res = await bridge.worker.postMessage<
         VMCommandRequest,
         VMStateResponse

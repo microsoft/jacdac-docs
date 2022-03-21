@@ -144,8 +144,8 @@ function JacScriptEditorWithContext() {
         [jscProgram]
     )
     useEffect(() => {
-        if (jscCompiled) jacScriptCommand("start")
-        else jacScriptCommand("stop")
+        //if (jscCompiled) jacScriptCommand("start")
+        //else jacScriptCommand("stop")
     }, [jscCompiled])
 
     // final cleanup on exit
