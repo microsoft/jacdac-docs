@@ -73,7 +73,7 @@ async function jacscriptDeploy(
     return res
 }
 
-async function jacscriptCommand(
+export async function jacscriptCommand(
     action: "start" | "stop"
 ): Promise<VMStateResponse> {
     const bridge = jacscriptBridge()
@@ -99,31 +99,15 @@ class VMJacscriptManagerServer extends JacscriptManagerServer {
 
         this.bridge = jacscriptBridge()
         this.bridge.on(CHANGE, this.handleBridgeChange.bind(this))
-        this.running.on(CHANGE, this.handleRunningChange.bind(this))
-
-        this.on(
-            JacscriptManagerServer.PROGRAM_CHANGE,
-            this.handleProgramChange.bind(this)
-        )
-    }
-
-    private handleProgramChange() {
-        console.debug("jdvm proxy: program change")
-        const autoStart = this.autoStart.values()[0]
-        jacscriptDeploy(this.binary, this.debugInfo, !!autoStart)
     }
 
     private handleBridgeChange() {
         const state = this.bridge.state
         const running = state === "running" || state === "initializing"
+        console.log(
+            `jdvm server: state ${state} ${running ? "running" : "stopped"}`
+        )
         this.running.setValues([running])
-    }
-
-    private handleRunningChange() {
-        const running = this.running.values()[0]
-        const action = running ? "start" : "stop"
-        console.log(`jdvm server: ${action}`)
-        jacscriptCommand(action)
     }
 }
 
