@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useState } from "react"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import { CodalMessageBusCmd } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import { Grid, TextField } from "@mui/material"
 import SendIcon from "@mui/icons-material/Send"
 import CmdButton from "../CmdButton"

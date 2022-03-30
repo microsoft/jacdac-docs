@@ -7,7 +7,7 @@ import {
     SelectChangeEvent,
 } from "@mui/material"
 import React, { ChangeEvent, ReactNode } from "react"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 
 export default function SelectWithLabel(props: {
     required?: boolean

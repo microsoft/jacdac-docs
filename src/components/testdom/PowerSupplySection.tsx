@@ -3,7 +3,7 @@ import { SRV_POWER_SUPPLY } from "../../../jacdac-ts/jacdac-spec/dist/specconsta
 import useServices from "../hooks/useServices"
 import React from "react"
 import DashboardServiceWidgetItem from "../dashboard/DashboardServiceWidgetItem"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 
 export default function PowerSupplySection() {
     const sectionId = useId()

@@ -7,7 +7,7 @@ import {
     TextField,
 } from "@mui/material"
 import React, { ChangeEvent, lazy, useState } from "react"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import Suspense from "../../components/ui/Suspense"
 import { toMap } from "../../../jacdac-ts/src/jdom/utils"
 const SilkQRCode = lazy(() => import("../../components/widgets/SilkQrCode"))

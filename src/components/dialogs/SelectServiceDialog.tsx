@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogContent, Grid, MenuItem, SelectChangeEvent } from "@mui/material"
 import React, { useMemo, useState } from "react"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import { serviceSpecifications } from "../../../jacdac-ts/src/jdom/spec"
 import SelectWithLabel from "../ui/SelectWithLabel"
 import useMediaQueries from "../hooks/useMediaQueries"

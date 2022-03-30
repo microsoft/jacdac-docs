@@ -9,7 +9,7 @@ import {
     useTheme,
 } from "@mui/material"
 import React, { useContext, useMemo } from "react"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import ConnectButton from "../buttons/ConnectButton"
 import useDeviceImage from "../devices/useDeviceImage"

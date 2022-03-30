@@ -36,7 +36,7 @@ import { ProtocolTestServer } from "../../../jacdac-ts/src/jdom/servers/protocol
 import { Link } from "gatsby-theme-material-ui"
 import { cryptoRandomUint32 } from "../../../jacdac-ts/src/jdom/random"
 import { JDServerServiceProvider } from "../../../jacdac-ts/src/jdom/servers/serverserviceprovider"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 
 function randomFieldPayload(field: JDField) {
     const { specification } = field

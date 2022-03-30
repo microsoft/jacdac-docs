@@ -2,7 +2,7 @@ import { Box } from "@mui/material"
 import React, { useMemo } from "react"
 import { Piano, KeyboardShortcuts, MidiNumbers } from "react-piano"
 import "react-piano/dist/styles.css"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 
 export default function PianoWidget(props: {
     playTone: (frequency: number) => Promise<void>

@@ -13,7 +13,7 @@ import LoadingProgress from "../ui/LoadingProgress"
 import Suspense from "../ui/Suspense"
 import SliderWithLabel from "../ui/SliderWithLabel"
 import useRegister from "../hooks/useRegister"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import MaxReadingField from "./MaxReadingField"
 
 const CanvasWidget = lazy(() => import("../widgets/CanvasWidget"))

@@ -16,7 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import AddIcon from "@mui/icons-material/Add"
 import CmdButton from "./CmdButton"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import LoadingProgress from "./ui/LoadingProgress"
 import SwitchWithLabel from "./ui/SwitchWithLabel"
 import { bufferToString } from "../../jacdac-ts/src/jdom/utils"

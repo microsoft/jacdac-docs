@@ -9,7 +9,7 @@ import type {
 } from "../../workers/cad/dist/node_modules/enclosurecad"
 import Suspense from "../ui/Suspense"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import SliderWithLabel from "../ui/SliderWithLabel"
 import SwitchWithLabel from "../ui/SwitchWithLabel"
 import { Flags } from "../../../jacdac-ts/src/jdom/flags"

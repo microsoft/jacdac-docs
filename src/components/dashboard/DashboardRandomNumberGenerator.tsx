@@ -7,7 +7,7 @@ import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import { toHex } from "../../../jacdac-ts/src/jdom/utils"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import { RngReg } from "../../../jacdac-ts/src/jdom/constants"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 import LoadingProgress from "../ui/LoadingProgress"
 import useRegister from "../hooks/useRegister"
 

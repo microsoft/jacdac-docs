@@ -1,6 +1,6 @@
 import { Grid, Input, Slider, Typography } from "@mui/material"
 import React from "react"
-import { useId } from "react-use-id-hook"
+import { useId } from "react"
 
 export default function InputSlider(props: {
     value: number
