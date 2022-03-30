@@ -98,8 +98,6 @@ export default function CanvasWidget(props: {
                 material={undefined}
                 quaternion={undefined}
                 attach={undefined}
-                attachArray={undefined}
-                attachObject={undefined}
                 onUpdate={undefined}
                 up={undefined}
                 scale={undefined}
