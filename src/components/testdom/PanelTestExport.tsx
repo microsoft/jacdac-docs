@@ -13,7 +13,7 @@ const PANEL_UPLOAD_URL = "panel-test-post-url"
 export default function PanelTestExport(props: { panel: PanelTest }) {
     const { panel } = props
     const urlId = useId()
-    const tokenId = useId()
+    const tokenId = urlId + "-token"
     const [url, setUrl] = useLocalStorage(PANEL_UPLOAD_URL, "")
     const [token, setToken] = useState("")
     const [posting, setPosting] = useState(false)

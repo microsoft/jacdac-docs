@@ -53,8 +53,8 @@ export default function StartSimulatorDialog(props: {
     const { trackEvent } = useAnalytics()
     const { mobile } = useMediaQueries()
     const searchId = useId()
-    const deviceHostDialogId = useId()
-    const deviceHostLabelId = useId()
+    const deviceHostDialogId = searchId + "-devhostdialog"
+    const deviceHostLabelId = searchId + "-devhostlabel"
     const contentRef = useRef<HTMLElement>()
 
     const documents: {

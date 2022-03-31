@@ -26,8 +26,8 @@ function Sliders(props: {
 }) {
     const { server, register } = props
     const xId = useId()
-    const yId = useId()
-    const zId = useId()
+    const yId = xId + "-y"
+    const zId = xId + "-z"
     const forces = useRegisterUnpackedValue<[number, number, number]>(
         register,
         props

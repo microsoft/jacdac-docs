@@ -39,9 +39,9 @@ export default function SelectWithLabel(props: {
         type,
         none,
     } = props
-    const labelId = useId()
-    const descrId = useId()
     const id = useId()
+    const labelId = id + "-label"
+    const descrId = id + "-descr"
     const hasDescr = !!helperText || !!error
 
     return (

@@ -9,7 +9,7 @@ import CmdButton from "../CmdButton"
 export default function DashboardCODALMessageBus(props: DashboardServiceProps) {
     const { service } = props
     const sourceId = useId()
-    const valueId = useId()
+    const valueId = sourceId + "value"
     const [source, setSource] = useState("")
     const [value, setValue] = useState("")
 

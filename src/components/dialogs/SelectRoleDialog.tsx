@@ -15,7 +15,7 @@ export default function SelectRoleDialog(props: {
     const { service, onClose } = props
     const open = !!service
     const dialogId = useId()
-    const labelId = useId()
+    const labelId = dialogId + "-label"
     const roleManager = useRoleManagerClient()
     const roles = useChange(roleManager, rm => rm?.compatibleRoles(service), [
         service,

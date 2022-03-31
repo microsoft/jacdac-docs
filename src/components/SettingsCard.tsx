@@ -44,7 +44,7 @@ function SettingRow(props: {
         await client.deleteValue(name)
     }
     const keyId = useId()
-    const valueId = useId()
+    const valueId = keyId + "-value"
     const nameError = ""
     const valueError = ""
     return (
@@ -100,7 +100,7 @@ function AddSettingRow(props: {
     const [value, setValue] = useState("")
     const [secret, setSecret] = useState(showSecrets)
     const keyId = useId()
-    const valueId = useId()
+    const valueId = keyId + "-value"
 
     const handleNameChange = (ev: ChangeEvent<HTMLInputElement>) => {
         setName(ev.target.value.trim())

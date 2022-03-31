@@ -1,4 +1,11 @@
-import { Button, Dialog, DialogContent, Grid, MenuItem, SelectChangeEvent } from "@mui/material"
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    Grid,
+    MenuItem,
+    SelectChangeEvent,
+} from "@mui/material"
 import React, { useMemo, useState } from "react"
 import { useId } from "react"
 import { serviceSpecifications } from "../../../jacdac-ts/src/jdom/spec"
@@ -12,7 +19,7 @@ export default function SelectServiceDialog(props: {
 }) {
     const { open, onClose } = props
     const deviceHostDialogId = useId()
-    const deviceHostLabelId = useId()
+    const deviceHostLabelId = deviceHostDialogId + "-label"
 
     const [selected, setSelected] = useState("button")
     const specDefinitions = useMemo(() => serviceSpecifications(), [])

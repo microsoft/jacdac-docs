@@ -16,7 +16,7 @@ export default function DashboardRoleManager(props: DashboardServiceProps) {
     const handleChecked = async (ev, checked: boolean) =>
         await autoBindRegister.sendSetBoolAsync(checked, true)
     const switchId = useId()
-    const labelId = useId()
+    const labelId = switchId + "-label"
     const roleManager = useRoleManagerClient()
     const roles = useChange(roleManager, _ => _?.roles)
 

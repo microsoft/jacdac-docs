@@ -68,7 +68,8 @@ function CompanySelect(props: {
         () => unique(specifications.map(dev => dev.company)),
         [specifications]
     )
-    const companyId = useId()
+    const id = useId()
+    const companyId = id + "-company"
     const helperText =
         "Name of the company manufacturing this device. The company name will be used to generate the module identifier."
 
@@ -129,16 +130,17 @@ export default function DeviceRegistration() {
         React.useState<null | HTMLElement>(null)
     const [imageDataURI, setImageDataURI] = useState<string>(undefined)
     const deviceCatalog = useDeviceCatalog()
-    const nameId = useId()
-    const firmwareMenuId = useId()
-    const repoId = useId()
-    const identifierId = useId()
-    const descriptionId = useId()
-    const homepageId = useId()
-    const hardwareVersionId = useId()
-    const designIdentifierId = useId()
-    const hardwareDesignId = useId()
-    const firmwareSourceId = useId()
+    const id = useId()
+    const nameId = id + "-name"
+    const firmwareMenuId = id + "-firmwaremenu"
+    const repoId = id + "-repo"
+    const identifierId = id + "-identifier"
+    const descriptionId = id + "-description"
+    const homepageId = id + "-homepage"
+    const hardwareVersionId = id + "-hwversion"
+    const designIdentifierId = id + "-designid"
+    const hardwareDesignId = id + "-hwdesign"
+    const firmwareSourceId = id + "-hwsource"
     const specifications = useDeviceSpecifications({
         includeDeprecated: true,
         includeExperimental: true,

@@ -120,10 +120,11 @@ function EnclosureDesign(props: {
     const [depth, setDepth] = useState(6)
     const [legs, setLegs] = useState(true)
 
-    const gridHeightId = useId()
-    const gridWidthId = useId()
-    const depthId = useId()
-    const legsId = useId()
+    const id = useId()
+    const gridHeightId = id + "-height"
+    const gridWidthId = id + "-width"
+    const depthId = id + "-depth"
+    const legsId = id + "-legs"
 
     const handleGridWidth: any = (
         event: React.ChangeEvent<unknown>,

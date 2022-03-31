@@ -79,7 +79,7 @@ export default function ConnectTransportDialog(props: {
     const { transports } = bus
     const { open, onClose } = props
     const dialogId = useId()
-    const labelId = useId()
+    const labelId = dialogId + "-label"
     return (
         <Dialog
             id={dialogId}

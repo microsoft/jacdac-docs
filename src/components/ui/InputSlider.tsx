@@ -32,8 +32,8 @@ export default function InputSlider(props: {
     } = props
     const readOnly = !onChange
     const sliderId = useId()
-    const inputId = useId()
-    const labelId = useId()
+    const inputId = sliderId + "-input"
+    const labelId = sliderId + "-label"
 
     const handleSliderChange = (
         event: unknown,

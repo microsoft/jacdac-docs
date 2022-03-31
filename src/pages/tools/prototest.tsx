@@ -280,7 +280,7 @@ function ServiceProtocolTest(props: { service: JDService }) {
 export default function ProtocolTest() {
     const { bus } = useContext<JacdacContextProps>(JacdacContext)
     const labelId = useId()
-    const switchId = useId()
+    const switchId = labelId + "-switch"
     const [host, setHost] = useState(false)
     const services = useChange(bus, b =>
         b.services({ serviceClass: SRV_PROTO_TEST })

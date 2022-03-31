@@ -9,7 +9,7 @@ export default function SliderWithLabel(
 ) {
     const { label, ...others } = props
     const labelId = useId()
-    const sliderId = useId()
+    const sliderId = labelId + "sliderId"
 
     return (
         <>
