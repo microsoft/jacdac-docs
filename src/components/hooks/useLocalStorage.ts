@@ -17,9 +17,9 @@ export default function useLocalStorage<T>(
             try {
                 // Get from local storage by key
                 const item =
-                    typeof window !== "undefined" &&
+                    typeof self !== "undefined" &&
                     key &&
-                    window.localStorage.getItem(pkey)
+                    self.localStorage.getItem(pkey)
                 // Parse stored json or if none return initialValue
                 return (item && JSON.parse(item)) || initialValue
             } catch (error) {
@@ -44,8 +44,8 @@ export default function useLocalStorage<T>(
                     // Save state
                     setStoredValue(valueToStore)
                     // Save to local storage
-                    if (typeof window !== "undefined" && key)
-                        window.localStorage.setItem(
+                    if (typeof self !== "undefined" && key)
+                        self.localStorage.setItem(
                             pkey,
                             JSON.stringify(valueToStore)
                         )
