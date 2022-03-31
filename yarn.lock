@@ -17259,11 +17259,6 @@ react-transition-group@^4.4.2:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react-use-id-hook@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/react-use-id-hook/-/react-use-id-hook-1.0.1.tgz#319e1fa2dcbf5e51dcffe181686b7ac23d9b4143"
-  integrity sha512-bCZEZhUEtLluNt3XHn31Fr3o7bdnvu4ugH2RuFg+wMytglnUOsPSTSf598DtS+Z8O/JvnE6LGvQZor08XA8c1g==
-
 react-use-measure@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/react-use-measure/-/react-use-measure-2.1.1.tgz#5824537f4ee01c9469c45d5f7a8446177c6cc4ba"
