@@ -16,6 +16,11 @@ export interface JacscriptCompileRequest extends JacscriptRequest {
     source: string
 }
 
+export interface JacscriptSpecsRequest extends JacscriptRequest {
+    type: "specs"
+    serviceSpecs: jdspec.ServiceSpec[]
+}
+
 export interface JacscriptCompileResponse extends JacscriptMessage {
     success: boolean
     binary: Uint8Array
@@ -30,7 +35,7 @@ class WorkerHost implements Host {
     logs: string
     errors: JacError[]
 
-    constructor() {
+    constructor(private specs: jdspec.ServiceSpec[]) {
         this.files = {}
         this.logs = ""
         this.errors = []
@@ -47,13 +52,19 @@ class WorkerHost implements Host {
     error(err: JacError) {
         this.errors.push(err)
     }
+    getSpecs(): jdspec.ServiceSpec[] {
+        return this.specs
+    }
 }
+
+let serviceSpecs: jdspec.ServiceSpec[]
 
 const handlers: { [index: string]: (props: any) => object | Promise<object> } =
     {
         compile: async (props: JacscriptCompileRequest) => {
             const { source } = props
-            const host = new WorkerHost()
+            if (!serviceSpecs) throw new Error("specs missing")
+            const host = new WorkerHost(serviceSpecs)
             const res = compile(host, source)
 
             return <Partial<JacscriptCompileResponse>>{
@@ -62,6 +73,10 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
                 logs: host.logs,
                 errors: host.errors,
             }
+        },
+        specs: async (props: JacscriptSpecsRequest) => {
+            serviceSpecs = props.serviceSpecs
+            return {}
         },
     }
 
