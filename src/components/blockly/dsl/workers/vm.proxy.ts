@@ -10,6 +10,7 @@ import {
     MESSAGE,
 } from "../../../../../jacdac-ts/src/jdom/constants"
 import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
+import bus from "../../../../jacdac/providerbus"
 
 class JacscriptBridge extends JDBridge {
     state: VMState = "stopped"
@@ -22,7 +23,7 @@ class JacscriptBridge extends JDBridge {
             if (type === "packet") {
                 const { data } = msg as VMPacketRequest
                 //console.debug("vm.proxy: received packet from worker", toHex(data))
-                bridge.receivePacket(data)
+                bridge.receiveFrameOrPacket(data)
             } else if (type === "state") {
                 const { state, variables } = msg as VMStateResponse
                 if (
@@ -53,6 +54,7 @@ export function jacscriptBridge() {
     if (!bridge) {
         const worker = workerProxy("vm")
         bridge = new JacscriptBridge(worker)
+        bridge.bus = bus
     }
     return bridge
 }

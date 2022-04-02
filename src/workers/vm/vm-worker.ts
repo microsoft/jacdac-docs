@@ -34,6 +34,7 @@ const init = vmMod().then(Module => {
             data,
         })
     }
+    Module.jacsStart()
     return Module
 })
 
@@ -41,7 +42,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
     {
         packet: (props: VMPacketRequest) => {
             const { data } = props
-            init.then(m => m.sendPacket(data))
+            init.then(m => m.handlePacket(data))
             //console.log("vm.worker: received packet from proxy", toHex(data))
             return undefined
         },
