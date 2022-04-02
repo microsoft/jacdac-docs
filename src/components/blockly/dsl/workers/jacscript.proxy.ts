@@ -1,9 +1,9 @@
-import { serviceSpecifications } from "jacdac-ts/src/jdom/spec"
+import { serviceSpecifications } from "../../../../../jacdac-ts/src/jdom/spec"
 import type {
     JacscriptCompileRequest,
     JacscriptCompileResponse,
     JacscriptSpecsRequest,
-} from "../../../../workers/jacscript/jacscript.worker"
+} from "../../../../workers/jacscript/jacscript-worker"
 import workerProxy from "./proxy"
 
 let specsSent = false

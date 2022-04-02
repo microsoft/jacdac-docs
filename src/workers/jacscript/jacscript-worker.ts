@@ -1,4 +1,6 @@
-import { compile, JacError, Host } from "jacscript"
+import { compile, JacError, Host, DebugInfo } from "jacscript-compiler"
+import type { JacsModule } from "jacscript-vm"
+import vmMod from "jacscript-vm"
 
 export type JacscriptError = JacError
 
@@ -35,10 +37,15 @@ class WorkerHost implements Host {
     logs: string
     errors: JacError[]
 
-    constructor(private specs: jdspec.ServiceSpec[]) {
+    constructor(
+        private specs: jdspec.ServiceSpec[],
+        private vmMod: JacsModule
+    ) {
         this.files = {}
         this.logs = ""
         this.errors = []
+
+        this.vmMod.jacsInit()
 
         this.error = this.error.bind(this)
     }
@@ -55,6 +62,10 @@ class WorkerHost implements Host {
     getSpecs(): jdspec.ServiceSpec[] {
         return this.specs
     }
+    verifyBytecode(buf: Uint8Array, dbgInfo?: DebugInfo): void {
+        const r = this.vmMod.jacsDeploy(buf)
+        if (r != 0) throw new Error("verification failed: " + r)
+    }
 }
 
 let serviceSpecs: jdspec.ServiceSpec[]
@@ -64,7 +75,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
         compile: async (props: JacscriptCompileRequest) => {
             const { source } = props
             if (!serviceSpecs) throw new Error("specs missing")
-            const host = new WorkerHost(serviceSpecs)
+            const host = new WorkerHost(serviceSpecs, await vmMod())
             const res = compile(host, source)
 
             return <Partial<JacscriptCompileResponse>>{
