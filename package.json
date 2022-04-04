@@ -174,7 +174,8 @@
     "watchworkercad": "cd src/workers/cad && node ../../../node_modules/microbundle/dist/cli.js watch -f modern --no-compress --types --ts-config tsconfig.json",
     "watchts": "cd jacdac-ts && yarn watch",
     "watchjacscript": "cd jacscript/compiler && yarn watch",
-    "buildcssamples": "cd jacdac-dotnet && snippets.bat"
+    "buildcssamples": "cd jacdac-dotnet && snippets.bat",
+    "buildjacscript": "make -C jacscript/ && yarn buildworkervm && yarn buildworkerjacscript"
   },
   "repository": {
     "type": "git",
