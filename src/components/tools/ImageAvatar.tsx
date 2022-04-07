@@ -6,6 +6,7 @@ const PREFIX = "ImageAvatar"
 const classes = {
     img: `${PREFIX}-img`,
     small: `${PREFIX}-small`,
+    default: `${PREFIX}-default`,
     large: `${PREFIX}-large`,
 }
 
@@ -15,14 +16,20 @@ const StyledAvatar = styled("span")(({ theme }) => ({
     },
 
     [`& .${classes.small}`]: {
-        width: theme.spacing(2),
-        height: theme.spacing(2),
+        width: theme.spacing(3),
+        height: theme.spacing(3),
+        marginRight: theme.spacing(0.5),
+    },
+
+    [`& .${classes.default}`]: {
+        width: theme.spacing(5),
+        height: theme.spacing(5),
         marginRight: theme.spacing(0.5),
     },
 
     [`& .${classes.large}`]: {
-        width: theme.spacing(7),
-        height: theme.spacing(7),
+        width: theme.spacing(6),
+        height: theme.spacing(6),
         marginRight: theme.spacing(1),
     },
 }))
@@ -40,7 +47,7 @@ export default function ImageAvatar(props: {
             ? classes.small
             : size === "large"
             ? classes.large
-            : undefined
+            : classes.default
     return (
         <StyledAvatar>
             <Avatar
