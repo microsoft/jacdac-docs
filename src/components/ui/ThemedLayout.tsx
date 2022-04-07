@@ -6,7 +6,6 @@ import {
 } from "@mui/material"
 import { SnackbarProvider } from "notistack"
 import React, { ReactNode } from "react"
-import { LiveAnnouncer } from "react-aria-live"
 import JacdacProvider from "../../jacdac/Provider"
 import { AppProvider } from "../AppContext"
 import { DbProvider } from "../DbContext"
@@ -40,52 +39,50 @@ export default function ThemedLayout(props: {
             <ThemeProvider theme={theme}>
                 <AppInsightsErrorBoundary>
                     <SnackbarProvider maxSnack={maxSnack || 1} dense={true}>
-                        <LiveAnnouncer>
-                            <DbProvider>
-                                <FileSystemProvider>
-                                    <WebAudioProvider>
-                                        <JacdacProvider connectOnStart={true}>
-                                            <HostedSimulatorsProvider>
-                                                <ServiceManagerProvider>
-                                                    <PacketsProvider>
-                                                        <AppProvider>
-                                                            <CommandPaletteProvider>
-                                                                <SimulatorDialogsProvider>
-                                                                    <ConsoleProvider>
-                                                                        <MakeCodeSnippetProvider>
-                                                                            <CssBaseline />
-                                                                            <Helmet>
-                                                                                <link
-                                                                                    rel="preconnect"
-                                                                                    href="https://fonts.googleapis.com"
-                                                                                    crossOrigin="anonymous"
-                                                                                />
-                                                                                <link
-                                                                                    rel="preconnect"
-                                                                                    href="https://raw.githubusercontent.com"
-                                                                                    crossOrigin="anonymous"
-                                                                                />
-                                                                                <meta
-                                                                                    name="viewport"
-                                                                                    content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
-                                                                                />
-                                                                            </Helmet>
-                                                                            {
-                                                                                children
-                                                                            }
-                                                                        </MakeCodeSnippetProvider>
-                                                                    </ConsoleProvider>
-                                                                </SimulatorDialogsProvider>
-                                                            </CommandPaletteProvider>
-                                                        </AppProvider>
-                                                    </PacketsProvider>
-                                                </ServiceManagerProvider>
-                                            </HostedSimulatorsProvider>
-                                        </JacdacProvider>
-                                    </WebAudioProvider>
-                                </FileSystemProvider>
-                            </DbProvider>
-                        </LiveAnnouncer>
+                        <DbProvider>
+                            <FileSystemProvider>
+                                <WebAudioProvider>
+                                    <JacdacProvider connectOnStart={true}>
+                                        <HostedSimulatorsProvider>
+                                            <ServiceManagerProvider>
+                                                <PacketsProvider>
+                                                    <AppProvider>
+                                                        <CommandPaletteProvider>
+                                                            <SimulatorDialogsProvider>
+                                                                <ConsoleProvider>
+                                                                    <MakeCodeSnippetProvider>
+                                                                        <CssBaseline />
+                                                                        <Helmet>
+                                                                            <link
+                                                                                rel="preconnect"
+                                                                                href="https://fonts.googleapis.com"
+                                                                                crossOrigin="anonymous"
+                                                                            />
+                                                                            <link
+                                                                                rel="preconnect"
+                                                                                href="https://raw.githubusercontent.com"
+                                                                                crossOrigin="anonymous"
+                                                                            />
+                                                                            <meta
+                                                                                name="viewport"
+                                                                                content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
+                                                                            />
+                                                                        </Helmet>
+                                                                        {
+                                                                            children
+                                                                        }
+                                                                    </MakeCodeSnippetProvider>
+                                                                </ConsoleProvider>
+                                                            </SimulatorDialogsProvider>
+                                                        </CommandPaletteProvider>
+                                                    </AppProvider>
+                                                </PacketsProvider>
+                                            </ServiceManagerProvider>
+                                        </HostedSimulatorsProvider>
+                                    </JacdacProvider>
+                                </WebAudioProvider>
+                            </FileSystemProvider>
+                        </DbProvider>
                     </SnackbarProvider>
                 </AppInsightsErrorBoundary>
             </ThemeProvider>
