@@ -40,7 +40,6 @@ const ignoredServices = [
     SRV_BRIDGE,
     SRV_JACSCRIPT_CLOUD,
     SRV_JACSCRIPT_CONDITION,
-    SRV_POWER_SUPPLY,
 ]
 
 export function isModuleTester(device: JDDevice) {

@@ -30,6 +30,7 @@
     "@tensorflow/tfjs": "3.8.0",
     "@tidyjs/tidy": "^2.4.5",
     "@types/json-schema": "^7.0.11",
+    "@types/react": "^18.0.0",
     "@types/react-aria-live": "^2.0.2",
     "@types/use-subscription": "^1.0.0",
     "@types/w3c-web-serial": "^1.0.2",
