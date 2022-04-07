@@ -28,8 +28,8 @@ const StyledAvatar = styled("span")(({ theme }) => ({
     },
 
     [`& .${classes.large}`]: {
-        width: theme.spacing(6),
-        height: theme.spacing(6),
+        width: theme.spacing(7),
+        height: theme.spacing(7),
         marginRight: theme.spacing(1),
     },
 }))
