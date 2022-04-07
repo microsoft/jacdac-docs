@@ -152,7 +152,7 @@ const serviceViews: {
     },
     [SRV_BUZZER]: {
         component: DashboardBuzzer,
-        weight: () => 6,
+        weight: () => 3,
     },
     [SRV_LED_STRIP]: {
         component: DashboardLEDStrip,
@@ -302,6 +302,7 @@ const serviceViews: {
     },
     [SRV_RELAY]: {
         component: DashboardRelay,
+        weight: () => 2,
     },
     [SRV_LIGHT_BULB]: {
         component: DashboardLightBulb,
@@ -466,7 +467,7 @@ export default function DashboardServiceWidget(
                         color={color}
                         disableShrink={true}
                         variant={"indeterminate"}
-                        size={"3em"}
+                        size={"2rem"}
                     />
                 }
             >

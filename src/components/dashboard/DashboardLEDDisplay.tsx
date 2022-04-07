@@ -14,9 +14,9 @@ import useRegister from "../hooks/useRegister"
 import SettingsIcon from "@mui/icons-material/Settings"
 import RegisterInput from "../RegisterInput"
 import { bufferEq } from "../../../jacdac-ts/src/jdom/utils"
-import LoadingProgress from "../ui/LoadingProgress"
 import useChange from "../../jacdac/useChange"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
+import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 
 const configureRegisters = [
     LedDisplayReg.Brightness,
@@ -94,35 +94,39 @@ export default function DashboardLEDDisplay(props: DashboardServiceProps) {
         []
     )
 
-    if (!hasData) return <LoadingProgress />
+    if (!hasData)
+        return <DashboardRegisterValueFallback register={pixelsRegister} />
     return (
         <>
-            <LightWidget
-                colors={colors}
-                subscribeColors={subscribeColors}
-                registers={registers}
-                widgetCount={services?.length}
-                onLedClick={handleLedClick}
-                {...props}
-            />
-            <Grid container direction="column" spacing={1}>
+            <Grid container direction="column" spacing={1} alignItems="center">
+                <Grid item xs={12}>
+                    <LightWidget
+                        colors={colors}
+                        subscribeColors={subscribeColors}
+                        registers={registers}
+                        widgetCount={services?.length}
+                        onLedClick={handleLedClick}
+                        {...props}
+                    />
+                </Grid>
                 <Grid item>
                     <ColorButtons
                         color={penColor}
                         onColorChange={handleColorChange}
-                    />
-                </Grid>
-                <Grid item>
-                    <IconButtonWithTooltip
-                        title={
-                            configure
-                                ? "Hide configuration"
-                                : "Show configuration"
-                        }
-                        onClick={toggleConfigure}
                     >
-                        <SettingsIcon />
-                    </IconButtonWithTooltip>
+                        <Grid item>
+                            <IconButtonWithTooltip
+                                title={
+                                    configure
+                                        ? "Hide configuration"
+                                        : "Show configuration"
+                                }
+                                onClick={toggleConfigure}
+                            >
+                                <SettingsIcon />
+                            </IconButtonWithTooltip>
+                        </Grid>
+                    </ColorButtons>
                 </Grid>
 
                 {configure &&

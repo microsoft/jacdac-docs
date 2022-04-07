@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useId } from "react"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import { Grid, TextField } from "@mui/material"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
@@ -7,9 +7,8 @@ import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import { toHex } from "../../../jacdac-ts/src/jdom/utils"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import { RngReg } from "../../../jacdac-ts/src/jdom/constants"
-import { useId } from "react"
-import LoadingProgress from "../ui/LoadingProgress"
 import useRegister from "../hooks/useRegister"
+import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 
 export default function DashboardRandomNumberGenerator(
     props: DashboardServiceProps
@@ -21,7 +20,8 @@ export default function DashboardRandomNumberGenerator(
 
     const handleRefresh = () => randomRegister.refresh()
 
-    if (!rnd) return <LoadingProgress />
+    if (!rnd)
+        return <DashboardRegisterValueFallback register={randomRegister} />
 
     return (
         <Grid container spacing={2} direction="row">
