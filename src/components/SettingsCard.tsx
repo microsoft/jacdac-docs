@@ -26,6 +26,7 @@ import ServiceManagerContext from "./ServiceManagerContext"
 import Suspense from "./ui/Suspense"
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt"
 import useSnackbar from "./hooks/useSnackbar"
+import useAnalytics from "./hooks/useAnalytics"
 
 const ImportButton = lazy(() => import("./ImportButton"))
 
@@ -222,18 +223,27 @@ export default function SettingsCard(props: {
 }) {
     const { service, mutable, keyPrefix = "", showSecrets, autoKey } = props
     const { fileStorage } = useContext(ServiceManagerContext)
+    const { trackError } = useAnalytics()
     const factory = useCallback(srv => new SettingsClient(srv), [])
     const client = useServiceClient(service, factory)
     const values = useChangeAsync(
         client,
         async c => {
-            const keys = await c?.list()
-            return keys
-                ?.filter(({ key }) => !keyPrefix || key.startsWith(keyPrefix))
-                .map(({ key, value }) => ({
-                    key,
-                    value: bufferToString(value),
-                }))
+            try {
+                const keys = await c?.list()
+                return keys
+                    ?.filter(
+                        ({ key }) => !keyPrefix || key.startsWith(keyPrefix)
+                    )
+                    .map(({ key, value }) => ({
+                        key,
+                        value: bufferToString(value),
+                    }))
+            } catch (e) {
+                trackError(e)
+                console.debug(e)
+                return []
+            }
         },
         [keyPrefix]
     )
