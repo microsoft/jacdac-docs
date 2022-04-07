@@ -4341,13 +4341,6 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-aria-live@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/react-aria-live/-/react-aria-live-2.0.2.tgz#9b2221d7451187b5151f002105ebbfe57c9d9b9d"
-  integrity sha512-3r88Xv3dhhi92zyrZmenOgmp061S7/Ylq45UBiWIc+hXtsqqgis1/diHx8zWdomk9pfRGaMRE3hykjXHGcYNmg==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-is@^16.7.1 || ^17.0.0":
   version "17.0.3"
   resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-17.0.3.tgz#2d855ba575f2fc8d17ef9861f084acc4b90a137a"
@@ -17257,13 +17250,6 @@ rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-aria-live@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/react-aria-live/-/react-aria-live-2.0.5.tgz#333480cb898d6963421bd86fe3cbd0ce54e37f08"
-  integrity sha512-rXiH1HNKJrr/UfVeGwA2aKY43r5WbjLs+AYB6/kJF1qny2hwxzQc1qewQmUpdQ5h8HAOTD8O/XlGcEHjqlCl0g==
-  dependencies:
-    uuid "^3.2.1"
-
 react-blockly@^7.0.0-alpha.2:
   version "7.0.0-alpha.2"
   resolved "https://registry.yarnpkg.com/react-blockly/-/react-blockly-7.0.0-alpha.2.tgz#3715f5392079127680c2a707947fe89d430d2095"
@@ -20940,7 +20926,7 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@3.4.0, uuid@^3.2.1, uuid@^3.3.2:
+uuid@3.4.0, uuid@^3.3.2:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
