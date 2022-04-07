@@ -10,11 +10,17 @@ export default function PianoWidget(props: {
     const { playTone } = props
     const firstNote = MidiNumbers.fromNote("c4")
     const lastNote = MidiNumbers.fromNote("d5")
-    const keyboardShortcuts = KeyboardShortcuts.create({
-        firstNote: firstNote,
-        lastNote: lastNote,
-        keyboardConfig: KeyboardShortcuts.HOME_ROW,
-    })
+    /*
+    const keyboardShortcuts = useMemo(
+        () =>
+            KeyboardShortcuts.create({
+                firstNote: firstNote,
+                lastNote: lastNote,
+                keyboardConfig: KeyboardShortcuts.HOME_ROW,
+            }),
+        [firstNote, lastNote]
+    )
+    */
     const midiFrequencies = useMemo(
         () =>
             new Array(127)
@@ -37,7 +43,7 @@ export default function PianoWidget(props: {
                 stopNote={() => {
                     // not supported
                 }}
-                keyboardShortcuts={keyboardShortcuts}
+                //keyboardShortcuts={keyboardShortcuts}
             />
         </Box>
     )
