@@ -159,11 +159,6 @@ export default function ToolsDrawer() {
             to: "/tools/collector/",
             icon: <FiberManualRecordIcon />,
         },
-        UIFlags.webcam && {
-            text: showWebCam ? "Stop WebCam" : "Start WebCam",
-            icon: <VideoCallIcon />,
-            action: () => setShowWebCam(!showWebCam),
-        },
         UIFlags.peers && {
             text: "Peers",
             to: "/tools/peers/",
@@ -232,6 +227,11 @@ export default function ToolsDrawer() {
                 .join(", ")})`,
             action: handleUnitClick(unit, name, names),
         })),
+        UIFlags.webcam && {
+            text: showWebCam ? "Stop WebCam" : "Start WebCam",
+            icon: <VideoCallIcon />,
+            action: () => setShowWebCam(!showWebCam),
+        },
     ].filter(l => !!l)
 
     if (!toolsMenu) return null
