@@ -11,7 +11,7 @@ import {
     SRV_LED,
     SRV_DOT_MATRIX,
     SRV_LED_STRIP,
-    SRV_LED_DISPLAY,
+    SRV_LED_SINGLE,
     SRV_MATRIX_KEYPAD,
     SRV_MOTION,
     SRV_POWER,
@@ -62,7 +62,7 @@ import DashboardButton from "./DashboardButton"
 import DashboardRotaryEncoder from "./DashboardRotaryEncoder"
 import DashboardSwitch from "./DashboardSwitch"
 import DashboardGamepad from "./DashboardGamepad"
-import DashboardLED from "./DashboardLED"
+import DashboardLED from "./DashboardLEDSingle"
 import useServiceServer from "../hooks/useServiceServer"
 import Suspense from "../ui/Suspense"
 
@@ -71,7 +71,7 @@ const DashboardServo = lazy(() => import("./DashboardServo"))
 const DashboardAccelerometer = lazy(() => import("./DashboardAccelerometer"))
 const DashboardBuzzer = lazy(() => import("./DashboardBuzzer"))
 const DashboardLEDStrip = lazy(() => import("./DashboardLEDStrip"))
-const DashboardLEDDisplay = lazy(() => import("./DashboardLEDDisplay"))
+const DashboardLEDSingle = lazy(() => import("./DashboardLEDSingle"))
 const DashboardRoleManager = lazy(() => import("./DashboardRoleManager"))
 const DashboardTrafficLight = lazy(() => import("./DashboardTrafficLight"))
 const DashboardCharacterScreen = lazy(
@@ -153,8 +153,9 @@ const serviceViews: {
         component: DashboardLEDStrip,
         weight: () => 3,
     },
-    [SRV_LED_DISPLAY]: {
-        component: DashboardLEDDisplay,
+    [SRV_LED]: {
+        component: DashboardLED,
+        bundle: true,
         weight: () => 3,
     },
     [SRV_ACCELEROMETER]: {
@@ -216,9 +217,8 @@ const serviceViews: {
     [SRV_REAL_TIME_CLOCK]: {
         component: DashboardRealTimeClock,
     },
-    [SRV_LED]: {
-        component: DashboardLED,
-        bundled: true,
+    [SRV_LED_SINGLE]: {
+        component: DashboardLEDSingle,
     },
     [SRV_GAMEPAD]: {
         component: DashboardGamepad,
