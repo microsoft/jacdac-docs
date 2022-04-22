@@ -155,7 +155,7 @@ const serviceViews: {
     },
     [SRV_LED]: {
         component: DashboardLED,
-        bundle: true,
+        bundled: true,
         weight: () => 3,
     },
     [SRV_ACCELEROMETER]: {
