@@ -62,7 +62,6 @@ import DashboardButton from "./DashboardButton"
 import DashboardRotaryEncoder from "./DashboardRotaryEncoder"
 import DashboardSwitch from "./DashboardSwitch"
 import DashboardGamepad from "./DashboardGamepad"
-import DashboardLED from "./DashboardLEDSingle"
 import useServiceServer from "../hooks/useServiceServer"
 import Suspense from "../ui/Suspense"
 
@@ -70,6 +69,7 @@ import Suspense from "../ui/Suspense"
 const DashboardServo = lazy(() => import("./DashboardServo"))
 const DashboardAccelerometer = lazy(() => import("./DashboardAccelerometer"))
 const DashboardBuzzer = lazy(() => import("./DashboardBuzzer"))
+const DashboardLED = lazy(() => import("./DashboardLED"))
 const DashboardLEDStrip = lazy(() => import("./DashboardLEDStrip"))
 const DashboardLEDSingle = lazy(() => import("./DashboardLEDSingle"))
 const DashboardRoleManager = lazy(() => import("./DashboardRoleManager"))
@@ -155,7 +155,6 @@ const serviceViews: {
     },
     [SRV_LED]: {
         component: DashboardLED,
-        bundled: true,
         weight: () => 3,
     },
     [SRV_ACCELEROMETER]: {
