@@ -18,6 +18,7 @@ import BlockDomainSpecificLanguage from "./dsl/dsl"
 import { addDataPreviewField } from "./fields/DataPreviewField"
 import { WorkspaceJSON } from "./dsl/workspacejson"
 import useAsyncMemo from "../hooks/useAsyncMemo"
+import useJacscript from "../jacscript/JacscriptContext"
 
 // overrides blockly emboss filter for svg elements
 Blockly.BlockSvg.prototype.setHighlighted = function (highlighted) {
@@ -104,6 +105,7 @@ export default function useToolbox(
     source: WorkspaceJSON
 ): ToolboxConfiguration {
     const liveServices = useServices({ specification: true })
+    const { clientSpecs } = useJacscript()
     const theme = useTheme()
 
     const blocks = useAsyncMemo(async () => {
@@ -116,7 +118,12 @@ export default function useToolbox(
 
         const dslsCategories = arrayConcatMany(
             dsls.map(dsl =>
-                dsl?.createCategory?.({ theme, source, liveServices })
+                dsl?.createCategory?.({
+                    theme,
+                    source,
+                    liveServices,
+                    clientSpecs,
+                })
             )
         )
             .filter(cat => !!cat)
