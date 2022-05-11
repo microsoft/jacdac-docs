@@ -24,7 +24,6 @@ export interface CreateCategoryOptions {
     theme: Theme
     source: WorkspaceJSON
     liveServices: JDService[]
-    clientSpecs?: jdspec.ServiceSpec[]
 }
 
 export interface CompileEventToVMOptions {

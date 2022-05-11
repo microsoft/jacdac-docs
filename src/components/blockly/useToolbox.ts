@@ -105,7 +105,6 @@ export default function useToolbox(
     source: WorkspaceJSON
 ): ToolboxConfiguration {
     const liveServices = useServices({ specification: true })
-    const { clientSpecs } = useJacscript()
     const theme = useTheme()
 
     const blocks = useAsyncMemo(async () => {
@@ -122,7 +121,6 @@ export default function useToolbox(
                     theme,
                     source,
                     liveServices,
-                    clientSpecs,
                 })
             )
         )
