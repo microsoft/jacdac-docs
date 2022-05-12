@@ -5,12 +5,15 @@ import { Button, Grid, Typography } from "@mui/material"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import useServiceServer from "../hooks/useServiceServer"
 import {
+    JacscriptCloudCommandResponse,
     JacscriptCloudServer,
     JacscriptCloudUploadRequest,
     UPLOAD,
 } from "../../../jacdac-ts/src/servers/jacscriptcloudserver"
 import {
+    EVENT,
     JacscriptCloudCmd,
+    JacscriptCloudEvent,
     JacscriptCloudReg,
 } from "../../../jacdac-ts/src/jdom/constants"
 import useRegister from "../hooks/useRegister"
@@ -18,23 +21,54 @@ import { useRegisterBoolValue } from "../../jacdac/useRegisterValue"
 import SwitchWithLabel from "../ui/SwitchWithLabel"
 import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 import CmdButton from "../CmdButton"
+import useEvent from "../hooks/useEvent"
+import useBus from "../../jacdac/useBus"
 
 export default function DashboardJacscriptManager(
     props: DashboardServiceProps
 ) {
     const { service, expanded } = props
+    const bus = useBus()
 
     const connectedRegister = useRegister(service, JacscriptCloudReg.Connected)
+    const cloudCommandEvent = useEvent(
+        service,
+        JacscriptCloudEvent.CloudCommand
+    )
     const connected = useRegisterBoolValue(connectedRegister, props)
-    const [uploads, setUploads] = useState<JacscriptCloudUploadRequest[]>([])
     const server = useServiceServer(service, () => new JacscriptCloudServer())
     const color = server ? "secondary" : "primary"
 
-    useEffect(() => setUploads([]), [connectedRegister])
+    const [msgs, setMsgs] = useState<string[]>([])
+
+    useEffect(
+        () =>
+            cloudCommandEvent.subscribe(
+                EVENT,
+                (req: JacscriptCloudCommandResponse) =>
+                    setMsgs(prev =>
+                        [
+                            ...prev,
+                            `${bus.timestamp | 0}> command: ${
+                                req.status
+                            }, ${req.args.join(", ")}`,
+                        ].slice(-10)
+                    )
+            ),
+        [cloudCommandEvent]
+    )
+    useEffect(() => setMsgs([]), [connectedRegister])
     useEffect(
         () =>
             server?.subscribe(UPLOAD, (req: JacscriptCloudUploadRequest) => {
-                setUploads(prev => [...prev, req].slice(-10))
+                setMsgs(prev =>
+                    [
+                        ...prev,
+                        `${bus.timestamp | 0}> upload: ${
+                            req.label
+                        } -> ${req.args.join(", ")}`,
+                    ].slice(-10)
+                )
             }),
         [server]
     )
@@ -72,14 +106,9 @@ export default function DashboardJacscriptManager(
                     onChange={handleConnected}
                 />
             </Grid>
-            {!!uploads?.length && (
+            {!!msgs?.length && (
                 <Grid item xs={12}>
-                    <pre>
-                        {uploads.map(
-                            ({ label, args }) =>
-                                `${label}: ${args.join(", ")}\n`
-                        )}
-                    </pre>
+                    <pre>{msgs.join("\n")}</pre>
                 </Grid>
             )}
             {expanded && (
