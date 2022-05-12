@@ -409,9 +409,9 @@ export class ServicesBlockDomainSpecificLanguage
                         name: "twin",
                     },
                 ],
-                colour: toolsColour,
+                colour: commandColor,
                 inputsInline: false,
-                tooltip: `Twin of the selected role`,
+                tooltip: `Twin of role`,
                 nextStatement: DATA_SCIENCE_STATEMENT_TYPE,
                 helpUrl: "",
                 template: "meta",
@@ -440,9 +440,9 @@ export class ServicesBlockDomainSpecificLanguage
                         name: "twin",
                     },
                 ],
-                colour: toolsColour,
+                colour: commandColor,
                 inputsInline: false,
-                tooltip: `Inspect a service`,
+                tooltip: `Inspect a role`,
                 helpUrl: "",
                 template: "meta",
             },
@@ -566,6 +566,18 @@ export class ServicesBlockDomainSpecificLanguage
                         },
                     },
                 },
+                <LabelDefinition>{
+                    kind: "label",
+                    text: "Device Twins",
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: TWIN_BLOCK,
+                },
+                <BlockReference>{
+                    kind: "block",
+                    type: INSPECT_BLOCK,
+                },
             ],
         }
 
@@ -574,10 +586,6 @@ export class ServicesBlockDomainSpecificLanguage
             name: "Debug",
             colour: toolsColour,
             contents: [
-                <LabelDefinition>{
-                    kind: "label",
-                    text: "Console",
-                },
                 <BlockReference>{
                     kind: "block",
                     type: LOG_BLOCK,
@@ -596,18 +604,6 @@ export class ServicesBlockDomainSpecificLanguage
                 <BlockReference>{
                     kind: "block",
                     type: CONSOLE_BLOCK,
-                },
-                <LabelDefinition>{
-                    kind: "label",
-                    text: "Device Twins",
-                },
-                <BlockReference>{
-                    kind: "block",
-                    type: TWIN_BLOCK,
-                },
-                <BlockReference>{
-                    kind: "block",
-                    type: INSPECT_BLOCK,
                 },
                 <BlockReference>{
                     kind: "block",
