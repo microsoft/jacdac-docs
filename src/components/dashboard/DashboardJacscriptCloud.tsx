@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { Button, Grid, Typography } from "@mui/material"
+import React, { ChangeEvent, useEffect, useId, useState } from "react"
+import { Button, Grid, TextField, Typography } from "@mui/material"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import { DashboardServiceProps } from "./DashboardServiceWidget"
@@ -23,10 +23,76 @@ import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 import CmdButton from "../CmdButton"
 import useEvent from "../hooks/useEvent"
 import useBus from "../../jacdac/useBus"
+import { JDService } from "../../../jacdac-ts/src/jdom/service"
 
-export default function DashboardJacscriptManager(
-    props: DashboardServiceProps
-) {
+function Controller(props: { service: JDService; connected: boolean }) {
+    const { service, connected } = props
+    const id = useId()
+    const labelid = id + "-label"
+    const argsid = id + "-args"
+    const [label, setLabel] = useState("")
+    const [args, setArgs] = useState("")
+    const argsNum = args.length
+        ? args
+              .replace(/,\s*$/, "")
+              .split(",")
+              .map(arg => parseFloat(arg.trim()))
+        : []
+    const argsHasError = argsNum.some(isNaN)
+
+    const handleLabelChange = (ev: ChangeEvent<HTMLInputElement>) =>
+        setLabel(ev.target.value)
+    const handleArgsChange = (ev: ChangeEvent<HTMLInputElement>) =>
+        setArgs(ev.target.value)
+    const handleUpload = async () => {
+        await service.sendCmdPackedAsync(JacscriptCloudCmd.Upload, [
+            label,
+            argsNum.map(n => [n]),
+        ])
+    }
+
+    return (
+        <>
+            <Grid item xs={12}>
+                <Grid container direction="row" spacing={1}>
+                    <Grid item>
+                        <TextField
+                            id={labelid}
+                            value={label}
+                            label="label"
+                            onChange={handleLabelChange}
+                        />
+                    </Grid>
+                    <Grid item xs>
+                        <TextField
+                            id={argsid}
+                            value={args}
+                            fullWidth={true}
+                            label="arguments, list of numbers"
+                            onChange={handleArgsChange}
+                            helperText={
+                                argsHasError
+                                    ? "invalid number syntax"
+                                    : undefined
+                            }
+                        />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid item xs={12}>
+                <CmdButton
+                    variant="outlined"
+                    onClick={handleUpload}
+                    disabled={!connected || argsHasError}
+                >
+                    upload
+                </CmdButton>
+            </Grid>
+        </>
+    )
+}
+
+export default function DashboardJacscriptCloud(props: DashboardServiceProps) {
     const { service, expanded } = props
     const bus = useBus()
 
@@ -79,16 +145,6 @@ export default function DashboardJacscriptManager(
               connectedRegister.scheduleRefresh()
           }
         : undefined
-
-    const handleUpload = async () => {
-        const label = "test"
-        const args = [1, 2, 3]
-        await service.sendCmdPackedAsync(JacscriptCloudCmd.Upload, [
-            label,
-            args.map(n => [n]),
-        ])
-    }
-
     if (connected === undefined)
         return <DashboardRegisterValueFallback register={connectedRegister} />
 
@@ -108,20 +164,12 @@ export default function DashboardJacscriptManager(
             </Grid>
             {!!msgs?.length && (
                 <Grid item xs={12}>
-                    <pre>{msgs.join("\n")}</pre>
+                    <Typography variant="caption">
+                        <pre>{msgs.join("\n")}</pre>
+                    </Typography>
                 </Grid>
             )}
-            {expanded && (
-                <Grid item xs={12}>
-                    <CmdButton
-                        variant="outlined"
-                        onClick={handleUpload}
-                        disabled={!connected}
-                    >
-                        upload
-                    </CmdButton>
-                </Grid>
-            )}
+            {expanded && <Controller service={service} connected={connected} />}
         </Grid>
     )
 }

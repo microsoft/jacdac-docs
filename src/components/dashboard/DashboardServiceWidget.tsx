@@ -324,6 +324,7 @@ const serviceViews: {
     [SRV_JACSCRIPT_CLOUD]: {
         component: DashboardJacscriptCloud,
         expandable: true,
+        weight: () => 3,
     },
 }
 
