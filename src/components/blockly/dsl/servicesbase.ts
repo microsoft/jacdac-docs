@@ -1050,7 +1050,6 @@ export class ServicesBaseDSL {
                             undefined,
                             inputs[0].child
                         )
-                        console.log({ input: inputs[0].child, expr })
                         return {
                             cmd: makeVMBase(block, {
                                 type: "CallExpression",
