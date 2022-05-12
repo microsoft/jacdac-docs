@@ -25,8 +25,13 @@ import useEvent from "../hooks/useEvent"
 import useBus from "../../jacdac/useBus"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 
-function Controller(props: { service: JDService; connected: boolean }) {
-    const { service, connected } = props
+function Controller(props: {
+    service: JDService
+    server: JacscriptCloudServer
+    connected: boolean
+}) {
+    const { service, server, connected } = props
+    const { twin } = service
     const id = useId()
     const labelid = id + "-label"
     const argsid = id + "-args"
@@ -50,6 +55,9 @@ function Controller(props: { service: JDService; connected: boolean }) {
             argsNum.map(n => [n]),
         ])
     }
+    const handleCloudMethod = async () => {
+        await server.sendCloudCommand(label, argsNum)
+    }
 
     return (
         <>
@@ -59,7 +67,7 @@ function Controller(props: { service: JDService; connected: boolean }) {
                         <TextField
                             id={labelid}
                             value={label}
-                            label="label"
+                            label="label or cloud method"
                             onChange={handleLabelChange}
                         />
                     </Grid>
@@ -80,13 +88,28 @@ function Controller(props: { service: JDService; connected: boolean }) {
                 </Grid>
             </Grid>
             <Grid item xs={12}>
-                <CmdButton
-                    variant="outlined"
-                    onClick={handleUpload}
-                    disabled={!connected || argsHasError}
-                >
-                    upload
-                </CmdButton>
+                <Grid container spacing={1} direction="row">
+                    <Grid item>
+                        <CmdButton
+                            variant="outlined"
+                            onClick={handleUpload}
+                            disabled={!connected || !label || argsHasError}
+                        >
+                            upload
+                        </CmdButton>
+                    </Grid>
+                    <Grid item>
+                        {server && !twin && (
+                            <CmdButton
+                                variant="outlined"
+                                onClick={handleCloudMethod}
+                                disabled={!connected || !label || argsHasError}
+                            >
+                                cloud event
+                            </CmdButton>
+                        )}
+                    </Grid>
+                </Grid>
             </Grid>
         </>
     )
@@ -102,25 +125,30 @@ export default function DashboardJacscriptCloud(props: DashboardServiceProps) {
         JacscriptCloudEvent.CloudCommand
     )
     const connected = useRegisterBoolValue(connectedRegister, props)
-    const server = useServiceServer(service, () => new JacscriptCloudServer())
+    const server = useServiceServer<JacscriptCloudServer>(
+        service,
+        () => new JacscriptCloudServer()
+    )
     const color = server ? "secondary" : "primary"
 
     const [msgs, setMsgs] = useState<string[]>([])
 
     useEffect(
         () =>
-            cloudCommandEvent.subscribe(
-                EVENT,
-                (req: JacscriptCloudCommandResponse) =>
-                    setMsgs(prev =>
-                        [
-                            ...prev,
-                            `${bus.timestamp | 0}> command: ${
-                                req.status
-                            }, ${req.args.join(", ")}`,
-                        ].slice(-10)
-                    )
-            ),
+            cloudCommandEvent.subscribe(EVENT, () => {
+                console.log(cloudCommandEvent.unpackedValue)
+                const [seqNo, status, args] =
+                    cloudCommandEvent.unpackedValue || []
+                console.log({ seqNo, status, args })
+                setMsgs(prev =>
+                    [
+                        ...prev,
+                        `${bus.timestamp | 0}> command: ${status}, ${args
+                            .map(r => r[0])
+                            .join(", ")}`,
+                    ].slice(-10)
+                )
+            }),
         [cloudCommandEvent]
     )
     useEffect(() => setMsgs([]), [connectedRegister])
@@ -169,7 +197,13 @@ export default function DashboardJacscriptCloud(props: DashboardServiceProps) {
                     </Typography>
                 </Grid>
             )}
-            {expanded && <Controller service={service} connected={connected} />}
+            {expanded && (
+                <Controller
+                    service={service}
+                    server={server}
+                    connected={connected}
+                />
+            )}
         </Grid>
     )
 }
