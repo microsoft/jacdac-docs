@@ -46,13 +46,13 @@ import {
     LOG_VALUE_BLOCK,
     ROLE_BOUND_EVENT_BLOCK,
     CONSOLE_BLOCK,
+    ROLE_BOUND_BLOCK,
+    SET_STATUS_LIGHT_BLOCK,
 } from "./servicesbase"
 import { humanify } from "../../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import VariablesField from "../fields/VariablesFields"
 import ConsoleField from "../fields/ConsoleField"
 
-const SET_STATUS_LIGHT_BLOCK = "jacdac_set_status_light"
-const ROLE_BOUND_BLOCK = "jacdac_role_bound"
 const INSPECT_BLOCK = "jacdac_tools_inspect"
 const VARIABLES_BLOCK = "tools_variables_view"
 const commandColor = "#8c6a1d"
@@ -349,18 +349,8 @@ export class ServicesBlockDomainSpecificLanguage
             {
                 kind: "block",
                 type: SET_STATUS_LIGHT_BLOCK,
-                message0: "set %1 status light to %2",
+                message0: "set status light to %1",
                 args0: [
-                    <VariableInputDefinition>{
-                        type: "field_variable",
-                        name: "role",
-                        variable: "none",
-                        variableTypes: [
-                            "client",
-                            ...supportedServices.map(srv => toRoleType(srv)),
-                        ],
-                        defaultType: "client",
-                    },
                     <ValueInputDefinition>{
                         type: "input_value",
                         name: "color",
