@@ -29,7 +29,7 @@ export default function useEventRaised<
             isEqual: isEqual
                 ? isEqual
                 : (a: TValue, b: TValue) => {
-                      if (Array.isArray(a) || Array.isArray(b))
+                      if (Array.isArray(a))
                           return arrayEq(
                               a as unknown as unknown[],
                               b as unknown as unknown[]
