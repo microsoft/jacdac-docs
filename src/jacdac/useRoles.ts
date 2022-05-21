@@ -51,7 +51,7 @@ export default function useRoles<
             }
             return r
         },
-        []
+        [incomplete]
     )
     return { roleManager, roles }
 }
