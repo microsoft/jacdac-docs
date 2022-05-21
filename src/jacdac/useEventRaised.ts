@@ -20,21 +20,22 @@ export default function useEventRaised<
     assert((node as any) !== false)
     const subscription = useMemo(
         () => ({
-            getSnapshot: () => node,
-            selector: query ? query : (): TValue => undefined,
-            subscribe: callback => {
-                const unsubscribe = node?.subscribe(eventName, callback)
+            getSnapshot: () => query?.(node),
+            selector: _ => _,
+            subscribe: (onStoreChanged: () => void) => {
+                const unsubscribe = node?.subscribe(eventName, onStoreChanged)
                 return () => unsubscribe?.()
             },
             isEqual: isEqual
                 ? isEqual
                 : (a: TValue, b: TValue) => {
-                      if (Array.isArray(a))
-                          return arrayEq(
+                      if (Array.isArray(a)) {
+                          const e = arrayEq(
                               a as unknown as unknown[],
                               b as unknown as unknown[]
                           )
-                      else return Object.is(a, b)
+                          return e
+                      } else return Object.is(a, b)
                   },
         }),
         [node, ...(deps || [])]
