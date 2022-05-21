@@ -34,7 +34,7 @@ export default function useEventRaised<
                               a as unknown as unknown[],
                               b as unknown as unknown[]
                           )
-                      else Object.is(a, b)
+                      else return Object.is(a, b)
                   },
         }),
         [node, ...(deps || [])]
