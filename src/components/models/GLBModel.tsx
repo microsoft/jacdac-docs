@@ -6,7 +6,11 @@ import Suspense from "../ui/Suspense"
 
 export default function GLBModel(props: { name: string }) {
     const { name } = props
-    const obj = useLoader(GLTFLoader, withPrefix(`/models/${name}.glb`))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const obj = useLoader<any, string>(
+        GLTFLoader,
+        withPrefix(`/models/${name}.glb`)
+    )
     return (
         <Suspense>
             <primitive object={obj.scene} />
