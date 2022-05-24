@@ -1,12 +1,15 @@
 ---
-title: Microbit Machine
+title: Micro:bit Jukebox
 hideToc: true
 order: 100
 ---
 
 import DownloadFirmwareButton from "../../../components/ui/DownloadFirmwareButton"
 
-#  Microbit Machine
+#  Micro:bit Jukebox
+
+The micro:bit jukebox is a program that reacts to Jacdac modules that are connected to 
+the micro:bit V2 over the Jacdac bus.
 
 ![Animation of a button connected to the micro:bit V2](./microbit-jukebox.gif)
 
@@ -24,18 +27,18 @@ import DownloadFirmwareButton from "../../../components/ui/DownloadFirmwareButto
     -   Hold: display a second icon
     -   Up: clear display
 
--   When a Jacdac sensor (slider, rotary encoder, thermometer) is attached and the sensor value changes appreciably,
+-   When a Jacdac sensor (slider, rotary encoder) is attached and the sensor value changes appreciably,
     micro:bit will display a bar chart showing the magnitude of the reading register, or will display the value as a number
 
--   When a Jacdac actuator (LED pixel strip, single LED) is attached, the micro:bit will send a command to it based
+-   When a Jacdac actuator (RGB LED strip) is attached, the micro:bit will send a command to it based
     on which button of micro:bit is pressed (A, B, A+B)
 
--   When a LED pixel strip and a potentiometer (slider) are connected, the potentiometer will control the LED brightness
--   When a LED pixel strip and a rotary encoder are connected, the rotary encoder will rotate the LEDs on the strip
+-   When a LED strip and a potentiometer (slider) are connected, the potentiometer will control the LED brightness
+-   When a LED strip and a rotary encoder are connected, the rotary encoder will rotate the LEDs on the strip
 
 ## Download again
 
-The out-of-the-box experience is a MakeCode program that you can download or even modify!
+The micro:bit Jukebox experience is a MakeCode program that you can download or even modify!
 
 <DownloadFirmwareButton
     variant="contained"
