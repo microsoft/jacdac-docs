@@ -6,9 +6,9 @@ import {
     CompileCommandToVMOptions,
     CompileEventToVMOptions,
     CompileEventToVMResult,
-    CompileExpressionToVMOptions,
 } from "./dsl/dsl"
 import { CmdWithErrors } from "../jacscript/JacscriptGenerator"
+import { JSONSchema4 } from "json-schema"
 
 export const NEW_PROJET_XML = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'
 
@@ -203,6 +203,7 @@ export const TWIN_BLOCK = "jacdac_tools_twin"
 export const SENSOR_BLOCK = "jacdac_sensors_sensor"
 
 export const toolsColour = "#303030"
+export const analyzeColour = "#404040"
 export const sensorsColour = paletteColorByIndex(0)
 
 export const CHART_WIDTH = 468
@@ -224,6 +225,94 @@ export const MB_WARNINGS_CATEGORY = "mb"
 export const JACSCRIPT_WARNINGS_CATEGORY = "jcs"
 
 export const WORKSPACE_FILENAME = `blocks.json`
+
+export const chartSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        title: {
+            type: "string",
+            title: "Chart title",
+        },
+    },
+}
+export const axisSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        title: {
+            type: "string",
+            title: "Title",
+        },
+    },
+}
+export const scaleSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        domainMin: {
+            type: "number",
+            title: "minimum",
+            description: "Sets the minimum value in the scale domain",
+        },
+        domainMax: {
+            type: "number",
+            title: "maximum",
+            description: "Sets the maximum value in the scale domain",
+        },
+    },
+}
+export const encodingSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        axis: axisSchema,
+    },
+}
+export const encodingNumberSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        scale: scaleSchema,
+        axis: axisSchema,
+    },
+}
+export const char2DSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        title: {
+            type: "string",
+            title: "Chart title",
+        },
+        encoding: {
+            type: "object",
+            properties: {
+                x: {
+                    title: "X",
+                    ...encodingNumberSettingsSchema,
+                },
+                y: {
+                    title: "Y",
+                    ...encodingNumberSettingsSchema,
+                },
+            },
+        },
+    },
+}
+export const charMapSettingsSchema: JSONSchema4 = {
+    type: "object",
+    properties: {
+        title: {
+            type: "string",
+            title: "Chart title",
+        },
+        encoding: {
+            index: {
+                title: "Index",
+                ...encodingSettingsSchema,
+            },
+            value: {
+                title: "Value",
+                ...encodingNumberSettingsSchema,
+            },
+        },
+    },
+}
 
 export interface ContentDefinition {
     kind: "category" | "sep" | "button" | "label" | "block"
