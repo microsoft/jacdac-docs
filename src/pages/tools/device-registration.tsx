@@ -712,8 +712,9 @@ export default function DeviceRegistration() {
                     <TextField
                         id={firmwareSourceId}
                         fullWidth={true}
-                        helperText="public URL to the firmware sources."
-                        label="Firmware source code"
+                        helperText="public URL to the firmware sources. If possible, provide a deep link to the relevant source files."
+                        label="Firmware source repository"
+                        placeholder="https://github.com/..."
                         value={device?.firmwareSource}
                         onChange={handleFirmwareSourceChanged}
                         variant={variant}
@@ -723,8 +724,9 @@ export default function DeviceRegistration() {
                     <TextField
                         id={hardwareDesignId}
                         fullWidth={true}
-                        helperText="public URL to the hardware design files"
-                        label="Hardware design files"
+                        helperText="public URL to the repositry of hardware design files. If possible, provide a deep link to the relevant source files."
+                        label="Hardware design repository"
+                        placeholder="https://github.com/..."
                         value={device?.hardwareDesign}
                         onChange={handleHardwareDesignChanged}
                         variant={variant}
