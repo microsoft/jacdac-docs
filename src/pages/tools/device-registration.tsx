@@ -364,7 +364,11 @@ export default function DeviceRegistration() {
         <>
             <h1>
                 Device Registration
-                <IconButtonWithTooltip title="New Device" onClick={handleClear}>
+                <IconButtonWithTooltip
+                    sx={{ ml: 1 }}
+                    title="New Device"
+                    onClick={handleClear}
+                >
                     <ClearIcon />
                 </IconButtonWithTooltip>
             </h1>
@@ -598,19 +602,23 @@ export default function DeviceRegistration() {
                                 PCB edge connector, independently powered.
                             </MenuItem>
                             <MenuItem value="edgeConsumer">
-                                PCB edge connector, consumer - power always taken from Jacdac bus
+                                PCB edge connector, consumer - power always
+                                taken from Jacdac bus
                             </MenuItem>
                             <MenuItem value="edgeLowCurrentProvider">
-                                PCB edge connector, low current provider - power always provided to the Jacdac bus
+                                PCB edge connector, low current provider - power
+                                always provided to the Jacdac bus
                             </MenuItem>
                             <MenuItem value="edgeHighCurrentProvider">
                                 PCB edge connector, high current provider
                             </MenuItem>
                             <MenuItem value="edgeLowCurrentProviderConsumer">
-                                PCB edge connector, low current provider or consumer
+                                PCB edge connector, low current provider or
+                                consumer
                             </MenuItem>
                             <MenuItem value="edgeHighCurrentProviderConsumer">
-                                PCB edge connector, high current provider or consumer
+                                PCB edge connector, high current provider or
+                                consumer
                             </MenuItem>
                         </Select>
                         <Typography variant="caption" component="div">
