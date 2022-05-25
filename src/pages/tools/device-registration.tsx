@@ -244,10 +244,6 @@ export default function DeviceRegistration() {
         device.productIdentifiers.splice(i, 1)
         updateDevice()
     }
-    const handleDesignIdentifier = (ev: ChangeEvent<HTMLInputElement>) => {
-        device.designIdentifier = ev.target.value?.trim()
-        updateDevice()
-    }
     const handleVersion = (ev: ChangeEvent<HTMLInputElement>) => {
         device.version = ev.target.value?.trim()
         updateDevice()
@@ -298,7 +294,7 @@ export default function DeviceRegistration() {
         ev: SelectChangeEvent<jdspec.ConnectorType>
     ) => {
         device.connector = ev.target.value as jdspec.ConnectorType
-        if (device.connector === "edge") delete device.connector
+        if (device.connector === "edgeIndependent") delete device.connector
         updateDevice()
     }
     const renderRepoInput = params => (
@@ -592,7 +588,7 @@ export default function DeviceRegistration() {
                             id={connectorId}
                             fullWidth={true}
                             size="small"
-                            value={device.connector || "edge"}
+                            value={device.connector || "edgeIndependent"}
                             onChange={handleConnectorChanged}
                         >
                             <MenuItem value="noConnector">
@@ -611,10 +607,10 @@ export default function DeviceRegistration() {
                                 PCB edge connector, high current provider
                             </MenuItem>
                             <MenuItem value="edgeLowCurrentProviderConsumer">
-                                PCB edge connector, low current provider consumer
+                                PCB edge connector, low current provider or consumer
                             </MenuItem>
                             <MenuItem value="edgeHighCurrentProviderConsumer">
-                                PCB edge connector, high current provider consumer
+                                PCB edge connector, high current provider or consumer
                             </MenuItem>
                         </Select>
                         <Typography variant="caption" component="div">
