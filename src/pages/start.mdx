@@ -13,19 +13,56 @@ working with them.
 
 ## The device dashboard and simulators
 
-You can start off via the [device dashboard](/dashboard),
-which allows you spin up simulators for many Jacdac [services](/services):
+Visit the [device dashboard](/dashboard),
+which allows you spin up simulators for many Jacdac [services](/services).
 
 [![dashboard simulator pane](/start/dashboardSimulators.png)](/dashboard)
 
 Each Jacdac service describes a basic electronic feature, such as a
 [button](/services/button) or [temperature sensor](/services/temperature).
-If you visit the [service catalog](/services) and click the `Simulator` icon, 
-the services that have simulator support will be listed:
+Start a button simulator and temperature (thermometer)
+simulator, by clicking on the button and thermometer icons in the simulator pane. 
+Clicking on tool (wrench) on the upper left will open the device
+tree view showing the properties of the services associated with the two 
+simulators:
 
-![services with simulators](/start/searchSimulators.png)
+![button and temperature simulators, and device tree](/start/buttonAndTemp.png)
 
-XYZ
+## Programming with simulators
+
+Once you are familiar with the simulators, you can dive into programming 
+with simulators using a variety of [client programming languages](/clients)
+supported by Jacdac. **These very same programs will work against Jacdac devices**, 
+no software change required, when connected to the computer (brain) running 
+the client code; a brain could be a low-powered Jacdac device or a laptop/desktop computer.
+
+### MakeCode
+
+To get started programming with MakeCode, browse the [MakeCode Jacdac projects](/clients/makecode/projects). 
+From here, you can open MakeCode directly with the push of a button,
+loading the needed Jacdac libraries. MakeCode has in-browser programming and 
+integrates the Jacdac simulators into the debugging experience. 
+
+[Read more](/clients/makecode) about the integration of Jacdac with MakeCode.
+
+### JavaScript/TypeScript
+
+If you program in JavaScript/TypeScript, you can use [Node.js](https://nodejs.org/en/) to 
+execute Jacdac applications.  [Read more](/clients/javascript) about the Jacdac TypeScript APIs and 
+the [Jacdac object model](/clients/javascript/jdom). You can use the [Jacdac Command Line Interface](/clients/cli), 
+a Node.js program, to start a local websocket server that acts as a bridge between the Jacdac dashboard and a 
+your code.  This allows you to run your code using the latest version of the web 
+developer tools. 
+
+When building web-hosted Jacdac Javascript programs,
+Jacdac's [JavaScript debugging tools](/clients/javascript/debugging) are a must.
+
+[Read more](/clients/more#web-integration) about other Jacdac web integration points,
+including React and hosting Jacdac in an IFrame.
+
+### .NET
+
+### Python
 
 ## Devices: Brains, Modules, and Jacdaptors
 
@@ -34,8 +71,6 @@ XYZ
 ### Modules
 
 ### Jacdaptors
-
-## Programming
 
 
 
