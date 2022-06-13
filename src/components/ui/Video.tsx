@@ -48,12 +48,13 @@ export default function Video(props: {
         <div ref={ref}>
             <video
                 aria-label={label}
-                style={{ maxWidth: "100%", ...(style || {}) }}
+                style={{ width: "100%", ...(style || {}) }}
                 ref={videoRef}
                 playsInline
                 controls={controls}
                 preload={preload}
                 autoPlay={autoPlay && inView}
+                disablePictureInPicture={true}
                 muted={muted}
                 loop={loop}
                 poster={withPrefix(`/videos/${src}.jpg`)}

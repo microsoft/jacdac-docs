@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Button } from "@mui/material"
+import { Button, SxProps, Theme } from "@mui/material"
 import { toMap } from "../../../jacdac-ts/src/jdom/utils"
 import MakeCodeIcon from "../icons/MakeCodeIcon"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
@@ -8,21 +8,25 @@ import useSnackbar from "../hooks/useSnackbar"
 import usePxtJson from "../makecode/usePxtJson"
 
 export default function MakeCodeOpenSnippetButton(props: {
+    sx?: SxProps<Theme>
     name?: string
     code?: string
     options?: { package?: string }
     slug?: string
     branch?: string
+    full?: boolean
 }) {
     const { setError } = useSnackbar()
     const { mobile } = useMediaQueries()
     const [importing, setImporting] = useState(false)
     const {
+        sx,
         code = "",
         options,
         name = "Jacdac demo",
         slug,
         branch = "master",
+        full
     } = props
     const pxt = usePxtJson(slug, branch)
     const disabled = importing || (slug && !pxt)
@@ -83,8 +87,9 @@ export default function MakeCodeOpenSnippetButton(props: {
         }
     }
 
-    return mobile ? (
+    return !full && mobile ? (
         <IconButtonWithTooltip
+            sx={sx}
             onClick={handleClick}
             color="primary"
             disabled={disabled}
@@ -94,6 +99,7 @@ export default function MakeCodeOpenSnippetButton(props: {
         </IconButtonWithTooltip>
     ) : (
         <Button
+            sx={sx}
             variant="outlined"
             color="primary"
             onClick={handleClick}
