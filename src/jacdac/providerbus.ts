@@ -90,6 +90,7 @@ function sniffQueryArguments() {
         webcam: isMediaDevicesSupported(),
         consoleinsights: params.get("consoleinsights") === "1",
         devTools: params.get("devtools"),
+        connect: params.get("connect") !== "0"
     }
 }
 
@@ -108,6 +109,7 @@ export class UIFlags {
     static hosted = args.hosted
     static gamepad = args.gamepad
     static webcam = args.webcam
+    static connect = args.connect
     static consoleinsights = args.consoleinsights
     static devTools = args.devTools
 }

@@ -2,8 +2,12 @@ import React, { ChangeEvent, useState } from "react"
 import { Grid, TextField } from "@mui/material"
 import { Button } from "gatsby-theme-material-ui"
 import SendIcon from "@mui/icons-material/Send"
+import { withPrefix } from "gatsby"
+import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
+import { createProxyBridge } from "../../../jacdac-ts/src/jdom/bridge"
+import useBus from "../../jacdac/useBus"
 
-function startDevTools() {
+function startDevTools(bus: JDBus) {
     // inject style
     const style = document.createElement("style")
     style.innerText = `
@@ -40,7 +44,7 @@ function startDevTools() {
         margin: 0.2rem;
         height: 1.2rem;
       }
-      #jacdac-dev-tools .dashboard {
+      #jacdac-dev-tools iframe {
         height: calc(100% - 1.2rem);
         width: 100%;
         border: none;
@@ -48,51 +52,54 @@ function startDevTools() {
     `
     document.head.appendChild(style)
 
-    // inject dom
-    /**
-    <div id="jacdac-dev-tools" class="right">
-      <div class="header">
-        <button id="jacdac-btn-close">
-          x
-        </button>
-        <button id="jacdac-btn-right">
-          &gt;&gt;&gt;
-        </button>
-        <button id="jacdac-btn-left">
-          &lt;&lt;&lt;
-        </button>
-      </div>
-      <iframe class="dashboard" src="https://microsoft.github.io/jacdac-docs/dashboard/"></iframe>
-    </div>
-         */
+    const container = document.createElement("div")
+    container.id = "jacdac-dev-tools"
+    container.classList.add("right")
+    const header = document.createElement("div")
+    header.className = "header"
+    container.append(header)
+    const close = document.createElement("button")
+    close.innerText = "close"
+    const left = document.createElement("button")
+    left.innerText = "<<<"
+    left.onclick = () => {
+        container.classList.remove("right")
+        container.classList.add("left")
+    }
+    const right = document.createElement("button")
+    right.innerText = ">>>"
+    right.onclick = () => {
+        container.classList.remove("left")
+        container.classList.add("right")
+    }
+    header.append(close)
+    header.append(right)
+    header.append(left)
+    const iframe = document.createElement("iframe")
+    iframe.src = withPrefix("/dashboard/?embed=1&connect=0")
+    container.append(iframe)
     document.body.insertBefore(container, document.body.firstElementChild)
 
-    // inject js
-    const script = document.createElement("script")
-    script.innerText = `
-    const devtools = document.getElementById("jacdac-dev-tools")
-    const btnleft = document.getElementById("jacdac-btn-left")
-    const btnright = document.getElementById("jacdac-btn-right")
-    const btnclose = document.getElementById("jacdac-btn-close")
-    btnleft.onclick = () => {
-      console.log("left")
-      devtools.classList.remove("right")
-      devtools.classList.add("left")
-    }      
-    btnright.onclick = () => {
-      console.log("right")
-      devtools.classList.remove("left")
-      devtools.classList.add("right")
+    // hooking up frames
+    const unsub = bus.addBridge(
+        createProxyBridge((data, sender) => {
+            iframe.contentWindow?.postMessage({
+                type: "messagepacket",
+                channel: "jacdac",
+                data,
+                sender,
+            })
+        })
+    )
+    close.onclick = () => {
+        unsub?.()
+        container.remove()
     }
-    btnclose.onclick = () => {
-      devtools.remove()
-    }    
-    `
-    document.body.appendChild(script)
 }
 
 export default function DevToolsLauncher() {
     const [text, setText] = useState("")
+    const bus = useBus()
 
     const url = `https://microsoft.github.io/jacdac-docs/clients/javascript/devtools#${
         text || ""
@@ -101,7 +108,7 @@ export default function DevToolsLauncher() {
         setText(ev.target.value)
     const handleClick = () => window.open(url, "_blank")
 
-    const handleEmbed = () => startDevTools()
+    const handleEmbed = () => startDevTools(bus)
 
     return (
         <Grid container spacing={1}>

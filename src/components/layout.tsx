@@ -221,7 +221,7 @@ function LayoutWithContext(props: LayoutProps) {
         hideUnderConstruction = false,
         hideBreadcrumbs = false,
     } = frontmatter || {
-        hideMainMenu: isHosted || makeCodeTool,
+        hideMainMenu: isHosted || makeCodeTool || !UIFlags.menu,
         hideUnderConstruction: isDataEditor || makeCodeTool || fullWidthTools,
         hideBreadcrumbs: isDataEditor || tools || fullWidthTools || devicesPage,
     }
