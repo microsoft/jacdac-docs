@@ -90,7 +90,7 @@ function sniffQueryArguments() {
         webcam: isMediaDevicesSupported(),
         consoleinsights: params.get("consoleinsights") === "1",
         devTools: params.get("devtools"),
-        connect: params.get("connect") !== "0"
+        connect: params.get("connect") !== "0",
     }
 }
 
