@@ -118,12 +118,14 @@ export class UIFlags {
 function createBus(): JDBus {
     const worker =
         typeof window !== "undefined" &&
+        Flags.webUSB &&
+        UIFlags.connect &&
         new Worker(withPrefix(`/jacdac-worker-${jacdacTsPackage.version}.js`))
     const b = new JDBus(
         [
-            Flags.webUSB && worker && createUSBWorkerTransport(worker),
-            Flags.webSerial && createWebSerialTransport(),
-            Flags.webBluetooth && createBluetoothTransport(),
+            worker && createUSBWorkerTransport(worker),
+            Flags.webSerial && UIFlags.connect && createWebSerialTransport(),
+            Flags.webBluetooth && UIFlags.connect && createBluetoothTransport(),
             args.webSocket && createWebSocketTransport(args.webSocket),
         ],
         {

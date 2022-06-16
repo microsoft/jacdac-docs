@@ -6,9 +6,11 @@ import { withPrefix } from "gatsby"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import { createProxyBridge } from "../../../jacdac-ts/src/jdom/bridge"
 import useBus from "../../jacdac/useBus"
+import { randomDeviceId } from "../../../jacdac-ts/src/jdom/random"
 
 function startDevTools(bus: JDBus) {
     // inject style
+    const frameid = randomDeviceId()
     const style = document.createElement("style")
     style.innerText = `
     #jacdac-dev-tools {
@@ -42,10 +44,10 @@ function startDevTools(bus: JDBus) {
         font-size: 0.8rem;
         font-family: monospace;
         margin: 0.2rem;
-        height: 1.2rem;
+        height: 1.5rem;
       }
       #jacdac-dev-tools > iframe {
-        height: calc(100% - 1.2rem);
+        height: calc(100% - 1.5rem);
         width: 100%;
         border: none;
       }    
@@ -76,7 +78,7 @@ function startDevTools(bus: JDBus) {
     header.append(right)
     header.append(left)
     const iframe = document.createElement("iframe")
-    iframe.src = withPrefix(`/dashboard/?embed=1&connect=0`)
+    iframe.src = withPrefix(`/dashboard/?embed=1&connect=0#${frameid}`)
     container.append(iframe)
     document.body.insertBefore(container, document.body.firstElementChild)
 
