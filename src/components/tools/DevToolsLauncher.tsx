@@ -38,13 +38,13 @@ function startDevTools(bus: JDBus) {
         bottom: 2rem;        
         top: unset;
       }
-      #jacdac-dev-tools .header {
+      #jacdac-dev-tools > .header {
         font-size: 0.8rem;
         font-family: monospace;
         margin: 0.2rem;
         height: 1.2rem;
       }
-      #jacdac-dev-tools iframe {
+      #jacdac-dev-tools > iframe {
         height: calc(100% - 1.2rem);
         width: 100%;
         border: none;
