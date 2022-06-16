@@ -31,7 +31,6 @@ import {
 } from "../../jacdac-ts/src/jdom/transport/transport"
 import { JDDevice } from "../../jacdac-ts/src/jdom/device"
 import { isInfrastructure } from "../../jacdac-ts/src/jdom/spec"
-import { inIFrame } from "../../jacdac-ts/src/jdom/iframeclient"
 import createAzureIotHubServiceDefinition from "../components/jacscript/azureiotconnector"
 import { addServiceProviderDefinition } from "../../jacdac-ts/src/servers/servers"
 
@@ -131,6 +130,7 @@ function createBus(): JDBus {
             args.webSocket && createWebSocketTransport(args.webSocket),
         ],
         {
+            serviceProviderIdSalt: args.frameId,
             parentOrigin: args.parentOrigin,
             client: false,
             dashboard: true,

@@ -25,5 +25,9 @@
     "git.detectSubmodulesLimit": 20,
     "[svg]": {
         "editor.defaultFormatter": "jock.svg"
-    }
+    },
+    "cSpell.words": [
+        "Jacdac",
+        "jdom"
+    ]
 }
