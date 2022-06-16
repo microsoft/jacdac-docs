@@ -12,7 +12,7 @@ function startDevTools(bus: JDBus) {
     const style = document.createElement("style")
     style.innerText = `
     #jacdac-dev-tools {
-        position:absolute;
+        position: fixed;
         overflow: hide;
         box-shadow: 4px 4px 4px 4px #ccc;
         width: 40rem;
@@ -80,7 +80,7 @@ function startDevTools(bus: JDBus) {
     container.append(iframe)
     document.body.insertBefore(container, document.body.firstElementChild)
 
-    // hooking up frames
+    // send packets to dashboard iframe
     const unsub = bus.addBridge(
         createProxyBridge((data, sender) => {
             iframe.contentWindow?.postMessage({
