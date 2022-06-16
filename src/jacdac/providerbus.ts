@@ -145,9 +145,8 @@ function createBus(): JDBus {
     // tslint:disable-next-line: no-unused-expression
     // always start bridge
     if (typeof window !== "undefined") {
-        if (inIFrame())
-            new IFrameBridgeClient(b, args.frameId)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        new IFrameBridgeClient(b, args.frameId)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(<any>window).__jacdacBus = b
     }
 
