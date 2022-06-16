@@ -41,7 +41,7 @@ export default function Connect() {
         <button onClick={handleConnect}>
             jacdac {connected ? "disconnect" : "connect"}
         </button>
-        <button onClick={handleDevTools}>dev tools</button>
+        <button onClick={handleDevTools} className="button-clear">dev tools</button>
     </div>
   );
 }

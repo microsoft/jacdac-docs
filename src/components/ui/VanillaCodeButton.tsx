@@ -53,7 +53,7 @@ ${code}
         <h1>Jacdac ${title || "demo"}</h1>
         <div>
         <button id="connectbtn">connect</button>
-        <button id="devtoolsbtn">dev tools</button>
+        <button id="devtoolsbtn" class="button-clear">dev tools</button>
         </div>    
 
 ${html}
