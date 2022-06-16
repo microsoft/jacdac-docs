@@ -78,7 +78,7 @@ function startDevTools(bus: JDBus) {
     header.append(right)
     header.append(left)
     const iframe = document.createElement("iframe")
-    iframe.src = withPrefix(`/dashboard/?embed=1&connect=0#${frameid}`)
+    iframe.src = withPrefix(`/dashboard/?embed=1&connect=0&transient=1#${frameid}`)
     container.append(iframe)
     document.body.insertBefore(container, document.body.firstElementChild)
 

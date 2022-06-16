@@ -91,6 +91,7 @@ function sniffQueryArguments() {
         consoleinsights: params.get("consoleinsights") === "1",
         devTools: params.get("devtools"),
         connect: params.get("connect") !== "0",
+        transient: params.get("transient") === "1",
     }
 }
 
@@ -112,6 +113,7 @@ export class UIFlags {
     static connect = args.connect
     static consoleinsights = args.consoleinsights
     static devTools = args.devTools
+    static transient = args.transient
 }
 
 // defeat react fast-refresh
