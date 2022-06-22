@@ -70,7 +70,7 @@ export function pageQueryToNodes(data: {
                 order?: number
                 date?: string
             }
-            headings: {
+            headings?: {
                 value: string
             }[]
         }[]
