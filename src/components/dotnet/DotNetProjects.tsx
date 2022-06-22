@@ -45,15 +45,13 @@ export default function DotNetProjects() {
             }
         }
     `)
-    const nodes = query.allMdx.edges
-        .map(edge => edge.node)
-        .sort((l, r) => l.fields.slug.localeCompare(r.fields.slug))
-        .sort((l, r) => (l.frontmatter?.order || 50) - (r.frontmatter?.order || 50))
+    const nodes = query.allMdx.edges.map(edge => edge.node)
     return (
         <PageLinkList
             nodes={nodes.map(({ fields, frontmatter, headings }) => ({
                 slug: fields.slug,
                 title: frontmatter.title || headings?.[0]?.value,
+                order: frontmatter.order,
             }))}
         />
     )

@@ -9,6 +9,8 @@ export interface PageLinkListItemProps {
     title: string
     description?: string
     services?: string
+    order?: number
+    date?: string
 }
 
 function PageLinkListItem(props: PageLinkListItemProps) {
@@ -61,12 +63,24 @@ export default function PageLinkList(props: {
     nodes: PageLinkListItemProps[]
 }) {
     const { header, nodes } = props
+    const sorted = nodes?.sort((l, r) => {
+        const ld = Date.parse(l?.date) || 0
+        const rd = Date.parse(r?.date) || 0
+        const dc = ld - rd
+        if (dc) return dc
+
+        const lo = Number(l?.order) || 50
+        const ro = Number(r?.order) || 50
+        const c = lo - ro
+        if (c) return c
+        return l.slug.localeCompare(r.slug)
+    })
     return (
-        !!nodes?.length && (
+        !!sorted?.length && (
             <>
                 {header}
                 <List>
-                    {nodes?.map(node => (
+                    {sorted?.map(node => (
                         <PageLinkListItem key={node.slug} {...node} />
                     ))}
                 </List>

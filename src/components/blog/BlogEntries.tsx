@@ -16,6 +16,7 @@ export default function BlogEntries(props: { header?: ReactNode }) {
                         title?: string
                         order?: number
                         description?: string
+                        data?: string
                     }
                     headings: {
                         value: string
@@ -39,6 +40,7 @@ export default function BlogEntries(props: { header?: ReactNode }) {
                             title
                             order
                             description
+                            date
                         }
                         headings {
                             value
@@ -50,7 +52,6 @@ export default function BlogEntries(props: { header?: ReactNode }) {
     `)
 
     const nodes = query.allMdx.edges.map(edge => edge.node)
-
     return (
         <PageLinkList
             header={header}
@@ -58,6 +59,8 @@ export default function BlogEntries(props: { header?: ReactNode }) {
                 slug: fields.slug,
                 title: frontmatter.title || headings?.[0]?.value,
                 description: frontmatter.description,
+                order: frontmatter.order,
+                date: frontmatter.date
             }))}
         />
     )
