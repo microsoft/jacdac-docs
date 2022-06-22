@@ -3,7 +3,7 @@ import { graphql, useStaticQuery } from "gatsby"
 import PageLinkList, { pageQueryToNodes } from "../ui/PageLinkList"
 
 export default function FaqPageList() {
-    const data = useStaticQuery<{
+    const query = useStaticQuery<{
         allMdx: {
             nodes: {
                 fields: {
@@ -40,5 +40,5 @@ export default function FaqPageList() {
         }
     `)
 
-    return <PageLinkList nodes={pageQueryToNodes(data)} />
+    return <PageLinkList nodes={pageQueryToNodes(query)} />
 }
