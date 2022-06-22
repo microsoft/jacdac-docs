@@ -16,7 +16,7 @@ export default function BlogEntries(props: { header?: ReactNode }) {
                         title?: string
                         order?: number
                         description?: string
-                        data?: string
+                        date?: string
                     }
                     headings: {
                         value: string

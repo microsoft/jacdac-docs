@@ -1,7 +1,7 @@
 import React from "react"
 import { graphql, useStaticQuery } from "gatsby"
-import { groupBy } from "../../jacdac-ts/src/jdom/utils"
-import PageLinkList from "./ui/PageLinkList"
+import { groupBy } from "../../../jacdac-ts/src/jdom/utils"
+import PageLinkList from "../ui/PageLinkList"
 
 export default function ErrorList() {
     const data = useStaticQuery<{

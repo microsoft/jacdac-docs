@@ -41,6 +41,8 @@ const MakeCodeOpenSnippetButton = lazy(
     () => import("./makecode/MakeCodeOpenSnippetButton")
 )
 const FaqPageList = lazy(() => import("./faq/FaqPageList"))
+const ErrorList = lazy(() => import("./faq/ErrorList"))
+
 export default function useMdxComponents() {
     const theme = useTheme()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,6 +168,11 @@ export default function useMdxComponents() {
             FaqPageList: props => (
                 <Suspense>
                     <FaqPageList {...props} />
+                </Suspense>
+            ),
+            ErrorList: props => (
+                <Suspense>
+                    <ErrorList {...props} />
                 </Suspense>
             ),
         }),
