@@ -1,6 +1,6 @@
 import React from "react"
 import { graphql, useStaticQuery } from "gatsby"
-import PageLinkList from "../ui/PageLinkList"
+import PageLinkList, { pageQueryToNodes } from "../ui/PageLinkList"
 
 export default function FaqPageList() {
     const data = useStaticQuery<{
@@ -40,11 +40,5 @@ export default function FaqPageList() {
         }
     `)
 
-    const nodes = data?.allMdx?.nodes.map(node => ({
-        slug: node.fields?.slug,
-        title: node.frontmatter.title || node.headings?.[0].value,
-        order: node.frontmatter.order,
-    }))
-
-    return <PageLinkList nodes={nodes} />
+    return <PageLinkList nodes={pageQueryToNodes(data)} />
 }

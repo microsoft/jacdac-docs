@@ -58,6 +58,36 @@ function PageLinkListItem(props: PageLinkListItemProps) {
     )
 }
 
+export function pageQueryToNodes(data: {
+    allMdx: {
+        nodes: {
+            fields: {
+                slug: string
+            }
+            frontmatter: {
+                title?: string
+                description?: string
+                order?: number
+                date?: string
+            }
+            headings: {
+                value: string
+            }[]
+        }[]
+    }
+}) {
+    const nodes = data?.allMdx?.nodes.map(
+        ({ frontmatter, fields, headings }) => ({
+            slug: fields?.slug,
+            title: frontmatter.title || headings?.[0].value,
+            description: frontmatter.description,
+            order: frontmatter.order,
+            date: frontmatter.date,
+        })
+    )
+    return nodes
+}
+
 export default function PageLinkList(props: {
     header?: ReactNode
     nodes: PageLinkListItemProps[]
