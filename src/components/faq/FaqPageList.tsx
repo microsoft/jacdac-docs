@@ -11,6 +11,7 @@ export default function FaqPageList() {
                 }
                 frontmatter: {
                     title?: string
+                    description?: string
                     order?: number
                 }
                 headings: {
@@ -21,8 +22,7 @@ export default function FaqPageList() {
     }>(graphql`
         {
             allMdx(
-                filter: { slug: { glob: "faq/**" } }
-                sort: { fields: slug }
+                filter: { slug: { glob: "faq/*" } }
             ) {
                 nodes {
                     fields {
@@ -30,6 +30,7 @@ export default function FaqPageList() {
                     }
                     frontmatter {
                         title
+                        description
                         order
                     }
                     headings {
