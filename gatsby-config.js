@@ -90,20 +90,10 @@ module.exports = {
         `gatsby-plugin-react-helmet`,
         `gatsby-plugin-image`,
         `gatsby-plugin-sharp`,
-        {
-            resolve: `gatsby-remark-images`,
-            options: {
-                linkImagesToOriginal: false,
-            },
-        },
         `gatsby-transformer-sharp`,
         {
             resolve: `gatsby-plugin-mdx`,
             options: {
-                defaultLayouts: {
-                    extensions: [`.mdx`, `.md`],
-                    default: require.resolve("./src/components/Page.tsx"),
-                },
                 gatsbyRemarkPlugins: [
                     wsl || offline
                         ? undefined
@@ -126,7 +116,6 @@ module.exports = {
                         },
                     },
                     "gatsby-remark-static-images",
-                    "gatsby-remark-embed-snippet",
                     "gatsby-remark-copy-linked-files",
                 ].filter(plugin => !!plugin),
             },
@@ -156,7 +145,6 @@ module.exports = {
                         },
                     },
                     "gatsby-remark-static-images",
-                    "gatsby-remark-embed-snippet",
                     "gatsby-remark-copy-linked-files",
                 ].filter(plugin => !!plugin),
             },
@@ -170,7 +158,7 @@ module.exports = {
                         title: node => node.frontmatter.title,
                         description: node =>
                             node.frontmatter.description || node.excerpt,
-                        body: node => node.rawBody,
+                        body: node => node.rawBody || node.body,
                         tags: node => node.frontmatter.tags || "",
                         url: node => node.frontmatter.path || node.fields.slug,
                     },
@@ -200,65 +188,7 @@ module.exports = {
                     },
                 }, // filter: (node, getNode) => node.frontmatter.tags !== "exempt",
             },
-        },
-        /*    
-    {
-      resolve: 'gatsby-plugin-flexsearch',
-      options: {
-        // L
-        languages: ['en'],
-        type: 'Mdx', // Filter the node types you want to index
-        // Fields to index.
-        fields: [
-          {
-            name: 'title',
-            indexed: true, // If indexed === true, the field will be indexed.
-            resolver: 'frontmatter.title',
-            // Attributes for indexing logic. Check https://github.com/nextapps-de/flexsearch#presets for details.
-            attributes: {
-              encode: "extra",
-              tokenize: "full",
-              threshold: 1,
-              resolution: 3
-            },
-            store: true, // In case you want to make the field available in the search results.
-          },
-          {
-            name: 'description',
-            indexed: true,
-            resolver: 'frontmatter.description',
-            attributes: {
-              encode: 'balance',
-              tokenize: 'strict',
-              threshold: 6,
-              depth: 3,
-            },
-            store: false,
-          },
-          {
-            name: 'body',
-            indexed: true, // If indexed === true, the field will be indexed.
-            resolver: 'rawBody',
-            // Attributes for indexing logic. Check https://github.com/nextapps-de/flexsearch#presets for details.
-            attributes: {
-              encode: "casei",
-              tokenize: "forward",
-              threshold: 2,
-              resolution: 4,
-              depth: 3
-            },
-            store: false, // In case you want to make the field available in the search results.
-          },
-          {
-            name: 'url',
-            indexed: false,
-            resolver: 'fields.slug',
-            store: true,
-          },
-        ],
-      },
-    },
-    */
+        },        
         "gatsby-plugin-sitemap",
         {
             resolve: `gatsby-plugin-manifest`,
