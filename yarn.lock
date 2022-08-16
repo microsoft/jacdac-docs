@@ -14541,14 +14541,13 @@ mdast-util-gfm-autolink-literal@^1.0.0:
     micromark-util-character "^1.0.0"
 
 mdast-util-gfm-footnote@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/mdast-util-gfm-footnote/-/mdast-util-gfm-footnote-1.0.0.tgz#355c1e8dc9e17e871d1b3fa5da8824923fc756e0"
-  integrity sha512-qeg9YoS2YYP6OBmMyUFxKXb6BLwAsbGidIxgwDAXHIMYZQhIwe52L9BSJs+zP29Jp5nSERPkmG3tSwAN23/ZbQ==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/mdast-util-gfm-footnote/-/mdast-util-gfm-footnote-1.0.1.tgz#11d2d40a1a673a399c459e467fa85e00223191fe"
+  integrity sha512-p+PrYlkw9DeCRkTVw1duWqPRHX6Ywh2BNKJQcZbCwAuP/59B0Lk9kakuAd7KbQprVO4GzdW8eS5++A9PUSqIyw==
   dependencies:
     "@types/mdast" "^3.0.0"
-    mdast-util-to-markdown "^1.0.0"
+    mdast-util-to-markdown "^1.3.0"
     micromark-util-normalize-identifier "^1.0.0"
-    unist-util-visit "^4.0.0"
 
 mdast-util-gfm-strikethrough@^0.2.0:
   version "0.2.3"
@@ -14608,15 +14607,17 @@ mdast-util-gfm@^0.1.0:
     mdast-util-to-markdown "^0.6.1"
 
 mdast-util-gfm@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/mdast-util-gfm/-/mdast-util-gfm-2.0.0.tgz#2545856bc18a66d5cc63fbef0b097a020a8e9e3d"
-  integrity sha512-wMwejlTN3EQADPFuvxe8lmGsay3+f6gSJKdAHR6KBJzpcxvsjJSILB9K6u6G7eQLC7iOTyVIHYGui9uBc9r1Tg==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/mdast-util-gfm/-/mdast-util-gfm-2.0.1.tgz#16fcf70110ae689a06d77e8f4e346223b64a0ea6"
+  integrity sha512-42yHBbfWIFisaAfV1eixlabbsa6q7vHeSPY+cg+BBjX51M8xhgMacqH9g6TftB/9+YkcI0ooV4ncfrJslzm/RQ==
   dependencies:
+    mdast-util-from-markdown "^1.0.0"
     mdast-util-gfm-autolink-literal "^1.0.0"
     mdast-util-gfm-footnote "^1.0.0"
     mdast-util-gfm-strikethrough "^1.0.0"
     mdast-util-gfm-table "^1.0.0"
     mdast-util-gfm-task-list-item "^1.0.0"
+    mdast-util-to-markdown "^1.0.0"
 
 mdast-util-mdx-expression@^1.0.0:
   version "1.3.0"
@@ -15044,9 +15045,9 @@ micromark-extension-gfm-autolink-literal@~0.5.0:
     micromark "~2.11.3"
 
 micromark-extension-gfm-footnote@^1.0.0:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/micromark-extension-gfm-footnote/-/micromark-extension-gfm-footnote-1.0.3.tgz#5280b29667e4ecb8687f369829aa3322caca7d11"
-  integrity sha512-bn62pC5y39rIo2g1RqZk1NhF7T7cJLuJlbevunQz41U0iPVCdVOFASe5/L1kke+DFKSgfCRhv24+o42cZ1+ADw==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/micromark-extension-gfm-footnote/-/micromark-extension-gfm-footnote-1.0.4.tgz#cbfd8873b983e820c494498c6dac0105920818d5"
+  integrity sha512-E/fmPmDqLiMUP8mLJ8NbJWJ4bTw6tS+FEQS8CcuDtZpILuOb2kjLqPEeAePF1djXROHXChM/wPJw0iS4kHCcIg==
   dependencies:
     micromark-core-commonmark "^1.0.0"
     micromark-factory-space "^1.0.0"
@@ -15054,6 +15055,7 @@ micromark-extension-gfm-footnote@^1.0.0:
     micromark-util-normalize-identifier "^1.0.0"
     micromark-util-sanitize-uri "^1.0.0"
     micromark-util-symbol "^1.0.0"
+    micromark-util-types "^1.0.0"
     uvu "^0.5.0"
 
 micromark-extension-gfm-strikethrough@^1.0.0:

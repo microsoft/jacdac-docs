@@ -10,6 +10,14 @@ const offline = !!process.env.JACDAC_OFFLINE
 const SITE_TITLE = `Jacdac - Connect and code electronics. Instantly.`
 const SITE_DESCRIPTION = `Jacdac is a plug-and-play hardware and software stack for microcontrollers and their peripherals such as sensors and actuators. Jacdac is primarily designed for “modular electronics” scenarios that support rapid prototyping, creative exploration, making and learning through physical computing. Jacdac is designed to be cheap, flexible and extensible.`
 
+const wrapESMPlugin = name => opts => {
+    return async (...args) => {
+        const mod = await import(name)
+        const plugin = mod.default(opts)
+        return plugin(...args)
+    }
+}
+
 module.exports = {
     trailingSlash: "always",
     siteMetadata: {
@@ -94,36 +102,11 @@ module.exports = {
         {
             resolve: `gatsby-plugin-mdx`,
             options: {
+                extensions: [`.mdx`, `.md`],
+                mdxOptions: {
+                    remarkPlugins: [],
+                },
                 gatsbyRemarkPlugins: [
-                    wsl || offline
-                        ? undefined
-                        : {
-                              resolve: "gatsby-remark-makecode",
-                              options: {
-                                  editorUrl: "https://makecode.microbit.org/",
-                              },
-                          },
-                    "gatsby-remark-autolink-headers",
-                    "gatsby-remark-external-links",
-                    {
-                        resolve: `gatsby-remark-images`,
-                        options: {
-                            // It's important to specify the maxWidth (in pixels) of
-                            // the content container as this plugin uses this as the
-                            // base for generating different widths of each image.
-                            maxWidth: maxImageWidth,
-                            linkImagesToOriginal: false,
-                        },
-                    },
-                    "gatsby-remark-static-images",
-                    "gatsby-remark-copy-linked-files",
-                ].filter(plugin => !!plugin),
-            },
-        },
-        {
-            resolve: `gatsby-transformer-remark`,
-            options: {
-                plugins: [
                     wsl || offline
                         ? undefined
                         : {
@@ -188,7 +171,7 @@ module.exports = {
                     },
                 }, // filter: (node, getNode) => node.frontmatter.tags !== "exempt",
             },
-        },        
+        },
         "gatsby-plugin-sitemap",
         {
             resolve: `gatsby-plugin-manifest`,
