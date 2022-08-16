@@ -80,16 +80,19 @@ export type PageQuery = {
                 order?: number
                 date?: string
             }
+            headings?: {
+                value
+            }
         }[]
     }
 }
 
 export function pageQueryToNodes(data: PageQuery) {
     const nodes = data?.allMdx?.nodes.map(
-        ({ excerpt, frontmatter, fields }) => ({
+        ({ excerpt, frontmatter, fields, headings }) => ({
             slug: fields?.slug,
-            title: frontmatter.title,
-            description: frontmatter.description || excerpt,
+            title: frontmatter?.title || headings?.value,
+            description: frontmatter?.description || excerpt,
             order: frontmatter.order,
             date: frontmatter.date,
         })
