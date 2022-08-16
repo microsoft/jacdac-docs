@@ -16,9 +16,6 @@ export default function FaqPageList() {
                         description
                         order
                     }
-                    headings {
-                        value
-                    }
                 }
             }
         }
