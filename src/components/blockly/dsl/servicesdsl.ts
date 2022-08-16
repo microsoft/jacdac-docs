@@ -422,10 +422,12 @@ export class ServicesBlockDomainSpecificLanguage
 
         const clientCommands = arrayConcatMany(
             clientSpecs?.map(spec =>
-                spec.packets.map(command => ({
-                    service: resolveService(spec.classIdentifier)[0],
-                    command,
-                }))
+                spec.packets
+                    .filter(pkt => pkt.kind === "command")
+                    .map(command => ({
+                        service: resolveService(spec.classIdentifier)[0],
+                        command,
+                    }))
             )
         )
         const allCommands = [...commands, ...(clientCommands || [])]
