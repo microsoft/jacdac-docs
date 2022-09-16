@@ -30,6 +30,7 @@
     "@tidyjs/tidy": "^2.5.1",
     "@types/json-schema": "^7.0.11",
     "@types/react": "^18.0.20",
+    "@types/three": "^0.144.0",
     "@types/use-sync-external-store": "^0.0.3",
     "@types/w3c-web-serial": "^1.0.2",
     "@types/w3c-web-usb": "^1.0.6",
