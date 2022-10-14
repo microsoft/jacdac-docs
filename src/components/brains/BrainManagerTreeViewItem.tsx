@@ -1,15 +1,16 @@
 import React from "react"
 import { JDomTreeViewProps } from "../tools/JDomTreeViewItems"
 import StyledTreeItem, { StyledTreeViewItemProps } from "../ui/StyledTreeItem"
-import {
-    BrainDevice,
-    BrainProgram,
-    useBrainManagerState,
-} from "./useBrainManagerState"
+import useBrainManagerState from "./useBrainManagerState"
 import CloudQueueIcon from "@mui/icons-material/CloudQueue"
 import CodeIcon from "@mui/icons-material/Code"
 import { prettySize, shortDeviceId } from "../../../jacdac-ts/src/jdom/pretty"
 import { DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants"
+import {
+    BrainDevice,
+    BrainProgram,
+    useBrainManager,
+} from "./BrainManagerContext"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -17,7 +18,7 @@ export default function BrainManagerTreeItem(
     const nodeId = "brain-manager"
     const name = "brains"
     const description = "Manage remote brains and programs"
-    const { programs, devices, connected } = useBrainManagerState()
+    const { programs, devices } = useBrainManagerState()
 
     return (
         <StyledTreeItem
@@ -62,13 +63,22 @@ function BrainProgramTreeItem(
 ) {
     const { program } = props
     const { id, name, source } = program
+    const { programId, setProgramId } = useBrainManager()
     const nodeId = `brain-manager-programs-${id}`
     const description = prettySize(source.length)
+    const current = id === programId
+
+    const handleClick = () => {
+        setProgramId(id)
+    }
+
     return (
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
             labelCaption={description}
+            sx={{ fontWeight: current ? "bold" : undefined }}
+            onClick={handleClick}
         ></StyledTreeItem>
     )
 }
@@ -102,13 +112,22 @@ function BrainDeviceTreeItem(
 ) {
     const { device } = props
     const { id } = device
+    const { deviceId, setDeviceId } = useBrainManager()
     const nodeId = `brain-manager-devices-${id}`
     const name = shortDeviceId(id)
+    const current = id === deviceId
+
+    const handleClick = () => {
+        setDeviceId(id)
+    }
+
     return (
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
             labelCaption={id}
+            sx={{ fontWeight: current ? "bold" : undefined }}
+            onClick={handleClick}
         ></StyledTreeItem>
     )
 }
