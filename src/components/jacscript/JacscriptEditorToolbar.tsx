@@ -5,8 +5,6 @@ import JacscriptManagerChipItems from "./JacscriptManagerChipItems"
 import useBrainManagerState from "../brains/useBrainManagerState"
 
 export default function JacscriptEditorToolbar() {
-    const { state } = useBrainManagerState()
-
     return (
         <Grid item xs={12}>
             <BlockRolesToolbar>
