@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from "react"
+import React from "react"
 import { JDomTreeViewProps } from "../tools/JDomTreeViewItems"
 import StyledTreeItem, { StyledTreeViewItemProps } from "../ui/StyledTreeItem"
 import CloudQueueIcon from "@mui/icons-material/CloudQueue"
