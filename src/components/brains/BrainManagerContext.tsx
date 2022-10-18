@@ -30,12 +30,14 @@ export interface BrainManagerProps {
     setProgramId: (id: string) => void
     deviceId?: string
     setDeviceId: (id: string) => void
+    refresh: () => Promise<void>
 }
 
 const defaultContextProps: BrainManagerProps = Object.freeze({
     setToken: () => {},
     setProgramId: () => {},
     setDeviceId: () => {},
+    refresh: async () => {},
 })
 const BrainManagerContext =
     createContext<BrainManagerProps>(defaultContextProps)
@@ -78,6 +80,7 @@ export const BrainManagerProvider = ({ children }) => {
     })
     const [programId, setProgramId] = useState("")
     const [deviceId, setDeviceId] = useState("")
+    const refresh = async () => {}
 
     return (
         <BrainManagerContext.Provider
@@ -89,6 +92,7 @@ export const BrainManagerProvider = ({ children }) => {
                 setProgramId,
                 deviceId,
                 setDeviceId,
+                refresh,
             }}
         >
             {children}

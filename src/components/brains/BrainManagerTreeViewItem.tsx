@@ -1,7 +1,6 @@
-import React from "react"
+import React, { MouseEventHandler } from "react"
 import { JDomTreeViewProps } from "../tools/JDomTreeViewItems"
 import StyledTreeItem, { StyledTreeViewItemProps } from "../ui/StyledTreeItem"
-import useBrainManagerState from "./useBrainManagerState"
 import CloudQueueIcon from "@mui/icons-material/CloudQueue"
 import CodeIcon from "@mui/icons-material/Code"
 import { prettySize, shortDeviceId } from "../../../jacdac-ts/src/jdom/pretty"
@@ -11,6 +10,8 @@ import {
     BrainProgram,
     useBrainManager,
 } from "./BrainManagerContext"
+import RefreshIcon from "@mui/icons-material/Refresh"
+import CmdButton from "../CmdButton"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -18,7 +19,12 @@ export default function BrainManagerTreeItem(
     const nodeId = "brain-manager"
     const name = "brains"
     const description = "Manage remote brains and programs"
-    const { programs, devices } = useBrainManagerState()
+    const { state, refresh } = useBrainManager()
+    const { programs, devices } = state || {}
+
+    const handleRefresh = async () => {
+        await refresh()
+    }
 
     return (
         <StyledTreeItem
@@ -26,6 +32,14 @@ export default function BrainManagerTreeItem(
             labelText={name}
             labelCaption={description}
             icon={<CloudQueueIcon fontSize="small" />}
+            actions={
+                <CmdButton
+                    title="refresh"
+                    size="small"
+                    icon={<RefreshIcon />}
+                    onClick={handleRefresh}
+                />
+            }
         >
             <BrainProgramsTreeItem programs={programs} {...props} />
             <BrainDevicesTreeItem devices={devices} {...props} />

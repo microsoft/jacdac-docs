@@ -42,7 +42,7 @@ function UploadProgramButton() {
             onClick={handleUpload}
             variant="outlined"
         >
-            Upload
+            Save
         </Button>
     )
 }
