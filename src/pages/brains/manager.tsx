@@ -1,6 +1,6 @@
 import React from "react"
 import ApiKeyAccordion from "../../components/ApiKeyAccordion"
-import useBrainManagerApiKey from "../../components/brains/useBrainManagerApiKey"
+import { useBrainManager } from "../../components/brains/BrainManagerContext"
 
 export const frontmatter = {
     title: "Brain Manager",
@@ -11,11 +11,11 @@ import CoreHead from "../../components/shell/Head"
 export const Head = props => <CoreHead {...props} {...frontmatter} />
 
 export default function Page() {
-    const [apiToken, setApiToken] = useBrainManagerApiKey()
+    const { token, setToken } = useBrainManager()
     return (
         <>
             <h1>Brain Manager</h1>
-            <ApiKeyAccordion apiKey={apiToken} setApiKey={setApiToken}>
+            <ApiKeyAccordion apiKey={token} setApiKey={setToken}>
                 Enter your brain management API key.
             </ApiKeyAccordion>
         </>

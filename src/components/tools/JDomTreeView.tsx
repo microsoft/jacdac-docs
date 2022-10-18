@@ -12,8 +12,8 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import useDevices from "../hooks/useDevices"
 import { DeviceTreeItem, JDomTreeViewProps } from "./JDomTreeViewItems"
 import { Flags } from "../../../jacdac-ts/src/jdom/flags"
-import useBrainManagerApiKey from "../brains/useBrainManagerApiKey"
 import Suspense from "../ui/Suspense"
+import { useBrainManager } from "../brains/BrainManagerContext"
 
 const BrainManagerTreeItem = lazy(
     () => import("../brains/BrainManagerTreeViewItem")
@@ -41,7 +41,7 @@ export default function JDomTreeView(props: JDomTreeViewProps) {
     const [expanded, setExpanded] = useState<string[]>(defaultExpanded || [])
     const [selected, setSelected] = useState<string[]>(defaultSelected || [])
     const devices = useDevices({ ignoreInfrastructure: !Flags.diagnostics })
-    const [brainManagerKey] = useBrainManagerApiKey()
+    const { token: brainToken } = useBrainManager()
 
     const handleToggle = (
         event: React.ChangeEvent<unknown>,
@@ -77,7 +77,7 @@ export default function JDomTreeView(props: JDomTreeViewProps) {
                     {...other}
                 />
             ))}
-            {brainManagerKey && (
+            {brainToken && (
                 <Suspense>
                     <BrainManagerTreeItem
                         key={"brain-manager"}

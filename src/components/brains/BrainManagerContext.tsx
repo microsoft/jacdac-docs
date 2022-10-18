@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react"
+import useSessionStorage from "../hooks/useSessionStorage"
 
 export interface BrainProgram {
     id: string
@@ -22,6 +23,8 @@ export interface BrainManagerState {
 }
 
 export interface BrainManagerProps {
+    token?: string
+    setToken: (token: string) => void
     state?: BrainManagerState
     programId?: string
     setProgramId: (id: string) => void
@@ -30,6 +33,7 @@ export interface BrainManagerProps {
 }
 
 const defaultContextProps: BrainManagerProps = Object.freeze({
+    setToken: () => {},
     setProgramId: () => {},
     setDeviceId: () => {},
 })
@@ -41,6 +45,7 @@ export default BrainManagerContext
 
 // eslint-disable-next-line react/prop-types
 export const BrainManagerProvider = ({ children }) => {
+    const [token, setToken] = useSessionStorage("brain-manager-token")
     const [state] = useState<BrainManagerState>({
         programs: [
             {
@@ -76,7 +81,15 @@ export const BrainManagerProvider = ({ children }) => {
 
     return (
         <BrainManagerContext.Provider
-            value={{ state, programId, setProgramId, deviceId, setDeviceId }}
+            value={{
+                token,
+                setToken,
+                state,
+                programId,
+                setProgramId,
+                deviceId,
+                setDeviceId,
+            }}
         >
             {children}
         </BrainManagerContext.Provider>
