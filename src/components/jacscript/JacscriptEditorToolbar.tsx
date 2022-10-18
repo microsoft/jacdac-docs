@@ -1,11 +1,12 @@
 import { Grid, MenuItem, SelectChangeEvent } from "@mui/material"
-import React from "react"
+import React, { useContext } from "react"
 import BlockRolesToolbar from "../blockly/BlockRolesToolbar"
 import JacscriptManagerChipItems from "./JacscriptManagerChipItems"
 import { useBrainManager } from "../brains/BrainManagerContext"
 import { Button } from "gatsby-theme-material-ui"
 import CloudUploadIcon from "@mui/icons-material/CloudUpload"
 import SelectWithLabel from "../ui/SelectWithLabel"
+import BlockContext from "../blockly/BlockContext"
 
 function SelectProgram() {
     const { state, programId, setProgramId } = useBrainManager()
@@ -33,6 +34,7 @@ function SelectProgram() {
 }
 
 function UploadProgramButton() {
+    const { workspaceXml } = useContext(BlockContext)
     const handleUpload = () => {}
     return (
         <Button
