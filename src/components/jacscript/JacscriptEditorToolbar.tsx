@@ -10,13 +10,15 @@ import { BrainScript } from "../brains/braindom"
 import CmdButton from "../CmdButton"
 import useEffectAsync from "../useEffectAsync"
 import { useDebounce } from "use-debounce"
+import { WorkspaceFile } from "../blockly/dsl/workspacejson"
+import { JSONTryParse } from "../../../jacdac-ts/src/jacdac"
 
 function SaveScriptButton(props: { script: BrainScript }) {
     const { script } = props
-    const { workspaceXml } = useContext(BlockContext)
+    const { workspaceSaved } = useContext(BlockContext)
     const handleUpload = async () => {
         await script.uploadBody({
-            blocks: workspaceXml,
+            blocks: JSON.stringify(workspaceSaved),
             text: "",
             compiled: "",
         })
@@ -64,10 +66,10 @@ function BrainManagerToolbar(props: { script: BrainScript }) {
 }
 
 function useBrainScriptInBlocks(script: BrainScript) {
-    const { setWorkspaceXml } = useContext(BlockContext)
+    const { loadWorkspaceFile, workspace } = useContext(BlockContext)
 
     useEffectAsync(async () => {
-        if (!script) return
+        if (!script || !workspace) return
 
         // fetch latest body
         const body = await script.refreshBody()
@@ -77,8 +79,9 @@ function useBrainScriptInBlocks(script: BrainScript) {
 
         // update blocks
         console.debug("current brain script", { body })
-        setWorkspaceXml(body.blocks)
-    }, [script?.id])
+        const file = JSONTryParse<WorkspaceFile>(body.blocks)
+        loadWorkspaceFile(file)
+    }, [script?.id, workspace])
 }
 
 export default function JacscriptEditorToolbar() {

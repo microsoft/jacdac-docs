@@ -331,7 +331,7 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     }
 
     async updateName(name: string) {
-        if (!name) return
+        if (!name || name === this.data.name) return
 
         const resp: BrainScriptData = await this.manager.fetchJSON(
             this.apiPath,
