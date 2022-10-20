@@ -2,15 +2,16 @@ import { Grid, MenuItem, SelectChangeEvent } from "@mui/material"
 import React, { useContext } from "react"
 import BlockRolesToolbar from "../blockly/BlockRolesToolbar"
 import JacscriptManagerChipItems from "./JacscriptManagerChipItems"
-import { useBrainManager } from "../brains/BrainManagerContext"
 import { Button } from "gatsby-theme-material-ui"
 import CloudUploadIcon from "@mui/icons-material/CloudUpload"
 import SelectWithLabel from "../ui/SelectWithLabel"
 import BlockContext from "../blockly/BlockContext"
+import BrainManagerContext from "../brains/BrainManagerContext"
+import useChange from "../../jacdac/useChange"
 
 function SelectProgram() {
-    const { state, programId, setProgramId } = useBrainManager()
-    const { programs } = state || {}
+    const { brainManager, scriptId: programId, setScriptId: setProgramId } = useContext(BrainManagerContext)
+    const scripts = useChange(brainManager, _ => _?.scripts)
     const handleChange = (ev: SelectChangeEvent<string>) => {
         const id = ev.target.value
         setProgramId(id)
@@ -24,9 +25,9 @@ function SelectProgram() {
             size="small"
             onChange={handleChange}
         >
-            {programs?.map(program => (
-                <MenuItem key={program.id} value={program.id}>
-                    {program.name}
+            {scripts?.map(script => (
+                <MenuItem key={script.id} value={script.id}>
+                    {script.name}
                 </MenuItem>
             ))}
         </SelectWithLabel>
@@ -61,15 +62,11 @@ function BrainManagerToolbar() {
 }
 
 export default function JacscriptEditorToolbar() {
-    const { token } = useBrainManager()
-
     return (
         <>
-            {token && (
-                <Grid item xs={12}>
-                    <BrainManagerToolbar />
-                </Grid>
-            )}
+            <Grid item xs={12}>
+                <BrainManagerToolbar />
+            </Grid>
             <Grid item xs={12}>
                 <BlockRolesToolbar>
                     <JacscriptManagerChipItems />

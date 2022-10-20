@@ -1,23 +1,24 @@
-import React, { createContext, useContext, useMemo, useState } from "react"
+import React, { createContext, useEffect, useMemo, useState } from "react"
 import useSessionStorage from "../hooks/useSessionStorage"
+import useEffectAsync from "../useEffectAsync"
 import { BrainManager } from "./braindom"
+
+const BRAIN_API_ROOT = "jacdac-cloud-0.azurewebsites.net/api"
 
 export interface BrainManagerProps {
     token?: string
     setToken: (token: string) => void
     brainManager: BrainManager
-    programId?: string
-    setProgramId: (id: string) => void
+    scriptId?: string
+    setScriptId: (id: string) => void
     deviceId?: string
     setDeviceId: (id: string) => void
-    refresh: () => Promise<void>
 }
 
 const defaultContextProps: BrainManagerProps = Object.freeze({
     setToken: () => {},
-    setProgramId: () => {},
+    setScriptId: () => {},
     setDeviceId: () => {},
-    refresh: async () => {},
     brainManager: undefined,
 })
 const BrainManagerContext =
@@ -29,13 +30,21 @@ export default BrainManagerContext
 // eslint-disable-next-line react/prop-types
 export const BrainManagerProvider = ({ children }) => {
     const [token, setToken] = useSessionStorage("brain-manager-token")
+    const api = BRAIN_API_ROOT
     const brainManager = useMemo(
-        () => new BrainManager("jacdac-cloud-0.azurewebsites.net/api"),
-        []
+        () => new BrainManager(api, token),
+        [api, token]
     )
-    const [programId, setProgramId] = useState("")
+    const [scriptId, setScriptId] = useState("")
     const [deviceId, setDeviceId] = useState("")
-    const refresh = async () => {}
+
+    // reset selected devices/script when reloading manager
+    useEffect(() => {
+        setScriptId("")
+        setDeviceId("")
+    }, [brainManager])
+    // first reload
+    useEffectAsync(() => brainManager?.refresh(), [])
 
     return (
         <BrainManagerContext.Provider
@@ -43,18 +52,13 @@ export const BrainManagerProvider = ({ children }) => {
                 token,
                 setToken,
                 brainManager,
-                programId,
-                setProgramId,
+                scriptId,
+                setScriptId,
                 deviceId,
                 setDeviceId,
-                refresh,
             }}
         >
             {children}
         </BrainManagerContext.Provider>
     )
-}
-
-export function useBrainManager(): BrainManagerProps {
-    return useContext(BrainManagerContext) || defaultContextProps
 }

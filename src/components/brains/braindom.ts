@@ -1,4 +1,3 @@
-import { shortDeviceId } from "../../../jacdac-ts/src/jacdac"
 import { CHANGE, ERROR } from "../../../jacdac-ts/src/jdom/constants"
 import { JDNode } from "../../../jacdac-ts/src/jdom/node"
 
@@ -10,7 +9,7 @@ export class BrainManager extends JDNode {
     private _devices: BrainDevice[]
     private _scripts: BrainScript[]
 
-    constructor(readonly apiRoot: string) {
+    constructor(readonly apiRoot: string, readonly token: string) {
         super()
     }
 
@@ -29,7 +28,6 @@ export class BrainManager extends JDNode {
     get parent(): JDNode {
         return undefined
     }
-
     get scripts(): BrainScript[] {
         return this._scripts?.slice(0) || []
     }
@@ -42,6 +40,10 @@ export class BrainManager extends JDNode {
         return [...(this._devices || []), ...(this._scripts || [])] as JDNode[]
     }
 
+    async refresh() {
+        await Promise.all([this.refreshDevices(), this.refreshScripts()])
+    }
+
     async refreshDevices() {
         const datas = (await this.fetchJSON("devices")) as BrainDeviceData[]
         if (!datas) return // query failed
@@ -49,26 +51,32 @@ export class BrainManager extends JDNode {
         // merge cloud datas with local devices
         const dids = new Set(datas.map(d => d.id))
         // remove dead devices
-        this._devices = this._devices.filter(d => dids.has(d.data.id))
+        this._devices = this._devices?.filter(d => dids.has(d.data.id)) || []
         // update existing devices
         datas.forEach(data => {
             const device = this._devices.find(d => d.data.id === data.id)
-            if (device) device.data = data
-            else this._devices.push(new BrainDevice(this, data))
+            if (device) {
+                device.data = data
+            } else {
+                this._devices.push(new BrainDevice(this, data))
+            }
         })
         this.emit(CHANGE)
     }
 
     async refreshScripts() {
-        const datas = (await this.fetchJSON("scripts")) as BrainScriptData[]
+        const datas = (await this.fetchJSON("scripts")) as {
+            headers: BrainScriptData[]
+        }
         if (!datas) return // query failed
 
+        const { headers = [] } = datas
         // merge cloud datas with local devices
-        const dids = new Set(datas.map(d => d.id))
+        const dids = new Set(headers.map(d => d.id))
         // remove dead devices
-        this._scripts = this._scripts.filter(d => dids.has(d.data.id))
+        this._scripts = this._scripts?.filter(d => dids.has(d.data.id)) || []
         // update existing devices
-        datas.forEach(data => {
+        headers.forEach(data => {
             const script = this._scripts.find(d => d.data.id === data.id)
             if (script) script.data = data
             else this._scripts.push(new BrainScript(this, data))
@@ -77,10 +85,13 @@ export class BrainManager extends JDNode {
     }
 
     async fetchJSON<T>(path: string) {
+        if (!this.token) return undefined
+
         const options: RequestInit = {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Basic ${btoa(this.token)}`,
             },
         }
         const resp = await self.fetch(
@@ -91,7 +102,9 @@ export class BrainManager extends JDNode {
             this.emit(ERROR, resp.statusText)
             return undefined
         }
-        return (await resp.json()) as T
+        const json = (await resp.json()) as T
+        console.debug({ json })
+        return json
     }
 }
 
@@ -100,7 +113,7 @@ export interface BrainData {
 }
 
 export abstract class BrainNode<TData extends BrainData> extends JDNode {
-    private _lastFetch: number
+    private _lastFetch = Date.now()
 
     constructor(
         readonly manager: BrainManager,
@@ -152,7 +165,9 @@ export abstract class BrainNode<TData extends BrainData> extends JDNode {
     }
 
     private async internalRefresh(): Promise<void> {
-        const data = await this.manager.fetchJSON<TData>(this.path)
+        const data = await this.manager.fetchJSON<TData>(
+            `${this.path}/${this._data.id}`
+        )
         this.data = data
         this.refreshPromise = undefined
     }
@@ -168,6 +183,7 @@ export interface BrainDeviceData extends BrainData {
 export class BrainDevice extends BrainNode<BrainScriptData> {
     constructor(readonly manager, data: BrainScriptData) {
         super(manager, "devices", data)
+        console.assert(!Array.isArray(data))
     }
     get nodeKind(): string {
         return BRAIN_DEVICE_NODE
@@ -193,6 +209,8 @@ export interface BrainScriptData extends BrainData {
 }
 
 export class BrainScript extends BrainNode<BrainScriptData> {
+    private _source: string
+
     constructor(readonly manager, data: BrainScriptData) {
         super(manager, "scripts", data)
     }
@@ -202,5 +220,10 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     get name(): string {
         const { data } = this
         return data.name || data.id
+    }
+
+    get source(): string {
+        if (this._source === undefined) this.refresh()
+        return this._source
     }
 }

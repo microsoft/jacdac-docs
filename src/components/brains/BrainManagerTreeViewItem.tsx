@@ -1,17 +1,15 @@
-import React from "react"
+import React, { useContext } from "react"
 import { JDomTreeViewProps } from "../tools/JDomTreeViewItems"
 import StyledTreeItem, { StyledTreeViewItemProps } from "../ui/StyledTreeItem"
 import CloudQueueIcon from "@mui/icons-material/CloudQueue"
 import CodeIcon from "@mui/icons-material/Code"
 import { prettySize, shortDeviceId } from "../../../jacdac-ts/src/jdom/pretty"
 import { DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants"
-import {
-    BrainDevice,
-    BrainProgram,
-    useBrainManager,
-} from "./BrainManagerContext"
+import BrainManagerContext from "./BrainManagerContext"
 import RefreshIcon from "@mui/icons-material/Refresh"
 import CmdButton from "../CmdButton"
+import useChange from "../../jacdac/useChange"
+import { BrainDevice, BrainScript } from "./braindom"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -19,11 +17,10 @@ export default function BrainManagerTreeItem(
     const nodeId = "brain-manager"
     const name = "brains"
     const description = "Manage remote brains and programs"
-    const { state, refresh } = useBrainManager()
-    const { programs, devices } = state || {}
+    const { brainManager } = useContext(BrainManagerContext)
 
     const handleRefresh = async () => {
-        await refresh()
+        await brainManager?.refresh()
     }
 
     return (
@@ -41,17 +38,17 @@ export default function BrainManagerTreeItem(
                 />
             }
         >
-            <BrainProgramsTreeItem programs={programs} {...props} />
-            <BrainDevicesTreeItem devices={devices} {...props} />
+            <BrainProgramsTreeItem {...props} />
+            <BrainDevicesTreeItem {...props} />
         </StyledTreeItem>
     )
 }
 
 function BrainProgramsTreeItem(
-    props: { programs?: BrainProgram[] } & StyledTreeViewItemProps &
-        JDomTreeViewProps
+    props: StyledTreeViewItemProps & JDomTreeViewProps
 ) {
-    const { programs } = props
+    const { brainManager } = useContext(BrainManagerContext)
+    const scripts = useChange(brainManager, _ => _?.scripts)
     const nodeId = "brain-manager-programs"
     const name = "programs"
     return (
@@ -60,10 +57,10 @@ function BrainProgramsTreeItem(
             labelText={name}
             icon={<CodeIcon fontSize="small" />}
         >
-            {programs?.map(program => (
-                <BrainProgramTreeItem
-                    key={program.id}
-                    program={program}
+            {scripts?.map(script => (
+                <BrainScriptTreeItem
+                    key={script.id}
+                    script={script}
                     {...props}
                 />
             ))}
@@ -71,15 +68,15 @@ function BrainProgramsTreeItem(
     )
 }
 
-function BrainProgramTreeItem(
-    props: { program: BrainProgram } & StyledTreeViewItemProps &
-        JDomTreeViewProps
+function BrainScriptTreeItem(
+    props: { script: BrainScript } & StyledTreeViewItemProps & JDomTreeViewProps
 ) {
-    const { program } = props
-    const { id, name, source } = program
-    const { programId, setProgramId } = useBrainManager()
+    const { script } = props
+    const { id, name, source } = script
+    const { scriptId: programId, setScriptId: setProgramId } =
+        useContext(BrainManagerContext)
     const nodeId = `brain-manager-programs-${id}`
-    const description = prettySize(source.length)
+    const description = prettySize(source?.length || 0)
     const current = id === programId
 
     const handleClick = () => {
@@ -98,10 +95,10 @@ function BrainProgramTreeItem(
 }
 
 function BrainDevicesTreeItem(
-    props: { devices?: BrainDevice[] } & StyledTreeViewItemProps &
-        JDomTreeViewProps
+    props: StyledTreeViewItemProps & JDomTreeViewProps
 ) {
-    const { devices } = props
+    const { brainManager } = useContext(BrainManagerContext)
+    const devices = useChange(brainManager, _ => _?.devices)
     const nodeId = "brain-manager-devices"
     const name = "devices"
     return (
@@ -126,9 +123,9 @@ function BrainDeviceTreeItem(
 ) {
     const { device } = props
     const { id } = device
-    const { deviceId, setDeviceId } = useBrainManager()
+    const { deviceId, setDeviceId } = useContext(BrainManagerContext)
     const nodeId = `brain-manager-devices-${id}`
-    const name = shortDeviceId(id)
+    const name = useChange(device, _ => _.name)
     const current = id === deviceId
 
     const handleClick = () => {
