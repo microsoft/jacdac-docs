@@ -1,3 +1,4 @@
+import { PostAdd } from "@mui/icons-material"
 import { JDDevice, jdpack } from "../../../jacdac-ts/src/jacdac"
 import {
     AzureIotHubHealthCmd,
@@ -237,7 +238,7 @@ export abstract class BrainNode<TData extends BrainData> extends JDNode {
         )
     }
 
-    private get apiPath() {
+    protected get apiPath() {
         return `${this.path}/${this._data.id}`
     }
 
@@ -251,7 +252,7 @@ export abstract class BrainNode<TData extends BrainData> extends JDNode {
         await this.manager.fetchJSON<TData>(this.apiPath, {
             method: "DELETE",
         })
-        await this.manager.refreshDevices()
+        await this.manager.refresh()
     }
 }
 
@@ -263,7 +264,7 @@ export interface BrainDeviceData extends BrainData {
 }
 
 export class BrainDevice extends BrainNode<BrainDeviceData> {
-    constructor(readonly manager, data: BrainDeviceData) {
+    constructor(manager: BrainManager, data: BrainDeviceData) {
         super(manager, "devices", data)
         console.assert(!Array.isArray(data))
     }
@@ -298,10 +299,16 @@ export interface BrainScriptData extends BrainData {
     head?: string
 }
 
-export class BrainScript extends BrainNode<BrainScriptData> {
-    private _source: string
+export interface BrainScriptBody {
+    blocks: string
+    text: string
+    compiled: string
+}
 
-    constructor(readonly manager, data: BrainScriptData) {
+export class BrainScript extends BrainNode<BrainScriptData> {
+    private _body: BrainScriptBody
+
+    constructor(manager: BrainManager, data: BrainScriptData) {
         super(manager, "scripts", data)
     }
     get nodeKind(): string {
@@ -318,8 +325,18 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     get displayName(): string {
         return `${this.name} ${this.data.version || ""}`
     }
-    get source(): string {
-        if (this._source === undefined) this.refresh()
-        return this._source
+    get body(): BrainScriptBody {
+        return this._body
+    }
+
+    async upload(body: BrainScriptBody) {
+        const resp: BrainScriptData = await this.manager.fetchJSON(
+            `${this.apiPath}/body`,
+            {
+                method: "POST",
+                body,
+            }
+        )
+        if (resp) this.data = resp
     }
 }

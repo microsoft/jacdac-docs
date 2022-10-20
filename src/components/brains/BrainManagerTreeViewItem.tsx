@@ -92,23 +92,32 @@ function BrainScriptTreeItem(
 ) {
     const { script } = props
     const { id, name, version } = script
-    const { scriptId: programId, setScriptId: setProgramId } =
-        useContext(BrainManagerContext)
+    const { scriptId, setScriptId } = useContext(BrainManagerContext)
     const nodeId = `brain-manager-programs-${id}`
-    const current = id === programId
-    const description = `v${version || ""}`
+    const current = id === scriptId
+    const description = id
+    const info = `v${version || ""}`
 
     const handleClick = () => {
-        setProgramId(id)
+        setScriptId(id)
     }
+    const handleDelete = async () => await script.delete()
 
     return (
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
             labelCaption={description}
+            labelInfo={info}
             sx={{ fontWeight: current ? "bold" : undefined }}
             onClick={handleClick}
+            actions={
+                <CmdButton
+                    title="delete"
+                    icon={<DeleteIcon />}
+                    onClick={handleDelete}
+                />
+            }
         ></StyledTreeItem>
     )
 }
