@@ -159,7 +159,6 @@ export class BrainManager extends JDNode {
             return undefined
         }
         const json = (await resp.json()) as T
-        console.debug({ json })
         return json
     }
 }
@@ -245,10 +244,13 @@ export interface BrainDeviceData extends BrainData {
     lastAct: string
 }
 
-export class BrainDevice extends BrainNode<BrainScriptData> {
-    constructor(readonly manager, data: BrainScriptData) {
+export class BrainDevice extends BrainNode<BrainDeviceData> {
+    constructor(readonly manager, data: BrainDeviceData) {
         super(manager, "devices", data)
         console.assert(!Array.isArray(data))
+    }
+    get deviceId(): string {
+        return this.data.id
     }
     get nodeKind(): string {
         return BRAIN_DEVICE_NODE
@@ -257,8 +259,13 @@ export class BrainDevice extends BrainNode<BrainScriptData> {
         const { data } = this
         return data.name || data.id
     }
-    get displayName(): string {
-        return `${this.name} ${this.data.version || ""}`
+    get connected(): boolean {
+        const { data } = this
+        return data.conn
+    }
+    get lastActivity(): string {
+        const { data } = this
+        return data.lastAct
     }
     get qualifiedName(): string {
         return this.name
@@ -286,7 +293,9 @@ export class BrainScript extends BrainNode<BrainScriptData> {
         const { data } = this
         return data.name || data.id
     }
-
+    get displayName(): string {
+        return `${this.name} ${this.data.version || ""}`
+    }
     get source(): string {
         if (this._source === undefined) this.refresh()
         return this._source

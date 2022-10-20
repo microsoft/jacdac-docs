@@ -14,6 +14,8 @@ import AddIcon from "@mui/icons-material/Add"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import RegisterBrainDeviceDialog from "./RegisterBrainDeviceDialog"
 import DeleteIcon from "@mui/icons-material/Delete"
+import WifiIcon from "@mui/icons-material/Wifi"
+import WifiOffIcon from "@mui/icons-material/WifiOff"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -146,8 +148,10 @@ function BrainDeviceTreeItem(
     const { id } = device
     const { deviceId, setDeviceId } = useContext(BrainManagerContext)
     const nodeId = `brain-manager-devices-${id}`
+    const devId = useChange(device, _ => _.deviceId)
     const name = useChange(device, _ => _.name)
-    const current = id === deviceId
+    const connected = useChange(device, _ => _.connected)
+    const current = devId === deviceId
 
     const handleClick = () => {
         setDeviceId(id)
@@ -161,9 +165,16 @@ function BrainDeviceTreeItem(
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
-            labelCaption={id}
+            labelCaption={devId}
             sx={{ fontWeight: current ? "bold" : undefined }}
             onClick={handleClick}
+            icon={
+                connected ? (
+                    <WifiIcon color="success" />
+                ) : (
+                    <WifiOffIcon color="warning" />
+                )
+            }
             actions={
                 <CmdButton
                     title="delete"
