@@ -220,12 +220,21 @@ export abstract class BrainNode<TData extends BrainData> extends JDNode {
         )
     }
 
+    private get apiPath() {
+        return `${this.path}/${this._data.id}`
+    }
+
     private async internalRefresh(): Promise<void> {
-        const data = await this.manager.fetchJSON<TData>(
-            `${this.path}/${this._data.id}`
-        )
+        const data = await this.manager.fetchJSON<TData>(this.apiPath)
         this.data = data
         this.refreshPromise = undefined
+    }
+
+    async delete() {
+        await this.manager.fetchJSON<TData>(this.apiPath, {
+            method: "DELETE",
+        })
+        await this.manager.refreshDevices()
     }
 }
 

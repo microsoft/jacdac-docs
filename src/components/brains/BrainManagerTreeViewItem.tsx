@@ -13,6 +13,7 @@ import { BrainDevice, BrainScript } from "./braindom"
 import AddIcon from "@mui/icons-material/Add"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import RegisterBrainDeviceDialog from "./RegisterBrainDeviceDialog"
+import DeleteIcon from "@mui/icons-material/Delete"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -106,7 +107,7 @@ function BrainDevicesTreeItem(
     const nodeId = "brain-manager-devices"
     const name = "devices"
 
-    const handleDialogOpenToggle = (ev) => {
+    const handleDialogOpenToggle = ev => {
         ev.stopPropagation()
         ev.preventDefault()
         setOpen(v => !v)
@@ -152,6 +153,10 @@ function BrainDeviceTreeItem(
         setDeviceId(id)
     }
 
+    const handleDelete = async () => {
+        await device.delete()
+    }
+
     return (
         <StyledTreeItem
             nodeId={nodeId}
@@ -159,6 +164,13 @@ function BrainDeviceTreeItem(
             labelCaption={id}
             sx={{ fontWeight: current ? "bold" : undefined }}
             onClick={handleClick}
+            actions={
+                <CmdButton
+                    title="delete"
+                    icon={<DeleteIcon />}
+                    onClick={handleDelete}
+                />
+            }
         ></StyledTreeItem>
     )
 }
