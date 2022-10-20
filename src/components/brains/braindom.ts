@@ -1,4 +1,10 @@
-import { CHANGE, ERROR } from "../../../jacdac-ts/src/jdom/constants"
+import { JDDevice, jdpack } from "../../../jacdac-ts/src/jacdac"
+import {
+    AzureIotHubHealthCmd,
+    CHANGE,
+    ERROR,
+    SRV_AZURE_IOT_HUB_HEALTH,
+} from "../../../jacdac-ts/src/jdom/constants"
 import { JDNode } from "../../../jacdac-ts/src/jdom/node"
 
 export const BRAIN_NODE = "brain"
@@ -42,6 +48,48 @@ export class BrainManager extends JDNode {
 
     device(id: string): BrainDevice {
         return this._devices?.find(d => d.id === id)
+    }
+
+    async registerDevice(device: JDDevice, name: string) {
+        const { productIdentifier, deviceId } = device
+
+        // create new device
+        console.debug(`create new device`)
+        const resp: { deviceId: string; connectionString: string } =
+            await this.fetchJSON("devices", {
+                method: "POST",
+                body: { deviceId },
+            })
+        if (!resp) {
+            this.emit(ERROR, "register failed")
+            return
+        }
+
+        // patch name
+        const meta = {
+            productId: productIdentifier,
+        }
+        console.debug(`patch name`)
+        await this.fetchJSON(`devices/${deviceId}`, {
+            method: "PATCH",
+            body: { name, meta },
+        })
+
+        // patch azure iot service
+        const { connectionString } = resp
+        const service = device.services({
+            serviceClass: SRV_AZURE_IOT_HUB_HEALTH,
+        })[0]
+        const data = jdpack<[string]>("s", [connectionString])
+        console.debug(`update connection string`)
+        await service.sendCmdAsync(
+            AzureIotHubHealthCmd.SetConnectionString,
+            data,
+            true
+        )
+
+        // all good, we're done
+        this.refresh()
     }
 
     async refresh() {
@@ -88,15 +136,19 @@ export class BrainManager extends JDNode {
         this.emit(CHANGE)
     }
 
-    async fetchJSON<T>(path: string) {
+    async fetchJSON<T>(
+        path: string,
+        opts?: { method: "GET" | "POST" | "PATCH" | "DELETE"; body?: any }
+    ) {
         if (!this.token) return undefined
 
         const options: RequestInit = {
-            method: "GET",
+            method: opts?.method || "GET",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Basic ${btoa(this.token)}`,
             },
+            body: opts?.body ? JSON.stringify(opts.body) : undefined,
         }
         const resp = await self.fetch(
             `https://${this.apiRoot}/${path}`,

@@ -1,15 +1,18 @@
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { JDomTreeViewProps } from "../tools/JDomTreeViewItems"
 import StyledTreeItem, { StyledTreeViewItemProps } from "../ui/StyledTreeItem"
 import CloudQueueIcon from "@mui/icons-material/CloudQueue"
 import CodeIcon from "@mui/icons-material/Code"
-import { prettySize, shortDeviceId } from "../../../jacdac-ts/src/jdom/pretty"
+import { prettySize } from "../../../jacdac-ts/src/jdom/pretty"
 import { DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants"
 import BrainManagerContext from "./BrainManagerContext"
 import RefreshIcon from "@mui/icons-material/Refresh"
 import CmdButton from "../CmdButton"
 import useChange from "../../jacdac/useChange"
 import { BrainDevice, BrainScript } from "./braindom"
+import AddIcon from "@mui/icons-material/Add"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import RegisterBrainDeviceDialog from "./RegisterBrainDeviceDialog"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -98,14 +101,30 @@ function BrainDevicesTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
 ) {
     const { brainManager } = useContext(BrainManagerContext)
+    const [open, setOpen] = useState(false)
     const devices = useChange(brainManager, _ => _?.devices)
     const nodeId = "brain-manager-devices"
     const name = "devices"
+
+    const handleDialogOpenToggle = (ev) => {
+        ev.stopPropagation()
+        ev.preventDefault()
+        setOpen(v => !v)
+    }
+
     return (
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
             kind={DEVICE_NODE_NAME}
+            actions={
+                <IconButtonWithTooltip
+                    title="Register device"
+                    onClick={handleDialogOpenToggle}
+                >
+                    <AddIcon />
+                </IconButtonWithTooltip>
+            }
         >
             {devices?.map(device => (
                 <BrainDeviceTreeItem
@@ -114,6 +133,7 @@ function BrainDevicesTreeItem(
                     {...props}
                 />
             ))}
+            <RegisterBrainDeviceDialog open={open} setOpen={setOpen} />
         </StyledTreeItem>
     )
 }
