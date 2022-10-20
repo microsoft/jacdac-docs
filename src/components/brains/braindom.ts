@@ -81,7 +81,7 @@ export class BrainManager extends JDNode {
             serviceClass: SRV_AZURE_IOT_HUB_HEALTH,
         })[0]
         const data = jdpack<[string]>("s", [connectionString])
-        console.debug(`update connection string`)
+        console.debug(`update connection string`, { service, connectionString })
         await service.sendCmdAsync(
             AzureIotHubHealthCmd.SetConnectionString,
             data,
@@ -89,7 +89,7 @@ export class BrainManager extends JDNode {
         )
 
         // all good, we're done
-        this.refresh()
+        await this.refreshDevices()
     }
 
     async refresh() {

@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useContext, useId, useState } from "react"
+import React, {
+    ChangeEvent,
+    useContext,
+    useEffect,
+    useId,
+    useState,
+} from "react"
 import CmdButton from "../CmdButton"
 import {
     Dialog,
@@ -33,6 +39,10 @@ export default function RegisterBrainDeviceDialog(props: {
     const [name, setName] = useState("")
     const nameId = useId()
     const disabled = !device || !name
+
+    useEffect(() => {
+        if (device && !name) setName(device.friendlyName)
+    }, [device])
 
     const reset = () => {
         setDeviceId("")
