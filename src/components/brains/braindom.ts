@@ -40,6 +40,10 @@ export class BrainManager extends JDNode {
         return [...(this._devices || []), ...(this._scripts || [])] as JDNode[]
     }
 
+    device(id: string): BrainDevice {
+        return this._devices?.find(d => d.id === id)
+    }
+
     async refresh() {
         await Promise.all([this.refreshDevices(), this.refreshScripts()])
     }

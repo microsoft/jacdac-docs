@@ -32,7 +32,7 @@ export const BrainManagerProvider = ({ children }) => {
     const [token, setToken] = useSessionStorage("brain-manager-token")
     const api = BRAIN_API_ROOT
     const brainManager = useMemo(
-        () => new BrainManager(api, token),
+        () => (token ? new BrainManager(api, token) : undefined),
         [api, token]
     )
     const [scriptId, setScriptId] = useState("")
