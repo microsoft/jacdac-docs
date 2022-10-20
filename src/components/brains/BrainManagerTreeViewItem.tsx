@@ -53,15 +53,28 @@ export default function BrainManagerTreeItem(
 function BrainProgramsTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
 ) {
-    const { brainManager } = useContext(BrainManagerContext)
+    const { brainManager, setScriptId } = useContext(BrainManagerContext)
     const scripts = useChange(brainManager, _ => _?.scripts)
     const nodeId = "brain-manager-programs"
     const name = "programs"
+
+    const handleNewScript = async () => {
+        const scriptId = await brainManager.createScript("new script")
+        if (scriptId) setScriptId(scriptId)
+    }
+
     return (
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
             icon={<CodeIcon fontSize="small" />}
+            actions={
+                <CmdButton
+                    title="New script"
+                    onClick={handleNewScript}
+                    icon={<AddIcon />}
+                />
+            }
         >
             {scripts?.map(script => (
                 <BrainScriptTreeItem
@@ -78,12 +91,12 @@ function BrainScriptTreeItem(
     props: { script: BrainScript } & StyledTreeViewItemProps & JDomTreeViewProps
 ) {
     const { script } = props
-    const { id, name, source } = script
+    const { id, name, version } = script
     const { scriptId: programId, setScriptId: setProgramId } =
         useContext(BrainManagerContext)
     const nodeId = `brain-manager-programs-${id}`
-    const description = prettySize(source?.length || 0)
     const current = id === programId
+    const description = `v${version || ""}`
 
     const handleClick = () => {
         setProgramId(id)

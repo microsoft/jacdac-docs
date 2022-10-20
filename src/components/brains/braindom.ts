@@ -50,6 +50,24 @@ export class BrainManager extends JDNode {
         return this._devices?.find(d => d.id === id)
     }
 
+    async createScript(name: string) {
+        const body = {
+            name,
+            meta: {},
+            body: {
+                blocks: "",
+                text: "",
+                compiled: "",
+            },
+        }
+        const resp = await this.fetchJSON<BrainScriptData>("scripts", {
+            method: "POST",
+            body,
+        })
+        if (resp) await this.refreshScripts()
+        return resp?.id
+    }
+
     async registerDevice(device: JDDevice, name: string) {
         const { productIdentifier, deviceId } = device
 
@@ -288,6 +306,10 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     }
     get nodeKind(): string {
         return BRAIN_SCRIPT_NODE
+    }
+    get version(): number {
+        const { data } = this
+        return data.version
     }
     get name(): string {
         const { data } = this
