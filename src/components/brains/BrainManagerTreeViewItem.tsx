@@ -16,6 +16,7 @@ import RegisterBrainDeviceDialog from "./RegisterBrainDeviceDialog"
 import DeleteIcon from "@mui/icons-material/Delete"
 import WifiIcon from "@mui/icons-material/Wifi"
 import WifiOffIcon from "@mui/icons-material/WifiOff"
+import { navigate } from "gatsby"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -60,7 +61,10 @@ function BrainProgramsTreeItem(
 
     const handleNewScript = async () => {
         const scriptId = await brainManager.createScript("new script")
-        if (scriptId) setScriptId(scriptId)
+        if (scriptId) {
+            setScriptId(scriptId)
+            navigate("/editors/jacscript")
+        }
     }
 
     return (
@@ -91,8 +95,10 @@ function BrainScriptTreeItem(
     props: { script: BrainScript } & StyledTreeViewItemProps & JDomTreeViewProps
 ) {
     const { script } = props
-    const { id, name, version } = script
     const { scriptId, setScriptId } = useContext(BrainManagerContext)
+    const { id } = script
+    const name = useChange(script, _ => _.name)
+    const version = useChange(script, _ => _.version)
     const nodeId = `brain-manager-programs-${id}`
     const current = id === scriptId
     const description = id
@@ -100,6 +106,7 @@ function BrainScriptTreeItem(
 
     const handleClick = () => {
         setScriptId(id)
+        navigate("/editors/jacscript")
     }
     const handleDelete = async () => await script.delete()
 

@@ -51,6 +51,10 @@ export class BrainManager extends JDNode {
         return this._devices?.find(d => d.id === id)
     }
 
+    script(id: string): BrainScript {
+        return this._scripts?.find(d => d.id === id)
+    }
+
     async createScript(name: string) {
         const body = {
             name,
@@ -157,7 +161,10 @@ export class BrainManager extends JDNode {
 
     async fetchJSON<T>(
         path: string,
-        opts?: { method: "GET" | "POST" | "PATCH" | "DELETE"; body?: any }
+        opts?: {
+            method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT"
+            body?: any
+        }
     ) {
         if (!this.token) return undefined
 
@@ -329,14 +336,21 @@ export class BrainScript extends BrainNode<BrainScriptData> {
         return this._body
     }
 
-    async upload(body: BrainScriptBody) {
+    async refreshBody() {
+        return this._body = await this.manager.fetchJSON(`${this.apiPath}/body`)
+    }
+
+    async uploadBody(body: BrainScriptBody) {
         const resp: BrainScriptData = await this.manager.fetchJSON(
             `${this.apiPath}/body`,
             {
-                method: "POST",
+                method: "PUT",
                 body,
             }
         )
-        if (resp) this.data = resp
+        if (resp) {
+            this._body = body
+            this.data = resp
+        }
     }
 }
