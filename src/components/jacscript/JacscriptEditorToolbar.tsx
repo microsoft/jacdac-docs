@@ -1,5 +1,5 @@
-import { Grid } from "@mui/material"
-import React, { useContext } from "react"
+import { Grid, TextField } from "@mui/material"
+import React, { useContext, useState } from "react"
 import BlockRolesToolbar from "../blockly/BlockRolesToolbar"
 import JacscriptManagerChipItems from "./JacscriptManagerChipItems"
 import CloudUploadIcon from "@mui/icons-material/CloudUpload"
@@ -9,6 +9,7 @@ import useChange from "../../jacdac/useChange"
 import { BrainScript } from "../brains/braindom"
 import CmdButton from "../CmdButton"
 import useEffectAsync from "../useEffectAsync"
+import { useDebounce } from "use-debounce"
 
 function SaveScriptButton(props: { script: BrainScript }) {
     const { script } = props
@@ -34,11 +35,26 @@ function SaveScriptButton(props: { script: BrainScript }) {
 function BrainManagerToolbar(props: { script: BrainScript }) {
     const { script } = props
     const { name } = script
+    const [_name, _setName] = useState(name)
+    const [debouncedName] = useDebounce(_name, 1000)
+
+    const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+        _setName(ev.target.value)
+    }
+
+    useEffectAsync(() => script?.updateName(debouncedName), [debouncedName])
 
     return (
         <Grid sx={{ mt: 0.5, mb: 0.5 }} container direction="row" spacing={1}>
             <Grid item xs>
-                {name}
+                <TextField
+                    fullWidth
+                    label={`Script Name${name !== _name ? "*" : ""}`}
+                    value={_name}
+                    spellCheck={false}
+                    onChange={handleChange}
+                    size="small"
+                />
             </Grid>
             <Grid item>
                 <SaveScriptButton script={script} />
@@ -60,6 +76,7 @@ function useBrainScriptInBlocks(script: BrainScript) {
         if (!body) return
 
         // update blocks
+        console.debug("current brain script", { body })
         setWorkspaceXml(body.blocks)
     }, [script?.id])
 }

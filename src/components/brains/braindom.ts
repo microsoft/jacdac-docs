@@ -329,6 +329,17 @@ export class BrainScript extends BrainNode<BrainScriptData> {
         const { data } = this
         return data.name || data.id
     }
+
+    async updateName(name: string) {
+        if (!name) return
+
+        const resp: BrainScriptData = await this.manager.fetchJSON(
+            this.apiPath,
+            { method: "PATCH", body: { name } }
+        )
+        if (resp) this.data = resp
+    }
+
     get displayName(): string {
         return `${this.name} ${this.data.version || ""}`
     }
@@ -337,7 +348,9 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     }
 
     async refreshBody() {
-        return this._body = await this.manager.fetchJSON(`${this.apiPath}/body`)
+        return (this._body = await this.manager.fetchJSON(
+            `${this.apiPath}/body`
+        ))
     }
 
     async uploadBody(body: BrainScriptBody) {
