@@ -5,15 +5,12 @@ import React, {
     useState,
     useRef,
 } from "react"
-import {
-    createWebSocketTransport,
-    WebSocketTransport,
-} from "../../../jacdac-ts/src/jdom/transport/websockettransport"
 import useBus from "../../jacdac/useBus"
 import useChange from "../../jacdac/useChange"
 import useLocalStorage from "../hooks/useLocalStorage"
 import useEffectAsync from "../useEffectAsync"
 import { BrainManager } from "./braindom"
+import WebSocketBridge from "./WebSocketBridge"
 
 export interface BrainManagerProps {
     domain?: string
@@ -60,8 +57,7 @@ export const BrainManagerProvider = ({ children }) => {
     const [liveDeviceId, setLiveDeviceId] = useState("")
     const transportRef = useRef<{
         deviceId: string
-        ws: WebSocketTransport
-        unmount: () => void
+        bridge: WebSocketBridge
     }>()
 
     const setDomain = (domain: string) => {
@@ -84,10 +80,10 @@ export const BrainManagerProvider = ({ children }) => {
     useEffectAsync(() => brainManager?.refresh(), [])
 
     const cleanup = () => {
-        const { unmount } = transportRef.current || {}
-        if (unmount) {
+        const { bridge } = transportRef.current || {}
+        if (bridge) {
             console.debug(`cleanup transport`)
-            unmount?.()
+            bridge.bus = undefined
             transportRef.current = undefined
         }
     }
@@ -105,16 +101,15 @@ export const BrainManagerProvider = ({ children }) => {
             if (dev) {
                 cleanup()
                 console.log(`open transport`)
-                const { url, key } = (await dev.createConnection()) || {}
+                const { url, protocols } = (await dev.createConnection()) || {}
                 if (url) {
-                    const ws = createWebSocketTransport(url)
-                    const unmount = bus.addTransport(ws)
+                    const bridge = new WebSocketBridge(url, protocols)
+                    bridge.bus = bus
                     transportRef.current = {
                         deviceId: liveDeviceId,
-                        ws,
-                        unmount,
+                        bridge,
                     }
-                    await ws.connect()
+                    bridge.connect()
                 }
             }
         },

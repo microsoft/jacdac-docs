@@ -20,7 +20,7 @@ export default class WebSocketBridge extends JDBridge {
         }
     }
 
-    private connect() {
+    async connect() {
         if (this._ws) return Promise.resolve()
         if (!this._startPromise) {
             this._startPromise = new Promise<void>((resolve, reject) => {

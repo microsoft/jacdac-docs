@@ -281,7 +281,7 @@ export interface BrainDeviceData extends BrainData {
 
 export interface BrainDeviceConnectionInfo {
     url: string
-    key: string
+    protocols: string | string[]
 }
 
 export class BrainDevice extends BrainNode<BrainDeviceData> {
