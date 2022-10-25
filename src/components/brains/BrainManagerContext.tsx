@@ -114,6 +114,7 @@ export const BrainManagerProvider = ({ children }) => {
                         ws,
                         unmount,
                     }
+                    await ws.connect()
                 }
             }
         },
