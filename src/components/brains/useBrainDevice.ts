@@ -4,8 +4,7 @@ import useChange from "../../jacdac/useChange"
 import BrainManagerContext from "./BrainManagerContext"
 
 export default function useBrainDevice(device: JDDevice) {
-    const id = device?.id
     const { brainManager } = useContext(BrainManagerContext)
-    const brainDevice = useChange(brainManager, _ => _?.device(id), [device])
+    const brainDevice = useChange(brainManager, _ => _?.deviceByDeviceId(device?.deviceId), [device])
     return brainDevice
 }

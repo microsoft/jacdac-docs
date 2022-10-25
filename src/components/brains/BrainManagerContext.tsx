@@ -1,4 +1,13 @@
-import React, { createContext, useEffect, useMemo, useState } from "react"
+import React, {
+    createContext,
+    useEffect,
+    useMemo,
+    useState,
+    useRef,
+} from "react"
+import { WebSocketTransport } from "../../../jacdac-ts/src/jdom/transport/websockettransport"
+import useBus from "../../jacdac/useBus"
+import useChange from "../../jacdac/useChange"
 import useLocalStorage from "../hooks/useLocalStorage"
 import useEffectAsync from "../useEffectAsync"
 import { BrainManager } from "./braindom"
@@ -30,6 +39,7 @@ export default BrainManagerContext
 
 // eslint-disable-next-line react/prop-types
 export const BrainManagerProvider = ({ children }) => {
+    const bus = useBus()
     const [domain, _setDomain] = useLocalStorage(
         "brain-manager-domain",
         "jacdac-portal2.azurewebsites.net"
@@ -41,19 +51,47 @@ export const BrainManagerProvider = ({ children }) => {
     )
     const [scriptId, setScriptId] = useState("")
     const [deviceId, setDeviceId] = useState("")
+    const [liveDeviceId, setLiveDeviceId] = useState("")
+    const transportRef = useRef<{ deviceId: string; ws: WebSocketTransport }>()
 
     const setDomain = (domain: string) => {
         _setDomain(domain?.replace(/^https:\/\//i, "")?.replace(/\/$/, ""))
         setToken("")
     }
 
-    // reset selected devices/script when reloading manager
-    useEffect(() => {
-        setScriptId("")
-        setDeviceId("")
-    }, [brainManager])
+    // refresh selected device, scripts
+    useChange(
+        brainManager,
+        (_: BrainManager) => {
+            if (scriptId && !_?.script(scriptId)) setScriptId("")
+            if (deviceId && !_?.device(deviceId)) setDeviceId("")
+            if (liveDeviceId && !_?.device(liveDeviceId)) setLiveDeviceId("")
+        },
+        [scriptId, deviceId, liveDeviceId]
+    )
+
     // first reload
     useEffectAsync(() => brainManager?.refresh(), [])
+
+    // setup transport
+    useEffectAsync(
+        async mounted => {
+            const dev =
+                liveDeviceId && brainManager?.deviceByDeviceId(liveDeviceId)
+            if (dev) {
+                const ws = await dev.connect()
+                transportRef.current = { deviceId: liveDeviceId, ws }
+                bus.addTransport(ws)
+            }
+            return () => {
+                const ws = transportRef.current || {}
+                if (ws) {
+                    bus.addTransport
+                }
+            }
+        },
+        [brainManager, liveDeviceId]
+    )
 
     return (
         <BrainManagerContext.Provider

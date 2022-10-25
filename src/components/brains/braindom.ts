@@ -283,6 +283,11 @@ export interface BrainDeviceData extends BrainData {
     meta?: BrainDeviceMeta
 }
 
+export interface BrainDeviceConnectionInfo {
+    url: string
+    key: string
+}
+
 export class BrainDevice extends BrainNode<BrainDeviceData> {
     constructor(manager: BrainManager, data: BrainDeviceData) {
         super(manager, "devices", data)
@@ -309,6 +314,13 @@ export class BrainDevice extends BrainNode<BrainDeviceData> {
     get meta(): BrainDeviceMeta {
         const { data } = this
         return data.meta || {}
+    }
+    get deviceId() {
+        return this.data.id
+    }
+
+    async createConnection(): Promise<BrainDeviceConnectionInfo> {
+        return await this.manager.fetchJSON()
     }
 }
 
