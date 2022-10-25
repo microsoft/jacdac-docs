@@ -11,9 +11,9 @@ import CmdButton from "../CmdButton"
 import useEffectAsync from "../useEffectAsync"
 import { useDebounce } from "use-debounce"
 import { WorkspaceFile } from "../blockly/dsl/workspacejson"
-import { JSONTryParse, toHex } from "../../../jacdac-ts/src/jacdac"
 import useJacscript from "./JacscriptContext"
 import useBrainScript from "../brains/useBrainScript"
+import { JSONTryParse, toHex } from "../../../jacdac-ts/src/jdom/utils"
 
 function SaveScriptButton(props: { script: BrainScript }) {
     const { script } = props

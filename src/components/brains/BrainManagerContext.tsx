@@ -49,7 +49,8 @@ export const BrainManagerProvider = ({ children }) => {
     )
     const [token, setToken] = useLocalStorage("brain-manager-token")
     const brainManager = useMemo(
-        () => (token && domain ? new BrainManager(domain, token) : undefined),
+        () =>
+            token && domain ? new BrainManager(bus, domain, token) : undefined,
         [domain, token]
     )
     const [scriptId, setScriptId] = useState("")

@@ -1,11 +1,13 @@
-import { JDDevice, jdpack, shortDeviceId } from "../../../jacdac-ts/src/jacdac"
+import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
 import {
     AzureIotHubHealthCmd,
     CHANGE,
     ERROR,
     SRV_AZURE_IOT_HUB_HEALTH,
 } from "../../../jacdac-ts/src/jdom/constants"
+import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import { JDNode } from "../../../jacdac-ts/src/jdom/node"
+import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 
 export const BRAIN_NODE = "brain"
 export const BRAIN_DEVICE_NODE = "brainDevice"
@@ -15,7 +17,11 @@ export class BrainManager extends JDNode {
     private _devices: BrainDevice[]
     private _scripts: BrainScript[]
 
-    constructor(readonly apiRoot: string, readonly token: string) {
+    constructor(
+        readonly bus: JDBus,
+        readonly apiRoot: string,
+        readonly token: string
+    ) {
         super()
     }
 
@@ -269,6 +275,7 @@ export abstract class BrainNode<TData extends BrainData> extends JDNode {
 
 export type BrainDeviceMeta = {
     productId?: number
+    fwVersion?: string
 } & Record<string, string | number | boolean>
 
 export interface BrainDeviceData extends BrainData {
@@ -287,7 +294,9 @@ export interface BrainDeviceConnectionInfo {
 export class BrainDevice extends BrainNode<BrainDeviceData> {
     constructor(manager: BrainManager, data: BrainDeviceData) {
         super(manager, "devices", data)
-        console.assert(!Array.isArray(data))
+
+        this.on(CHANGE, this.refreshMeta.bind(this))
+        this.refreshMeta()
     }
     get nodeKind(): string {
         return BRAIN_DEVICE_NODE
@@ -313,6 +322,36 @@ export class BrainDevice extends BrainNode<BrainDeviceData> {
     }
     get deviceId() {
         return this.data.id
+    }
+
+    resolveDevice(): JDDevice {
+        return this.manager.bus.device(this.deviceId)
+    }
+
+    async refreshMeta() {
+        const device = this.resolveDevice()
+        if (!device) return
+
+        const { meta } = this.data
+        let changed = false
+        const newMeta = JSON.parse(JSON.stringify(meta || {}))
+        const productId = await device.resolveProductIdentifier()
+        const fwVersion = await device.resolveFirmwareVersion()
+        if (productId && meta.productId !== productId) {
+            newMeta.productId = productId
+            changed = true
+        }
+        if (fwVersion && meta.fwVersion !== fwVersion) {
+            newMeta.fwVersion = fwVersion
+            changed = true
+        }
+        if (changed) {
+            console.debug(`sync meta`)
+            await this.manager.fetchJSON(this.apiPath, {
+                method: "PATCH",
+                body: { newMeta },
+            })
+        }
     }
 
     async createConnection(): Promise<BrainDeviceConnectionInfo> {
