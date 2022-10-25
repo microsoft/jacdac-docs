@@ -2,8 +2,8 @@ import React, { useContext } from "react"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import { BrainDevice } from "./braindom"
 import BrainManagerContext from "./BrainManagerContext"
-import StopIcon from "@mui/icons-material/Stop"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import ScreenShareIcon from '@mui/icons-material/ScreenShare';
+import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 
 export default function BrainLiveConnectionButton(props: {
     brain: BrainDevice
@@ -20,7 +20,7 @@ export default function BrainLiveConnectionButton(props: {
             title={connected ? "disconnect live" : "connect live"}
             onClick={handleClick}
         >
-            {connected ? <StopIcon /> : <PlayArrowIcon />}
+            {connected ? <StopScreenShareIcon /> : <ScreenShareIcon />}
         </IconButtonWithTooltip>
     )
 }
