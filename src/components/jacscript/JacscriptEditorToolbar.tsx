@@ -13,6 +13,7 @@ import { useDebounce } from "use-debounce"
 import { WorkspaceFile } from "../blockly/dsl/workspacejson"
 import { JSONTryParse, toHex } from "../../../jacdac-ts/src/jacdac"
 import useJacscript from "./JacscriptContext"
+import useBrainScript from "../brains/useBrainScript"
 
 function SaveScriptButton(props: { script: BrainScript }) {
     const { script } = props
@@ -56,7 +57,8 @@ function BrainManagerToolbar(props: { script: BrainScript }) {
             <Grid item xs>
                 <TextField
                     fullWidth
-                    label={`Script Name${name !== _name ? "*" : ""}`}
+                    title={`Script Name${name !== _name ? "*" : ""}`}
+                    placeholder="Script Name"
                     value={_name}
                     spellCheck={false}
                     onChange={handleChange}
@@ -90,9 +92,8 @@ function useBrainScriptInBlocks(script: BrainScript) {
 }
 
 export default function JacscriptEditorToolbar() {
-    const { brainManager, scriptId } = useContext(BrainManagerContext)
-    const script = useChange(brainManager, _ => _?.script(scriptId))
-
+    const { scriptId } = useContext(BrainManagerContext)
+    const script = useBrainScript(scriptId)
     useBrainScriptInBlocks(script)
 
     return (

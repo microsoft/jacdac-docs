@@ -111,7 +111,7 @@ function BrainScriptTreeItem(
     const info = `v${version || ""}`
 
     const handleClick = () => {
-        setScriptId(id)
+        setScriptId(script.scriptId)
         navigate("/editors/jacscript")
     }
     const handleOpen = () => setConfirmDeleteOpen(true)
