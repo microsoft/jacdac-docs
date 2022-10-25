@@ -5,7 +5,10 @@ import React, {
     useState,
     useRef,
 } from "react"
-import { WebSocketTransport } from "../../../jacdac-ts/src/jdom/transport/websockettransport"
+import {
+    createWebSocketTransport,
+    WebSocketTransport,
+} from "../../../jacdac-ts/src/jdom/transport/websockettransport"
 import useBus from "../../jacdac/useBus"
 import useChange from "../../jacdac/useChange"
 import useLocalStorage from "../hooks/useLocalStorage"
@@ -52,7 +55,11 @@ export const BrainManagerProvider = ({ children }) => {
     const [scriptId, setScriptId] = useState("")
     const [deviceId, setDeviceId] = useState("")
     const [liveDeviceId, setLiveDeviceId] = useState("")
-    const transportRef = useRef<{ deviceId: string; ws: WebSocketTransport }>()
+    const transportRef = useRef<{
+        deviceId: string
+        ws: WebSocketTransport
+        unmount: () => void
+    }>()
 
     const setDomain = (domain: string) => {
         _setDomain(domain?.replace(/^https:\/\//i, "")?.replace(/\/$/, ""))
@@ -73,20 +80,37 @@ export const BrainManagerProvider = ({ children }) => {
     // first reload
     useEffectAsync(() => brainManager?.refresh(), [])
 
+    const cleanup = () => {
+        const { unmount } = transportRef.current || {}
+        if (unmount) {
+            console.debug(`cleanup transport`)
+            unmount?.()
+            transportRef.current = undefined
+        }
+    }
+
+    // first cleanup
+    useEffect(() => {
+        cleanup()
+        return cleanup
+    }, [brainManager, liveDeviceId])
+
     // setup transport
     useEffectAsync(
         async mounted => {
-            const dev =
-                liveDeviceId && brainManager?.deviceByDeviceId(liveDeviceId)
+            const dev = liveDeviceId && brainManager?.device(liveDeviceId)
             if (dev) {
-                const ws = await dev.connect()
-                transportRef.current = { deviceId: liveDeviceId, ws }
-                bus.addTransport(ws)
-            }
-            return () => {
-                const ws = transportRef.current || {}
-                if (ws) {
-                    bus.addTransport
+                cleanup()
+                console.log(`open transport`)
+                const { url, key } = await dev.createConnection()
+                if (url) {
+                    const ws = createWebSocketTransport(url)
+                    const unmount = bus.addTransport(ws)
+                    transportRef.current = {
+                        deviceId: liveDeviceId,
+                        ws,
+                        unmount,
+                    }
                 }
             }
         },

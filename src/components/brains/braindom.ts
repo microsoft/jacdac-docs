@@ -46,16 +46,12 @@ export class BrainManager extends JDNode {
         return [...(this._devices || []), ...(this._scripts || [])] as JDNode[]
     }
 
-    device(id: string): BrainDevice {
-        return this._devices?.find(d => d.id === id)
+    device(deviceId: string): BrainDevice {
+        return this._devices?.find(d => d.deviceId === deviceId)
     }
 
-    deviceByDeviceId(deviceId: string): BrainDevice {
-        return this._devices?.find(d => d.data.id === deviceId)
-    }
-
-    script(id: string): BrainScript {
-        return this._scripts?.find(d => d.id === id)
+    script(scriptId: string): BrainScript {
+        return this._scripts?.find(d => d.data.id === scriptId)
     }
 
     async createScript(name: string) {
@@ -320,7 +316,10 @@ export class BrainDevice extends BrainNode<BrainDeviceData> {
     }
 
     async createConnection(): Promise<BrainDeviceConnectionInfo> {
-        return await this.manager.fetchJSON()
+        return await this.manager.fetchJSON(
+            `devices/${this.data.id}/socketaddr`,
+            { method: "GET" }
+        )
     }
 }
 
@@ -355,7 +354,9 @@ export class BrainScript extends BrainNode<BrainScriptData> {
         const { data } = this
         return data.name || data.id
     }
-
+    get scriptId() {
+        return this.data.id
+    }
     async updateName(name: string) {
         if (!name || name === this.data.name) return
 

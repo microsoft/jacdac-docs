@@ -5,6 +5,10 @@ import BrainManagerContext from "./BrainManagerContext"
 
 export default function useBrainDevice(device: JDDevice) {
     const { brainManager } = useContext(BrainManagerContext)
-    const brainDevice = useChange(brainManager, _ => _?.deviceByDeviceId(device?.deviceId), [device])
+    const brainDevice = useChange(
+        brainManager,
+        _ => _?.device(device?.deviceId),
+        [device]
+    )
     return brainDevice
 }
