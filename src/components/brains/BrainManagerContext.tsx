@@ -23,7 +23,7 @@ export interface BrainManagerProps {
     deviceId?: string
     setDeviceId: (id: string) => void
     liveDeviceId?: string
-    setLiveDeviceId: (id: string) => void
+    connectLiveDevice: (id: string) => Promise<void>
 }
 
 const defaultContextProps: BrainManagerProps = Object.freeze({
@@ -31,7 +31,7 @@ const defaultContextProps: BrainManagerProps = Object.freeze({
     setToken: () => {},
     setScriptId: () => {},
     setDeviceId: () => {},
-    setLiveDeviceId: () => {},
+    connectLiveDevice: async () => {},
     brainManager: undefined,
 })
 const BrainManagerContext =
@@ -55,7 +55,7 @@ export const BrainManagerProvider = ({ children }) => {
     const [scriptId, setScriptId] = useState("")
     const [deviceId, setDeviceId] = useState("")
     const [liveDeviceId, setLiveDeviceId] = useState("")
-    const transportRef = useRef<{
+    const bridgeRef = useRef<{
         deviceId: string
         bridge: WebSocketBridge
     }>()
@@ -79,42 +79,40 @@ export const BrainManagerProvider = ({ children }) => {
     // first reload
     useEffectAsync(() => brainManager?.refresh(), [])
 
-    const cleanup = () => {
-        const { bridge } = transportRef.current || {}
+    const cleanupBridge = () => {
+        const { bridge } = bridgeRef.current || {}
         if (bridge) {
             console.debug(`cleanup transport`)
             bridge.bus = undefined
-            transportRef.current = undefined
+            bridgeRef.current = undefined
         }
     }
 
-    // first cleanup
-    useEffect(() => {
-        cleanup()
-        return cleanup
-    }, [brainManager, liveDeviceId])
+    const connectLiveDevice = async (did: string) => {
+        const dev = brainManager?.device(did)
+        if (dev && did === liveDeviceId) return // already opened
 
-    // setup transport
-    useEffectAsync(
-        async mounted => {
-            const dev = liveDeviceId && brainManager?.device(liveDeviceId)
-            if (dev) {
-                cleanup()
-                console.log(`open transport`)
-                const { url, protocols } = (await dev.createConnection()) || {}
-                if (url) {
-                    const bridge = new WebSocketBridge(url, protocols)
-                    bridge.bus = bus
-                    transportRef.current = {
-                        deviceId: liveDeviceId,
-                        bridge,
-                    }
-                    bridge.connect()
-                }
-            }
-        },
-        [brainManager, liveDeviceId]
-    )
+        cleanupBridge()
+
+        const { url, protocols } = (await dev?.createConnection()) || {}
+        if (!url) {
+            setLiveDeviceId(did)
+            return
+        }
+
+        console.debug(`connect websocket ${url}`)
+        const bridge = new WebSocketBridge(url, protocols)
+        bridge.bus = bus
+        bridgeRef.current = {
+            deviceId: liveDeviceId,
+            bridge,
+        }
+        bridge.connect()
+        setLiveDeviceId(did)
+    }
+
+    // final cleanup cleanup
+    useEffect(() => cleanupBridge, [])
 
     return (
         <BrainManagerContext.Provider
@@ -129,7 +127,7 @@ export const BrainManagerProvider = ({ children }) => {
                 deviceId,
                 setDeviceId,
                 liveDeviceId,
-                setLiveDeviceId,
+                connectLiveDevice,
             }}
         >
             {children}
