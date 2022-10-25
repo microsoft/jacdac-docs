@@ -9,17 +9,17 @@ import useChange from "../../jacdac/useChange"
 import { BrainScript } from "../brains/braindom"
 import CmdButton from "../CmdButton"
 import useEffectAsync from "../useEffectAsync"
-import { useDebounce } from "use-debounce"
 import { WorkspaceFile } from "../blockly/dsl/workspacejson"
 import useJacscript from "./JacscriptContext"
 import useBrainScript from "../brains/useBrainScript"
 import { JSONTryParse, toHex } from "../../../jacdac-ts/src/jdom/utils"
 
-function SaveScriptButton(props: { script: BrainScript }) {
-    const { script } = props
+function SaveScriptButton(props: { script: BrainScript; name: string }) {
+    const { script, name } = props
     const { workspaceSaved } = useContext(BlockContext)
     const { program, compiled } = useJacscript()
     const handleUpload = async () => {
+        if (name && name !== script.name) await script.updateName(name)
         await script.uploadBody({
             blocks: JSON.stringify(workspaceSaved),
             text: program?.program.join("\n"),
@@ -41,23 +41,19 @@ function BrainManagerToolbar(props: { script: BrainScript }) {
     const { script } = props
     const { name } = script
     const [_name, _setName] = useState(name)
-    const [debouncedName] = useDebounce(_name, 1000)
+    const nameChanged = name !== _name
 
     const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
         _setName(ev.target.value)
     }
-
-    useEffectAsync(
-        () => script?.updateName(debouncedName),
-        [script, debouncedName]
-    )
 
     return (
         <Grid sx={{ mt: 0.5, mb: 0.5 }} container direction="row" spacing={1}>
             <Grid item xs>
                 <TextField
                     fullWidth
-                    title={`Script Name${name !== _name ? "*" : ""}`}
+                    label={nameChanged ? "*" : ""}
+                    title={`Script Name`}
                     placeholder="Script Name"
                     value={_name}
                     spellCheck={false}
@@ -66,7 +62,7 @@ function BrainManagerToolbar(props: { script: BrainScript }) {
                 />
             </Grid>
             <Grid item>
-                <SaveScriptButton script={script} />
+                <SaveScriptButton script={script} name={_name} />
             </Grid>
         </Grid>
     )
