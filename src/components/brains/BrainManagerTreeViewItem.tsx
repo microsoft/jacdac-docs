@@ -20,6 +20,7 @@ import { Button } from "gatsby-theme-material-ui"
 import useEffectAsync from "../useEffectAsync"
 import DeviceIconFromProductIdentifier from "../devices/DeviceIconFromProductIdentifier"
 import ServiceConnectedIconButton from "../buttons/ServiceConnectedIconButton"
+import BrainLiveConnectionButton from "./BrainLiveConnectionButton"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -178,7 +179,7 @@ function BrainDevicesTreeItem(
             {devices?.map(device => (
                 <BrainDeviceTreeItem
                     key={device.id}
-                    device={device}
+                    brain={device}
                     {...props}
                 />
             ))}
@@ -188,17 +189,17 @@ function BrainDevicesTreeItem(
 }
 
 function BrainDeviceTreeItem(
-    props: { device: BrainDevice } & StyledTreeViewItemProps & JDomTreeViewProps
+    props: { brain: BrainDevice } & StyledTreeViewItemProps & JDomTreeViewProps
 ) {
-    const { device } = props
-    const { id } = device
+    const { brain } = props
+    const { id } = brain
     const { deviceId, setDeviceId } = useContext(BrainManagerContext)
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const nodeId = `brain-manager-devices-${id}`
-    const devId = useChange(device, _ => _.data.id)
-    const productIdentifier = useChange(device, _ => _?.data.meta?.productId)
-    const name = useChange(device, _ => _.name)
-    const connected = useChange(device, _ => _.connected)
+    const devId = useChange(brain, _ => _.data.id)
+    const productIdentifier = useChange(brain, _ => _?.data.meta?.productId)
+    const name = useChange(brain, _ => _.name)
+    const connected = useChange(brain, _ => _.connected)
     const current = devId === deviceId
 
     const handleClick = () => {
@@ -206,7 +207,7 @@ function BrainDeviceTreeItem(
     }
     const handleOpenConfirmDelete = () => setConfirmDeleteOpen(true)
     const handleDelete = async () => {
-        await device.delete()
+        await brain.delete()
     }
     const handleConnectionClick = ev => {
         ev.stopPropagation()
@@ -229,6 +230,7 @@ function BrainDeviceTreeItem(
                 }
                 actions={
                     <>
+                        <BrainLiveConnectionButton brain={brain} />
                         <ServiceConnectedIconButton
                             connected={connected}
                             onClick={handleConnectionClick}

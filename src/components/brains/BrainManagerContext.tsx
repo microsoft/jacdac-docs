@@ -25,6 +25,8 @@ export interface BrainManagerProps {
     setScriptId: (id: string) => void
     deviceId?: string
     setDeviceId: (id: string) => void
+    liveDeviceId?: string
+    setLiveDeviceId: (id: string) => void
 }
 
 const defaultContextProps: BrainManagerProps = Object.freeze({
@@ -32,6 +34,7 @@ const defaultContextProps: BrainManagerProps = Object.freeze({
     setToken: () => {},
     setScriptId: () => {},
     setDeviceId: () => {},
+    setLiveDeviceId: () => {},
     brainManager: undefined,
 })
 const BrainManagerContext =
@@ -102,7 +105,7 @@ export const BrainManagerProvider = ({ children }) => {
             if (dev) {
                 cleanup()
                 console.log(`open transport`)
-                const { url, key } = await dev.createConnection()
+                const { url, key } = (await dev.createConnection()) || {}
                 if (url) {
                     const ws = createWebSocketTransport(url)
                     const unmount = bus.addTransport(ws)
@@ -129,6 +132,8 @@ export const BrainManagerProvider = ({ children }) => {
                 setScriptId,
                 deviceId,
                 setDeviceId,
+                liveDeviceId,
+                setLiveDeviceId,
             }}
         >
             {children}
