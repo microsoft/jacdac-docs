@@ -1,5 +1,6 @@
 import {
     Card,
+    CardActionArea,
     CardActions,
     CardContent,
     CardHeader,
@@ -22,7 +23,6 @@ import Suspense from "../ui/Suspense"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import DeleteIcon from "@mui/icons-material/Delete"
 import { navigate } from "gatsby"
-import FileOpenIcon from "@mui/icons-material/FileOpen"
 const ConfirmDialog = lazy(() => import("../shell/ConfirmDialog"))
 
 function BrainScriptCard(props: { script: BrainScript }) {
@@ -30,6 +30,7 @@ function BrainScriptCard(props: { script: BrainScript }) {
     const { scriptId } = script
     const { setScriptId } = useContext(BrainManagerContext)
     const name = useChange(script, _ => _.name)
+    const version = useChange(script, _ => _.version)
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const handleDelete = async () => await script.delete()
     const handleOpenDelete = (ev: MouseEvent<HTMLButtonElement>) => {
@@ -44,22 +45,27 @@ function BrainScriptCard(props: { script: BrainScript }) {
 
     return (
         <Card>
-            <CardHeader avatar={<ArticleIcon />} />
-            <CardContent>
-                <Typography variant="subtitle1">{name}</Typography>
-                <Typography variant="caption">{scriptId}</Typography>
-            </CardContent>
-            <CardActions>
-                <IconButtonWithTooltip title="open" onClick={handleOpen}>
-                    <FileOpenIcon color="action" />
-                </IconButtonWithTooltip>
-                <IconButtonWithTooltip
-                    title="delete"
-                    onClick={handleOpenDelete}
-                >
-                    <DeleteIcon />
-                </IconButtonWithTooltip>
-            </CardActions>
+            <CardActionArea onClick={handleOpen}>
+                <CardHeader
+                    avatar={<ArticleIcon />}
+                    action={
+                        <IconButtonWithTooltip
+                            title="delete"
+                            onClick={handleOpenDelete}
+                        >
+                            <DeleteIcon />
+                        </IconButtonWithTooltip>
+                    }
+                />
+                <CardContent>
+                    <Typography variant="subtitle1">
+                        {name}{" "}
+                        <Typography component="span" variant="caption">
+                            v{version}
+                        </Typography>
+                    </Typography>
+                </CardContent>
+            </CardActionArea>
             <Suspense>
                 <ConfirmDialog
                     title="Delete Script?"
@@ -96,22 +102,25 @@ function BrainDeviceCard(props: { brain: BrainDevice }) {
                         avatar={true}
                     />
                 }
-                action={<BrainConnectedButton brain={brain} />}
+                action={
+                    <IconButtonWithTooltip
+                        title="delete"
+                        onClick={handleOpenDelete}
+                    >
+                        <DeleteIcon />
+                    </IconButtonWithTooltip>
+                }
             />
             <CardContent>
-                <Typography variant="subtitle1">{name}</Typography>
+                <Typography variant="subtitle1">
+                    <BrainConnectedButton brain={brain} />
+                    {name}
+                </Typography>
                 <Typography variant="caption">{deviceId}</Typography>
             </CardContent>
             <CardActions>
                 <BrainLiveConnectionButton brain={brain} />
-                <IconButtonWithTooltip
-                    title="delete"
-                    onClick={handleOpenDelete}
-                >
-                    <DeleteIcon />
-                </IconButtonWithTooltip>
             </CardActions>
-            <CardActions></CardActions>
             <Suspense>
                 <ConfirmDialog
                     title="Delete Device?"

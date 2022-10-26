@@ -13,6 +13,15 @@ export const BRAIN_NODE = "brain"
 export const BRAIN_DEVICE_NODE = "brainDevice"
 export const BRAIN_SCRIPT_NODE = "brainScript"
 
+export function timeKey(t?: number) {
+    if (!t) t = Date.now()
+    return (1e10 - Math.round(t / 1000)).toString()
+}
+
+export function dateFromTimeKey(t: string) {
+    return new Date((1e10 - parseInt(t.slice(0, 10))) * 1000)
+}
+
 export class BrainManager extends JDNode {
     private _devices: BrainDevice[]
     private _scripts: BrainScript[]
