@@ -30,7 +30,6 @@ function BrainCard(props: { brain: BrainDevice }) {
                     <DeviceIconFromProductIdentifier
                         productIdentifier={productId}
                         avatar={true}
-                        size="small"
                     />
                 }
                 action={
