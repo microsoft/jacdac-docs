@@ -1,10 +1,10 @@
 import React, { useContext } from "react"
-import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import { BrainDevice } from "./braindom"
 import BrainManagerContext from "./BrainManagerContext"
 import ScreenShareIcon from "@mui/icons-material/ScreenShare"
 import StopScreenShareIcon from "@mui/icons-material/StopScreenShare"
 import CmdButton from "../CmdButton"
+import useChange from "../../jacdac/useChange"
 
 export default function BrainLiveConnectionButton(props: {
     brain: BrainDevice
@@ -12,15 +12,18 @@ export default function BrainLiveConnectionButton(props: {
     const { brain } = props
     const { liveDeviceId, connectLiveDevice } = useContext(BrainManagerContext)
     const { deviceId } = brain
-    const connected = liveDeviceId === deviceId
+    const connected = useChange(brain, _ => _.connected)
+    const selected = liveDeviceId === deviceId
+    const disabled = !connected
 
-    const handleClick = () => connectLiveDevice(connected ? "" : deviceId)
+    const handleClick = () => connectLiveDevice(selected ? "" : deviceId)
 
     return (
         <CmdButton
-            title={connected ? "disconnect live" : "connect live"}
+            title={selected ? "disconnect live" : "connect live"}
             onClick={handleClick}
-            icon={connected ? <StopScreenShareIcon /> : <ScreenShareIcon />}
+            disabled={disabled}
+            icon={selected ? <StopScreenShareIcon /> : <ScreenShareIcon />}
         />
     )
 }
