@@ -27,7 +27,6 @@ export default function BrainManagerTreeItem(
 ) {
     const nodeId = "brain-manager"
     const name = "brains"
-    const description = "Manage remote brains and programs"
     const { brainManager } = useContext(BrainManagerContext)
 
     const handleRefresh = async () => {
@@ -40,8 +39,7 @@ export default function BrainManagerTreeItem(
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
-            labelCaption={description}
-            icon={<CloudQueueIcon fontSize="small" />}
+            icon={<CloudQueueIcon />}
             actions={
                 <CmdButton
                     title="refresh"
