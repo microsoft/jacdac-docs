@@ -17,10 +17,10 @@ import Suspense from "../ui/Suspense"
 import ConfirmDialog from "../shell/ConfirmDialog"
 import useEffectAsync from "../useEffectAsync"
 import DeviceIconFromProductIdentifier from "../devices/DeviceIconFromProductIdentifier"
-import ServiceConnectedIconButton from "../buttons/ServiceConnectedIconButton"
 import BrainLiveConnectionButton from "./BrainLiveConnectionButton"
 import SourceIcon from "@mui/icons-material/Source"
 import ArticleIcon from "@mui/icons-material/Article"
+import BrainConnectedButton from "./BrainConnectedButton"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -198,10 +198,9 @@ function BrainDeviceTreeItem(
         useContext(BrainManagerContext)
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const nodeId = `brain-manager-devices-${id}`
-    const devId = useChange(brain, _ => _.data.id)
+    const devId = brain.deviceId
     const productIdentifier = useChange(brain, _ => _?.data.meta?.productId)
     const data = useChange(brain, _ => _.data)
-    const connected = useChange(brain, _ => _.connected)
     const { name, lastAct, scriptId, scriptVersion } = data
     const script = brainManager.script(scriptId)
     const current = devId === deviceId
@@ -215,10 +214,6 @@ function BrainDeviceTreeItem(
     const handleOpenConfirmDelete = () => setConfirmDeleteOpen(true)
     const handleDelete = async () => {
         await brain.delete()
-    }
-    const handleConnectionClick = ev => {
-        ev.stopPropagation()
-        ev.preventDefault()
     }
 
     return (
@@ -238,10 +233,7 @@ function BrainDeviceTreeItem(
                 actions={
                     <>
                         <BrainLiveConnectionButton brain={brain} />
-                        <ServiceConnectedIconButton
-                            connected={connected}
-                            onClick={handleConnectionClick}
-                        />
+                        <BrainConnectedButton brain={brain} />
                         <IconButtonWithTooltip
                             title="delete"
                             onClick={handleOpenConfirmDelete}
