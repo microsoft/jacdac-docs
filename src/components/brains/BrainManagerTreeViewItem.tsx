@@ -1,8 +1,7 @@
-import React, { useContext, useState } from "react"
+import React, { MouseEvent, useContext, useState } from "react"
 import { JDomTreeViewProps } from "../tools/JDomTreeViewItems"
 import StyledTreeItem, { StyledTreeViewItemProps } from "../ui/StyledTreeItem"
 import CloudQueueIcon from "@mui/icons-material/CloudQueue"
-import CodeIcon from "@mui/icons-material/Code"
 import { DEVICE_NODE_NAME } from "../../../jacdac-ts/src/jdom/constants"
 import BrainManagerContext from "./BrainManagerContext"
 import RefreshIcon from "@mui/icons-material/Refresh"
@@ -16,11 +15,12 @@ import DeleteIcon from "@mui/icons-material/Delete"
 import { navigate } from "gatsby"
 import Suspense from "../ui/Suspense"
 import ConfirmDialog from "../shell/ConfirmDialog"
-import { Button } from "gatsby-theme-material-ui"
 import useEffectAsync from "../useEffectAsync"
 import DeviceIconFromProductIdentifier from "../devices/DeviceIconFromProductIdentifier"
 import ServiceConnectedIconButton from "../buttons/ServiceConnectedIconButton"
 import BrainLiveConnectionButton from "./BrainLiveConnectionButton"
+import SourceIcon from "@mui/icons-material/Source"
+import ArticleIcon from "@mui/icons-material/Article"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -77,7 +77,7 @@ function BrainScriptsTreeItem(
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
-            icon={<CodeIcon fontSize="small" />}
+            icon={<SourceIcon fontSize="small" />}
             actions={
                 <CmdButton
                     title="New script"
@@ -114,7 +114,11 @@ function BrainScriptTreeItem(
         setScriptId(script.scriptId)
         navigate("/editors/jacscript")
     }
-    const handleOpen = () => setConfirmDeleteOpen(true)
+    const handleOpen = (ev: MouseEvent<HTMLButtonElement>) => {
+        ev.stopPropagation()
+        ev.preventDefault()
+        setConfirmDeleteOpen(true)
+    }
     const handleDelete = async () => await script.delete()
 
     return (
@@ -125,12 +129,11 @@ function BrainScriptTreeItem(
                 labelInfo={info}
                 sx={{ fontWeight: current ? "bold" : undefined }}
                 onClick={handleClick}
+                icon={<ArticleIcon fontSize="small" />}
                 actions={
-                    <Button
-                        title="delete"
-                        startIcon={<DeleteIcon color="action" />}
-                        onClick={handleOpen}
-                    />
+                    <IconButtonWithTooltip title="delete" onClick={handleOpen}>
+                        <DeleteIcon color="action" fontSize="small" />
+                    </IconButtonWithTooltip>
                 }
             ></StyledTreeItem>
             <Suspense>
@@ -193,14 +196,20 @@ function BrainDeviceTreeItem(
 ) {
     const { brain } = props
     const { id } = brain
-    const { deviceId, setDeviceId } = useContext(BrainManagerContext)
+    const { brainManager, deviceId, setDeviceId } =
+        useContext(BrainManagerContext)
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const nodeId = `brain-manager-devices-${id}`
     const devId = useChange(brain, _ => _.data.id)
     const productIdentifier = useChange(brain, _ => _?.data.meta?.productId)
-    const name = useChange(brain, _ => _.name)
+    const data = useChange(brain, _ => _.data)
     const connected = useChange(brain, _ => _.connected)
+    const { name, lastAct, scriptId, scriptVersion } = data
+    const script = brainManager.script(scriptId)
     const current = devId === deviceId
+    const caption = scriptId
+        ? `${script?.name || scriptId} v${scriptVersion || ""}`
+        : `no script`
 
     const handleClick = () => {
         setDeviceId(id)
@@ -219,7 +228,7 @@ function BrainDeviceTreeItem(
             <StyledTreeItem
                 nodeId={nodeId}
                 labelText={name}
-                labelCaption={devId}
+                labelCaption={caption}
                 sx={{ fontWeight: current ? "bold" : undefined }}
                 onClick={handleClick}
                 icon={
@@ -239,11 +248,22 @@ function BrainDeviceTreeItem(
                             title="delete"
                             onClick={handleOpenConfirmDelete}
                         >
-                            <DeleteIcon color="action" />
+                            <DeleteIcon color="action" fontSize="small" />
                         </IconButtonWithTooltip>
                     </>
                 }
-            ></StyledTreeItem>{" "}
+            >
+                <StyledTreeItem
+                    nodeId={`${nodeId}-devid`}
+                    labelText={`device id`}
+                    labelInfo={devId}
+                />
+                <StyledTreeItem
+                    nodeId={`${nodeId}-lastacc`}
+                    labelText={`last accessed`}
+                    labelInfo={new Date(lastAct).toLocaleString()}
+                />
+            </StyledTreeItem>
             <Suspense>
                 <ConfirmDialog
                     title="Delete Device?"

@@ -283,6 +283,9 @@ export interface BrainDeviceData extends BrainData {
     name: string
     conn: boolean
     lastAct: string
+    scriptId?: string
+    scriptRev?: string
+    scriptVersion?: number
     meta?: BrainDeviceMeta
 }
 
@@ -324,8 +327,29 @@ export class BrainDevice extends BrainNode<BrainDeviceData> {
         return this.data.id
     }
 
+    get scriptId() {
+        return this.data.scriptId
+    }
+
+    get scriptRev() {
+        return this.data.scriptRev
+    }
+
+    get scriptVersion() {
+        return this.data.scriptVersion
+    }
+
     resolveDevice(): JDDevice {
         return this.manager.bus.device(this.deviceId)
+    }
+
+    async updateScript(scriptId: string, scriptRev: string) {
+        await this.manager.fetchJSON(this.apiPath, {
+            method: "PATCH",
+            body: { scriptId, scriptRev },
+        })
+        // async refresh
+        this.refresh()
     }
 
     async refreshMeta() {
