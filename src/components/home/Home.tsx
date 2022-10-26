@@ -13,17 +13,10 @@ import SubscriptionsIcon from "@mui/icons-material/Subscriptions"
 import DarkModeContext from "../ui/DarkModeContext"
 import Suspense from "../ui/Suspense"
 import { Link } from "gatsby-theme-material-ui"
-import BrainManagerContext from "../brains/BrainManagerContext"
 const DeviceImageList = lazy(() => import("../devices/DeviceImageList"))
-
-export const frontmatter = {
-    title: "Jacdac",
-    path: "/",
-}
 
 export default function Home() {
     const { imgStyle } = useContext(DarkModeContext)
-    const { brainManager } = useContext(BrainManagerContext)
     return (
         <Grid
             container
@@ -33,7 +26,7 @@ export default function Home() {
             alignItems="center"
         >
             <SplitGrid
-                title={brainManager ? "Low Code Things" : "Jacdac"}
+                title="Jacdac"
                 subtitle3="Connect and code electronics. Instantly."
                 imageColumns={6}
                 image={
