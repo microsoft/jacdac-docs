@@ -18,8 +18,8 @@ export class BrainManager extends JDNode {
     private _scripts: BrainScript[]
 
     constructor(
-        readonly bus: JDBus,
-        readonly apiRoot: string,
+        public readonly bus: JDBus,
+        public readonly apiRoot: string,
         readonly token: string
     ) {
         super()

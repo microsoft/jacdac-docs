@@ -179,8 +179,16 @@ function BrainDeviceGridItems() {
 }
 
 export default function BrainHome() {
+    const { brainManager } = useContext(BrainManagerContext)
+    if (!brainManager) return null
     return (
         <Grid container spacing={2}>
+            <Grid item xs={12}>
+                <Typography variant="subtitle2">
+                    connected to{" "}
+                    <a href={brainManager.apiRoot}>{brainManager.apiRoot}</a>
+                </Typography>
+            </Grid>
             <BrainScriptGridItems />
             <BrainDeviceGridItems />
         </Grid>
