@@ -7,7 +7,7 @@ import React, {
 } from "react"
 import useBus from "../../jacdac/useBus"
 import useChange from "../../jacdac/useChange"
-import useLocalStorage from "../hooks/useLocalStorage"
+import useLocalStorage, { getLocalStorageItem } from "../hooks/useLocalStorage"
 import useEffectAsync from "../useEffectAsync"
 import { BrainManager } from "./braindom"
 import WebSocketBridge from "./WebSocketBridge"
@@ -40,14 +40,21 @@ BrainManagerContext.displayName = "brains"
 
 export default BrainManagerContext
 
+const DOMAIN_KEY = "brain-manager-domain"
+const TOKEN_KEY = "brain-manager-token"
+
+export function isBrainManagerEnabled() {
+    return !!getLocalStorageItem(DOMAIN_KEY) && !!getLocalStorageItem(TOKEN_KEY)
+}
+
 // eslint-disable-next-line react/prop-types
 export const BrainManagerProvider = ({ children }) => {
     const bus = useBus()
     const [domain, _setDomain] = useLocalStorage(
-        "brain-manager-domain",
+        DOMAIN_KEY,
         "jacdac-portal2.azurewebsites.net"
     )
-    const [token, setToken] = useLocalStorage("brain-manager-token")
+    const [token, setToken] = useLocalStorage(TOKEN_KEY)
     const brainManager = useMemo(
         () =>
             token && domain ? new BrainManager(bus, domain, token) : undefined,
