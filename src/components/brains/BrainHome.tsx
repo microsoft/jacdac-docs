@@ -15,6 +15,8 @@ import BrainManagerContext from "./BrainManagerContext"
 import GridHeader from "../ui/GridHeader"
 import BrainLiveConnectionButton from "./BrainLiveConnectionButton"
 import { shortDeviceId } from "../../../jacdac-ts/src/jacdac"
+import CmdButton from "../CmdButton"
+import RefreshIcon from "@mui/icons-material/Refresh"
 
 function BrainCard(props: { brain: BrainDevice }) {
     const { brain } = props
@@ -51,9 +53,20 @@ function BrainCard(props: { brain: BrainDevice }) {
 export default function BrainHome() {
     const { brainManager } = useContext(BrainManagerContext)
     const brains = useChange(brainManager, _ => _?.devices())
+
+    const handleRefreshDevices = () => brainManager?.refreshDevices()
     return (
         <Grid container spacing={2}>
-            <GridHeader title="Devices" />
+            <GridHeader
+                title="Devices"
+                action={
+                    <CmdButton
+                        onClick={handleRefreshDevices}
+                        icon={<RefreshIcon />}
+                        disabled={!brainManager}
+                    />
+                }
+            />
             {brains?.map(brain => (
                 <Grid item key={brain.id}>
                     <BrainCard brain={brain} />
