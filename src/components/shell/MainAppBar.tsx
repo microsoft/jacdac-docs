@@ -124,7 +124,7 @@ function MainToolbar() {
                     style={{
                         color: UIFlags.widget ? "black" : "white",
                     }}
-                    to={"/"}
+                    to={brainManager ? "/brains" : "/"}
                     underline="hover"
                 >
                     {brainManager ? `Low Code Things` : `Jacdac`}
