@@ -44,7 +44,7 @@ const DOMAIN_KEY = "brain-manager-domain"
 const TOKEN_KEY = "brain-manager-token"
 
 export function isBrainManagerEnabled() {
-    return !!getLocalStorageItem(DOMAIN_KEY) && !!getLocalStorageItem(TOKEN_KEY)
+    return !!getLocalStorageItem(TOKEN_KEY)
 }
 
 // eslint-disable-next-line react/prop-types

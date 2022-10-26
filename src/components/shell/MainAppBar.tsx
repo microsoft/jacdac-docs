@@ -147,19 +147,21 @@ function MainToolbar() {
                 full={"disconnected"}
             />
             <OpenDashboardButton className={clsx(classes.menuButton)} />
-            <IconButtonWithTooltip
-                className={clsx(
-                    classes.menuButton,
-                    drawerOpen && classes.hideMobile
-                )}
-                aria-label="More tools"
-                title="More"
-                edge="start"
-                color="inherit"
-                onClick={toggleToolsMenu}
-            >
-                <MoreIcon />
-            </IconButtonWithTooltip>
+            {!brainManager && (
+                <IconButtonWithTooltip
+                    className={clsx(
+                        classes.menuButton,
+                        drawerOpen && classes.hideMobile
+                    )}
+                    aria-label="More tools"
+                    title="More"
+                    edge="start"
+                    color="inherit"
+                    onClick={toggleToolsMenu}
+                >
+                    <MoreIcon />
+                </IconButtonWithTooltip>
+            )}
         </Toolbar>
     )
 }
