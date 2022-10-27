@@ -301,7 +301,8 @@ export interface BrainDeviceData extends BrainData {
 
 export interface BrainDeviceConnectionInfo {
     url: string
-    protocols: string | string[]
+    protocols: string
+    expires: number
 }
 
 export class BrainDevice extends BrainNode<BrainDeviceData> {
@@ -389,10 +390,9 @@ export class BrainDevice extends BrainNode<BrainDeviceData> {
     }
 
     async createConnection(): Promise<BrainDeviceConnectionInfo> {
-        return await this.manager.fetchJSON(
-            `devices/${this.data.id}/socketaddr`,
-            { method: "GET" }
-        )
+        return await this.manager.fetchJSON(`devices/${this.data.id}/fwd`, {
+            method: "GET",
+        })
     }
 }
 
