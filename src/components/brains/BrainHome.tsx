@@ -34,6 +34,12 @@ function BrainScriptCard(props: { script: BrainScript }) {
     const { setScriptId } = useContext(BrainManagerContext)
     const name = useChange(script, _ => _.name)
     const version = useChange(script, _ => _.version)
+    const creationTime = useChange(
+        script,
+        _ => _.creationTime,
+        [],
+        (a, b) => a?.toLocaleString() === b?.toLocaleString()
+    )
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
     const handleDelete = async () => await script.delete()
     const handleOpenDelete = (ev: MouseEvent<HTMLButtonElement>) => {
@@ -67,6 +73,11 @@ function BrainScriptCard(props: { script: BrainScript }) {
                             v{version}
                         </Typography>
                     </Typography>
+                    {creationTime && (
+                        <Typography variant="subtitle2">
+                            {creationTime.toLocaleString()}
+                        </Typography>
+                    )}
                 </CardContent>
             </CardActionArea>
             <Suspense>

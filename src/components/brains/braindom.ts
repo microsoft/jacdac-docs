@@ -13,12 +13,13 @@ export const BRAIN_NODE = "brain"
 export const BRAIN_DEVICE_NODE = "brainDevice"
 export const BRAIN_SCRIPT_NODE = "brainScript"
 
-export function timeKey(t?: number) {
+/*function timeKey(t?: number) {
     if (!t) t = Date.now()
     return (1e10 - Math.round(t / 1000)).toString()
-}
+}*/
 
-export function dateFromTimeKey(t: string) {
+function dateFromTimeKey(t: string) {
+    if (t === undefined) return undefined
     return new Date((1e10 - parseInt(t.slice(0, 10))) * 1000)
 }
 
@@ -428,6 +429,10 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     }
     get scriptId() {
         return this.data.id
+    }
+    get creationTime(): Date | undefined {
+        const { head } = this.data
+        return dateFromTimeKey(head)
     }
     async updateName(name: string) {
         if (!name || name === this.data.name) return
