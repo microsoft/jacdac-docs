@@ -245,7 +245,9 @@ export default function BrainHome() {
             <Grid item xs={12}>
                 <Typography variant="subtitle2">
                     connected to{" "}
-                    <a href={brainManager.apiRoot}>{brainManager.apiRoot}</a>
+                    <a href={`https://${brainManager.apiRoot}/swagger/`}>
+                        {brainManager.apiRoot}
+                    </a>
                 </Typography>
             </Grid>
             <BrainScriptGridItems />
