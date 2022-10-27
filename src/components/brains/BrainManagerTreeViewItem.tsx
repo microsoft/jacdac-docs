@@ -20,6 +20,7 @@ import BrainLiveConnectionButton from "./BrainLiveConnectionButton"
 import SourceIcon from "@mui/icons-material/Source"
 import ArticleIcon from "@mui/icons-material/Article"
 import BrainConnectedButton from "./BrainConnectedButton"
+import { shortDeviceId } from "../../../jacdac-ts/src/jdom/pretty"
 
 export default function BrainManagerTreeItem(
     props: StyledTreeViewItemProps & JDomTreeViewProps
@@ -104,7 +105,8 @@ function BrainScriptTreeItem(
     const version = useChange(script, _ => _.version)
     const nodeId = `brain-manager-programs-${id}`
     const current = id === scriptId
-    const info = `v${version || ""}`
+    const caption = `v${version || ""}`
+    const info = useChange(script, _ => _.creationTime?.toLocaleString())
 
     const handleClick = () => {
         setScriptId(script.scriptId)
@@ -115,6 +117,7 @@ function BrainScriptTreeItem(
         <StyledTreeItem
             nodeId={nodeId}
             labelText={name}
+            labelCaption={caption}
             labelInfo={info}
             sx={{ fontWeight: current ? "bold" : undefined }}
             onClick={handleClick}
@@ -189,7 +192,7 @@ function BrainDeviceTreeItem(
     return (
         <StyledTreeItem
             nodeId={nodeId}
-            labelText={name}
+            labelText={`${shortDeviceId(devId)}, ${name}`}
             labelCaption={caption}
             sx={{ fontWeight: current ? "bold" : undefined }}
             onClick={handleClick}
@@ -202,14 +205,8 @@ function BrainDeviceTreeItem(
             actions={<BrainConnectedButton brain={brain} />}
         >
             <StyledTreeItem
-                nodeId={`${nodeId}-devid`}
-                labelText={`device id`}
-                labelInfo={devId}
-            />
-            <StyledTreeItem
-                nodeId={`${nodeId}-lastacc`}
-                labelText={`last accessed`}
-                labelInfo={new Date(lastAct).toLocaleString()}
+                nodeId={`${nodeId}-info`}
+                labelText={`${devId}, ${new Date(lastAct).toLocaleString()}`}
             />
         </StyledTreeItem>
     )
