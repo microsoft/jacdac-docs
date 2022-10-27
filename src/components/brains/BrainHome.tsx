@@ -27,6 +27,8 @@ import DeleteIcon from "@mui/icons-material/Delete"
 import { navigate } from "gatsby"
 import SelectWithLabel from "../ui/SelectWithLabel"
 import { Button } from "gatsby-theme-material-ui"
+import AddIcon from "@mui/icons-material/Add"
+
 const ConfirmDialog = lazy(() => import("../shell/ConfirmDialog"))
 
 function BrainScriptCard(props: { script: BrainScript }) {
@@ -201,20 +203,37 @@ function BrainDeviceCard(props: { brain: BrainDevice }) {
 }
 
 function BrainScriptGridItems() {
-    const { brainManager } = useContext(BrainManagerContext)
+    const { brainManager, setScriptId } = useContext(BrainManagerContext)
     const scripts = useChange(brainManager, _ => _?.scripts())
 
     const handleRefresh = () => brainManager?.refreshScripts()
+    const handleNewScript = async () => {
+        const scriptId = await brainManager.createScript("new script")
+        if (scriptId) {
+            setScriptId(scriptId)
+            navigate("/editors/jacscript")
+        }
+    }
+
     return (
         <>
             <GridHeader
                 title="Scripts"
                 action={
-                    <CmdButton
-                        onClick={handleRefresh}
-                        icon={<RefreshIcon />}
-                        disabled={!brainManager}
-                    />
+                    <>
+                        <CmdButton
+                            title="new script"
+                            onClick={handleNewScript}
+                            icon={<AddIcon />}
+                            disabled={!brainManager}
+                        />
+                        <CmdButton
+                            title="refresh"
+                            onClick={handleRefresh}
+                            icon={<RefreshIcon />}
+                            disabled={!brainManager}
+                        />
+                    </>
                 }
             />
             {scripts?.map(script => (
