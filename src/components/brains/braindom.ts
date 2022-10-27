@@ -352,7 +352,7 @@ export class BrainDevice extends BrainNode<BrainDeviceData> {
         return this.manager.bus.device(this.deviceId)
     }
 
-    async updateScript(scriptId: string, scriptRev: string) {
+    async updateScript(scriptId: string, scriptRev?: number) {
         await this.manager.fetchJSON(this.apiPath, {
             method: "PATCH",
             body: { scriptId, scriptRev },
