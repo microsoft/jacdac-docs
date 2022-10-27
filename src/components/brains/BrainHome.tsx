@@ -26,6 +26,7 @@ import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import DeleteIcon from "@mui/icons-material/Delete"
 import { navigate } from "gatsby"
 import SelectWithLabel from "../ui/SelectWithLabel"
+import { Button } from "gatsby-theme-material-ui"
 const ConfirmDialog = lazy(() => import("../shell/ConfirmDialog"))
 
 function BrainScriptCard(props: { script: BrainScript }) {
@@ -54,32 +55,35 @@ function BrainScriptCard(props: { script: BrainScript }) {
 
     return (
         <Card>
-            <CardActionArea onClick={handleOpen}>
-                <CardHeader
-                    avatar={<ArticleIcon />}
-                    action={
-                        <IconButtonWithTooltip
-                            title="delete"
-                            onClick={handleOpenDelete}
-                        >
-                            <DeleteIcon />
-                        </IconButtonWithTooltip>
-                    }
-                />
-                <CardContent>
-                    <Typography variant="subtitle1">
-                        {name}{" "}
-                        <Typography component="span" variant="caption">
-                            v{version}
-                        </Typography>
+            <CardHeader
+                avatar={<ArticleIcon />}
+                action={
+                    <IconButtonWithTooltip
+                        title="delete"
+                        onClick={handleOpenDelete}
+                    >
+                        <DeleteIcon />
+                    </IconButtonWithTooltip>
+                }
+            />
+            <CardContent>
+                <Typography variant="subtitle1">
+                    {name}{" "}
+                    <Typography component="span" variant="caption">
+                        v{version}
                     </Typography>
-                    {creationTime && (
-                        <Typography variant="subtitle2">
-                            {creationTime.toLocaleString()}
-                        </Typography>
-                    )}
-                </CardContent>
-            </CardActionArea>
+                </Typography>
+                {creationTime && (
+                    <Typography variant="subtitle2">
+                        {creationTime.toLocaleString()}
+                    </Typography>
+                )}
+            </CardContent>
+            <CardActions>
+                <Button variant="outlined" onClick={handleOpen}>
+                    Open
+                </Button>
+            </CardActions>
             <Suspense>
                 <ConfirmDialog
                     title="Delete Script?"
