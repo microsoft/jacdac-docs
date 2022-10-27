@@ -13,29 +13,16 @@ import { WorkspaceFile } from "../blockly/dsl/workspacejson"
 import useJacscript from "./JacscriptContext"
 import useBrainScript from "../brains/useBrainScript"
 import { JSONTryParse, toHex } from "../../../jacdac-ts/src/jdom/utils"
-import Alert from "../ui/Alert"
-
-function ProgramModifiedAlertItem(props: { script: BrainScript }) {
-    const { script } = props
-    const sourceBlocks = useChange(script, _ => _.sourceBlocks)
-    const { workspaceSaved } = useContext(BlockContext)
-
-    const ws = JSON.stringify(workspaceSaved)
-    if (!workspaceSaved || !sourceBlocks || sourceBlocks === ws) return null
-
-    return (
-        <Grid item xs={12}>
-            <Alert severity="warning">
-                Program modified, do not forget to save your changes.
-            </Alert>
-        </Grid>
-    )
-}
 
 function SaveScriptButton(props: { script: BrainScript; name: string }) {
     const { script, name } = props
     const { workspaceSaved } = useContext(BlockContext)
     const { program, compiled } = useJacscript()
+
+    const sourceBlocks = useChange(script, _ => _.sourceBlocks)
+    const ws = JSON.stringify(workspaceSaved)
+    const changed = name !== script.name || sourceBlocks !== ws
+
     const handleUpload = async () => {
         if (name && name !== script.name) await script.updateName(name)
         await script.uploadBody({
@@ -48,7 +35,8 @@ function SaveScriptButton(props: { script: BrainScript; name: string }) {
         <CmdButton
             icon={<CloudUploadIcon />}
             onClick={handleUpload}
-            variant="outlined"
+            color={changed ? "warning" : "primary"}
+            variant={changed ? "contained" : "outlined"}
         >
             Save
         </CmdButton>
@@ -67,7 +55,6 @@ function BrainManagerToolbar(props: { script: BrainScript }) {
 
     return (
         <Grid sx={{ mt: 0.5, mb: 0.5 }} container direction="row" spacing={1}>
-            <ProgramModifiedAlertItem script={script} />
             <Grid item xs>
                 <TextField
                     fullWidth
