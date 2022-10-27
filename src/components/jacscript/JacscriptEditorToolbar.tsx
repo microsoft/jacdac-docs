@@ -13,6 +13,24 @@ import { WorkspaceFile } from "../blockly/dsl/workspacejson"
 import useJacscript from "./JacscriptContext"
 import useBrainScript from "../brains/useBrainScript"
 import { JSONTryParse, toHex } from "../../../jacdac-ts/src/jdom/utils"
+import Alert from "../ui/Alert"
+
+function ProgramModifiedAlertItem(props: { script: BrainScript }) {
+    const { script } = props
+    const sourceBlocks = useChange(script, _ => _.sourceBlocks)
+    const { workspaceSaved } = useContext(BlockContext)
+
+    const ws = JSON.stringify(workspaceSaved)
+    if (!workspaceSaved || !sourceBlocks || sourceBlocks === ws) return null
+
+    return (
+        <Grid item xs={12}>
+            <Alert severity="warning">
+                Program modified, do not forget to save your changes.
+            </Alert>
+        </Grid>
+    )
+}
 
 function SaveScriptButton(props: { script: BrainScript; name: string }) {
     const { script, name } = props
@@ -49,6 +67,7 @@ function BrainManagerToolbar(props: { script: BrainScript }) {
 
     return (
         <Grid sx={{ mt: 0.5, mb: 0.5 }} container direction="row" spacing={1}>
+            <ProgramModifiedAlertItem script={script} />
             <Grid item xs>
                 <TextField
                     fullWidth
@@ -75,7 +94,8 @@ function useBrainScriptInBlocks(script: BrainScript) {
         if (!script || !workspace) return
 
         // fetch latest body
-        const body = await script.refreshBody()
+        await script.refreshBody()
+        const body = script.body
 
         // update context
         if (!body) return

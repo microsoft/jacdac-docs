@@ -447,17 +447,32 @@ export class BrainScript extends BrainNode<BrainScriptData> {
     get displayName(): string {
         return `${this.name} ${this.data.version || ""}`
     }
+
     get body(): BrainScriptBody {
         return this._body
     }
 
-    async refreshBody() {
-        return (this._body = await this.manager.fetchJSON(
+    get sourceBlocks(): string {
+        return this.body?.blocks
+    }
+
+    get sourceText(): string {
+        return this.body?.text
+    }
+
+    async refreshBody(): Promise<void> {
+        console.debug(`refresh body`)
+        const newBody = (await this.manager.fetchJSON(
             `${this.apiPath}/body`
-        ))
+        )) as BrainScriptBody
+        if (JSON.stringify(this._body) !== JSON.stringify(newBody)) {
+            this._body = newBody
+            this.emit(CHANGE)
+        }
     }
 
     async uploadBody(body: BrainScriptBody) {
+        console.debug(`upload body`)
         const resp: BrainScriptData = await this.manager.fetchJSON(
             `${this.apiPath}/body`,
             {
