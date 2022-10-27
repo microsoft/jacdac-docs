@@ -183,7 +183,7 @@ function LayoutWithMdx(props: LayoutProps) {
     const themeDef: DeprecatedThemeOptions = {
         palette: {
             primary: {
-                main: isBrain ? "#00A4EF" : isDark ? "#56d364" : "#2e7d32",
+                main: isBrain ? "#0074cF" : isDark ? "#56d364" : "#2e7d32",
             },
             secondary: {
                 main: "#ffc400",
