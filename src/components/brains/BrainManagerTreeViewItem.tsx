@@ -203,7 +203,8 @@ function BrainDeviceTreeItem(
         >
             <StyledTreeItem
                 nodeId={`${nodeId}-info`}
-                labelText={`${devId}, ${new Date(lastAct).toLocaleString()}`}
+                labelText={devId}
+                labelInfo={lastAct ? new Date(lastAct).toLocaleString() : ""}
             />
         </StyledTreeItem>
     )
