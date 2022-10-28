@@ -4,7 +4,7 @@ import BrainManagerContext from "../components/brains/BrainManagerContext"
 
 import CoreHead from "../components/shell/Head"
 export const frontmatter = {
-    title: "Low Code Things",
+    title: "Low-Code Connected Things",
 }
 export const Head = props => <CoreHead {...props} {...frontmatter} />
 
