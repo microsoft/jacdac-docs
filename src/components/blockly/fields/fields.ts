@@ -26,7 +26,6 @@ import VegaChartField from "./chart/VegaChartField"
 
 import FileSaveField from "./FileSaveField"
 import FileOpenField from "./FileOpenField"
-import UseModelField from "./UseModelField"
 
 import JSONSettingsField from "./JSONSettingsField"
 import IFrameDataChooserField from "./IFrameDataChooserField"
@@ -79,7 +78,6 @@ export function registerFields() {
 
         FileSaveField,
         FileOpenField,
-        UseModelField,
 
         JSONSettingsField,
 
