@@ -1,4 +1,6 @@
-importScripts("https://microsoft.github.io/jacscript/dist/jacscript-compiler.js")
+importScripts(
+    "https://microsoft.github.io/jacscript/dist/jacscript-compiler.js"
+)
 
 const { compile } = (self as any).jacscript
 
@@ -35,7 +37,7 @@ export interface JacscriptCompileResponse extends JacscriptMessage {
     errors: JacscriptError[]
 }
 
-class WorkerHost implements Host {
+class WorkerHost {
     files: Record<string, Uint8Array | string>
     logs: string
     errors: JacError[]
@@ -47,7 +49,9 @@ class WorkerHost implements Host {
 
         this.error = this.error.bind(this)
     }
-
+    mainFileName() {
+        return ""
+    }
     write(filename: string, contents: Uint8Array | string) {
         this.files[filename] = contents
     }
@@ -71,7 +75,7 @@ const handlers: { [index: string]: (props: any) => object | Promise<object> } =
             const { source } = props
             if (!serviceSpecs) throw new Error("specs missing")
             const host = new WorkerHost(serviceSpecs)
-            const res = compile(host, source)
+            const res = compile(source, { host })
 
             return <Partial<JacscriptCompileResponse>>{
                 ...res,
