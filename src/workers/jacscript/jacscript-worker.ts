@@ -1,9 +1,10 @@
-import { compile, JacError, Host } from "jacscript-compiler"
-import type { DebugInfo } from "jacscript-compiler"
+importScripts("https://microsoft.github.io/jacscript/dist/jacscript-compiler.js")
 
-export type JacscriptError = JacError
+const { compile } = (self as any).jacscript
 
-export type JacscriptDebugInfo = DebugInfo
+export type JacscriptDebugInfo = any
+export type JacscriptError = any
+export type JacError = any
 
 export interface JacscriptMessage {
     worker: "jacscript"
@@ -59,7 +60,7 @@ class WorkerHost implements Host {
     getSpecs(): jdspec.ServiceSpec[] {
         return this.specs
     }
-    verifyBytecode(buf: Uint8Array, dbg?: DebugInfo): void {}
+    verifyBytecode(buf: Uint8Array, dbg?: JacscriptDebugInfo): void {}
 }
 
 let serviceSpecs: jdspec.ServiceSpec[]
