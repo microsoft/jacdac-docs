@@ -55,7 +55,7 @@ export function DeviceScriptProvider(props: { children: ReactNode }) {
     const [compiled, setCompiled] = useState<DeviceScriptCompileResponse>()
     const [manager, setManager] = useState<JDService>(undefined)
     const [vmUsed, setVmUsed] = useState(0)
-    const jacscript = !!UIFlags.jacscriptvm
+    const devicescriptvm = !!UIFlags.devicescriptvm
     const [debouncedSource] = useDebounce(source, 1000)
 
     // keep track of source without re-render
@@ -149,7 +149,7 @@ export function DeviceScriptProvider(props: { children: ReactNode }) {
             }}
         >
             {children}
-            {!!(jacscript || vmUsed) && (
+            {!!(devicescriptvm || vmUsed) && (
                 <Suspense>
                     <DeviceScriptVMLoader />
                 </Suspense>

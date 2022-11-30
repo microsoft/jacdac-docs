@@ -94,8 +94,7 @@ function sniffQueryArguments() {
         transient: params.get("transient") === "1",
         persistent: params.get("persistent") === "1" || isLocalhost,
         footer: params.get("footer") !== "0",
-        jacscriptvm:
-            params.get("devicescript") === "1",
+        devicescriptvm: params.get("devicescript") === "1",
         resetIn: params.get("resetin") === "1",
         serialVendorIds: (params.get("serialvendorids") || "")
             .split(/,/g)
@@ -123,7 +122,7 @@ export class UIFlags {
     static connect = args.connect
     static transient = args.transient
     static persistent = args.persistent
-    static jacscriptvm = args.jacscriptvm
+    static devicescriptvm = args.devicescriptvm
     static resetIn = args.resetIn
     static footer = args.footer
 }
