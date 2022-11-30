@@ -18,9 +18,9 @@ import { defaultDeviceFilter, defaultDeviceSort } from "./filters"
 import useHostedSimulators from "../HostedSimulatorsContext"
 import StartMissingSimulatorsButton from "../buttons/StartMissingSimulatorsButton"
 import useBusWithMode from "../../jacdac/useBusWithMode"
-import useJacscript from "../devicescript/JacscriptContext"
+import useDeviceScript from "../devicescript/DeviceScriptContext"
 import Suspense from "../ui/Suspense"
-const JacscriptToolbar = lazy(() => import("../devicescript/JacscriptToolbar"))
+const DeviceScriptToolbar = lazy(() => import("../devicescript/DeviceScriptToolbar"))
 
 export interface DashboardDeviceProps {
     showHeader?: boolean
@@ -63,7 +63,7 @@ export default function Dashboard(props: DashboardProps) {
         deviceFilter = defaultDeviceFilter,
         ...other
     } = props
-    const { source: jacscriptSource } = useJacscript()
+    const { source: jacscriptSource } = useDeviceScript()
     const bus = useBusWithMode({ autoConnect: true })
     const { isHostedSimulator, clearHostedSimulators } = useHostedSimulators()
     const devices = useDevices({
@@ -87,7 +87,7 @@ export default function Dashboard(props: DashboardProps) {
         <>
             {showDeviceScript && jacscriptSource !== undefined && (
                 <Suspense>
-                    <JacscriptToolbar />
+                    <DeviceScriptToolbar />
                 </Suspense>
             )}
             {!hideSimulators && (

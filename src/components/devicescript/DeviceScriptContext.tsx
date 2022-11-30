@@ -18,14 +18,14 @@ import {
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import useWindowEvent from "../hooks/useWindowEvent"
 import { JSONTryParse } from "../../../jacdac-ts/src/jdom/utils"
-import JacscriptVMLoader from "./JacscriptVMLoader"
+import DeviceScriptVMLoader from "./DeviceScriptVMLoader"
 import Suspense from "../ui/Suspense"
 import { UIFlags } from "../../jacdac/providerbus"
 import { useDebounce } from "use-debounce"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import useBus from "../../jacdac/useBus"
 
-export interface JacscriptProps {
+export interface DeviceScriptProps {
     source?: string
     setSource: (program: string) => void
     compilePending?: boolean
@@ -36,7 +36,7 @@ export interface JacscriptProps {
     acquireVm: () => () => void
 }
 
-export const JacscriptContext = createContext<JacscriptProps>({
+export const DeviceScriptContext = createContext<DeviceScriptProps>({
     source: undefined,
     setSource: () => {},
     compiled: undefined,
@@ -45,9 +45,9 @@ export const JacscriptContext = createContext<JacscriptProps>({
     setManager: () => {},
     acquireVm: () => () => {},
 })
-JacscriptContext.displayName = "DeviceScript"
+DeviceScriptContext.displayName = "DeviceScript"
 
-export function JacscriptProvider(props: { children: ReactNode }) {
+export function DeviceScriptProvider(props: { children: ReactNode }) {
     const { children } = props
     const bus = useBus()
     const [source, setSource_] = useState<string>(undefined)
@@ -137,7 +137,7 @@ export function JacscriptProvider(props: { children: ReactNode }) {
     )
 
     return (
-        <JacscriptContext.Provider
+        <DeviceScriptContext.Provider
             value={{
                 source,
                 setSource,
@@ -151,15 +151,15 @@ export function JacscriptProvider(props: { children: ReactNode }) {
             {children}
             {!!(jacscript || vmUsed) && (
                 <Suspense>
-                    <JacscriptVMLoader />
+                    <DeviceScriptVMLoader />
                 </Suspense>
             )}
-        </JacscriptContext.Provider>
+        </DeviceScriptContext.Provider>
     )
 }
 
-export default function useJacscript(): JacscriptProps {
-    const res = useContext<JacscriptProps>(JacscriptContext)
+export default function useDeviceScript(): DeviceScriptProps {
+    const res = useContext<DeviceScriptProps>(DeviceScriptContext)
     return (
         res || {
             setSource: () => {},

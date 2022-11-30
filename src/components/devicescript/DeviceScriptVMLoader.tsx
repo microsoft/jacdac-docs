@@ -12,7 +12,7 @@ import useWindowEvent from "../hooks/useWindowEvent"
  * Ensures that at least one jacscript VM is running
  * @returns
  */
-export default function JacscriptVMLoader() {
+export default function DeviceScriptVMLoader() {
     const managers = useServices({ serviceClass: SRV_DEVICE_SCRIPT_MANAGER })
     const manager = managers[0]
     const vmCleanup = useRef<() => void>()

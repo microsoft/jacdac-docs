@@ -13,15 +13,15 @@ import useEffectAsync from "../useEffectAsync"
 import useEvent from "../hooks/useEvent"
 import { EVENT } from "../../../jacdac-ts/src/jdom/constants"
 import { OutPipe } from "../../../jacdac-ts/src/jdom/pipes"
-import useJacscript from "./JacscriptContext"
+import useDeviceScript from "./DeviceScriptContext"
 
-export default function JacscriptManagerChip(props: {
+export default function DeviceScriptManagerChip(props: {
     service: JDService
     selected: boolean
     setSelected: () => void
 }) {
     const { service, selected, setSelected } = props
-    const { compiled: jscCompiled } = useJacscript()
+    const { compiled: jscCompiled } = useDeviceScript()
     const [deploying, setDeploying] = useState(false)
     const [deployError, setDeployError] = useState<Error>(undefined)
 

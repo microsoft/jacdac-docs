@@ -1,5 +1,5 @@
 import React from "react"
-import JacscriptTextEditor from "../../components/devicescript/JacscriptTextEditor"
+import DeviceScriptTextEditor from "../../components/devicescript/DeviceScriptTextEditor"
 
 export const frontmatter = {
     title: "DeviceScript Editor",
@@ -9,5 +9,5 @@ import CoreHead from "../../components/shell/Head"
 export const Head = props => <CoreHead {...props} {...frontmatter} />
 
 export default function Page() {
-    return <JacscriptTextEditor />
+    return <DeviceScriptTextEditor />
 }
