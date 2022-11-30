@@ -18,7 +18,7 @@ import {
     useRegisterUnpackedValue,
 } from "../../jacdac/useRegisterValue"
 
-export default function DashboardJacscriptManager(
+export default function DashboardDeviceScriptManager(
     props: DashboardServiceProps
 ) {
     const { service, expanded, ...rest } = props

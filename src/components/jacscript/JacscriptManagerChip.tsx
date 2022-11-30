@@ -2,8 +2,8 @@ import { Chip } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import useRegister from "../hooks/useRegister"
 import {
-    JacscriptManagerCmd,
-    JacscriptManagerReg,
+    DeviceScriptManagerCmd,
+    DeviceScriptManagerReg,
     SystemEvent,
 } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
@@ -29,7 +29,7 @@ export default function JacscriptManagerChip(props: {
         service,
         SystemEvent.StatusCodeChanged
     )
-    const runningRegister = useRegister(service, JacscriptManagerReg.Running)
+    const runningRegister = useRegister(service, DeviceScriptManagerReg.Running)
     const running = useRegisterBoolValue(runningRegister, { visible: true })
 
     useEffect(
@@ -42,7 +42,7 @@ export default function JacscriptManagerChip(props: {
 
     const autoStartRegister = useRegister(
         service,
-        JacscriptManagerReg.Autostart
+        DeviceScriptManagerReg.Autostart
     )
 
     const stopped = !running
@@ -82,7 +82,7 @@ export default function JacscriptManagerChip(props: {
             setDeployError(undefined)
             await OutPipe.sendBytes(
                 service,
-                JacscriptManagerCmd.DeployBytecode,
+                DeviceScriptManagerCmd.DeployBytecode,
                 binary || new Uint8Array(0)
             )
         } catch (e) {
