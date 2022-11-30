@@ -1,5 +1,5 @@
 importScripts(
-    "https://microsoft.github.io/jacscript/dist/jacscript-compiler.js"
+    "https://microsoft.github.io/jacscript/dist/devicescript-compiler.js"
 )
 
 const { compile } = (self as any).jacscript
@@ -8,26 +8,26 @@ export type JacscriptDebugInfo = any
 export type JacscriptError = any
 export type JacError = any
 
-export interface JacscriptMessage {
-    worker: "jacscript"
+export interface DeviceScriptMessage {
+    worker: "devicescript"
     id?: string
 }
 
-export interface JacscriptRequest extends JacscriptMessage {
+export interface DeviceScriptRequest extends DeviceScriptMessage {
     type: string
 }
 
-export interface JacscriptCompileRequest extends JacscriptRequest {
+export interface DeviceScriptCompileRequest extends DeviceScriptRequest {
     type: "compile"
     source: string
 }
 
-export interface JacscriptSpecsRequest extends JacscriptRequest {
+export interface DeviceScriptSpecsRequest extends DeviceScriptRequest {
     type: "specs"
     serviceSpecs: jdspec.ServiceSpec[]
 }
 
-export interface JacscriptCompileResponse extends JacscriptMessage {
+export interface DeviceScriptCompileResponse extends DeviceScriptMessage {
     success: boolean
     binary: Uint8Array
     dbg: JacscriptDebugInfo
@@ -77,26 +77,26 @@ let serviceSpecs: jdspec.ServiceSpec[]
 
 const handlers: { [index: string]: (props: any) => object | Promise<object> } =
     {
-        compile: async (props: JacscriptCompileRequest) => {
+        compile: async (props: DeviceScriptCompileRequest) => {
             const { source } = props
             if (!serviceSpecs) throw new Error("specs missing")
             const host = new WorkerHost(serviceSpecs)
             const res = compile(source, { host })
 
-            return <Partial<JacscriptCompileResponse>>{
+            return <Partial<DeviceScriptCompileResponse>>{
                 ...res,
                 files: host.files,
                 logs: host.logs,
                 errors: host.errors,
             }
         },
-        specs: async (props: JacscriptSpecsRequest) => {
+        specs: async (props: DeviceScriptSpecsRequest) => {
             serviceSpecs = props.serviceSpecs
             return {}
         },
     }
 
-function processMessage(message: JacscriptRequest): any {
+function processMessage(message: DeviceScriptRequest): any {
     try {
         const handler = handlers[message.type]
         return handler?.(message)
@@ -107,10 +107,10 @@ function processMessage(message: JacscriptRequest): any {
 }
 
 async function handleMessage(event: MessageEvent) {
-    const message: JacscriptRequest = event.data
+    const message: DeviceScriptRequest = event.data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, worker, type, ...rest } = message
-    if (worker !== "jacscript") return
+    if (worker !== "devicescript") return
 
     try {
         const result = await processMessage(message)
@@ -119,7 +119,7 @@ async function handleMessage(event: MessageEvent) {
             self.postMessage(resp)
         }
     } catch (e) {
-        console.debug(`jacscript: error ${e + ""}`, e)
+        console.debug(`devicescript: error ${e + ""}`, e)
         self.postMessage({
             id,
             type,
