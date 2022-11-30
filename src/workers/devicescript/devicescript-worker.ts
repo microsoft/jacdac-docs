@@ -39,7 +39,7 @@ export interface DeviceScriptCompileResponse extends DeviceScriptMessage {
 class WorkerHost {
     files: Record<string, Uint8Array | string>
     logs: string
-    errors: JacError[]
+    errors: { filename: string; message: string; line: number }[]
 
     constructor(private specs: jdspec.ServiceSpec[]) {
         this.files = {}
