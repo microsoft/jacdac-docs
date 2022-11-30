@@ -19,7 +19,7 @@ import { addDataPreviewField } from "./fields/DataPreviewField"
 import { WorkspaceJSON } from "./dsl/workspacejson"
 import useAsyncMemo from "../hooks/useAsyncMemo"
 import { dependencyId } from "../../../jacdac-ts/src/jdom/eventsource"
-import useJacscript from "../jacscript/JacscriptContext"
+import useJacscript from "../devicescript/JacscriptContext"
 import { isSupportedInBlocks } from "./dsl/servicesbase"
 
 // overrides blockly emboss filter for svg elements

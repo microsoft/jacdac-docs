@@ -69,7 +69,7 @@ import {
 import {
     ExpressionWithErrors,
     makeVMBase,
-} from "../../jacscript/JacscriptGenerator"
+} from "../../devicescript/JacscriptGenerator"
 import {
     CompileCommandToVMOptions,
     CompileEventToVMOptions,

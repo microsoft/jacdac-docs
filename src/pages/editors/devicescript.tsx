@@ -1,5 +1,5 @@
 import React from "react"
-import JacscriptTextEditor from "../../components/jacscript/JacscriptTextEditor"
+import JacscriptTextEditor from "../../components/devicescript/JacscriptTextEditor"
 
 export const frontmatter = {
     title: "DeviceScript Editor",

@@ -31,7 +31,7 @@ import {
 } from "../../jacdac-ts/src/jdom/transport/transport"
 import { JDDevice } from "../../jacdac-ts/src/jdom/device"
 import { isInfrastructure } from "../../jacdac-ts/src/jdom/spec"
-import createAzureIotHubServiceDefinition from "../components/jacscript/azureiotconnector"
+import createAzureIotHubServiceDefinition from "../components/devicescript/azureiotconnector"
 import { addServiceProviderDefinition } from "../../jacdac-ts/src/servers/servers"
 
 function sniffQueryArguments() {

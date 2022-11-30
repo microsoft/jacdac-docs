@@ -18,9 +18,9 @@ import { defaultDeviceFilter, defaultDeviceSort } from "./filters"
 import useHostedSimulators from "../HostedSimulatorsContext"
 import StartMissingSimulatorsButton from "../buttons/StartMissingSimulatorsButton"
 import useBusWithMode from "../../jacdac/useBusWithMode"
-import useJacscript from "../jacscript/JacscriptContext"
+import useJacscript from "../devicescript/JacscriptContext"
 import Suspense from "../ui/Suspense"
-const JacscriptToolbar = lazy(() => import("../jacscript/JacscriptToolbar"))
+const JacscriptToolbar = lazy(() => import("../devicescript/JacscriptToolbar"))
 
 export interface DashboardDeviceProps {
     showHeader?: boolean

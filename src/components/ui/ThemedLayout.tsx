@@ -21,7 +21,7 @@ import { SimulatorDialogsProvider } from "../SimulatorsDialogContext"
 import { CommandPaletteProvider } from "../commands/CommandPaletteContext"
 import { YouTubeProvider } from "../youtube/YouTubeContext"
 import { BrainManagerProvider } from "../brains/BrainManagerContext"
-import { JacscriptProvider } from "../jacscript/JacscriptContext"
+import { JacscriptProvider } from "../devicescript/JacscriptContext"
 
 /*
 declare module "@mui/styles/defaultTheme" {

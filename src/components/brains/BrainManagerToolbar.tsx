@@ -5,7 +5,7 @@ import BlockContext from "../blockly/BlockContext"
 import useChange from "../../jacdac/useChange"
 import { BrainScript } from "./braindom"
 import CmdButton from "../CmdButton"
-import useJacscript from "../jacscript/JacscriptContext"
+import useJacscript from "../devicescript/JacscriptContext"
 import { toHex } from "../../../jacdac-ts/src/jdom/utils"
 
 function SaveScriptButton(props: { script: BrainScript; name: string }) {
