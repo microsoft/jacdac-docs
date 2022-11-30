@@ -95,8 +95,7 @@ function sniffQueryArguments() {
         persistent: params.get("persistent") === "1" || isLocalhost,
         footer: params.get("footer") !== "0",
         jacscriptvm:
-            params.get("jacscriptvm") === "1" ||
-            params.get("jacscript") === "1",
+            params.get("devicescript") === "1",
         resetIn: params.get("resetin") === "1",
         serialVendorIds: (params.get("serialvendorids") || "")
             .split(/,/g)

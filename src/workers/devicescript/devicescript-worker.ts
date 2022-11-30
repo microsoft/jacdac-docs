@@ -1,12 +1,11 @@
 importScripts(
-    "https://microsoft.github.io/jacscript/dist/devicescript-compiler.js"
+    "https://microsoft.github.io/devicescript/dist/devicescript-compiler.js"
 )
 
-const { compile } = (self as any).jacscript
+const { compile } = (self as any).deviceScript
 
-export type JacscriptDebugInfo = any
-export type JacscriptError = any
-export type JacError = any
+export type DeviceScriptDebugInfo = any
+export type DeviceScriptError = any
 
 export interface DeviceScriptMessage {
     worker: "devicescript"
@@ -30,11 +29,11 @@ export interface DeviceScriptSpecsRequest extends DeviceScriptRequest {
 export interface DeviceScriptCompileResponse extends DeviceScriptMessage {
     success: boolean
     binary: Uint8Array
-    dbg: JacscriptDebugInfo
+    dbg: DeviceScriptDebugInfo
     clientSpecs: jdspec.ServiceSpec[]
     files: Record<string, Uint8Array | string>
     logs: string
-    errors: JacscriptError[]
+    errors: DeviceScriptError[]
 }
 
 class WorkerHost {
@@ -58,7 +57,7 @@ class WorkerHost {
     log(msg: string): void {
         this.logs += msg + "\n"
     }
-    error(err: JacError) {
+    error(err: DeviceScriptError) {
         console.log(err)
         const { file, category, messageText, start, length } = err
         this.errors.push({
@@ -70,7 +69,7 @@ class WorkerHost {
     getSpecs(): jdspec.ServiceSpec[] {
         return this.specs
     }
-    verifyBytecode(buf: Uint8Array, dbg?: JacscriptDebugInfo): void {}
+    verifyBytecode(buf: Uint8Array, dbg?: DeviceScriptDebugInfo): void {}
 }
 
 let serviceSpecs: jdspec.ServiceSpec[]
@@ -130,4 +129,4 @@ async function handleMessage(event: MessageEvent) {
 }
 
 self.addEventListener("message", handleMessage)
-console.debug(`jacscript: worker registered`)
+console.debug(`devicescript: worker registered`)
