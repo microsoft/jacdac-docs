@@ -361,17 +361,12 @@ export default function DeviceRegistration() {
             .map(srv => srv.serviceClass)
         const description = descrReg.stringValue || ""
         const m = /^(.+)\s+(\d+)\s+(v[.\w]+)$/.exec(description)
-        if (m) {
+        const company = m && companies.find(c => m[1].startsWith(c))
+        if (company) {
             d.designIdentifier = m[2]
             d.version = m[3]
-            const company = companies.find(c => m[1].startsWith(c))
-            if (company) {
-                d.company = company
-                d.name = m[1].slice(company.length + 1).trim()
-            } else {
-                d.company = m[1].split(/\s+/gi)[0]
-                d.name = m[1].split(/\s+/gi)[0].slice(1)
-            }
+            d.company = company
+            d.name = m[1].slice(company.length + 1).trim()
         } else {
             const ds = description.split(/\s+/g)
             d.company = ds.shift() || ""
