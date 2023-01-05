@@ -13,7 +13,7 @@ of 1 start bit, 8 data bits, and 1 stop bit. Jacdac devices must only communicat
 and when no data is being transmitted, the bus must read as a logical one. Many MCU UARTs support 
 single-wire half duplex communications,  but if necessary the UART transmit and receive pins can be 
 connected together externally. The native Jacdac SWS signal uses 3.3V logic where a logical one 
-is nominally 3.3V and a logical zero is nominally 0V. The full spec of the signalling voltage is provided [here](https:///reference/electrical-spec/#all-devices).
+is nominally 3.3V and a logical zero is nominally 0V. The full spec of the signalling voltage is provided in the [electrical specification](https:///reference/electrical-spec/#all-devices).
 
 To interface a microcontroller to the Jacdac bus data signal (JD_DATA) use the following circuit:
 ![Jacdac bus interface](./Jacdac_electrical_interface.png)
