@@ -28,10 +28,10 @@ export interface PacketsProps {
     paused: boolean
     setPaused: (p: boolean) => void
     setSilent: (p: boolean) => void
-    progress: number
     timeRange: number[] // [start, end]
     toggleTimeRange: () => void
     setTimeRange: (range: number[]) => void
+    player: TracePlayer
 }
 
 const PacketsContext = createContext<PacketsProps>({
@@ -49,10 +49,10 @@ const PacketsContext = createContext<PacketsProps>({
     paused: false,
     setPaused: () => {},
     setSilent: () => {},
-    progress: undefined,
     timeRange: undefined,
     toggleTimeRange: () => {},
     setTimeRange: () => {},
+    player: undefined,
 })
 PacketsContext.displayName = "packets"
 
@@ -72,7 +72,6 @@ export const PacketsProvider = ({ children }) => {
     const view = useRef<TraceView>(new TraceView(bus, filter))
     const player = useRef<TracePlayer>(new TracePlayer(bus))
 
-    const [progress, setProgress] = useState(0)
     const [timeRange, setTimeRange] = useState<number[]>(undefined)
     const [recording, setRecording] = useState(false)
     const [replayTrace, _setReplayTrace] = useState<Trace>(undefined)
@@ -81,7 +80,6 @@ export const PacketsProvider = ({ children }) => {
     const [silent, _setSilent] = useState(false)
 
     const clearPackets = () => {
-        setProgress(undefined)
         setTimeRange(undefined)
         player.current.stop()
         recorder.current.stop()
@@ -103,7 +101,6 @@ export const PacketsProvider = ({ children }) => {
         } else {
             recorder.current.start()
             player.current.trace = undefined
-            setProgress(undefined)
         }
     }
     const toggleTracing = async () => {
@@ -159,12 +156,6 @@ export const PacketsProvider = ({ children }) => {
                 }
             })
         )
-        player.current.mount(
-            player.current.subscribe(PROGRESS, () =>
-                setProgress(player.current.progress)
-            )
-        )
-
         return () => {
             recorder.current.unmount()
             view.current.unmount()
@@ -196,7 +187,7 @@ export const PacketsProvider = ({ children }) => {
                 paused,
                 setPaused,
                 setSilent,
-                progress,
+                player: player.current,
                 timeRange,
                 setTimeRange,
                 toggleTimeRange,

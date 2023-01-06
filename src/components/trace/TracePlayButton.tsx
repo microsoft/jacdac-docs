@@ -2,11 +2,13 @@
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import StopIcon from "@mui/icons-material/Stop"
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useState } from "react"
+import { PROGRESS } from "../../../jacdac-ts/src/jdom/constants"
 import PacketsContext from "../PacketsContext"
 import IconButtonWithProgress, {
     IconButtonWithProgressProps,
 } from "../ui/IconButtonWithProgress"
+import useTraceProgress from "./useTraceProgress"
 
 export default function TracePlayButton(
     props: {
@@ -14,8 +16,9 @@ export default function TracePlayButton(
     } & IconButtonWithProgressProps
 ) {
     const { disabled, ...others } = props
-    const { toggleTracing, tracing, recording, replayTrace, progress } =
+    const { toggleTracing, tracing, recording, replayTrace } =
         useContext(PacketsContext)
+    const progress = useTraceProgress()
 
     return (
         <IconButtonWithProgress
