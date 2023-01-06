@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material"
-import React, { lazy } from "react"
+import React, { lazy, useContext } from "react"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import { splitFilter } from "../../../jacdac-ts/src/jdom/utils"
 import useDevices from "../hooks/useDevices"
@@ -20,7 +20,10 @@ import StartMissingSimulatorsButton from "../buttons/StartMissingSimulatorsButto
 import useBusWithMode from "../../jacdac/useBusWithMode"
 import useDeviceScript from "../devicescript/DeviceScriptContext"
 import Suspense from "../ui/Suspense"
-const DeviceScriptToolbar = lazy(() => import("../devicescript/DeviceScriptToolbar"))
+import PacketsContext from "../PacketsContext"
+const DeviceScriptToolbar = lazy(
+    () => import("../devicescript/DeviceScriptToolbar")
+)
 
 export interface DashboardDeviceProps {
     showHeader?: boolean
@@ -64,7 +67,8 @@ export default function Dashboard(props: DashboardProps) {
         ...other
     } = props
     const { source: jacscriptSource } = useDeviceScript()
-    const bus = useBusWithMode({ autoConnect: true })
+    const { tracing } = useContext(PacketsContext)
+    const bus = useBusWithMode({ autoConnect: !tracing })
     const { isHostedSimulator, clearHostedSimulators } = useHostedSimulators()
     const devices = useDevices({
         announced: true,
