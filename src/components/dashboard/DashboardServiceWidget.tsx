@@ -48,6 +48,7 @@ import {
     SRV_CLOUD_ADAPTER,
     SRV_SAT_NAV,
     SRV_PLANAR_POSITION,
+    SRV_SERIAL,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { CircularProgress, SvgIconProps } from "@mui/material"
@@ -120,6 +121,7 @@ const DashboardDeviceScriptManager = lazy(
 )
 const DashboardCloudAdapter = lazy(() => import("./DashboardCloudAdapter"))
 const DashboardPlanarPosition = lazy(() => import("./DashboardPlanarPosition"))
+const DashboardSerial = lazy(() => import("./DashboardSerial"))
 
 // icons
 const PowerSettingsNewIcon = lazy(
@@ -130,6 +132,7 @@ const AppsIcon = lazy(() => import("@mui/icons-material/Apps"))
 const SensorsIcon = lazy(() => import("@mui/icons-material/Sensors"))
 const MemoryIcon = lazy(() => import("@mui/icons-material/Memory"))
 const CloudQueueIcon = lazy(() => import("@mui/icons-material/CloudQueue"))
+const SerialIcon = lazy(() => import("../icons/SerialIcon"))
 
 export interface DashboardServiceProps {
     service: JDService
@@ -304,6 +307,11 @@ const serviceViews: {
         weight: () => 4,
         expandable: true,
         icon: SensorsIcon,
+    },
+    [SRV_SERIAL]: {
+        component: DashboardSerial,
+        weight: () => 2,
+        icon: SerialIcon,
     },
     [SRV_HID_KEYBOARD]: {
         component: DashboardHIDKeyboard,
