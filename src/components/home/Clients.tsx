@@ -95,6 +95,22 @@ export default function Clients() {
                 }
             />
 
+            <SplitGrid
+                right={true}
+                subtitle="MicroCode"
+                imageColumns={8}
+                description="Physical computing for young learners on the micro:bit V2."
+                buttonText="Try MicroCode"
+                buttonVariant="link"
+                buttonUrl="/clients/microcode"
+                image={
+                    <StaticImage
+                        src="./microcode.png"
+                        alt="A microcode program."
+                    />
+                }
+            />
+
             <CenterGrid
                 subtitle2="More programming options"
                 subtitle3="Node-Red, React, A-Frame, CLI, ..."
