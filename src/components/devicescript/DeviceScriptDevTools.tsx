@@ -76,9 +76,6 @@ function DeviceScriptDevToolsWithContext() {
                     />
                 </Suspense>
             </Grid>
-            <Grid item xs={12}>
-                <GridHeader title="Console" />
-            </Grid>
         </Grid>
     )
 }
