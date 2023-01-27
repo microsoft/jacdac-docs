@@ -165,6 +165,16 @@ export default function Page() {
                         description: "node-red-contrib-jacdac",
                         href: "https://github.com/microsoft/node-red-contrib-jacdac",
                     },
+                    {
+                        title: "microsoft/microcode",
+                        description: "MicroCode",
+                        href: "https://github.com/microsoft/microcode",
+                    },
+                    {
+                        title: "microsoft/devicescript",
+                        description: "DeviceScript",
+                        href: "https://github.com/microsoft/devicescript",
+                    },
                 ]}
             />
 
