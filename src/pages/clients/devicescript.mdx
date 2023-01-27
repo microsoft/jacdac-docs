@@ -1,0 +1,28 @@
+---
+title: DeviceScript
+order: 4
+---
+
+# DeviceScript (beta)
+
+**Beta: the python layer is still in pre-release mode and beta quality.**
+
+Microsoft DeviceScript is a TypeScript-like language built on top Jacdac services.
+
+```typescript
+const sensor = new ds.AirPressure()
+// listen for pressure changes
+sensor.pressure.onChange(10, () => {
+    // read sensor reading
+    const pressure = sensor.pressure.read()
+    console.log(pressure)
+})
+```
+
+## Jacdac and DeviceScript
+
+DeviceScript uses the Jacdac services to provide an abstraction layer between the physical hardware and the scripts.
+
+## More information
+
+-   read the [MicroCode user guide](https://microsoft.github.io/devicescript)
