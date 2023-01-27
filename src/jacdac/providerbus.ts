@@ -56,6 +56,7 @@ function sniffQueryArguments() {
     const toolsMakecode =
         /\/tools\/makecode-/.test(href) || params.get(`nestededitorsim`) === "1"
     const toolsDeviceScript = /\/tools\/devicescript-/.test(href)
+    const toolsDeviceScriptVsCode = /\/tools\/devicescript-devtools-vscode/.test(href)
     const toolsMakeEditorExtension = /\/tools\/makecode-editor-extension/.test(
         href
     )
@@ -65,15 +66,18 @@ function sniffQueryArguments() {
         webUSB:
             isWebUSBSupported() &&
             params.get(`webusb`) !== "0" &&
-            !toolsMakecode,
+            !toolsMakecode &&
+            !toolsDeviceScriptVsCode,
         webBluetooth:
             isWebBluetoothSupported() &&
             params.get(`webble`) !== "0" &&
-            !toolsMakecode,
+            !toolsMakecode &&
+            !toolsDeviceScriptVsCode,
         webSerial:
             isWebSerialSupported() &&
             params.get(`webserial`) !== "0" &&
-            !toolsMakecode,
+            !toolsMakecode &&
+            !toolsDeviceScriptVsCode,
         webSocket:
             params.get(`ws`) === "1"
                 ? "ws://127.0.0.1:8080/"
@@ -84,21 +88,21 @@ function sniffQueryArguments() {
         trace: params.get("trace") === "1",
         localhost: params.get("localhost") === "1",
         passive: params.get("passive") === "1" || toolsMakeEditorExtension,
-        gamepad: params.get("gamepad") === "1",
+        gamepad: params.get("gamepad") === "1" && !toolsDeviceScriptVsCode,
         hosted:
             toolsDeviceScript ||
             params.get("hosted") === "1" ||
             params.get("embed") === "1",
         storage: params.get("storage") === "0" ? false : true,
         bus: params.get("bus") === "0" ? false : true,
-        webcam: isMediaDevicesSupported(),
+        webcam: isMediaDevicesSupported() && !toolsDeviceScriptVsCode,
         consoleinsights: params.get("consoleinsights") === "1",
         devTools: params.get("devtools"),
         connect: params.get("connect") !== "0",
         transient: params.get("transient") === "1",
         persistent: params.get("persistent") === "1" || isLocalhost,
-        footer: params.get("footer") !== "0",
-        devicescriptvm: params.get("devicescript") === "1",
+        footer: params.get("footer") !== "0" && !toolsDeviceScriptVsCode,
+        devicescriptvm: params.get("devicescript") === "1" && !toolsDeviceScriptVsCode,
         resetIn: params.get("resetin") === "1",
         serialVendorIds: (params.get("serialvendorids") || "")
             .split(/,/g)
