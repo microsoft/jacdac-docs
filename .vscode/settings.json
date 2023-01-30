@@ -29,6 +29,7 @@
     "cSpell.words": [
         "Blinky",
         "blockly",
+        "bootloader",
         "bytecode",
         "clsx",
         "colour",
@@ -38,6 +39,7 @@
         "Jacdaptors",
         "Jacscript",
         "jdom",
+        "jdspec",
         "keepout",
         "keepouts",
         "microbit",

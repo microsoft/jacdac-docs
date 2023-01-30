@@ -31,6 +31,7 @@ import MakeCodeExtensions from "../makecode/MakeCodeExtensions"
 import WebShareButton from "../ui/WebShareButton"
 import GithubRepositoryList from "../github/GithubRespositoryList"
 import { semverCmp } from "../../../jacdac-ts/src/jdom/semver"
+import FirmwareFlashInstructions from "../firmware/FirmwareFlashInstructions"
 const Enclosure = lazy(() => import("../enclosure/Enclosure"))
 
 const HR_GAP = 4
@@ -377,11 +378,6 @@ export default function DeviceSpecification(props: {
             {!!firmwares && (
                 <>
                     <h3 id="firmwarebinaries">Firmware binaries</h3>
-                    <p>
-                        Drag and drop the files below to your device drive. You
-                        might have to press the bootloader button once to see
-                        this drive.
-                    </p>
                     <ul>
                         {firmwares.map(({ name, url }) => (
                             <li key={url}>
@@ -395,6 +391,10 @@ export default function DeviceSpecification(props: {
                             </li>
                         ))}
                     </ul>
+                    <ol>
+                        <li>Download the firmware file.</li>
+                        <FirmwareFlashInstructions specification={device} />
+                    </ol>
                 </>
             )}
             {repo && (
