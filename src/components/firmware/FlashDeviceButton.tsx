@@ -22,10 +22,10 @@ import { Link } from "gatsby-material-ui-components"
 import DialogTitleWithClose from "../ui/DialogTitleWithClose"
 import { useLatestReleaseAsset } from "../github"
 import useBus from "../../jacdac/useBus"
-import { semverCmp } from "../semver"
 import useSnackbar from "../hooks/useSnackbar"
 import { PROGRESS } from "../../../jacdac-ts/src/jdom/constants"
 import useDeviceFirmwareInfo from "./useDeviceFirmwareInfo"
+import { semverCmp } from "../../../jacdac-ts/src/jdom/semver"
 
 function DragAndDropUpdateButton(props: {
     firmwareVersion: string

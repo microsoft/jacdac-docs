@@ -12,7 +12,6 @@ import useDeviceImage from "../devices/useDeviceImage"
 import DownloadFirmwareButton from "../ui/DownloadFirmwareButton"
 import MemoryIcon from "@mui/icons-material/Memory"
 import ChipList from "../ui/ChipList"
-import { semverCmp } from "../semver"
 import useDeviceSpecifications from "../devices/useDeviceSpecifications"
 import { Link } from "gatsby-theme-material-ui"
 import {
@@ -31,6 +30,7 @@ import PageLinkList from "../ui/PageLinkList"
 import MakeCodeExtensions from "../makecode/MakeCodeExtensions"
 import WebShareButton from "../ui/WebShareButton"
 import GithubRepositoryList from "../github/GithubRespositoryList"
+import { semverCmp } from "../../../jacdac-ts/src/jdom/semver"
 const Enclosure = lazy(() => import("../enclosure/Enclosure"))
 
 const HR_GAP = 4

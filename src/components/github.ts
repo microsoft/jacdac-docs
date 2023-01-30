@@ -1,4 +1,4 @@
-import { semverCmp } from "./semver"
+import { semverCmp } from "../../jacdac-ts/src/jdom/semver"
 import useFetch from "./useFetch"
 
 const ROOT = "https://api.github.com/"
