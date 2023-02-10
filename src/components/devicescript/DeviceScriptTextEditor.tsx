@@ -1,8 +1,5 @@
 import React, { useContext, lazy } from "react"
 import { Grid, NoSsr } from "@mui/material"
-import BrainManagerToolbar from "../brains/BrainManagerToolbar"
-import BrainManagerContext from "../brains/BrainManagerContext"
-import useBrainScript from "../brains/useBrainScript"
 import Suspense from "../ui/Suspense"
 import useDeviceScriptVm from "./useDeviceScriptVm"
 import DeviceScriptToolbar from "./DeviceScriptToolbar"
@@ -18,8 +15,6 @@ const ConsoleLog = lazy(() => import("../console/ConsoleLog"))
 const Dashboard = lazy(() => import("../dashboard/Dashboard"))
 
 function DeviceScriptTextEditorWithContext() {
-    const { scriptId } = useContext(BrainManagerContext)
-    const script = useBrainScript(scriptId)
     const showTextField = useLocationSearchParamBoolean("text", true)
 
     useDeviceScriptVm()
@@ -28,11 +23,6 @@ function DeviceScriptTextEditorWithContext() {
 
     return (
         <Grid spacing={1} container>
-            {script && (
-                <Grid item xs={12}>
-                    <BrainManagerToolbar script={script} />
-                </Grid>
-            )}
             <Grid item xs={12}>
                 <GridHeader
                     title="DeviceScript"

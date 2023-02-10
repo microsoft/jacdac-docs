@@ -32,11 +32,8 @@ import ChipList from "../ui/ChipList"
 import useEvent from "../hooks/useEvent"
 import useEventCount from "../../jacdac/useEventCount"
 import DialogTitleWithClose from "../ui/DialogTitleWithClose"
-import BrainManagerContext from "../brains/BrainManagerContext"
-import { BrainManager } from "../brains/braindom"
 import useChange from "../../jacdac/useChange"
 import useEffectAsync from "../useEffectAsync"
-import useBrainDevice from "../brains/useBrainDevice"
 import useRegister from "../hooks/useRegister"
 
 function ConnectionStringDialog(props: {
@@ -97,72 +94,10 @@ function ConnectionStringDialog(props: {
     )
 }
 
-function BrainManagerConnectionStringDialog(props: {
-    open: boolean
-    setOpen: (v: boolean) => void
-    brainManager: BrainManager
-    client: CloudConfigurationClient
-}) {
-    const { client, open, setOpen, brainManager } = props
-    const { device } = client.service
-    const { shortId } = device
-    const brain = useBrainDevice(device)
-    const brainName = useChange(brain, _ => _?.name)
-    const [value, setValue] = useState(brainName || shortId)
-    const connectionStringId = useId()
-    const handleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.value)
-    }
-    const handleCancel = () => {
-        setOpen(false)
-    }
-    const handleOk = async mounted => {
-        await brainManager.registerDevice(device, value)
-        if (!mounted()) return
-        setOpen(false)
-    }
-    useEffectAsync(() => brainManager?.refreshDevices(), [brainManager])
-    useEffect(() => setValue(brainName), [brainName])
-
-    return (
-        <Dialog open={open} fullWidth={true} maxWidth={"md"}>
-            <DialogTitleWithClose onClose={handleCancel}>
-                Brain Registration
-            </DialogTitleWithClose>
-            <DialogContent>
-                <Typography component="p" variant="caption">
-                    Register or update your IoT Hub in the brain manager.
-                </Typography>
-                <TextField
-                    sx={{ mt: 2 }}
-                    id={connectionStringId}
-                    value={value}
-                    label={`Device Name${brainName !== value ? "*" : ""}`}
-                    fullWidth={true}
-                    size="small"
-                    placeholder="Enter a friendly name"
-                    onChange={handleValueChange}
-                />
-            </DialogContent>
-            <DialogActions>
-                <CmdButton
-                    variant="contained"
-                    color="primary"
-                    disabled={!client || !value}
-                    onClick={handleOk}
-                >
-                    {brain ? "Update" : "Register"}
-                </CmdButton>
-            </DialogActions>
-        </Dialog>
-    )
-}
-
 export default function DashboardCloudConfiguration(
     props: DashboardServiceProps
 ) {
     const { service } = props
-    const { brainManager } = useContext(BrainManagerContext)
     const [open, setOpen] = useState(false)
 
     const serverNameRegister = useRegister(
@@ -203,7 +138,6 @@ export default function DashboardCloudConfiguration(
     const factory = useCallback(srv => new CloudConfigurationClient(srv), [])
     const client = useServiceClient(service, factory)
     const color = "primary"
-    const { textPrimary } = useWidgetTheme(color)
     const connected =
         connectionStatus === CloudConfigurationConnectionStatus.Connected
 
@@ -246,15 +180,7 @@ export default function DashboardCloudConfiguration(
                     <SettingsIcon />
                 </IconButtonWithTooltip>
             </ChipList>
-            {client && brainManager && (
-                <BrainManagerConnectionStringDialog
-                    brainManager={brainManager}
-                    client={client}
-                    open={open}
-                    setOpen={setOpen}
-                />
-            )}
-            {client && !brainManager && (
+            {client && (
                 <ConnectionStringDialog
                     client={client}
                     open={open}

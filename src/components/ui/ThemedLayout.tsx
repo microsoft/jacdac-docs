@@ -20,7 +20,6 @@ import { ConsoleProvider } from "../console/ConsoleContext"
 import { SimulatorDialogsProvider } from "../SimulatorsDialogContext"
 import { CommandPaletteProvider } from "../commands/CommandPaletteContext"
 import { YouTubeProvider } from "../youtube/YouTubeContext"
-import { BrainManagerProvider } from "../brains/BrainManagerContext"
 import { DeviceScriptProvider } from "../devicescript/DeviceScriptContext"
 
 /*
@@ -55,13 +54,11 @@ export default function ThemedLayout(props: {
                                                                     <ConsoleProvider>
                                                                         <DeviceScriptProvider>
                                                                             <MakeCodeSnippetProvider>
-                                                                                <BrainManagerProvider>
-                                                                                    <CssBaseline />
+                                                                                <CssBaseline />
 
-                                                                                    {
-                                                                                        children
-                                                                                    }
-                                                                                </BrainManagerProvider>
+                                                                                {
+                                                                                    children
+                                                                                }
                                                                             </MakeCodeSnippetProvider>
                                                                         </DeviceScriptProvider>
                                                                     </ConsoleProvider>

@@ -1,8 +1,5 @@
 import React, { useContext, lazy, useMemo } from "react"
 import { Grid, NoSsr } from "@mui/material"
-import BrainManagerToolbar from "../brains/BrainManagerToolbar"
-import BrainManagerContext from "../brains/BrainManagerContext"
-import useBrainScript from "../brains/useBrainScript"
 import Suspense from "../ui/Suspense"
 import useDeviceScriptVm from "./useDeviceScriptVm"
 import DeviceScriptToolbar from "./DeviceScriptToolbar"
@@ -27,19 +24,11 @@ function useAutoStartSimulators(delay = 2000) {
 }
 
 function DeviceScriptDevToolsWithContext() {
-    const { scriptId } = useContext(BrainManagerContext)
-    const script = useBrainScript(scriptId)
-
     useDeviceScriptVm()
     useAutoStartSimulators()
 
     return (
         <Grid spacing={1} container>
-            {script && (
-                <Grid item xs={12}>
-                    <BrainManagerToolbar script={script} />
-                </Grid>
-            )}
             <Grid item xs={12}>
                 <GridHeader
                     title="DeviceScript"

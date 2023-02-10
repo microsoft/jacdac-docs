@@ -9,7 +9,6 @@ import MoreIcon from "@mui/icons-material/MoreVert"
 // tslint:disable-next-line: no-submodule-imports
 import AppContext, { DrawerType } from "../AppContext"
 import DarkModeContext from "../ui/DarkModeContext"
-import GitHubButton from "../buttons/GitHubButton"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import OpenDashboardButton from "../buttons/OpenDashboardButton"
 import PacketStats from "./PacketStats"
@@ -29,7 +28,6 @@ import { Flags } from "../../../jacdac-ts/src/jdom/flags"
 import DrawerToolsButton from "./DrawerToolsButton"
 import ConnectButtons from "../buttons/ConnectButtons"
 import Suspense from "../ui/Suspense"
-import BrainManagerContext from "../brains/BrainManagerContext"
 
 const InstallPWAButton = lazy(() => import("../ui/InstallPWAButton"))
 
@@ -105,7 +103,6 @@ const Root = styled("div")(({ theme }) => ({
 
 function MainToolbar() {
     const { drawerType, toolsMenu, setToolsMenu } = useContext(AppContext)
-    const { brainManager } = useContext(BrainManagerContext)
     const drawerOpen = drawerType !== DrawerType.None
     const toggleToolsMenu = () => setToolsMenu(!toolsMenu)
 
@@ -124,22 +121,14 @@ function MainToolbar() {
                     style={{
                         color: UIFlags.widget ? "black" : "white",
                     }}
-                    to={brainManager ? "/brains" : "/"}
+                    to={"/"}
                     underline="hover"
                 >
-                    {brainManager ? `DeviceScript` : `Jacdac`}
+                    {`Jacdac`}
                 </Link>
             </Typography>
             <div className={classes.grow} />
             {Flags.diagnostics && <PacketStats />}
-            {!brainManager && (
-                <Suspense>
-                    <InstallPWAButton
-                        color="inherit"
-                        className={clsx(classes.menuButton)}
-                    />
-                </Suspense>
-            )}
             <BridgeButtons className={clsx(classes.menuButton)} />
             <ConnectButtons
                 className={clsx(classes.menuButton)}
@@ -147,21 +136,19 @@ function MainToolbar() {
                 full={"disconnected"}
             />
             <OpenDashboardButton className={clsx(classes.menuButton)} />
-            {!brainManager && (
-                <IconButtonWithTooltip
-                    className={clsx(
-                        classes.menuButton,
-                        drawerOpen && classes.hideMobile
-                    )}
-                    aria-label="More tools"
-                    title="More"
-                    edge="start"
-                    color="inherit"
-                    onClick={toggleToolsMenu}
-                >
-                    <MoreIcon />
-                </IconButtonWithTooltip>
-            )}
+            <IconButtonWithTooltip
+                className={clsx(
+                    classes.menuButton,
+                    drawerOpen && classes.hideMobile
+                )}
+                aria-label="More tools"
+                title="More"
+                edge="start"
+                color="inherit"
+                onClick={toggleToolsMenu}
+            >
+                <MoreIcon />
+            </IconButtonWithTooltip>
         </Toolbar>
     )
 }

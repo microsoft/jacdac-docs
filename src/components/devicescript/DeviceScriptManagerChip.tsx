@@ -14,7 +14,6 @@ import useEvent from "../hooks/useEvent"
 import { EVENT } from "../../../jacdac-ts/src/jdom/constants"
 import { OutPipe } from "../../../jacdac-ts/src/jdom/pipes"
 import useDeviceScript from "./DeviceScriptContext"
-import useBrainDevice from "../brains/useBrainDevice"
 import useSnackbar from "../hooks/useSnackbar"
 
 export default function DeviceScriptManagerChip(props: {
@@ -28,7 +27,6 @@ export default function DeviceScriptManagerChip(props: {
     const { bytecode } = useDeviceScript()
     const [deploying, setDeploying] = useState(false)
     const [deployError, setDeployError] = useState<Error>(undefined)
-    const brainDevice = useBrainDevice(device)
     const { enqueueSnackbar } = useSnackbar()
 
     const statusCodeChangedEvent = useEvent(
@@ -85,13 +83,6 @@ export default function DeviceScriptManagerChip(props: {
         try {
             setDeploying(true)
             setDeployError(undefined)
-            if (brainDevice?.scriptId) {
-                enqueueSnackbar(
-                    "Disabling device automatic script deployment in brain manager.",
-                    "warning"
-                )
-                await brainDevice.updateScript("")
-            }
             await OutPipe.sendBytes(
                 service,
                 DeviceScriptManagerCmd.DeployBytecode,
@@ -102,7 +93,7 @@ export default function DeviceScriptManagerChip(props: {
         } finally {
             setDeploying(false)
         }
-    }, [service, selected, bytecode, brainDevice])
+    }, [service, selected, bytecode])
 
     // stop after deselected
     useEffectAsync(

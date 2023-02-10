@@ -21,7 +21,6 @@ import MainAppBar from "./shell/MainAppBar"
 import { UIFlags } from "../jacdac/providerbus"
 import YouTubeContext from "./youtube/YouTubeContext"
 import HelpAlert from "./alert/HelpAlert"
-import { isBrainManagerEnabled } from "./brains/BrainManagerContext"
 
 const Breadcrumbs = lazy(() => import("./ui/Breadcrumbs"))
 const AppDrawer = lazy(() => import("./shell/AppDrawer"))
@@ -177,17 +176,20 @@ function LayoutWithDarkMode(props: LayoutProps) {
 function LayoutWithMdx(props: LayoutProps) {
     const { darkMode } = useContext(DarkModeContext)
     const isDark = darkMode === "dark"
-    const isBrain = isBrainManagerEnabled()
     const themeDef: DeprecatedThemeOptions = {
         palette: {
             primary: {
-                main: isBrain ? "#0074cF" : isDark ? "#56d364" : "#2e7d32",
+                main: isDark ? "#56d364" : "#2e7d32",
             },
             secondary: {
                 main: "#ffc400",
             },
             contrastThreshold: isDark ? 5.1 : 3.1,
             mode: darkMode,
+            background: {
+                default: isDark ? "#1e1e1e" : undefined,
+                paper: isDark ? "#070707" : undefined,
+            },
         },
     }
     const rawTheme = createTheme(themeDef)
