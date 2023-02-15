@@ -176,6 +176,12 @@ function LayoutWithDarkMode(props: LayoutProps) {
 function LayoutWithMdx(props: LayoutProps) {
     const { darkMode } = useContext(DarkModeContext)
     const isDark = darkMode === "dark"
+    const background = isDark
+        ? {
+              default: "#1e1e1e",
+              paper: "#070707",
+          }
+        : undefined
     const themeDef: DeprecatedThemeOptions = {
         palette: {
             primary: {
@@ -186,10 +192,7 @@ function LayoutWithMdx(props: LayoutProps) {
             },
             contrastThreshold: isDark ? 5.1 : 3.1,
             mode: darkMode,
-            background: {
-                default: isDark ? "#1e1e1e" : undefined,
-                paper: isDark ? "#070707" : undefined,
-            },
+            background,
         },
     }
     const rawTheme = createTheme(themeDef)
