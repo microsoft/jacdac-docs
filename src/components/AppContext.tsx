@@ -11,6 +11,8 @@ import { isCancelError } from "../../jacdac-ts/src/jdom/error"
 import useBus from "../jacdac/useBus"
 import useSnackbar from "./hooks/useSnackbar"
 import PacketsContext from "./PacketsContext"
+import useLocalStorage from "./hooks/useLocalStorage"
+import { Flags } from "../../jacdac-ts/src/jacdac"
 
 export enum DrawerType {
     None,
@@ -30,6 +32,8 @@ export interface AppProps {
     setSelectedPacket: (pkt: Packet) => void
     showWebCam: boolean
     setShowWebCam: (newValue: boolean) => void
+    developerMode: boolean
+    setDeveloperMode: (enabled: boolean) => void
 }
 
 const AppContext = createContext<AppProps>({
@@ -41,6 +45,8 @@ const AppContext = createContext<AppProps>({
     setSelectedPacket: () => {},
     showWebCam: false,
     setShowWebCam: () => {},
+    developerMode: false,
+    setDeveloperMode: () => {},
 })
 AppContext.displayName = "app"
 
@@ -54,7 +60,15 @@ export const AppProvider = ({ children }) => {
     const [toolsMenu, _setToolsMenu] = useState(false)
     const [selectedPacket, setSelectedPacket] = useState<Packet>(undefined)
     const [showWebCam, setShowWebCam] = useState(false)
+    const [developerMode, setDeveloperMode] = useLocalStorage(
+        "settings:developermode",
+        false
+    )
     const { setError } = useSnackbar()
+
+    useEffect(() => {
+        Flags.developerMode = developerMode
+    }, [developerMode])
 
     const setDrawerType = (type: DrawerType) => {
         if (type !== DrawerType.None) _setToolsMenu(false)
@@ -93,6 +107,8 @@ export const AppProvider = ({ children }) => {
                 setSelectedPacket,
                 showWebCam,
                 setShowWebCam,
+                developerMode,
+                setDeveloperMode,
             }}
         >
             {children}

@@ -1,89 +1,35 @@
-import {
-    Card,
-    CardActions,
-    CardContent,
-    CardHeader,
-    CardMedia,
-    Dialog,
-    DialogContent,
-    Grid,
-    Typography,
-} from "@mui/material"
+import { Dialog, DialogContent, Grid } from "@mui/material"
 import React, { useContext } from "react"
 import { useId } from "react"
 import JacdacContext, { JacdacContextProps } from "../../jacdac/Context"
 import ConnectButton from "../buttons/ConnectButton"
-import useDeviceImage from "../devices/useDeviceImage"
 import useDeviceSpecifications from "../devices/useDeviceSpecifications"
 import { Transport } from "../../../jacdac-ts/src/jdom/transport/transport"
 import DialogTitleWithClose from "../ui/DialogTitleWithClose"
-import GridHeader from "../ui/GridHeader"
 import { Flags } from "../../../jacdac-ts/src/jdom/flags"
-import { Link } from "gatsby-theme-material-ui"
-import useGridBreakpoints from "../useGridBreakpoints"
-import { useDeviceSpecificationFromProductIdentifier } from "../../jacdac/useDeviceSpecification"
-
-function ConnectDeviceCard(props: { device: jdspec.DeviceSpec }) {
-    const { device } = props
-    const { name, firmwares, productIdentifiers } = device
-    const firmware = firmwares?.[0]
-    const image = useDeviceImage(device, "preview")
-    const deviceSpec = useDeviceSpecificationFromProductIdentifier(
-        productIdentifiers?.[0]
-    )
-    const requestDescription = deviceSpec?.transport?.requestDescription
-    return (
-        <Card>
-            <CardHeader
-                disableTypography={true}
-                title={<Typography variant="subtitle2">{name}</Typography>}
-                subheader={
-                    <Typography variant="caption">
-                        {requestDescription}
-                    </Typography>
-                }
-            />
-            <CardMedia>
-                <img
-                    src={image}
-                    style={{
-                        aspectRatio: "4 / 3",
-                        width: "100%",
-                        marginBottom: 0,
-                    }}
-                    alt={`photograph of ${name}`}
-                    loading="lazy"
-                />
-            </CardMedia>
-            {!!firmware && (
-                <CardActions>
-                    <Link
-                        variant="caption"
-                        color="inherit"
-                        href={firmware.url}
-                        title="Download firwmare to connect Jacdac devices"
-                    >
-                        Download firmware
-                    </Link>
-                </CardActions>
-            )}
-        </Card>
-    )
-}
+import DeveloperModeAlert from "../alert/DeveloperModeAlert"
+import { DeviceSpecificationIcon } from "../devices/DeviceIcon"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/spec"
+import useDeveloperMode from "../hooks/useDeveloperMode"
 
 function ConnectTransport(props: {
     transport: Transport
     onClose: () => void
 }) {
     const { transport, onClose } = props
+    const { developerMode } = useDeveloperMode()
     const { type: transportType } = transport
-    const devices = useDeviceSpecifications({ transport: transportType })
-    const breakpoints = useGridBreakpoints(devices?.length)
+    const devices = useDeviceSpecifications({
+        transport: transportType,
+        includeExperimental: developerMode,
+        includeDeprecated: developerMode,
+    })
     if (!devices?.length && !Flags.diagnostics) return null
     return (
-        <>
-            <GridHeader
-                action={
+        <Grid item xs={12}>
+            <Grid container spacing={1} alignContent="flex-end">
+                <Grid item alignSelf="center">
                     <ConnectButton
                         key={transport.type}
                         transport={transport}
@@ -91,14 +37,29 @@ function ConnectTransport(props: {
                         full={true}
                         typeInTitle={true}
                     />
-                }
-            />
-            {devices.map(device => (
-                <Grid item {...breakpoints} key={device.id}>
-                    <ConnectDeviceCard device={device} />
                 </Grid>
-            ))}
-        </>
+                <Grid item xs>
+                    <Grid container spacing={1}>
+                        {devices.map(device => (
+                            <Grid item key={device.id}>
+                                <IconButtonWithTooltip
+                                    title={device.name}
+                                    to={`/devices/${identifierToUrlPath(
+                                        device.id
+                                    )}/`}
+                                    onClick={onClose}
+                                >
+                                    <DeviceSpecificationIcon
+                                        specification={device}
+                                        avatar={true}
+                                    />
+                                </IconButtonWithTooltip>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
     )
 }
 
@@ -123,6 +84,7 @@ export default function ConnectTransportDialog(props: {
                 Connect to a device
             </DialogTitleWithClose>
             <DialogContent>
+                <DeveloperModeAlert />
                 <Grid container spacing={2}>
                     {transports.map(transport => (
                         <ConnectTransport

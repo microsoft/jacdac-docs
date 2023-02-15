@@ -39,12 +39,11 @@ import {
 } from "../../../jacdac-ts/src/jdom/constants"
 import bus, { UIFlags } from "../../jacdac/providerbus"
 import { resolveUnit } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
-import useBus from "../../jacdac/useBus"
-import useChange from "../../jacdac/useChange"
 import useSnackbar from "../hooks/useSnackbar"
 import SimulatorDialogsContext from "../SimulatorsDialogContext"
 import useInteractionMode from "./useInteractionMode"
 import { BusInteractionMode } from "../../../jacdac-ts/src/jacdac"
+import useDeveloperMode from "../hooks/useDeveloperMode"
 
 const PREFIX = "ToolsDrawer"
 
@@ -124,6 +123,7 @@ export default function ToolsDrawer() {
     const { enqueueSnackbar } = useSnackbar()
     const { toggleDarkMode, darkMode } = useContext(DarkModeContext)
     const { converters, setConverter } = useUnitConverters()
+    const { developerMode, setDeveloperMode } = useDeveloperMode()
     const handleShowStartSimulator = () => toggleShowDeviceHostsDialog()
     const handleUnitClick =
         (unit: string, name: string, names: string[]) => () => {
@@ -146,6 +146,7 @@ export default function ToolsDrawer() {
         setToolsMenu(false)
         toggleDarkMode()
     }
+    const handleToggleDeveloperMode = () => setDeveloperMode(!developerMode)
     const handleToggleInteractionMode = () => {
         if (interactionMode === BusInteractionMode.Active)
             bus.interactionMode = BusInteractionMode.Observer
@@ -199,6 +200,15 @@ export default function ToolsDrawer() {
         {
             // separator
         },
+        ...converters.map(({ unit, name, names }) => ({
+            text: `${name} (change to ${names
+                .filter(n => n !== name)
+                .join(", ")})`,
+            action: handleUnitClick(unit, name, names),
+        })),
+        {
+            // separator
+        },
         {
             text:
                 interactionMode === BusInteractionMode.Active
@@ -207,12 +217,11 @@ export default function ToolsDrawer() {
             title: "Change how the browser interacts with sensors and devices on the bus",
             action: handleToggleInteractionMode,
         },
-        ...converters.map(({ unit, name, names }) => ({
-            text: `${name} (change to ${names
-                .filter(n => n !== name)
-                .join(", ")})`,
-            action: handleUnitClick(unit, name, names),
-        })),
+        {
+            text: developerMode ? "Exit Developer Mode" : "Use Developer Mode",
+            title: "Allows to connect to any device, increased logging",
+            action: handleToggleDeveloperMode,
+        },
         UIFlags.webcam && {
             text: showWebCam ? "Stop WebCam" : "Start WebCam",
             icon: <VideoCallIcon />,

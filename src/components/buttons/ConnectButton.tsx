@@ -9,6 +9,7 @@ import IconButtonWithProgress from "../ui/IconButtonWithProgress"
 import TransportIcon from "../icons/TransportIcon"
 import useChange from "../../jacdac/useChange"
 import useMediaQueries from "../hooks/useMediaQueries"
+import useDeveloperMode from "../hooks/useDeveloperMode"
 
 export default function ConnectButton(props: {
     full?: boolean
@@ -29,6 +30,7 @@ export default function ConnectButton(props: {
         typeInTitle,
     } = props
     const { type } = transport
+    const { developerMode } = useDeveloperMode()
     const connectionState = useChange(transport, t => t.connectionState)
     const showDisconnect =
         connectionState == ConnectionState.Connected ||

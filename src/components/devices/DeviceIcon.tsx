@@ -16,15 +16,28 @@ export default function DeviceIcon(props: {
 }) {
     const { device, size, avatar } = props
     const specification = useDeviceSpecification(device)
+    const server = useServiceProvider<JDServerServiceProvider>(device)
+    return server ? (
+        <KindIcon kind={VIRTUAL_DEVICE_NODE_NAME} />
+    ) : (
+        <DeviceSpecificationIcon
+            size={size}
+            specification={specification}
+            avatar={avatar}
+        />
+    )
+}
+
+export function DeviceSpecificationIcon(props: {
+    specification: jdspec.DeviceSpec
+    size?: "small" | "large"
+    avatar?: boolean
+}) {
+    const { specification, size, avatar } = props
     const imageUrl =
         useDeviceImage(specification, "avatar") ||
         withPrefix("images/missing-device.svg")
     const name = specification?.name || "Image of the device"
 
-    const server = useServiceProvider<JDServerServiceProvider>(device)
-    return server ? (
-        <KindIcon kind={VIRTUAL_DEVICE_NODE_NAME} />
-    ) : (
-        <ImageAvatar size={size} alt={name} src={imageUrl} avatar={avatar} />
-    )
+    return <ImageAvatar size={size} alt={name} src={imageUrl} avatar={avatar} />
 }
