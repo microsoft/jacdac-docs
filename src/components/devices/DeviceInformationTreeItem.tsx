@@ -2,7 +2,7 @@ import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import React from "react"
 import StyledTreeItem from "../ui/StyledTreeItem"
 import useDeviceSpecification from "../../jacdac/useDeviceSpecification"
-import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/spec"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/catalog"
 
 export default function DeviceProductInformationTreeItem(props: { device: JDDevice }) {
     const { device } = props

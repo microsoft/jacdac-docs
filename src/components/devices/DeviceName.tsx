@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material"
 import { Link } from "gatsby-material-ui-components"
 import React from "react"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/catalog"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
-import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/spec"
 import useDeviceSpecification from "../../jacdac/useDeviceSpecification"
 import useDeviceName from "./useDeviceName"
 

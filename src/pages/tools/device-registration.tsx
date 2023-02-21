@@ -16,7 +16,6 @@ import {
 } from "@mui/material"
 import { ChangeEvent } from "react"
 import {
-    identifierToUrlPath,
     isInfrastructure,
     serviceSpecificationFromClassIdentifier,
 } from "../../../jacdac-ts/src/jdom/spec"
@@ -113,6 +112,7 @@ export const frontmatter = {
 }
 import CoreHead from "../../components/shell/Head"
 import { withPrefix } from "gatsby"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/catalog"
 export const Head = props => <CoreHead {...props} {...frontmatter} />
 
 export default function DeviceRegistration() {

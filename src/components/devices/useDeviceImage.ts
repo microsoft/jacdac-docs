@@ -1,5 +1,5 @@
 import { withPrefix } from "gatsby-link"
-import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/spec"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/catalog"
 
 export default function useDeviceImage(
     specification: jdspec.DeviceSpec,

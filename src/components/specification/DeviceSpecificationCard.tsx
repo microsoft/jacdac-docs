@@ -1,7 +1,6 @@
 import React from "react"
 import { Card, CardContent, Chip, Typography } from "@mui/material"
 import {
-    identifierToUrlPath,
     serviceSpecificationFromClassIdentifier,
 } from "../../../jacdac-ts/src/jdom/spec"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
@@ -10,6 +9,7 @@ import { uniqueMap } from "../../../jacdac-ts/src/jdom/utils"
 import useDeviceImage from "../devices/useDeviceImage"
 import { humanify } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import ChipList from "../ui/ChipList"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/catalog"
 
 export default function DeviceSpecificationCard(props: {
     specification: jdspec.DeviceSpec

@@ -1,9 +1,6 @@
 import React, { lazy, ReactNode, useMemo } from "react"
 import IDChip from "../IDChip"
-import {
-    identifierToUrlPath,
-    serviceSpecificationFromClassIdentifier,
-} from "../../../jacdac-ts/src/jdom/spec"
+import { serviceSpecificationFromClassIdentifier } from "../../../jacdac-ts/src/jdom/spec"
 import { AlertTitle, Chip, Divider, Grid, Typography } from "@mui/material"
 import useGridBreakpoints from "../useGridBreakpoints"
 import Markdown from "../ui/Markdown"
@@ -21,7 +18,10 @@ import {
     uniqueMap,
 } from "../../../jacdac-ts/src/jdom/utils"
 import Alert from "../ui/Alert"
-import { deviceCatalog } from "../../../jacdac-ts/src/jdom/catalog"
+import {
+    deviceCatalog,
+    identifierToUrlPath,
+} from "../../../jacdac-ts/src/jdom/catalog"
 import DeviceSpecificationCard from "./DeviceSpecificationCard"
 import useChange from "../../jacdac/useChange"
 import Suspense from "../ui/Suspense"

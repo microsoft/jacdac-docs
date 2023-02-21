@@ -10,8 +10,8 @@ import { Flags } from "../../../jacdac-ts/src/jdom/flags"
 import DeveloperModeAlert from "../alert/DeveloperModeAlert"
 import { DeviceSpecificationIcon } from "../devices/DeviceIcon"
 import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
-import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/spec"
 import useDeveloperMode from "../hooks/useDeveloperMode"
+import { identifierToUrlPath } from "../../../jacdac-ts/src/jdom/catalog"
 
 function ConnectTransport(props: {
     transport: Transport
