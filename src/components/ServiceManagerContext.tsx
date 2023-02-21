@@ -3,9 +3,13 @@ import { JSONTryParse } from "../../jacdac-ts/src/jdom/utils"
 import {
     BrowserFileStorage,
     HostedFileStorage,
-    IFileStorage,
+    FileStorage,
 } from "../../jacdac-ts/src/embed/filestorage"
-import { IThemeMessage } from "../../jacdac-ts/src/embed/protocol"
+import {
+    EmbedMessage,
+    EmbedSpecsMessage,
+    EmbedThemeMessage,
+} from "../../jacdac-ts/src/embed/protocol"
 import {
     ModelStore,
     HostedModelStore,
@@ -50,7 +54,7 @@ export class LocalStorageSettings implements ISettings {
 
 export interface ServiceManagerContextProps {
     isHosted: boolean
-    fileStorage: IFileStorage
+    fileStorage: FileStorage
     modelStore: ModelStore
 }
 
@@ -71,13 +75,19 @@ export const ServiceManagerProvider = ({ children }) => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleMessage = useCallback(
-        (ev: MessageEvent<any>) => {
+        (ev: MessageEvent<EmbedMessage>) => {
             const msg = ev.data
             if (msg?.source !== "jacdac") return
             switch (msg.type) {
                 case "theme": {
-                    const themeMsg = msg as IThemeMessage
+                    const themeMsg = msg as EmbedThemeMessage
                     toggleDarkMode(themeMsg.data.type)
+                    break
+                }
+                case "specs": {
+                    const specMsg = msg as EmbedSpecsMessage
+                    const { services } = specMsg.data
+                    bus.setCustomServiceSpecifications(services)
                     break
                 }
             }
@@ -94,7 +104,7 @@ export const ServiceManagerProvider = ({ children }) => {
 
     function createProps(): ServiceManagerContextProps {
         const isHosted = UIFlags.hosted
-        let fileStorage: IFileStorage = new BrowserFileStorage()
+        let fileStorage: FileStorage = new BrowserFileStorage()
         let modelStore: ModelStore = undefined
         if (isHosted) {
             console.log(`starting hosted services`)

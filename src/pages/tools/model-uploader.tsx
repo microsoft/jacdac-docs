@@ -21,7 +21,7 @@ import {
 import SensorAggregatorConfigView from "../../components/SensorAggregatorConfigView"
 import ServiceManagerContext from "../../components/ServiceManagerContext"
 import useChange from "../../jacdac/useChange"
-import { IFile } from "../../../jacdac-ts/src/embed/protocol"
+import { EmbedFile } from "../../../jacdac-ts/src/embed/protocol"
 import { prettySize } from "../../../jacdac-ts/src/jdom/pretty"
 import RegisterTrend from "../../components/RegisterTrend"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
@@ -149,7 +149,7 @@ export default function ModelUploader() {
             setImporting(false)
         }
     }
-    const handleLoadModel = (model: IFile) => async () => {
+    const handleLoadModel = (model: EmbedFile) => async () => {
         try {
             setImporting(true)
             console.log(`loading model`, model)
@@ -162,7 +162,7 @@ export default function ModelUploader() {
             setImporting(false)
         }
     }
-    const handleLoadInputConfiguration = (model: IFile) => async () => {
+    const handleLoadInputConfiguration = (model: EmbedFile) => async () => {
         try {
             setImporting(true)
             console.log(`loading model`, model)

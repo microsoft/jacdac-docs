@@ -1,12 +1,12 @@
-import React, { useMemo } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Grid } from "@mui/material"
 import { parseServiceSpecificationMarkdownToJSON } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
 import { serviceMap } from "../../../jacdac-ts/src/jdom/spec"
 import RandomGenerator from "../RandomGenerator"
 import useLocalStorage from "../hooks/useLocalStorage"
 import HighlightTextField from "../ui/HighlightTextField"
-import ServiceSpecification from "../specification/ServiceSpecification"
 import ServiceSpecificationSource from "../specification/ServiceSpecificationSource"
+import { EmbedSpecsMessage } from "../../../jacdac-ts/src/embed/protocol"
 
 const SERVICE_SPECIFICATION_STORAGE_KEY =
     "jacdac:servicespecificationeditorsource"
@@ -27,6 +27,19 @@ export default function ServiceSpecificationEditor() {
             json.shortId ||
             `0x${json.classIdentifier.toString(16)}`
         ).toLowerCase()}`
+
+    useEffect(() => {
+        const services: jdspec.ServiceSpec[] =
+            json && !json.errors?.length ? [json] : []
+        window.postMessage({
+            source: "jacdac",
+            type: "specs",
+            data: {
+                services,
+            },
+        } as EmbedSpecsMessage)
+    }, [json])
+
     return (
         <Grid spacing={2} container>
             <Grid item xs={12}>
