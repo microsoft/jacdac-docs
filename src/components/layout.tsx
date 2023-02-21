@@ -283,7 +283,6 @@ function LayoutWithContext(props: LayoutProps) {
                     {element}
                 </Typography>
             )}
-            {!hideUnderConstruction && !UIFlags.hosted && <HelpAlert />}
         </>
     )
 

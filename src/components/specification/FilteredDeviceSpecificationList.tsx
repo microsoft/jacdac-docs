@@ -42,7 +42,11 @@ export default function FilteredDeviceSpecificationList(props: {
     const handleSetFirmwareSources = () => setFirmwareSources(c => !c)
     const handleSetHardwareDesign = () => setHardwareDesign(c => !c)
     const handleSetDeviceScript = () =>
-        setServiceClass(SRV_DEVICE_SCRIPT_MANAGER)
+        setServiceClass(
+            serviceClass === SRV_DEVICE_SCRIPT_MANAGER
+                ? undefined
+                : SRV_DEVICE_SCRIPT_MANAGER
+        )
     const handleSetSelectedTag = (tag: string) => () =>
         setSelectedTags(ts => {
             const i = ts.indexOf(tag)

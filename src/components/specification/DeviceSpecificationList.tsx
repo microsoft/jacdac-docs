@@ -57,7 +57,9 @@ export default function DeviceSpecificationList(props: {
         hideChips,
         hideServices,
     } = props
-    const specifications = useDeviceSpecifications()
+    const specifications = useDeviceSpecifications({
+        includeExperimental: !buyNow,
+    })
     const specs = useMemo(() => {
         let r = (devices || specifications).slice(0)
         if (ids?.length) r = r.filter(({ id }) => ids.indexOf(id) > -1)
