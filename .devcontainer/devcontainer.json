@@ -9,20 +9,21 @@
             "VARIANT": "14"
         }
     },
-    // Set *default* container specific settings.json values on container create.
-    "settings": {},
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
-		"dbaeumer.vscode-eslint",
-		"esbenp.prettier-vscode",
-		"wix.vscode-import-cost",
-		"hediet.vscode-drawio",
-		"streetsidesoftware.code-spell-checker",
-		"unifiedjs.vscode-mdx",
-		"redhat.vscode-yaml"
-	],
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "wix.vscode-import-cost",
+        "hediet.vscode-drawio",
+        "streetsidesoftware.code-spell-checker",
+        "unifiedjs.vscode-mdx",
+        "redhat.vscode-yaml"
+    ],
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    "forwardPorts": [8080, 8000],
+    "forwardPorts": [
+        8080,
+        8000
+    ],
     // Specifies a command that should be run after the container has been created.
     "postCreateCommand": "yarn setup",
     // Comment out the next line to run as root instead.
@@ -34,67 +35,78 @@
                 "microsoft/jacdac-ts": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/jacdac-ddk": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/node-red-contrib-jacdac": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/gatsby-remark-makecode": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/react-jacdac": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/jacdac-cli": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/jacdac-python": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/pxt-jacdac": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/jacdac-dotnet": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/jacdac": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 },
                 "microsoft/jacdac-c": {
                     "permissions": {
                         "contents": "write",
-                        "pull_requests": "write"
+                        "pull_requests": "write",
+                        "workflows": "write"
                     }
                 }
             }
