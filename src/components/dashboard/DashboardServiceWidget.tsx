@@ -358,7 +358,7 @@ const serviceViews: {
     },
     [SRV_CLOUD_ADAPTER]: {
         component: DashboardCloudAdapter,
-        weight: () => 3,
+        weight: () => 4,
         expandable: true,
         icon: CloudQueueIcon,
     },

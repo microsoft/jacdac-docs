@@ -25,8 +25,8 @@ import { ServiceProviderDefinition } from "../../../jacdac-ts/src/servers/server
 import {
     CloudAdapterServer,
     CloudAdapterUploadBinRequest,
-    CloudAdapterUploadRequest,
-    UPLOAD,
+    CloudAdapterUploadJSONRequest,
+    UPLOAD_JSON,
     UPLOAD_BIN,
 } from "../../../jacdac-ts/src/servers/cloudadapterserver"
 
@@ -133,15 +133,8 @@ class AzureIoTHubConnector extends JDEventSource {
         }, 1000)
     }
 
-    public upload(label: string, values: number[]) {
-        this.publish(
-            `devices/${this.clientId}/messages/events/`,
-            JSON.stringify({
-                device: this.healthServer.device.deviceId,
-                label,
-                values,
-            })
-        )
+    public uploadJSON(json: string) {
+        this.publish(`devices/${this.clientId}/messages/events/`, json)
     }
 
     public uploadBin(data: Uint8Array) {
@@ -386,39 +379,16 @@ export default function createAzureIotHubServiceDefinition(): ServiceProviderDef
                 connectionName: "Azure IoT Hub",
                 controlled: true,
             })
-            cloud.on(UPLOAD, (req: CloudAdapterUploadRequest) => {
-                const { label, args } = req
-                connector.upload(label, args)
+            cloud.on(UPLOAD_JSON, (req: CloudAdapterUploadJSONRequest) => {
+                const { json } = req
+                connector.uploadJSON(json)
             })
             cloud.on(UPLOAD_BIN, (req: CloudAdapterUploadBinRequest) => {
                 const { data } = req
                 connector.uploadBin(data)
             })
-            connector.on(METHOD, (msg: MethodInvocation) => {
-                const { method, seqNo, payload } = msg
-                let values = []
-                if (Array.isArray(payload)) values = payload
-                else if (typeof payload == "number") values = [payload]
-                cloud.sendCloudCommand(method, values, 30000).then(
-                    resp => {
-                        connector.finishMethod(
-                            seqNo,
-                            { values: resp.args },
-                            resp.status
-                        )
-                    },
-                    err => {
-                        connector.finishMethod(
-                            seqNo,
-                            { error: err.message || err + "" },
-                            500
-                        )
-                    }
-                )
-            })
             config.connectionStatus.on(CHANGE, () => {
-                const connectionStatus =
-                    config.connectionStatus.values()[0]
+                const connectionStatus = config.connectionStatus.values()[0]
                 const connected =
                     connectionStatus ===
                     CloudConfigurationConnectionStatus.Connected
