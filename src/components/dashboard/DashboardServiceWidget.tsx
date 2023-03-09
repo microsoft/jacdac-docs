@@ -197,7 +197,6 @@ const serviceViews: {
     },
     [SRV_SERVO]: {
         component: DashboardServo,
-        expandable: true,
     },
     [SRV_SWITCH]: {
         component: DashboardSwitch,
