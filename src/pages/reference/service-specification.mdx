@@ -132,8 +132,8 @@ The following type descriptions are supported:
 -   `u8`, `u16`, `u32` - unsigned, 1, 2, and 4 bytes long respectively
 -   `i8`, `i16`, `i32` - similar, but signed
 -   `b` - buffer until the end of input (has to be last)
--   `s` - similar, but utf-8 encoded string
--   `z` - NULL-terminated utf-8 string
+-   `string` - similar, but utf-8 encoded string
+-   `string0` - NULL-terminated utf-8 string
 -   `b[10]` - 10 byte buffer (10 is just an example, here and below)
 -   `s[10]` - 10 byte utf-8 string; trailing NUL bytes (if any) are removed
 -   `x[10]` - 10 bytes of padding
@@ -332,7 +332,7 @@ For example, the `play_tone` command is expressed in terms of electrical terms, 
 
 ## Volatile
 
-A ``volatile`` register's values can change due to changes to the physical environment, even if the register was not programmatically modified.
+A `volatile` register's values can change due to changes to the physical environment, even if the register was not programmatically modified.
 If the register changes generated an event, it should not be marked as volatile.
 
 ```markdown
