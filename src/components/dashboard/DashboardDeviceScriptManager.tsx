@@ -28,11 +28,9 @@ export default function DashboardDeviceScriptManager(
         service,
         DeviceScriptManagerReg.Autostart
     )
-    const loggingRegister = useRegister(service, DeviceScriptManagerReg.Logging)
     const statusCodeRegister = useRegister(service, SystemReg.StatusCode)
     const running = useRegisterBoolValue(runningRegister, rest)
     const autoStart = useRegisterBoolValue(autoStartRegister, rest)
-    const logging = useRegisterBoolValue(loggingRegister, rest)
     const [statusCode] = useRegisterUnpackedValue(statusCodeRegister, rest)
     const disabled =
         statusCode === undefined ||
@@ -44,10 +42,6 @@ export default function DashboardDeviceScriptManager(
         event: ChangeEvent<HTMLInputElement>,
         checked: boolean
     ) => autoStartRegister?.sendSetBoolAsync(checked, true)
-    const handleLoggingChange = (
-        event: ChangeEvent<HTMLInputElement>,
-        checked: boolean
-    ) => loggingRegister?.sendSetBoolAsync(checked, true)
 
     return (
         <Grid container spacing={1}>
@@ -69,16 +63,6 @@ export default function DashboardDeviceScriptManager(
                         checked={autoStart || false}
                         disabled={autoStart === undefined}
                         onChange={handleAutoStartChange}
-                    />
-                </Grid>
-            )}
-            {expanded && (
-                <Grid item xs>
-                    <SwitchWithLabel
-                        label="logging"
-                        checked={logging || false}
-                        disabled={logging === undefined}
-                        onChange={handleLoggingChange}
                     />
                 </Grid>
             )}
