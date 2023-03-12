@@ -117,34 +117,6 @@ function useJacdacLogger(appendLog: (log: Message) => void) {
     )
 }
 
-function useJacscriptManagerLogger(appendLog: (log: Message) => void) {
-    const bus = useBus()
-    useEffect(
-        () =>
-            bus.subscribe(PACKET_REPORT, (pkt: Packet) => {
-                if (
-                    pkt.serviceClass === SRV_DEVICE_SCRIPT_MANAGER &&
-                    pkt.isReport &&
-                    pkt.serviceCommand === DeviceScriptManagerCmd.LogMessage
-                ) {
-                    const { device } = pkt
-                    const { shortId } = device
-                    const [counter, flags, content] =
-                        pkt.jdunpack<[number, number, string]>("u8 u8 s")
-                    const prefix = content.startsWith(`${shortId}.`)
-                        ? ""
-                        : `${shortId}> `
-                    const message = `${prefix}${content.trimEnd()}`
-                    appendLog({
-                        method: "log",
-                        data: [message],
-                    })
-                }
-            }),
-        []
-    )
-}
-
 function useFilter() {
     const bus = useBus()
     const minLoggerPriority = useChange(bus, _ => _.minLoggerPriority)
@@ -211,7 +183,6 @@ export const ConsoleProvider = ({ children }) => {
     )
 
     useJacdacLogger(appendLog)
-    useJacscriptManagerLogger(appendLog)
 
     const clear = () => {
         setLogs([])
