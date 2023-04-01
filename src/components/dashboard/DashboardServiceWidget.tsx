@@ -315,6 +315,7 @@ const serviceViews: {
     [SRV_HID_KEYBOARD]: {
         component: DashboardHIDKeyboard,
         weight: () => 4,
+        expandable: true,
     },
     [SRV_HID_MOUSE]: {
         component: DashboardHIDMouse,
