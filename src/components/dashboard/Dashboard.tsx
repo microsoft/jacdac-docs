@@ -21,6 +21,9 @@ import useBusWithMode from "../../jacdac/useBusWithMode"
 import useDeviceScript from "../devicescript/DeviceScriptContext"
 import Suspense from "../ui/Suspense"
 import PacketsContext from "../PacketsContext"
+import ModulatorComp from "../modulator/modulator"
+
+
 const DeviceScriptToolbar = lazy(
     () => import("../devicescript/DeviceScriptToolbar")
 )
@@ -145,6 +148,7 @@ export default function Dashboard(props: DashboardProps) {
                     </Grid>
                 )}
             </DashboardDeviceGroup>
+            <ModulatorComp/>
         </>
     )
 }
