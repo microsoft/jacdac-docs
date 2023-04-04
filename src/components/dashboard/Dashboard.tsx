@@ -100,7 +100,12 @@ export default function Dashboard(props: DashboardProps) {
                     action={
                         <>
                             {showStartRoleSimulators && (
-                                <StartMissingSimulatorsButton trackName="dashboard.simulators.missing" />
+                                <StartMissingSimulatorsButton
+                                    trackName="dashboard.simulators.missing"
+                                    disabledChildren={null}
+                                >
+                                    Auto start
+                                </StartMissingSimulatorsButton>
                             )}
                             <StartSimulatorButton trackName="dashboard.simulators.start" />
                             <IconButtonWithTooltip

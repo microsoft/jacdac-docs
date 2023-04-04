@@ -9,9 +9,11 @@ export default function StartMissingSimulatorsButton(props: {
     variant?: "contained" | "outlined"
     trackName?: string
     children?: ReactNode
+    disabledChildren?: ReactNode
     hideOnDisabled?: boolean
 }) {
-    const { trackName, children, variant, hideOnDisabled } = props
+    const { trackName, children, disabledChildren, variant = "outlined", hideOnDisabled } =
+        props
     const roleManager = useRoleManagerClient()
     const allRolesBound = useChange(roleManager, _ => _?.allRolesBound())
     const handleStartSimulators = async () => {
@@ -26,12 +28,14 @@ export default function StartMissingSimulatorsButton(props: {
         <CmdButton
             variant={variant}
             trackName={trackName}
-            title="start missing Jacdac simulators"
+            title="start missing simulators"
             onClick={handleStartSimulators}
             disabled={disabled}
             icon={<DevicesIcon />}
         >
-            {children}
+            {disabled && disabledChildren !== undefined
+                ? disabledChildren
+                : children}
         </CmdButton>
     )
 }
