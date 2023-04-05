@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material"
 import { StaticImage } from "gatsby-plugin-image"
-import React, { lazy, useContext } from "react"
+import React, { useContext } from "react"
 import CenterGrid from "./CenterGrid"
 import SplitGrid from "./SplitGrid"
 import AppContext, { DrawerType } from "../AppContext"

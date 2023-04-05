@@ -221,11 +221,7 @@ function LayoutWithContext(props: LayoutProps) {
         /^\/(tools\/(makecode-|player|devicescript-)|dashboard)/.test(path) ||
         !!frontmatter?.fullWidth
     const isDataEditor = /^\/editors\/data/.test(path)
-    const {
-        hideMainMenu = false,
-        hideUnderConstruction = false,
-        hideBreadcrumbs = false,
-    } = frontmatter || {
+    const { hideMainMenu = false, hideBreadcrumbs = false } = frontmatter || {
         hideMainMenu: isHosted || makeCodeTool || deviceScriptTool,
         hideUnderConstruction:
             isDataEditor || makeCodeTool || deviceScriptTool || fullWidthTools,
