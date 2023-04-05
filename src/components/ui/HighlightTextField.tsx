@@ -7,7 +7,7 @@ import Highlight, {
     PrismTheme,
 } from "prism-react-renderer"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
-import LIGHT_THEME from "prism-react-renderer/themes/github"
+import LIGHT_THEME from "prism-react-renderer/themes/vsLight"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DARK_THEME from "prism-react-renderer/themes/vsDark"
 import DarkModeContext from "./DarkModeContext"
