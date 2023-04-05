@@ -5,40 +5,12 @@ import CenterGrid from "./CenterGrid"
 import SplitGrid from "./SplitGrid"
 import AppContext, { DrawerType } from "../AppContext"
 import Suspense from "../ui/Suspense"
-import {
-    SRV_BUTTON,
-    SRV_GAMEPAD,
-    SRV_DOT_MATRIX,
-    SRV_LED_STRIP,
-    SRV_POTENTIOMETER,
-    SRV_ROLE_MANAGER,
-    SRV_SERVO,
-} from "../../../jacdac-ts/src/jdom/constants"
-import useServiceProviderFromServiceClass from "../hooks/useServiceProviderFromServiceClass"
-import useDevices from "../hooks/useDevices"
 import DashboardDevice from "../dashboard/DashboardDevice"
 
 export default function Tools() {
-    useServiceProviderFromServiceClass(SRV_BUTTON)
-    useServiceProviderFromServiceClass(SRV_GAMEPAD)
-    useServiceProviderFromServiceClass(SRV_SERVO)
-    useServiceProviderFromServiceClass(SRV_POTENTIOMETER)
-    useServiceProviderFromServiceClass(SRV_LED_STRIP)
-    useServiceProviderFromServiceClass(SRV_DOT_MATRIX)
     const { setDrawerType } = useContext(AppContext)
     const handleShowDeviceTree = () => setDrawerType(DrawerType.Dom)
     const handleShowPacketConsole = () => setDrawerType(DrawerType.Packets)
-    const simulatorClass = SRV_DOT_MATRIX
-    const dashboards = useDevices({
-        ignoreInfrastructure: true,
-        announced: true,
-    })
-        .filter(
-            dev =>
-                !dev.hasService(SRV_ROLE_MANAGER) &&
-                !dev.hasService(simulatorClass)
-        )
-        .slice(0, 4)
     return (
         <Grid
             container
@@ -47,31 +19,16 @@ export default function Tools() {
             alignContent="center"
             alignItems="center"
         >
-            <SplitGrid
+            <CenterGrid
                 title="Web Tools"
                 subtitle3="Visualize, debug, sniff, track, record, replay, update... from your browser."
-                imageColumns={6}
-                image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
             />
 
             <SplitGrid
                 right={true}
                 subtitle="Digital Twins and Simulators."
                 description="Visualize and interact with digital twins of physical devices, or simulated devices. Interact with the simulators on the left. To see more details, open the device tree."
-                image={
-                    <Grid container spacing={1}>
-                        {dashboards.map(device => (
-                            <Grid item key={device.id} xs={12} sm={6}>
-                                <Suspense>
-                                    <DashboardDevice
-                                        variant="icon"
-                                        device={device}
-                                    />
-                                </Suspense>
-                            </Grid>
-                        ))}
-                    </Grid>
-                }
+                image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
                 buttonText="Open Device Tree"
                 buttonVariant="link"
                 onButtonClick={handleShowDeviceTree}
