@@ -20,7 +20,7 @@ import useMediaQueries from "./hooks/useMediaQueries"
 import MainAppBar from "./shell/MainAppBar"
 import { UIFlags } from "../jacdac/providerbus"
 import YouTubeContext from "./youtube/YouTubeContext"
-import HelpAlert from "./alert/HelpAlert"
+import { Helmet } from "react-helmet"
 
 const Breadcrumbs = lazy(() => import("./ui/Breadcrumbs"))
 const AppDrawer = lazy(() => import("./shell/AppDrawer"))
@@ -151,8 +151,15 @@ export interface LayoutProps {
 }
 
 export default function Layout(props: LayoutProps) {
+    const { props: pageProps } = props
+    const { pageContext = {} } = pageProps
+    const { frontmatter = {} } = pageContext
+    const { title, description = "" } = frontmatter
     return (
         <DarkModeProvider>
+            {title && (
+                <Helmet title={title} description={description} defer={false} />
+            )}
             <LayoutWithDarkMode {...props} />
         </DarkModeProvider>
     )
