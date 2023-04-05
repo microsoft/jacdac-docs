@@ -17,7 +17,6 @@ import {
 import useServiceProviderFromServiceClass from "../hooks/useServiceProviderFromServiceClass"
 import useDevices from "../hooks/useDevices"
 import DashboardDevice from "../dashboard/DashboardDevice"
-const PacketView = lazy(() => import("../tools/PacketView"))
 
 export default function Tools() {
     useServiceProviderFromServiceClass(SRV_BUTTON)
@@ -82,13 +81,7 @@ export default function Tools() {
                 right={false}
                 subtitle="Packet Console"
                 description="Sniff the packet traffic, record and replay traces in the packet console."
-                image={
-                    <div style={{ height: "14rem" }}>
-                        <Suspense>
-                            <PacketView />
-                        </Suspense>
-                    </div>
-                }
+                image={<StaticImage src="./packets.png" alt="Packet view" />}
                 buttonText="Open Packet Console"
                 buttonVariant="link"
                 onButtonClick={handleShowPacketConsole}
