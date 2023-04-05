@@ -1,4 +1,11 @@
-import { Chip, Grid, List, ListItemText, Typography } from "@mui/material"
+import {
+    Chip,
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+    Typography,
+} from "@mui/material"
 import React, { useMemo } from "react"
 import { isInfrastructure } from "../../../jacdac-ts/src/jdom/spec"
 import { ellipseFirstSentence } from "../../../jacdac-ts/src/jdom/utils"
@@ -18,9 +25,11 @@ import { isMixinService } from "../../../jacdac-ts/jacdac-spec/spectool/jdutils"
 import useDeviceCatalog from "../devices/useDeviceCatalog"
 import useChange from "../../jacdac/useChange"
 
-function ServiceSpecificatinListItem(props: { service: jdspec.ServiceSpec }) {
+function ServiceSpecificatinListItemText(props: {
+    service: jdspec.ServiceSpec
+}) {
     const { service } = props
-    const { shortId, classIdentifier, name, notes, tags } = service
+    const { classIdentifier, name, notes, tags } = service
     const makecode = resolveMakecodeServiceFromClassIdentifier(classIdentifier)
     const simulator = serviceProviderDefinitionFromServiceClass(classIdentifier)
     const deviceCatalog = useDeviceCatalog()
@@ -31,55 +40,49 @@ function ServiceSpecificatinListItem(props: { service: jdspec.ServiceSpec }) {
     const mixin = isMixinService(classIdentifier)
 
     return (
-        <Link to={`/services/${shortId}`} style={{ textDecoration: "none" }}>
-            <ListItemText
-                key={classIdentifier}
-                disableTypography={true}
-                primary={name}
-                secondary={
-                    <ChipList>
-                        <Typography variant="caption">
-                            {ellipseFirstSentence(notes["short"])}
-                        </Typography>
-                        {tags?.map(tag => (
-                            <Chip key={tag} size="small" label={tag} />
-                        ))}
-                        {mixin && (
-                            <Chip
-                                icon={
-                                    <KindIcon kind={SERVICE_MIXIN_NODE_NAME} />
-                                }
-                                size="small"
-                                label="mixin"
-                            />
-                        )}
-                        {simulator && (
-                            <Chip
-                                icon={
-                                    <KindIcon kind={VIRTUAL_DEVICE_NODE_NAME} />
-                                }
-                                size="small"
-                                label="simulator"
-                            />
-                        )}
-                        {device && (
-                            <Chip
-                                icon={<JacdacIcon />}
-                                size="small"
-                                label="devices"
-                            />
-                        )}
-                        {makecode && (
-                            <Chip
-                                icon={<MakeCodeIcon />}
-                                size="small"
-                                label="MakeCode"
-                            />
-                        )}
-                    </ChipList>
-                }
-            />
-        </Link>
+        <ListItemText
+            key={classIdentifier}
+            disableTypography={true}
+            primary={name}
+            secondary={
+                <ChipList>
+                    <Typography variant="caption">
+                        {ellipseFirstSentence(notes["short"])}
+                    </Typography>
+                    {tags?.map(tag => (
+                        <Chip key={tag} size="small" label={tag} />
+                    ))}
+                    {mixin && (
+                        <Chip
+                            icon={<KindIcon kind={SERVICE_MIXIN_NODE_NAME} />}
+                            size="small"
+                            label="mixin"
+                        />
+                    )}
+                    {simulator && (
+                        <Chip
+                            icon={<KindIcon kind={VIRTUAL_DEVICE_NODE_NAME} />}
+                            size="small"
+                            label="simulator"
+                        />
+                    )}
+                    {device && (
+                        <Chip
+                            icon={<JacdacIcon />}
+                            size="small"
+                            label="devices"
+                        />
+                    )}
+                    {makecode && (
+                        <Chip
+                            icon={<MakeCodeIcon />}
+                            size="small"
+                            label="MakeCode"
+                        />
+                    )}
+                </ChipList>
+            }
+        />
     )
 }
 
@@ -110,8 +113,12 @@ export default function ServiceSpecificationList(props: {
             <Grid item>
                 <List component="div">
                     {specs.map(node => (
-                        <ListItemButton key={node.shortId}>
-                            <ServiceSpecificatinListItem service={node} />
+                        <ListItemButton
+                            key={node.shortId}
+                            to={`/services/${node.shortId}`}
+                            style={{ textDecoration: "none" }}
+                        >
+                            <ServiceSpecificatinListItemText service={node} />
                         </ListItemButton>
                     ))}
                 </List>
