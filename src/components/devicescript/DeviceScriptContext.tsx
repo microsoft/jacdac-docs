@@ -7,7 +7,7 @@ import React, {
     useState,
 } from "react"
 import useEffectAsync from "../useEffectAsync"
-import { deviceScriptCompile } from "../blockly/dsl/workers/devicescript.proxy"
+import { deviceScriptCompile } from "../workers/devicescript.proxy"
 import type { DeviceScriptCompileResponse } from "../../workers/devicescript/devicescript-worker"
 import {
     DEVICE_ANNOUNCE,
