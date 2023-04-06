@@ -67,7 +67,7 @@
     "gatsby-transformer-javascript-frontmatter": "^4.24.0",
     "gatsby-transformer-json": "^4.24.0",
     "gatsby-transformer-plaintext": "^2.0.0",
-    "gatsby-transformer-remark": "^5.24.0",
+    "gatsby-transformer-remark": "^5.25.1",
     "gatsby-transformer-sharp": "^4.24.0",
     "gltfjsx": "^5.0.2",
     "howler": "^2.2.3",
