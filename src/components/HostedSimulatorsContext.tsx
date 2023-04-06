@@ -111,26 +111,12 @@ export function hostedSimulatorDefinitions(): HostedSimulatorDefinition[] {
             height: "17.5rem",
             requiresDeviceScript: true,
         },
-        {
-            id: "azureiotuploader",
-            name: "Azure IoT Uploader",
-            url: "https://microsoft.github.io/pxt-jacdac/",
-            width: "20rem",
-            height: "12rem",
-        },
         Flags.diagnostics && {
             id: "arcademultitool",
             name: "MakeCode Arcade multitool",
             url: "https://microsoft.github.io/pxt-jacdac/?tool=multitool",
             width: "25vw",
             height: "28.75vw",
-        },
-        UIFlags.localhost && {
-            id: "azureiotuploaderlocal",
-            name: "Azure IoT Uploader (localhost)",
-            url: "http://localhost:3232/index.html",
-            width: "20rem",
-            height: "12rem",
         },
         UIFlags.localhost && {
             id: "makecodeserve",

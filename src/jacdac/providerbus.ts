@@ -31,7 +31,6 @@ import {
 } from "../../jacdac-ts/src/jdom/transport/transport"
 import { JDDevice } from "../../jacdac-ts/src/jdom/device"
 import { isInfrastructure } from "../../jacdac-ts/src/jdom/spec"
-import createAzureIotHubServiceDefinition from "../components/devicescript/azureiotconnector"
 import { addServiceProviderDefinition } from "../../jacdac-ts/src/servers/servers"
 
 function sniffQueryArguments() {
@@ -56,7 +55,8 @@ function sniffQueryArguments() {
     const toolsMakecode =
         /\/tools\/makecode-/.test(href) || params.get(`nestededitorsim`) === "1"
     const toolsDeviceScript = /\/tools\/devicescript-/.test(href)
-    const toolsDeviceScriptVsCode = /\/tools\/devicescript-devtools-vscode/.test(href)
+    const toolsDeviceScriptVsCode =
+        /\/tools\/devicescript-devtools-vscode/.test(href)
     const toolsMakeEditorExtension = /\/tools\/makecode-editor-extension/.test(
         href
     )
@@ -102,7 +102,8 @@ function sniffQueryArguments() {
         transient: params.get("transient") === "1",
         persistent: params.get("persistent") === "1" || isLocalhost,
         footer: params.get("footer") !== "0" && !toolsDeviceScriptVsCode,
-        devicescriptvm: params.get("devicescript") === "1" && !toolsDeviceScriptVsCode,
+        devicescriptvm:
+            params.get("devicescript") === "1" && !toolsDeviceScriptVsCode,
         resetIn: params.get("resetin") === "1",
         serialVendorIds: (params.get("serialvendorids") || "")
             .split(/,/g)
@@ -264,8 +265,6 @@ function createBus(): JDBus {
             }
         })
         if (!args.bus) b.stop()
-
-        addServiceProviderDefinition(createAzureIotHubServiceDefinition())
     }
 
     return b

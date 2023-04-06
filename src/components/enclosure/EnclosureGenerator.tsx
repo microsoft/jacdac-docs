@@ -2,7 +2,7 @@ import React, { lazy, useEffect, useState } from "react"
 
 import { Button, Grid } from "@mui/material"
 import Suspense from "../ui/Suspense"
-import { convertToSTL } from "../blockly/dsl/workers/cad.proxy"
+import { convertToSTL } from "../workers/cad.proxy"
 import type {
     EnclosureModel,
     EnclosureOptions,

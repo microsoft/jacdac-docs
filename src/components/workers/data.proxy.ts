@@ -1,7 +1,7 @@
 import type {
     DataRequest,
     DataMessage,
-} from "../../../../workers/data/dist/node_modules/data.worker"
+} from "../../workers/data/dist/node_modules/data.worker"
 import workerProxy from "./proxy"
 
 export default async function postTransformData(

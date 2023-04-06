@@ -3,12 +3,12 @@ import workerProxy from "./proxy"
 import type {
     CadConvertRequest,
     CadConvertResponse,
-} from "../../../../workers/cad/dist/node_modules/cad.worker"
+} from "../../workers/cad/dist/node_modules/cad.worker"
 import type {
     EnclosureModel,
     EnclosureOptions,
     EnclosureFile,
-} from "../../../../workers/cad/dist/node_modules/enclosurecad"
+} from "../../workers/cad/dist/node_modules/enclosurecad"
 
 export async function convertToSTL(
     model: EnclosureModel,

@@ -9,7 +9,7 @@ import type {
     CsvUnparseRequest,
     CsvUnparseResponse,
     CsvMessage,
-} from "../../../../workers/csv/dist/node_modules/csv.worker"
+} from "../../workers/csv/dist/node_modules/csv.worker"
 
 export async function downloadCSV(url: string): Promise<CsvFile> {
     const worker = workerProxy("csv")

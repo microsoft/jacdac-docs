@@ -4,7 +4,7 @@ import {
     SRV_DEVICE_SCRIPT_MANAGER,
 } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import { OutPipe } from "../../../jacdac-ts/src/jdom/pipes"
-import { startDeviceScriptVM } from "../blockly/dsl/workers/vm.proxy"
+import { startDeviceScriptVM } from "../workers/vm.proxy"
 import useServices from "../hooks/useServices"
 import useWindowEvent from "../hooks/useWindowEvent"
 

@@ -3,11 +3,11 @@ import type {
     VMState,
     VMRequest,
     VMPacketRequest,
-} from "../../../../workers/vm/dist/node_modules/vm-worker"
+} from "../../workers/vm/dist/node_modules/vm-worker"
 import workerProxy, { WorkerProxy } from "./proxy"
-import { CHANGE, MESSAGE } from "../../../../../jacdac-ts/src/jdom/constants"
-import { JDBridge } from "../../../../../jacdac-ts/src/jdom/bridge"
-import bus from "../../../../jacdac/providerbus"
+import { CHANGE, MESSAGE } from "../../../jacdac-ts/src/jdom/constants"
+import { JDBridge } from "../../../jacdac-ts/src/jdom/bridge"
+import bus from "../../jacdac/providerbus"
 
 class DeviceScriptBridge extends JDBridge {
     refs = 0
