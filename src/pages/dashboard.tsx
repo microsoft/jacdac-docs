@@ -13,7 +13,7 @@ export const Head = props => <CoreHead {...props} {...frontmatter} />
 
 const DataStreamer = lazy(() => import("../components/tools/DataStreamer"))
 
-export default function Page() {
+export default async function Page() {
     const dataStreamer =
         useLocationSearchParamBoolean("datastreamer", false) && UIFlags.hosted
     const { drawerType, setDrawerType } = useContext(AppContext)

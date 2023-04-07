@@ -1,0 +1,97 @@
+{
+    "name":"Micro:bit v2 pin layout",
+    "totalPins":18,
+    "power":3.3,
+    "pins":[
+        {
+            "name":"P0",
+            "pos":0,
+            "options":["Analog IN", "Analog OUT", "Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P1",
+            "pos":1,
+            "options":["Analog IN", "Analog OUT", "Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P2",
+            "pos":2,
+            "options":["Analog IN", "Analog OUT", "Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P3",
+            "pos":3,
+            "options":["Analog IN", "Analog OUT", "Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P4",
+            "pos":4,
+            "options":["Analog IN", "Analog OUT", "Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P5",
+            "pos":5,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P6",
+            "pos":6,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P7",
+            "pos":7,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P8",
+            "pos":8,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P9",
+            "pos":9,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P10",
+            "pos":10,
+            "options":["Analog IN", "Analog OUT","Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P11",
+            "pos":11,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P13",
+            "pos":13,
+            "options":["SCK SPI","Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P14",
+            "pos":14,
+            "options":["MISO SPI","Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P15",
+            "pos":15,
+            "options":["MOSI SPI","Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P16",
+            "pos":16,
+            "options":["Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P19",
+            "pos":19,
+            "options":["SCL I2C","Digital IN", "Digital OUT"]
+        },
+        {
+            "name":"P20",
+            "pos":20,
+            "options":["SDA I2C","Digital IN", "Digital OUT"]
+        }
+    ]
+}

@@ -1,0 +1,37 @@
+{
+    "name": "sr04",
+    "type": "Distance",
+    "numberPins": 4,
+    "diagram": "https://soldered.com/productdata/2015/02/751276-Edit.jpg",
+    "pinLayout": [
+        {
+            "type": "GND",
+            "pos": "0",
+            "name": "GND"
+        },
+        {
+            "type": "Analog IN",
+            "pos": "1",
+            "name": "ECHO"
+        },
+        {
+            "type": "Analog IN",
+            "pos": "2",
+            "name": "TRIG"
+        },
+        {
+            "type": "VCC",
+            "pos": "3",
+            "name": "5V"
+        }
+    ],
+    "code": {
+        "codeClient": "export const #_client = new DistanceClient(\"#\")",
+        "codeService": "new ServiceImpl.DepthServer(() => sonar.ping(DigitalPin.#, DigitalPin.#, PingUnit.Centimers)/100.0, { \"instanceName\": \"#\"})",
+        "codeServiceParam": [
+            "2",
+            "1",
+            "Name"
+        ]
+    }
+}

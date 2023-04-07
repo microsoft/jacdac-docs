@@ -1,18 +1,25 @@
 import React from "react";
-import { ModuExtern } from "./modulator";
+import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, TypePin } from "./helper/types";
 import { StaticImage } from "gatsby-plugin-image";
+import Button from "../ui/Button";
 
 
 export default function ModuleComponent(
     props:{
         module: ModuExtern;
+        removeFunc: (moduleName:string) =>void;
     }
 ){
-    const {module} = props;
+    const {module, removeFunc} = props;
+
+    const fileInCode = () => {
+
+    }
     
     return(
         
         <div style={{border: "1px solid black", borderRadius: "20px", padding: "10px", margin: "10px" }}>
+            <Button onClick={() => removeFunc(module.name)}>Remove</Button>
             <p>Module name: {module.name}</p>
             {module.diagram === undefined?null:
             <div style={{textAlign:"center"}}>
@@ -27,7 +34,7 @@ export default function ModuleComponent(
             ))}
             {module.codeAct === undefined?null: 
             <div>
-                {module.codeAct.module} {module.codeAct.service}    
+                {module.codeAct.clientCode} {module.codeAct.serviceCode}    
             </div>}
 
         </div>

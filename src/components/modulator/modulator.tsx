@@ -1,4 +1,4 @@
-import { ReactElement, useId, useState } from "react";
+import { ReactElement, useEffect, useId, useState } from "react";
 import React from "react"
 import { Grid } from "@mui/material"
 import GridHeader from "../ui/GridHeader"
@@ -7,48 +7,9 @@ import PinLayoutComp from "./pinLayoutComp";
 import SchemaComp from "./schemaComp";
 import Button from "../ui/Button";
 import { log } from "vega";
+import { fetchModule, fetchPinLayout } from "./helper/file";
+import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, TypePin } from "./helper/types";
 
-export enum TypePins {
-    AnalogIn= "Analog IN",
-    AnalogOut= "Analog OUT" ,
-    DigitalIn = "Digital IN",
-    DigitalOut = "Digital OUT",
-    SdaI2C = "SDA I2C",
-    SclI2c = "SCL I2C",
-    SckSPI = "SCK SPI",
-    MisoSPI = "MISO SPI",
-    MosiSPI = "MOSI SPI",
-    GND = "GND",
-    Power = "VCC"
-}
-
-export type Pins = {
-    typePin: TypePins;
-    posPin: number;
-    name?: string;
-}
-
-export type CodeMake = {
-    module: string;
-    service: string;
-    inputFunc?: string;
-}
-
-export type ModuExtern = {
-    name: string;
-    type: string;
-    numberPins: number;
-    pinLayout: Pins[];
-    diagram: string;
-    codeAct?: CodeMake;
-}
-
-//Need to work on
-export type PinAlloc = {
-    typeConn: TypePins;
-    pinLocation: number;
-    moduleName: string;
-}
 
 //TODO: making pin allocation and removing
 //TODO: get module info from file or github???
@@ -57,24 +18,45 @@ export type PinAlloc = {
 //TODO: layout working
 //TODO: image from web not local gives problems
 
+// type Props={
+//     breakoutBoard: Breakout;
+// }
+async function getBreakout():Promise<Breakout>{
+    return await fetchPinLayout();
+}
+
 const ModulatorComp = () =>{
     const sectionId = useId();
     const [conModules, setconModules] = useState<Array<ModuExtern>>([]);
+    const [breakoutBoard, setBreakoutBoard] = useState(undefined as Breakout | undefined);
 
     const [, updateState] = React.useState({});
     const forceUpdate = React.useCallback(() => updateState({}), [])
 
-    
+    useEffect(() =>{
+        getBreakout().then((data) => {
+            setBreakoutBoard(data);
+        })
+    }, [])
 
+    const removeConModule = (moduleName: string) => {
+        const index = conModules.findIndex( i => i.name === moduleName);
+        const temp = conModules
+        temp.splice(index, 1);
 
-    const addSchema = () =>{
+        setconModules(temp);
+        forceUpdate();
+    }
+
+    //Old way of loading static
+    const staticaddSchema = () =>{
         console.log(conModules.length)
-        const tempPin: Pins[] = [   {typePin:TypePins.GND, posPin:-1}, 
-                                    {typePin:TypePins.AnalogIn, posPin:1, name:"Trig"}, 
-                                    {typePin:TypePins.AnalogIn, posPin:0, name:"Echo"}, 
-                                    {typePin:TypePins.Power, posPin:21}];
-
-        const temp: ModuExtern = {name:"Test",
+        const tempPin: Pin[] = [   {typePin:TypePin.GND, posPin:-1}, 
+                                    {typePin:TypePin.AnalogIn, posPin:1, name:"Trig"}, 
+                                    {typePin:TypePin.AnalogIn, posPin:0, name:"Echo"}, 
+                                    {typePin:TypePin.Power, posPin:21}];
+        const tempName = "Test" + new Date().toISOString();
+        const temp: ModuExtern = {name:tempName,
                                 type:"Distance",
                                 numberPins: 4,
                                 pinLayout:tempPin,
@@ -87,8 +69,21 @@ const ModulatorComp = () =>{
         forceUpdate();
     }
 
-    const pinAlloccation = () =>{
+    const addSchema = async () =>{
+        const argument = "sr04";
+        const tempModu = await fetchModule(argument);
+        console.log(tempModu.pinLayout[0].typePin)
+        console.log("checking")
+        const tempCon = conModules;
+        tempCon.push(tempModu)
+        setconModules(tempCon);
+        forceUpdate();
+    }
 
+    const pinAlloccation = () =>{
+        if(breakoutBoard){
+            console.log("REEEeeee")
+        }
     }
 
     return(
@@ -107,7 +102,7 @@ const ModulatorComp = () =>{
                     </Grid>
                 </Grid>
 
-            <SchemaComp modules={conModules}/>
+            <SchemaComp modules={conModules} removeFunc={removeConModule}/>
             
 
 

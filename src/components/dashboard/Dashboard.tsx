@@ -22,6 +22,7 @@ import useDeviceScript from "../devicescript/DeviceScriptContext"
 import Suspense from "../ui/Suspense"
 import PacketsContext from "../PacketsContext"
 import ModulatorComp from "../modulator/modulator"
+import { fetchPinLayout } from "../modulator/helper/file"
 
 
 const DeviceScriptToolbar = lazy(
@@ -90,6 +91,8 @@ export default function Dashboard(props: DashboardProps) {
         bus.clearServiceProviders()
     }
 
+    //Added
+    // const breakoutBoard = async fetchPinLayout();
     return (
         <>
             {showDeviceScript && jacscriptSource !== undefined && (
@@ -148,7 +151,7 @@ export default function Dashboard(props: DashboardProps) {
                     </Grid>
                 )}
             </DashboardDeviceGroup>
-            <ModulatorComp/>
+            <ModulatorComp /*breakoutBoard={breakoutBoard}*/ />
         </>
     )
 }
