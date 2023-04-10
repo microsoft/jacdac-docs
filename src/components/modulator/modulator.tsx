@@ -7,8 +7,9 @@ import PinLayoutComp from "./pinLayoutComp";
 import SchemaComp from "./schemaComp";
 import Button from "../ui/Button";
 import { log } from "vega";
-import { fetchModule, fetchPinLayout } from "./helper/file";
-import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, TypePin } from "./helper/types";
+import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
+import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin } from "./helper/types";
+import { element } from "prop-types";
 
 
 //TODO: making pin allocation and removing
@@ -51,11 +52,12 @@ const ModulatorComp = () =>{
     //Old way of loading static
     const staticaddSchema = () =>{
         console.log(conModules.length)
-        const tempPin: Pin[] = [   {typePin:TypePin.GND, posPin:-1}, 
-                                    {typePin:TypePin.AnalogIn, posPin:1, name:"Trig"}, 
-                                    {typePin:TypePin.AnalogIn, posPin:0, name:"Echo"}, 
-                                    {typePin:TypePin.Power, posPin:21}];
         const tempName = "Test" + new Date().toISOString();
+
+        const tempPin: Pin[] = [   {typePin:TypePin.GND, posPin:-1, moduleId:tempName}, 
+                                    {typePin:TypePin.AnalogIn, posPin:1, name:"Trig", moduleId:tempName}, 
+                                    {typePin:TypePin.AnalogIn, posPin:0, name:"Echo", moduleId:tempName}, 
+                                    {typePin:TypePin.Power, posPin:21, moduleId:tempName}];
         const temp: ModuExtern = {name:tempName,
                                 type:"Distance",
                                 numberPins: 4,
@@ -74,17 +76,78 @@ const ModulatorComp = () =>{
         const tempModu = await fetchModule(argument);
         console.log(tempModu.pinLayout[0].typePin)
         console.log("checking")
+        
+        
+        pinAlloccationCheck(tempModu);
+
         const tempCon = conModules;
         tempCon.push(tempModu)
         setconModules(tempCon);
         forceUpdate();
     }
 
-    const pinAlloccation = () =>{
+    const pinAlloccationCheck = (newModule: ModuExtern) =>{
         if(breakoutBoard){
-            console.log("REEEeeee")
+            const sortPinlayout = newModule.pinLayout.sort((a, b) => predicate(a.typePin, b.typePin));
+
+            const pinPossible: number[] = [];
+            const pinAllocTemp: PinAlloc[] = [];
+            let counterBasic = 0;
+
+            for(let i = 0; i < sortPinlayout.length; i++){
+                if(sortPinlayout[i].typePin === TypePin.GND || sortPinlayout[i].typePin === TypePin.Power){
+                    pinPossible.push(-1);
+                    counterBasic +=1;
+                    //TODO:add check if Voltage not too high, other ways adding voltage convertere
+                }
+                for(let j = 0; j < breakoutBoard.pinOut.length; j++){
+                    
+                    //check pin is in use
+                    if(!breakoutBoard.pinOut[j].used ){
+                        //check if pin in temp
+                        if(!pinPossible.includes(breakoutBoard.pinOut[j].position)){
+                            //Check if type correct
+                            if(breakoutBoard.pinOut[j].options.includes(sortPinlayout[i].typePin)){
+                                pinPossible.push(breakoutBoard.pinOut[j].position);
+                                pinAllocTemp.push({ moduleName: newModule.name,
+                                                    modulePin: sortPinlayout[i],
+                                                    pinBreakboardLocation: breakoutBoard.pinOut[j].position,
+                                                });
+                            }   
+                        }
+                    }
+                }
+            }
+
+            if((counterBasic + pinAllocTemp.length) === newModule.numberPins){
+                allocatedPins(pinAllocTemp);
+            }else{
+                console.log("Not possible to load in");
+            }
+        }else{
+            console.log("ERROR: no breakoutboard loaded in!!!");
         }
+
     }
+
+    //set the temp allocated pin position to the breakoutboard
+    const allocatedPins = (allocPins: PinAlloc[]) => {
+        if(breakoutBoard){
+            const tempBreakoutBoard = breakoutBoard;
+            for(let i = 0; i<allocPins.length; i++){
+                const index =tempBreakoutBoard.pinOut.findIndex(element => element.position === allocPins[i].pinBreakboardLocation);
+                if(index !== -1){
+                    tempBreakoutBoard.pinOut[index].used == true;
+                    tempBreakoutBoard.pinOut[index].moduleName.push(allocPins[i].moduleName);
+                    tempBreakoutBoard.pinOut[index].modulePin.push(allocPins[i].modulePin);
+                }
+            }
+            setBreakoutBoard(tempBreakoutBoard);
+        }
+        
+    }
+
+
 
     return(
         <section id={sectionId}>

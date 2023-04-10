@@ -14,6 +14,7 @@ export enum TypePin {
 
 //Used in module as different pins
 export type Pin = {
+    moduleId: string;
     typePin: TypePin;
     posPin: number;
     name?: string;
@@ -49,14 +50,14 @@ export type PinBreakout = {
     position: number;
     options: TypePin[];
     used: boolean;
-    moduleName?: string;
-    modulePin?: Pin;
+    moduleName?: string[];
+    modulePin?: Pin[];
 }
 //Need to work on
 //Need???
 export type PinAlloc = {
-    typeConn: TypePin;
-    pinLocation: number;
+    pinBreakboardLocation: number;
     moduleName: string;
     modulePin: Pin;
 }
+

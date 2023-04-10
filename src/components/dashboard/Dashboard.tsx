@@ -22,7 +22,6 @@ import useDeviceScript from "../devicescript/DeviceScriptContext"
 import Suspense from "../ui/Suspense"
 import PacketsContext from "../PacketsContext"
 import ModulatorComp from "../modulator/modulator"
-import { fetchPinLayout } from "../modulator/helper/file"
 
 
 const DeviceScriptToolbar = lazy(
@@ -151,7 +150,7 @@ export default function Dashboard(props: DashboardProps) {
                     </Grid>
                 )}
             </DashboardDeviceGroup>
-            <ModulatorComp /*breakoutBoard={breakoutBoard}*/ />
+             <ModulatorComp/> 
         </>
     )
 }
