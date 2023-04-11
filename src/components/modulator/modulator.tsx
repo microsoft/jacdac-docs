@@ -80,9 +80,11 @@ const ModulatorComp = () =>{
         
         pinAlloccationCheck(tempModu);
 
+        
         const tempCon = conModules;
         tempCon.push(tempModu)
         setconModules(tempCon);
+        console.log(breakoutBoard)
         forceUpdate();
     }
 
@@ -113,6 +115,7 @@ const ModulatorComp = () =>{
                                                     modulePin: sortPinlayout[i],
                                                     pinBreakboardLocation: breakoutBoard.pinOut[j].position,
                                                 });
+                                break;
                             }   
                         }
                     }
@@ -122,7 +125,7 @@ const ModulatorComp = () =>{
             if((counterBasic + pinAllocTemp.length) === newModule.numberPins){
                 allocatedPins(pinAllocTemp);
             }else{
-                console.log("Not possible to load in");
+                console.log("Not possible to load in" + counterBasic + " " + pinAllocTemp.length);
             }
         }else{
             console.log("ERROR: no breakoutboard loaded in!!!");
@@ -137,7 +140,7 @@ const ModulatorComp = () =>{
             for(let i = 0; i<allocPins.length; i++){
                 const index =tempBreakoutBoard.pinOut.findIndex(element => element.position === allocPins[i].pinBreakboardLocation);
                 if(index !== -1){
-                    tempBreakoutBoard.pinOut[index].used == true;
+                    tempBreakoutBoard.pinOut[index].used = true;
                     tempBreakoutBoard.pinOut[index].moduleName.push(allocPins[i].moduleName);
                     tempBreakoutBoard.pinOut[index].modulePin.push(allocPins[i].modulePin);
                 }
