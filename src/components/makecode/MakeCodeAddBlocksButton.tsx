@@ -1,11 +1,10 @@
-import { Box } from "@mui/material"
+import Tooltip from "../ui/Tooltip"
 import { Button } from "gatsby-theme-material-ui"
 import React, { useMemo } from "react"
 import useChange from "../../jacdac/useChange"
 import IFrameBridgeClient from "./iframebridgeclient"
 import MakeCodeIcon from "../../components/icons/MakeCodeIcon"
 import useBus from "../../jacdac/useBus"
-import StartMissingSimulatorsButton from "../buttons/StartMissingSimulatorsButton"
 
 export default function MakeCodeAddBlocksButton() {
     const bus = useBus()
@@ -20,30 +19,33 @@ export default function MakeCodeAddBlocksButton() {
             /makecode/.test(window.location.href),
         []
     )
+    const isButtonEnabled = !!(extensions?.length);
+
+    //TODO: i18n
+    const enabledTooltip = "Add blocks for your connected and simulated devices to the modules drawer";
+    const disabledTooltip = "This button becomes available if you have devices connected that don't have their matching blocks added to the 'Modules' drawer";
 
     if (!isMakeCodeTool) return null
 
     return (
-        <Box m={1}>
-            {!!extensions?.length && (
-                <Button
-                    sx={{ mr: 1 }}
-                    size="medium"
-                    color="primary"
-                    variant="contained"
-                    startIcon={<MakeCodeIcon />}
-                    onClick={handleAdd}
-                    aria-label={"Add blocks"}
-                >
-                    Add blocks
-                </Button>
-            )}
-            <StartMissingSimulatorsButton
-                hideOnDisabled={true}
+        <Tooltip
+          describeChild
+          title={ isButtonEnabled ? enabledTooltip : disabledTooltip }
+          placement="bottom"
+        >
+          <span>
+            <Button
+                sx={{ mr: 1 }}
+                size="medium"
+                color="primary"
                 variant="contained"
+                disabled={!isButtonEnabled}
+                startIcon={<MakeCodeIcon />}
+                onClick={handleAdd}
             >
-                Start simulators
-            </StartMissingSimulatorsButton>
-        </Box>
+                Add blocks
+            </Button>
+          </span>
+        </Tooltip>
     )
 }
