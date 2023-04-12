@@ -61,3 +61,10 @@ export type PinAlloc = {
     modulePin: Pin;
 }
 
+
+
+//Type given to SchemaComp
+export type ModuAlloc = {
+    modualiComp: ModuExtern;
+    breakoutPlace: PinAlloc[];
+}

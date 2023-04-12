@@ -21,11 +21,13 @@ export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
     const modulJson = await import ("../diagrams/"+nameFile+".json");
 
     //Possible to do checks if all things filled in
+    //TODO: change tempName
+    const tempName = "Test" + new Date().toISOString();
 
-    const pins = pinTyping(modulJson.numberPins, modulJson.pinLayout, modulJson.name)
+    const pins = pinTyping(modulJson.numberPins, modulJson.pinLayout, tempName)
     const tempCode = typeCode(modulJson.code)
     const modu:ModuExtern = {
-        "name":modulJson.name,
+        "name":tempName,
         "type":modulJson.type,
         "numberPins":modulJson.numberPins,
         "diagram":modulJson.diagram,

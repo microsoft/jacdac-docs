@@ -30,6 +30,7 @@ const ModulatorComp = () =>{
     const sectionId = useId();
     const [conModules, setconModules] = useState<Array<ModuExtern>>([]);
     const [breakoutBoard, setBreakoutBoard] = useState(undefined as Breakout | undefined);
+    const [allocedPins, setAllocedPins] = useState<Array<PinAlloc>>([]);
 
     const [, updateState] = React.useState({});
     const forceUpdate = React.useCallback(() => updateState({}), [])
@@ -41,12 +42,37 @@ const ModulatorComp = () =>{
     }, [])
 
     const removeConModule = (moduleName: string) => {
-        const index = conModules.findIndex( i => i.name === moduleName);
-        const temp = conModules
-        temp.splice(index, 1);
+        //remove from conModules
+        const indexconModule = conModules.findIndex( i => i.name === moduleName);
+        const tempConModule = conModules
+        tempConModule.splice(indexconModule, 1);
+        //remove from allocedPins
+        const tempAllocedPins = allocedPins.filter(function(value) { return value.moduleName !== moduleName});
+        //Remove from breakoutBoard
+        const tempPinOut = breakoutBoard.pinOut
+        tempPinOut.forEach(function(value, index) {
+            if(value.used){
+                const tempIndex = value.moduleName.findIndex(i => i === moduleName);
+                if(tempIndex !== -1){
+                    if(value.moduleName.length === 1){
+                        value.used = false;
+                    }
+                    value.moduleName.splice(tempIndex, 1);
+                    value.modulePin.splice(tempIndex, 1);
+                }
+            }
+        })
+        const tempBreakout = breakoutBoard;
+        tempBreakout.pinOut = tempPinOut;
 
-        setconModules(temp);
+
+
+        setconModules(tempConModule);
+        setAllocedPins(tempAllocedPins);
+        setBreakoutBoard(tempBreakout);
+
         forceUpdate();
+
     }
 
     //Old way of loading static
@@ -78,17 +104,33 @@ const ModulatorComp = () =>{
         console.log("checking")
         
         
-        pinAlloccationCheck(tempModu);
+        const tempModuPins = breakBoardAllocCheck(tempModu);
+        if(tempModuPins){
+            if(tempModuPins.length !==0){
+                breakBoardAllocPins(tempModuPins);
+                
 
+                //Set new Alocced
+                let tempAllocPin = allocedPins;
+                tempAllocPin = tempAllocPin.concat(tempModuPins);
+                //console.log(tempAllocPin)
+                setAllocedPins(tempAllocPin);
+            }
+            
+
+
+            //Place the new module
+            const tempCon = conModules;
+            tempCon.push(tempModu)
+            setconModules(tempCon);
+            console.log(breakoutBoard)
+            
+        }
         
-        const tempCon = conModules;
-        tempCon.push(tempModu)
-        setconModules(tempCon);
-        console.log(breakoutBoard)
         forceUpdate();
     }
 
-    const pinAlloccationCheck = (newModule: ModuExtern) =>{
+    const breakBoardAllocCheck = (newModule: ModuExtern): PinAlloc[]|undefined =>{
         if(breakoutBoard){
             const sortPinlayout = newModule.pinLayout.sort((a, b) => predicate(a.typePin, b.typePin));
 
@@ -123,22 +165,25 @@ const ModulatorComp = () =>{
             }
 
             if((counterBasic + pinAllocTemp.length) === newModule.numberPins){
-                allocatedPins(pinAllocTemp);
+                
+                return pinAllocTemp;
             }else{
                 console.log("Not possible to load in" + counterBasic + " " + pinAllocTemp.length);
+                return [];
             }
         }else{
             console.log("ERROR: no breakoutboard loaded in!!!");
+            return undefined;
         }
 
     }
 
     //set the temp allocated pin position to the breakoutboard
-    const allocatedPins = (allocPins: PinAlloc[]) => {
+    const breakBoardAllocPins = (allocPins: PinAlloc[]) => {
         if(breakoutBoard){
             const tempBreakoutBoard = breakoutBoard;
             for(let i = 0; i<allocPins.length; i++){
-                const index =tempBreakoutBoard.pinOut.findIndex(element => element.position === allocPins[i].pinBreakboardLocation);
+                const index = tempBreakoutBoard.pinOut.findIndex(element => element.position === allocPins[i].pinBreakboardLocation);
                 if(index !== -1){
                     tempBreakoutBoard.pinOut[index].used = true;
                     tempBreakoutBoard.pinOut[index].moduleName.push(allocPins[i].moduleName);
@@ -168,7 +213,7 @@ const ModulatorComp = () =>{
                     </Grid>
                 </Grid>
 
-            <SchemaComp modules={conModules} removeFunc={removeConModule}/>
+            <SchemaComp modules={conModules} removeFunc={removeConModule} allocedPins={allocedPins}/>
             
 
 
