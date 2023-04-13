@@ -8,7 +8,7 @@ import Dashboard from "../../components/dashboard/Dashboard"
 import DarkModeContext from "../../components/ui/DarkModeContext"
 import IFrameBridgeClient from "../../components/makecode/iframebridgeclient"
 import useBus from "../../jacdac/useBus"
-import MakeCodeAddBlocksButton from "../../components/makecode/MakeCodeAddBlocksButton"
+import MakeCodeBlocksAndSimsBox from "../../components/makecode/MakeCodeBlocksAndSimsBox"
 import { usePersistentSimulators } from "../../jacdac/usePersistentSimulators"
 
 /**
@@ -64,7 +64,7 @@ function Carousel() {
 
     return (
         <>
-            <MakeCodeAddBlocksButton />
+            <MakeCodeBlocksAndSimsBox />
             <Dashboard
                 showHeader={false}
                 showDeviceHeader={true}
