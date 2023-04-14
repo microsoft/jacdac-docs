@@ -1,6 +1,5 @@
 import { Grid, TextField } from "@mui/material"
 import React, { ChangeEvent, startTransition, useState } from "react"
-import { SRV_DEVICE_SCRIPT_MANAGER } from "../../../jacdac-ts/src/jacdac"
 import { arrayConcatMany, unique } from "../../../jacdac-ts/src/jdom/utils"
 import useBus from "../../jacdac/useBus"
 import useChange from "../../jacdac/useChange"
@@ -24,7 +23,6 @@ export default function FilteredDeviceSpecificationList(props: {
     const [query, setQuery] = useState("")
     const [firmwareSources, setFirmwareSources] = useState(false)
     const [hardwareDesign, setHardwareDesign] = useState(false)
-    const deviceScript = serviceClass === SRV_DEVICE_SCRIPT_MANAGER
 
     const tags = useChange(deviceCatalog, _ =>
         unique(
@@ -41,12 +39,6 @@ export default function FilteredDeviceSpecificationList(props: {
         startTransition(() => setQuery(e.target.value))
     const handleSetFirmwareSources = () => setFirmwareSources(c => !c)
     const handleSetHardwareDesign = () => setHardwareDesign(c => !c)
-    const handleSetDeviceScript = () =>
-        setServiceClass(
-            serviceClass === SRV_DEVICE_SCRIPT_MANAGER
-                ? undefined
-                : SRV_DEVICE_SCRIPT_MANAGER
-        )
     const handleSetSelectedTag = (tag: string) => () =>
         setSelectedTags(ts => {
             const i = ts.indexOf(tag)
@@ -105,13 +97,6 @@ export default function FilteredDeviceSpecificationList(props: {
                             />
                         </Grid>
                     ))}
-                <Grid item>
-                    <FilterChip
-                        label="DeviceScript"
-                        value={deviceScript}
-                        onClick={handleSetDeviceScript}
-                    />
-                </Grid>
             </Grid>
             <DeviceSpecificationList
                 {...others}
