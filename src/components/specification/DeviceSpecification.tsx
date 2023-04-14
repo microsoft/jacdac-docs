@@ -78,6 +78,7 @@ function storeInfo(url: string) {
         "makerbit.com": { name: "MakerBit" },
         "category.yahboom.com": { name: "YahBoom" },
         "microbit.org": { name: "MicroBit Educational Foundation" },
+        "amazon.com": { name: "Amazon" },
     }
 
     return infos[host] || { name: host }
