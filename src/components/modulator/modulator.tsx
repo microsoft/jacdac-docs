@@ -9,7 +9,7 @@ import Button from "../ui/Button";
 import { log } from "vega";
 import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
 import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin } from "./helper/types";
-import SerialHandler from "./helper/serialHandler";
+import SerialThing from "./serialThing";
 
 
 //TODO: making pin allocation and removing
@@ -31,9 +31,6 @@ const ModulatorComp = () =>{
     const [conModules, setconModules] = useState<Array<ModuExtern>>([]);
     const [breakoutBoard, setBreakoutBoard] = useState(undefined as Breakout | undefined);
     const [allocedPins, setAllocedPins] = useState<Array<PinAlloc>>([]);
-    const [handlerLoaded, sethandlerLoaded] = useState(false);
-    const serialHandler = (new SerialHandler());
-
 
     const [, updateState] = React.useState({});
     const forceUpdate = React.useCallback(() => updateState({}), [])
@@ -200,19 +197,11 @@ const ModulatorComp = () =>{
         }
     }
 
-    //TODO: add serial for code read out, make it loop
-    //TODO: chip button for console read
-    const serialConnect = async () => {
-        serialHandler.init().then(() =>{
-            sethandlerLoaded(true);
-            getSerialMsg();
-        })
-    }
-
-    const getSerialMsg = async () => {
-        let newComp = await serialHandler.read();
-        console.log("new id send from chip: "+ newComp);
-        await addSchema();
+    const getSerialMsg = (msg: string) => {
+        //let newComp = await serialHandler.read();
+        console.log("new Message: "+msg);
+        //console.log("new id send from chip: "+ newComp);
+        //await addSchema();
     }
 
 
@@ -220,8 +209,7 @@ const ModulatorComp = () =>{
         <section id={sectionId}>
             <Button
                 onClick={addSchema}>TESTING</Button>
-            {!handlerLoaded? <Button onClick={serialConnect}>Connect?</Button>: null}
-            
+            <SerialThing addComp={getSerialMsg}/>
             <Grid container spacing={4}>
                 <GridHeader title={"Modulator"}/>
                 <Grid xs={4} item>
