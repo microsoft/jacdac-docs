@@ -12,12 +12,11 @@ import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin } f
 import SerialThing from "./serialThing";
 
 
-//TODO: making pin allocation and removing
-//TODO: get module info from file or github???
+//TODO: improving pin allocation
+//TODO: get module info from file or github??? (local current)
 //TODO: code auto fill in (now static do??)
-//TODO: MCU send id to stupid thing
 //TODO: layout working
-//TODO: image from web not local gives problems
+//TODO: image from web
 
 // type Props={
 //     breakoutBoard: Breakout;
@@ -99,11 +98,10 @@ const ModulatorComp = () =>{
         forceUpdate();
     }
 
-    const addSchema = async () =>{
+    const addSchema = async (id: string) =>{
         //console.log("new comp id: "+id);
-        const argument = "sr04";
-        const tempModu = await fetchModule(argument);
-        console.log(tempModu.pinLayout[0].typePin)
+        //"sr04" == 897654321;
+        const tempModu = await fetchModule(id);
         console.log("checking")
         
         
@@ -114,9 +112,11 @@ const ModulatorComp = () =>{
                 
 
                 //Set new Alocced
-                let tempAllocPin = allocedPins;
-                tempAllocPin = tempAllocPin.concat(tempModuPins);
-                //console.log(tempAllocPin)
+                const tempAllocPin = allocedPins;
+                for(let i = 0; i < tempModuPins.length; i++){
+                    tempAllocPin.push(tempModuPins[i])
+                }
+                console.log("Alloced Pins modu: "+tempAllocPin.length)
                 setAllocedPins(tempAllocPin);
             }
             
@@ -126,13 +126,15 @@ const ModulatorComp = () =>{
             const tempCon = conModules;
             tempCon.push(tempModu)
             setconModules(tempCon);
-            console.log(breakoutBoard)
+            console.log("BreakoutBaord: "+breakoutBoard)
             
         }
         
         forceUpdate();
     }
 
+
+    //TODO:add check if Voltage not too high, other ways adding voltage convertere
     const breakBoardAllocCheck = (newModule: ModuExtern): PinAlloc[]|undefined =>{
         if(breakoutBoard){
             const sortPinlayout = newModule.pinLayout.sort((a, b) => predicate(a.typePin, b.typePin));
@@ -197,18 +199,18 @@ const ModulatorComp = () =>{
         }
     }
 
-    const getSerialMsg = (msg: string) => {
-        //let newComp = await serialHandler.read();
-        console.log("new Message: "+msg);
-        //console.log("new id send from chip: "+ newComp);
-        //await addSchema();
+
+    //message needs to be at least 11 long
+    const getSerialMsg = async (msg: string) => {
+        if(msg.length >= 10){
+            console.log("new Message: "+msg);
+            await addSchema(msg.trim());
+        }
     }
 
 
     return(
         <section id={sectionId}>
-            <Button
-                onClick={addSchema}>TESTING</Button>
             <SerialThing addComp={getSerialMsg}/>
             <Grid container spacing={4}>
                 <GridHeader title={"Modulator"}/>

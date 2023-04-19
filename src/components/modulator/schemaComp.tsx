@@ -14,6 +14,7 @@ type Props={
 }
 
 const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins}) =>{
+    console.log("Alloced Pins: "+allocedPins);
     const moduAllocList = (moduleName: string) =>{
         const tempList = [];
         allocedPins.forEach(function (valPin, index) {
@@ -21,7 +22,7 @@ const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins}) =>{
                 tempList.push(valPin)
             }
         });
-        console.log(tempList)
+        //console.log("SchemaComp TempList: "+tempList + "moduleName: "+moduleName)
         return tempList;
     }
     

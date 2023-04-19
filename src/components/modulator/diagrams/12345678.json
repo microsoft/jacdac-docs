@@ -1,0 +1,38 @@
+{
+    "name": "RGB-Led",
+    "type": "LED",
+    "numberPins": 4,
+    "diagram": "https://whadda.com/wp-content/uploads/vma307_back-1.jpg",
+    "pinLayout": [
+        {
+            "type": "Digital IN",
+            "pos": "0",
+            "name": "Red"
+        },
+        {
+            "type": "Digital IN",
+            "pos": "1",
+            "name": "Green"
+        },
+        {
+            "type": "Digital IN",
+            "pos": "2",
+            "name": "Blue"
+        },
+        {
+            "type": "GND",
+            "pos": "3",
+            "name": "GND"
+        }
+    ],
+    "code": {
+        "codeClient": "export const #_client = new LedClient(\"#\")",
+        "codeService": "new jacdac.LedServer(1, jacdac.LedPixelLayout.Rgbw, (p,b) =>{ need works)",
+        "codeServiceParam": [
+            "0",
+            "1",
+            "2",
+            "Name"
+        ]
+    }
+}
