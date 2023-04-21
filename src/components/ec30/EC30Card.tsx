@@ -1,10 +1,17 @@
 import React from "react"
-import { Button, Card, CardActions, CardContent } from "@mui/material"
+import {
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+} from "@mui/material"
 import useDataUri from "../hooks/useDataUri"
 import ChipList from "../ui/ChipList"
 import useEC30Model from "./useEC30Model"
 import { useModelDXF, useModelSvg } from "./useModelExports"
 import type { EnclosureModel } from "../../workers/cad/dist/node_modules/enclosurecad"
+import { toEC30 } from "../enclosure/ec30"
 
 export default function EC30Card(props: {
     model: EnclosureModel
@@ -19,9 +26,11 @@ export default function EC30Card(props: {
     const svgUri = useDataUri(svg)
     const dxf = useModelDXF(m)
     const dxfUri = useDataUri(dxf)
+    const textModel = toEC30(gw, gh, connectors)
 
     return (
         <Card>
+            <CardHeader title={textModel} />
             <CardContent>
                 <div dangerouslySetInnerHTML={{ __html: svg }} />
             </CardContent>

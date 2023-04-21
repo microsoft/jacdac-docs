@@ -14,6 +14,10 @@ export function isEC30(shape: jdspec.Shape) {
     return typeof shape === "string" && /^ec30_/.test(shape)
 }
 
+export function toEC30(gridWidth: number, gridHeight: number, connectors = "") {
+    return `ec30_${gridWidth}x${gridHeight}_${connectors}`
+}
+
 export function generateEC30EnclosureModel(
     gridWidth: number,
     gridHeight: number,
@@ -30,7 +34,7 @@ export function generateEC30EnclosureModel(
         grid: {
             width: gridWidth,
             height: gridHeight,
-            connectors
+            connectors,
         },
         box: {
             width: boxWidth,
