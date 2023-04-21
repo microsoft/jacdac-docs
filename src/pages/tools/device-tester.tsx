@@ -30,6 +30,7 @@ import SwitchWithLabel from "../../components/ui/SwitchWithLabel"
 import { arrayConcatMany, splitFilter } from "../../../jacdac-ts/src/jdom/utils"
 import { resolveReadingTolerage } from "../../../jacdac-ts/src/testdom/testrules"
 import GridHeader from "../../components/ui/GridHeader"
+import { Link } from "gatsby-theme-material-ui"
 
 const FACTORY_MODE_STORAGE_KEY = "device_tester_factory"
 const EXPORT_MODE_STORAGE_KEY = "device_tester_export"
@@ -68,7 +69,7 @@ export const frontmatter = {
         "Validating services in devices. Designed for manual or factory floor testing.",
 }
 import CoreHead from "../../components/shell/Head"
-export const Head = (props) => <CoreHead {...props} {...frontmatter} />
+export const Head = props => <CoreHead {...props} {...frontmatter} />
 
 export default function Page() {
     const [tab, setTab] = useState(0)
@@ -249,6 +250,13 @@ export default function Page() {
                     ))}
                 </Grid>
             </TabPanel>
+            <p>
+                Read the{" "}
+                <Link to="/ddk/design/manufacturing/">
+                    Device Tester documentation
+                </Link>
+                .
+            </p>
         </>
     )
 }

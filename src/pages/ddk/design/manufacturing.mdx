@@ -11,3 +11,32 @@ The **[Device Tester](/tools/device-tester/)** will load and run compliance test
 devices and services. You can use this page to validate that your device is behaving correctly.
 
 ![The device tester tool using on a ](./devicetestermanufacturing.jpg)
+
+### Usage
+
+The device tester pass is meant help development of new Jacdac devices and streamline quality testing in product on the factory floor.
+
+-   connect to a physical device or other, (micro:bit or other),
+-   plugin the device under test
+-   Once a new Jacdac module is detected on the bus, the device tester page will run a set of automated or manual tests for the services present on the device.
+
+#### Manual testing vs Factory mode
+
+Some tests require interaction, such as clicking a button.
+
+The device tester can be set in factory mode to disable all manual steps. In such mode, the operator may have to interact with the service but there will not be explicity manual validation step.
+This is useful on the factory floor to simplify the testing process.
+
+#### Upload test results
+
+You can use the `upload test results` to track test progress of devices.
+After entering a Web API URL (`POST`) and a authorization header, the device tester will post each result automatically to your server.
+The data payload is a simple JSON object that you can further ingest into your product management lifecycle.
+
+#### Automatic dongle mode
+
+This mode forces any connected brain (as a bridge to the jacdac-docs web site) into dongle mode. This prevents any application code from interfering with the testing process.
+
+#### Oracles
+
+For some sensors, such as a temperature sensor, you can connect a tester sensor that will serve as an oracle for readings. The device tester will verity that the reading on the device-under-test is within a certain error threshold of the device-oracle.
