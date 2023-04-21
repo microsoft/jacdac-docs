@@ -49,6 +49,7 @@ import {
     SRV_SAT_NAV,
     SRV_PLANAR_POSITION,
     SRV_SERIAL,
+    SRV_GPIO,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { CircularProgress, SvgIconProps } from "@mui/material"
@@ -115,6 +116,7 @@ const DashboardCODALMessageBus = lazy(
     () => import("./DashboardCODALMessageBus")
 )
 const DashboardRelay = lazy(() => import("./DashboardRelay"))
+const DashboardGPIO = lazy(() => import("./DashboardGPIO"))
 const DashboardLightBulb = lazy(() => import("./DashboardLightBulb"))
 const DashboardDeviceScriptManager = lazy(
     () => import("./DashboardDeviceScriptManager")
@@ -343,6 +345,10 @@ const serviceViews: {
     },
     [SRV_RELAY]: {
         component: DashboardRelay,
+    },
+    [SRV_GPIO]: {
+        component: DashboardGPIO,
+        weight: () => 4,
     },
     [SRV_LIGHT_BULB]: {
         component: DashboardLightBulb,
