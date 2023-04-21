@@ -20,14 +20,16 @@ export default function ModuleComponent(
 
     }
 
-    //TODO: make so that voltage GND works
-    const getPin = (positionPin: number): number => {
+    //TODO: make so that voltage works
+    const getPin = (positionPin: number): string => {
         const index = allocedPins.findIndex((value) => value.modulePin.posPin == positionPin);
         if(index !== -1){
-            return allocedPins[index].pinBreakboardLocation;
+            return allocedPins[index].breakboardPinName;
         }
-        return -1;
+        return "";
     }
+
+    const sortedPinlayout = module.pinLayout.sort((x, y) => x.posPin > y.posPin ? 1: x.posPin < y.posPin ? -1: 0);
     
     return(
         
@@ -40,7 +42,7 @@ export default function ModuleComponent(
             </div>
             }
             <p>PinLayout mapping:</p>
-            {module.pinLayout.map((pin, index) =>(
+            {sortedPinlayout.map((pin, index) =>(
                 <div key={index}>
                     Type: {pin.typePin} | Module Position: {pin.posPin} | BreakoutBoard Position: {getPin(pin.posPin)}
                 </div>

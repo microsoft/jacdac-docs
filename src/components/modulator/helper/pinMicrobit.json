@@ -1,6 +1,7 @@
 {
     "name":"Micro:bit v2 pin layout",
-    "totalPins":18,
+    "totalPins":19,
+    "totalPowerPins":1,
     "power":3.3,
     "pins":[
         {
@@ -92,6 +93,18 @@
             "name":"P20",
             "pos":20,
             "options":["SDA I2C","Digital IN", "Digital OUT"]
+        },
+        {
+            "name": "GND",
+            "pos": 21,
+            "options":["GND"]
+        }
+    ],
+    "powerPins": [
+        {
+            "name":"3.3V",
+            "pos": 21,
+            "voltage":3.3
         }
     ]
 }

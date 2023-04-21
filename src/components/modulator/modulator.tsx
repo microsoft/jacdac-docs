@@ -138,35 +138,65 @@ const ModulatorComp = () =>{
     const breakBoardAllocCheck = (newModule: ModuExtern): PinAlloc[]|undefined =>{
         if(breakoutBoard){
             const sortPinlayout = newModule.pinLayout.sort((a, b) => predicate(a.typePin, b.typePin));
+            const gndPin = breakoutBoard.pinOut.findIndex(i => i.name === "GND");
+
 
             const pinPossible: number[] = [];
             const pinAllocTemp: PinAlloc[] = [];
             let counterBasic = 0;
 
             for(let i = 0; i < sortPinlayout.length; i++){
-                if(sortPinlayout[i].typePin === TypePin.GND || sortPinlayout[i].typePin === TypePin.Power){
-                    pinPossible.push(-1);
-                    counterBasic +=1;
-                    //TODO:add check if Voltage not too high, other ways adding voltage convertere
-                }
-                for(let j = 0; j < breakoutBoard.pinOut.length; j++){
-                    
-                    //check pin is in use
-                    if(!breakoutBoard.pinOut[j].used ){
-                        //check if pin in temp
-                        if(!pinPossible.includes(breakoutBoard.pinOut[j].position)){
-                            //Check if type correct
-                            if(breakoutBoard.pinOut[j].options.includes(sortPinlayout[i].typePin)){
-                                pinPossible.push(breakoutBoard.pinOut[j].position);
-                                pinAllocTemp.push({ moduleName: newModule.name,
+                if(sortPinlayout[i].typePin === TypePin.Power){
+                    console.log("checkpoints")
+                    //work in progress
+                    if(Number(sortPinlayout[i].name) > breakoutBoard.maxPower){
+                        pinPossible.push(-1);
+                        counterBasic +=1;
+
+                    }else{
+                        for(let j = 0; j < breakoutBoard.powerPins.length; j++){
+                            if(Number(sortPinlayout[i].name) === Number(breakoutBoard.powerPins[j].voltage)){
+                                pinPossible.push(breakoutBoard.powerPins[j].position);
+                                pinAllocTemp.push({moduleName: newModule.name,
                                                     modulePin: sortPinlayout[i],
-                                                    pinBreakboardLocation: breakoutBoard.pinOut[j].position,
+                                                    pinBreakboardLocation: breakoutBoard.powerPins[j].position,
+                                                    breakboardPinName: breakoutBoard.powerPins[j].name,
                                                 });
                                 break;
-                            }   
+                            }
+                        }
+                    }
+                    pinPossible.push(-1);
+                    //TODO:add check if Voltage not too high, other ways adding voltage convertere
+                }else if(sortPinlayout[i].typePin === TypePin.GND){
+                    pinPossible.push(breakoutBoard.pinOut[gndPin].position);
+                    pinAllocTemp.push({ moduleName: newModule.name,
+                                        modulePin: sortPinlayout[i],
+                                        pinBreakboardLocation: breakoutBoard.pinOut[gndPin].position,
+                                        breakboardPinName: breakoutBoard.pinOut[gndPin].name,
+                                        })
+                }else{
+                    for(let j = 0; j < breakoutBoard.pinOut.length; j++){
+                    
+                        //check pin is in use
+                        if(!breakoutBoard.pinOut[j].used ){
+                            //check if pin in temp
+                            if(!pinPossible.includes(breakoutBoard.pinOut[j].position)){
+                                //Check if type correct
+                                if(breakoutBoard.pinOut[j].options.includes(sortPinlayout[i].typePin)){
+                                    pinPossible.push(breakoutBoard.pinOut[j].position);
+                                    pinAllocTemp.push({ moduleName: newModule.name,
+                                                        modulePin: sortPinlayout[i],
+                                                        pinBreakboardLocation: breakoutBoard.pinOut[j].position,
+                                                        breakboardPinName: breakoutBoard.pinOut[j].name,
+                                                    });
+                                    break;
+                                }   
+                            }
                         }
                     }
                 }
+                
             }
 
             if((counterBasic + pinAllocTemp.length) === newModule.numberPins){
@@ -209,8 +239,18 @@ const ModulatorComp = () =>{
     }
 
 
+    const testModuRGB = () =>{
+        addSchema("12345678");
+    }
+
+    const testModuDist = () =>{
+        addSchema("897654321");
+    }
+
     return(
         <section id={sectionId}>
+            <Button onClick={testModuRGB}>TestRGB</Button>
+            <Button onClick={testModuDist}>Test Dist</Button>
             <SerialThing addComp={getSerialMsg}/>
             <Grid container spacing={4}>
                 <GridHeader title={"Modulator"}/>

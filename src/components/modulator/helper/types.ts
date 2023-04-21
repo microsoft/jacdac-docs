@@ -9,7 +9,12 @@ export enum TypePin {
     MisoSPI = "MISO SPI",
     MosiSPI = "MOSI SPI",
     GND = "GND",
-    Power = "VCC"
+    Power = "VCC",
+    P3V = "3.3 V",
+    P5V = "5 V",
+    P9V = "9 V",
+    P12V = "12 V"
+
 }
 
 //Used in module as different pins
@@ -42,6 +47,14 @@ export type Breakout = {
     name: string;
     maxPower: number;
     pinOut: PinBreakout[];
+    powerPins: PinPower[];
+}
+
+export type PinPower = {
+    name: string;
+    voltage: number;
+    position: number;
+
 }
 
 //type for the pin for breakout
@@ -57,6 +70,7 @@ export type PinBreakout = {
 //Need???
 export type PinAlloc = {
     pinBreakboardLocation: number;
+    breakboardPinName: string;
     moduleName: string;
     modulePin: Pin;
 }

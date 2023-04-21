@@ -1,20 +1,34 @@
 import { forEach } from "vega-lite/build/src/encoding";
-import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, TypePin } from "./types";
+import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, PinPower, TypePin } from "./types";
 
 
 //fetch all info from pin out layout
 export const fetchPinLayout = async():Promise<Breakout> =>{
-    const pinOut = await import ("./pinlayout.json");
+    const pinOut = await import ("./pinMicrobit.json");
 
     const breakoutPins= breakoutPinType(pinOut.totalPins, pinOut.pins)
+    const breakoutPower = getPowerPins(pinOut.totalPowerPins, pinOut.powerPins)
 
     const result: Breakout = {"name": pinOut.name,
                             "maxPower": pinOut.power,
-                            "pinOut": breakoutPins}
+                            "pinOut": breakoutPins,
+                            "powerPins": breakoutPower}
     
     return result;
 }
 
+
+const getPowerPins = (numberOfPins: number, data: any): PinPower[] =>{
+    const result:PinPower[] = [];
+    for(let i = 0; i < numberOfPins; i++){
+        result.push({
+                    name: data[i].name,
+                    voltage: data[i].voltage,
+                    position: data[i].pos,  
+                })
+    }
+    return result;
+}
 
 //get all the neede info from json file for new module
 export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
