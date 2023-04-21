@@ -150,15 +150,17 @@ export default function RegisterInput(props: {
                     {serviceName}
                 </Typography>
             )}
-            {showRegisterName && specification && serviceName !== registerName && (
-                <Typography
-                    variant="caption"
-                    key="registername"
-                    aria-label={registerName}
-                >
-                    {" " + registerName}
-                </Typography>
-            )}
+            {showRegisterName &&
+                specification &&
+                serviceName !== registerName && (
+                    <Typography
+                        variant="caption"
+                        key="registername"
+                        aria-label={registerName}
+                    >
+                        {" " + registerName}
+                    </Typography>
+                )}
             {!hasData && (
                 <Box>
                     <IconButtonWithProgress

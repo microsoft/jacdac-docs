@@ -64,13 +64,16 @@ export default function PacketBadge(props: { packet: Packet; count?: number }) {
                     </span>
                 </Tooltip>
             )}
-            {direction === "from" && !getPacket && !failedAck && !receivedAck && (
-                <Tooltip title={`from ${packet.friendlyDeviceName}`}>
-                    <span>
-                        <ArrowRightIcon />
-                    </span>
-                </Tooltip>
-            )}
+            {direction === "from" &&
+                !getPacket &&
+                !failedAck &&
+                !receivedAck && (
+                    <Tooltip title={`from ${packet.friendlyDeviceName}`}>
+                        <span>
+                            <ArrowRightIcon />
+                        </span>
+                    </Tooltip>
+                )}
             {requiredAck === true && failedAck && (
                 <Tooltip title="no ack">
                     <span>
