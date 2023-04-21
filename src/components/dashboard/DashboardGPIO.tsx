@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
     GPIOCapabilities,
     GPIOCmd,
@@ -15,7 +15,11 @@ import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import useEffectAsync from "../useEffectAsync"
 import { jdpack } from "../../../jacdac-ts/src/jdom/pack"
 import { Packet } from "../../../jacdac-ts/src/jdom/packet"
-import { SRV_GPIO, prettyEnum } from "../../../jacdac-ts/src/jacdac"
+import {
+    COMMAND_RECEIVE,
+    SRV_GPIO,
+    prettyEnum,
+} from "../../../jacdac-ts/src/jacdac"
 import { useServiceSpecificationFromServiceClass } from "../../jacdac/useServiceSpecification"
 
 interface GPIOPinInfo {
@@ -32,6 +36,7 @@ function PinItem(props: {
     visible: boolean
 }) {
     const { service, pin, state } = props
+    const [changeId, setChangeId] = useState(0)
     const [info, setInfo] = useState<GPIOPinInfo>(undefined)
     const { label = "", mode, capabilities, hwPin } = info || {}
     const spec = useServiceSpecificationFromServiceClass(SRV_GPIO)
@@ -49,7 +54,18 @@ function PinItem(props: {
         )
 
         setInfo({ hwPin, capabilities, mode, label })
-    }, [service, service?.changeId])
+    }, [service, changeId])
+
+    useEffect(
+        () =>
+            service?.subscribe(COMMAND_RECEIVE, (pkt: Packet) => {
+                const cmd = pkt.serviceCommand
+                if (cmd === GPIOCmd.Configure) {
+                    setChangeId(id => id + 1)
+                }
+            }),
+        [service]
+    )
 
     return (
         <TableRow>
