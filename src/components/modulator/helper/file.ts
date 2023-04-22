@@ -1,4 +1,3 @@
-import { forEach } from "vega-lite/build/src/encoding";
 import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, PinPower, TypePin } from "./types";
 
 
@@ -30,13 +29,13 @@ const getPowerPins = (numberOfPins: number, data: any): PinPower[] =>{
     return result;
 }
 
+//TODO: change tempName
 //get all the neede info from json file for new module
 export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
     const modulJson = await import ("../diagrams/"+nameFile+".json");
 
     //Possible to do checks if all things filled in
-    //TODO: change tempName
-    const tempName = "Test" + new Date().toISOString();
+    const tempName = modulJson.name+ " " + new Date().getSeconds();
 
     const pins = pinTyping(modulJson.numberPins, modulJson.pinLayout, tempName)
     const tempCode = typeCode(modulJson.code)

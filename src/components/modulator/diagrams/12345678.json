@@ -27,8 +27,9 @@
     ],
     "code": {
         "codeClient": "export const #_client = new LedClient(\"#\")",
-        "codeService": "new jacdac.LedServer(1, jacdac.LedPixelLayout.Rgbw, (p,b) =>{ need works)",
+        "codeService": "const #Serive = new ServiceImpl.RGBServer(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\");",
         "codeServiceParam": [
+            "Name",
             "0",
             "1",
             "2",

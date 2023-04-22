@@ -1,7 +1,6 @@
-import { Card, CardContent, CardHeader, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import React from "react";
 import GridHeader from "../ui/GridHeader"
-import DeviceAvatar from "../devices/DeviceAvatar";
 import { StaticImage } from "gatsby-plugin-image";
 //TODO wont load fucking pictures bullshit
 

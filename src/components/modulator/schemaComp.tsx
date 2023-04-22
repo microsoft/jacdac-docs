@@ -14,7 +14,6 @@ type Props={
 }
 
 const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins}) =>{
-    console.log("Alloced Pins: "+allocedPins);
     const moduAllocList = (moduleName: string) =>{
         const tempList = [];
         allocedPins.forEach(function (valPin, index) {
@@ -30,7 +29,7 @@ const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins}) =>{
     return(
         <Grid xs={8} item>
             <GridHeader title={"Added modules"}/>
-            <div style={{overflow:"scroll", maxHeight:"50vh"}}>
+            <div style={{overflowY:"scroll", maxHeight:"50vh"}}>
                 {modules.map((mod, index) => (
 
                     <ModuleComponent module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} key={index}/>

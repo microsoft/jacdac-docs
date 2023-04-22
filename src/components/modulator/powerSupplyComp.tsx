@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import React from "react";
-import DeviceAvatar from "../devices/DeviceAvatar";
 import GridHeader from "../ui/GridHeader";
 import { powerSup } from "./helper/types";
 
@@ -10,6 +9,7 @@ type Props = {
 }
 
 
+//TODO: styling of it
 const PowerSupplyComp: React.FC<Props> = ({supplies}) => {
     
 
@@ -19,11 +19,12 @@ const PowerSupplyComp: React.FC<Props> = ({supplies}) => {
             <GridHeader title={"Extra Power supply"}/>
             {supplies.map((sup, index) => (
                 <div key={index}>
-                    Name: {sup.supplyName}
+                    <p>Name: {sup.supplyName} </p>
+                    Modules connected:  
                     {sup.conModule.map((supMod, index) => (
-                        <span key={index}>
-                            {supMod}
-                        </span>
+                        <div key={index}>
+                             { supMod }
+                        </div>
                     ))}
                 </div>
             ))}

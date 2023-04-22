@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useId, useState } from "react";
+import {useEffect, useId, useState } from "react";
 import React from "react"
 import { Grid } from "@mui/material"
 import GridHeader from "../ui/GridHeader"
@@ -6,7 +6,7 @@ import PinLayoutComp from "./pinLayoutComp";
 import SchemaComp from "./schemaComp";
 import Button from "../ui/Button";
 import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
-import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin, powerSup } from "./helper/types";
+import { Breakout, ModuExtern, Pin, PinAlloc,  TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
 import PowerSupplyComp from "./powerSupplyComp";
 
@@ -95,33 +95,11 @@ const ModulatorComp = () =>{
 
     }
 
-    //Old way of loading static
-    const staticaddSchema = () =>{
-        console.log(conModules.length)
-        const tempName = "Test" + new Date().toISOString();
-
-        const tempPin: Pin[] = [   {typePin:TypePin.GND, posPin:-1, moduleId:tempName}, 
-                                    {typePin:TypePin.AnalogIn, posPin:1, name:"Trig", moduleId:tempName}, 
-                                    {typePin:TypePin.AnalogIn, posPin:0, name:"Echo", moduleId:tempName}, 
-                                    {typePin:TypePin.Power, posPin:21, moduleId:tempName}];
-        const temp: ModuExtern = {name:tempName,
-                                type:"Distance",
-                                numberPins: 4,
-                                pinLayout:tempPin,
-                                //diagram:"./images/pins-v2.PNG",
-                                diagram:"https://soldered.com/productdata/2015/02/751276-Edit.jpg"
-                                }
-        const tempCon = conModules;
-        tempCon.push(temp)
-        setconModules(tempCon);
-        forceUpdate();
-    }
 
     const addSchema = async (id: string) =>{
         //console.log("new comp id: "+id);
         //"sr04" == 897654321;
         const tempModu = await fetchModule(id);
-        console.log("checking")
         
         
         const tempModuPins = breakBoardAllocCheck(tempModu);
@@ -135,17 +113,13 @@ const ModulatorComp = () =>{
                 for(let i = 0; i < tempModuPins.length; i++){
                     tempAllocPin.push(tempModuPins[i])
                 }
-                console.log("Alloced Pins modu: "+tempAllocPin.length)
                 setAllocedPins(tempAllocPin);
             }
-            
-
 
             //Place the new module
             const tempCon = conModules;
             tempCon.push(tempModu)
             setconModules(tempCon);
-            console.log("BreakoutBaord: "+breakoutBoard)
             
         }
         
@@ -201,12 +175,10 @@ const ModulatorComp = () =>{
         }
     }
 
-    //TODO:add check if Voltage not too high, other ways adding voltage convertere
     const breakBoardAllocCheck = (newModule: ModuExtern): PinAlloc[]|undefined =>{
         if(breakoutBoard){
             const sortPinlayout = newModule.pinLayout.sort((a, b) => predicate(a.typePin, b.typePin));
             const gndPin = breakoutBoard.pinOut.findIndex(i => i.name === "GND");
-
 
             const pinPossible: number[] = [];
             const pinAllocTemp: PinAlloc[] = [];
@@ -214,49 +186,18 @@ const ModulatorComp = () =>{
             let powerModu = -1;
             let gndModu = -1;
 
-
             for(let i = 0; i < sortPinlayout.length; i++){
                 if(sortPinlayout[i].typePin === TypePin.Power){
-                    console.log("checkpoints")
                     pinPossible.push(-1);
                     counterBasic +=1;
                     powerModu = i;
-                    //work in progress
-                    // if(Number(sortPinlayout[i].name) > breakoutBoard.maxPower){
-                    //     pinPossible.push(-1);
-                    //     counterBasic +=1;
-
-                    // }else{
-                    //     pinPossible.push(-1);
-                    //     counterBasic += 1;
-                    //     // for(let j = 0; j < breakoutBoard.powerPins.length; j++){
-                    //     //     if(Number(sortPinlayout[i].name) === Number(breakoutBoard.powerPins[j].voltage)){
-                    //     //         pinPossible.push(breakoutBoard.powerPins[j].position);
-                    //     //         pinAllocTemp.push({moduleName: newModule.name,
-                    //     //                             modulePin: sortPinlayout[i],
-                    //     //                             pinBreakLocation: breakoutBoard.powerPins[j].position,
-                    //     //                             pinBreakName: breakoutBoard.powerPins[j].name,
-                    //     //                             powerSup: false,
-                    //     //                         });
-                    //     //         break;
-                    //     //     }
-                    //     // }
-                    // }
-
+            
                 }else if(sortPinlayout[i].typePin === TypePin.GND){
                     pinPossible.push(-1);
                     counterBasic +=1;
                     gndModu= i;
-                    // pinPossible.push(breakoutBoard.pinOut[gndPin].position);
-                    // pinAllocTemp.push({ moduleName: newModule.name,
-                    //                     modulePin: sortPinlayout[i],
-                    //                     pinBreakLocation: breakoutBoard.pinOut[gndPin].position,
-                    //                     pinBreakName: breakoutBoard.pinOut[gndPin].name,
-                    //                     powerSup: false,
-                    //                     })
                 }else{
                     for(let j = 0; j < breakoutBoard.pinOut.length; j++){
-                    
                         //check pin is in use
                         if(!breakoutBoard.pinOut[j].used ){
                             //check if pin in temp
@@ -275,8 +216,7 @@ const ModulatorComp = () =>{
                             }
                         }
                     }
-                }
-                
+                } 
             }
 
             //All the IO ports can be connected
