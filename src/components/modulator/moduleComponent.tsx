@@ -24,7 +24,11 @@ export default function ModuleComponent(
     const getPin = (positionPin: number): string => {
         const index = allocedPins.findIndex((value) => value.modulePin.posPin == positionPin);
         if(index !== -1){
-            return allocedPins[index].breakboardPinName;
+            if(allocedPins[index].powerSup){
+                return (allocedPins[index].pinBreakName +" " +allocedPins[index].modulePin.typePin)
+            }
+
+            return allocedPins[index].pinBreakName;
         }
         return "";
     }

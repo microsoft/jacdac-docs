@@ -67,18 +67,27 @@ export type PinBreakout = {
     modulePin?: Pin[];
 }
 //Need to work on
-//Need???
+//pinBreakLocation is of the breakoutboard or powerSupply
 export type PinAlloc = {
-    pinBreakboardLocation: number;
-    breakboardPinName: string;
+    pinBreakLocation: number;
+    pinBreakName: string;
     moduleName: string;
     modulePin: Pin;
+    powerSup: boolean;
 }
 
 
+export type powerSup = {
+    supplyName: string;
+    voltage: number;
+    maxAmps: number;
+    supLocPin: number;
 
-//Type given to SchemaComp
-export type ModuAlloc = {
-    modualiComp: ModuExtern;
-    breakoutPlace: PinAlloc[];
+    conModule: string[];
 }
+
+
+// export type voltageAlloc = {
+//     extraSup: boolean;
+    
+// }

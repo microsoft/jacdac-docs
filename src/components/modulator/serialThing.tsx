@@ -135,10 +135,10 @@ const SerialThing: React.FC<Props> = ({addComp}) => {
     }
 
     return(
-        <div>
+        <span>
             <Button onClick={connectBtnClick}>{conButtonText}</Button>
             <Button onClick={disconnectFromPort}>Disconnect</Button>
-        </div>
+        </span>
     );
 }
 

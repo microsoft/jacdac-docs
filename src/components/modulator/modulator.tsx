@@ -2,14 +2,13 @@ import { ReactElement, useEffect, useId, useState } from "react";
 import React from "react"
 import { Grid } from "@mui/material"
 import GridHeader from "../ui/GridHeader"
-import LegendComp from "./legendComp";
 import PinLayoutComp from "./pinLayoutComp";
 import SchemaComp from "./schemaComp";
 import Button from "../ui/Button";
-import { log } from "vega";
 import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
-import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin } from "./helper/types";
+import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
+import PowerSupplyComp from "./powerSupplyComp";
 
 
 //TODO: improving pin allocation
@@ -30,6 +29,8 @@ const ModulatorComp = () =>{
     const [conModules, setconModules] = useState<Array<ModuExtern>>([]);
     const [breakoutBoard, setBreakoutBoard] = useState(undefined as Breakout | undefined);
     const [allocedPins, setAllocedPins] = useState<Array<PinAlloc>>([]);
+    const [conPowerSup, setconPowerSup] = useState<Array<powerSup>>([]);
+
 
     const [, updateState] = React.useState({});
     const forceUpdate = React.useCallback(() => updateState({}), [])
@@ -47,8 +48,10 @@ const ModulatorComp = () =>{
         const indexconModule = conModules.findIndex( i => i.name === moduleName);
         const tempConModule = conModules
         tempConModule.splice(indexconModule, 1);
+        
         //remove from allocedPins
         const tempAllocedPins = allocedPins.filter(function(value) { return value.moduleName !== moduleName});
+        
         //Remove from breakoutBoard
         const tempPinOut = breakoutBoard.pinOut
         tempPinOut.forEach(function(value, index) {
@@ -66,11 +69,27 @@ const ModulatorComp = () =>{
         const tempBreakout = breakoutBoard;
         tempBreakout.pinOut = tempPinOut;
 
+        //Remove from powerSupply
+        const indexlistPowerSup = [];
+        const tempPowerSup = conPowerSup;
+        tempPowerSup.forEach(function(value, index) {
+            const tempIndex = value.conModule.findIndex(i => i === moduleName);
+            if(tempIndex !== -1){
+                if(value.conModule.length === 1){
+                    indexlistPowerSup.unshift(index);
+                }
+                value.conModule.splice(tempIndex, 1);
+            }
+        });
+        indexlistPowerSup.forEach(function(value, index) {
+            tempPowerSup.splice(value, 1);
+        })
 
 
         setconModules(tempConModule);
         setAllocedPins(tempAllocedPins);
         setBreakoutBoard(tempBreakout);
+        setconPowerSup(tempPowerSup);
 
         forceUpdate();
 
@@ -134,6 +153,54 @@ const ModulatorComp = () =>{
     }
 
 
+
+    const allocVoltage = (powerPin: Pin, moduleName: string): PinAlloc =>{
+        const indexPWRBoard = breakoutBoard.powerPins.findIndex((value, index) => Number(powerPin.name) === Number(value.voltage));
+        //exist power pin, with right voltage for module
+
+        if (indexPWRBoard !== -1) {
+            return({
+                moduleName: moduleName,
+                modulePin: powerPin,
+                pinBreakLocation: breakoutBoard.powerPins[indexPWRBoard].position,
+                pinBreakName: breakoutBoard.powerPins[indexPWRBoard].name,
+                powerSup: false,
+            })
+        }
+        if(conPowerSup.length > 0){
+            const indexConPowerSup = conPowerSup.findIndex((value, index) => Number(powerPin.name) === value.voltage);
+            if(indexConPowerSup !== -1){
+                conPowerSup[indexConPowerSup].conModule.push(moduleName);
+                return({
+                    moduleName: moduleName,
+                    modulePin: powerPin,
+                    pinBreakLocation: conPowerSup[indexConPowerSup].supLocPin,
+                    pinBreakName: conPowerSup[indexConPowerSup].supplyName,
+                    powerSup: true,
+                    });
+            }
+        }else{
+            const newPowerSup:powerSup = ({
+                                            supplyName: "Power Supply "+powerPin.name,
+                                            voltage: Number(powerPin.name),
+                                            maxAmps: 5,
+                                            supLocPin: 900 +Number(powerPin.name),
+                                            conModule: [moduleName]
+                                        });
+            const tempPowerSup = conPowerSup;
+            tempPowerSup.push(newPowerSup);
+            setconPowerSup(tempPowerSup);
+
+            return ({
+                moduleName: moduleName,
+                modulePin: powerPin,
+                pinBreakLocation: newPowerSup.supLocPin,
+                pinBreakName: newPowerSup.supplyName,
+                powerSup: true,
+            });
+        }
+    }
+
     //TODO:add check if Voltage not too high, other ways adding voltage convertere
     const breakBoardAllocCheck = (newModule: ModuExtern): PinAlloc[]|undefined =>{
         if(breakoutBoard){
@@ -144,37 +211,49 @@ const ModulatorComp = () =>{
             const pinPossible: number[] = [];
             const pinAllocTemp: PinAlloc[] = [];
             let counterBasic = 0;
+            let powerModu = -1;
+            let gndModu = -1;
+
 
             for(let i = 0; i < sortPinlayout.length; i++){
                 if(sortPinlayout[i].typePin === TypePin.Power){
                     console.log("checkpoints")
-                    //work in progress
-                    if(Number(sortPinlayout[i].name) > breakoutBoard.maxPower){
-                        pinPossible.push(-1);
-                        counterBasic +=1;
-
-                    }else{
-                        for(let j = 0; j < breakoutBoard.powerPins.length; j++){
-                            if(Number(sortPinlayout[i].name) === Number(breakoutBoard.powerPins[j].voltage)){
-                                pinPossible.push(breakoutBoard.powerPins[j].position);
-                                pinAllocTemp.push({moduleName: newModule.name,
-                                                    modulePin: sortPinlayout[i],
-                                                    pinBreakboardLocation: breakoutBoard.powerPins[j].position,
-                                                    breakboardPinName: breakoutBoard.powerPins[j].name,
-                                                });
-                                break;
-                            }
-                        }
-                    }
                     pinPossible.push(-1);
-                    //TODO:add check if Voltage not too high, other ways adding voltage convertere
+                    counterBasic +=1;
+                    powerModu = i;
+                    //work in progress
+                    // if(Number(sortPinlayout[i].name) > breakoutBoard.maxPower){
+                    //     pinPossible.push(-1);
+                    //     counterBasic +=1;
+
+                    // }else{
+                    //     pinPossible.push(-1);
+                    //     counterBasic += 1;
+                    //     // for(let j = 0; j < breakoutBoard.powerPins.length; j++){
+                    //     //     if(Number(sortPinlayout[i].name) === Number(breakoutBoard.powerPins[j].voltage)){
+                    //     //         pinPossible.push(breakoutBoard.powerPins[j].position);
+                    //     //         pinAllocTemp.push({moduleName: newModule.name,
+                    //     //                             modulePin: sortPinlayout[i],
+                    //     //                             pinBreakLocation: breakoutBoard.powerPins[j].position,
+                    //     //                             pinBreakName: breakoutBoard.powerPins[j].name,
+                    //     //                             powerSup: false,
+                    //     //                         });
+                    //     //         break;
+                    //     //     }
+                    //     // }
+                    // }
+
                 }else if(sortPinlayout[i].typePin === TypePin.GND){
-                    pinPossible.push(breakoutBoard.pinOut[gndPin].position);
-                    pinAllocTemp.push({ moduleName: newModule.name,
-                                        modulePin: sortPinlayout[i],
-                                        pinBreakboardLocation: breakoutBoard.pinOut[gndPin].position,
-                                        breakboardPinName: breakoutBoard.pinOut[gndPin].name,
-                                        })
+                    pinPossible.push(-1);
+                    counterBasic +=1;
+                    gndModu= i;
+                    // pinPossible.push(breakoutBoard.pinOut[gndPin].position);
+                    // pinAllocTemp.push({ moduleName: newModule.name,
+                    //                     modulePin: sortPinlayout[i],
+                    //                     pinBreakLocation: breakoutBoard.pinOut[gndPin].position,
+                    //                     pinBreakName: breakoutBoard.pinOut[gndPin].name,
+                    //                     powerSup: false,
+                    //                     })
                 }else{
                     for(let j = 0; j < breakoutBoard.pinOut.length; j++){
                     
@@ -187,8 +266,9 @@ const ModulatorComp = () =>{
                                     pinPossible.push(breakoutBoard.pinOut[j].position);
                                     pinAllocTemp.push({ moduleName: newModule.name,
                                                         modulePin: sortPinlayout[i],
-                                                        pinBreakboardLocation: breakoutBoard.pinOut[j].position,
-                                                        breakboardPinName: breakoutBoard.pinOut[j].name,
+                                                        pinBreakLocation: breakoutBoard.pinOut[j].position,
+                                                        pinBreakName: breakoutBoard.pinOut[j].name,
+                                                        powerSup: false,
                                                     });
                                     break;
                                 }   
@@ -199,8 +279,38 @@ const ModulatorComp = () =>{
                 
             }
 
+            //All the IO ports can be connected
             if((counterBasic + pinAllocTemp.length) === newModule.numberPins){
+                //Make the power and GND work, current just 1 power expect
+                if(powerModu !== -1){
+                    const voltagePin = allocVoltage(sortPinlayout[powerModu], newModule.name);
+                    pinAllocTemp.push(voltagePin);
+
+                    if(voltagePin.powerSup){
+                        pinAllocTemp.push({
+                                            pinBreakLocation: voltagePin.pinBreakLocation,
+                                            pinBreakName: voltagePin.pinBreakName,
+                                            modulePin: sortPinlayout[gndModu],
+                                            moduleName: newModule.name,
+                                            powerSup: true
+                                        })
+                        return pinAllocTemp;
+                    }
+                    
+                }
+                if(gndModu !== -1){
+                    pinAllocTemp.push({
+                        pinBreakLocation: breakoutBoard.pinOut[gndPin].position,
+                        pinBreakName: breakoutBoard.pinOut[gndPin].name,
+                        modulePin: sortPinlayout[gndModu],
+                        moduleName: newModule.name,
+                        powerSup: false
+                    })
+                }
                 
+
+
+
                 return pinAllocTemp;
             }else{
                 console.log("Not possible to load in" + counterBasic + " " + pinAllocTemp.length);
@@ -218,7 +328,7 @@ const ModulatorComp = () =>{
         if(breakoutBoard){
             const tempBreakoutBoard = breakoutBoard;
             for(let i = 0; i<allocPins.length; i++){
-                const index = tempBreakoutBoard.pinOut.findIndex(element => element.position === allocPins[i].pinBreakboardLocation);
+                const index = tempBreakoutBoard.pinOut.findIndex(element => element.position === allocPins[i].pinBreakLocation);
                 if(index !== -1){
                     tempBreakoutBoard.pinOut[index].used = true;
                     tempBreakoutBoard.pinOut[index].moduleName.push(allocPins[i].moduleName);
@@ -247,19 +357,23 @@ const ModulatorComp = () =>{
         addSchema("897654321");
     }
 
+    const testModuDist5 = () => {
+        addSchema("897654322");
+    }
+
     return(
         <section id={sectionId}>
             <Button onClick={testModuRGB}>TestRGB</Button>
             <Button onClick={testModuDist}>Test Dist</Button>
-            <SerialThing addComp={getSerialMsg}/>
+            <Button onClick={testModuDist5}>Tets Dist 5</Button>
             <Grid container spacing={4}>
-                <GridHeader title={"Modulator"}/>
+                <GridHeader title={"Modulator"} action={<SerialThing addComp={getSerialMsg}/>}/>
                 <Grid xs={4} item>
                     <Grid
                         direction={"column"}
                         container
                     >
-                        <LegendComp/>
+                        <PowerSupplyComp supplies={conPowerSup}/>
                         <PinLayoutComp/>
                     </Grid>
                 </Grid>
