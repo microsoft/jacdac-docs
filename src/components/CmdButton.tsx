@@ -10,6 +10,7 @@ import useMounted from "./hooks/useMounted"
 import clsx from "clsx"
 import useSnackbar from "./hooks/useSnackbar"
 import useBus from "../jacdac/useBus"
+import OptionalTooltip from "./widgets/OptionalTooltip"
 
 const PREFIX = "CmdButton"
 
@@ -149,20 +150,22 @@ export default function CmdButton(props: {
                     {statusIcon || icon}
                 </IconButtonWithTooltip>
             ) : (
-                <Button
-                    className={elClassName}
-                    style={style}
-                    startIcon={icon}
-                    endIcon={statusIcon}
-                    onClick={handleClick}
-                    aria-label={title}
-                    title={title}
-                    disabled={_disabled}
-                    color={color}
-                    {...others}
-                >
-                    {children}
-                </Button>
+                <OptionalTooltip title={title} placement="bottom">
+                    <Button
+                        className={elClassName}
+                        style={style}
+                        startIcon={icon}
+                        endIcon={statusIcon}
+                        onClick={handleClick}
+                        aria-label={title}
+                        title=""
+                        disabled={_disabled}
+                        color={color}
+                        {...others}
+                    >
+                        {children}
+                    </Button>
+                </OptionalTooltip>
             )}
         </Root>
     )
