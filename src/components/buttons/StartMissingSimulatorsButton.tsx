@@ -19,13 +19,13 @@ export default function StartMissingSimulatorsButton(props: {
         variant = "outlined",
         hideOnDisabled,
     } = props
-    const roleManager = useRoleManagerClient()
-    const allRolesBound = useChange(roleManager, _ => _?.allRolesBound())
+    const roleManagerClient = useRoleManagerClient()
+    const allRolesBound = useChange(roleManagerClient, _ => _?.allRolesBound())
     const handleStartSimulators = async () => {
-        roleManager?.startSimulators()
+        roleManagerClient?.startSimulators()
         await delay(1000)
     }
-    const disabled = !roleManager || allRolesBound
+    const disabled = !roleManagerClient || allRolesBound
 
     if (disabled && hideOnDisabled) return null
 
