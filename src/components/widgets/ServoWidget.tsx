@@ -29,6 +29,7 @@ export default function ServoWidget(props: {
     const continuous = rotationRate !== undefined
     const offsetRef = useRef(0)
     const armRef = useRef<SVGPathElement>()
+    const textRef = useRef<SVGTextElement>()
 
     const cx = 78
     const cy = 55
@@ -46,12 +47,16 @@ export default function ServoWidget(props: {
             ? time => {
                   const arm = armRef.current
                   if (!arm) return
+                  const text = textRef.current
 
                   let offset = offsetRef.current
                   offset = (offset + (time / 1000) * rotationRate) % 360
                   offsetRef.current = offset
                   const transform = `rotate(${offset}, ${cx}, ${cy})`
                   arm.setAttribute("transform", transform)
+                  text.childNodes[0].nodeValue = `${Math.round(
+                      rotationRate / 360 * 60
+                  )}rpm`
 
                   return true
               }
@@ -87,6 +92,7 @@ export default function ServoWidget(props: {
                 d="M93.782 55.623c-.032-3.809-.19-6.403-.352-7.023h-.002c-.93-3.558-6.621-6.73-14.793-6.73-8.17 0-14.649 3.016-14.795 6.73-.25 6.419-4.049 62.795 13.561 62.806 14.308.008 16.52-39.277 16.38-55.783zm-8.05.08a7.178 7.178 0 010 .012 7.178 7.178 0 01-7.179 7.176 7.178 7.178 0 01-7.177-7.176 7.178 7.178 0 017.177-7.178 7.178 7.178 0 017.178 7.166z"
             />
             <text
+                ref={textRef}
                 {...textProps}
                 x={w / 2}
                 y={30}

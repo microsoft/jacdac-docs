@@ -82,11 +82,15 @@ export default function DashboardServo(props: DashboardServiceProps) {
     const continuousFormat = (throttle: number) => {
         return Math.round(throttle) + "%"
     }
-    const handleContinuousChange = (ev: unknown, newValue: number | number[]) =>
-        angleRegister.sendSetPackedAsync(
-            [((newValue as number) / 100) * (maxAngle - minAngle) + minAngle],
-            true
-        )
+    const handleContinuousChange = (
+        ev: unknown,
+        newValue: number | number[]
+    ) => {
+        const newAngle =
+            (0.5 + (newValue as number) / 200) * (maxAngle - minAngle) +
+            minAngle
+        angleRegister.sendSetPackedAsync([newAngle], true)
+    }
     const handleAngleChange = (ev: unknown, newValue: number | number[]) =>
         angleRegister.sendSetPackedAsync([newValue as number], true)
 
@@ -114,7 +118,7 @@ export default function DashboardServo(props: DashboardServiceProps) {
                         onChange={readOnly ? undefined : handleContinuousChange}
                         min={-100}
                         max={100}
-                        step={5}
+                        step={10}
                         valueLabelDisplay="auto"
                     />
                 ) : (
