@@ -1,4 +1,5 @@
 import {
+    DEVICE_FIRMWARE_INFO,
     FRAME_PROCESS,
     REPORT_UPDATE,
     SRV_CONTROL,
@@ -151,7 +152,10 @@ export class IFrameBridgeClient extends JDClient {
             this.mount(this.bus.subscribe(FRAME_PROCESS, this.postPacket))
             this.mount(this.bus.subscribe(DEVICE_ANNOUNCE, this.handleResize))
             this.mount(
-                this.bus.subscribe(DEVICE_ANNOUNCE, () => this.emit(CHANGE))
+                this.bus.subscribe(
+                    [DEVICE_ANNOUNCE, DEVICE_FIRMWARE_INFO],
+                    () => this.emit(CHANGE)
+                )
             )
             this.mount(
                 this.bus.subscribe(REPORT_UPDATE, this.handleReportUpdate)
@@ -316,17 +320,19 @@ export class IFrameBridgeClient extends JDClient {
         return ignoredServices.indexOf(srv.serviceClass) < 0
     }
 
-    get candidateExtensions(): string[] {
+    candidateExtensions(): string[] {
         if (!this.packetProcessed || !this._runOptions?.dependencies)
             // bridge is not active
             return []
 
-        const devices = this.bus
+        const { bus } = this
+        const { deviceCatalog } = bus
+        const devices = bus
             .devices({ announced: true, ignoreInfrastructure: true })
             .filter(this.deviceFilter.bind(this))
         let extensions = unique(
-            arrayConcatMany(
-                devices.map(device =>
+            arrayConcatMany([
+                ...devices.map(device =>
                     device
                         .services()
                         .map(srv =>
@@ -336,15 +342,26 @@ export class IFrameBridgeClient extends JDClient {
                         )
                         .map(info => info?.client.repo)
                         .filter(q => !!q)
-                )
-            )
+                ),
+                ...devices
+                    .map(
+                        device =>
+                            deviceCatalog.specificationFromProductIdentifier(
+                                device.productIdentifier
+                            )?.makecodeExtensions
+                    )
+                    .filter(q => !!q),
+            ])
         )
+
+        // add custom extension
+
         const runtimeDependencies = this._runOptions.dependencies
         const dependencies = Object.values(runtimeDependencies)
             .filter(d => /^github:/.test(d))
             .map(d => /^github:([^#]+)(#.?)?/.exec(d)[1])
         if (dependencies?.length > 0) {
-            // remove all needed extenions that are already in the dependencies
+            // remove all needed extensions that are already in the dependencies
             extensions = extensions.filter(extension => {
                 //console.log(`check ext`, { extension })
                 return dependencies.indexOf(extension) < 0
@@ -362,7 +379,7 @@ export class IFrameBridgeClient extends JDClient {
     public postAddExtensions() {
         if (!this.hosted) return
 
-        const extensions = this.candidateExtensions
+        const extensions = this.candidateExtensions()
         console.log(`addextensions`, {
             extensions,
             deps: this._runOptions?.dependencies,
