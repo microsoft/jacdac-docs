@@ -20,8 +20,10 @@ export default function useAnimationFrame(
     }
 
     useEffect(() => {
-        previousTimeRef.current = undefined
-        requestRef.current = requestAnimationFrame(animate)
+        if (callback) {
+            previousTimeRef.current = undefined
+            requestRef.current = requestAnimationFrame(animate)
+        }
         return () =>
             requestRef.current !== undefined &&
             cancelAnimationFrame(requestRef.current)

@@ -1,7 +1,8 @@
-import React from "react"
+import React, { useRef } from "react"
 import SvgWidget from "../widgets/SvgWidget"
 import useWidgetTheme from "../widgets/useWidgetTheme"
 import PowerButton from "./PowerButton"
+import useAnimationFrame from "../hooks/useAnimationFrame"
 
 export default function ServoWidget(props: {
     angle: number
@@ -10,10 +11,24 @@ export default function ServoWidget(props: {
     enabled?: boolean
     toggleOff?: () => void
     widgetSize?: string
+    rotationRate?: number
+    visible?: boolean
 }) {
-    const { widgetSize, toggleOff, angle, offset, color, enabled } = props
+    const {
+        widgetSize,
+        toggleOff,
+        angle,
+        offset,
+        color,
+        enabled,
+        rotationRate,
+        visible,
+    } = props
     const { background, controlBackground, active, textPrimary, textProps } =
         useWidgetTheme(color)
+    const continuous = rotationRate !== undefined
+    const offsetRef = useRef(0)
+    const armRef = useRef<SVGPathElement>()
 
     const cx = 78
     const cy = 55
@@ -25,6 +40,24 @@ export default function ServoWidget(props: {
     const pr = 14
     const pri = 6
     const text = enabled ? `${Math.round(a)}°` : "off"
+
+    useAnimationFrame(
+        continuous && enabled && visible && rotationRate !== undefined
+            ? time => {
+                  const arm = armRef.current
+                  if (!arm) return
+
+                  let offset = offsetRef.current
+                  offset = (offset + (time / 1000) * rotationRate) % 360
+                  offsetRef.current = offset
+                  const transform = `rotate(${offset}, ${cx}, ${cy})`
+                  arm.setAttribute("transform", transform)
+
+                  return true
+              }
+            : undefined,
+        [continuous, visible, enabled, rotationRate]
+    )
 
     return (
         <SvgWidget
@@ -47,6 +80,7 @@ export default function ServoWidget(props: {
                 d="M125.545 55.641c0-24.994-20.26-45.256-45.254-45.256-17.882.016-34.077 9.446-41.328 25.79-2.655.024-4.192.076-6.35.07-11.158 0-20.204 9.046-20.204 20.204 0 11.158 9.046 20.203 20.203 20.203 2.389-.005 4.354-.332 6.997-.256 7.56 15.59 23.356 24.485 40.682 24.5 24.992 0 45.254-20.264 45.254-45.256z"
             />
             <path
+                ref={armRef}
                 fill={enabled ? active : background}
                 stroke={active}
                 transform={transform}
