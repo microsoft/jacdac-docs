@@ -27,7 +27,7 @@
     ],
     "code": {
         "codeClient": "export const #_client = new DistanceClient(\"#\")",
-        "codeService": "const #Service = new ServiceImpl.DepthServer(() => sonar.ping(DigitalPin.#, DigitalPin.#, PingUnit.Centimers)/100.0, { \"instanceName\": \"#\"});",
+        "codeService": "const #Service = new ServiceImpl.DepthServer(() => sonar.ping(DigitalPin.#, DigitalPin.#, PingUnit.Centimers)/100.0, \"#\");",
         "codeServiceParam": [
             "Name",
             "2",

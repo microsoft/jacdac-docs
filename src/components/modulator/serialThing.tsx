@@ -126,11 +126,11 @@ const SerialThing: React.FC<Props> = ({addComp}) => {
         setConButtonText("Connect");
     }
 
-    const connectBtnClick = () => {
+    const connectBtnClick =async () => {
         if(port){
-            disconnectFromPort();
+            await disconnectFromPort();
         }else{
-            connectToPort();
+            await connectToPort();
         }
     }
 

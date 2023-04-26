@@ -9,6 +9,8 @@ import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
 import { Breakout, ModuExtern, Pin, PinAlloc,  TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
 import PowerSupplyComp from "./powerSupplyComp";
+import { forEach } from "vega-lite/build/src/encoding";
+import { Type } from "vega-lite/build/src/type";
 
 
 //TODO: improving pin allocation
@@ -178,7 +180,6 @@ const ModulatorComp = () =>{
     const breakBoardAllocCheck = (newModule: ModuExtern): PinAlloc[]|undefined =>{
         if(breakoutBoard){
             const sortPinlayout = newModule.pinLayout.sort((a, b) => predicate(a.typePin, b.typePin));
-            const gndPin = breakoutBoard.pinOut.findIndex(i => i.name === "GND");
 
             const pinPossible: number[] = [];
             const pinAllocTemp: PinAlloc[] = [];
@@ -187,15 +188,36 @@ const ModulatorComp = () =>{
             let gndModu = -1;
 
             for(let i = 0; i < sortPinlayout.length; i++){
-                if(sortPinlayout[i].typePin === TypePin.Power){
+                if(sortPinlayout[i].typePin === TypePin.Power || sortPinlayout[i].typePin === TypePin.GND){
                     pinPossible.push(-1);
-                    counterBasic +=1;
-                    powerModu = i;
+                    counterBasic += 1;
+                    if(sortPinlayout[i].typePin === TypePin.Power) powerModu = i;
+                    if(sortPinlayout[i].typePin === TypePin.GND) gndModu = i;
             
-                }else if(sortPinlayout[i].typePin === TypePin.GND){
-                    pinPossible.push(-1);
-                    counterBasic +=1;
-                    gndModu= i;
+                }else if(sortPinlayout[i].typePin === TypePin.SclI2c || sortPinlayout[i].typePin === TypePin.SdaI2C){
+                    if(checkBreakBoardI2C()){
+                        const tempProtoIndex = getIndexProtocoll(sortPinlayout[i].typePin);
+                        pinPossible.push(breakoutBoard.pinOut[tempProtoIndex].position);
+                        pinAllocTemp.push({
+                            moduleName: newModule.name,
+                            modulePin: sortPinlayout[i],
+                            pinBreakLocation: breakoutBoard.pinOut[tempProtoIndex].position,
+                            pinBreakName: breakoutBoard.pinOut[tempProtoIndex].name,
+                            powerSup: false,
+                        });
+                    }
+                }else if(sortPinlayout[i].typePin === TypePin.SckSPI || sortPinlayout[i].typePin === TypePin.MisoSPI || sortPinlayout[i].typePin === TypePin.MosiSPI){
+                    if(checkBreadBoardSPI()){
+                        const tempProtoIndex = getIndexProtocoll(sortPinlayout[i].typePin);
+                        pinPossible.push(breakoutBoard.pinOut[tempProtoIndex].position);
+                        pinAllocTemp.push({
+                            moduleName: newModule.name,
+                            modulePin: sortPinlayout[i],
+                            pinBreakLocation: breakoutBoard.pinOut[tempProtoIndex].position,
+                            pinBreakName: breakoutBoard.pinOut[tempProtoIndex].name,
+                            powerSup: false,
+                        });
+                    }
                 }else{
                     for(let j = 0; j < breakoutBoard.pinOut.length; j++){
                         //check pin is in use
@@ -239,6 +261,7 @@ const ModulatorComp = () =>{
                     
                 }
                 if(gndModu !== -1){
+                    const gndPin = getIndexProtocoll(TypePin.GND);
                     pinAllocTemp.push({
                         pinBreakLocation: breakoutBoard.pinOut[gndPin].position,
                         pinBreakName: breakoutBoard.pinOut[gndPin].name,
@@ -261,6 +284,55 @@ const ModulatorComp = () =>{
             return undefined;
         }
 
+    }
+
+    const getIndexProtocoll = (protoType: TypePin): number =>{
+        return breakoutBoard.pinOut.findIndex(i => i.options.includes(protoType))
+    }
+
+    const checkBreakBoardI2C = () =>{
+        const indexSDA = getIndexProtocoll(TypePin.SdaI2C); 
+        const indexSCL = getIndexProtocoll(TypePin.SclI2c); 
+        if(indexSDA !== -1 && indexSCL !==-1){
+            breakoutBoard.pinOut[indexSDA].modulePin.forEach(function (value){
+                if(value.typePin !== TypePin.SdaI2C){
+                    return false;
+                }
+            });
+            breakoutBoard.pinOut[indexSCL].modulePin.forEach(function (value){
+                if(value.typePin !== TypePin.SclI2c){
+                    return false;
+                }
+            });
+            return true;
+        }
+        return false;
+    }
+
+    const checkBreadBoardSPI = () =>{
+        const indexSck = getIndexProtocoll(TypePin.SckSPI); 
+        const indexMiso = getIndexProtocoll(TypePin.MisoSPI); 
+        const indexMosi = getIndexProtocoll(TypePin.MosiSPI);
+        if(indexSck !== -1 && indexMiso !== -1 && indexMosi !== -1){
+            breakoutBoard.pinOut[indexSck].modulePin.forEach(function (value){
+                if(value.typePin !== TypePin.SckSPI){
+                    return false;
+                }
+            });
+            breakoutBoard.pinOut[indexMiso].modulePin.forEach(function (value){
+                if(value.typePin !== TypePin.MisoSPI){
+                    return false;
+                }
+            });
+            breakoutBoard.pinOut[indexMosi].modulePin.forEach(function (value){
+                if(value.typePin !== TypePin.MosiSPI){
+                    return false;
+                }
+            });
+
+            return true;
+        }
+        return false;
     }
 
     //set the temp allocated pin position to the breakoutboard
@@ -301,11 +373,21 @@ const ModulatorComp = () =>{
         addSchema("897654322");
     }
 
+    const testDisplay= () => {
+        addSchema("654321789");
+    }
+
+    const testRelay= () => {
+        addSchema("321654987")
+    }
+
     return(
         <section id={sectionId}>
             <Button onClick={testModuRGB}>TestRGB</Button>
             <Button onClick={testModuDist}>Test Dist</Button>
             <Button onClick={testModuDist5}>Tets Dist 5</Button>
+            <Button onClick={testDisplay}>TEst display</Button>
+            <Button onClick={testRelay}>Test Relay</Button>
             <Grid container spacing={4}>
                 <GridHeader title={"Modulator"} action={<SerialThing addComp={getSerialMsg}/>}/>
                 <Grid xs={4} item>
