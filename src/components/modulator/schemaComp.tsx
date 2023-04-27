@@ -1,22 +1,22 @@
-import styled from "@emotion/styled";
 import { Grid } from "@mui/material";
 import React from "react";
 import GridHeader from "../ui/GridHeader";
-import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin } from "./helper/types";
+import { ModuExtern, PinAlloc,} from "./helper/types";
 import ModuleComponent from "./moduleComponent";
-import Button from "../ui/Button";
+import ManualAddComp from "./manualAddComponent";
 
 
 type Props={
     modules: ModuExtern[];
     allocedPins: PinAlloc[];
     removeFunc: (moduleName: string) =>void;
+    addSchema: (moduleId: string) => void;
 }
 
-const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins}) =>{
+const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchema}) =>{
     const moduAllocList = (moduleName: string) =>{
         const tempList = [];
-        allocedPins.forEach(function (valPin, index) {
+        allocedPins.forEach(function (valPin) {
             if(valPin.moduleName === moduleName){
                 tempList.push(valPin)
             }
@@ -27,8 +27,8 @@ const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins}) =>{
     
     
     return(
-        <Grid xs={8} item>
-            <GridHeader title={"Added modules"}/>
+        <Grid xs={8} item style={{paddingTop:0}}>
+            <GridHeader title={"Added modules"} action={<ManualAddComp addSchema={addSchema}/>}/>
             <div style={{overflowY:"scroll", maxHeight:"50vh"}}>
                 {modules.map((mod, index) => (
 

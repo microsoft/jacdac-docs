@@ -1,8 +1,6 @@
 import React from "react";
-import { Breakout, CodeMake, ModuExtern, Pin, PinAlloc, PinBreakout, TypePin } from "./helper/types";
-import { StaticImage } from "gatsby-plugin-image";
+import { ModuExtern, PinAlloc, } from "./helper/types";
 import Button from "../ui/Button";
-import { forEach } from "vega-lite/build/src/encoding";
 
 
 export default function ModuleComponent(
@@ -14,6 +12,7 @@ export default function ModuleComponent(
 ){
     const {module, removeFunc, allocedPins} = props;
 
+    const onBoard = (module.numberPins === allocedPins.length)
     
     //File in the parameters for code complission
     const fileInCode = (): string => {
@@ -26,6 +25,8 @@ export default function ModuleComponent(
                 const indexAlloc = allocedPins.findIndex((value) => value.modulePin.posPin == Number(module.codeAct.codeServiceParam[index])) 
                 if(indexAlloc !== -1){
                     result += allocedPins[indexAlloc].pinBreakName;
+                }else{
+                    result += "#";
                 }
             }
             else if(module.codeAct.codeServiceParam[index]==="Name"){
@@ -46,7 +47,7 @@ export default function ModuleComponent(
 
             return allocedPins[index].pinBreakName;
         }
-        return "";
+        return "#";
     }
 
     const sortedPinlayout = module.pinLayout.sort((x, y) => x.posPin > y.posPin ? 1: x.posPin < y.posPin ? -1: 0);
@@ -58,6 +59,7 @@ export default function ModuleComponent(
                 <span style={{fontWeight:"bold"}}>Module name: </span>
                 <span>{module.name}</span>
                 <Button onClick={() => removeFunc(module.name)}>Remove</Button>
+                {onBoard?null: <p style={{color:"red", fontWeight:"bold"}}>Could not be added</p>}
             </div>
            
             {module.diagram === undefined?null:

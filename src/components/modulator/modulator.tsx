@@ -9,8 +9,7 @@ import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
 import { Breakout, ModuExtern, Pin, PinAlloc,  TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
 import PowerSupplyComp from "./powerSupplyComp";
-import { forEach } from "vega-lite/build/src/encoding";
-import { Type } from "vega-lite/build/src/type";
+
 
 
 //TODO: improving pin allocation
@@ -56,7 +55,7 @@ const ModulatorComp = () =>{
         
         //Remove from breakoutBoard
         const tempPinOut = breakoutBoard.pinOut
-        tempPinOut.forEach(function(value, index) {
+        tempPinOut.forEach(function(value) {
             if(value.used){
                 const tempIndex = value.moduleName.findIndex(i => i === moduleName);
                 if(tempIndex !== -1){
@@ -83,7 +82,7 @@ const ModulatorComp = () =>{
                 value.conModule.splice(tempIndex, 1);
             }
         });
-        indexlistPowerSup.forEach(function(value, index) {
+        indexlistPowerSup.forEach(function(value) {
             tempPowerSup.splice(value, 1);
         })
 
@@ -106,7 +105,7 @@ const ModulatorComp = () =>{
         
         const tempModuPins = breakBoardAllocCheck(tempModu);
         if(tempModuPins){
-            if(tempModuPins.length !==0){
+            if(tempModuPins.length !== 0){
                 breakBoardAllocPins(tempModuPins);
                 
 
@@ -131,7 +130,7 @@ const ModulatorComp = () =>{
 
 
     const allocVoltage = (powerPin: Pin, moduleName: string): PinAlloc =>{
-        const indexPWRBoard = breakoutBoard.powerPins.findIndex((value, index) => Number(powerPin.name) === Number(value.voltage));
+        const indexPWRBoard = breakoutBoard.powerPins.findIndex((value) => Number(powerPin.name) === Number(value.voltage));
         //exist power pin, with right voltage for module
 
         if (indexPWRBoard !== -1) {
@@ -144,7 +143,7 @@ const ModulatorComp = () =>{
             })
         }
         if(conPowerSup.length > 0){
-            const indexConPowerSup = conPowerSup.findIndex((value, index) => Number(powerPin.name) === value.voltage);
+            const indexConPowerSup = conPowerSup.findIndex((value) => Number(powerPin.name) === value.voltage);
             if(indexConPowerSup !== -1){
                 conPowerSup[indexConPowerSup].conModule.push(moduleName);
                 return({
@@ -361,46 +360,21 @@ const ModulatorComp = () =>{
     }
 
 
-    const testModuRGB = () =>{
-        addSchema("12345678");
-    }
-
-    const testModuDist = () =>{
-        addSchema("897654321");
-    }
-
-    const testModuDist5 = () => {
-        addSchema("897654322");
-    }
-
-    const testDisplay= () => {
-        addSchema("654321789");
-    }
-
-    const testRelay= () => {
-        addSchema("321654987")
-    }
-
     return(
         <section id={sectionId}>
-            <Button onClick={testModuRGB}>TestRGB</Button>
-            <Button onClick={testModuDist}>Test Dist</Button>
-            <Button onClick={testModuDist5}>Tets Dist 5</Button>
-            <Button onClick={testDisplay}>TEst display</Button>
-            <Button onClick={testRelay}>Test Relay</Button>
             <Grid container spacing={4}>
-                <GridHeader title={"Modulator"} action={<SerialThing addComp={getSerialMsg}/>}/>
-                <Grid xs={4} item>
+                <GridHeader title={"Modulator"} action={<span><SerialThing addComp={getSerialMsg}/> </span>}/>
+                <Grid xs={4} item style={{paddingTop:"0"}}>
                     <Grid
                         direction={"column"}
                         container
                     >
-                        <PowerSupplyComp supplies={conPowerSup}/>
                         <PinLayoutComp/>
+                        {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
                     </Grid>
                 </Grid>
 
-            <SchemaComp modules={conModules} removeFunc={removeConModule} allocedPins={allocedPins}/>
+            <SchemaComp modules={conModules} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/>
             
 
 

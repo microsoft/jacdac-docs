@@ -5,7 +5,7 @@
     "diagram": "http://www.techydiy.org/wp-content/uploads/2017/02/keyes-SR1y-photo-with-labels.jpg",
     "pinLayout": [
         {
-            "type": "DigitalOut",
+            "type": "Digital OUT",
             "pos": "0",
             "name": "S"
         },
@@ -22,7 +22,7 @@
     ],
     "code": {
         "codeClient": "export const #_client = new RelayClient(\"#\")",
-        "codeService": "const #Service = new ServiceImpl.relayService(DigitalPin.#,\"#\");",
+        "codeService": "const #Service = new ServiceImpl.relayService(DigitalPin.#, \"#\");",
         "codeServiceParam": [
             "Name",
             "0",

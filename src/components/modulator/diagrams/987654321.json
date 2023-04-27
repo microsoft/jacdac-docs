@@ -1,0 +1,32 @@
+{
+    "name": "Light Sensor",
+    "type": "LightSensor ",
+    "numberPins": 3,
+    "diagram": "https://i.imgur.com/zZtT6jH.png",
+    "pinLayout": [
+        {
+            "type": "GND",
+            "pos": "0",
+            "name": "GND"
+        },
+        {
+            "type": "Analog IN",
+            "pos": "1",
+            "name": "Input Pin"
+        },
+        {
+            "type": "VCC",
+            "pos": "2",
+            "name": "3.3"
+        }
+    ],
+    "code": {
+        "codeClient": "export const #_client = new LightLevelClient(\"#\")",
+        "codeService": "const #Service = new ServiceImpl.LightLevelService(() => pins.analogReadPin(AnalogPin.#) /1024, \"#\");",
+        "codeServiceParam": [
+            "Name",
+            "1",
+            "Name"
+        ]
+    }
+}
