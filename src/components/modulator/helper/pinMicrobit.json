@@ -1,6 +1,6 @@
 {
     "name":"Micro:bit v2 pin layout",
-    "totalPins":19,
+    "totalPins":17,
     "totalPowerPins":1,
     "power":3.3,
     "pins":[
@@ -29,11 +29,7 @@
             "pos":4,
             "options":["Analog IN", "Analog OUT", "Digital IN", "Digital OUT"]
         },
-        {
-            "name":"P5",
-            "pos":5,
-            "options":["Digital IN", "Digital OUT"]
-        },
+        
         {
             "name":"P6",
             "pos":6,
@@ -60,11 +56,6 @@
             "options":["Analog IN", "Analog OUT","Digital IN", "Digital OUT"]
         },
         {
-            "name":"P11",
-            "pos":11,
-            "options":["Digital IN", "Digital OUT"]
-        },
-        {
             "name":"P13",
             "pos":13,
             "options":["SCK SPI","Digital IN", "Digital OUT"]
@@ -87,12 +78,12 @@
         {
             "name":"P19",
             "pos":19,
-            "options":["SCL I2C","Digital IN", "Digital OUT"]
+            "options":["SCL I2C"]
         },
         {
             "name":"P20",
             "pos":20,
-            "options":["SDA I2C","Digital IN", "Digital OUT"]
+            "options":["SDA I2C"]
         },
         {
             "name": "GND",

@@ -359,6 +359,7 @@ const ModulatorComp = () =>{
         }
     }
 
+    //TODO: add code for led.enable when some pins are used
 
     return(
         <section id={sectionId}>
@@ -370,6 +371,7 @@ const ModulatorComp = () =>{
                         container
                     >
                         <PinLayoutComp/>
+                        {<p>Extra code: led.enable(false)</p>}
                         {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
                     </Grid>
                 </Grid>
