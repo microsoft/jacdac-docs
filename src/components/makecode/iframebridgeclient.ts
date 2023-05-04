@@ -348,14 +348,15 @@ export class IFrameBridgeClient extends JDClient {
                         device =>
                             deviceCatalog.specificationFromProductIdentifier(
                                 device.productIdentifier
-                            )?.makecodeExtensions
+                            )?.makeCodeRepo
+                                ?.filter(({ target }) => target === "microbit")
+                                ?.map(({ slug }) => slug)
                     )
                     .filter(q => !!q),
             ])
         )
 
         // add custom extension
-
         const runtimeDependencies = this._runOptions.dependencies
         const dependencies = Object.values(runtimeDependencies)
             .filter(d => /^github:/.test(d))
