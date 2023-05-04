@@ -79,6 +79,7 @@ function storeInfo(url: string) {
         "category.yahboom.com": { name: "YahBoom" },
         "microbit.org": { name: "MicroBit Educational Foundation" },
         "amazon.com": { name: "Amazon" },
+        "forwardedu.com": { name: "Forward Education"}
     }
 
     return infos[host] || { name: host }
@@ -199,7 +200,7 @@ export default function DeviceSpecification(props: {
                         <Typography component="div" variant="subtitle1">
                             by{" "}
                             <Link
-                                to={`/devices/${identifierToUrlPath(company)}/`}
+                                to={`/devices/${identifierToUrlPath(company).replace(' ', '-')}/`}
                             >
                                 {company}
                             </Link>
