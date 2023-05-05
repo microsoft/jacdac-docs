@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
     Card,
     CardContent,
@@ -15,12 +15,14 @@ import { Button } from "gatsby-theme-material-ui"
 import { NoSsr } from "@mui/material"
 import { useId } from "react"
 import useDeviceCatalog from "./devices/useDeviceCatalog"
+import SwitchWithLabel from "./ui/SwitchWithLabel"
 
 export default function RandomGenerator(props: {
     device?: boolean
     firmware?: boolean
 }) {
     const { device, firmware } = props
+    const [hex, setHex] = useState(true)
     const fieldId = useId()
     const deviceCatalog = useDeviceCatalog()
 
@@ -28,7 +30,7 @@ export default function RandomGenerator(props: {
         device
             ? deviceCatalog.uniqueDeviceId()
             : firmware
-            ? deviceCatalog.uniqueFirmwareId()
+            ? deviceCatalog.uniqueFirmwareId(!hex)
             : deviceCatalog.uniqueServiceId()
 
     const [value, setValue] = useState(compute())
@@ -47,6 +49,10 @@ export default function RandomGenerator(props: {
             setCopySuccess(false)
         }
     }
+    const handleHex = (ev, checked: boolean) => {
+        setHex(checked)
+    }
+    useEffect(handleRegenerate, [hex])
     const title = device
         ? "Random Device Identifier"
         : firmware
@@ -77,6 +83,7 @@ export default function RandomGenerator(props: {
                     )}
                 </CardContent>
                 <CardActions>
+                    {firmware && <SwitchWithLabel label="hex" checked={hex} onChange={handleHex} />}
                     <Button
                         aria-label="copy random number to clipboard"
                         size="small"
