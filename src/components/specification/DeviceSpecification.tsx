@@ -355,7 +355,6 @@ export default function DeviceSpecification(props: {
                 devices={relatedDeviceSpecs}
             />
             <Divider light={true} />
-            <h2>Technical Details</h2>
             <ChipList>
                 {designIdentifier && (
                     <Chip
