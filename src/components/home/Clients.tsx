@@ -49,6 +49,38 @@ export default function Clients() {
 
             <SplitGrid
                 right={false}
+                subtitle="p5*js"
+                imageColumns={8}
+                description="Physical Creative Coding."
+                buttonText="p5.jacdac library"
+                buttonVariant="link"
+                buttonUrl="/clients/javascript/p5js"
+                image={
+                    <StaticImage
+                        src="./p5js.jpg"
+                        alt="A p5js program that controls color with sliders."
+                    />
+                }
+            />
+
+            <SplitGrid
+                right={true}
+                subtitle="DeviceScript"
+                imageColumns={8}
+                description="TypeScript for microcontrollers with Visual Studio Code integration."
+                buttonText="Get started with DeviceScript"
+                buttonVariant="link"
+                buttonUrl="/clients/devicescript"
+                image={
+                    <StaticImage
+                        src="./devicescript.png"
+                        alt="A DeviceScript program in Visual Studio Code."
+                    />
+                }
+            />
+
+            <SplitGrid
+                right={false}
                 subtitle=".NET"
                 description="Control hardware from your computer or your Raspberry Pi using .NET, TinyCLR."
                 buttonText="Get started with .NET"
@@ -79,21 +111,6 @@ export default function Clients() {
                 }
             />
 
-            <SplitGrid
-                right={false}
-                subtitle="p5*js"
-                imageColumns={8}
-                description="Physical Creative Coding."
-                buttonText="p5.jacdac library"
-                buttonVariant="link"
-                buttonUrl="/clients/javascript/p5js"
-                image={
-                    <StaticImage
-                        src="./p5js.jpg"
-                        alt="A p5js program that controls color with sliders."
-                    />
-                }
-            />
 
             <SplitGrid
                 right={true}

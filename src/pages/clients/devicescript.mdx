@@ -5,7 +5,7 @@ order: 4
 
 # DeviceScript
 
-Microsoft DeviceScript is a TypeScript-like language and portable runtime built on top of Jacdac service abstractions.
+[Microsoft DeviceScript](https://microsoft.github.io/devicescript/) is a TypeScript-like language and portable runtime built on top of Jacdac service abstractions.
 
 DeviceScript comes with a full Visual Studio Code integration,
 with TypeScript syntax and type checking, debugging
@@ -14,13 +14,13 @@ and live device interaction.
 ```typescript
 import { AirPressure } from "@devicescript/core"
 import { ewma, throttleTime } from "@devicescript/observables"
-import { uploadMessage } from "@devicescript/cloud"
+import { publishMessage } from "@devicescript/cloud"
 
 const barometer = new AirPressure()
-const { pressure } = barometer
+const { reading: pressure } = barometer
 pressure.pipe(ewma(0.9), throttleTime(5000)).subscribe(async p => {
     console.data({ p })
-    await uploadMessage("pressure", { p })
+    await publishMessage("pressure", { p })
 })
 ```
 
