@@ -143,7 +143,7 @@ async function createDeviceQRPages(actions) {
             ? `/devices/0x${productid.toString(16)}/`
             : `/devices/microsoft-research/`
         const r = { fromPath: p, toPath }
-        console.debug(`redirect ${r.fromPath} -> ${r.toPath}`)
+        //console.debug(`redirect ${r.fromPath} -> ${r.toPath}`)
         await createRedirect(r)
     }
 
@@ -160,7 +160,7 @@ async function createDeviceQRPages(actions) {
         const p = `/devices/codes/${vanity}/`
         const toPath = `/devices/0x${spec.productIdentifiers[0].toString(16)}/`
         const r = { fromPath: p, toPath }
-        console.debug(`redirect ${r.fromPath} -> ${r.toPath}`)
+        //console.debug(`redirect ${r.fromPath} -> ${r.toPath}`)
         await createRedirect(r)
     }
 
@@ -263,7 +263,7 @@ async function createDevicePages(graphql, actions, reporter) {
     for (const cp of Object.keys(companies)) {
         const company = companies[cp]
         const p = `/devices/${cp}`
-        console.log(`device company page`, { p })
+        //console.log(`device company page`, { p })
         createPage({
             path: p,
             component: slash(companyTemplate),
