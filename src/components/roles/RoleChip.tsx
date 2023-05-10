@@ -6,6 +6,7 @@ import useServiceServer from "../hooks/useServiceServer"
 import CancelIcon from "@mui/icons-material/Cancel"
 import { Chip, Tooltip } from "@mui/material"
 import useBus from "../../jacdac/useBus"
+import { escapeRoleName } from "../../../jacdac-ts/src/jdom/rolemanager"
 
 export default function RoleChip(props: {
     role: string
@@ -17,7 +18,7 @@ export default function RoleChip(props: {
     const { role, service, onClick } = props
     const serviceServer = useServiceServer(service)
 
-    const roleName = role.split("?", 1)[0]
+    const roleName = escapeRoleName(role)
 
     const handleDelete = () => bus.removeServiceProvider(serviceServer.device)
     return (
