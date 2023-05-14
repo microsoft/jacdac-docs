@@ -45,7 +45,7 @@ export default function ModuleComponent(
                 return (allocedPins[index].pinBreakName +" " +allocedPins[index].modulePin.typePin)
             }
 
-            return allocedPins[index].pinBreakName;
+            return "breakoutboard pin "+ allocedPins[index].pinBreakName;
         }
         return "#";
     }
@@ -67,10 +67,11 @@ export default function ModuleComponent(
                 <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
             </div>
             }
-            <p style={{fontWeight:"bold", marginBottom:0}}>PinLayout mapping:</p>
+            <p style={{fontWeight:"bold", marginBottom:0}}>How to connect:</p>
             {sortedPinlayout.map((pin, index) =>(
                 <div key={index}>
-                    Type: {pin.typePin} | Module Position: {pin.posPin} | BreakoutBoard Position: {getPin(pin.posPin)}
+                    Connect module pin {pin.posPin} ({pin.typePin}) to the {getPin(pin.posPin)}
+                    {/* Type: {pin.typePin} | Module Position: {pin.posPin} | BreakoutBoard Position: {getPin(pin.posPin)} */}
                 </div>
             ))}
             {module.codeAct === undefined?null: 

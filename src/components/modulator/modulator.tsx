@@ -12,11 +12,9 @@ import PowerSupplyComp from "./powerSupplyComp";
 
 
 
-//TODO: improving pin allocation
-//TODO: get module info from file or github??? (local current)
-//TODO: code auto fill in (now static do??)
-//TODO: layout working
-//TODO: image from web
+//TODO: change pin allocation way
+//TODO: try highlighting pin needed connect
+//TODO: try create auto client code
 
 // type Props={
 //     breakoutBoard: Breakout;
@@ -370,8 +368,9 @@ const ModulatorComp = () =>{
                         direction={"column"}
                         container
                     >
+                        {<h3>First Code for Makecode: led.enable(false);</h3>}
                         <PinLayoutComp/>
-                        {<p>Extra code: led.enable(false)</p>}
+                        
                         {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
                     </Grid>
                 </Grid>
