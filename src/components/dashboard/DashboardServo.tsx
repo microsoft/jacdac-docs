@@ -104,7 +104,7 @@ export default function DashboardServo(props: DashboardServiceProps) {
                     enabled={enabled}
                     toggleOff={toggleOff}
                     widgetSize={widgetSize}
-                    rotationRate={(throttle * rotationalSpeed) / 100}
+                    rotationRate={continuous ? (throttle * rotationalSpeed) / 100 : undefined}
                     visible={visible}
                 />
             </Grid>
