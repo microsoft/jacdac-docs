@@ -1,0 +1,36 @@
+---
+title: Vibration Motor
+services: vibrationmotor
+tags: makecode
+---
+
+# Vibration Motor
+
+This extension supports vibration motors, typically used for haptic feedback.
+
+## vibrate
+
+Vibrates for the given duration (millis) and intensity (%)
+
+```blocks
+modules.vibrationMotor1.vibrate(500, 50)
+```
+
+
+## vibrate pattern
+
+The vibration pattern is a morse like encoding of vibration duration, intensities that can be combined in a string:
+
+-   "." dit
+-  "-" dat
+-  " " space
+-  "_" low dat
+-  "=" hight dat
+-   "'" high dit
+-  "," low dit
+
+```blocks
+modules.vibrationMotor1.vibratePattern(".-.")
+```
+
+<MakeCodeExtensionFooter serviceName="vibrationmotor" />

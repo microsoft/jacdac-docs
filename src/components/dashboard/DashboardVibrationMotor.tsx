@@ -20,6 +20,7 @@ import CmdButton from "../CmdButton"
 import SliderWithLabel from "../ui/SliderWithLabel"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import useRegister from "../hooks/useRegister"
+import Alert from "../ui/Alert"
 
 const T_DIT = 50
 const T_REST = 120
@@ -144,7 +145,7 @@ function PatternInput(props: {
 export default function DashboardVibrationMotor(props: DashboardServiceProps) {
     const { service } = props
     const server = useServiceServer<VibrationMotorServer>(service)
-    const { playTone } = useContext(WebAudioContext)
+    const { playTone, activated } = useContext(WebAudioContext)
     const [intensity, setIntensity] = useState(20)
     const maxVibrationsRegister = useRegister(
         service,
@@ -192,6 +193,7 @@ export default function DashboardVibrationMotor(props: DashboardServiceProps) {
                     valueLabelFormat={percentValueFormat}
                 />
             </Grid>
+            {!activated && <Alert severity="warning">Press VIBRATE to enable sound playback.</Alert>}
         </>
     )
 }
