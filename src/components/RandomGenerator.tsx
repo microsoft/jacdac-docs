@@ -83,7 +83,13 @@ export default function RandomGenerator(props: {
                     )}
                 </CardContent>
                 <CardActions>
-                    {firmware && <SwitchWithLabel label="hex" checked={hex} onChange={handleHex} />}
+                    {firmware && (
+                        <SwitchWithLabel
+                            label="hex"
+                            checked={hex}
+                            onChange={handleHex}
+                        />
+                    )}
                     <Button
                         aria-label="copy random number to clipboard"
                         size="small"
