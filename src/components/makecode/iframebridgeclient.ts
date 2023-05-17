@@ -258,7 +258,8 @@ export class IFrameBridgeClient extends JDClient {
                 break
             }
             case "stop": // start again
-                this._runOptions = undefined
+                // remember options
+                // this._runOptions = undefined
                 break
         }
     }
@@ -325,7 +326,7 @@ export class IFrameBridgeClient extends JDClient {
             // bridge is not active
             return []
 
-        const { bus } = this
+        const { bus, _runOptions: runOptions } = this
         const { deviceCatalog } = bus
         const devices = bus
             .devices({ announced: true, ignoreInfrastructure: true })
@@ -357,7 +358,7 @@ export class IFrameBridgeClient extends JDClient {
         )
 
         // add custom extension
-        const runtimeDependencies = this._runOptions.dependencies
+        const runtimeDependencies = runOptions.dependencies
         const dependencies = Object.values(runtimeDependencies)
             .filter(d => /^github:/.test(d))
             .map(d => /^github:([^#]+)(#.?)?/.exec(d)[1])
@@ -381,10 +382,6 @@ export class IFrameBridgeClient extends JDClient {
         if (!this.hosted) return
 
         const extensions = this.candidateExtensions()
-        console.log(`addextensions`, {
-            extensions,
-            deps: this._runOptions?.dependencies,
-        })
         // list all devices connected to the bus
         // and query for them, let makecode show the missing ones
         // send message to makecode
