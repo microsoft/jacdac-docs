@@ -31,6 +31,8 @@ export default function ModuleComponent(
             }
             else if(module.codeAct.codeServiceParam[index]==="Name"){
                 result += module.name.replace(/\s/g, "")
+            }else if(module.codeAct.codeServiceParam[index] === "Service"){
+                result += module.name.replace(/\s/g, "") + "Service"
             }
         })
 
@@ -77,7 +79,7 @@ export default function ModuleComponent(
             {module.codeAct === undefined?null: 
             <div>
                 <p style={{fontWeight:"bold", marginBottom:0}}>Code to make sevice: </p>
-                {fileInCode()}    
+                {fileInCode()}
             </div>}
 
         </div>

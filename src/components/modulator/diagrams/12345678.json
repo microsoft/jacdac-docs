@@ -1,5 +1,5 @@
 {
-    "name": "RGB-Led",
+    "name": "RGB Led",
     "type": "LED",
     "numberPins": 4,
     "diagram": "https://whadda.com/wp-content/uploads/vma307_back-1.jpg",
@@ -26,10 +26,10 @@
         }
     ],
     "code": {
-        "codeClient": "export const #_client = new LedClient(\"#\")",
-        "codeService": "const #Serive = new ServiceImpl.RGBServer(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\");",
+        "codeClient": "export const #_client = new LedClient(\"#\");",
+        "codeService": "const # = new ServiceImpl.RGBServer(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\");",
         "codeServiceParam": [
-            "Name",
+            "Service",
             "0",
             "1",
             "2",

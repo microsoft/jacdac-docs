@@ -9,6 +9,8 @@ import { fetchModule, fetchPinLayout, predicate } from "./helper/file";
 import { Breakout, ModuExtern, Pin, PinAlloc,  TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
 import PowerSupplyComp from "./powerSupplyComp";
+import ServiceCodeComp from "./serviceStartComponent";
+import ClientStartModu from "./clientStartModu";
 
 
 
@@ -369,9 +371,12 @@ const ModulatorComp = () =>{
                         container
                     >
                         {<h3>First Code for Makecode: led.enable(false);</h3>}
-                        <PinLayoutComp/>
+                        
                         
                         {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
+                        {conModules.length >0? <ServiceCodeComp modules={conModules}/>: null}
+                        {conModules.length >0? <ClientStartModu modules={conModules}/>: null}
+                        <PinLayoutComp/>
                     </Grid>
                 </Grid>
 

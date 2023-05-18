@@ -21,10 +21,10 @@
         }
     ],
     "code": {
-        "codeClient": "export const #_client = new RelayClient(\"#\")",
-        "codeService": "const #Service = new ServiceImpl.relayService(DigitalPin.#, \"#\");",
+        "codeClient": "export const #_client = new RelayClient(\"#\");",
+        "codeService": "const # = new ServiceImpl.relayService(DigitalPin.#, \"#\");",
         "codeServiceParam": [
-            "Name",
+            "Service",
             "0",
             "Name"
         ]

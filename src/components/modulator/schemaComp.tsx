@@ -29,7 +29,7 @@ const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchem
     return(
         <Grid xs={8} item style={{paddingTop:0}}>
             <GridHeader title={"Added modules"} action={<ManualAddComp addSchema={addSchema}/>}/>
-            <div style={{overflowY:"scroll", maxHeight:"50vh"}}>
+            <div style={{overflowY:"scroll", maxHeight:"75vh"}}>
                 {modules.map((mod, index) => (
 
                     <ModuleComponent module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} key={index}/>

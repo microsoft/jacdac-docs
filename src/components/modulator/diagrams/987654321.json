@@ -21,10 +21,10 @@
         }
     ],
     "code": {
-        "codeClient": "export const #_client = new LightLevelClient(\"#\")",
-        "codeService": "const #Service = new ServiceImpl.LightLevelService(() => pins.analogReadPin(AnalogPin.#) /1024, \"#\");",
+        "codeClient": "export const #_client = new LightLevelClient(\"#\");",
+        "codeService": "const # = new ServiceImpl.LightLevelService(() => pins.analogReadPin(AnalogPin.#) /1024, \"#\");",
         "codeServiceParam": [
-            "Name",
+            "Service",
             "1",
             "Name"
         ]
