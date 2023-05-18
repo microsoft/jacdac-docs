@@ -148,7 +148,7 @@ async function createDeviceQRPages(actions) {
     }
 
     // new way using msr codes
-    for (const spec of deviceCatalog.filter(
+    for (const spec of deviceCatalog.specifications().filter(
             spec =>
                 spec.productIdentifiers?.length &&
                 !isNaN(parseInt(spec.designIdentifier))
