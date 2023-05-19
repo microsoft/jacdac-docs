@@ -53,7 +53,7 @@ The [LED service](/services/ledstrip) has
 a small command language that can be used to create your own animations
 and effects.
 
-```
+```sts
 function runEncoded(prog: string, args?: number[]) {
     let encoded = jacdac.lightEncode(prog, args)
     modules.ledStrip1.runProgram(encoded)
