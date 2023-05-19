@@ -5,17 +5,17 @@
     "diagram": "https://whadda.com/wp-content/uploads/vma307_back-1.jpg",
     "pinLayout": [
         {
-            "type": "Digital IN",
+            "type": "Digital OUT",
             "pos": "0",
             "name": "Red"
         },
         {
-            "type": "Digital IN",
+            "type": "Digital OUT",
             "pos": "1",
             "name": "Green"
         },
         {
-            "type": "Digital IN",
+            "type": "Digital OUT",
             "pos": "2",
             "name": "Blue"
         },
@@ -27,7 +27,7 @@
     ],
     "code": {
         "codeClient": "export const #_client = new LedClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.RGBServer(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\");",
+        "codeService": "const # = new ServiceImpl.RGBService(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\");",
         "codeServiceParam": [
             "Service",
             "0",

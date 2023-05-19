@@ -27,7 +27,7 @@
     ],
     "code": {
         "codeClient": "export const #_client = new CharacterScreenClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.CharLCDScreen(\"#\");",
+        "codeService": "const # = new ServiceImpl.LcdScreenService(\"#\");",
         "codeServiceParam": [
             "Service",
             "Name"

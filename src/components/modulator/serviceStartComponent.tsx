@@ -20,7 +20,7 @@ const ServiceCodeComp: React.FC<Props> = ({modules}) => {
         <Grid item>
             <GridHeader title={"How to start Services?"}/>
             <div style={{marginBottom:"0", paddingLeft: "20px"}}>
-                <p style={{marginBottom:"0"}}>jacdac.startSelfServer(() ={">"} [</p>
+                <p style={{marginBottom:"0"}}>jacdac.startSelfServers(() ={">"} [</p>
                 {modules.map((mod, index) => (
                     <p style={{marginBottom:"0", paddingLeft:"50px"}} key={index}>{"\t\t"+mod.name.replace(/\s/g, "")+"Service.startServer()," }</p>
                 ))}
