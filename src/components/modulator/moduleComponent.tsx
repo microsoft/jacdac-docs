@@ -39,6 +39,11 @@ export default function ModuleComponent(
         return result
     }
 
+    const clientCodeGen = (): string =>{
+        const tempCodeString = module.codeAct.clientCode.split("#").join(module.name.replace(/\s/g, ""));
+        return tempCodeString;
+    }
+
     //give back the pin name on breakboard or voltageconverter
     const getPin = (positionPin: number): string => {
         const index = allocedPins.findIndex((value) => value.modulePin.posPin == positionPin);
@@ -78,8 +83,11 @@ export default function ModuleComponent(
             ))}
             {module.codeAct === undefined?null: 
             <div>
-                <p style={{fontWeight:"bold", marginBottom:0}}>Code to make sevice: </p>
-                {fileInCode()}
+                <p style={{fontWeight: "bold"}}>Copy to MakeCode:</p>
+                <div style={{marginBottom:0}}>//Code for service</div>
+                <div style={{marginBottom:0}}>{fileInCode()}</div>
+                <div style={{marginBottom:0}}>//Code for client</div>
+                <div style={{marginBottom:0}}>{clientCodeGen()}</div>
             </div>}
 
         </div>

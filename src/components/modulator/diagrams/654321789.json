@@ -26,8 +26,8 @@
         }
     ],
     "code": {
-        "codeClient": "export const #_client = new CharacterScreenClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.LcdScreenService(\"#\");",
+        "codeClient": "const #_client = new modules.CharacterScreenClient(\"#\");",
+        "codeService": "const # = new ServiceImpl.LcdScreenService(\"#\", true);",
         "codeServiceParam": [
             "Service",
             "Name"

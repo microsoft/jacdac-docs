@@ -374,8 +374,8 @@ const ModulatorComp = () =>{
                         
                         
                         {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
-                        {conModules.length >0? <ServiceCodeComp modules={conModules}/>: null}
-                        {conModules.length >0? <ClientStartModu modules={conModules}/>: null}
+                        {/* {conModules.length >0? <ServiceCodeComp modules={conModules}/>: null} */}
+                        {/* {conModules.length >0? <ClientStartModu modules={conModules}/>: null} */}
                         <PinLayoutComp/>
                     </Grid>
                 </Grid>
