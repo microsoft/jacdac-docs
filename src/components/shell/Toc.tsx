@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { styled } from "@mui/material/styles"
 import { List, Collapse } from "@mui/material"
 import { ListItemButton } from "gatsby-theme-material-ui"
@@ -7,6 +7,7 @@ import ListItemText from "@mui/material/ListItemText"
 import { graphql, useStaticQuery } from "gatsby"
 import ExpandMore from "@mui/icons-material/ExpandMore"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
+import AppContext, { DrawerType } from "../AppContext"
 const PREFIX = "Toc"
 
 const classes = {
@@ -76,6 +77,7 @@ function TocListItem(props: {
     const { pagePath, entry, level } = props
     const { path, children, name } = entry
     const selected = pagePath === path
+    const {setDrawerType} = useContext(AppContext)
     const [expanded, setExpanded] = useState(pagePath.startsWith(path))
     const hasChildren = !!children?.length
     const sub = level === 1 || hasChildren
@@ -83,6 +85,8 @@ function TocListItem(props: {
 
     const handleClick = () => {
         if (selected) setExpanded(v => !v)
+        if (!hasChildren && level === 1)
+            setDrawerType(DrawerType.None)
     }
 
     useEffect(() => {

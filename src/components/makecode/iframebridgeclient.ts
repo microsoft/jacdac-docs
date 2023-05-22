@@ -10,6 +10,7 @@ import {
     SRV_ROLE_MANAGER,
     SRV_SETTINGS,
     SRV_UNIQUE_BRAIN,
+    SRV_POWER,
     SystemReg,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { JDBus } from "../../../jacdac-ts/src/jdom/bus"
@@ -94,6 +95,7 @@ const ignoredServices = [
     SRV_PROXY,
     SRV_UNIQUE_BRAIN,
     SRV_INFRASTRUCTURE,
+    SRV_POWER,
 ]
 
 /**

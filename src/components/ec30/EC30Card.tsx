@@ -12,6 +12,8 @@ import useEC30Model from "./useEC30Model"
 import { useModelDXF, useModelSvg } from "./useModelExports"
 import type { EnclosureModel } from "../../workers/cad/dist/node_modules/enclosurecad"
 import { toEC30 } from "../enclosure/ec30"
+import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
+import QuestionMarkIcon from "@mui/icons-material/QuestionMark"
 
 export default function EC30Card(props: {
     model: EnclosureModel
@@ -30,7 +32,7 @@ export default function EC30Card(props: {
 
     return (
         <Card>
-            <CardHeader title={textModel} />
+            <CardHeader title={textModel} action={<IconButtonWithTooltip to="/ddk/design/ec30"><QuestionMarkIcon /></IconButtonWithTooltip>} />
             <CardContent>
                 <div dangerouslySetInnerHTML={{ __html: svg }} />
             </CardContent>
