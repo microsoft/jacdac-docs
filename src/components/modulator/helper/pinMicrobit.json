@@ -3,6 +3,7 @@
     "totalPins":17,
     "totalPowerPins":1,
     "power":3.3,
+    "logicPower": 3.3,
     "pins":[
         {
             "name":"P0",

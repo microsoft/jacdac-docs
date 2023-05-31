@@ -1,0 +1,43 @@
+{
+    "name": "TEst logic",
+    "type": "LED",
+    "numberPins": 4,
+    "diagram": "https://i.pinimg.com/originals/a3/03/b9/a303b97eb7cc0cab93deac2d8d446adc.jpg",
+    "pinLayout": [
+        {
+            "type": "VCC",
+            "pos": "0",
+            "name": "VCC",
+            "logicLevel":"5"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "1",
+            "name": "Green",
+            "logicLevel":"5"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "2",
+            "name": "Blue",
+            "logicLevel":"5"
+
+        },
+        {
+            "type": "GND",
+            "pos": "3",
+            "name": "GND"
+        }
+    ],
+    "code": {
+        "codeClient": "const #_client = new modules.LedClient(\"#\");",
+        "codeService": "const # = new ServiceImpl.RGBService(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\", true);",
+        "codeServiceParam": [
+            "Service",
+            "0",
+            "1",
+            "2",
+            "Name"
+        ]
+    }
+}

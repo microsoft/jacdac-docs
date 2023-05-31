@@ -23,6 +23,7 @@ export type Pin = {
     typePin: TypePin;
     posPin: number;
     name?: string;
+    logicLevel?: number;
 }
 
 //used module for dynamic code
@@ -45,6 +46,7 @@ export type ModuExtern = {
 //type for pinout breakboard
 export type Breakout = {
     name: string;
+    logicPw: number;
     maxPower: number;
     pinOut: PinBreakout[];
     powerPins: PinPower[];

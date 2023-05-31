@@ -9,6 +9,7 @@ export const fetchPinLayout = async():Promise<Breakout> =>{
     const breakoutPower = getPowerPins(pinOut.totalPowerPins, pinOut.powerPins)
 
     const result: Breakout = {"name": pinOut.name,
+                            "logicPw": pinOut.logicPower,
                             "maxPower": pinOut.power,
                             "pinOut": breakoutPins,
                             "powerPins": breakoutPower}
@@ -72,7 +73,8 @@ const pinTyping = (numberOfPins: number, data: any[], moduelId:string):Pin[] => 
             moduleId: moduelId,
             typePin: tempType,
             posPin: data[i].pos,
-            name: data[i].name
+            name: data[i].name,
+            logicLevel: data[i].logicLevel
         })
     }
     return result;

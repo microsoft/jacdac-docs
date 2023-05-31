@@ -218,6 +218,8 @@ const ModulatorComp = () =>{
                         });
                     }
                 }else{
+                    let tempPinPossible= undefined;
+
                     for(let j = 0; j < breakoutBoard.pinOut.length; j++){
                         //check pin is in use
                         if(!breakoutBoard.pinOut[j].used ){
@@ -225,18 +227,38 @@ const ModulatorComp = () =>{
                             if(!pinPossible.includes(breakoutBoard.pinOut[j].position)){
                                 //Check if type correct
                                 if(breakoutBoard.pinOut[j].options.includes(sortPinlayout[i].typePin)){
-                                    pinPossible.push(breakoutBoard.pinOut[j].position);
-                                    pinAllocTemp.push({ moduleName: newModule.name,
-                                                        modulePin: sortPinlayout[i],
-                                                        pinBreakLocation: breakoutBoard.pinOut[j].position,
-                                                        pinBreakName: breakoutBoard.pinOut[j].name,
-                                                        powerSup: false,
-                                                    });
-                                    break;
+                                    if(tempPinPossible){
+                                        if(breakoutBoard.pinOut[j].options.length < tempPinPossible.options.length){
+                                            tempPinPossible = breakoutBoard.pinOut[j];
+                                        }
+    
+                                        // pinPossible.push(breakoutBoard.pinOut[j].position);
+                                        // pinAllocTemp.push({ moduleName: newModule.name,
+                                        //                     modulePin: sortPinlayout[i],
+                                        //                     pinBreakLocation: breakoutBoard.pinOut[j].position,
+                                        //                     pinBreakName: breakoutBoard.pinOut[j].name,
+                                        //                     powerSup: false,
+                                        //                 });
+                                        // break;
+                                    }else{
+                                        tempPinPossible = breakoutBoard.pinOut[j];
+                                    }
+                                   
                                 }   
                             }
                         }
                     }
+                    if(tempPinPossible){
+                        pinPossible.push(tempPinPossible.position);
+                        pinAllocTemp.push({ moduleName: newModule.name,
+                                            modulePin: sortPinlayout[i],
+                                            pinBreakLocation: tempPinPossible.position,
+                                            pinBreakName: tempPinPossible.name,
+                                            powerSup: false,
+                                        });
+                        
+                    }
+
                 } 
             }
 
