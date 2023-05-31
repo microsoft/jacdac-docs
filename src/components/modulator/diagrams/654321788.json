@@ -1,8 +1,8 @@
 {
-    "name": "2004A Display",
+    "name": "1602A Display",
     "type": "Display ",
     "numberPins": 4,
-    "diagram": "https://cdn.shopify.com/s/files/1/0474/7729/3217/products/CN0132-01.jpg",
+    "diagram": "https://m.media-amazon.com/images/I/41WKdaftWRL.jpg",
     "pinLayout": [
         {
             "type": "GND",
@@ -27,7 +27,7 @@
     ],
     "code": {
         "codeClient": "const #_client = new modules.CharacterScreenClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.LcdScreenService(\"#\", 80,true);",
+        "codeService": "const # = new ServiceImpl.LcdScreenService(\"#\", 32,true);",
         "codeServiceParam": [
             "Service",
             "Name"

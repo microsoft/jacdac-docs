@@ -1,27 +1,27 @@
 {
-    "name": "sr04 VCC",
+    "name": "HC SR04 VCC",
     "type": "Distance",
     "numberPins": 4,
     "diagram": "https://soldered.com/productdata/2015/02/751276-Edit.jpg",
     "pinLayout": [
         {
             "type": "GND",
-            "pos": "0",
+            "pos": "3",
             "name": "GND"
         },
         {
             "type": "Analog IN",
-            "pos": "1",
+            "pos": "2",
             "name": "ECHO"
         },
         {
             "type": "Analog IN",
-            "pos": "2",
+            "pos": "1",
             "name": "TRIG"
         },
         {
             "type": "VCC",
-            "pos": "3",
+            "pos": "0",
             "name": "5"
         }
     ],
@@ -30,8 +30,8 @@
         "codeService": "const # = new ServiceImpl.DepthService(() => sonar.ping(DigitalPin.#, DigitalPin.#, PingUnit.Centimeters)/100.0, \"#\", true);",
         "codeServiceParam": [
             "Service",
-            "2",
             "1",
+            "2",
             "Name"
         ]
     }

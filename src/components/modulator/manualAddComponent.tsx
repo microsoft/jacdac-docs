@@ -23,8 +23,9 @@ const ManualAddComp: React.FC<Props> = ({addSchema}) => {
                     <MenuItem value=""> <em>None</em> </MenuItem>
                     <MenuItem value="12345678">RGB Led</MenuItem>
                     {/* <MenuItem value="897654321">Distance 3.3V</MenuItem> */}
-                    <MenuItem value="897654322">Distance 5V</MenuItem>
-                    <MenuItem value="654321789">Display 2004A</MenuItem>
+                    <MenuItem value="897654322">Distance HC-SR04</MenuItem>
+                    <MenuItem value="654321789">Display LCD 2004A</MenuItem>
+                    <MenuItem value="654321788">Display LCD 1602A</MenuItem>
                     <MenuItem value="321654987">Relay SRLY</MenuItem>
                     <MenuItem value="987654321">Light Sensor</MenuItem>
                 </Select>
