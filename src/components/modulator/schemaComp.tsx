@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
 import React from "react";
 import GridHeader from "../ui/GridHeader";
-import { ModuExtern, PinAlloc,} from "./helper/types";
+import { LogicSup, ModuExtern, PinAlloc,} from "./helper/types";
 import ModuleComponent from "./moduleComponent";
 import ManualAddComp from "./manualAddComponent";
 
@@ -9,6 +9,7 @@ import ManualAddComp from "./manualAddComponent";
 type Props={
     modules: ModuExtern[];
     allocedPins: PinAlloc[];
+    logicDeviders: LogicSup[];
     removeFunc: (moduleName: string) =>void;
     addSchema: (moduleId: string) => void;
 }
@@ -27,7 +28,7 @@ const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchem
     
     
     return(
-        <Grid xs={8} item style={{paddingTop:0}}>
+        <Grid xs={7} item style={{paddingTop:0}}>
             <GridHeader title={"Added modules"} action={<ManualAddComp addSchema={addSchema}/>}/>
             <div style={{overflowY:"scroll", maxHeight:"55vh"}}>
                 {modules.map((mod, index) => (

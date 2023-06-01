@@ -51,6 +51,10 @@ export default function ModuleComponent(
             if(allocedPins[index].powerSup){
                 return (allocedPins[index].pinBreakName +" " +allocedPins[index].modulePin.typePin)
             }
+            if(allocedPins[index].BreakoutName !=="Micro:bit v2 pin layout"){
+                const temp = allocedPins[index].pinBreakLocation +1;
+                return (allocedPins[index].BreakoutName + " "+temp);
+            }
 
             return "breakoutboard pin "+ allocedPins[index].pinBreakName;
         }

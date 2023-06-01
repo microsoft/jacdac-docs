@@ -1,4 +1,4 @@
-import { Breakout, CodeMake, ModuExtern, Pin, PinBreakout, PinPower, TypePin } from "./types";
+import { Breakout, CodeMake, LogicSup, ModuExtern, Pin, PinBreakout, PinPower, TypePin } from "./types";
 
 
 //fetch all info from pin out layout
@@ -52,6 +52,25 @@ export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
     return modu;
 }
 
+export const fetchLogic = async(nameFile: string):Promise<LogicSup> => {
+    const logicJson = await import ("../logicLevels/"+nameFile+"_3.3Logic.json");
+    const tempName = logicJson.name+ " " + new Date().getSeconds();
+
+    const lowVoltPins = breakoutPinType(logicJson.numPinsSide, logicJson.pinLayoutLow);
+    const highVoltPins = breakoutPinType(logicJson.numPinsSide, logicJson.pinLayoutHigh);
+
+    const logic:LogicSup = {
+        "convName": tempName,
+        "highVolt": logicJson.highVolt,
+        "lowVolt": logicJson.lowVolt,
+        "numberConvPins":logicJson.channels,
+        "pinOutHigh": highVoltPins,
+        "pinOutLow": lowVoltPins,
+        "conModule":[],
+        "conPairs":[]
+    }
+    return logic;
+}
 
 //Creating Code type form json string
 const typeCode = (data: any):CodeMake => {
@@ -97,8 +116,12 @@ const breakoutPinType = (numberOfPins: number, data: any[]): PinBreakout[] =>{
     const result:PinBreakout[] = [];
     for(let i = 0; i<numberOfPins; i++){
         const tempOptions = [];
-        for(let j = 0; j<data[i].options.length; j++){
-            tempOptions.push(findTypePin(data[i].options[j]));
+        if(data[i].options){
+            for(let j = 0; j<data[i].options.length; j++){
+                tempOptions.push(findTypePin(data[i].options[j]));
+            }
+        }else{
+            tempOptions.push(findTypePin(data[i].type));
         }
         result.push({
             name: data[i].name,
@@ -108,6 +131,7 @@ const breakoutPinType = (numberOfPins: number, data: any[]): PinBreakout[] =>{
             moduleName: [],
             modulePin: [],
         });
+        
     }
     return result;
 }

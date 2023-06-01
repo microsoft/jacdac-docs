@@ -1,0 +1,74 @@
+{
+    "name": "SparkFun Logic Conv",
+    "type": "Logic Level",
+    "numPinsSide": 6,
+    "channels": 4,
+    "lowVolt": 3.3,
+    "highVolt":5,
+    "diagram": "https://www.kiwi-electronics.com/image/cache/catalog/product/aem8hbpd/SF-BOB-12009_0-766x511h.jpg",
+    "pinLayoutLow": [
+        {
+            "type": "Digital OUT",
+            "pos": "0",
+            "name": "LV1"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "1",
+            "name": "LV2"
+        },
+        {
+            "type": "VCC",
+            "pos": "2",
+            "name": "3.3"
+        },
+        {
+            "type": "GND",
+            "pos": "4",
+            "name": "GND"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "5",
+            "name": "LV3"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "6",
+            "name": "LV4"
+        }
+       
+    ],
+    "pinLayoutHigh": [
+        {
+            "type": "Digital OUT",
+            "pos": "0",
+            "name": "HV1"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "1",
+            "name": "HV2"
+        },
+        {
+            "type": "VCC",
+            "pos": "2",
+            "name": "5"
+        },
+        {
+            "type": "GND",
+            "pos": "4",
+            "name": "GND"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "5",
+            "name": "HV3"
+        },
+        {
+            "type": "Digital OUT",
+            "pos": "6",
+            "name": "HV4"
+        }
+    ]
+}

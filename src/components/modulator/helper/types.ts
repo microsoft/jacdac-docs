@@ -71,11 +71,13 @@ export type PinBreakout = {
 //Need to work on
 //pinBreakLocation is of the breakoutboard or powerSupply
 export type PinAlloc = {
+    BreakoutName: string;
     pinBreakLocation: number;
     pinBreakName: string;
     moduleName: string;
     modulePin: Pin;
     powerSup: boolean;
+
 }
 
 
@@ -88,6 +90,31 @@ export type powerSup = {
     conModule: string[];
 }
 
+export type LogicSup = {
+    convName: string;
+    highVolt: number;
+    lowVolt: number;
+    numberConvPins: number;
+    
+    pinOutLow: PinBreakout[];
+    pinOutHigh: PinBreakout[];
+
+    conModule: string[];
+    conPairs: LogicPair[];
+
+}
+
+export type LogicPair = {
+    logicPos: number;
+
+    moduleName: string;
+    modulePin: Pin;
+    moduleHigh: boolean;
+
+    pinBreakLocation: number;
+    pinBreakName: string;
+    BreakoutName: string;
+}
 
 // export type voltageAlloc = {
 //     extraSup: boolean;

@@ -7,7 +7,7 @@
         {
             "type": "VCC",
             "pos": "0",
-            "name": "VCC",
+            "name": "5",
             "logicLevel":"5"
         },
         {
