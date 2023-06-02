@@ -70,7 +70,7 @@ function RosMessageEditor(props: { service: JDService }) {
                 label="Message (JSON)"
                 aria-label="Message (JSON)"
                 fullWidth={true}
-                value={topic}
+                value={message}
                 onChange={handleMessage}
                 helperText={error}
                 error={!!error}
