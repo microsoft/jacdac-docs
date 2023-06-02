@@ -318,6 +318,7 @@ const serviceViews: {
     },
     [SRV_ROS]: {
         component: DashboardRos,
+        expandable: true,
         weight: () => 4,        
     },
     [SRV_HID_KEYBOARD]: {
