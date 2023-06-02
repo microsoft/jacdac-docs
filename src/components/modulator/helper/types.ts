@@ -90,6 +90,7 @@ export type powerSup = {
     conModule: string[];
 }
 
+
 export type LogicSup = {
     convName: string;
     highVolt: number;

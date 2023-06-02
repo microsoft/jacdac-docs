@@ -1,5 +1,5 @@
 import React from "react";
-import { ModuExtern, PinAlloc, } from "./helper/types";
+import { LogicSup, ModuExtern, PinAlloc, } from "./helper/types";
 import Button from "../ui/Button";
 
 
@@ -8,9 +8,10 @@ export default function ModuleComponent(
         module: ModuExtern;
         removeFunc: (moduleName:string) =>void;
         allocedPins: PinAlloc[];
+        logicDeviders: LogicSup[];
     }
 ){
-    const {module, removeFunc, allocedPins} = props;
+    const {module, removeFunc, allocedPins, logicDeviders} = props;
 
     const onBoard = (module.numberPins === allocedPins.length)
     
@@ -21,11 +22,26 @@ export default function ModuleComponent(
         tempCodeString.forEach(function (value, index){
             result += value
             if(!Number.isNaN(Number(module.codeAct.codeServiceParam[index]))){
-
                 const indexAlloc = allocedPins.findIndex((value) => value.modulePin.posPin == Number(module.codeAct.codeServiceParam[index])) 
                 if(indexAlloc !== -1){
-                    result += allocedPins[indexAlloc].pinBreakName;
-                }else{
+                    if(allocedPins[indexAlloc].BreakoutName !=="Micro:bit v2 pin layout"){
+                        const logicIndex = logicDeviders.findIndex((value) => value.convName === allocedPins[indexAlloc].BreakoutName);
+                        
+                        if(logicDeviders[logicIndex].highVolt == allocedPins[indexAlloc].modulePin.logicLevel){
+                            const indexPin = logicDeviders[logicIndex].pinOutLow.findIndex((value) => value.position == allocedPins[indexAlloc].pinBreakLocation);
+                            
+                            result += logicDeviders[logicIndex].pinOutLow[indexPin].modulePin[0].name;
+                        }else{
+                            const indexPin = logicDeviders[logicIndex].pinOutHigh.findIndex((value) => value.position == allocedPins[indexAlloc].pinBreakLocation);
+                            result += logicDeviders[logicIndex].pinOutHigh[indexPin].modulePin[0].name;
+                        }
+                        result += ""
+    
+                    }else{
+                        result += allocedPins[indexAlloc].pinBreakName;
+                    }
+                }
+                else{
                     result += "#";
                 }
             }
@@ -52,8 +68,8 @@ export default function ModuleComponent(
                 return (allocedPins[index].pinBreakName +" " +allocedPins[index].modulePin.typePin)
             }
             if(allocedPins[index].BreakoutName !=="Micro:bit v2 pin layout"){
-                const temp = allocedPins[index].pinBreakLocation +1;
-                return (allocedPins[index].BreakoutName + " "+temp);
+                const temp = allocedPins[index].pinBreakName;
+                return (allocedPins[index].BreakoutName + " pin "+temp);
             }
 
             return "breakoutboard pin "+ allocedPins[index].pinBreakName;

@@ -1,5 +1,5 @@
 {
-    "name":"Micro:bit v2 pin layout",
+    "name":"Micro:bit V2",
     "totalPins":17,
     "totalPowerPins":1,
     "power":3.3,

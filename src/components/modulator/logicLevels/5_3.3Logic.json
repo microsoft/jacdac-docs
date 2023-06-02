@@ -8,12 +8,12 @@
     "diagram": "https://www.kiwi-electronics.com/image/cache/catalog/product/aem8hbpd/SF-BOB-12009_0-766x511h.jpg",
     "pinLayoutLow": [
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "0",
             "name": "LV1"
         },
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "1",
             "name": "LV2"
         },
@@ -28,12 +28,12 @@
             "name": "GND"
         },
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "5",
             "name": "LV3"
         },
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "6",
             "name": "LV4"
         }
@@ -41,12 +41,12 @@
     ],
     "pinLayoutHigh": [
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "0",
             "name": "HV1"
         },
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "1",
             "name": "HV2"
         },
@@ -61,12 +61,12 @@
             "name": "GND"
         },
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "5",
             "name": "HV3"
         },
         {
-            "type": "Digital OUT",
+            "options":["Digital IN", "Digital OUT"],
             "pos": "6",
             "name": "HV4"
         }

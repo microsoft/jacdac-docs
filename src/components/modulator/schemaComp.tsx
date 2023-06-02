@@ -14,7 +14,7 @@ type Props={
     addSchema: (moduleId: string) => void;
 }
 
-const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchema}) =>{
+const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchema, logicDeviders}) =>{
     const moduAllocList = (moduleName: string) =>{
         const tempList = [];
         allocedPins.forEach(function (valPin) {
@@ -30,10 +30,10 @@ const SchemaComp: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchem
     return(
         <Grid xs={7} item style={{paddingTop:0}}>
             <GridHeader title={"Added modules"} action={<ManualAddComp addSchema={addSchema}/>}/>
-            <div style={{overflowY:"scroll", maxHeight:"55vh"}}>
+            <div style={{overflowY:"scroll", maxHeight:"85vh"}}>
                 {modules.map((mod, index) => (
 
-                    <ModuleComponent module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} key={index}/>
+                    <ModuleComponent module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} logicDeviders={logicDeviders} key={index}/>
                 ))}
             </div>
         </Grid>
