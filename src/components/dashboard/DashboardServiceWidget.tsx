@@ -50,6 +50,7 @@ import {
     SRV_PLANAR_POSITION,
     SRV_SERIAL,
     SRV_GPIO,
+    SRV_ROS,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { CircularProgress, SvgIconProps } from "@mui/material"
@@ -124,6 +125,7 @@ const DashboardDeviceScriptManager = lazy(
 const DashboardCloudAdapter = lazy(() => import("./DashboardCloudAdapter"))
 const DashboardPlanarPosition = lazy(() => import("./DashboardPlanarPosition"))
 const DashboardSerial = lazy(() => import("./DashboardSerial"))
+const DashboardRos = lazy(() => import("./DashboardRos"))
 
 // icons
 const PowerSettingsNewIcon = lazy(
@@ -313,6 +315,10 @@ const serviceViews: {
         component: DashboardSerial,
         weight: () => 2,
         icon: SerialIcon,
+    },
+    [SRV_ROS]: {
+        component: DashboardRos,
+        weight: () => 4,        
     },
     [SRV_HID_KEYBOARD]: {
         component: DashboardHIDKeyboard,
