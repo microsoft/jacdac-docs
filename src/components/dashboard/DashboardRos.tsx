@@ -10,15 +10,18 @@ export default function DashboardRos(props: DashboardServiceProps) {
     const server = useServiceServer<RosServer>(service)
 
     const subscriptions = useChange(server, _ => _?.subscriptions)
+    const messages = useChange(server, _ => _?.messages)
 
     return (
         <Grid container spacing={1}>
             <Grid item xs={12}>
-                ros
+                ROS
             </Grid>
-                {subscriptions?.length && <Grid item xs={12}>
-                <pre>{subscriptions.join("\n")}</pre>
-            </Grid>}
+            <Grid item xs={12}>
+            <pre style={{ whiteSpace: "pre-wrap", fontSize: "70%" }}>
+{`subscriptions: ${subscriptions?.join("   \n")}
+messages: ${messages?.map(({node, topic, message}) => `${node} ${topic} ${JSON.stringify(message)}`).join("    \n")}`}</pre>
+            </Grid>
         </Grid>
     )
 }
