@@ -106,14 +106,14 @@ export default function DashboardLED(props: DashboardServiceProps) {
     return (
         <>
             <Grid item xs={12}>
-                <LightWidget
-                    colors={colors}
-                    subscribeColors={subscribeColors}
-                    registers={registers}
-                    widgetCount={services?.length}
-                    onLedClick={canLedClick ? handleLedClick : undefined}
-                    {...props}
-                />
+              <LightWidget
+                  colors={colors}
+                  subscribeColors={subscribeColors}
+                  registers={registers}
+                  widgetCount={services?.length}
+                  onLedClick={canLedClick ? handleLedClick : undefined}
+                  {...props}
+              />
             </Grid>
             {expanded && (
                 <Grid item>
