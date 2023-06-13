@@ -24,7 +24,9 @@ export default function ModuleComponent(
             if(!Number.isNaN(Number(module.codeAct.codeServiceParam[index]))){
                 const indexAlloc = allocedPins.findIndex((value) => value.modulePin.posPin == Number(module.codeAct.codeServiceParam[index])) 
                 if(indexAlloc !== -1){
-                    if(allocedPins[indexAlloc].BreakoutName !=="Micro:bit v2 pin layout"){
+                    if(allocedPins[indexAlloc].BreakoutName !=="Micro:bit V2"){
+                        console.log(allocedPins[indexAlloc]);
+                        
                         const logicIndex = logicDeviders.findIndex((value) => value.convName === allocedPins[indexAlloc].BreakoutName);
                         
                         if(logicDeviders[logicIndex].highVolt == allocedPins[indexAlloc].modulePin.logicLevel){
