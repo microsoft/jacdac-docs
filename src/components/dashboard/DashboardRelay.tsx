@@ -1,3 +1,4 @@
+import {Grid} from "@mui/material"
 import React, { CSSProperties } from "react"
 import { RelayReg } from "../../../jacdac-ts/jacdac-spec/dist/specconstants"
 import { useRegisterBoolValue } from "../../jacdac/useRegisterValue"
@@ -5,6 +6,7 @@ import useRegister from "../hooks/useRegister"
 import useServiceServer from "../hooks/useServiceServer"
 import SwitchWithLabel from "../ui/SwitchWithLabel"
 import useWidgetTheme from "../widgets/useWidgetTheme"
+import {FwdPumpWidget, isFwdEdu} from "./DashboardFwdEduWidgets"
 import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 
@@ -15,6 +17,7 @@ export default function DashboardRelay(props: DashboardServiceProps) {
     const server = useServiceServer(service)
     const color = server ? "secondary" : "primary"
     const { textPrimary } = useWidgetTheme(color)
+    const renderFwdEduWidget = isFwdEdu(service.device)
 
     const handleClose = (event: unknown, checked) =>
         activeRegister?.sendSetBoolAsync(checked, true)
@@ -25,12 +28,20 @@ export default function DashboardRelay(props: DashboardServiceProps) {
     const labelStyle: CSSProperties = {
         color: textPrimary,
     }
+
     return (
+      <>
+        { renderFwdEduWidget ?
+          <FwdPumpWidget 
+            active={active}
+            size={`clamp(3em, 11vw, 14vh)`}
+          /> : undefined }
         <SwitchWithLabel
             label={active ? "active" : "inactive"}
             checked={active}
             onChange={handleClose}
             labelStyle={labelStyle}
-        />
+        /> 
+      </>
     )
 }

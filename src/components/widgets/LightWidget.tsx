@@ -10,6 +10,8 @@ import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import useRegister from "../hooks/useRegister"
 import useFireKey from "../hooks/useFireKey"
 import DashboardRegisterValueFallback from "../dashboard/DashboardRegisterValueFallback"
+import {isFwdEdu} from "../dashboard/DashboardFwdEduWidgets"
+import FwdLEDWidget from "./FwdLEDWidget"
 
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     const [r$, g$, b$] = [r / 255, g / 255, b / 255]
@@ -341,6 +343,7 @@ export default function LightWidget(props: {
 }) {
     const { service, colors, subscribeColors, registers, onLedClick } = props
 
+    const renderFwdEduWidget = isFwdEdu(service.device)
     const numPixelsRegister = useRegister(service, registers.numPixels)
     const variantRegister = useRegister(service, registers.variant)
     const actualBrightnessRegister = useRegister(
@@ -387,6 +390,16 @@ export default function LightWidget(props: {
                 onLedClick={onLedClick}
             />
         )
+    } else if (renderFwdEduWidget) { 
+      return <FwdLEDWidget
+                widgetSize={'clamp(6rem, 12vw, 15vh)'}
+                colors={colors}
+                subscribeColors={subscribeColors}
+                numPixels={numPixels}
+                lightVariant={lightVariant}
+                actualBrightness={actualBrightness}
+                onLedClick={onLedClick}
+              />
     } else {
         const widgetSize =
             lightVariant === LedStripVariant.Strip ||

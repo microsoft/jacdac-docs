@@ -4,6 +4,7 @@ import {
     ButtonReg,
     EVENT,
     SystemReg,
+    SRV_ROTARY_ENCODER,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { ButtonServer } from "../../../jacdac-ts/src/servers/buttonserver"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
@@ -22,6 +23,7 @@ import useRegister from "../hooks/useRegister"
 import useEvent from "../hooks/useEvent"
 import { roundWithPrecision } from "../../../jacdac-ts/src/jdom/utils"
 import OptionalTooltip from "../widgets/OptionalTooltip"
+import { isFwdEdu, FwdDialButtonWidget, FwdTouchWidget } from "./DashboardFwdEduWidgets"
 
 export default function DashboardButton(props: DashboardServiceProps) {
     const { service } = props
@@ -54,10 +56,23 @@ function BinaryButton(props: { pressed: boolean } & DashboardServiceProps) {
     const handleUp = () => server?.up()
     const widgetSize = `clamp(3rem, 10vw, 10vh)`
 
+    const renderFwdDevice = isFwdEdu(service.device)
+    const renderRotaryVariant = service.serviceIndex > 1 && service.device.serviceClassAt(service.serviceIndex - 1) == SRV_ROTARY_ENCODER
+    const fwdProps = {
+      checked: !!pressed,
+      color: color as "primary" | "secondary",
+      onDown: server ? handleDown : undefined,
+      onUp: server ? handleUp : undefined,
+      label: label,
+      size: `clamp(6rem, 12vw, 15vh)`,
+    }
+
     return (
         <OptionalTooltip
             title={!server ? "Use the physical button!" : undefined}
         >
+        { renderFwdDevice && 
+        ( renderRotaryVariant ? <FwdDialButtonWidget {...fwdProps} /> : <FwdTouchWidget {...fwdProps} />) || 
             <ButtonWidget
                 checked={!!pressed}
                 color={color}
@@ -66,6 +81,7 @@ function BinaryButton(props: { pressed: boolean } & DashboardServiceProps) {
                 label={label}
                 size={widgetSize}
             />
+          }
         </OptionalTooltip>
     )
 }
