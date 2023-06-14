@@ -52,6 +52,27 @@ export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
     return modu;
 }
 
+
+export const fetchModuleSvg = async(nameFile: string):Promise<ModuExtern> => {
+    const modulJson = await import ("../diagrams/"+nameFile+".json");
+
+    //Possible to do checks if all things filled in
+    const tempName = modulJson.name+ " " + new Date().getSeconds();
+
+    const pins = pinTyping(modulJson.numberPins, modulJson.pinLayout, tempName)
+    const tempCode = typeCode(modulJson.code)
+    const modu:ModuExtern = {
+        "name":tempName,
+        "type":modulJson.type,
+        "numberPins":modulJson.numberPins,
+        "diagram":modulJson.diagram,
+        "pinLayout":pins,
+        "codeAct":tempCode
+    } 
+
+    return modu;
+}
+
 export const fetchLogic = async(nameFile: string):Promise<LogicSup> => {
     const logicJson = await import ("../logicLevels/"+nameFile+"_3.3Logic.json");
     const tempName = logicJson.name+ " " + new Date().getSeconds();
@@ -93,7 +114,9 @@ const pinTyping = (numberOfPins: number, data: any[], moduelId:string):Pin[] => 
             typePin: tempType,
             posPin: data[i].pos,
             name: data[i].name,
-            logicLevel: data[i].logicLevel
+            logicLevel: data[i].logicLevel,
+            x: data[i].x,
+            y: data[i].y
         })
     }
     return result;

@@ -5,7 +5,7 @@ import GridHeader from "../ui/GridHeader"
 import PinLayoutComp from "./pinLayoutComp";
 import SchemaComp from "./schemaComp";
 import Button from "../ui/Button";
-import { fetchLogic, fetchModule, fetchPinLayout, predicate } from "./helper/file";
+import { fetchLogic, fetchModule, fetchModuleSvg, fetchPinLayout, predicate } from "./helper/file";
 import { Breakout, LogicPair, LogicSup, ModuExtern, Pin, PinAlloc,  PinBreakout,  TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
 import PowerSupplyComp from "./powerSupplyComp";
@@ -13,6 +13,7 @@ import ServiceCodeComp from "./serviceStartComponent";
 import ClientStartModu from "./clientStartModu";
 import { sort } from "@tidyjs/tidy";
 import ExtraNeededComp from "./logicLevelComp";
+import SchemaCompTest from "./testing/schemaCompTest";
 
 
 
@@ -201,6 +202,38 @@ const ModulatorComp = () =>{
         forceUpdate();
     }
 
+
+
+    const addSVG = async (id:string) =>{
+        const tempModu = await fetchModuleSvg(id);
+
+        const tempModuPins = await breakBoardAllocCheck(tempModu);
+        if(tempModuPins){
+            if(tempModuPins.pinAlloctedTemp.length !== 0){
+                breakBoardAllocPins(tempModuPins.pinAlloctedTemp);
+                if(tempModuPins.pinDifLogic.length !== 0){
+                    tempModuPins.pinAlloctedTemp = await allocLogicLevel(tempModuPins.pinDifLogic, tempModuPins.pinAlloctedTemp);
+                }
+
+
+                //Set new Alocced
+                const tempAllocPin = allocedPins;
+                for(let i = 0; i < tempModuPins.pinAlloctedTemp.length; i++){
+                    tempAllocPin.push(tempModuPins.pinAlloctedTemp[i])
+                }
+                setAllocedPins(tempAllocPin);
+            }
+
+            //Place the new module
+            const tempCon = conModules;
+            tempCon.push(tempModu)
+            setconModules(tempCon);
+            
+        }
+        
+        forceUpdate();
+    }
+
 //TODO: change pinAlloc and add different anming
 //Toevoegen van voltage divider voor analoog
     const allocLogicLevel = async (pins: Pin[], pinAlloclist: PinAlloc[]): Promise<PinAlloc []> =>{
@@ -353,45 +386,6 @@ const ModulatorComp = () =>{
         return -5;
     }
 
-    const logicLeveLPairCreate = (modulePin:Pin, allocedPin: PinAlloc, logicSup: LogicSup): LogicPair =>{
-        const moduleHigh = modulePin.logicLevel >3.3;
-        const positionLogic = listNumberFind(logicSup.conPairs);
-        
-        return {
-            "logicPos": positionLogic,
-            "moduleName": modulePin.moduleId,
-            "modulePin": modulePin,
-            "moduleHigh": moduleHigh,
-            "pinBreakLocation": allocedPin.pinBreakLocation,
-            "pinBreakName": allocedPin.pinBreakName,
-            "BreakoutName": allocedPin.BreakoutName,
-        }
-
-
-    }
-
-    const listNumberFind = (pairs: LogicPair[]): number =>{
-        const searchList = [];
-        for(let i = 0; i < pairs.length; i++){
-            searchList.push(pairs[i].logicPos);
-        }
-        if(searchList.length == 0){
-            return 0;
-        }
-
-        searchList.sort(function(a, b) {return a-b;})
-        let lowest = -1;
-        for(let i=0; i< searchList.length; i++){
-            if(searchList[i] != i){
-                lowest = i;
-                break;
-            }
-        }
-        if(lowest == -1){
-            lowest = searchList[searchList.length - 1] + 1;
-        }
-        return lowest;
-    }
 
 
     const allocVoltage = (powerPin: Pin, gndPin: Pin, moduleName: string): PinAlloc[] =>{
@@ -641,7 +635,6 @@ const ModulatorComp = () =>{
     }
 
     //set the temp allocated pin position to the breakoutboard
-    //TODO: remove pin as option
     const breakBoardAllocPins = (allocPins: PinAlloc[]) => {
         if(breakoutBoard){
             const tempBreakoutBoard = breakoutBoard;
@@ -670,7 +663,6 @@ const ModulatorComp = () =>{
         }
     }
 
-    //TODO: add code for led.enable when some pins are used
 
     return(
         <section id={sectionId}>
@@ -692,8 +684,9 @@ const ModulatorComp = () =>{
                     </Grid>
                 </Grid>
 
-            <SchemaComp modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/>
+            {/* <SchemaComp modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/> */}
             
+            <SchemaCompTest modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSVG}/>
 
 
             </Grid>
