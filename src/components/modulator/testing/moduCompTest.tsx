@@ -81,6 +81,12 @@ export default function ModuleComponentTest(
 
     const sortedPinlayout = module.pinLayout.sort((x, y) => x.posPin > y.posPin ? 1: x.posPin < y.posPin ? -1: 0);
     
+//    document.getElementById("connector2pin").addEventListener("click", function() {
+//         console.log("Fuck");
+        
+//    })
+
+
     return(
         
         <div style={{border: "1px solid black", borderRadius: "20px", padding: "10px", margin: "10px" }}>
@@ -94,13 +100,19 @@ export default function ModuleComponentTest(
 
 
             {module.diagram === undefined?null:
-            // <div style={{textAlign:"center"}}>
-            //     <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/hc-sr04_bf8299a_002.svg"} width="300"/>
-            // </div>
             <div style={{textAlign:"center"}}>
-                <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/led-rgb-4pin-anode-leg.svg"} width="300"/>
+                <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/hc-sr04_bf8299a_002.svg"} width="300"/>
             </div>
+            
+
+             
+            // <div style={{textAlign:"center"}}>
+            //     <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/led-rgb-4pin-anode-leg.svg"} width="300"/>
+            // </div>
             }
+            {/* <div style={{textAlign:"center"}}>
+                <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
+            </div> */}
             {/*Drawing the needed boxes???*/ }
             <div style={{textAlign:"center"}}>
                 <svg height={20} width={300}>
