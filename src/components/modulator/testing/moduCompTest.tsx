@@ -9,9 +9,10 @@ export default function ModuleComponentTest(
         removeFunc: (moduleName:string) =>void;
         allocedPins: PinAlloc[];
         logicDeviders: LogicSup[];
+        highlightFunc: (moduleName:string) =>void;
     }
 ){
-    const {module, removeFunc, allocedPins, logicDeviders} = props;
+    const {module, removeFunc, allocedPins, logicDeviders, highlightFunc} = props;
 
     const onBoard = (module.numberPins === allocedPins.length)
     
@@ -125,7 +126,7 @@ export default function ModuleComponentTest(
 
 
 
-
+            <Button onClick={() => highlightFunc(module.name)}>Highlight connections</Button>
             <p style={{fontWeight:"bold", marginBottom:0}}>How to connect:</p>
             {sortedPinlayout.map((pin, index) =>(
                 <div key={index}>

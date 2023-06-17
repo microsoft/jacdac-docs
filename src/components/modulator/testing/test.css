@@ -1,0 +1,209 @@
+.Pinout {
+    background: #073642;
+    width: 150px;
+    position: relative;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    float: left;
+}
+
+.Pinout {
+    background-image: url(https://i.ibb.co/VvQmZNm/microbit-background.png);
+    width:180px;
+    background-size: cover;
+    background-position: -32px;
+    background-repeat: no-repeat;
+    position: relative;
+    height:694px;
+    border-top-right-radius:30px;
+    border-bottom-right-radius:30px;
+    float:left;
+}
+
+.Pinout ul {
+    margin:0;
+    padding:0;
+    list-style:none;
+    position:absolute;
+    left:180px;
+    top:0px;
+}
+
+.Pinout li {
+    margin:2px 0;
+    padding:0;
+    list-style:none;
+}
+
+.Pinout .typeHook {
+    margin:6px 0px;
+}
+
+.Pinout Button {
+    display:block;
+    padding-left:10px;
+    position:relative;
+    height:20px;
+    width:250px;
+    text-decoration:none;
+    color:#333333;
+}
+
+.Pinout span, .Pinout strong, .Pinout small {
+    height:20px;
+    line-height:20px;
+    font-size:14px;
+    font-weight:normal;
+}
+
+.Pinout small {
+    font-size:10px;
+    float:right;
+    margin-right:10px;
+}
+
+.Pinout span {
+    position:absolute;
+    left:-70px;
+    top: 0px;
+}
+
+.Pinout .typeHook Button {
+    height:38px;
+}
+
+.Pinout .typeHook Button span, .Pinout .typeHook Button strong {
+    line-height:38px;
+}
+
+.Pinout Button:before {
+    content:'';
+    display:block;
+    width:80px;
+    height:20px;
+    position:absolute;
+    left:-80px;
+    top:0;
+    background: #D4AF37;
+    border-right:10px solid rgba(255, 255, 255, 0.5);
+}
+
+.Pinout #pin-0 Button:before {
+    content:'';
+    display:block;
+    width:80px;
+    height:20px;
+    position:absolute;
+    left:-80px;
+    top:0;
+    background: #D4AF37;
+    border-right:10px solid rgba(255, 255, 255, 0.5);
+    border-top-right-radius: 18px;
+}
+
+#left {
+  float: left;
+  width: 65%;
+  overflow: hidden;
+}
+
+#right {
+  overflow: hidden;
+}
+
+.Pinout #pin-24 Button:before {
+    content:'';
+    display:block;
+    width:80px;
+    height:20px;
+    position:absolute;
+    left:-80px;
+    top:0;
+    background: #D4AF37;
+    border-right:10px solid rgba(255, 255, 255, 0.5);
+    border-bottom-right-radius: 18px;
+}
+
+.Pinout .active  {
+    background:rgba(62, 182, 252, 0.5);
+}
+
+.Pinout .active :before {
+    background:#e9d79b;
+}
+
+.Pinout .type-power Button:before {
+    border-right-color: #DC322F;
+}
+
+.Pinout .type-i2c Button:before {
+    border-right-color: #6c71c4;
+}
+
+.Pinout .type-spi Button:before {
+    border-right-color: #D33682;
+}
+
+.Pinout .type-button Button:before {
+    border-right-color: #859900;
+}
+
+.Pinout .type-analog Button:before {
+    border-right-color:#B58900;
+}
+
+.Pinout .type-ground Button:before {
+    border-right-color: rgba(255, 255, 255, 0.5);
+}
+
+.Pinout .typeHook Button:before {
+    height:38px;
+    width:110px;
+    left:-110px;
+    top:0;
+    border-top-left-radius:19px;
+    border-bottom-left-radius:19px;
+}
+
+.Pinout .typeHook small {
+    line-height: 38px;
+}
+
+.cardfooter {
+    clear: both;
+    position: absolute;
+    bottom: 0;
+    padding: 20px 0;
+}
+
+h1 {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+p {
+    margin-top: 0px !important;
+}
+
+.Pinout .typeHook Button:after {
+    content: '';
+    background: #FFFFFF;
+    display: block;
+    position: absolute;
+    left: -106px;
+    top: 4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+}
+
+.Pinout Button:hover,
+.Pinout Button:hover:before {
+    background:#3eb6fc;
+}
+
+.Pinout Button:hover strong, .Pinout Button:hover span, .Pinout Button:hover small {
+    color:#FFFFFF;
+}
+
+

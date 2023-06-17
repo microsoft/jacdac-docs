@@ -2,7 +2,7 @@ import {useEffect, useId, useState } from "react";
 import React from "react"
 import { Grid } from "@mui/material"
 import GridHeader from "../ui/GridHeader"
-import PinLayoutComp from "./pinLayoutComp";
+import PinLayoutComp from "./testing/pinLayoutComp";
 import SchemaComp from "./schemaComp";
 import Button from "../ui/Button";
 import { fetchLogic, fetchModule, fetchModuleSvg, fetchPinLayout, predicate } from "./helper/file";
@@ -35,9 +35,11 @@ const ModulatorComp = () =>{
     const [allocedPins, setAllocedPins] = useState<Array<PinAlloc>>([]);
     const [conPowerSup, setconPowerSup] = useState<Array<powerSup>>([]);
     const [conLogicLevels, setconLogicLevels] = useState<Array<LogicSup>>([]);
+    const [highLighted, setHighlighted] = useState(undefined as ModuExtern |undefined);
 
     const [, updateState] = React.useState({});
     const forceUpdate = React.useCallback(() => updateState({}), [])
+
 
     useEffect(() =>{
         getBreakout().then((data) => {
@@ -664,6 +666,32 @@ const ModulatorComp = () =>{
     }
 
 
+    const highlightShit = (moduleName: string|undefined) =>{
+        if(moduleName){
+            const indexconModule = conModules.findIndex( i => i.name === moduleName);
+            if(indexconModule !== -1){
+                setHighlighted(conModules[indexconModule]);
+                return;
+            }
+        }
+        setHighlighted(undefined);
+    }
+
+    const getAllocedPinsForModule = (module: ModuExtern| undefined): PinAlloc[]|undefined =>{
+        if(module){
+            const tempList = [];
+            allocedPins.forEach(function (valPin) {
+                if(valPin.moduleName === module.name){
+                    tempList.push(valPin)
+                }
+            });
+            return tempList;
+        }
+        return undefined;
+    }
+
+
+
     return(
         <section id={sectionId}>
             <Grid container spacing={5}>
@@ -674,19 +702,19 @@ const ModulatorComp = () =>{
                         container
                     >
                         {<h3>First Code for Makecode: led.enable(false);</h3>}
-                        
+                        <PinLayoutComp highlighted={highLighted} highlightPinsAlloc={getAllocedPinsForModule(highLighted)}/>
                         
                         {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
                         {conLogicLevels.length >0?<ExtraNeededComp supplies={conLogicLevels} />: null}
                         {/* {conModules.length >0? <ServiceCodeComp modules={conModules}/>: null} */}
                         {/* {conModules.length >0? <ClientStartModu modules={conModules}/>: null} */}
-                        <PinLayoutComp/>
+                       
                     </Grid>
                 </Grid>
 
             {/* <SchemaComp modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/> */}
             
-            <SchemaCompTest modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSVG}/>
+            <SchemaCompTest modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSVG} highlight={highlightShit}/>
 
 
             </Grid>
