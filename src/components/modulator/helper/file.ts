@@ -116,7 +116,6 @@ const pinTyping = (numberOfPins: number, data: any[], moduelId:string):Pin[] => 
             name: data[i].name,
             logicLevel: data[i].logicLevel,
             x: data[i].x,
-            y: data[i].y
         })
     }
     return result;
@@ -188,4 +187,20 @@ export const predicate = (a, b) =>{
 
 
     return 0;
+}
+
+export const getColor = (pinName) => {
+    const map = new Map<string, string>();
+    map.set("GND", "#000000");
+    map.set("P20", "#ffe119");
+    map.set("P19", "#4363d8");
+    map.set("P1", "#f58231");
+    map.set("P0", "#911eb4");
+
+
+    let temp = map.get(pinName);
+    if(!temp){
+        temp = "#e6194B"
+    }
+    return temp;
 }

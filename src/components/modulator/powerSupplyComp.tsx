@@ -12,7 +12,7 @@ type Props = {
 }
 
 
-//TODO: styling of it
+//TODO: highlight and hide others!!!
 const PowerSupplyComp: React.FC<Props> = ({supplies}) => {
     
 

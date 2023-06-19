@@ -25,7 +25,6 @@ export type Pin = {
     name?: string;
     logicLevel?: number;
     x?: number;
-    y?: number;
 }
 
 //used module for dynamic code

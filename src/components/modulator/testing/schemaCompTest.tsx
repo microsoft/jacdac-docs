@@ -33,7 +33,7 @@ const SchemaCompTest: React.FC<Props> = ({modules, removeFunc, allocedPins, addS
     return(
         <Grid xs={7} item style={{paddingTop:0}}>
             <GridHeader title={"Added modules"} action={<span><ManualAddComp addSchema={addSchema}/> <Button onClick={() => highlight(undefined)}>Reset Highlight</Button></span>}/>
-            <div style={{overflowY:"scroll", maxHeight:"85vh"}}>
+            <div style={{overflowY:"scroll", maxHeight:"120vh"}}>
                 {modules.map((mod, index) => (
 
                     <ModuleComponentTest module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} logicDeviders={logicDeviders} key={index} highlightFunc={highlight}/>

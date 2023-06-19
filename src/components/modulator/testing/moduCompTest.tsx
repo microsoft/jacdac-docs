@@ -1,7 +1,9 @@
 import React from "react";
-import { LogicSup, ModuExtern, PinAlloc, } from "../helper/types";
+import { LogicSup, ModuExtern, PinAlloc, TypePin, } from "../helper/types";
 import Button from "../../ui/Button";
+import { getColor } from "../helper/file";
 
+//TODO: kijken hoe hide wanneer neit highlighted
 
 export default function ModuleComponentTest(
     props:{
@@ -70,14 +72,31 @@ export default function ModuleComponentTest(
             if(allocedPins[index].powerSup){
                 return (allocedPins[index].pinBreakName +" " +allocedPins[index].modulePin.typePin)
             }
-            if(allocedPins[index].BreakoutName !=="Micro:bit v2 pin layout"){
+            // if(allocedPins[index].BreakoutName !=="Micro:bit V2"){
                 const temp = allocedPins[index].pinBreakName;
                 return (allocedPins[index].BreakoutName + " pin "+temp);
-            }
+            // }
 
-            return "breakoutboard pin "+ allocedPins[index].pinBreakName;
+            // return "breakoutboard pin "+ allocedPins[index].pinBreakName;
         }
         return "#";
+    }
+
+    const getColorPin = (positionPin: number):string => {
+        const index = allocedPins.findIndex((value) => value.modulePin.posPin == positionPin);
+
+        if(index !== -1){
+            if(allocedPins[index].powerSup && allocedPins[index].modulePin.typePin === TypePin.Power){
+                return "#e6194B"
+            }
+            if(allocedPins[index].powerSup && allocedPins[index].modulePin.typePin === TypePin.GND){
+                return "#000000"
+            }
+            if(allocedPins[index].BreakoutName ==="Micro:bit V2"){
+                
+                return getColor(allocedPins[index].pinBreakName)
+            }
+        }
     }
 
     const sortedPinlayout = module.pinLayout.sort((x, y) => x.posPin > y.posPin ? 1: x.posPin < y.posPin ? -1: 0);
@@ -101,29 +120,27 @@ export default function ModuleComponentTest(
 
 
             {module.diagram === undefined?null:
-            <div style={{textAlign:"center"}}>
-                <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/hc-sr04_bf8299a_002.svg"} width="300"/>
-            </div>
+            // <div style={{textAlign:"center"}}>
+            //     <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/hc-sr04_bf8299a_002.svg"} width="300"/>
+            // </div>
             
-
+                <div style={{textAlign:"center"}}>
+                    <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
+                </div>
              
             // <div style={{textAlign:"center"}}>
             //     <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/led-rgb-4pin-anode-leg.svg"} width="300"/>
             // </div>
             }
-            {/* <div style={{textAlign:"center"}}>
-                <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
-            </div> */}
+            {/*  */}
             {/*Drawing the needed boxes???*/ }
             <div style={{textAlign:"center"}}>
                 <svg height={20} width={300}>
-                    <rect x={116.5} y={5} style={{fill:"purple"}} width={"10"} height={"10"} />
-                    <rect x={134} y={5} style={{fill: "green"}} width={"10"} height={"10"}/>   
+                    {sortedPinlayout.map((pin, index) =>(
+                        <rect key={index} x={pin.x} y={5} style={{fill:getColorPin(pin.posPin)}} width={"10"} height={"20"}/>
+                    ))}
                 </svg>
-
             </div>
-
-
 
 
             <Button onClick={() => highlightFunc(module.name)}>Highlight connections</Button>

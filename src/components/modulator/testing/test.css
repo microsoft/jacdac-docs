@@ -68,6 +68,12 @@
     top: 0px;
 }
 
+.Pinout strong {
+    position: absolute;
+    top:0px;
+    left: 5px;
+}
+
 .Pinout .typeHook Button {
     height:38px;
 }
@@ -156,6 +162,22 @@
     border-right-color: rgba(255, 255, 255, 0.5);
 }
 
+.Pinout .typeP20 Button:before {
+     border-right-color: #ffe119;
+}
+
+.Pinout .typeP19 Button:before {
+    border-right-color: #4363d8;
+}
+.Pinout .typeP1 Button:before {
+    border-right-color: #f58231;
+}
+.Pinout .typeP0 Button:before {
+    border-right-color: #911eb4;
+}
+.Pinout .typeP20 Button:before {
+    border-right-color: #ffe119;
+}
 .Pinout .typeHook Button:before {
     height:38px;
     width:110px;

@@ -28,8 +28,7 @@ function stupidComp(
 
 }
 
-//TODO: styling of it
-//connection steps
+//TODO: maybe if neede highlight support
 const ExtraNeededComp: React.FC<Props> = ({supplies}) => {
 
     const getPin = (pin: PinBreakout, lowSup: boolean) =>{
