@@ -192,8 +192,26 @@ export const predicate = (a, b) =>{
 export const getColor = (pinName) => {
     const map = new Map<string, string>();
     map.set("GND", "#000000");
+    map.set("3.3V", "#e6194B")
     map.set("P20", "#ffe119");
     map.set("P19", "#4363d8");
+
+    map.set("P16", "#3cb44b");
+    map.set("P15", "#fabed4");
+    map.set("P14", "#469990");
+    map.set("P13", "#000075");
+    map.set("P12", "#800000");
+    map.set("P11", "#800000");
+    map.set("P10", "#808000");
+    map.set("P9", "#aaffc3");
+    map.set("P8", "#9A6324");
+    map.set("P7", "#dcbeff");
+    map.set("P6", "#bfef45");
+    map.set("P5", "#800000");
+    map.set("P4", "#f032e6");
+    map.set("P3", "#42d4f4");
+    map.set("P2", "#ffd8b1");
+    
     map.set("P1", "#f58231");
     map.set("P0", "#911eb4");
 

@@ -114,7 +114,10 @@ export default function ModuleComponentTest(
                 <span style={{fontWeight:"bold"}}>Module name: </span>
                 <span>{module.name}</span>
                 <Button onClick={() => removeFunc(module.name)}>Remove</Button>
-                {onBoard?null: <p style={{color:"red", fontWeight:"bold"}}>Could not be added</p>}
+                {onBoard?            
+                    <Button onClick={() => highlightFunc(module.name)}>Highlight connections</Button>: 
+                    <p style={{color:"red", fontWeight:"bold"}}>Could not be added</p>
+                }
             </div>
            
 
@@ -143,7 +146,6 @@ export default function ModuleComponentTest(
             </div>
 
 
-            <Button onClick={() => highlightFunc(module.name)}>Highlight connections</Button>
             <p style={{fontWeight:"bold", marginBottom:0}}>How to connect:</p>
             {sortedPinlayout.map((pin, index) =>(
                 <div key={index}>

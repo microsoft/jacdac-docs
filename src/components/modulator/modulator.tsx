@@ -36,6 +36,7 @@ const ModulatorComp = () =>{
     const [conPowerSup, setconPowerSup] = useState<Array<powerSup>>([]);
     const [conLogicLevels, setconLogicLevels] = useState<Array<LogicSup>>([]);
     const [highLighted, setHighlighted] = useState(undefined as ModuExtern |undefined);
+    const [highLightPins, setHighlightPins] =  useState<Array<PinAlloc>>([]);
 
     const [, updateState] = React.useState({});
     const forceUpdate = React.useCallback(() => updateState({}), [])
@@ -139,7 +140,15 @@ const ModulatorComp = () =>{
         setBreakoutBoard(tempBreakout);
         setconPowerSup(tempPowerSup);
         setconLogicLevels(tempLogicLevel);
-
+        if(highLighted){
+            if(highLighted.name === moduleName){
+                setHighlighted(undefined);
+                setHighlightPins(tempAllocedPins);
+            }
+        }else{
+            setHighlightPins(tempAllocedPins);
+        }
+        
         forceUpdate();
 
     }
@@ -224,13 +233,17 @@ const ModulatorComp = () =>{
                     tempAllocPin.push(tempModuPins.pinAlloctedTemp[i])
                 }
                 setAllocedPins(tempAllocPin);
+                if(!highLighted){
+                    setHighlightPins(tempAllocPin);
+                }
+
             }
 
             //Place the new module
             const tempCon = conModules;
             tempCon.push(tempModu)
             setconModules(tempCon);
-            
+
         }
         
         forceUpdate();
@@ -671,13 +684,15 @@ const ModulatorComp = () =>{
             const indexconModule = conModules.findIndex( i => i.name === moduleName);
             if(indexconModule !== -1){
                 setHighlighted(conModules[indexconModule]);
+                setHighlightPins(getAllocedPinsForModule(conModules[indexconModule]));
                 return;
             }
         }
         setHighlighted(undefined);
+        setHighlightPins(getAllocedPinsForModule(undefined));
     }
 
-    const getAllocedPinsForModule = (module: ModuExtern| undefined): PinAlloc[]|undefined =>{
+    const getAllocedPinsForModule = (module: ModuExtern| undefined) =>{
         if(module){
             const tempList = [];
             allocedPins.forEach(function (valPin) {
@@ -687,25 +702,33 @@ const ModulatorComp = () =>{
             });
             return tempList;
         }
-        return undefined;
+        return allocedPins;
     }
 
+    const checkExtraComp = () =>{
+        if(conPowerSup.length > 0){
+            return true;
+        }
+        if(conLogicLevels.length > 0){
+            return true;
+        }
+        return false;
+    }
 
 
     return(
         <section id={sectionId}>
             <Grid container spacing={5}>
                 <GridHeader title={"Modulator"} action={<span><SerialThing addComp={getSerialMsg}/> </span>}/>
-                <Grid xs={5} item style={{paddingTop:"0"}}>
+                <Grid xs={4} item style={{paddingTop:"0"}}>
                     <Grid
                         direction={"column"}
                         container
                     >
                         {<h3>First Code for Makecode: led.enable(false);</h3>}
-                        <PinLayoutComp highlighted={highLighted} highlightPinsAlloc={getAllocedPinsForModule(highLighted)}/>
+                        <PinLayoutComp highlighted={highLighted} highlightPinsAlloc={highLightPins}/>
                         
-                        {conPowerSup.length >0?<PowerSupplyComp supplies={conPowerSup}/>:null}
-                        {conLogicLevels.length >0?<ExtraNeededComp supplies={conLogicLevels} />: null}
+                        {/* {conLogicLevels.length >0?<ExtraNeededComp supplies={conLogicLevels} />: null} */}
                         {/* {conModules.length >0? <ServiceCodeComp modules={conModules}/>: null} */}
                         {/* {conModules.length >0? <ClientStartModu modules={conModules}/>: null} */}
                        
@@ -714,7 +737,8 @@ const ModulatorComp = () =>{
 
             {/* <SchemaComp modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/> */}
             
-            <SchemaCompTest modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSVG} highlight={highlightShit}/>
+            <SchemaCompTest modules={conModules} logicDeviders={conLogicLevels} highlighted={highLighted} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSVG} highlight={highlightShit}/>
+            {checkExtraComp()?<ExtraNeededComp powerSupplies={conPowerSup} LogicSupl={conLogicLevels} highlighted={highLighted} highlightPinsAlloc={highLightPins}/>:null}
 
 
             </Grid>

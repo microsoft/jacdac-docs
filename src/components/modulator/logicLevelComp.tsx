@@ -1,35 +1,43 @@
 import { Grid } from "@mui/material";
 import React from "react";
 import GridHeader from "../ui/GridHeader";
-import { LogicSup, PinBreakout, TypePin, powerSup } from "./helper/types";
+import { LogicSup, ModuExtern, PinAlloc, PinBreakout, TypePin, powerSup } from "./helper/types";
 import { rotate } from "@jscad/modeling/src/maths/mat4";
 import Button from "../ui/Button";
 
 
-const imgPath = "https://www.kiwi-electronics.com/image/cache/catalog/product/aem8hbpd/SF-BOB-12009_0-766x511h.jpg";
+const imgPathLogic = "https://www.kiwi-electronics.com/image/cache/catalog/product/aem8hbpd/SF-BOB-12009_0-766x511h.jpg";
+const imgPathPw = "https://i.imgur.com/YOXo2ki.png";
 
 type Props = {
-    supplies: LogicSup[];
+    LogicSupl: LogicSup[];
+    powerSupplies: powerSup[];
+    highlighted: ModuExtern|undefined;
+    highlightPinsAlloc: PinAlloc[];
 }
 
-
-function stupidComp(
-    props:{
-        stupidPins: PinBreakout[];
-    }
-){
-    const {stupidPins} = props;
-
-    return (
-        <div>
-
-        </div>
-    )
-
-}
 
 //TODO: maybe if neede highlight support
-const ExtraNeededComp: React.FC<Props> = ({supplies}) => {
+const ExtraNeededComp: React.FC<Props> = ({LogicSupl, powerSupplies, highlightPinsAlloc, highlighted}) => {
+
+    const checkHighligt = () => {
+        if(highlighted){
+            return true;
+        }
+        return false;
+    }
+
+    const checkIfIncluded = (powerName: string) => {
+        if(highlighted){
+            for(let i = 0; i<highlightPinsAlloc.length; i++){
+                if(highlightPinsAlloc[i].BreakoutName === powerName){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
 
     const getPin = (pin: PinBreakout, lowSup: boolean) =>{
         if(pin.used){
@@ -54,18 +62,52 @@ const ExtraNeededComp: React.FC<Props> = ({supplies}) => {
     }
 
     return(
-        <Grid item >
+        <Grid xs={12} item >
             <GridHeader title={"Extra Components"}/>
-            <div style={{display:"flex"}}>
-                {supplies.map((sup, index) => (
+            {checkHighligt()?
+                <div style={{display:"flex"}}>
+                    {powerSupplies.map((sup, index) => (
+                        <div key={index} style={{opacity:checkIfIncluded(sup.supplyName)?"1.0":"0.5"}} >
+                            {checkIfIncluded(sup.supplyName)?
+                            <>
+                                <svg height={20} width={100}>
+                                    <rect x={35} y={5} style={{fill:"#a9a9a9"}} width={"10"} height={"20"}/>
+                                    <rect x={55} y={5} style={{fill:"#e6194B"}} width={"10"} height={"20"}/>
+                                </svg>
+                                <br></br>
+                            </>
+                            :null}
+                            <img src={imgPathPw} alt="Power Supply diagram" height="100"/>
+                            <br/>
+                            {sup.supplyName}V
+                            <br></br>
+                            Connected: {sup.conModule.length}                         
+                        </div>
+                    ))}
+                </div>:
+                <div style={{display:"flex"}}>
+                {powerSupplies.map((sup, index) => (
+                    <div key={index} >
+                        <img src={imgPathPw} alt="Power Supply diagram" height="100"/>
+                        <br/>
+                        {sup.supplyName}V
+                        <br></br>
+                        Connected: {sup.conModule.length}                         
+                    </div>
+                ))}
+                </div>
+            }
+            
 
+            <div style={{display:"flex"}}>
+                {LogicSupl.map((sup, index) => (
                     <div key={index} style={{marginRight:5}}>
                         <div>
                             <span style={{fontWeight:"bold"}}>Component Name: </span>
                             <span>{sup.convName}</span>
                         </div>
                         <div>
-                            <img src={imgPath} alt="diagram" height="100"/>
+                            <img src={imgPathLogic} alt="diagram" height="100"/>
                         </div>
                         <div>
                             <span style={{fontWeight:"bold"}}> Connected: </span>
@@ -83,7 +125,6 @@ const ExtraNeededComp: React.FC<Props> = ({supplies}) => {
                             <div key={index}>
                                 {getPin(pin, false)}
                             </div>
-                            
                         ))}
                        
                     </div>

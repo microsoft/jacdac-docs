@@ -52,7 +52,7 @@
 .Pinout span, .Pinout strong, .Pinout small {
     height:20px;
     line-height:20px;
-    font-size:14px;
+    font-size:1rem;
     font-weight:normal;
 }
 
@@ -74,12 +74,18 @@
     left: 5px;
 }
 
+/* .Pinout .typeHook #pinGND strong {
+    border-bottom: 3px solid #8a8a8a;
+} */
+
 .Pinout .typeHook Button {
     height:38px;
 }
 
-.Pinout .typeHook Button span, .Pinout .typeHook Button strong {
+.Pinout .typeHook  span, .Pinout .typeHook  strong {
     line-height:38px;
+    height:38px;
+
 }
 
 .Pinout Button:before {
@@ -94,7 +100,7 @@
     border-right:10px solid rgba(255, 255, 255, 0.5);
 }
 
-.Pinout #pin-0 Button:before {
+.Pinout #pinGNDend Button:before {
     content:'';
     display:block;
     width:80px;
@@ -117,7 +123,7 @@
   overflow: hidden;
 }
 
-.Pinout #pin-24 Button:before {
+.Pinout #pinEnd Button:before {
     content:'';
     display:block;
     width:80px;
@@ -161,23 +167,61 @@
 .Pinout .type-ground Button:before {
     border-right-color: rgba(255, 255, 255, 0.5);
 }
-
-.Pinout .typeP20 Button:before {
-     border-right-color: #ffe119;
-}
-
-.Pinout .typeP19 Button:before {
-    border-right-color: #4363d8;
+.Pinout .typeP0 Button:before {
+    border-right-color: #911eb4;
 }
 .Pinout .typeP1 Button:before {
     border-right-color: #f58231;
 }
-.Pinout .typeP0 Button:before {
-    border-right-color: #911eb4;
+.Pinout .typeP2 Button:before {
+    border-right-color: #ffd8b1;
+}
+.Pinout .typeP3 Button:before {
+    border-right-color: #42d4f4;
+}
+.Pinout .typeP4 Button:before {
+    border-right-color: #f032e6;
+}
+.Pinout .typeUnuse Button:before {
+    border-right-color: #800000;
+}
+.Pinout .typeP6 Button:before {
+    border-right-color: #bfef45;
+}
+.Pinout .typeP7 Button:before {
+    border-right-color: #dcbeff;
+}
+.Pinout .typeP8 Button:before {
+    border-right-color: #9A6324;
+}
+.Pinout .typeP9 Button:before {
+    border-right-color: #aaffc3;
+}
+.Pinout .typeP10 Button:before {
+    border-right-color: #808000;
+}
+.Pinout .typeP13 Button:before {
+    border-right-color: #000075;
+}
+.Pinout .typeP14 Button:before {
+    border-right-color: #469990;
+}
+.Pinout .typeP15 Button:before {
+    border-right-color: #fabed4;
+}
+.Pinout .typeP16 Button:before {
+    border-right-color: #3cb44b;
+}
+.Pinout .typeP19 Button:before {
+   border-right-color: #4363d8;
 }
 .Pinout .typeP20 Button:before {
     border-right-color: #ffe119;
 }
+.Pinout .typePower Button:before {
+    border-right-color: #e6194B;
+}
+
 .Pinout .typeHook Button:before {
     height:38px;
     width:110px;
@@ -225,7 +269,7 @@ p {
 }
 
 .Pinout Button:hover strong, .Pinout Button:hover span, .Pinout Button:hover small {
-    color:#FFFFFF;
+    color:#000;
 }
 
 

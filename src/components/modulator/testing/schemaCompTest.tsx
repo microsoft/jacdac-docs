@@ -12,12 +12,13 @@ type Props={
     modules: ModuExtern[];
     allocedPins: PinAlloc[];
     logicDeviders: LogicSup[];
+    highlighted: ModuExtern|undefined;
     removeFunc: (moduleName: string) =>void;
     addSchema: (moduleId: string) => void;
     highlight: (moduleName:string|undefined) =>void;
 }
 
-const SchemaCompTest: React.FC<Props> = ({modules, removeFunc, allocedPins, addSchema, logicDeviders, highlight}) =>{
+const SchemaCompTest: React.FC<Props> = ({modules, removeFunc, highlighted, allocedPins, addSchema, logicDeviders, highlight}) =>{
     const moduAllocList = (moduleName: string) =>{
         const tempList = [];
         allocedPins.forEach(function (valPin) {
@@ -29,16 +30,41 @@ const SchemaCompTest: React.FC<Props> = ({modules, removeFunc, allocedPins, addS
         return tempList;
     }
     
+    const checkhigh = () => {
+        if(highlighted){
+            return true
+        }
+        return false
+    }
+
+    const checkIfHighlighted = (moduleName:string) => {
+        if(highlighted){
+            if(highlighted.name == moduleName){
+                return true;
+            }
+        }
+        return false;
+    }
+
     
     return(
-        <Grid xs={7} item style={{paddingTop:0}}>
+        <Grid xs={8} item style={{paddingTop:0}}>
             <GridHeader title={"Added modules"} action={<span><ManualAddComp addSchema={addSchema}/> <Button onClick={() => highlight(undefined)}>Reset Highlight</Button></span>}/>
-            <div style={{overflowY:"scroll", maxHeight:"120vh"}}>
-                {modules.map((mod, index) => (
+            {checkhigh()? 
+                <div style={{overflowY:"scroll", maxHeight:"75vh"}}>
+                    {modules.map((mod, index) =>(
+                        <span key={index} style={{opacity:checkIfHighlighted(mod.name)?"1.0": "0.5" }}>
+                            <ModuleComponentTest module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} logicDeviders={logicDeviders} key={index} highlightFunc={highlight}/>
+                        </span>
+                    ))}
+                </div>
+                :<div style={{overflowY:"scroll", maxHeight:"75vh"}}>
+                    {modules.map((mod, index) => (
 
-                    <ModuleComponentTest module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} logicDeviders={logicDeviders} key={index} highlightFunc={highlight}/>
-                ))}
-            </div>
+                        <ModuleComponentTest module={mod} removeFunc={removeFunc} allocedPins={moduAllocList(mod.name)} logicDeviders={logicDeviders} key={index} highlightFunc={highlight}/>
+                    ))}
+                </div>}
+            
         </Grid>
     )
 
