@@ -72,18 +72,18 @@ export default function PinLayoutComp(
                     {highlight("GND")?
                     <><li id="pinGNDend" className="type-ground" style={{ opacity: 1.0 }}>
                             <Button id="pinGND" style={{ background: "#fff" }}>
-                                <span>Ground</span>
+                                <span>GND</span>
                                 <strong style={{ borderBottom: "3px solid #8a8d8a" }}>{getPinName("GND")}</strong>
                             </Button>
-                        </li><li className="typeHook" style={{ opacity: 1.0 }}>
+                        </li><li className="typeHook type-ground" style={{ opacity: 1.0 }}>
                             <Button id="pinGND" style={{ background: "#fff" }}>
-                                <span>Ground</span>
+                                <span>GND</span>
                                 <strong style={{ borderBottom: "3px solid #8a8d8a" }}>{getPinName("GND")}</strong>
                             </Button>
                         </li>
                         <li className="type-ground" style={{ opacity: 1.0 }}>
                             <Button id="pinGND" style={{ background: "#fff" }}>
-                                <span>Ground</span>
+                                <span>GND</span>
                                 <strong style={{ borderBottom: "3px solid #8a8d8a" }}>{getPinName("GND")}</strong>
                             </Button>
                         </li>
@@ -91,17 +91,17 @@ export default function PinLayoutComp(
                     :<>
                     <li id="pinGNDend" className="type-ground" style={{opacity:0.5}}>
                             <Button id="pinGND" style={{background:"#fff"}} >
-                                <span>Ground</span>
+                                <span>GND</span>
                             </Button>
                     </li>
-                    <li className="typeHook" style={{opacity:0.5}}>
+                    <li className="typeHook type-ground" style={{opacity:0.5}}>
                             <Button id="pinGND" style={{background:"#fff"}} >
-                                <span>Ground</span>
+                                <span>GND</span>
                             </Button>
                     </li>
                     <li className="type-ground" style={{opacity:0.5}}>
                             <Button id="pinGND" style={{background:"#fff"}} >
-                                <span>Ground</span>
+                                <span>GND</span>
                             </Button>
                     </li>
                     </>

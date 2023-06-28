@@ -109,7 +109,7 @@
     left:-80px;
     top:0;
     background: #D4AF37;
-    border-right:10px solid rgba(255, 255, 255, 0.5);
+    border-right:10px solid #000;
     border-top-right-radius: 18px;
 }
 
@@ -132,7 +132,7 @@
     left:-80px;
     top:0;
     background: #D4AF37;
-    border-right:10px solid rgba(255, 255, 255, 0.5);
+    border-right:10px solid #42d4f4;
     border-bottom-right-radius: 18px;
 }
 
@@ -165,7 +165,7 @@
 }
 
 .Pinout .type-ground Button:before {
-    border-right-color: rgba(255, 255, 255, 0.5);
+    border-right-color: #000;
 }
 .Pinout .typeP0 Button:before {
     border-right-color: #911eb4;

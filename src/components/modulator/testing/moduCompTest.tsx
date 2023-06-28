@@ -90,7 +90,7 @@ export default function ModuleComponentTest(
                 return "#e6194B"
             }
             if(allocedPins[index].powerSup && allocedPins[index].modulePin.typePin === TypePin.GND){
-                return "#000000"
+                return "#a9a9a9"
             }
             if(allocedPins[index].BreakoutName ==="Micro:bit V2"){
                 
@@ -111,7 +111,7 @@ export default function ModuleComponentTest(
         
         <div style={{border: "1px solid black", borderRadius: "20px", padding: "10px", margin: "10px" }}>
             <div>
-                <span style={{fontWeight:"bold"}}>Module name: </span>
+                <span style={{fontWeight: 600, fontSize: "1.38rem"}}>Module name: </span>
                 <span>{module.name}</span>
                 <Button onClick={() => removeFunc(module.name)}>Remove</Button>
                 {onBoard?            
@@ -136,7 +136,8 @@ export default function ModuleComponentTest(
             // </div>
             }
             {/*  */}
-            {/*Drawing the needed boxes???*/ }
+            {/*Drawing the needed boxes??? change to make hoverable*/ }
+            {/*TODO: change maybe to thing with imagamapper, has working of hover shit???*/}
             <div style={{textAlign:"center"}}>
                 <svg height={20} width={300}>
                     {sortedPinlayout.map((pin, index) =>(
@@ -146,16 +147,17 @@ export default function ModuleComponentTest(
             </div>
 
 
-            <p style={{fontWeight:"bold", marginBottom:0}}>How to connect:</p>
+            <h3 style={{ marginBottom:0}}>How to connect:</h3>
             {sortedPinlayout.map((pin, index) =>(
                 <div key={index}>
-                    Connect module pin {pin.posPin} ({pin.typePin}) to the {getPin(pin.posPin)}
+                    Connect module <span style={{}}> pin {pin.posPin} </span> ({pin.typePin}) to the <span style={{borderBottom:"3px solid",borderBottomColor:getColorPin(pin.posPin), fontWeight:600}}>{getPin(pin.posPin)}</span>
                     {/* Type: {pin.typePin} | Module Position: {pin.posPin} | BreakoutBoard Position: {getPin(pin.posPin)} */}
                 </div>
             ))}
             {module.codeAct === undefined?null: 
-            <div>
-                <p style={{fontWeight: "bold"}}>Copy to MakeCode:</p>
+            <div style={{marginTop:15}}>
+                {/* <h3 style={{fontSize: "1.3rem",fontWeight: "bold"}}>Copy to MakeCode:</h3> */}
+                <h3 style={{margin:0}}>Copy to MakeCode:</h3>
                 <div style={{marginBottom:0}}>//Code for service</div>
                 <div style={{marginBottom:0}}>{fileInCode()}</div>
                 <div style={{marginBottom:0}}>//Code for client</div>
