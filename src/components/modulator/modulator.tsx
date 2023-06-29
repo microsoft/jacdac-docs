@@ -217,7 +217,10 @@ const ModulatorComp = () =>{
 
     const addSVG = async (id:string) =>{
         const tempModu = await fetchModuleSvg(id);
-
+        
+        const name = checkName(tempModu.name);
+        console.log(name);
+        tempModu.name = name;
         const tempModuPins = await breakBoardAllocCheck(tempModu);
         if(tempModuPins){
             if(tempModuPins.pinAlloctedTemp.length !== 0){
@@ -247,6 +250,49 @@ const ModulatorComp = () =>{
         }
         
         forceUpdate();
+    }
+    function isNumber(numStr: string) {
+        return !isNaN(parseFloat(numStr)) && !isNaN(+numStr)
+      }
+
+      ///bug in not higher number
+    const checkName = (currentName: string): string =>{
+        const total:number[] = [];
+
+        for(let i =0; i< conModules.length; i++){
+            if(conModules[i].name.includes(currentName)){
+                const splitTemp = conModules[i].name.split(" ");
+                if(isNumber(splitTemp[splitTemp.length-1])){
+                    total.push(Number(splitTemp[splitTemp.length-1]));
+                }else{
+                    total.push(0);
+                }
+            }
+        }
+        if(total.length === 0){
+            return currentName;
+        }
+        const numberValue = findLowestNumber(total);
+        if(numberValue === 0){
+            return currentName;
+        }
+        return currentName + " "+numberValue.toString();
+        
+    }
+
+    const findLowestNumber = (pair: number[]): number =>{
+        pair.sort();
+        let lowest = -1;
+        for(let i = 0; i < pair.length; i++){
+            if(pair[i] != i){
+                lowest = i;
+                break;
+            }
+        }
+        if(lowest == -1){
+            lowest = pair[pair.length -1]+1;
+        }
+        return lowest;
     }
 
 //TODO: change pinAlloc and add different anming

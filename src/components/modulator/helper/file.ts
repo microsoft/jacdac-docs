@@ -36,8 +36,8 @@ export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
     const modulJson = await import ("../diagrams/"+nameFile+".json");
 
     //Possible to do checks if all things filled in
-    const tempName = modulJson.name+ " " + new Date().getSeconds();
-
+    //const tempName = modulJson.name+ " " + new Date().getSeconds();
+    const tempName = modulJson.name;
     const pins = pinTyping(modulJson.numberPins, modulJson.pinLayout, tempName)
     const tempCode = typeCode(modulJson.code)
     const modu:ModuExtern = {
@@ -57,7 +57,8 @@ export const fetchModuleSvg = async(nameFile: string):Promise<ModuExtern> => {
     const modulJson = await import ("../diagrams/"+nameFile+".json");
 
     //Possible to do checks if all things filled in
-    const tempName = modulJson.name+ " " + new Date().getSeconds();
+    //const tempName = modulJson.name+ " " + new Date().getSeconds();
+    const tempName = modulJson.name;
 
     const pins = pinTyping(modulJson.numberPins, modulJson.pinLayout, tempName)
     const tempCode = typeCode(modulJson.code)
