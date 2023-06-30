@@ -45,6 +45,7 @@ export const fetchModule = async(nameFile: string):Promise<ModuExtern> => {
         "type":modulJson.type,
         "numberPins":modulJson.numberPins,
         "diagram":modulJson.diagram,
+        "diagramWidth":modulJson.diagramWidth,
         "pinLayout":pins,
         "codeAct":tempCode
     } 
@@ -67,6 +68,7 @@ export const fetchModuleSvg = async(nameFile: string):Promise<ModuExtern> => {
         "type":modulJson.type,
         "numberPins":modulJson.numberPins,
         "diagram":modulJson.diagram,
+        "diagramWidth":modulJson.diagramWidth,
         "pinLayout":pins,
         "codeAct":tempCode
     } 
@@ -116,7 +118,11 @@ const pinTyping = (numberOfPins: number, data: any[], moduelId:string):Pin[] => 
             posPin: data[i].pos,
             name: data[i].name,
             logicLevel: data[i].logicLevel,
-            x: data[i].x,
+            posRect: {  xTop:data[i].rectPos.xTop,
+                        yTop:data[i].rectPos.yTop,
+                        xBot:data[i].rectPos.xBot,
+                        yBot:data[i].rectPos.yBot,
+                    }
         })
     }
     return result;

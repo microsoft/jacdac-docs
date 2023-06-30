@@ -1,20 +1,24 @@
-import React from "react";
+/* eslint-disable react/jsx-no-comment-textnodes */
+import React, { useState } from "react";
 import { LogicSup, ModuExtern, PinAlloc, TypePin, } from "../helper/types";
 import Button from "../../ui/Button";
 import { getColor } from "../helper/file";
+import ImageMapper from 'react-image-mapper';
 
 //TODO: kijken hoe hide wanneer neit highlighted
 
-export default function ModuleComponentTest(
-    props:{
-        module: ModuExtern;
-        removeFunc: (moduleName:string) =>void;
-        allocedPins: PinAlloc[];
-        logicDeviders: LogicSup[];
-        highlightFunc: (moduleName:string) =>void;
-    }
-){
-    const {module, removeFunc, allocedPins, logicDeviders, highlightFunc} = props;
+type Props={
+    module: ModuExtern;
+    removeFunc: (moduleName:string) =>void;
+    allocedPins: PinAlloc[];
+    logicDeviders: LogicSup[];
+    highlightFunc: (moduleName:string) =>void;
+}
+
+const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, logicDeviders, highlightFunc})  => 
+{
+    const [hoverdArea, setHoverArea] = useState(null);
+    const [moveMSG, setMoveMSG] = useState("");
 
     const onBoard = (module.numberPins === allocedPins.length)
     
@@ -101,10 +105,49 @@ export default function ModuleComponentTest(
 
     const sortedPinlayout = module.pinLayout.sort((x, y) => x.posPin > y.posPin ? 1: x.posPin < y.posPin ? -1: 0);
     
-//    document.getElementById("connector2pin").addEventListener("click", function() {
-//         console.log("Fuck");
-        
-//    })
+    const onEnterArea = (area) => {
+        const index = module.pinLayout.findIndex((value) => value.name == area.name);
+        // setHoverArea(area);
+        if(index !== -1){
+            if(module.pinLayout[index].typePin=== TypePin.Power){
+                setHoverArea (<div>
+                    <span style={{fontWeight:600}}>Pin name: </span> <span>VCC</span> 
+                    <br></br>
+                    <span style={{fontWeight:600}}>Used Power: </span><span>{module.pinLayout[index].name}V</span>
+                </div>)
+            }else{
+                setHoverArea (<div>
+                    <span style={{fontWeight:600}}>Pin name: </span> <span>{module.pinLayout[index].name}</span> 
+                    <br></br>
+                    <span style={{fontWeight:600}}>Pin Type: </span><span>{module.pinLayout[index].typePin} </span>
+                </div>)
+            }
+
+        }
+
+    }
+
+    const getTipPosition = (area) => {
+        return { top: `${area.center[1]}px`, left: `${area.center[0]}px` };
+    }
+
+    const createMap = () => {
+        const areaList = [];
+        for(let i = 0; i<module.pinLayout.length; i++){
+            areaList.push({
+                name: module.pinLayout[i].name,
+                shape: "rect",
+                coords: [module.pinLayout[i].posRect.xTop,module.pinLayout[i].posRect.yTop,
+                        module.pinLayout[i].posRect.xBot,module.pinLayout[i].posRect.yBot],
+                preFillColor: getColorPin(module.pinLayout[i].posPin)
+            })
+        }
+
+        return {
+            name: module.name,
+            areas: areaList
+        }
+    }
 
 
     return(
@@ -121,30 +164,44 @@ export default function ModuleComponentTest(
             </div>
            
 
-
+{/* 
             {module.diagram === undefined?null:
-            // <div style={{textAlign:"center"}}>
-            //     <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/hc-sr04_bf8299a_002.svg"} width="300"/>
-            // </div>
-            
-                <div style={{textAlign:"center"}}>
-                    <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
-                </div>
-             
-            // <div style={{textAlign:"center"}}>
-            //     <img style={{textAlign: "center", margin:"0"}} alt={"test"} src={"https://raw.githubusercontent.com/fritzing/fritzing-parts/9597553a1adc09019b4a42fe7929196abff18133/svg/core/breadboard/led-rgb-4pin-anode-leg.svg"} width="300"/>
-            // </div>
-            }
-            {/*  */}
-            {/*Drawing the needed boxes??? change to make hoverable*/ }
-            {/*TODO: change maybe to thing with imagamapper, has working of hover shit???*/}
-            <div style={{textAlign:"center"}}>
-                <svg height={20} width={300}>
+                // <div style={{textAlign:"center"}}>
+                //     <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
+                // </div>
+            } */}
+
+
+            {/*Drawing the needed boxes??? change to make hoverable
+            TODO: change maybe to thing with imagamapper, has working of hover shit???*/}
+            <div style={{display:"flex", alignContent:"center",}}>
+                {/* <svg height={20} width={300}>
                     {sortedPinlayout.map((pin, index) =>(
                         <rect key={index} x={pin.x} y={5} style={{fill:getColorPin(pin.posPin)}} width={"10"} height={"20"}/>
                     ))}
-                </svg>
+                </svg> */}
+                <div style={{position:"relative"}}>
+                    <ImageMapper src={module.diagram} map={createMap()} width={250} imgWidth={module.diagramWidth}
+                        onMouseEnter={area => onEnterArea(area)}
+                        onMouseLeave={area => setHoverArea(null)}
+
+                    />
+                </div>
+                <div>
+                    <h3>Detail Pin:</h3>
+                    {hoverdArea && <span>{hoverdArea}</span>}
+                </div>
+                {/* {
+                    hoverdArea &&
+                    <span>
+                        { hoverdArea && hoverdArea.name}
+                    </span>
+                    
+                } */}
+                
             </div>
+
+            
 
 
             <h3 style={{ marginBottom:0}}>How to connect:</h3>
@@ -167,3 +224,5 @@ export default function ModuleComponentTest(
         </div>
     );
 }
+
+export default ModuleComponentTest;

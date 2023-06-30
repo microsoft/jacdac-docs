@@ -24,7 +24,14 @@ export type Pin = {
     posPin: number;
     name?: string;
     logicLevel?: number;
-    x?: number;
+    posRect?: RectPos;
+}
+
+export type RectPos = {
+    xTop: number;
+    yTop: number;
+    xBot: number;
+    yBot: number;
 }
 
 //used module for dynamic code
@@ -42,6 +49,7 @@ export type ModuExtern = {
     pinLayout: Pin[];
     diagram: string;
     codeAct?: CodeMake;
+    diagramWidth: number;
 }
 
 //type for pinout breakboard
