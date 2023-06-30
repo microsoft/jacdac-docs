@@ -3,30 +3,55 @@
     "type": "LED",
     "numberPins": 4,
     "diagram": "https://i.pinimg.com/originals/a3/03/b9/a303b97eb7cc0cab93deac2d8d446adc.jpg",
+    "diagramWidth":700,
     "pinLayout": [
         {
             "type": "VCC",
             "pos": "0",
             "name": "5",
-            "logicLevel":"5"
+            "logicLevel":"5",
+            "rectPos":{
+                "xTop": 65,
+                "yTop": 57,
+                "xBot": 69,
+                "yBot": 73
+            }
         },
         {
             "type": "Digital OUT",
             "pos": "1",
             "name": "Green",
-            "logicLevel":"5"
+            "logicLevel":"5",
+            "rectPos":{
+                "xTop": 65,
+                "yTop": 57,
+                "xBot": 69,
+                "yBot": 73
+            }
         },
         {
             "type": "Digital OUT",
             "pos": "2",
             "name": "Blue",
-            "logicLevel":"5"
+            "logicLevel":"5",
+            "rectPos":{
+                "xTop": 65,
+                "yTop": 57,
+                "xBot": 69,
+                "yBot": 73
+            }
 
         },
         {
             "type": "GND",
             "pos": "3",
-            "name": "GND"
+            "name": "GND",
+            "rectPos":{
+                "xTop": 65,
+                "yTop": 57,
+                "xBot": 69,
+                "yBot": 73
+            }
         }
     ],
     "code": {

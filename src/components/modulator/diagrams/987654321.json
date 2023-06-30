@@ -2,22 +2,41 @@
     "name": "Light Sensor",
     "type": "LightSensor ",
     "numberPins": 3,
-    "diagram": "https://i.imgur.com/zZtT6jH.png",
+    "diagram": "https://i.imgur.com/GVPaWe7.png",
+    "diagramWidth":213,
     "pinLayout": [
         {
             "type": "GND",
             "pos": "0",
-            "name": "GND"
+            "name": "GND",
+            "rectPos":{
+                "xTop": 7,
+                "yTop": 0,
+                "xBot": 18,
+                "yBot": 28
+            }
         },
         {
             "type": "Analog IN",
             "pos": "1",
-            "name": "Input Pin"
+            "name": "Input Pin",
+            "rectPos":{
+                "xTop": 113,
+                "yTop": 173,
+                "xBot": 125,
+                "yBot": 213
+            }
         },
         {
             "type": "VCC",
             "pos": "2",
-            "name": "3.3"
+            "name": "3.3",
+            "rectPos":{
+                "xTop": 195,
+                "yTop": 0,
+                "xBot": 205,
+                "yBot": 28
+            }
         }
     ],
     "code": {

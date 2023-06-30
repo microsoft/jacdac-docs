@@ -2,31 +2,52 @@
     "name": "2004A Display",
     "type": "Display ",
     "numberPins": 4,
-    "diagram": "https://cdn.shopify.com/s/files/1/0474/7729/3217/products/CN0132-01.jpg",
+    "diagram": "https://i.imgur.com/R1XHEss.png",
+    "diagramWidth":846,
     "pinLayout": [
         {
             "type": "GND",
             "pos": "0",
             "name": "GND",
-            "x": 120
+            "rectPos":{
+                "xTop": 767,
+                "yTop": 549,
+                "xBot": 846,
+                "yBot": 561
+            }
         },
         {
             "type": "VCC",
             "pos": "1",
             "name": "5",
-            "x": 135
+            "rectPos":{
+                "xTop": 767,
+                "yTop": 576,
+                "xBot": 846,
+                "yBot": 588
+            }
         },
         {
             "type": "SDA I2C",
             "pos": "2",
             "name": "SDA",
-            "x": 150
+            "rectPos":{
+                "xTop": 767,
+                "yTop": 604,
+                "xBot": 846,
+                "yBot": 615
+            }
         },
         {
             "type": "SCL I2C",
             "pos": "3",
             "name": "SCL",
-            "x": 165
+            "rectPos":{
+                "xTop": 767,
+                "yTop": 631,
+                "xBot": 846,
+                "yBot": 642
+            }
         }
     ],
     "code": {

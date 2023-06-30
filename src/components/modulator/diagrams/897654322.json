@@ -2,27 +2,52 @@
     "name": "HC SR04 VCC",
     "type": "Distance",
     "numberPins": 4,
-    "diagram": "https://soldered.com/productdata/2015/02/751276-Edit.jpg",
+    "diagram": "https://imgur.com/JyC3x4C.png",
+    "diagramWidth":114,
     "pinLayout": [
         {
             "type": "GND",
             "pos": "3",
-            "name": "GND"
+            "name": "GND",
+            "rectPos":{
+                "xTop": 65,
+                "yTop": 57,
+                "xBot": 69,
+                "yBot": 73
+            }
         },
         {
             "type": "Analog IN",
             "pos": "2",
-            "name": "ECHO"
+            "name": "ECHO",
+            "rectPos":{
+                "xTop": 58,
+                "yTop": 57,
+                "xBot": 62,
+                "yBot": 73
+            }
         },
         {
             "type": "Analog IN",
             "pos": "1",
-            "name": "TRIG"
+            "name": "TRIG",
+            "rectPos":{
+                "xTop": 51,
+                "yTop": 57,
+                "xBot": 55,
+                "yBot": 73
+            }
         },
         {
             "type": "VCC",
             "pos": "0",
-            "name": "5"
+            "name": "5",
+            "rectPos":{
+                "xTop": 44,
+                "yTop": 57,
+                "xBot": 48,
+                "yBot": 73
+            }
         }
     ],
     "code": {
