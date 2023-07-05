@@ -12,9 +12,9 @@
             "logicLevel":"5",
             "rectPos":{
                 "xTop": 65,
-                "yTop": 57,
-                "xBot": 69,
-                "yBot": 73
+                "yTop": 50,
+                "xBot": 100,
+                "yBot": 90
             }
         },
         {
@@ -23,10 +23,10 @@
             "name": "Green",
             "logicLevel":"5",
             "rectPos":{
-                "xTop": 65,
-                "yTop": 57,
-                "xBot": 69,
-                "yBot": 73
+                "xTop": 290,
+                "yTop": 50,
+                "xBot": 330,
+                "yBot": 90
             }
         },
         {
@@ -35,10 +35,10 @@
             "name": "Blue",
             "logicLevel":"5",
             "rectPos":{
-                "xTop": 65,
-                "yTop": 57,
-                "xBot": 69,
-                "yBot": 73
+                "xTop": 480,
+                "yTop": 50,
+                "xBot": 530,
+                "yBot": 90
             }
 
         },
@@ -47,10 +47,10 @@
             "pos": "3",
             "name": "GND",
             "rectPos":{
-                "xTop": 65,
-                "yTop": 57,
-                "xBot": 69,
-                "yBot": 73
+                "xTop": 600,
+                "yTop": 50,
+                "xBot": 650,
+                "yBot": 90
             }
         }
     ],

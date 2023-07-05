@@ -99,6 +99,8 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
             if(allocedPins[index].BreakoutName ==="Micro:bit V2"){
                 
                 return getColor(allocedPins[index].pinBreakName)
+            }else{
+                return "#f505c1"
             }
         }
     }
