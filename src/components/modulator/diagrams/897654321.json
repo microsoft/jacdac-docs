@@ -52,9 +52,8 @@
     ],
     "code": {
         "codeClient": "const #_client = new modules.DistanceClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.DepthService(() => sonar.ping(DigitalPin.#, DigitalPin.#, PingUnit.Centimeters)/100.0, \"#\", true);",
+        "codeService": "new ServiceImpl.DepthService(() => sonar.ping(DigitalPin.#, DigitalPin.#, PingUnit.Centimeters)/100.0, \"#\", true);",
         "codeServiceParam": [
-            "Service",
             "1",
             "2",
             "Name"

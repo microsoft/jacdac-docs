@@ -49,6 +49,8 @@ const SchemaCompTest: React.FC<Props> = ({modules, removeFunc, highlighted, allo
     
     return(
         <Grid xs={8} item style={{paddingTop:0}}>
+            {<h3>First Code for Makecode: led.enable(false);</h3>}
+
             <GridHeader title={"Added modules"} action={<span><ManualAddComp addSchema={addSchema}/> <Button onClick={() => highlight(undefined)}>Reset Highlight</Button></span>}/>
             {checkhigh()? 
                 <div style={{overflowY:"scroll", maxHeight:"75vh"}}>

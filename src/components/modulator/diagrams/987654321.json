@@ -41,9 +41,8 @@
     ],
     "code": {
         "codeClient": "const #_client = new modules.LightLevelClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.LightLevelService(() => pins.analogReadPin(AnalogPin.#) /1024, \"#\", true);",
+        "codeService": "new ServiceImpl.LightLevelService(() => pins.analogReadPin(AnalogPin.#) /1024, \"#\", true);",
         "codeServiceParam": [
-            "Service",
             "1",
             "Name"
         ]

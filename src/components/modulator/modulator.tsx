@@ -771,7 +771,6 @@ const ModulatorComp = () =>{
                         direction={"column"}
                         container
                     >
-                        {<h3>First Code for Makecode: led.enable(false);</h3>}
                         <PinLayoutComp highlighted={highLighted} highlightPinsAlloc={highLightPins}/>
                         
                         {/* {conLogicLevels.length >0?<ExtraNeededComp supplies={conLogicLevels} />: null} */}
@@ -780,9 +779,8 @@ const ModulatorComp = () =>{
                        
                     </Grid>
                 </Grid>
-
-            {/* <SchemaComp modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/> */}
             
+            {/* <SchemaComp modules={conModules} logicDeviders={conLogicLevels} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSchema}/> */}
             <SchemaCompTest modules={conModules} logicDeviders={conLogicLevels} highlighted={highLighted} removeFunc={removeConModule} allocedPins={allocedPins} addSchema={addSVG} highlight={highlightShit}/>
             {checkExtraComp()?<ExtraNeededComp powerSupplies={conPowerSup} LogicSupl={conLogicLevels} highlighted={highLighted} highlightPinsAlloc={highLightPins}/>:null}
 

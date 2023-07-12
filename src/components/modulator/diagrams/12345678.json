@@ -52,9 +52,8 @@
     ],
     "code": {
         "codeClient": "const #_client = new modules.LedClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.RGBService(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\", true);",
+        "codeService": "new ServiceImpl.RGBService(AnalogPin.#, AnalogPin.#, AnalogPin.#, \"#\", true);",
         "codeServiceParam": [
-            "Service",
             "0",
             "1",
             "2",

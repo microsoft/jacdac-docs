@@ -52,9 +52,8 @@
     ],
     "code": {
         "codeClient": "const #_client = new modules.CharacterScreenClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.LcdScreenService(\"#\", 32,true);",
+        "codeService": "new ServiceImpl.LcdScreenService(\"#\", 32,true);",
         "codeServiceParam": [
-            "Service",
             "Name"
         ]
     }

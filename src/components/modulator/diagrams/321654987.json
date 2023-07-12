@@ -41,9 +41,8 @@
     ],
     "code": {
         "codeClient": "const #_client = new modules.RelayClient(\"#\");",
-        "codeService": "const # = new ServiceImpl.RelayService(DigitalPin.#, \"#\", true);",
+        "codeService": "new ServiceImpl.RelayService(DigitalPin.#, \"#\", true);",
         "codeServiceParam": [
-            "Service",
             "0",
             "Name"
         ]

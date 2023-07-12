@@ -115,11 +115,15 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
                 setHoverArea (<div>
                     <span style={{fontWeight:600}}>Pin name: </span> <span>VCC</span> 
                     <br></br>
+                    <span style={{fontWeight:600}}>Pin position: </span> <span>{module.pinLayout[index].posPin}</span>
+                    <br></br>
                     <span style={{fontWeight:600}}>Used Power: </span><span>{module.pinLayout[index].name}V</span>
                 </div>)
             }else{
                 setHoverArea (<div>
                     <span style={{fontWeight:600}}>Pin name: </span> <span>{module.pinLayout[index].name}</span> 
+                    <br></br>
+                    <span style={{fontWeight:600}}>Pin position: </span> <span>{module.pinLayout[index].posPin}</span>
                     <br></br>
                     <span style={{fontWeight:600}}>Pin Type: </span><span>{module.pinLayout[index].typePin} </span>
                 </div>)
@@ -189,8 +193,8 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
 
                     />
                 </div>
-                <div>
-                    <h3>Detail Pin:</h3>
+                <div style={{paddingLeft: "10px"}}>
+                    <h3 style={{marginTop: "5px", marginBottom: "5px"}}>Detail Pin:</h3>
                     {hoverdArea && <span>{hoverdArea}</span>}
                 </div>
                 {/* {
