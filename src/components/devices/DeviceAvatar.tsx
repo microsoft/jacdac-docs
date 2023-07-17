@@ -3,7 +3,7 @@ import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import CmdButton from "../CmdButton"
 import useServiceProvider from "../hooks/useServiceProvider"
 import useDeviceName from "./useDeviceName"
-import { rgbToHtmlColor } from "../../../jacdac-ts/src/jdom/utils"
+import { rgbaToHtmlColor } from "../../../jacdac-ts/src/jdom/utils"
 import useChange from "../../jacdac/useChange"
 import IdentifyDialog from "../dialogs/IdentifyDialog"
 import { JDServerServiceProvider } from "../../../jacdac-ts/src/jdom/servers/serverserviceprovider"
@@ -18,11 +18,13 @@ export default function DeviceAvatar(props: {
     const [identifyDialog, setIdentifyDialog] = useState(false)
     const name = useDeviceName(device)
     const server = useServiceProvider<JDServerServiceProvider>(device)
-    const ctrl = server?.controlService
-    const color = useChange(ctrl, _ => _?.statusLightColor)
+    const statusLight = useChange(device, _ => _?.statusLight)
+    const color = useChange(statusLight, _ => _?.color)
     const style: CSSProperties = color
         ? {
-              color: rgbToHtmlColor(color),
+              outlineColor: rgbaToHtmlColor(color, 0.4),
+              outlineStyle: "solid",
+              outlineWidth: "2px",
           }
         : undefined
     const handleOpenIdentify = async () => setIdentifyDialog(true)
