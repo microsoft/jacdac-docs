@@ -27,19 +27,26 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
     const contextRef = useRef<CanvasRenderingContext2D>()
 
     useEffect(() => {
-        const canvas = canvasRef.current
         contextRef.current = undefined
-        if (!isNaN(width)) canvas.width = width
-        if (!isNaN(height)) canvas.height = height
+        const canvas = canvasRef.current
+        if (canvas) {
+            if (!isNaN(width)) canvas.width = width
+            if (!isNaN(height)) canvas.height = height
+        }
     }, [width, height])
 
     const paint = () => {
+        const canvas = canvasRef.current
+        if (!canvas) return
+
         const context =
-            contextRef.current ||
-            (contextRef.current = canvasRef.current?.getContext("2d"))
+            contextRef.current || (contextRef.current = canvas.getContext("2d"))
         if (!context) return
 
+        console.log("RENDER")
         // paint image
+        context.fillStyle = "#ccc"
+        context.fillRect(0, 0, canvas.width, canvas.height)
     }
 
     useEffect(
@@ -49,6 +56,7 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
 
     const style: CSSProperties = {
         minWidth: "10rem",
+        width: "100%"
     }
 
     if (width === undefined || height === undefined)
