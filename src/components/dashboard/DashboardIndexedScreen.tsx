@@ -42,7 +42,10 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
         // paint image
     }
 
-    useEffect(() => visible && bus?.subscribe(RENDER, paint), [visible, server])
+    useEffect(
+        () => visible && bus?.subscribe(RENDER, paint),
+        [bus, visible, service, server]
+    )
 
     const style: CSSProperties = {
         minWidth: "10rem",
