@@ -10,6 +10,7 @@ import AddIcon from "@mui/icons-material/Add"
 // tslint:disable-next-line: match-default-export-name no-submodule-imports
 import IconButtonWithTooltip from "./ui/IconButtonWithTooltip"
 import { useId } from "react"
+import { SRV_DEVICE_SCRIPT_MANAGER } from "../../jacdac-ts/src/jdom/constants"
 
 export default function AddServiceIconButton(props: {
     onAdd: (service: jdspec.ServiceSpec) => void
@@ -24,7 +25,11 @@ export default function AddServiceIconButton(props: {
     const services = useMemo(
         () =>
             serviceSpecifications()
-                .filter(srv => !isInfrastructure(srv))
+                .filter(
+                    srv =>
+                        srv.classIdentifier === SRV_DEVICE_SCRIPT_MANAGER ||
+                        !isInfrastructure(srv)
+                )
                 .filter(srv => !serviceFilter || serviceFilter(srv)),
         [serviceFilter]
     )
