@@ -41,6 +41,7 @@
         "jdom",
         "jdpack",
         "jdspec",
+        "jdunpack",
         "keepout",
         "keepouts",
         "makecode",

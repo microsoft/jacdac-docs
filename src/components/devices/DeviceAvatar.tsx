@@ -24,7 +24,7 @@ export default function DeviceAvatar(props: {
         ? {
               outlineColor: rgbaToHtmlColor(color, 0.4),
               outlineStyle: "solid",
-              outlineWidth: "2px",
+              outlineWidth: "3px",
           }
         : undefined
     const handleOpenIdentify = async () => setIdentifyDialog(true)
