@@ -53,6 +53,7 @@
         "microcontrollers",
         "Schottky",
         "Slidy",
+        "strcmp",
         "UART"
     ]
 }
