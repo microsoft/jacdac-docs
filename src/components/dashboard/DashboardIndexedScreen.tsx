@@ -70,10 +70,13 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
                 (contextRef.current = canvas.getContext("2d"))
             if (!context) return
 
-            console.log("RENDER")
-            // paint image
-            context.fillStyle = "#222"
-            context.fillRect(0, 0, canvas.width, canvas.height)
+            const pixels = server?.pixels
+            context.clearRect(0, 0, canvas.width, canvas.height)
+
+            if (!pixels) {
+                context.fillStyle = "#222"
+                context.fillRect(0, 0, canvas.width, canvas.height)
+            }
         }
 
         paint()
@@ -99,7 +102,7 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
     }
     if (rotation) canvasStyle.transform = `rotate(${rotation}deg)`
     const parentStyle: CSSProperties = {
-        width: "clamp(5rem, 90vw, 20rem)"
+        width: "clamp(5rem, 90vw, 20rem)",
     }
 
     return (
