@@ -41,13 +41,14 @@
         {
             "type": "VCC",
             "pos": "0",
-            "name": "5",
+            "name": "VCC",
             "rectPos":{
                 "xTop": 44,
                 "yTop": 57,
                 "xBot": 48,
                 "yBot": 73
-            }
+            },
+            "voltage":5
         }
     ],
     "code": {

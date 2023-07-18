@@ -30,13 +30,14 @@
         {
             "type": "VCC",
             "pos": "2",
-            "name": "3.3",
+            "name": "Input Voltage",
             "rectPos":{
                 "xTop": 195,
                 "yTop": 0,
                 "xBot": 205,
                 "yBot": 38
-            }
+            },
+            "voltage":3.3
         }
     ],
     "code": {

@@ -78,13 +78,13 @@ export const fetchModuleSvg = async(nameFile: string):Promise<ModuExtern> => {
 
 export const fetchLogic = async(nameFile: string):Promise<LogicSup> => {
     const logicJson = await import ("../logicLevels/"+nameFile+"_3.3Logic.json");
-    const tempName = logicJson.name+ " " + new Date().getSeconds();
-
+    //const tempName = logicJson.name+ " " + new Date().getSeconds();
+    const tempName = logicJson.name;
     const lowVoltPins = breakoutPinType(logicJson.numPinsSide, logicJson.pinLayoutLow);
     const highVoltPins = breakoutPinType(logicJson.numPinsSide, logicJson.pinLayoutHigh);
 
     const logic:LogicSup = {
-        "convName": tempName,
+        "name": tempName,
         "highVolt": logicJson.highVolt,
         "lowVolt": logicJson.lowVolt,
         "numberConvPins":logicJson.channels,
@@ -118,6 +118,7 @@ const pinTyping = (numberOfPins: number, data: any[], moduelId:string):Pin[] => 
             posPin: data[i].pos,
             name: data[i].name,
             logicLevel: data[i].logicLevel,
+            voltage: data[i].voltage,
             posRect: {  xTop:data[i].rectPos.xTop,
                         yTop:data[i].rectPos.yTop,
                         xBot:data[i].rectPos.xBot,

@@ -43,19 +43,16 @@ const ExtraNeededComp: React.FC<Props> = ({LogicSupl, powerSupplies, highlightPi
         if(pin.used){
             console.log(pin);
             if(pin.modulePin.length !== 0){
-                return "Connect module pin "+ pin.name + " to the "+pin.modulePin[0].name + " of "+pin.moduleName[0]+"\n";
+                    return <div>Connect <span style={{fontWeight:600}}> {pin.name}</span> to <span style={{fontWeight:600}}>{pin.moduleName[0]} P{pin.modulePin[0].posPin}  </span> </div>
+
             }
             if(pin.options[0] === TypePin.GND){
-                if(lowSup){
-                    return "Connect module pin LGND to the GND of "+ pin.moduleName[0]+"\n";
-                }
-                return "Connect module pin HGND to the GND of "+ pin.moduleName[0]+"\n";
+                    return<div>Connect <span style={{fontWeight:600}}>{pin.name} </span> to  <span style={{fontWeight:600}}>{pin.moduleName[0]} GND</span> </div>
+                
             }
             if(pin.options[0] === TypePin.Power){
-                if(lowSup){
-                    return "Connect module pin LV to the VCC of "+ pin.moduleName[0]+"\n";
-                }
-                return "Connect module pin HV to the VCC of "+ pin.moduleName[0]+"\n";
+                return<div>Connect <span style={{fontWeight:600}}>{pin.name} </span> to  <span style={{fontWeight:600}}>{pin.moduleName[0]} VCC</span> </div>
+                
             }
 
         }
@@ -84,51 +81,74 @@ const ExtraNeededComp: React.FC<Props> = ({LogicSupl, powerSupplies, highlightPi
                             Connected: {sup.conModule.length}                         
                         </div>
                     ))}
+
+                    {LogicSupl.map((sup, index) => (
+                        <div key={index} style={{paddingLeft: 50, opacity:checkIfIncluded(sup.name)?"1.0":"0.5"}}>
+                            {sup.name}
+                            <br></br>
+                            Connected: {sup.conModule.length}
+                            <h3 style={{marginBottom:0}}>How to connect High Voltage: </h3>
+                            {sup.pinOutHigh.map((pin, index) =>(
+                                <div key={index}>
+                                    {getPin(pin, false)}
+                                </div>
+                            ))}
+                            <div>
+                                <img src={imgPathLogic} alt="diagram" height="150"/>
+                            </div>
+                            <h3 style={{marginBottom:0}}>How to connect Low Voltage: </h3>
+                            
+                            {sup.pinOutLow.map((pin, index) =>(
+                                <div key={index}>
+                                    {getPin(pin, true)}
+                                </div>
+                            ))}
+
+                        </div>
+                    ))}
                 </div>:
+
                 <div style={{display:"flex"}}>
-                {powerSupplies.map((sup, index) => (
-                    <div key={index} >
-                        <img src={imgPathPw} alt="Power Supply diagram" height="100"/>
-                        <br/>
-                        {sup.supplyName}V
-                        <br></br>
-                        Connected: {sup.conModule.length}                         
-                    </div>
-                ))}
+                    {powerSupplies.map((sup, index) => (
+                        <div key={index} >
+                            <img src={imgPathPw} alt="Power Supply diagram" height="100"/>
+                            <br/>
+                            {sup.supplyName}V
+                            <br></br>
+                            Connected: {sup.conModule.length}                         
+                        </div>
+                    ))}
+                    
+                    {LogicSupl.map((sup, index) => (
+                        <div key={index} style={{paddingLeft: 50}}>
+                            {sup.name}
+                            <br></br>
+                            Connected: {sup.conModule.length}
+                            <h3 style={{marginBottom:0}}>How to connect High Voltage: </h3>
+                            {sup.pinOutHigh.map((pin, index) =>(
+                                <div key={index}>
+                                    {getPin(pin, false)}
+                                </div>
+                            ))}
+                            <div>
+                                <img src={imgPathLogic} alt="diagram" height="150"/>
+                            </div>
+                            <h3 style={{marginBottom:0}}>How to connect Low Voltage: </h3>
+                            
+                            {sup.pinOutLow.map((pin, index) =>(
+                                <div key={index}>
+                                    {getPin(pin, true)}
+                                </div>
+                            ))}
+
+                        </div>
+                    ))}
                 </div>
             }
             
 
             <div style={{display:"flex"}}>
-                {LogicSupl.map((sup, index) => (
-                    <div key={index} style={{marginRight:5}}>
-                        <div>
-                            <span style={{fontWeight:"bold"}}>Component Name: </span>
-                            <span>{sup.convName}</span>
-                        </div>
-                        <div>
-                            <img src={imgPathLogic} alt="diagram" height="100"/>
-                        </div>
-                        <div>
-                            <span style={{fontWeight:"bold"}}> Connected: </span>
-                            <span>{sup.conModule.length}</span>
-                        </div>
-                        <p style={{fontWeight: "bold", marginBottom:0}}>How to connect Low Voltage: </p>
-                        
-                        {sup.pinOutLow.map((pin, index) =>(
-                            <div key={index}>
-                                {getPin(pin, true)}
-                            </div>
-                        ))}
-                        <p style={{fontWeight: "bold", marginBottom:0}}>How to connect High Voltage: </p>
-                        {sup.pinOutHigh.map((pin, index) =>(
-                            <div key={index}>
-                                {getPin(pin, false)}
-                            </div>
-                        ))}
-                       
-                    </div>
-                ))}
+                
             </div>
         </Grid>
     );

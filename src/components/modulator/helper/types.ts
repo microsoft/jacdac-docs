@@ -25,6 +25,7 @@ export type Pin = {
     name?: string;
     logicLevel?: number;
     posRect?: RectPos;
+    voltage?: number;
 }
 
 export type RectPos = {
@@ -101,7 +102,7 @@ export type powerSup = {
 
 
 export type LogicSup = {
-    convName: string;
+    name: string;
     highVolt: number;
     lowVolt: number;
     numberConvPins: number;

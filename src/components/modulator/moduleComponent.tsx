@@ -27,7 +27,7 @@ export default function ModuleComponent(
                     if(allocedPins[indexAlloc].BreakoutName !=="Micro:bit V2"){
                         console.log(allocedPins[indexAlloc]);
                         
-                        const logicIndex = logicDeviders.findIndex((value) => value.convName === allocedPins[indexAlloc].BreakoutName);
+                        const logicIndex = logicDeviders.findIndex((value) => value.name === allocedPins[indexAlloc].BreakoutName);
                         
                         if(logicDeviders[logicIndex].highVolt == allocedPins[indexAlloc].modulePin.logicLevel){
                             const indexPin = logicDeviders[logicIndex].pinOutLow.findIndex((value) => value.position == allocedPins[indexAlloc].pinBreakLocation);

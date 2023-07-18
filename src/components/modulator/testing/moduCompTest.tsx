@@ -34,7 +34,7 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
                     if(allocedPins[indexAlloc].BreakoutName !=="Micro:bit V2"){
                         console.log(allocedPins[indexAlloc]);
                         
-                        const logicIndex = logicDeviders.findIndex((value) => value.convName === allocedPins[indexAlloc].BreakoutName);
+                        const logicIndex = logicDeviders.findIndex((value) => value.name === allocedPins[indexAlloc].BreakoutName);
                         
                         if(logicDeviders[logicIndex].highVolt == allocedPins[indexAlloc].modulePin.logicLevel){
                             const indexPin = logicDeviders[logicIndex].pinOutLow.findIndex((value) => value.position == allocedPins[indexAlloc].pinBreakLocation);
@@ -113,11 +113,11 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
         if(index !== -1){
             if(module.pinLayout[index].typePin=== TypePin.Power){
                 setHoverArea (<div>
-                    <span style={{fontWeight:600}}>Pin name: </span> <span>VCC</span> 
+                    <span style={{fontWeight:600}}>Pin name: </span> <span>{module.pinLayout[index].name}</span> 
                     <br></br>
                     <span style={{fontWeight:600}}>Pin position: </span> <span>{module.pinLayout[index].posPin}</span>
                     <br></br>
-                    <span style={{fontWeight:600}}>Used Power: </span><span>{module.pinLayout[index].name}V</span>
+                    <span style={{fontWeight:600}}>Used Power: </span><span>{module.pinLayout[index].voltage}V</span>
                 </div>)
             }else{
                 setHoverArea (<div>
@@ -170,22 +170,9 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
             </div>
            
 
-{/* 
-            {module.diagram === undefined?null:
-                // <div style={{textAlign:"center"}}>
-                //     <img style={{textAlign: "center"}} src={module.diagram} alt="module diagram" width="200"/>
-                // </div>
-            } */}
 
-
-            {/*Drawing the needed boxes??? change to make hoverable
-            TODO: change maybe to thing with imagamapper, has working of hover shit???*/}
             <div style={{display:"flex", alignContent:"center",}}>
-                {/* <svg height={20} width={300}>
-                    {sortedPinlayout.map((pin, index) =>(
-                        <rect key={index} x={pin.x} y={5} style={{fill:getColorPin(pin.posPin)}} width={"10"} height={"20"}/>
-                    ))}
-                </svg> */}
+                
                 <div style={{position:"relative"}}>
                     <ImageMapper src={module.diagram} map={createMap()} width={250} imgWidth={module.diagramWidth}
                         onMouseEnter={area => onEnterArea(area)}
@@ -197,14 +184,7 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
                     <h3 style={{marginTop: "5px", marginBottom: "5px"}}>Detail Pin:</h3>
                     {hoverdArea && <span>{hoverdArea}</span>}
                 </div>
-                {/* {
-                    hoverdArea &&
-                    <span>
-                        { hoverdArea && hoverdArea.name}
-                    </span>
-                    
-                } */}
-                
+                               
             </div>
 
             
@@ -214,12 +194,10 @@ const ModuleComponentTest: React.FC<Props> = ({module, removeFunc, allocedPins, 
             {sortedPinlayout.map((pin, index) =>(
                 <div key={index}>
                     Connect module <span style={{}}> pin {pin.posPin} </span> ({pin.typePin}) to the <span style={{borderBottom:"3px solid",borderBottomColor:getColorPin(pin.posPin), fontWeight:600}}>{getPin(pin.posPin)}</span>
-                    {/* Type: {pin.typePin} | Module Position: {pin.posPin} | BreakoutBoard Position: {getPin(pin.posPin)} */}
                 </div>
             ))}
             {module.codeAct === undefined?null: 
             <div style={{marginTop:15}}>
-                {/* <h3 style={{fontSize: "1.3rem",fontWeight: "bold"}}>Copy to MakeCode:</h3> */}
                 <h3 style={{margin:0}}>Copy to MakeCode:</h3>
                 <div style={{marginBottom:0}}>//Code for service</div>
                 <div style={{marginBottom:0}}>{fileInCode()}</div>

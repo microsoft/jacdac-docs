@@ -19,13 +19,14 @@
         {
             "type": "VCC",
             "pos": "1",
-            "name": "5",
+            "name": "2",
             "rectPos":{
                 "xTop": 172,
                 "yTop": 324,
                 "xBot": 181,
                 "yBot": 408
-            }
+            },
+            "voltage":5
         },
         {
             "type": "GND",

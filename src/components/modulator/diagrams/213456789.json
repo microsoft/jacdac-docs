@@ -8,14 +8,15 @@
         {
             "type": "VCC",
             "pos": "0",
-            "name": "5",
+            "name": "VCC",
             "logicLevel":"5",
             "rectPos":{
                 "xTop": 65,
                 "yTop": 50,
                 "xBot": 100,
                 "yBot": 90
-            }
+            },
+            "voltage":5
         },
         {
             "type": "Digital OUT",

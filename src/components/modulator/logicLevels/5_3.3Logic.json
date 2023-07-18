@@ -5,7 +5,7 @@
     "channels": 4,
     "lowVolt": 3.3,
     "highVolt":5,
-    "diagram": "https://www.kiwi-electronics.com/image/cache/catalog/product/aem8hbpd/SF-BOB-12009_0-766x511h.jpg",
+    "diagram": "https://i.imgur.com/b9m1efM.jpg",
     "pinLayoutLow": [
         {
             "options":["Digital IN", "Digital OUT"],
@@ -20,12 +20,13 @@
         {
             "type": "VCC",
             "pos": "2",
-            "name": "3.3"
+            "name": "LV",
+            "voltage":3.3
         },
         {
             "type": "GND",
             "pos": "4",
-            "name": "GND"
+            "name": "LGND"
         },
         {
             "options":["Digital IN", "Digital OUT"],
@@ -53,12 +54,13 @@
         {
             "type": "VCC",
             "pos": "2",
-            "name": "5"
+            "name": "HV",
+            "voltage":5
         },
         {
             "type": "GND",
             "pos": "4",
-            "name": "GND"
+            "name": "HGND"
         },
         {
             "options":["Digital IN", "Digital OUT"],

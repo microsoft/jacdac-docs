@@ -19,13 +19,14 @@
         {
             "type": "VCC",
             "pos": "1",
-            "name": "5",
+            "name": "VCC",
             "rectPos":{
                 "xTop": 767,
                 "yTop": 576,
                 "xBot": 846,
                 "yBot": 588
-            }
+            },
+            "voltage":5
         },
         {
             "type": "SDA I2C",
