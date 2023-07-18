@@ -59,25 +59,26 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
     }, [width, height])
 
     // repaint
-    useEffect(
-        () =>
-            visible &&
-            server?.subscribe(CHANGE, () => {
-                const canvas = canvasRef.current
-                if (!canvas) return
+    useEffect(() => {
+        if (!visible || !server || !width || !height) return
+        const paint = () => {
+            const canvas = canvasRef.current
+            if (!canvas) return
 
-                const context =
-                    contextRef.current ||
-                    (contextRef.current = canvas.getContext("2d"))
-                if (!context) return
+            const context =
+                contextRef.current ||
+                (contextRef.current = canvas.getContext("2d"))
+            if (!context) return
 
-                console.log("RENDER")
-                // paint image
-                context.fillStyle = "#333"
-                context.fillRect(0, 0, canvas.width, canvas.height)
-            }),
-        [server, visible, width, height, bitsPerPixel, palette]
-    )
+            console.log("RENDER")
+            // paint image
+            context.fillStyle = "#222"
+            context.fillRect(0, 0, canvas.width, canvas.height)
+        }
+
+        paint()
+        return server.subscribe(CHANGE, paint)
+    }, [server, visible, width, height, bitsPerPixel, palette])
 
     if (width === undefined || height === undefined)
         return (
@@ -86,11 +87,24 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
             />
         )
 
-    const style: CSSProperties = {
-        minWidth: "10rem",
-        width: "100%",
+    const canvasStyle: CSSProperties = {
         opacity: MIN_OPACITY + brightness * (1 - MIN_OPACITY),
+        border: "none",
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+        objectPosition: "top",
+        imageRendering: "pixelated",
+        display: "block",
     }
-    if (rotation) style.transform = `rotate(${rotation}deg)`
-    return <canvas id={id} ref={canvasRef} style={style} />
+    if (rotation) canvasStyle.transform = `rotate(${rotation}deg)`
+    const parentStyle: CSSProperties = {
+        width: "clamp(5rem, 90vw, 20rem)"
+    }
+
+    return (
+        <div style={parentStyle}>
+            <canvas id={id} ref={canvasRef} style={canvasStyle} />
+        </div>
+    )
 }
