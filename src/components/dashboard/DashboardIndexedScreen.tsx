@@ -1,17 +1,32 @@
-import React, { CSSProperties, useEffect, useId, useRef } from "react"
+import React, {
+    CSSProperties,
+    useContext,
+    useEffect,
+    useId,
+    useRef,
+} from "react"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import useServiceServer from "../hooks/useServiceServer"
 import { IndexedScreenServer } from "../../../jacdac-ts/src/servers/indexedscreenserver"
-import { CHANGE, IndexedScreenReg } from "../../../jacdac-ts/src/jdom/constants"
+import {
+    CHANGE,
+    FRAME_PROCESS_LARGE,
+    IndexedScreenReg,
+} from "../../../jacdac-ts/src/jdom/constants"
 import useRegister from "../hooks/useRegister"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
+import useBus from "../../jacdac/useBus"
+import { JDFrameBuffer } from "../../../jacdac-ts/src/jacdac"
+import DarkModeContext from "../ui/DarkModeContext"
 
 const MIN_OPACITY = 0.4
 
 export default function DashboardLEDStrip(props: DashboardServiceProps) {
     const { service, visible } = props
     const id = useId()
+    const { darkMode } = useContext(DarkModeContext)
+    const bus = useBus()
     const server = useServiceServer<IndexedScreenServer>(
         service,
         () => new IndexedScreenServer()
@@ -45,6 +60,14 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
         props
     )
 
+    useEffect(
+        () =>
+            bus?.subscribe(FRAME_PROCESS_LARGE, (frame: JDFrameBuffer) => {
+                console.log({ frame })
+            }),
+        [bus]
+    )
+
     const canvasRef = useRef<HTMLCanvasElement>()
     const contextRef = useRef<CanvasRenderingContext2D>()
 
@@ -74,7 +97,7 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
             context.clearRect(0, 0, canvas.width, canvas.height)
 
             if (!pixels) {
-                context.fillStyle = "#222"
+                context.fillStyle = darkMode === "dark" ? "#999" : "#222"
                 context.fillRect(0, 0, canvas.width, canvas.height)
             } else {
                 context.putImageData(pixels, 0, 0)
@@ -105,6 +128,10 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
     if (rotation) canvasStyle.transform = `rotate(${rotation}deg)`
     const parentStyle: CSSProperties = {
         width: "clamp(5rem, 90vw, 20rem)",
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderRadius: "0.25rem",
+        borderColor: darkMode === "dark" ? "#999" : "#222",
     }
 
     return (
