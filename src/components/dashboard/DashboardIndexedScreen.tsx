@@ -76,6 +76,8 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
             if (!pixels) {
                 context.fillStyle = "#222"
                 context.fillRect(0, 0, canvas.width, canvas.height)
+            } else {
+                context.putImageData(pixels, 0, 0)
             }
         }
 
