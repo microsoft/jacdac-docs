@@ -35,28 +35,11 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
     const widthRegister = useRegister(service, IndexedScreenReg.Width)
     const heightRegister = useRegister(service, IndexedScreenReg.Height)
     const brightnessRegister = useRegister(service, IndexedScreenReg.Brightness)
-    const rotationRegister = useRegister(service, IndexedScreenReg.Rotation)
-    const paletteRegister = useRegister(service, IndexedScreenReg.Palette)
-    const bitsPerPixelRegister = useRegister(
-        service,
-        IndexedScreenReg.BitsPerPixel
-    )
 
     const [width] = useRegisterUnpackedValue<[number]>(widthRegister, props)
     const [height] = useRegisterUnpackedValue<[number]>(heightRegister, props)
     const [brightness = 1] = useRegisterUnpackedValue<[number]>(
         brightnessRegister,
-        props
-    )
-    const [rotation = 0] = useRegisterUnpackedValue<[number]>(
-        rotationRegister,
-        props
-    )
-    const [palette] = useRegisterUnpackedValue<
-        [[number, number, number, number][]]
-    >(paletteRegister, props)
-    const [bitsPerPixel] = useRegisterUnpackedValue<[number]>(
-        bitsPerPixelRegister,
         props
     )
 
@@ -106,7 +89,7 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
 
         paint()
         return server.subscribe(CHANGE, paint)
-    }, [server, visible, width, height, bitsPerPixel, palette])
+    }, [server, visible, width, height])
 
     if (width === undefined || height === undefined)
         return (
@@ -125,7 +108,6 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
         imageRendering: "pixelated",
         display: "block",
     }
-    if (rotation) canvasStyle.transform = `rotate(${rotation}deg)`
     const parentStyle: CSSProperties = {
         width: "clamp(5rem, 90vw, 20rem)",
         borderWidth: "2px",
