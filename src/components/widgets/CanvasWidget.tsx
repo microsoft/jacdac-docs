@@ -52,7 +52,12 @@ export default function CanvasWidget(props: {
     if (typeof ResizeObserver === "undefined") return null
 
     return (
-        <Canvas camera={{ position: [-1, 0.5, 2], fov: 50 }}>
+        <Canvas
+            camera={{
+                position: [-1, 0.5, 2] as [number, number, number],
+                fov: 50,
+            }}
+        >
             <hemisphereLight intensity={0.35} />
             <spotLight
                 position={[10, 10, 10]}
