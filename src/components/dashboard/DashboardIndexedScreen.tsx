@@ -120,7 +120,7 @@ export default function DashboardIndexedScreen(props: DashboardServiceProps) {
 
     return (
         <>
-            <Grid item xs={12}>
+            <Grid sx={{ mt: 0.5 }} item xs={12}>
                 <div style={parentStyle}>
                     <canvas id={id} ref={canvasRef} style={canvasStyle} />
                 </div>{" "}
