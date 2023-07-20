@@ -51,6 +51,7 @@ import {
     SRV_SERIAL,
     SRV_GPIO,
     SRV_ROS,
+    SRV_INDEXED_SCREEN,
 } from "../../../jacdac-ts/src/jdom/constants"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { CircularProgress, SvgIconProps } from "@mui/material"
@@ -128,6 +129,7 @@ const DashboardCloudAdapter = lazy(() => import("./DashboardCloudAdapter"))
 const DashboardPlanarPosition = lazy(() => import("./DashboardPlanarPosition"))
 const DashboardSerial = lazy(() => import("./DashboardSerial"))
 const DashboardRos = lazy(() => import("./DashboardRos"))
+const DashboardIndexedScreen = lazy(() => import("./DashboardIndexedScreen"))
 
 // icons
 const PowerSettingsNewIcon = lazy(
@@ -181,6 +183,11 @@ const serviceViews: {
         component: DashboardLEDStrip,
         weight: () => 3,
         expandable: true,
+    },
+    [SRV_INDEXED_SCREEN]: {
+        component: DashboardIndexedScreen,
+        weight: () => 3,
+        expandable: true
     },
     [SRV_LED]: {
         component: DashboardLED,
@@ -321,7 +328,7 @@ const serviceViews: {
     [SRV_ROS]: {
         component: DashboardRos,
         expandable: true,
-        weight: () => 4,        
+        weight: () => 4,
     },
     [SRV_HID_KEYBOARD]: {
         component: DashboardHIDKeyboard,
@@ -399,7 +406,8 @@ export default function DashboardServiceWidget(
     const useFwdWidget = isFwdEdu(service.device)
 
     // for FwdEdu widgets that replace Default widgets
-    if (useFwdWidget && !component) return createElement(FwdEduSubstituteWidget, props)
+    if (useFwdWidget && !component)
+        return createElement(FwdEduSubstituteWidget, props)
 
     // no special support
     if (!component) return createElement(DashboardServiceDefaultWidget, props)

@@ -34,6 +34,8 @@
         "colour",
         "devicescript",
         "frontmatter",
+        "ipal",
+        "ipix",
         "Jacdac",
         "Jacdaptor",
         "Jacdaptors",
@@ -44,12 +46,16 @@
         "jdunpack",
         "keepout",
         "keepouts",
+        "leds",
         "makecode",
         "microbit",
         "microcontroller",
         "microcontrollers",
+        "pbuf",
+        "pixdata",
         "Schottky",
         "Slidy",
+        "strcmp",
         "UART"
     ]
 }
