@@ -1,4 +1,4 @@
-import { ListItemText } from "@mui/material"
+import { ListItem, ListItemText } from "@mui/material"
 import React from "react"
 import useChange from "../../jacdac/useChange"
 import { Role } from "../../../jacdac-ts/src/jdom/clients/rolemanagerclient"
@@ -31,9 +31,11 @@ export default function RoleListItem(props: {
         />
     )
 
-    return (
+    return onClick ? (
         <ListItemButton selected={selected} onClick={onClick}>
             {content}
         </ListItemButton>
+    ) : (
+        <ListItem>{content}</ListItem>
     )
 }
