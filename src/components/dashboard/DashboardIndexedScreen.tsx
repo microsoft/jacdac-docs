@@ -19,11 +19,13 @@ import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 import useBus from "../../jacdac/useBus"
 import { JDFrameBuffer } from "../../../jacdac-ts/src/jacdac"
 import DarkModeContext from "../ui/DarkModeContext"
+import { Grid } from "@mui/material"
+import RegisterInput from "../RegisterInput"
 
 const MIN_OPACITY = 0.4
 
-export default function DashboardLEDStrip(props: DashboardServiceProps) {
-    const { service, visible } = props
+export default function DashboardIndexedScreen(props: DashboardServiceProps) {
+    const { service, visible, expanded } = props
     const id = useId()
     const { darkMode } = useContext(DarkModeContext)
     const bus = useBus()
@@ -117,8 +119,21 @@ export default function DashboardLEDStrip(props: DashboardServiceProps) {
     }
 
     return (
-        <div style={parentStyle}>
-            <canvas id={id} ref={canvasRef} style={canvasStyle} />
-        </div>
+        <>
+            <Grid item xs={12}>
+                <div style={parentStyle}>
+                    <canvas id={id} ref={canvasRef} style={canvasStyle} />
+                </div>{" "}
+            </Grid>
+            {expanded && (
+                <Grid item xs={12}>
+                    <RegisterInput
+                        register={brightnessRegister}
+                        visible={visible}
+                        showRegisterName={true}
+                    />
+                </Grid>
+            )}
+        </>
     )
 }
