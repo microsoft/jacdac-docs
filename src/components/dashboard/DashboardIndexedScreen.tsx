@@ -8,16 +8,10 @@ import React, {
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import useServiceServer from "../hooks/useServiceServer"
 import { IndexedScreenServer } from "../../../jacdac-ts/src/servers/indexedscreenserver"
-import {
-    CHANGE,
-    FRAME_PROCESS_LARGE,
-    IndexedScreenReg,
-} from "../../../jacdac-ts/src/jdom/constants"
+import { CHANGE, IndexedScreenReg } from "../../../jacdac-ts/src/jdom/constants"
 import useRegister from "../hooks/useRegister"
 import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
 import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
-import useBus from "../../jacdac/useBus"
-import { JDFrameBuffer } from "../../../jacdac-ts/src/jacdac"
 import DarkModeContext from "../ui/DarkModeContext"
 import { Grid } from "@mui/material"
 import RegisterInput from "../RegisterInput"
@@ -28,7 +22,6 @@ export default function DashboardIndexedScreen(props: DashboardServiceProps) {
     const { service, visible, expanded } = props
     const id = useId()
     const { darkMode } = useContext(DarkModeContext)
-    const bus = useBus()
     const server = useServiceServer<IndexedScreenServer>(
         service,
         () => new IndexedScreenServer()
@@ -43,14 +36,6 @@ export default function DashboardIndexedScreen(props: DashboardServiceProps) {
     const [brightness = 1] = useRegisterUnpackedValue<[number]>(
         brightnessRegister,
         props
-    )
-
-    useEffect(
-        () =>
-            bus?.subscribe(FRAME_PROCESS_LARGE, (frame: JDFrameBuffer) => {
-                console.log({ frame })
-            }),
-        [bus]
     )
 
     const canvasRef = useRef<HTMLCanvasElement>()
