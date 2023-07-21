@@ -7,7 +7,7 @@ export default function DeviceScriptDevToolsVisualStudioCode() {
             showAvatar={true}
             showHeader={true}
             showConnect={false}
-            showStartSimulators={true}
+            showStartSimulators={false}
             showStartRoleSimulators={true}
             showDeviceProxyAlert={true}
         />
