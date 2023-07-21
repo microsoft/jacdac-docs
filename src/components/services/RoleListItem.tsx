@@ -4,8 +4,11 @@ import useChange from "../../jacdac/useChange"
 import { Role } from "../../../jacdac-ts/src/jdom/clients/rolemanagerclient"
 import { isDeviceId, shortDeviceId } from "../../../jacdac-ts/src/jdom/pretty"
 import { ListItemButton } from "gatsby-theme-material-ui"
-import { escapeRoleName } from "../../../jacdac-ts/src/jacdac"
 import useBus from "../../jacdac/useBus"
+import { ellipse } from "../../../jacdac-ts/src/jdom/utils"
+import { escapeRoleName } from "../../../jacdac-ts/src/jdom/rolemanager"
+
+const MAX_NAME_LENGTH = 20
 
 export default function RoleListItem(props: {
     role: Role
@@ -19,7 +22,7 @@ export default function RoleListItem(props: {
 
     const name = isDeviceId(roleName)
         ? shortDeviceId(roleName)
-        : escapeRoleName(roleName) || "???"
+        : ellipse(escapeRoleName(roleName), MAX_NAME_LENGTH) || "..."
     const content = (
         <ListItemText
             primary={name}

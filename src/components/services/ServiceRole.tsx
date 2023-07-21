@@ -7,6 +7,7 @@ import useChange from "../../jacdac/useChange"
 import Suspense from "../ui/Suspense"
 import useRoleManagerClient from "./useRoleManagerClient"
 import useServiceRole from "./useServiceRole"
+import { escapeRoleName } from "../../../jacdac-ts/src/jdom/rolemanager"
 const SelectRoleDialog = lazy(() => import("../dialogs/SelectRoleDialog"))
 
 const MAX_NAME_LENGTH = 20
@@ -34,7 +35,7 @@ export default function ServiceRole(props: { service: JDService }) {
 
     const name = isDeviceId(role)
         ? shortDeviceId(role)
-        : ellipse(role, MAX_NAME_LENGTH)
+        : ellipse(escapeRoleName(role), MAX_NAME_LENGTH) || "..."
     return (
         <>
             <RoleButton
