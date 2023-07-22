@@ -1,11 +1,12 @@
-import { useMemo } from "react"
+import { DependencyList, useMemo } from "react"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import { JDServiceServer } from "../../../jacdac-ts/src/jdom/servers/serviceserver"
 import useServiceProvider from "./useServiceProvider"
 
 export default function useServiceServer<T extends JDServiceServer>(
     service: JDService,
-    createTwin?: () => T
+    createTwin?: () => T,
+    deps?: DependencyList
 ) {
     const device = service?.device
     const provider = useServiceProvider(device)
@@ -17,6 +18,6 @@ export default function useServiceServer<T extends JDServiceServer>(
             if (twin) service.twin = twin
         }
         return twin
-    }, [device, provider, service?.changeId])
+    }, [device, provider, service?.changeId, ...(deps || [])])
     return (provider?.service(service?.serviceIndex) as T) || twin
 }
