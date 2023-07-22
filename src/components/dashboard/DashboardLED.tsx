@@ -12,9 +12,12 @@ import ColorButtons, { DEFAULT_COLORS } from "../widgets/ColorButtons"
 import useRegister from "../hooks/useRegister"
 import RegisterInput from "../RegisterInput"
 import { bufferEq } from "../../../jacdac-ts/src/jdom/utils"
-import useChange from "../../jacdac/useChange"
 import { JDEventSource } from "../../../jacdac-ts/src/jdom/eventsource"
 import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
+import { useRegisterUnpackedValue } from "../../jacdac/useRegisterValue"
+import useServiceServer from "../hooks/useServiceServer"
+import { LedServer } from "../../../jacdac-ts/src/servers/ledserver"
+import useChange from "../../jacdac/useChange"
 
 const configureRegisters = [
     LedReg.Brightness,
@@ -41,11 +44,21 @@ function RegisterInputItem(props: {
 export default function DashboardLED(props: DashboardServiceProps) {
     const { service, services, visible, expanded, controlled } = props
     const pixelsRegister = useRegister(service, LedReg.Pixels)
-    const hasData = useChange(pixelsRegister, _ => !!_?.data)
+    const numPixelsRegister = useRegister(service, LedReg.NumPixels)
+    const [numPixels] = useRegisterUnpackedValue<[number]>(
+        numPixelsRegister,
+        props
+    )
+    const canEdit = expanded && numPixels !== undefined && numPixels <= 64
     const [penColor, setPenColor] = useState<number>(DEFAULT_COLORS[0].value)
     const colorsRef = useRef<Uint8Array>(new Uint8Array(0))
     const clientRef = useRef(new JDEventSource())
-    const canLedClick = !isNaN(penColor) && expanded && !controlled
+    const canLedClick = !isNaN(penColor) && canEdit && !controlled
+    const server = useServiceServer(
+        service,
+        () => (numPixels > 64 ? new LedServer() : undefined),
+        [numPixels]
+    )
 
     const handleColorChange = (newColor: number) =>
         setPenColor(current => (newColor === current ? undefined : newColor))
@@ -85,8 +98,12 @@ export default function DashboardLED(props: DashboardServiceProps) {
     useEffect(() => {
         if (!pixelsRegister) return undefined
         const updatePixels = () => {
-            const [pixels] = pixelsRegister.unpackedValue || []
-            if (pixels && !bufferEq(colorsRef.current, pixels)) {
+            const pixels = pixelsRegister.data
+            if (
+                pixels &&
+                pixels.length &&
+                !bufferEq(colorsRef.current, pixels)
+            ) {
                 colorsRef.current = pixels.slice(0)
                 clientRef.current.emit(RENDER)
             }
@@ -94,28 +111,48 @@ export default function DashboardLED(props: DashboardServiceProps) {
         updatePixels()
         return pixelsRegister.subscribe(REPORT_UPDATE, updatePixels)
     }, [pixelsRegister])
+
+    console.log({ server })
+    useChange(
+        server?.pixels,
+        _ => {
+            const pixels = _?.data
+            console.log({ pixels })
+            if (
+                pixels &&
+                pixels.length &&
+                !bufferEq(colorsRef.current, pixels)
+            ) {
+                colorsRef.current = pixels.slice(0)
+                clientRef.current.emit(RENDER)
+            }
+        },
+        [server]
+    )
+
     const colors: () => Uint8Array = useCallback(() => colorsRef.current, [])
     const subscribeColors = useCallback(
         handler => clientRef.current.subscribe(RENDER, handler),
         []
     )
 
-    if (!hasData)
-        return <DashboardRegisterValueFallback register={pixelsRegister} />
+    if (numPixels === undefined)
+        return <DashboardRegisterValueFallback register={numPixelsRegister} />
+    if (!numPixels) return null
 
     return (
         <>
             <Grid item xs={12}>
-              <LightWidget
-                  colors={colors}
-                  subscribeColors={subscribeColors}
-                  registers={registers}
-                  widgetCount={services?.length}
-                  onLedClick={canLedClick ? handleLedClick : undefined}
-                  {...props}
-              />
+                <LightWidget
+                    colors={colors}
+                    subscribeColors={subscribeColors}
+                    registers={registers}
+                    widgetCount={services?.length}
+                    onLedClick={canLedClick ? handleLedClick : undefined}
+                    {...props}
+                />
             </Grid>
-            {expanded && (
+            {canEdit && (
                 <Grid item>
                     <ColorButtons
                         color={penColor}
