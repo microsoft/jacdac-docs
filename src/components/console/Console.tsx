@@ -6,12 +6,13 @@ import ConsoleToolbar, { ConsoleToolbarOptions } from "./ConsoleToolbar"
 /** Delay load */
 export default function Console(
     props: {
+        hook?: boolean
         height?: string
         showToolbar?: boolean
         showBottomToolbar?: boolean
     } & ConsoleToolbarOptions
 ) {
-    const { height, showToolbar, showBottomToolbar, ...rest } = props
+    const { height, showToolbar, showBottomToolbar, hook, ...rest } = props
     return (
         <NoSsr>
             {showToolbar && (
@@ -21,7 +22,7 @@ export default function Console(
                     </Box>
                 </Paper>
             )}
-            <ConsoleLog height={height} />
+            <ConsoleLog hook={hook} height={height} />
             {showBottomToolbar && (
                 <Box display="flex">
                     <ConsoleToolbar {...rest} />

@@ -11,6 +11,7 @@ import AppContext, { DrawerType } from "../AppContext"
 import { navigate } from "gatsby"
 import ConsoleLevelSelect from "./ConsoleLevelSelect"
 import ConsoleClearButton from "./ConsoleClearButton"
+import ConnectButtons from "../buttons/ConnectButtons"
 
 function SaveButton() {
     const { logs } = useContext(ConsoleContext)
@@ -61,11 +62,12 @@ export interface ConsoleToolbarOptions {
     showFiles?: boolean
     showSerial?: boolean
     showLevel?: boolean
+    showConnect?: boolean
 }
 
 export default function ConsoleToolbar(props: ConsoleToolbarOptions) {
     const { sourceMap } = useContext(ConsoleContext)
-    const { showPopout, showFiles, showSerial, showLevel } = props
+    const { showPopout, showFiles, showSerial, showLevel, showConnect } = props
     return (
         <Grid
             sx={{ mb: 0.5 }}
@@ -74,6 +76,11 @@ export default function ConsoleToolbar(props: ConsoleToolbarOptions) {
             direction="row"
             alignItems="center"
         >
+            {showConnect && (
+                <Grid item>
+                    <ConnectButtons full="always" transparent={true} />
+                </Grid>
+            )}
             {showSerial && (
                 <Grid item>
                     <ConsoleSerialButton />
