@@ -174,6 +174,7 @@ export default function AppDrawer(props: { pagePath: string }) {
                         showFiles={true}
                         showSerial={true}
                         showPopout={true}
+                        showFilter={true}
                         showLevel={true}
                         height="calc(100vh - 7rem)"
                     />

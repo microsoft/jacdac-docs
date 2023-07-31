@@ -14,6 +14,7 @@ export default function DeviceScriptConnect() {
                 showToolbar={true}
                 showFiles={false}
                 showLevel={false}
+                showFilter={false}
                 showPopout={false}
                 showSerial={false}
             />

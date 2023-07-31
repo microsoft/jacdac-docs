@@ -63,11 +63,19 @@ export interface ConsoleToolbarOptions {
     showSerial?: boolean
     showLevel?: boolean
     showConnect?: boolean
+    showFilter?: boolean
 }
 
 export default function ConsoleToolbar(props: ConsoleToolbarOptions) {
     const { sourceMap } = useContext(ConsoleContext)
-    const { showPopout, showFiles, showSerial, showLevel, showConnect } = props
+    const {
+        showPopout,
+        showFiles,
+        showSerial,
+        showLevel,
+        showConnect,
+        showFilter,
+    } = props
     return (
         <Grid
             sx={{ mb: 0.5 }}
@@ -99,9 +107,11 @@ export default function ConsoleToolbar(props: ConsoleToolbarOptions) {
                     <ConsoleImportSourceMapButton />
                 </Grid>
             )}
-            <Grid item>
-                <SearchKeywordField />
-            </Grid>
+            {showFilter && (
+                <Grid item>
+                    <SearchKeywordField />
+                </Grid>
+            )}
             {showLevel && (
                 <Grid item>
                     <ConsoleLevelSelect />

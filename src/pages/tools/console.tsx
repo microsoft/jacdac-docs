@@ -2,13 +2,12 @@ import React, { lazy } from "react"
 import Suspense from "../../components/ui/Suspense"
 const Console = lazy(() => import("../../components/console/Console"))
 
-
 export const frontmatter = {
     title: "Console view",
     description: "Console message viewer.",
 }
 import CoreHead from "../../components/shell/Head"
-export const Head = (props) => <CoreHead {...props} {...frontmatter} />
+export const Head = props => <CoreHead {...props} {...frontmatter} />
 
 export default function Page() {
     return (
@@ -19,6 +18,7 @@ export default function Page() {
                 showLevel={true}
                 showPopout={false}
                 showSerial={true}
+                showFilter={true}
             />
         </Suspense>
     )
