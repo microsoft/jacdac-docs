@@ -15,17 +15,17 @@ export default function FwdLineWidget(props: {
     buttonProps
   } = props
 
-  const { background, controlBackground } = useWidgetTheme(color)
+  const { background, controlBackground, active } = useWidgetTheme(color)
 
-  const w = 48
-  const h = 64
+  const w = 46
+  const h = 48
   const m = 4
   const sw = 20
   const dx = w >> 1
   const x = (w - sw - dx) / 2
   const sh = 32
   const dark = "#000"
-  const bright = "#ddd"
+  const bright = active
 
   const isLit = value > 0.5
 

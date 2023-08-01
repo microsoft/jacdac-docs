@@ -406,8 +406,7 @@ export default function DashboardServiceWidget(
     const useFwdWidget = isFwdEdu(service.device)
 
     // for FwdEdu widgets that replace Default widgets
-    if (useFwdWidget && !component)
-        return createElement(FwdEduSubstituteWidget, props)
+    if (useFwdWidget) return createElement(FwdEduSubstituteWidget, props)
 
     // no special support
     if (!component) return createElement(DashboardServiceDefaultWidget, props)
