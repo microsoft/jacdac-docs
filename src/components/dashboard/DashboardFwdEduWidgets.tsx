@@ -143,7 +143,7 @@ export function FwdEduSubstituteWidget (dashboardProps: DashboardServiceProps) {
       )
     case SRV_REFLECTED_LIGHT:
       return lazifyWidget(FwdLineWidget,
-        { ...widgetProps, ...lineWidgetProps(value, valueReg, server as ReflectedLightServer) }
+        { ...widgetProps, size: 'clamp(4rem, 8vw, 12vh)', ...lineWidgetProps(value, valueReg, server as ReflectedLightServer) }
       )
     case SRV_ROTARY_ENCODER:
       return lazifyWidget(FwdDialWidget, {...widgetProps, ...dialWidgetProps(value, service)})

@@ -9,7 +9,6 @@ import { Grid, Slider } from "@mui/material"
 import SoilMoistureWidget from "../widgets/SoilMoistureWidget"
 import useRegister from "../hooks/useRegister"
 import { useId } from "react"
-import { isFwdEdu, FwdSoilMoistureWidget } from "./DashboardFwdEduWidgets"
 
 export default function DashboardSoilMoisture(props: DashboardServiceProps) {
     const { service, services, variant, controlled } = props
@@ -31,18 +30,11 @@ export default function DashboardSoilMoisture(props: DashboardServiceProps) {
     return (
         <Grid container spacing={1}>
             <Grid item xs={12}>
-            { isFwdEdu(service.device) ? 
-                <FwdSoilMoistureWidget
-                  value={value}
-                  color={color}
-                  size={widgetSize}
-                /> :
                 <SoilMoistureWidget
                     value={value}
                     color={color}
                     size={widgetSize}
                 />
-            }
             </Grid>
             {(server || !controlled) && hasValue && (
                 <Grid item xs>

@@ -3,13 +3,13 @@ import SvgWidget from "./SvgWidget"
 import useWidgetTheme from "./useWidgetTheme"
 
 export default function FwdLineWidget(props: {
-  widgetSize: string,
+  size: string,
   color: "primary" | "secondary",
   value: number,
   buttonProps: React.SVGProps<SVGRectElement>,
 }) {
   const {
-    widgetSize,
+    size,
     color,
     value,
     buttonProps
@@ -17,7 +17,7 @@ export default function FwdLineWidget(props: {
 
   const { background, controlBackground, active } = useWidgetTheme(color)
 
-  const w = 46
+  const w = 48
   const h = 48
   const m = 4
   const sw = 20
@@ -30,7 +30,7 @@ export default function FwdLineWidget(props: {
   const isLit = value > 0.5
 
   return (
-    <SvgWidget width={w} height={h} size={widgetSize}>
+    <SvgWidget width={w} height={h} size={size}>
       <g transform={`translate(${x}, ${h - m - sh})`}>
         <rect
           x={0}
