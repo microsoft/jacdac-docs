@@ -19,8 +19,7 @@ const SerialThing: React.FC<Props> = ({addComp}) => {
     let port : SerialPort  |undefined;
     let reader: ReadableStreamDefaultReader | ReadableStreamBYOBReader | undefined;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const usePolyfill = urlParams.has('polyfill');
+   
     const bufferSize = 8 * 1024; // 8kB
 
     const serial = navigator.serial;

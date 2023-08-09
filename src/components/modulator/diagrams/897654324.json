@@ -1,5 +1,5 @@
 {
-    "name": "HC SR04 VCC",
+    "name": "HC SR04 Test",
     "type": "Distance",
     "numberPins": 4,
     "diagram": "https://imgur.com/JyC3x4C.png",

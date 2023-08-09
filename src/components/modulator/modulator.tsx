@@ -757,7 +757,7 @@ const ModulatorComp = () =>{
     const getSerialMsg = async (msg: string) => {
         if(msg.length >= 10){
             console.log("new Message: "+msg);
-            await addSchema(msg.trim());
+            await addSVG(msg.trim());
         }
     }
 
