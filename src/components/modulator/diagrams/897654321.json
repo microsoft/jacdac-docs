@@ -7,7 +7,7 @@
     "pinLayout": [
         {
             "type": "GND",
-            "pos": "0",
+            "pos": "3",
             "name": "GND",
             "rectPos":{
                 "xTop": 65,
@@ -18,7 +18,7 @@
         },
         {
             "type": "Analog IN",
-            "pos": "1",
+            "pos": "2",
             "name": "ECHO",
             "rectPos":{
                 "xTop": 58,
@@ -29,7 +29,7 @@
         },
         {
             "type": "Analog IN",
-            "pos": "2",
+            "pos": "1",
             "name": "TRIG",
             "rectPos":{
                 "xTop": 51,
@@ -40,7 +40,7 @@
         },
         {
             "type": "VCC",
-            "pos": "3",
+            "pos": "0",
             "name": "VCC",
             "rectPos":{
                 "xTop": 44,
