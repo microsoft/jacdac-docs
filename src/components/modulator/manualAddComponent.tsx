@@ -22,7 +22,7 @@ const ManualAddComp: React.FC<Props> = ({addSchema}) => {
                 <Select value={moduleId} onChange={handleChange} sx={{width: 200}}>
                     <MenuItem value=""> <em>None</em> </MenuItem>
                     <MenuItem value="12345678">RGB Led</MenuItem>
-                    <MenuItem value="897654322">Distance HC-SR04</MenuItem>
+                    <MenuItem value="897654321">Distance HC-SR04</MenuItem>
                     <MenuItem value="654321789">Display LCD 2004A</MenuItem>
                     <MenuItem value="654321788">Display LCD 1602A</MenuItem>
                     <MenuItem value="321654987">Relay SRLY</MenuItem>

@@ -3,7 +3,7 @@ import React from "react";
 import { LogicSup, ModuExtern, PinAlloc } from "../helper/types";
 import GridHeader from "../../ui/GridHeader";
 import ManualAddComp from "../manualAddComponent";
-import ModuleComponentTest from "./moduCompTest";
+import ModuleComponentTest from "./moduComp";
 import Button from "../../ui/Button";
 
 

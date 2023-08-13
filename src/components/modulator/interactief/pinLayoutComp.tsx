@@ -5,7 +5,7 @@ import { StaticImage } from "gatsby-plugin-image";
 import ImageMapper from 'react-image-mapper';
 import CSS from 'csstype';
 
-import "./test.css";
+import "./pinout.css";
 import { LogicSup, ModuExtern, PinAlloc } from "../helper/types";
 import { getColor } from "../helper/file";
 

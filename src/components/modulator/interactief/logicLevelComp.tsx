@@ -1,9 +1,9 @@
 import { Grid } from "@mui/material";
 import React from "react";
-import GridHeader from "../ui/GridHeader";
-import { LogicSup, ModuExtern, PinAlloc, PinBreakout, TypePin, powerSup } from "./helper/types";
+import GridHeader from "../../ui/GridHeader";
+import { LogicSup, ModuExtern, PinAlloc, PinBreakout, TypePin, powerSup } from "../helper/types";
 import { rotate } from "@jscad/modeling/src/maths/mat4";
-import Button from "../ui/Button";
+import Button from "../../ui/Button";
 
 
 const imgPathLogic = "https://www.kiwi-electronics.com/image/cache/catalog/product/aem8hbpd/SF-BOB-12009_0-766x511h.jpg";

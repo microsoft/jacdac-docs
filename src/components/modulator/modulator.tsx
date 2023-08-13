@@ -2,18 +2,14 @@ import {useEffect, useId, useState } from "react";
 import React from "react"
 import { Grid } from "@mui/material"
 import GridHeader from "../ui/GridHeader"
-import PinLayoutComp from "./testing/pinLayoutComp";
-import SchemaComp from "./schemaComp";
-import Button from "../ui/Button";
+import PinLayoutComp from "./interactief/pinLayoutComp";
+
 import { fetchLogic, fetchModule, fetchModuleSvg, fetchPinLayout, predicate } from "./helper/file";
 import { Breakout, LogicPair, LogicSup, ModuExtern, Pin, PinAlloc,  PinBreakout,  TypePin, powerSup } from "./helper/types";
 import SerialThing from "./serialThing";
-import PowerSupplyComp from "./powerSupplyComp";
-import ServiceCodeComp from "./serviceStartComponent";
-import ClientStartModu from "./clientStartModu";
-import { sort } from "@tidyjs/tidy";
-import ExtraNeededComp from "./logicLevelComp";
-import SchemaCompTest from "./testing/schemaCompTest";
+
+import ExtraNeededComp from "./interactief/logicLevelComp";
+import SchemaCompTest from "./interactief/schemaComp";
 
 
 
@@ -180,39 +176,7 @@ const ModulatorComp = () =>{
         return tempPowerSup;
     }
 
-    const addSchema = async (id: string) =>{
-        //console.log("new comp id: "+id);
-        //"sr04" == 897654321;
-        const tempModu = await fetchModule(id);
-        
-        
-        const tempModuPins = await breakBoardAllocCheck(tempModu);
-        if(tempModuPins){
-            if(tempModuPins.pinAlloctedTemp.length !== 0){
-                breakBoardAllocPins(tempModuPins.pinAlloctedTemp);
-                if(tempModuPins.pinDifLogic.length !== 0){
-                    tempModuPins.pinAlloctedTemp = await allocLogicLevel(tempModuPins.pinDifLogic, tempModuPins.pinAlloctedTemp);
-                }
-
-
-                //Set new Alocced
-                const tempAllocPin = allocedPins;
-                for(let i = 0; i < tempModuPins.pinAlloctedTemp.length; i++){
-                    tempAllocPin.push(tempModuPins.pinAlloctedTemp[i])
-                }
-                setAllocedPins(tempAllocPin);
-            }
-
-            //Place the new module
-            const tempCon = conModules;
-            tempCon.push(tempModu)
-            setconModules(tempCon);
-            
-        }
-        
-        forceUpdate();
-    }
-
+    
 
     const addSVG = async (id:string) =>{
         const tempModu = await fetchModuleSvg(id);
