@@ -9,7 +9,6 @@ import useWidgetTheme from "../widgets/useWidgetTheme"
 import { Grid, Slider } from "@mui/material"
 import useThrottledValue from "../hooks/useThrottledValue"
 import useRegister from "../hooks/useRegister"
-import { isFwdEdu, FwdDialWidget } from "./DashboardFwdEduWidgets"
 
 export default function DashboardRotaryEncoder(props: DashboardServiceProps) {
     const { service } = props
@@ -54,12 +53,6 @@ export default function DashboardRotaryEncoder(props: DashboardServiceProps) {
     return (
         <Grid container direction="column">
             <Grid item>
-                { isFwdEdu(service?.device) ? <FwdDialWidget 
-                    widgetSize={widgetSize}
-                    color={color}
-                    position={position}
-                    angle={angle}
-                /> :
                 <SvgWidget
                     title={`rotary encoder at position ${position}`}
                     size={widgetSize}
@@ -81,7 +74,7 @@ export default function DashboardRotaryEncoder(props: DashboardServiceProps) {
                     <text x={0.5} y={0.5} fontSize={fs} {...textProps}>
                         {label}
                     </text>
-                </SvgWidget> }
+                </SvgWidget>
             </Grid>
             {server && (
                 <Grid item>

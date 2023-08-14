@@ -3,12 +3,12 @@ import useWidgetTheme from "../widgets/useWidgetTheme"
 import SvgWidget from "../widgets/SvgWidget"
 
 export default function FwdDialWidget(props: {
-  widgetSize: string,
+  size: string,
   color: "primary" | "secondary",
   position: number,
   angle: number
 }) {
-  const { widgetSize, color, position, angle } = props
+  const { size, color, position, angle } = props
   const { background, controlBackground, active, textProps } =
       useWidgetTheme(color)
   const label = `${position}`
@@ -18,7 +18,7 @@ export default function FwdDialWidget(props: {
 
   return <SvgWidget
     title={`rotary encoder at position ${position}`}
-    size={widgetSize}
+    size={size}
     width={w}
     height={w}
     viewBox={"0 0 1 1"}

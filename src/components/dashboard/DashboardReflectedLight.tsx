@@ -12,7 +12,6 @@ import {
     ReflectedLightVariant,
 } from "../../../jacdac-ts/src/jdom/constants"
 import useRegister from "../hooks/useRegister"
-import { isFwdEdu, FwdLineWidget } from "./DashboardFwdEduWidgets"
 
 export default function DashboardReflectedLight(props: DashboardServiceProps) {
     const { service } = props
@@ -57,13 +56,6 @@ export default function DashboardReflectedLight(props: DashboardServiceProps) {
     const bright = "#ddd"
 
     return (
-      <>
-        { isFwdEdu(service.device) ? (<FwdLineWidget
-            widgetSize={ "clamp(3rem, 6vw, 10vh)"}
-            color={color}
-            value={actualBrightness}
-            buttonProps={buttonProps}
-        />) :
         <SvgWidget width={w} height={h} size={widgetSize}>
             <rect
                 x={0}
@@ -112,7 +104,5 @@ export default function DashboardReflectedLight(props: DashboardServiceProps) {
                 />
             </g>
         </SvgWidget>
-      }
-    </>
-  )
+    )
 }

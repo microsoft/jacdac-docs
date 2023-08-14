@@ -112,12 +112,10 @@ export default function DashboardLED(props: DashboardServiceProps) {
         return pixelsRegister.subscribe(REPORT_UPDATE, updatePixels)
     }, [pixelsRegister])
 
-    console.log({ server })
     useChange(
         server?.pixels,
         _ => {
             const pixels = _?.data
-            console.log({ pixels })
             if (
                 pixels &&
                 pixels.length &&

@@ -13,7 +13,6 @@ import { ServoServer } from "../../../jacdac-ts/src/servers/servoserver"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import ServoWidget from "../widgets/ServoWidget"
 import useRegister from "../hooks/useRegister"
-import { isFwdEdu, FwdServoWidget } from "./DashboardFwdEduWidgets"
 
 function useActualAngle(service: JDService, visible: boolean) {
     const angleRegister = useRegister(service, ServoReg.Angle)
@@ -98,17 +97,6 @@ export default function DashboardServo(props: DashboardServiceProps) {
     return (
         <Grid container alignContent="center">
             <Grid item xs={12}>
-              { isFwdEdu(service?.device) ?
-                <FwdServoWidget
-                    angle={angle}
-                    offset={offset}
-                    color={color}
-                    enabled={enabled}
-                    toggleOff={toggleOff}
-                    widgetSize={widgetSize}
-                    rotationRate={continuous ? (throttle * rotationalSpeed) / 100 : undefined}
-                    visible={visible}
-                /> :
                 <ServoWidget
                     angle={angle}
                     offset={offset}
@@ -119,7 +107,6 @@ export default function DashboardServo(props: DashboardServiceProps) {
                     rotationRate={continuous ? (throttle * rotationalSpeed) / 100 : undefined}
                     visible={visible}
                 />
-              }
             </Grid>
             <Grid item xs={12}>
                 {continuous ? (
