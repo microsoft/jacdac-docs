@@ -59,8 +59,32 @@ export default function Home() {
                 buttonUrl="/devices/"
             />
 
+            <SplitGrid
+                right={true}
+                subtitle="Kits"
+                description="Educational and Exploration Kits available today."
+                imageColumns={6}
+                image={
+                    <Suspense>
+                        <DeviceImageList
+                            ids={[
+                                "kittenbot-jacdacstarterkitawithjacdaptorformicrobitv2v10",
+                                "forward-education-climateactionkitv10",
+                                "kittenbot-jacdacdeveloperstoolelectronicmodulekitbv10",
+                                "kittenbot-duckybotkitv10",
+                            ]}
+                            cols={2}
+                        />
+                    </Suspense>
+                }
+                buttonText="Device catalog"
+                buttonVariant="link"
+                buttonUrl="/devices/"
+            />
+
+
             <CenterGrid
-                subtitle2="With or without hardware!"
+                subtitle2="Try it With or without hardware!"
                 buttonText="Get started now"
                 buttonVariant="link"
                 buttonUrl="/start/"
@@ -105,7 +129,7 @@ export default function Home() {
                             ids={[
                                 "kittenbot-jacdaptorformicrobitv2v10",
                                 "microsoft-research-jmspibridgev37",
-                                "microsoft-research-jmbrainrp204059v01",
+                                "kittenbot-brainrp2040v10",
                             ]}
                             cols={2}
                         />
