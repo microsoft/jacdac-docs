@@ -33,7 +33,7 @@ import { AlertTitle } from "@mui/material"
 import Alert from "../../components/ui/Alert"
 import { ProtocolTestServer } from "../../../jacdac-ts/src/jdom/servers/protocoltestserver"
 import { Link } from "gatsby-theme-material-ui"
-import { cryptoRandomUint32 } from "../../../jacdac-ts/src/jdom/random"
+import { anyRandomUint32 } from "../../../jacdac-ts/src/jdom/random"
 import { JDServerServiceProvider } from "../../../jacdac-ts/src/jdom/servers/serverserviceprovider"
 import { useId } from "react"
 import useServices from "../../components/hooks/useServices"
@@ -70,7 +70,7 @@ function randomFieldPayload(field: JDField) {
         }
         case "bytes": {
             // maxBytes?
-            const a = cryptoRandomUint32(randomRange(1, 3))
+            const a = anyRandomUint32(randomRange(1, 3))
             r = new Uint8Array(a.buffer)
             break
         }
