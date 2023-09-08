@@ -176,14 +176,17 @@ function LightStripWidget(props: {
         width = 2 * (margin + ringradius)
         height = width
         const hm = height - 2 * margin
-        d = `M ${width >> 1},${
-            margin
-        } a ${ringradius},${ringradius} 0 0,1 0,${hm} a ${ringradius},${ringradius} 0 0,1 0, -${hm}`
+        d = `M ${
+            width >> 1
+        },${margin} a ${ringradius},${ringradius} 0 0,1 0,${hm} a ${ringradius},${ringradius} 0 0,1 0, -${hm}`
     }
 
     // tune opacity to account for global opacity
     const alpha = 0.7
-    const opacity = alpha + (1 - alpha) * ((actualBrightness || 0) / 0xff)
+    const opacity =
+        actualBrightness <= 0
+            ? 0
+            : alpha + (1 - alpha) * ((actualBrightness || 0) / 0xff)
 
     return (
         <SvgWidget width={width} height={height} size={widgetSize}>
