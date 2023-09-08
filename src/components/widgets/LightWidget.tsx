@@ -11,6 +11,8 @@ import useRegister from "../hooks/useRegister"
 import useFireKey from "../hooks/useFireKey"
 import DashboardRegisterValueFallback from "../dashboard/DashboardRegisterValueFallback"
 
+export const MIN_VISIBLE_OPACITY = 0.5
+
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     const [r$, g$, b$] = [r / 255, g / 255, b / 255]
     const cMin = Math.min(r$, g$, b$)
@@ -41,16 +43,17 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     return [Math.floor(h), Math.floor(s), Math.floor(l)]
 }
 
-function setRgb(
+function setRgba(
     el: SVGElement,
     r: number,
     g: number,
     b: number,
+    a: number,
     radius?: number
 ) {
     const hsl = rgbToHsl(r, g, b)
     const [h, s, l] = hsl
-    const fill = `hsl(${h}, ${s}%, ${l}%)`
+    const fill = `hsla(${h}, ${s}%, ${l}%, ${a})`
     el.setAttribute("fill", fill)
     if (radius !== undefined) {
         const nr = radius * (1 + (l - 60) / 200)
@@ -58,9 +61,10 @@ function setRgb(
     }
 }
 
-function setRgbLeds(
+function setRgbaLeds(
     pixelsContainer: SVGElement,
     colors: Uint8Array,
+    alpha: number,
     radius?: number
 ) {
     const pixels = pixelsContainer?.children
@@ -70,9 +74,26 @@ function setRgbLeds(
     let ci = 0
     for (let i = 0; i < pn; ++i) {
         const pixel = pixels.item(i) as SVGElement
-        setRgb(pixel, colors[ci], colors[ci + 1], colors[ci + 2], radius)
+        setRgba(
+            pixel,
+            colors[ci],
+            colors[ci + 1],
+            colors[ci + 2],
+            alpha,
+            radius
+        )
         ci += 3
     }
+}
+
+function brightnessToOpacity(actualBrightness: number) {
+    // tune opacity to account for global opacity
+    const alpha = MIN_VISIBLE_OPACITY
+    const opacity =
+        actualBrightness <= 0
+            ? 0
+            : alpha + (1 - alpha) * (actualBrightness || 0)
+    return opacity
 }
 
 function LightStripWidget(props: {
@@ -102,10 +123,13 @@ function LightStripWidget(props: {
     const isJewel = lightVariant === LedStripVariant.Jewel
     const isRing = lightVariant === LedStripVariant.Ring
 
+    // tune opacity to account for global opacity
+    const opacity = brightnessToOpacity(actualBrightness)
+
     // paint svg via dom
     const paint = useCallback(() => {
-        setRgbLeds(pixelsRef.current, colors(), neocircleradius)
-    }, [colors, neocircleradius])
+        setRgbaLeds(pixelsRef.current, colors(), opacity, neocircleradius)
+    }, [colors, opacity, neocircleradius])
 
     // reposition pixels along the path
     useEffect(() => {
@@ -128,7 +152,7 @@ function LightStripWidget(props: {
         }
 
         paint()
-    }, [lightVariant, numPixels, pathRef.current, pixelsRef.current])
+    }, [lightVariant, numPixels, paint, pathRef.current, pixelsRef.current])
 
     // render when new colors are in
     useEffect(() => subscribeColors?.(paint), [paint, subscribeColors])
@@ -181,13 +205,6 @@ function LightStripWidget(props: {
         },${margin} a ${ringradius},${ringradius} 0 0,1 0,${hm} a ${ringradius},${ringradius} 0 0,1 0, -${hm}`
     }
 
-    // tune opacity to account for global opacity
-    const alpha = 0.7
-    const opacity =
-        actualBrightness <= 0
-            ? 0
-            : alpha + (1 - alpha) * ((actualBrightness || 0) / 0xff)
-
     return (
         <SvgWidget width={width} height={height} size={widgetSize}>
             <>
@@ -198,7 +215,7 @@ function LightStripWidget(props: {
                     stroke={background}
                     strokeWidth={sw}
                 />
-                <g ref={pixelsRef} opacity={opacity}>
+                <g ref={pixelsRef}>
                     {Array(numPixels)
                         .fill(0)
                         .map((_, i) => {
@@ -241,8 +258,15 @@ function LightMatrixWidget(props: {
     rows: number
     onLedClick?: (index: number) => void
 }) {
-    const { columns, rows, subscribeColors, widgetSize, onLedClick, colors } =
-        props
+    const {
+        columns,
+        rows,
+        subscribeColors,
+        widgetSize,
+        onLedClick,
+        colors,
+        actualBrightness,
+    } = props
     const { background, controlBackground } = useWidgetTheme()
 
     const widgetRef = useRef<SVGGElement>()
@@ -255,10 +279,13 @@ function LightMatrixWidget(props: {
     const w = columns * pw + (columns + 1) * m
     const h = rows * ph + (rows + 1) * m
 
+    // tune opacity to account for global opacity
+    const opacity = brightnessToOpacity(actualBrightness)
+
     // paint svg via dom
-    const paint = () => {
-        setRgbLeds(widgetRef.current, colors())
-    }
+    const paint = useCallback(() => {
+        setRgbaLeds(widgetRef.current, colors(), opacity)
+    }, [colors, opacity])
 
     // add leds
     const render = () => {
