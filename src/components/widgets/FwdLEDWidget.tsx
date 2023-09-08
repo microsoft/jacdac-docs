@@ -8,6 +8,8 @@ import useWidgetTheme from "../widgets/useWidgetTheme"
 import useFireKey from "../hooks/useFireKey"
 import "./fwd-edu.css"
 
+export const MIN_VISIBLE_OPACITY = 0.5
+
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     const [r$, g$, b$] = [r / 255, g / 255, b / 255]
     const cMin = Math.min(r$, g$, b$)
@@ -38,16 +40,17 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
     return [Math.floor(h), Math.floor(s), Math.floor(l)]
 }
 
-function setRgb(
+function setRgba(
     el: SVGElement,
     r: number,
     g: number,
     b: number,
+    a: number,
     radius?: number
 ) {
     const hsl = rgbToHsl(r, g, b)
     const [h, s, l] = hsl
-    const fill = `hsl(${h}, ${s}%, ${l}%)`
+    const fill = `hsla(${h}, ${s}%, ${l}%, ${a})`
     el.setAttribute("fill", fill)
     if (radius !== undefined) {
         const nr = radius * (1 + (l - 60) / 200)
@@ -55,9 +58,10 @@ function setRgb(
     }
 }
 
-function setRgbLeds(
+function setRgbaLeds(
     pixelsContainer: SVGElement,
     colors: Uint8Array,
+    alpha: number,
     radius?: number
 ) {
     const pixels = pixelsContainer?.children
@@ -67,9 +71,26 @@ function setRgbLeds(
     let ci = 0
     for (let i = 0; i < pn; ++i) {
         const pixel = pixels.item(i) as SVGElement
-        setRgb(pixel, colors[ci], colors[ci + 1], colors[ci + 2], radius)
+        setRgba(
+            pixel,
+            colors[ci],
+            colors[ci + 1],
+            colors[ci + 2],
+            alpha,
+            radius
+        )
         ci += 3
     }
+}
+
+function brightnessToOpacity(actualBrightness: number) {
+    // tune opacity to account for global opacity
+    const alpha = MIN_VISIBLE_OPACITY
+    const opacity =
+        actualBrightness <= 0
+            ? 0
+            : alpha + (1 - alpha) * (actualBrightness || 0)
+    return opacity
 }
 
 export default function FwdLEDWidget(props: {
@@ -97,11 +118,12 @@ export default function FwdLEDWidget(props: {
     const neocircleradius = neoradius + 1
     const isJewel = lightVariant === LedStripVariant.Jewel
     const isRing = lightVariant === LedStripVariant.Ring
+    const opacity = brightnessToOpacity(actualBrightness)
 
     // paint svg via dom
     const paint = useCallback(() => {
-        setRgbLeds(pixelsRef.current, colors(), neocircleradius)
-    }, [colors, neocircleradius])
+        setRgbaLeds(pixelsRef.current, colors(), opacity, neocircleradius)
+    }, [colors, opacity, neocircleradius])
 
     // reposition pixels along the path
     useEffect(() => {
@@ -142,7 +164,7 @@ export default function FwdLEDWidget(props: {
         }
 
         paint()
-    }, [lightVariant, numPixels, pathRef.current, pixelsRef.current])
+    }, [lightVariant, numPixels, paint, pathRef.current, pixelsRef.current])
 
     // render when new colors are in
     useEffect(() => subscribeColors?.(paint), [paint, subscribeColors])
@@ -158,13 +180,6 @@ export default function FwdLEDWidget(props: {
     d = `M ${
         width >> 1
     },${margin} a ${ringradius},${ringradius} 0 0,1 0,${hm} a ${ringradius},${ringradius} 0 0,1 0, -${hm}`
-
-    // tune opacity to account for global opacity
-    const alpha = 0.7
-    const opacity =
-        actualBrightness <= 0
-            ? 0
-            : alpha + (1 - alpha) * ((actualBrightness || 0) / 0xff)
 
     return (
         <SvgWidget width={width} height={height} size={widgetSize}>
@@ -275,7 +290,6 @@ export default function FwdLEDWidget(props: {
                 <path ref={pathRef} d={d} fill="transparent" />
                 <g
                     ref={pixelsRef}
-                    opacity={opacity}
                     transform={`translate(${width / 2} ${
                         height / 2
                     }) scale(0.65) translate(${-width / 2} ${-height / 2})`}
