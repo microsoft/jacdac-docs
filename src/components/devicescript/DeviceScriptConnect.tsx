@@ -1,8 +1,11 @@
 import React from "react"
 import Console from "../console/Console"
 import { Typography } from "@mui/material"
+import { useSystemDarkMode } from "../ui/DarkModeContext"
 
 export default function DeviceScriptConnect() {
+    useSystemDarkMode()
+
     return (
         <>
             <Typography component="h1" variant="h6">

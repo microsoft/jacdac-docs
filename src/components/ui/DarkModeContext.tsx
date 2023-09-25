@@ -7,6 +7,7 @@ import React, {
     useMemo,
     useState,
     createContext,
+    useContext,
 } from "react"
 import { useLocationSearchParamBoolean } from "../hooks/useLocationSearchParam"
 
@@ -15,6 +16,7 @@ export type PaletteType = "dark" | "light"
 export interface DarkModeContextProps {
     darkMode: PaletteType
     toggleDarkMode: (mode?: PaletteType) => void
+    setSystemMode: () => void
     darkModeMounted: boolean
     imgStyle?: CSSProperties
 }
@@ -24,6 +26,7 @@ const DarkModeContext = createContext<DarkModeContextProps>({
     toggleDarkMode: () => {},
     darkModeMounted: false,
     imgStyle: undefined,
+    setSystemMode: () => {},
 })
 DarkModeContext.displayName = "DarkMode"
 
@@ -57,6 +60,10 @@ export function DarkModeProvider(props: {
             window.localStorage.setItem(KEY, mode)
         setDarkMode(mode)
     }
+    const setSystemMode = () => {
+        if (prefersDarkMode !== undefined)
+            setMode(prefersDarkMode ? "dark" : "light")
+    }
     const toggleDarkMode = useCallback(
         (mode?: PaletteType) => {
             mode = mode || (darkMode === "light" ? "dark" : "light")
@@ -84,9 +91,20 @@ export function DarkModeProvider(props: {
 
     return (
         <DarkModeContext.Provider
-            value={{ darkMode, toggleDarkMode, darkModeMounted, imgStyle }}
+            value={{
+                darkMode,
+                toggleDarkMode,
+                darkModeMounted,
+                imgStyle,
+                setSystemMode,
+            }}
         >
             {children}
         </DarkModeContext.Provider>
     )
+}
+
+export function useSystemDarkMode() {
+    const { setSystemMode, darkModeMounted } = useContext(DarkModeContext)
+    useEffect(setSystemMode, [darkModeMounted])
 }

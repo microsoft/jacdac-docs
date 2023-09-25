@@ -10,6 +10,7 @@ import useRoleManagerClient from "../services/useRoleManagerClient"
 import useChange from "../../jacdac/useChange"
 import { debounce } from "../../../jacdac-ts/src/jdom/utils"
 import useBus from "../../jacdac/useBus"
+import { useSystemDarkMode } from "../ui/DarkModeContext"
 const Console = lazy(() => import("../console/Console"))
 const Dashboard = lazy(() => import("../dashboard/Dashboard"))
 
@@ -24,6 +25,7 @@ function useAutoStartSimulators(delay = 2000) {
 }
 
 function DeviceScriptDevToolsWithContext() {
+    useSystemDarkMode()
     useDeviceScriptVm()
     useAutoStartSimulators()
 
