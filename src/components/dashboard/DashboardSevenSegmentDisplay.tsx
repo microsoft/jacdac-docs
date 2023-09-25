@@ -1,11 +1,13 @@
 import React, { ChangeEvent, useEffect, useId, useState } from "react"
-import { SevenSegmentDisplayReg } from "../../../jacdac-ts/src/jdom/constants"
+import {
+    SevenSegmentDisplayCmd,
+    SevenSegmentDisplayReg,
+} from "../../../jacdac-ts/src/jdom/constants"
 import { DashboardServiceProps } from "./DashboardServiceWidget"
 import {
     useRegisterBoolValue,
     useRegisterUnpackedValue,
 } from "../../jacdac/useRegisterValue"
-import { sevenSegmentDigitEncode } from "../../../jacdac-ts/src/jdom/sevensegment"
 import SvgWidget from "../widgets/SvgWidget"
 import useWidgetTheme from "../widgets/useWidgetTheme"
 import { Grid, TextField } from "@mui/material"
@@ -16,15 +18,6 @@ import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 
 function DigitsInput(props: DashboardServiceProps) {
     const { service } = props
-    const digitsRegister = useRegister(service, SevenSegmentDisplayReg.Digits)
-    const digitCountRegister = useRegister(
-        service,
-        SevenSegmentDisplayReg.DigitCount
-    )
-    const [digitCount] = useRegisterUnpackedValue<[number]>(
-        digitCountRegister,
-        props
-    )
     const [value, setValue] = useState("")
     const handleValueChange = (ev: ChangeEvent<{ value: string }>) => {
         setValue(ev.target.value)
@@ -34,13 +27,9 @@ function DigitsInput(props: DashboardServiceProps) {
     useEffect(() => {
         // encode numbers into digits
         const v = parseFloat(value)
-        if (digitsRegister) {
-            const digits = isNaN(v)
-                ? new Uint8Array(0)
-                : sevenSegmentDigitEncode(v, digitCount)
-            digitsRegister.sendSetAsync(digits, true)
-        }
-    }, [value, digitsRegister, digitCount])
+        if (!isNaN(v))
+            service.sendCmdPackedAsync(SevenSegmentDisplayCmd.SetNumber, [v])
+    }, [value])
 
     return (
         <TextField
