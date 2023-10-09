@@ -16,7 +16,7 @@ A service is globally and uniquely identified by its service class, which should
 
 Services act on __commands__ and optionally respond with __reports__. 
 Reports can also be emitted separately from a service without prompting from another device. 
-This interface is specified in a [custom markdown language](./service-specification/) 
+This interface is specified in a [custom markdown language](/reference/service-specification/) 
 that lists the possible commands and reports that a service can consume and emit. 
 
 Specifications can also inherit from other specifications. An example of this can be seen in the [sensor specification](/services/_sensor). 
@@ -158,7 +158,7 @@ struct {
 
 The above structure omits the details about physical transmission of Jacdac packets 
 over the wire and the packing of multiple packets within frames. 
-For more information, see [the single wire serial protocol](./single-wire-serial/).
+For more information, see [the single wire serial protocol](/reference/single-wire-serial/).
 
 A device will generally maintain device-specific state for each of the services that it supports. This state should be kept in an array, where each array entry contains the service class and (a pointer to) the device-specific state for that service. When a device advertises its service classes they are presented in the same order as in the list.  This allows clients of the device to refer to one of its services by list index (`service_index`, an 8 bit quantity) instead of service class (a 32 bit quantity). The zero index (service number) is reserved for the control service. 
 
@@ -319,7 +319,7 @@ The responsibility of the physical layer is to send/receive a byte buffer
 (representing a Jacdac frame from the transport layer 
 over a particular media. Currently, we have implemented:
 
-- [Single Wire Serial](./single-wire-serial/) connects microcontrollers to each other using UART
+- [Single Wire Serial](/reference/single-wire-serial/) connects microcontrollers to each other using UART
 - Web USB: micro-controller to web browser
 
 ### Frames
