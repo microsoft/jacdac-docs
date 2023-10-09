@@ -37,7 +37,7 @@
     "bowser": "^2.11.0",
     "compare-versions": "^5.0.3",
     "concurrently": "^7.4.0",
-    "console-feed": "^3.4.3",
+    "console-feed": "^3.5.0",
     "d3-array": "^3.2.2",
     "dns-packet": "^5.4.0",
     "eslint": "^8.34.0",
