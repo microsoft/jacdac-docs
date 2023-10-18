@@ -17,6 +17,11 @@ export default function useThrottledValue(
                 return false
             }
 
+            // not a value yet
+            if (isNaN(value)) {
+                return false
+            }
+
             // increment towards value
             const dt = time / 1000 // s
             const error = value - animated

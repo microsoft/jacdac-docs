@@ -13,10 +13,11 @@ import { ServoServer } from "../../../jacdac-ts/src/servers/servoserver"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
 import ServoWidget from "../widgets/ServoWidget"
 import useRegister from "../hooks/useRegister"
+import DashboardRegisterValueFallback from "./DashboardRegisterValueFallback"
 
 function useActualAngle(service: JDService, visible: boolean) {
     const angleRegister = useRegister(service, ServoReg.Angle)
-    const [angle = 90] = useRegisterUnpackedValue<[number]>(angleRegister, {
+    const [angle] = useRegisterUnpackedValue<[number]>(angleRegister, {
         visible,
     })
     const actualAngleRegister = useRegister(service, ServoReg.ActualAngle)
@@ -52,12 +53,12 @@ export default function DashboardServo(props: DashboardServiceProps) {
         props
     )
     const minAngleRegister = useRegister(service, ServoReg.MinAngle)
-    const [minAngle = -90] = useRegisterUnpackedValue<[number]>(
+    const [minAngle] = useRegisterUnpackedValue<[number]>(
         minAngleRegister,
         props
     )
     const maxAngleRegister = useRegister(service, ServoReg.MaxAngle)
-    const [maxAngle = 90] = useRegisterUnpackedValue<[number]>(
+    const [maxAngle] = useRegisterUnpackedValue<[number]>(
         maxAngleRegister,
         props
     )
@@ -65,12 +66,20 @@ export default function DashboardServo(props: DashboardServiceProps) {
     const [responseSpeed = SG90_RESPONSE_SPEED] = useRegisterUnpackedValue<
         [number]
     >(responseSpeedRegister, { visible })
+    const server = useServiceServer<ServoServer>(service)
+
+    if (angle === undefined)
+        return <DashboardRegisterValueFallback register={angleRegister} />
+    if (minAngle === undefined)
+        return <DashboardRegisterValueFallback register={minAngleRegister} />
+    if (maxAngle === undefined)
+        return <DashboardRegisterValueFallback register={maxAngleRegister} />
+
     const rotationalSpeed = 60 / responseSpeed
 
     const continuous = /cont=1/.test(clientVariant)
     const throttle = ((angle - minAngle) / (maxAngle - minAngle)) * 200 - 100
 
-    const server = useServiceServer<ServoServer>(service)
     const color = server ? "secondary" : "primary"
 
     const toggleOff = () => enabledRegister.sendSetBoolAsync(!enabled, true)
@@ -104,7 +113,11 @@ export default function DashboardServo(props: DashboardServiceProps) {
                     enabled={enabled}
                     toggleOff={toggleOff}
                     widgetSize={widgetSize}
-                    rotationRate={continuous ? (throttle * rotationalSpeed) / 100 : undefined}
+                    rotationRate={
+                        continuous
+                            ? (throttle * rotationalSpeed) / 100
+                            : undefined
+                    }
                     visible={visible}
                 />
             </Grid>
