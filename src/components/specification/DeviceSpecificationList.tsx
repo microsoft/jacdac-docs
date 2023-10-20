@@ -122,6 +122,9 @@ export default function DeviceSpecificationList(props: {
                 -(a.tags?.indexOf("kit") > -1 ? 1 : 0) +
                 (b.tags?.indexOf("kit") > -1 ? 1 : 0)
             if (c) return c
+            // device with transports
+            c = -(a.transport ? 1 : 0) + (b.transport ? 1 : 0)
+            if (c) return c
             // use ec30 shape
             c = -(isEC30(a.shape) ? 1 : 0) + (isEC30(b.shape) ? 1 : 0)
             if (c) return c
