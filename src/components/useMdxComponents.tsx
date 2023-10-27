@@ -37,9 +37,6 @@ const DeviceImageList = lazy(() => import("./devices/DeviceImageList"))
 const JacdaptorImageList = lazy(() => import("./home/JacdaptorImageList"))
 const EC30Editor = lazy(() => import("./ec30/EC30Editor"))
 const GithubRepositoryCard = lazy(() => import("./github/GithubRepositoryCard"))
-const MakeCodeOpenSnippetButton = lazy(
-    () => import("./makecode/MakeCodeOpenSnippetButton")
-)
 const FaqPageList = lazy(() => import("./faq/FaqPageList"))
 const ErrorList = lazy(() => import("./faq/ErrorList"))
 
@@ -158,11 +155,6 @@ export default function useMdxComponents() {
             GithubRepositoryCard: props => (
                 <Suspense>
                     <GithubRepositoryCard {...props} />
-                </Suspense>
-            ),
-            MakeCodeOpenSnippetButton: props => (
-                <Suspense>
-                    <MakeCodeOpenSnippetButton {...props} />
                 </Suspense>
             ),
             FaqPageList: props => (

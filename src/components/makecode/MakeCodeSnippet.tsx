@@ -49,30 +49,28 @@ export default function MakeCodeSnippet(props: { renderedSource: string }) {
     }
     const { code } = snippet || {}
 
-    if (!code)
-        return <CodeBlock className="typescript">{renderedSource}</CodeBlock>
-
+    let tabi = 0
     return (
         <PaperBox>
-            {req && (
-                <div style={{ float: "right" }}>
-                    <MakeCodeOpenSnippetButton {...req} />
-                </div>
-            )}
             <Tabs
                 value={tab}
                 onChange={handleTabChange}
                 aria-label="Select MakeCode editor"
             >
-                <Tab label={"Blocks"} />
+                {url && <Tab label={"Blocks"} />}
                 <Tab label={"JavaScript"} />
             </Tabs>
-            <TabPanel value={tab} index={0}>
-                <img src={withPrefix(url)} alt={source} loading="lazy" />
+            {url && (
+                <TabPanel value={tab} index={tabi++}>
+                    <img src={withPrefix(url)} alt={source} loading="lazy" />
+                </TabPanel>
+            )}
+            <TabPanel value={tab} index={tabi++}>
+                <CodeBlock className="typescript">
+                    {code ?? renderedSource}
+                </CodeBlock>
             </TabPanel>
-            <TabPanel value={tab} index={1}>
-                <CodeBlock className="typescript">{code}</CodeBlock>
-            </TabPanel>
+            {req && <MakeCodeOpenSnippetButton sx={{ mr: 0.5 }} {...req} />}
         </PaperBox>
     )
 }

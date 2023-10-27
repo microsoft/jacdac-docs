@@ -6,6 +6,7 @@ import IconButtonWithTooltip from "../ui/IconButtonWithTooltip"
 import useMediaQueries from "../hooks/useMediaQueries"
 import useSnackbar from "../hooks/useSnackbar"
 import usePxtJson from "../makecode/usePxtJson"
+import { Grid } from "@mui/material"
 
 export default function MakeCodeOpenSnippetButton(props: {
     sx?: SxProps<Theme>
@@ -15,6 +16,36 @@ export default function MakeCodeOpenSnippetButton(props: {
     slug?: string
     branch?: string
     full?: boolean
+}) {
+    return (
+        <>
+            <EditorOpenSnippetButton
+                {...props}
+                target="microbit"
+                targetName="micro:bit V2"
+                editor="https://makecode.microbit.org/"
+            />
+            <EditorOpenSnippetButton
+                {...props}
+                target="calliopemini"
+                targetName="Calliope mini V3"
+                editor="https://makecode.calliope.cc/alpha/"
+            />
+        </>
+    )
+}
+
+function EditorOpenSnippetButton(props: {
+    sx?: SxProps<Theme>
+    name?: string
+    code?: string
+    options?: { package?: string }
+    slug?: string
+    branch?: string
+    full?: boolean
+    target: string
+    targetName: string
+    editor: string
 }) {
     const { setError } = useSnackbar()
     const { mobile } = useMediaQueries()
@@ -26,15 +57,16 @@ export default function MakeCodeOpenSnippetButton(props: {
         name = "Jacdac demo",
         slug,
         branch = "master",
-        full
+        full,
+        target,
+        targetName,
+        editor,
     } = props
     const pxt = usePxtJson(slug, branch)
     const disabled = importing || (slug && !pxt)
 
     const handleClick = async () => {
         const md = "\n"
-        const target = "microbit"
-        const editor = "https://makecode.microbit.org/"
         const deps = options?.package?.split(",").map(dep => dep.split("=", 2))
         const dependencies =
             toMap(
@@ -93,7 +125,7 @@ export default function MakeCodeOpenSnippetButton(props: {
             onClick={handleClick}
             color="primary"
             disabled={disabled}
-            title="Try in MakeCode"
+            title={`Try in ${targetName}`}
         >
             <MakeCodeIcon />
         </IconButtonWithTooltip>
@@ -106,7 +138,7 @@ export default function MakeCodeOpenSnippetButton(props: {
             disabled={disabled}
             startIcon={<MakeCodeIcon />}
         >
-            Try in MakeCode
+            {targetName}
         </Button>
     )
 }
