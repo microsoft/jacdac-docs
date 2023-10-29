@@ -30,7 +30,6 @@ const TraceAlert = lazy(() => import("./shell/TraceAlert"))
 const WebDiagnostics = lazy(() => import("./shell/WebDiagnostics"))
 const WebCam = lazy(() => import("./ui/WebCam"))
 const PassiveAlert = lazy(() => import("./shell/PassiveAlert"))
-const DataEditorAppBar = lazy(() => import("./shell/DataEditorAppBar"))
 const YouTubePlayer = lazy(() => import("./youtube/YouTubePlayer"))
 
 const PREFIX = "Layout"
@@ -223,25 +222,17 @@ function LayoutWithContext(props: LayoutProps) {
     const deviceScriptTool = /tools\/devicescript-/.test(path)
     const devicesPage = /^\/devices\/$/.test(path)
     const fullWidthTools =
-        /^\/editors\/\w/.test(path) ||
         /^\/tools\/console\/$/.test(path) ||
         /^\/(tools\/(makecode-|player|devicescript-)|dashboard)/.test(path) ||
         !!frontmatter?.fullWidth
-    const isDataEditor = /^\/editors\/data/.test(path)
     const { hideMainMenu = false, hideBreadcrumbs = false } = frontmatter || {
         hideMainMenu: isHosted || makeCodeTool || deviceScriptTool,
         hideUnderConstruction:
-            isDataEditor || makeCodeTool || deviceScriptTool || fullWidthTools,
-        hideBreadcrumbs: isDataEditor || tools || fullWidthTools || devicesPage,
+            makeCodeTool || deviceScriptTool || fullWidthTools,
+        hideBreadcrumbs: tools || fullWidthTools || devicesPage,
     }
 
-    const appBar = hideMainMenu ? undefined : isDataEditor ? (
-        <Suspense>
-            <DataEditorAppBar />
-        </Suspense>
-    ) : (
-        <MainAppBar />
-    )
+    const appBar = hideMainMenu ? undefined : <MainAppBar />
 
     const { darkMode } = useContext(DarkModeContext)
     const { drawerType, toolsMenu, showWebCam } = useContext(AppContext)
