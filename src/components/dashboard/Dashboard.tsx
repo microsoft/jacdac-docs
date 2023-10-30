@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material"
-import React, { lazy, useContext } from "react"
+import React, { useContext } from "react"
 import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import { splitFilter } from "../../../jacdac-ts/src/jdom/utils"
 import useDevices from "../hooks/useDevices"
@@ -18,12 +18,7 @@ import { defaultDeviceFilter, defaultDeviceSort } from "./filters"
 import useHostedSimulators from "../HostedSimulatorsContext"
 import StartMissingSimulatorsButton from "../buttons/StartMissingSimulatorsButton"
 import useBusWithMode from "../../jacdac/useBusWithMode"
-import useDeviceScript from "../devicescript/DeviceScriptContext"
-import Suspense from "../ui/Suspense"
 import PacketsContext from "../PacketsContext"
-const DeviceScriptToolbar = lazy(
-    () => import("../devicescript/DeviceScriptToolbar")
-)
 
 export interface DashboardDeviceProps {
     showHeader?: boolean
@@ -44,7 +39,6 @@ export interface DashboardProps extends DashboardDeviceProps {
     showStartSimulators?: boolean
     showStartRoleSimulators?: boolean
     showConnect?: boolean
-    showDeviceScript?: boolean
     deviceFilter?: (d: JDDevice) => boolean
     deviceSort?: (l: JDDevice, r: JDDevice) => number
 }
@@ -61,12 +55,10 @@ export default function Dashboard(props: DashboardProps) {
         showSimulatorAvatar,
         showDeviceHeader,
         showDeviceAvatar,
-        showDeviceScript,
         deviceSort = defaultDeviceSort,
         deviceFilter = defaultDeviceFilter,
         ...other
     } = props
-    const { source: jacscriptSource } = useDeviceScript()
     const { tracing } = useContext(PacketsContext)
     const bus = useBusWithMode({ autoConnect: !tracing })
     const { isHostedSimulator, clearHostedSimulators } = useHostedSimulators()
@@ -89,11 +81,6 @@ export default function Dashboard(props: DashboardProps) {
 
     return (
         <>
-            {showDeviceScript && jacscriptSource !== undefined && (
-                <Suspense>
-                    <DeviceScriptToolbar />
-                </Suspense>
-            )}
             {!hideSimulators && (
                 <DashboardDeviceGroup
                     title="Simulators"
