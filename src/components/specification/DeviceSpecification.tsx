@@ -79,7 +79,7 @@ function storeInfo(url: string) {
         "category.yahboom.com": { name: "YahBoom" },
         "microbit.org": { name: "MicroBit Educational Foundation" },
         "amazon.com": { name: "Amazon" },
-        "forwardedu.com": { name: "Forward Education"}
+        "forwardedu.com": { name: "Forward Education" },
     }
 
     return infos[host] || { name: host }
@@ -200,7 +200,9 @@ export default function DeviceSpecification(props: {
                         <Typography component="div" variant="subtitle1">
                             by{" "}
                             <Link
-                                to={`/devices/${identifierToUrlPath(company).replace(' ', '-')}/`}
+                                to={`/devices/${identifierToUrlPath(
+                                    company
+                                ).replace(" ", "-")}/`}
                             >
                                 {company}
                             </Link>
@@ -229,6 +231,24 @@ export default function DeviceSpecification(props: {
                             device and it can be connected to other devices with
                             a cable, but it will not provide to modules or
                             consume power the Jacdac bus.
+                        </Alert>
+                    )}
+                    {connector === "grove" && (
+                        <Alert severity="warning">
+                            <AlertTitle>Grove connector.</AlertTitle>
+                            This device has a Grove connector and is <b>
+                                not
+                            </b>{" "}
+                            compatible with Jacdac cables.
+                        </Alert>
+                    )}
+                    {connector === "qwiic" && (
+                        <Alert severity="warning">
+                            <AlertTitle>Qwiic connector.</AlertTitle>
+                            This device has a Qwiic connector and is <b>
+                                not
+                            </b>{" "}
+                            compatible with Jacdac cables.
                         </Alert>
                     )}
                     {requiredDeviceSpecs?.map(({ id, name }) => (
@@ -330,21 +350,23 @@ export default function DeviceSpecification(props: {
                     />
                 </>
             )}
-                        {!!services?.length && (
-        <PageLinkList
-            header={
-                            <>
-                                <Divider light={true} />
-                                <h3 id="devicescriptextensions">
-                                    DeviceScript Clients
-                                </h3>
-                            </>
-                        }
-            nodes={services.map(serviceSpecificationFromClassIdentifier).map(srv => ({
-                href: `https://microsoft.github.io/devicescript/api/clients/${srv.shortId}`,
-                title: srv.name,
-            }))}
-        />                
+            {!!services?.length && (
+                <PageLinkList
+                    header={
+                        <>
+                            <Divider light={true} />
+                            <h3 id="devicescriptextensions">
+                                DeviceScript Clients
+                            </h3>
+                        </>
+                    }
+                    nodes={services
+                        .map(serviceSpecificationFromClassIdentifier)
+                        .map(srv => ({
+                            href: `https://microsoft.github.io/devicescript/api/clients/${srv.shortId}`,
+                            title: srv.name,
+                        }))}
+                />
             )}
             <DeviceSpecificationList
                 header={<h3 id="kitdevices">Kit Devices</h3>}

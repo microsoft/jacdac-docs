@@ -668,6 +668,12 @@ export default function DeviceRegistration() {
                                 PCB edge connector, passive - passthrough for
                                 power and signal
                             </MenuItem>
+                            <MenuItem value="grove">
+                                Grove connector
+                            </MenuItem>
+                            <MenuItem value="qwiic">
+                                Qwiic connector
+                            </MenuItem>
                         </Select>
                         <Typography variant="caption" component="div">
                             Choose the type of Jacdac connector present on the

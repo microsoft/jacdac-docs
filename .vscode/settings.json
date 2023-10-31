@@ -54,6 +54,7 @@
         "microcontrollers",
         "pbuf",
         "pixdata",
+        "qwiic",
         "Schottky",
         "Slidy",
         "strcmp",
