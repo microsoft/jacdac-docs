@@ -39,6 +39,20 @@ The micro:bit in dongle mode does not execute the user's program.
 In pxt-jacdac v1.8.41 and earlier, the dongle behaved a bit differently where both physical and simulated device could become dongle.
 The new behavior is designed to provide a better user experience.
 
+## Client role binding
+
+You can provide hints in the client role name in the form of URL query arguments to influence the binding algorithm:
+
+```sts
+export const btnB = new modules.ButtonClient("A?dev=self&srvo=1")
+```
+
+Supported arguments are:
+
+-  `dev=[id]` where `[id]` is the full device id or shortid. `self` is a special name that refers to the micro:bit device itself, it is used for servers.
+-  `srvi=[index]` where `[index]` is the service index
+-  `srvo=[index]` where `[index]` is the service offset, an index that only takes into account services of the same type.
+
 ## Multiple Roles
 
 When running your code, Jacdac binds the modules detected on the bus with the **roles** defined in your program.
