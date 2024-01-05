@@ -3,9 +3,9 @@ import Alert from "../ui/Alert"
 import PacketsContext from "../PacketsContext"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import HistoryIcon from "@mui/icons-material/History"
-import { Box, Chip, Tooltip, useTheme } from "@mui/material"
+import { Box, Chip, Tooltip, Typography, useTheme } from "@mui/material"
 import PacketSpecification from "../specification/PacketSpecification"
-import { printPacket } from "../../../jacdac-ts/src/jdom/pretty"
+import { prettyDuration, printPacket } from "../../../jacdac-ts/src/jdom/pretty"
 import PacketHeaderLayout from "../PacketHeaderLayout"
 import {
     META_ACK,
@@ -67,7 +67,14 @@ export default function PacketInspector() {
                 {`${name} ${packet.isCommand ? "to" : "from"} ${
                     packet.friendlyDeviceName
                 }/${packet.friendlyServiceName}`}
-
+                <Chip
+                    sx={{ mr: 0.25 }}
+                    aria-label={`timestamp: ${prettyDuration(
+                        packet.timestamp,
+                        true
+                    )}`}
+                    label={prettyDuration(packet.timestamp, true)}
+                />
                 {packet.sender && (
                     <Chip
                         aria-label={`sender: ${packet.sender}`}

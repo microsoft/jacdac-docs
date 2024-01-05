@@ -69,7 +69,7 @@ export default function PacketListItem(props: {
                 : ""
         }`
     const secondary = `${
-        showTime ? `${prettyDuration(packet.timestamp)}: ` : ""
+        showTime ? `${prettyDuration(packet.timestamp, true)}: ` : ""
     }${packet.isCommand ? "to" : "from"} ${packet.friendlyDeviceName}/${
         packet.friendlyServiceName
     }${notImplemented ? `, not implemented` : ""}`

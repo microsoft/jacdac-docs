@@ -36,6 +36,8 @@ export default function TraceTimeFilterRangeSlider() {
 
     if (!minMax || !debouncedValue) return <></>
 
+    const d = (ms: number) => prettyDuration(ms)
+
     return (
         <Box display="flex" pl={theme.spacing(0.25)} pr={theme.spacing(0.25)}>
             <Slider
@@ -44,8 +46,8 @@ export default function TraceTimeFilterRangeSlider() {
                 value={value}
                 onChange={handleChange}
                 valueLabelDisplay="auto"
-                getAriaValueText={prettyDuration}
-                valueLabelFormat={prettyDuration}
+                getAriaValueText={d}
+                valueLabelFormat={d}
             />
         </Box>
     )
