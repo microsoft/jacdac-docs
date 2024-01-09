@@ -54,6 +54,8 @@
         "microcontrollers",
         "millis",
         "pbuf",
+        "PCCONTROLLER",
+        "PCMONITOR",
         "pixdata",
         "qwiic",
         "Schottky",
