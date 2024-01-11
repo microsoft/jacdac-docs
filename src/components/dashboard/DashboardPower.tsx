@@ -52,6 +52,8 @@ export default function DashboardPower(props: DashboardServiceProps) {
     const off = !allowed
     const label = off
         ? "off"
+        : powerStatus === PowerPowerStatus.Powering
+        ? "on"
         : humanify(PowerPowerStatus[powerStatus]?.toLowerCase())
 
     const toggleEnabled = () => allowedRegister.sendSetBoolAsync(!allowed, true)
