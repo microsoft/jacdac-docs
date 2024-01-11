@@ -19,6 +19,7 @@ import useHostedSimulators from "../HostedSimulatorsContext"
 import StartMissingSimulatorsButton from "../buttons/StartMissingSimulatorsButton"
 import useBusWithMode from "../../jacdac/useBusWithMode"
 import PacketsContext from "../PacketsContext"
+import DevicePowerChips from "../devices/DevicePowerChips"
 
 export interface DashboardDeviceProps {
     showHeader?: boolean
@@ -102,6 +103,7 @@ export default function Dashboard(props: DashboardProps) {
                             >
                                 <ClearIcon />
                             </IconButtonWithTooltip>{" "}
+                            <DevicePowerChips devices={simulators} />
                         </>
                     }
                     devices={simulators}
@@ -119,12 +121,15 @@ export default function Dashboard(props: DashboardProps) {
             <DashboardDeviceGroup
                 title="Devices"
                 action={
-                    showConnect && (
-                        <ConnectButtons
-                            full={"disconnected"}
-                            transparent={true}
-                        />
-                    )
+                    <>
+                        {showConnect && (
+                            <ConnectButtons
+                                full={"disconnected"}
+                                transparent={true}
+                            />
+                        )}
+                        <DevicePowerChips devices={physicals} />
+                    </>
                 }
                 devices={physicals}
                 showHeader={showHeader || showDeviceHeader}
