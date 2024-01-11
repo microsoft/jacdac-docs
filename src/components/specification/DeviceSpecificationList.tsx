@@ -27,7 +27,7 @@ export default function DeviceSpecificationList(props: {
     transports?: jdspec.TransportType[]
     tags?: string[]
     ec30?: boolean
-    connector?: boolean
+    connector?: "jacdac" | "grove" | "none"
     shapes?: jdspec.ShapeWellKnown[]
     onDeviceClick?: (device: jdspec.DeviceSpec) => void
     hideChips?: boolean
@@ -82,12 +82,24 @@ export default function DeviceSpecificationList(props: {
         if (buyNow !== undefined)
             r = r.filter(spec => !!spec.storeLink === buyNow)
         if (hardwareDesign) r = r.filter(spec => spec.hardwareDesign)
-        if (connector !== undefined)
+        if (connector === "jacdac")
             r = r.filter(
                 spec =>
-                    (spec.connector === "noConnector" ||
-                        spec.connector === "edgeIndependent") == !connector
+                    spec.connector !== "noConnector" &&
+                    spec.connector !== "grove" &&
+                    spec.connector !== "qwiic"
             )
+        else if (connector === "grove")
+            r = r.filter(
+                spec => spec.connector === "grove" || spec.connector === "qwiic"
+            )
+        else if (connector === "none")
+            r = r.filter(
+                spec =>
+                    spec.connector === "noConnector" ||
+                    spec.connector === "edgeIndependent"
+            )
+
         if (firmwareSources) r = r.filter(spec => spec.firmwareSource)
         if (ec30)
             r = r.filter(

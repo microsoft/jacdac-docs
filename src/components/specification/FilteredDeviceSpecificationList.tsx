@@ -102,7 +102,7 @@ export default function FilteredDeviceSpecificationList(props: {
                 {...others}
                 query={query}
                 buyNow={true}
-                connector={true}
+                connector={"jacdac"}
                 firmwareSources={firmwareSources}
                 hardwareDesign={hardwareDesign}
                 serviceClass={serviceClass}
@@ -111,10 +111,24 @@ export default function FilteredDeviceSpecificationList(props: {
             <div style={{ marginTop: "5rem" }} />
             <DeviceSpecificationList
                 {...others}
-                header={"No PCB Edge connector (does not connect with cables)"}
+                header={"Grove, Qwiic, STEMMA QT connectors"}
                 query={query}
                 buyNow={true}
-                connector={false}
+                connector={"grove"}
+                firmwareSources={firmwareSources}
+                hardwareDesign={hardwareDesign}
+                serviceClass={serviceClass}
+                tags={selectedTags}
+            />
+            <div style={{ marginTop: "5rem" }} />
+            <DeviceSpecificationList
+                {...others}
+                header={
+                    "No PCB Edge connector (does not connect with Jacdac cables)"
+                }
+                query={query}
+                buyNow={true}
+                connector={"none"}
                 firmwareSources={firmwareSources}
                 hardwareDesign={hardwareDesign}
                 serviceClass={serviceClass}
