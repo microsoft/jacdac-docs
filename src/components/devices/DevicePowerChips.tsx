@@ -7,15 +7,13 @@ import { JDDevice } from "../../../jacdac-ts/src/jdom/device"
 import React from "react"
 import DeviceAvatar from "./DeviceAvatar"
 import { JDService } from "../../../jacdac-ts/src/jdom/service"
-import { Chip, Typography } from "@mui/material"
+import { Chip } from "@mui/material"
 import useRegister from "../hooks/useRegister"
 import {
     useRegisterBoolValue,
     useRegisterUnpackedValue,
 } from "../../jacdac/useRegisterValue"
 import { humanify } from "../../../jacdac-ts/jacdac-spec/spectool/jdspec"
-import useServiceServer from "../hooks/useServiceServer"
-import SwitchWithLabel from "../ui/SwitchWithLabel"
 
 function ServicePowerChip(props: { service: JDService }) {
     const { service } = props
@@ -26,36 +24,23 @@ function ServicePowerChip(props: { service: JDService }) {
         powerStatusRegister,
         { visible: true }
     )
-    const server = useServiceServer(service)
-    const color = server ? "secondary" : "primary"
+    const deviceName = service.device.shortId
 
     if (allowed === undefined || powerStatus === undefined) return null
 
     const off = !allowed
+    const on = !off && powerStatus === PowerPowerStatus.Powering
     const status = off
         ? "off"
-        : powerStatus === PowerPowerStatus.Powering
+        : on
         ? "on"
         : humanify(PowerPowerStatus[powerStatus])?.toLowerCase()
-    const label = (
-        <SwitchWithLabel
-            color={
-                powerStatus === PowerPowerStatus.Overload ||
-                powerStatus === PowerPowerStatus.Overprovision
-                    ? "error"
-                    : color
-            }
-            label={<Typography variant="caption">{status}</Typography>}
-            title={`power ${status}`}
-            checked={!off}
-            readOnly={true}
-        />
-    )
     return (
         <Chip
             sx={{ mr: 0.5 }}
-            label={label}
+            label={status}
             variant={"outlined"}
+            title={`${deviceName}: power '${status}'`}
             avatar={<DeviceAvatar device={service.device} />}
         />
     )

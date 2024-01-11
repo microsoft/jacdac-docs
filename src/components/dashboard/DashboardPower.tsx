@@ -87,7 +87,7 @@ export default function DashboardPower(props: DashboardServiceProps) {
                 <Grid item xs={12}>
                     <RegisterInput
                         register={keepOnPulseDurationRegister}
-                        showRegisterName={true}
+                        showRegisterName={false}
                         visible={visible}
                     />
                 </Grid>
@@ -96,7 +96,7 @@ export default function DashboardPower(props: DashboardServiceProps) {
                 <Grid item xs={12}>
                     <RegisterInput
                         register={keepOnPulsePeriodRegister}
-                        showRegisterName={true}
+                        showRegisterName={false}
                         visible={visible}
                     />
                 </Grid>
