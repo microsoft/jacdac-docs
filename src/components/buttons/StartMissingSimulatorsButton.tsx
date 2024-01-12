@@ -37,6 +37,7 @@ export default function StartMissingSimulatorsButton(props: {
 
     return (
         <CmdButton
+            size="small"
             title={disabled ? disabledTooltip : enabledTooltip}
             variant={variant}
             trackName={trackName}

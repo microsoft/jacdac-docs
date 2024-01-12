@@ -38,7 +38,7 @@ export default function MakeCodeAddBlocksButton() {
             <span>
                 <Button
                     sx={{ mr: 1 }}
-                    size="medium"
+                    size="small"
                     color="primary"
                     variant="contained"
                     disabled={!isButtonEnabled}
