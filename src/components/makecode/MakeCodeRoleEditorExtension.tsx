@@ -1,5 +1,5 @@
 import { Grid, TextField, Typography } from "@mui/material"
-import React, { ChangeEvent, useMemo } from "react"
+import React, { ChangeEvent, useCallback, useMemo } from "react"
 import { clone, uniqueName } from "../../../jacdac-ts/src/jdom/utils"
 // tslint:disable-next-line: no-submodule-imports match-default-export-name
 import DeleteIcon from "@mui/icons-material/Delete"
@@ -96,14 +96,18 @@ export default function MakeRoleCodeEditorExtension() {
     const { target, configuration, setConfiguration } =
         useMakeCodeEditorExtensionClient()
 
-    const hasMakeCodeService = (srv: jdspec.ServiceSpec) => {
-        const mkc = resolveMakecodeService(srv)
-        return (
-            mkc &&
-            target &&
-            (!mkc.client.targets || mkc.client.targets.indexOf(target.id) > -1)
-        )
-    }
+    const hasMakeCodeService = useCallback(
+        (srv: jdspec.ServiceSpec) => {
+            const mkc = resolveMakecodeService(srv)
+            return (
+                mkc &&
+                target &&
+                (!mkc.client.targets ||
+                    mkc.client.targets.indexOf(target.id) > -1)
+            )
+        },
+        [target]
+    )
     const update = () => {
         setConfiguration(clone(configuration))
     }
@@ -124,6 +128,15 @@ export default function MakeRoleCodeEditorExtension() {
         })
         update()
     }
+
+    const makecodeServiceSorter = useCallback(
+        (l: jdspec.ServiceSpec, r: jdspec.ServiceSpec) => {
+            // favor makecode services supported by released hardware kits
+
+            return l.name.localeCompare(r.name)
+        },
+        []
+    )
 
     return (
         <Grid container direction="row" spacing={2}>
@@ -149,6 +162,7 @@ export default function MakeRoleCodeEditorExtension() {
             <Grid item xs={12}>
                 <AddServiceIconButton
                     serviceFilter={hasMakeCodeService}
+                    serviceSorter={makecodeServiceSorter}
                     onAdd={handleAddService}
                 />
             </Grid>

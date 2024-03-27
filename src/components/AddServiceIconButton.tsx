@@ -15,24 +15,28 @@ import { SRV_DEVICE_SCRIPT_MANAGER } from "../../jacdac-ts/src/jdom/constants"
 export default function AddServiceIconButton(props: {
     onAdd: (service: jdspec.ServiceSpec) => void
     serviceFilter?: (service: jdspec.ServiceSpec) => boolean
+    serviceSorter?: (
+        left: jdspec.ServiceSpec,
+        right: jdspec.ServiceSpec
+    ) => number
     error?: string
     children?: JSX.Element | JSX.Element[]
 }) {
-    const { error, onAdd, children, serviceFilter } = props
+    const { error, onAdd, children, serviceFilter, serviceSorter } = props
     const [servicesAnchorEl, setServicesAnchorEl] =
         useState<null | HTMLElement>(null)
     const servicesMenuId = useId()
-    const services = useMemo(
-        () =>
-            serviceSpecifications()
-                .filter(
-                    srv =>
-                        srv.classIdentifier === SRV_DEVICE_SCRIPT_MANAGER ||
-                        !isInfrastructure(srv)
-                )
-                .filter(srv => !serviceFilter || serviceFilter(srv)),
-        [serviceFilter]
-    )
+    const services = useMemo(() => {
+        let res = serviceSpecifications()
+            .filter(
+                srv =>
+                    srv.classIdentifier === SRV_DEVICE_SCRIPT_MANAGER ||
+                    !isInfrastructure(srv)
+            )
+            .filter(srv => !serviceFilter || serviceFilter(srv))
+        if (serviceSorter) res = res.sort(serviceSorter)
+        return res
+    }, [serviceFilter])
 
     const handleServiceAddClick = (
         event: React.MouseEvent<HTMLButtonElement>

@@ -84,28 +84,12 @@ export function SimulateDeviceHint() {
                 <LinearScaleIcon />
             </IconButtonWithTooltip>
             <IconButtonWithTooltip
-                trackName="simulator.hint.joystick"
-                onClick={handleStartSimulator(SRV_GAMEPAD)}
-                title="joystick"
-                aria-label="start joystick simulator"
-            >
-                <VideogameAssetIcon />
-            </IconButtonWithTooltip>
-            <IconButtonWithTooltip
                 trackName="simulator.hint.led"
                 onClick={handleStartSimulator(SRV_LED)}
                 title="LED"
                 aria-label="start LED simulator"
             >
                 <TungstenIcon />
-            </IconButtonWithTooltip>
-            <IconButtonWithTooltip
-                trackName="simulator.hint.traffic"
-                onClick={handleStartSimulator(SRV_TRAFFIC_LIGHT)}
-                title="traffic light"
-                aria-label="start traffic light simulator"
-            >
-                <TrafficIcon />
             </IconButtonWithTooltip>
             or click &nbsp;
             <IconButtonWithTooltip
