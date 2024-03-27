@@ -5,6 +5,7 @@
         "wix.vscode-import-cost",
         "hediet.vscode-drawio",
         "streetsidesoftware.code-spell-checker",
-        "unifiedjs.vscode-mdx"
+        "unifiedjs.vscode-mdx",
+        "genaiscript.genaiscript-vscode"
     ]
 }
