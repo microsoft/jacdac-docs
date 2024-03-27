@@ -1,0 +1,4 @@
+# ignore local cli
+genaiscript.cjs
+cache/
+retrieval/
