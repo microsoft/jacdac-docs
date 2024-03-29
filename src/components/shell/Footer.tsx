@@ -74,6 +74,14 @@ export default function Footer() {
             >
                 Trademarks
             </a>
+            |{" "}
+            <a
+                href="https://go.microsoft.com/fwlink/?linkid=2259814"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Consumer Health Privacy
+            </a>
             {repo && sha && (
                 <>
                     |
