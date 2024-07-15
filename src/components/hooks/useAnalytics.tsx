@@ -33,7 +33,7 @@ interface AppInsightsApp {
     trackTrace(msg: any, props: any): void;
 }
 
-const INSTRUMENTATION_KEY = "6c138c4e-0d8c-4279-bd37-51d796bb8d01"
+const INSTRUMENTATION_KEY: string = undefined // "6c138c4e-0d8c-4279-bd37-51d796bb8d01"
 const appInsights: AppInsightsApp =
     typeof window !== "undefined" &&
     INSTRUMENTATION_KEY &&
