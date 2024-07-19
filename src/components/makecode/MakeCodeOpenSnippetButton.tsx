@@ -87,6 +87,9 @@ export default function MakeCodeOpenSnippetButton(props: {
         }
     }
 
+    if (mobile) // mobile blocks all popups
+        return undefined
+
     return !full && mobile ? (
         <IconButtonWithTooltip
             sx={sx}
