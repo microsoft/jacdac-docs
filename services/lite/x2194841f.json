@@ -1,0 +1,105 @@
+{
+  "status": "deprecated",
+  "shortId": "verifiedtelemetrysensor",
+  "camelName": "verifiedTelemetry",
+  "classIdentifier": 563381279,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "ro",
+      "name": "telemetry_status",
+      "identifier": 384,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "telemetry_status_interval",
+      "identifier": 128,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "const",
+      "name": "fingerprint_type",
+      "identifier": 385,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "ro",
+      "name": "fingerprint_template",
+      "identifier": 386,
+      "fields": [
+        "confidence",
+        "template"
+      ],
+      "packFormat": "u16 b"
+    },
+    {
+      "kind": "command",
+      "name": "reset_fingerprint_template",
+      "identifier": 128
+    },
+    {
+      "kind": "command",
+      "name": "retrain_fingerprint_template",
+      "identifier": 129,
+      "unique": true
+    },
+    {
+      "kind": "event",
+      "name": "telemetry_status_change",
+      "identifier": 3,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "event",
+      "name": "fingerprint_template_change",
+      "identifier": 128
+    }
+  ]
+}

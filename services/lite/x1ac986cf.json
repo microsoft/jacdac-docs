@@ -1,0 +1,151 @@
+{
+  "status": "stable",
+  "shortId": "bitradio",
+  "camelName": "bitRadio",
+  "classIdentifier": 449414863,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "enabled",
+      "identifier": 1,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "group",
+      "identifier": 128,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "transmission_power",
+      "identifier": 129,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "frequency_band",
+      "identifier": 130,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "command",
+      "name": "send_string",
+      "identifier": 128,
+      "unique": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "command",
+      "name": "send_number",
+      "identifier": 129,
+      "unique": true,
+      "packFormat": "f64"
+    },
+    {
+      "kind": "command",
+      "name": "send_value",
+      "identifier": 130,
+      "fields": [
+        "value",
+        "name"
+      ],
+      "unique": true,
+      "packFormat": "f64 s"
+    },
+    {
+      "kind": "command",
+      "name": "send_buffer",
+      "identifier": 131,
+      "unique": true,
+      "packFormat": "b"
+    },
+    {
+      "kind": "report",
+      "name": "string_received",
+      "identifier": 144,
+      "fields": [
+        "time",
+        "device_serial_number",
+        "rssi",
+        "padding",
+        "message"
+      ],
+      "packFormat": "u32 u32 i8 b[1] s"
+    },
+    {
+      "kind": "report",
+      "name": "number_received",
+      "identifier": 145,
+      "fields": [
+        "time",
+        "device_serial_number",
+        "rssi",
+        "padding",
+        "value",
+        "name"
+      ],
+      "packed": true,
+      "packFormat": "u32 u32 i8 b[3] f64 s"
+    },
+    {
+      "kind": "report",
+      "name": "buffer_received",
+      "identifier": 146,
+      "fields": [
+        "time",
+        "device_serial_number",
+        "rssi",
+        "padding",
+        "data"
+      ],
+      "packFormat": "u32 u32 i8 b[1] b"
+    }
+  ]
+}

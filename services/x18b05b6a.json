@@ -1,0 +1,322 @@
+{
+  "name": "HID Keyboard",
+  "status": "stable",
+  "shortId": "hidkeyboard",
+  "camelName": "hidKeyboard",
+  "shortName": "hidKeyboard",
+  "extends": [
+    "_base"
+  ],
+  "notes": {
+    "short": "Control a HID keyboard.\n\nThe codes for the key (selectors) is defined in the [HID Keyboard\nspecification](https://usb.org/sites/default/files/hut1_21.pdf), chapter 10 Keyboard/Keypad Page, page 81.\nModifiers are in page 87.\n\nThe device keeps tracks of the key state and is able to clear it all with the clear command."
+  },
+  "classIdentifier": 414210922,
+  "enums": {
+    "Selector": {
+      "name": "Selector",
+      "storage": 2,
+      "members": {
+        "None": 0,
+        "ErrorRollOver": 1,
+        "PostFail": 2,
+        "ErrorUndefined": 3,
+        "A": 4,
+        "B": 5,
+        "C": 6,
+        "D": 7,
+        "E": 8,
+        "F": 9,
+        "G": 10,
+        "H": 11,
+        "I": 12,
+        "J": 13,
+        "K": 14,
+        "L": 15,
+        "M": 16,
+        "N": 17,
+        "O": 18,
+        "P": 19,
+        "Q": 20,
+        "R": 21,
+        "S": 22,
+        "T": 23,
+        "U": 24,
+        "V": 25,
+        "W": 26,
+        "X": 27,
+        "Y": 28,
+        "Z": 29,
+        "_1": 30,
+        "_2": 31,
+        "_3": 32,
+        "_4": 33,
+        "_5": 34,
+        "_6": 35,
+        "_7": 36,
+        "_8": 37,
+        "_9": 38,
+        "_0": 39,
+        "Return": 40,
+        "Escape": 41,
+        "Backspace": 42,
+        "Tab": 43,
+        "Spacebar": 44,
+        "Minus": 45,
+        "Equals": 46,
+        "LeftSquareBracket": 47,
+        "RightSquareBracket": 48,
+        "Backslash": 49,
+        "NonUsHash": 50,
+        "Semicolon": 51,
+        "Quote": 52,
+        "GraveAccent": 53,
+        "Comma": 54,
+        "Period": 55,
+        "Slash": 56,
+        "CapsLock": 57,
+        "F1": 58,
+        "F2": 59,
+        "F3": 60,
+        "F4": 61,
+        "F5": 62,
+        "F6": 63,
+        "F7": 64,
+        "F8": 65,
+        "F9": 66,
+        "F10": 67,
+        "F11": 68,
+        "F12": 69,
+        "PrintScreen": 70,
+        "ScrollLock": 71,
+        "Pause": 72,
+        "Insert": 73,
+        "Home": 74,
+        "PageUp": 75,
+        "Delete": 76,
+        "End": 77,
+        "PageDown": 78,
+        "RightArrow": 79,
+        "LeftArrow": 80,
+        "DownArrow": 81,
+        "UpArrow": 82,
+        "KeypadNumLock": 83,
+        "KeypadDivide": 84,
+        "KeypadMultiply": 85,
+        "KeypadAdd": 86,
+        "KeypadSubtrace": 87,
+        "KeypadReturn": 88,
+        "Keypad1": 89,
+        "Keypad2": 90,
+        "Keypad3": 91,
+        "Keypad4": 92,
+        "Keypad5": 93,
+        "Keypad6": 94,
+        "Keypad7": 95,
+        "Keypad8": 96,
+        "Keypad9": 97,
+        "Keypad0": 98,
+        "KeypadDecimalPoint": 99,
+        "NonUsBackslash": 100,
+        "Application": 101,
+        "Power": 102,
+        "KeypadEquals": 103,
+        "F13": 104,
+        "F14": 105,
+        "F15": 106,
+        "F16": 107,
+        "F17": 108,
+        "F18": 109,
+        "F19": 110,
+        "F20": 111,
+        "F21": 112,
+        "F22": 113,
+        "F23": 114,
+        "F24": 115,
+        "Execute": 116,
+        "Help": 117,
+        "Menu": 118,
+        "Select": 119,
+        "Stop": 120,
+        "Again": 121,
+        "Undo": 122,
+        "Cut": 123,
+        "Copy": 124,
+        "Paste": 125,
+        "Find": 126,
+        "Mute": 127,
+        "VolumeUp": 128,
+        "VolumeDown": 129
+      }
+    },
+    "Modifiers": {
+      "name": "Modifiers",
+      "storage": 1,
+      "isFlags": true,
+      "members": {
+        "None": 0,
+        "LeftControl": 1,
+        "LeftShift": 2,
+        "LeftAlt": 4,
+        "LeftGUI": 8,
+        "RightControl": 16,
+        "RightShift": 32,
+        "RightAlt": 64,
+        "RightGUI": 128
+      }
+    },
+    "Action": {
+      "name": "Action",
+      "storage": 1,
+      "members": {
+        "Press": 0,
+        "Up": 1,
+        "Down": 2
+      }
+    }
+  },
+  "constants": {},
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "description": "This report may be emitted by a server in response to a command (action or register operation)\nthat it does not understand.\nThe `service_command` and `packet_crc` fields are copied from the command packet that was unhandled.\nNote that it's possible to get an ACK, followed by such an error report.",
+      "fields": [
+        {
+          "name": "service_command",
+          "type": "u16",
+          "storage": 2,
+          "isSimpleType": true
+        },
+        {
+          "name": "packet_crc",
+          "type": "u16",
+          "storage": 2,
+          "isSimpleType": true
+        }
+      ],
+      "identifierName": "command_not_implemented",
+      "packFormat": "u16 u16",
+      "derived": "_base"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "description": "A friendly name that describes the role of this service instance in the device.\nIt often corresponds to what's printed on the device:\nfor example, `A` for button A, or `S0` for servo channel 0.\nWords like `left` should be avoided because of localization issues (unless they are printed on the device).",
+      "fields": [
+        {
+          "name": "_",
+          "type": "string",
+          "storage": 0
+        }
+      ],
+      "optional": true,
+      "identifierName": "instance_name",
+      "packFormat": "s",
+      "derived": "_base"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "description": "Reports the current state or error status of the device. ``code`` is a standardized value from \nthe Jacdac status/error codes. ``vendor_code`` is any vendor specific error code describing the device\nstate. This report is typically not queried, when a device has an error, it will typically\nadd this report in frame along with the announce packet. If a service implements this register,\nit should also support the ``status_code_changed`` event defined below.",
+      "fields": [
+        {
+          "name": "code",
+          "type": "u16",
+          "storage": 2,
+          "isSimpleType": true
+        },
+        {
+          "name": "vendor_code",
+          "type": "u16",
+          "storage": 2,
+          "isSimpleType": true
+        }
+      ],
+      "optional": true,
+      "identifierName": "status_code",
+      "packFormat": "u16 u16",
+      "derived": "_base"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "description": "An optional register in the format of a URL query string where the client can provide hints how\nthe device twin should be rendered. If the register is not implemented, the client library can simulate the register client side.",
+      "fields": [
+        {
+          "name": "_",
+          "type": "string",
+          "storage": 0
+        }
+      ],
+      "optional": true,
+      "identifierName": "client_variant",
+      "packFormat": "s",
+      "derived": "_base"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "description": "Notifies that the status code of the service changed.",
+      "fields": [
+        {
+          "name": "code",
+          "type": "u16",
+          "storage": 2,
+          "isSimpleType": true
+        },
+        {
+          "name": "vendor_code",
+          "type": "u16",
+          "storage": 2,
+          "isSimpleType": true
+        }
+      ],
+      "optional": true,
+      "identifierName": "status_code_changed",
+      "packFormat": "u16 u16",
+      "derived": "_base"
+    },
+    {
+      "kind": "command",
+      "name": "key",
+      "identifier": 128,
+      "description": "Presses a key or a sequence of keys down.",
+      "fields": [
+        {
+          "name": "selector",
+          "type": "Selector",
+          "storage": 2,
+          "startRepeats": true
+        },
+        {
+          "name": "modifiers",
+          "type": "Modifiers",
+          "storage": 1
+        },
+        {
+          "name": "action",
+          "type": "Action",
+          "storage": 1
+        }
+      ],
+      "lowLevel": true,
+      "unique": true,
+      "packFormat": "r: u16 u8 u8"
+    },
+    {
+      "kind": "command",
+      "name": "clear",
+      "identifier": 129,
+      "description": "Clears all pressed keys.",
+      "fields": []
+    }
+  ],
+  "tags": [
+    "8bit"
+  ]
+}

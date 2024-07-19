@@ -1,0 +1,223 @@
+{
+  "status": "stable",
+  "shortId": "control",
+  "camelName": "control",
+  "classIdentifier": 0,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "command",
+      "name": "services",
+      "identifier": 0,
+      "hasReport": true
+    },
+    {
+      "kind": "report",
+      "name": "services",
+      "identifier": 0,
+      "fields": [
+        "flags",
+        "packet_count",
+        "reserved",
+        "service_class"
+      ],
+      "secondary": true,
+      "packFormat": "u16 u8 u8 r: u32"
+    },
+    {
+      "kind": "command",
+      "name": "noop",
+      "identifier": 128
+    },
+    {
+      "kind": "command",
+      "name": "identify",
+      "identifier": 129,
+      "optional": true
+    },
+    {
+      "kind": "command",
+      "name": "reset",
+      "identifier": 130,
+      "optional": true
+    },
+    {
+      "kind": "command",
+      "name": "flood_ping",
+      "identifier": 131,
+      "fields": [
+        "num_responses",
+        "start_counter",
+        "size"
+      ],
+      "unique": true,
+      "optional": true,
+      "hasReport": true,
+      "packFormat": "u32 u32 u8"
+    },
+    {
+      "kind": "report",
+      "name": "flood_ping",
+      "identifier": 131,
+      "fields": [
+        "counter",
+        "dummy_payload"
+      ],
+      "secondary": true,
+      "packFormat": "u32 b"
+    },
+    {
+      "kind": "command",
+      "name": "set_status_light",
+      "identifier": 132,
+      "fields": [
+        "to_red",
+        "to_green",
+        "to_blue",
+        "speed"
+      ],
+      "packFormat": "u8 u8 u8 u8"
+    },
+    {
+      "kind": "command",
+      "name": "proxy",
+      "identifier": 133,
+      "optional": true
+    },
+    {
+      "kind": "command",
+      "name": "reliable_commands",
+      "identifier": 134,
+      "optional": true,
+      "hasReport": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "report",
+      "name": "reliable_commands",
+      "identifier": 134,
+      "secondary": true,
+      "pipeType": "reliable_commands",
+      "packFormat": "b[12]"
+    },
+    {
+      "kind": "pipe_command",
+      "name": "wrapped_command",
+      "identifier": 0,
+      "fields": [
+        "service_size",
+        "service_index",
+        "service_command",
+        "payload"
+      ],
+      "pipeType": "reliable_commands",
+      "packFormat": "u8 u8 u16 b"
+    },
+    {
+      "kind": "command",
+      "name": "standby",
+      "identifier": 135,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "rw",
+      "name": "reset_in",
+      "identifier": 128,
+      "internal": true,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "const",
+      "name": "device_description",
+      "identifier": 384,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "const",
+      "name": "product_identifier",
+      "identifier": 385,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "const",
+      "name": "bootloader_product_identifier",
+      "identifier": 388,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "const",
+      "name": "firmware_version",
+      "identifier": 389,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "mcu_temperature",
+      "identifier": 386,
+      "volatile": true,
+      "optional": true,
+      "preferredInterval": 60000,
+      "packFormat": "i16"
+    },
+    {
+      "kind": "ro",
+      "name": "uptime",
+      "identifier": 390,
+      "volatile": true,
+      "optional": true,
+      "preferredInterval": 60000,
+      "packFormat": "u64"
+    }
+  ]
+}
