@@ -1,6 +1,8 @@
-# ignore local cli
-genaiscript.cjs
+runs/
 cache/
 retrieval/
 containers/
 temp/
+tests/
+stats/
+*.csv
