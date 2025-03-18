@@ -78,7 +78,9 @@ run
 yarn buildspecs
 ```
 
-this will update the directory jacdac-spec/dist as well as client bindings (for changes to a service or addition of a new service). In particular, the distribution will contain updates for 
+This script will update the directory jacdac-ts/jacdac-spec/dist as well as client bindings (for changes to a service or addition of a new service). 
+
+In particular, the distribution will contain updates for 
 - pxt-jacdac
     - a new directory will be created for service with the following files
       - client.gts
@@ -96,12 +98,8 @@ this will update the directory jacdac-spec/dist as well as client bindings (for 
     - what can we test locally about pxt-jacdac???
       - see above
       - local testing with pxt-microbit (TBD)
-
 - jacdac-ts, which depends on jacdac-spec
-
 - jacdac-docs, which depends on most everything (except FIRMWARE)
-
-TODO: more 
 
 
 ### Docs build
