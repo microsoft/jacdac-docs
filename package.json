@@ -59,7 +59,7 @@
     "gatsby-remark-copy-linked-files": "^5.24.0",
     "gatsby-remark-external-links": "0.0.4",
     "gatsby-remark-images": "^6.24.0",
-    "gatsby-remark-makecode": "^1.0.24",
+    "gatsby-remark-makecode": "^1.0.25",
     "gatsby-remark-static-images": "^1.2.1",
     "gatsby-source-filesystem": "^4.24.0",
     "gatsby-theme-material-ui": "^5.3.0",

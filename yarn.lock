@@ -9339,10 +9339,10 @@ gatsby-remark-images@^6.24.0:
     unist-util-select "^3.0.4"
     unist-util-visit-parents "^3.1.1"
 
-gatsby-remark-makecode@^1.0.24:
-  version "1.0.24"
-  resolved "https://registry.yarnpkg.com/gatsby-remark-makecode/-/gatsby-remark-makecode-1.0.24.tgz#031ced4d637ce4f28b41e8ac8b86a1c032b24459"
-  integrity sha512-yG+EUwQ9oo7nXa0/4lFbcchxeV8Y/sb8ddWlrfm8hYinj4j3ov6Q4/zJ6uHZlxQnBbvxBnlElXCcNCsRNPM4aQ==
+gatsby-remark-makecode@^1.0.25:
+  version "1.0.25"
+  resolved "https://registry.yarnpkg.com/gatsby-remark-makecode/-/gatsby-remark-makecode-1.0.25.tgz#d421de66a63439887d560904fe1d98ee559cb085"
+  integrity sha512-e1Mtcwju9oY+Z7xmfpexgk/ShHGoJTGmUtRfAV4umRx4fXrGRRsh7YAOVD494UR7d2YJ8jcGaAD7LmjlkxTynA==
   dependencies:
     "@types/node" "^16.9.1"
     hast-util-to-html "^8.0.2"
