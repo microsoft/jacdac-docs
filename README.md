@@ -78,11 +78,11 @@ run
 yarn buildspecs
 ```
 
-This script will update the directory jacdac-ts/jacdac-spec/dist as well as client bindings (for changes to a service or addition of a new service). 
-
-In particular, the distribution will contain updates for 
-- pxt-jacdac
-    - a new directory will be created for service with the following files
+This script will update the directory jacdac-ts/jacdac-spec/dist as well as client bindings (for changes to a service or addition of a new service). In particular, the distribution will contain updates for 
+- jacdac-ts, which depends on jacdac-spec
+- jacdac-docs, which depends on jacdac-ts and many other repos
+- pxt-jacdac, the MakeCode extension for Jacdac.
+    - a new directory will be created for a newly added service. The directory will have the following files
       - client.gts
       - constants.ts
       - pxt.g.json
@@ -92,15 +92,6 @@ In particular, the distribution will contain updates for
       - add a test file to pxt.json
       - mkc init
       - mkc build to ensure you get a hex file
-    - note about MakeCode "generated" extension and where this comes from
-      - in particular, until there is a pxt.json in the new directory (hint: cp pxt.g.json pxt.json), it won't be known to MakeCode or to the jacdac-docs analyses
-      - or does the analyses look at the 
-    - what can we test locally about pxt-jacdac???
-      - see above
-      - local testing with pxt-microbit (TBD)
-- jacdac-ts, which depends on jacdac-spec
-- jacdac-docs, which depends on most everything (except FIRMWARE)
-
 
 ### Docs build
 
