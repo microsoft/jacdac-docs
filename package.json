@@ -59,7 +59,6 @@
     "gatsby-remark-copy-linked-files": "^5.24.0",
     "gatsby-remark-external-links": "0.0.4",
     "gatsby-remark-images": "^6.24.0",
-    "gatsby-remark-makecode": "^1.0.25",
     "gatsby-remark-static-images": "^1.2.1",
     "gatsby-source-filesystem": "^4.24.0",
     "gatsby-theme-material-ui": "^5.3.0",
@@ -139,7 +138,7 @@
     "docsbuild": "node node_modules/gatsby/cli.js build",
     "docsserve": "node node_modules/gatsby/cli.js serve",
     "dockerdocs": "node node_modules/gatsby/cli.js develop --host:0.0.0.0",
-    "buildspecs": "cd jacdac-ts && yarn buildspecs && yarn prettier && cd .. && cp -r jacdac-ts/jacdac-spec/services/generated/makecode/* pxt-jacdac && cp -r jacdac-ts/jacdac-spec/services/generated/python/* jacdac-python/jacdac && rm jacdac-dotnet/Jacdac/Constants/*.cs && cp -r jacdac-ts/jacdac-spec/services/generated/cs/* jacdac-dotnet/Jacdac && yarn prettier && cd pxt-jacdac && sh update-clients.sh",
+    "buildspecs": "cd jacdac-ts && yarn buildspecs && yarn prettier && cd .. && cp -r jacdac-ts/jacdac-spec/services/generated/makecode/* pxt-jacdac && cp -r jacdac-ts/jacdac-spec/services/generated/cs/* && yarn prettier && cd pxt-jacdac && sh update-clients.sh",
     "buildpxt": "cd pxt-jacdac && sh mk.sh",
     "buildmodels": "cd static/models && sh mk.sh",
     "builddocsts": "node node_modules/typescript/bin/tsc -b src",
@@ -155,8 +154,7 @@
     "watchworkervm": "cd src/workers/vm && node ../../../node_modules/esbuild/bin/esbuild --bundle vm-worker.ts --outdir=dist/node_modules --sourcemap --watch",
     "watchworkerdevicescript": "cd src/workers/devicescript && node ../../../node_modules/esbuild/bin/esbuild --bundle devicescript-worker.ts --outdir=dist/node_modules --sourcemap --watch",
     "watchworkercad": "cd src/workers/cad && node ../../../node_modules/microbundle/dist/cli.js watch -f modern --no-compress --types --ts-config tsconfig.json",
-    "watchts": "cd jacdac-ts && yarn watch",
-    "buildcssamples": "cd jacdac-dotnet && snippets.bat"
+    "watchts": "cd jacdac-ts && yarn watch"
   },
   "repository": {
     "type": "git",
