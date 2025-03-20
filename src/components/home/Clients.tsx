@@ -97,7 +97,7 @@ export default function Clients() {
 
             <CenterGrid
                 subtitle2="More programming options"
-                subtitle3="Node-Red, React, A-Frame, CLI, ..."
+                subtitle3="React, CLI, ..."
                 buttonText= "Read more"                
                 buttonVariant="link"
                 buttonUrl= "/clients/more"
