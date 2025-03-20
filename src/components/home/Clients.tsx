@@ -16,7 +16,7 @@ export default function Clients() {
         >
             <CenterGrid
                 title="Client Programming"
-                subtitle3="via MakeCode, JavaScript, .NET, Python, and more..."
+                subtitle3="via MakeCode, JavaScript, ..."
                 // imageColumns={6}
                 // image={<StaticImage src="./dashboard.png" alt="Dashboard" />}
             />
@@ -78,39 +78,6 @@ export default function Clients() {
                     />
                 }
             />
-
-            <SplitGrid
-                right={false}
-                subtitle=".NET"
-                description="Control hardware from your computer or your Raspberry Pi using .NET, TinyCLR."
-                buttonText="Get started with .NET"
-                buttonVariant="link"
-                buttonUrl="/clients/dotnet"
-                imageColumns={4}
-                image={
-                    <StaticImage
-                        src="https://raw.githubusercontent.com/dotnet/brand/main/logo/dotnet-logo.jpg"
-                        alt=".NET Framework logo"
-                    />
-                }
-            />
-
-            <SplitGrid
-                right={true}
-                subtitle="Python"
-                description="Control hardware from your computer or your Raspberry Pi using Python."
-                buttonText="Get started with Python"
-                buttonVariant="link"
-                buttonUrl="/clients/python"
-                imageColumns={6}
-                image={
-                    <StaticImage
-                        src="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png"
-                        alt="Python Foundation Logo"
-                    />
-                }
-            />
-
 
             <SplitGrid
                 right={true}

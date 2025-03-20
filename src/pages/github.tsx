@@ -123,16 +123,6 @@ export default function Page() {
                         href: "https://github.com/microsoft/devicescript",
                     },
                     {
-                        title: "microsoft/jacdac-dotnet",
-                        description: ".NET (desktop, nano, tiny) library",
-                        href: "https://github.com/microsoft/jacdac-dotnet",
-                    },
-                    {
-                        title: "microsoft/jacdac-python",
-                        description: "Python (desktop) library",
-                        href: "https://github.com/microsoft/jacdac-python",
-                    },
-                    {
                         title: "microsoft/pxt-jacdac",
                         description: "MakeCode library",
                         href: "https://github.com/microsoft/pxt-jacdac",

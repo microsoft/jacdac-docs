@@ -44,20 +44,6 @@
                         "workflows": "write"
                     }
                 },
-                "microsoft/node-red-contrib-jacdac": {
-                    "permissions": {
-                        "contents": "write",
-                        "pull_requests": "write",
-                        "workflows": "write"
-                    }
-                },
-                "microsoft/gatsby-remark-makecode": {
-                    "permissions": {
-                        "contents": "write",
-                        "pull_requests": "write",
-                        "workflows": "write"
-                    }
-                },
                 "microsoft/react-jacdac": {
                     "permissions": {
                         "contents": "write",
@@ -72,21 +58,7 @@
                         "workflows": "write"
                     }
                 },
-                "microsoft/jacdac-python": {
-                    "permissions": {
-                        "contents": "write",
-                        "pull_requests": "write",
-                        "workflows": "write"
-                    }
-                },
                 "microsoft/pxt-jacdac": {
-                    "permissions": {
-                        "contents": "write",
-                        "pull_requests": "write",
-                        "workflows": "write"
-                    }
-                },
-                "microsoft/jacdac-dotnet": {
                     "permissions": {
                         "contents": "write",
                         "pull_requests": "write",
