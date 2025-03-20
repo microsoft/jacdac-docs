@@ -93,7 +93,7 @@ export default function Home() {
             <SplitGrid
                 right={true}
                 subtitle="Coding"
-                description="Code apps in JavaScript, MakeCode, .NET, Python, ..."
+                description="Code apps in JavaScript, MakeCode, ..."
                 buttonText="Client programming"
                 buttonVariant="link"
                 buttonUrl="/clients/"
