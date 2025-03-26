@@ -151,11 +151,6 @@ export default function Page() {
                         href: "https://github.com/microsoft/react-jacdac",
                     },
                     {
-                        title: "microsoft/node-red-contrib-jacdac",
-                        description: "node-red-contrib-jacdac",
-                        href: "https://github.com/microsoft/node-red-contrib-jacdac",
-                    },
-                    {
                         title: "microsoft/microcode",
                         description: "MicroCode",
                         href: "https://github.com/microsoft/microcode",
