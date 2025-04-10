@@ -78,6 +78,21 @@ run
 yarn buildspecs
 ```
 
+This script will update the directory jacdac-ts/jacdac-spec/dist as well as client bindings (for changes to a service or addition of a new service). In particular, the distribution will contain updates for 
+- jacdac-ts, which depends on jacdac-spec
+- jacdac-docs, which depends on jacdac-ts and many other repos
+- pxt-jacdac, the MakeCode extension for Jacdac.
+    - a new directory will be created for a newly added service. The directory will have the following files
+      - client.gts
+      - constants.ts
+      - pxt.g.json
+    - The above needs to be worked on to ensure it compiles with mkc. In particular
+      - cp pxt.g.json pxt.json
+      - mv client.gts to client.g.ts (this seems to be a bug in the jacdac-spec spectools code gen for STS)
+      - add a test file to pxt.json
+      - mkc init
+      - mkc build to ensure you get a hex file
+
 ### Docs build
 
 -   run the docs web site locally

@@ -25,13 +25,15 @@ jobs:
             - run: yarn builddocsts
             - run: yarn distdocs
               env:
+                  # https://chromium.googlesource.com/chromium/src/+/main/docs/linux/suid_sandbox_development.md#try-bots-and-waterfall
+                  CHROME_DEVEL_SANDBOX: ""
                   GATSBY_GITHUB_REPOSITORY: ${{ github.repository }}
                   GATSBY_GITHUB_REF: ${{ github.ref }}
                   GATSBY_GITHUB_SHA: ${{ github.sha }}
                   NODE_OPTIONS: --max-old-space-size=4096
             - name: github pages
               uses: peaceiris/actions-gh-pages@v3
-              if: ${{ github.ref == 'refs/heads/main' }}
+              if: ${{ github.ref == 'refs/heads/dev' }}
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./public

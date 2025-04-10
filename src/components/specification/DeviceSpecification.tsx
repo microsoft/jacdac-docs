@@ -350,24 +350,6 @@ export default function DeviceSpecification(props: {
                     />
                 </>
             )}
-            {!!services?.length && (
-                <PageLinkList
-                    header={
-                        <>
-                            <Divider light={true} />
-                            <h3 id="devicescriptextensions">
-                                DeviceScript Clients
-                            </h3>
-                        </>
-                    }
-                    nodes={services
-                        .map(serviceSpecificationFromClassIdentifier)
-                        .map(srv => ({
-                            href: `https://microsoft.github.io/devicescript/api/clients/${srv.shortId}`,
-                            title: srv.name,
-                        }))}
-                />
-            )}
             <DeviceSpecificationList
                 header={<h3 id="kitdevices">Kit Devices</h3>}
                 devices={deviceSpecs}
