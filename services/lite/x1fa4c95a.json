@@ -1,0 +1,130 @@
+{
+  "status": "experimental",
+  "shortId": "power",
+  "camelName": "power",
+  "classIdentifier": 530893146,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "allowed",
+      "identifier": 1,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "max_power",
+      "identifier": 7,
+      "optional": true,
+      "packFormat": "u16"
+    },
+    {
+      "kind": "ro",
+      "name": "power_status",
+      "identifier": 385,
+      "volatile": true,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "ro",
+      "name": "current_draw",
+      "identifier": 257,
+      "volatile": true,
+      "optional": true,
+      "packFormat": "u16"
+    },
+    {
+      "kind": "ro",
+      "name": "battery_voltage",
+      "identifier": 384,
+      "volatile": true,
+      "optional": true,
+      "packFormat": "u16"
+    },
+    {
+      "kind": "ro",
+      "name": "battery_charge",
+      "identifier": 386,
+      "volatile": true,
+      "optional": true,
+      "packFormat": "u0.16"
+    },
+    {
+      "kind": "const",
+      "name": "battery_capacity",
+      "identifier": 387,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "rw",
+      "name": "keep_on_pulse_duration",
+      "identifier": 128,
+      "optional": true,
+      "packFormat": "u16"
+    },
+    {
+      "kind": "rw",
+      "name": "keep_on_pulse_period",
+      "identifier": 129,
+      "optional": true,
+      "packFormat": "u16"
+    },
+    {
+      "kind": "command",
+      "name": "shutdown",
+      "identifier": 128
+    },
+    {
+      "kind": "event",
+      "name": "power_status_changed",
+      "identifier": 3,
+      "packFormat": "u8"
+    }
+  ]
+}

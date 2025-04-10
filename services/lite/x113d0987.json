@@ -1,0 +1,78 @@
+{
+  "status": "experimental",
+  "shortId": "pccontroller",
+  "camelName": "PCController",
+  "classIdentifier": 289212807,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "command",
+      "name": "open_url",
+      "identifier": 128,
+      "packFormat": "s"
+    },
+    {
+      "kind": "command",
+      "name": "start_app",
+      "identifier": 129,
+      "packFormat": "s"
+    },
+    {
+      "kind": "command",
+      "name": "send_text",
+      "identifier": 130,
+      "packFormat": "s"
+    },
+    {
+      "kind": "command",
+      "name": "run_script",
+      "identifier": 131,
+      "packFormat": "s"
+    }
+  ]
+}

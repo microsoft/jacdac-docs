@@ -1,0 +1,73 @@
+{
+  "status": "experimental",
+  "shortId": "midioutput",
+  "camelName": "midiOutput",
+  "classIdentifier": 444894423,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "enabled",
+      "identifier": 1,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "command",
+      "name": "clear",
+      "identifier": 128
+    },
+    {
+      "kind": "command",
+      "name": "send",
+      "identifier": 129,
+      "unique": true,
+      "packFormat": "b"
+    }
+  ],
+  "group": "Sound"
+}

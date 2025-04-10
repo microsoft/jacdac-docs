@@ -1,0 +1,161 @@
+{
+  "status": "experimental",
+  "shortId": "gpio",
+  "camelName": "GPIO",
+  "classIdentifier": 282614377,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "streaming_samples",
+      "identifier": 3,
+      "internal": true,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "streaming_interval",
+      "identifier": 4,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "const",
+      "name": "streaming_preferred_interval",
+      "identifier": 258,
+      "internal": true,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "ro",
+      "name": "state",
+      "identifier": 257,
+      "volatile": true,
+      "packFormat": "b"
+    },
+    {
+      "kind": "ro",
+      "name": "num_pins",
+      "identifier": 384,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "command",
+      "name": "configure",
+      "identifier": 128,
+      "fields": [
+        "pin",
+        "mode"
+      ],
+      "packFormat": "r: u8 u8"
+    },
+    {
+      "kind": "command",
+      "name": "pin_info",
+      "identifier": 129,
+      "hasReport": true,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "report",
+      "name": "pin_info",
+      "identifier": 129,
+      "fields": [
+        "pin",
+        "hw_pin",
+        "capabilities",
+        "mode",
+        "label"
+      ],
+      "secondary": true,
+      "packFormat": "u8 u8 u16 u8 s"
+    },
+    {
+      "kind": "command",
+      "name": "pin_by_label",
+      "identifier": 131,
+      "hasReport": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "report",
+      "name": "pin_by_label",
+      "identifier": 131,
+      "fields": [
+        "pin",
+        "hw_pin",
+        "capabilities",
+        "mode",
+        "label"
+      ],
+      "secondary": true,
+      "packFormat": "u8 u8 u16 u8 s"
+    },
+    {
+      "kind": "command",
+      "name": "pin_by_hw_pin",
+      "identifier": 132,
+      "hasReport": true,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "report",
+      "name": "pin_by_hw_pin",
+      "identifier": 132,
+      "fields": [
+        "pin",
+        "hw_pin",
+        "capabilities",
+        "mode",
+        "label"
+      ],
+      "secondary": true,
+      "packFormat": "u8 u8 u16 u8 s"
+    }
+  ]
+}
