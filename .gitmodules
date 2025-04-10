@@ -1,13 +1,13 @@
 [submodule "jacdac-ts"]
 	path = jacdac-ts
-	url = https://github.com/microsoft/jacdac-ts
+	url = https://github.com/jacdac/jacdac-ts
 [submodule "react-jacdac"]
 	path = react-jacdac
-	url = https://github.com/microsoft/react-jacdac
+	url = https://github.com/jacdac/react-jacdac
 [submodule "jacdac-cli"]
 	path = jacdac-cli
-	url = https://github.com/microsoft/jacdac-cli
+	url = https://github.com/jacdac/jacdac-cli
 [submodule "pxt-jacdac"]
 	path = pxt-jacdac
-	url = https://github.com/microsoft/pxt-jacdac
+	url = https://github.com/jacdac/pxt-jacdac
 
