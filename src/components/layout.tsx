@@ -30,6 +30,7 @@ const TraceAlert = lazy(() => import("./shell/TraceAlert"))
 const WebDiagnostics = lazy(() => import("./shell/WebDiagnostics"))
 const WebCam = lazy(() => import("./ui/WebCam"))
 const PassiveAlert = lazy(() => import("./shell/PassiveAlert"))
+const MigrationAlert = lazy(() => import("./shell/MigrationAlert"))
 const YouTubePlayer = lazy(() => import("./youtube/YouTubePlayer"))
 
 const PREFIX = "Layout"
@@ -251,6 +252,9 @@ function LayoutWithContext(props: LayoutProps) {
 
     const InnerMainSection = () => (
         <>
+            <Suspense>
+                <MigrationAlert />
+            </Suspense>
             <Suspense>
                 <SimulatorCommands />
             </Suspense>
