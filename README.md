@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This Jacdac repository has moved to https://github.com/jacdac/jacdac-docs
+> This repository has moved to https://github.com/jacdac/jacdac-docs
 
 # Jacdac Documentation
 
