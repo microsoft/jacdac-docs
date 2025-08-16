@@ -1,0 +1,119 @@
+{
+  "status": "stable",
+  "shortId": "bootloader",
+  "camelName": "bootloader",
+  "classIdentifier": 536516936,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "command",
+      "name": "info",
+      "identifier": 0,
+      "hasReport": true
+    },
+    {
+      "kind": "report",
+      "name": "info",
+      "identifier": 0,
+      "fields": [
+        "service_class",
+        "page_size",
+        "flashable_size",
+        "product_identifier"
+      ],
+      "secondary": true,
+      "packFormat": "u32 u32 u32 u32"
+    },
+    {
+      "kind": "command",
+      "name": "set_session",
+      "identifier": 129,
+      "hasReport": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "report",
+      "name": "set_session",
+      "identifier": 129,
+      "secondary": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "command",
+      "name": "page_data",
+      "identifier": 128,
+      "fields": [
+        "page_address",
+        "page_offset",
+        "chunk_no",
+        "chunk_max",
+        "session_id",
+        "reserved0",
+        "reserved1",
+        "reserved2",
+        "reserved3",
+        "page_data"
+      ],
+      "unique": true,
+      "hasReport": true,
+      "packFormat": "u32 u16 u8 u8 u32 u32 u32 u32 u32 b[208]"
+    },
+    {
+      "kind": "report",
+      "name": "page_data",
+      "identifier": 128,
+      "fields": [
+        "session_id",
+        "page_error",
+        "page_address"
+      ],
+      "secondary": true,
+      "packFormat": "u32 u32 u32"
+    }
+  ]
+}

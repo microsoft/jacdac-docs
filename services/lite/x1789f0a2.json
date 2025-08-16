@@ -1,0 +1,68 @@
+{
+  "status": "rc",
+  "shortId": "rng",
+  "camelName": "rng",
+  "classIdentifier": 394916002,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "ro",
+      "name": "random",
+      "identifier": 384,
+      "volatile": true,
+      "packFormat": "b"
+    },
+    {
+      "kind": "const",
+      "name": "variant",
+      "identifier": 263,
+      "optional": true,
+      "packFormat": "u8"
+    }
+  ]
+}

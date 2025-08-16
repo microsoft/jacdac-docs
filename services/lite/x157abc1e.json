@@ -1,0 +1,113 @@
+{
+  "status": "experimental",
+  "shortId": "soundspectrum",
+  "camelName": "soundSpectrum",
+  "classIdentifier": 360365086,
+  "packets": [
+    {
+      "kind": "report",
+      "name": "command_not_implemented",
+      "identifier": 3,
+      "fields": [
+        "service_command",
+        "packet_crc"
+      ],
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "const",
+      "name": "instance_name",
+      "identifier": 265,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "ro",
+      "name": "status_code",
+      "identifier": 259,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "client_variant",
+      "identifier": 9,
+      "optional": true,
+      "packFormat": "s"
+    },
+    {
+      "kind": "event",
+      "name": "status_code_changed",
+      "identifier": 4,
+      "fields": [
+        "code",
+        "vendor_code"
+      ],
+      "optional": true,
+      "packFormat": "u16 u16"
+    },
+    {
+      "kind": "rw",
+      "name": "streaming_samples",
+      "identifier": 3,
+      "internal": true,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "streaming_interval",
+      "identifier": 4,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "const",
+      "name": "streaming_preferred_interval",
+      "identifier": 258,
+      "internal": true,
+      "optional": true,
+      "packFormat": "u32"
+    },
+    {
+      "kind": "ro",
+      "name": "frequency_bins",
+      "identifier": 257,
+      "volatile": true,
+      "packFormat": "b"
+    },
+    {
+      "kind": "rw",
+      "name": "enabled",
+      "identifier": 1,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "fft_pow2_size",
+      "identifier": 128,
+      "packFormat": "u8"
+    },
+    {
+      "kind": "rw",
+      "name": "min_decibels",
+      "identifier": 129,
+      "packFormat": "i16"
+    },
+    {
+      "kind": "rw",
+      "name": "max_decibels",
+      "identifier": 130,
+      "packFormat": "i16"
+    },
+    {
+      "kind": "rw",
+      "name": "smoothing_time_constant",
+      "identifier": 131,
+      "packFormat": "u0.8"
+    }
+  ],
+  "group": "Sound"
+}
